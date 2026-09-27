@@ -8,27 +8,24 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 12 – Football club:** Football club (its own pack; it is the biggest system)
 - **Pack 13 – More to own:** More rungs on the industry ladder · Farms and forest · Landmark buildings · Art
 - **Later:** Hotels abroad and holiday apartments (Travel is built, so it can go in any pack)
 
 ## Businesses
 
-1. **Football club.** Buy a club in a low division. Buy players, win matches, get promoted and win trophies. It gives prestige and income from tickets and sponsors, but player wages are a big cost. The club lives as a card in the Luxury tab that opens its own club screen, so the tab bar stays at five tabs.
-
-2. **More rungs on the industry ladder.** New businesses between and after today's ones, for example a food truck, bakery, gym, car dealership, shipping company and airline, plus Norwegian specials such as a fish farm, ferry company and ski resort. Each needs a place on the ladder, an illustration and a check with the balance bench.
+1. **More rungs on the industry ladder.** New businesses between and after today's ones, for example a food truck, bakery, gym, car dealership, shipping company and airline, plus Norwegian specials such as a fish farm, ferry company and ski resort. Each needs a place on the ladder, an illustration and a check with the balance bench.
 
 ## Property
 
-3. **Farms and forest.** Land that grows slowly in value and gives a yearly income from timber and crops.
+2. **Farms and forest.** Land that grows slowly in value and gives a yearly income from timber and crops.
 
-4. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement.
+3. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement.
 
-5. **Landmark buildings.** Unique and very expensive buildings, such as a tall tower in Oslo or a lighthouse. Each one exists only once, and the rivals can buy it before you.
+4. **Landmark buildings.** Unique and very expensive buildings, such as a tall tower in Oslo or a lighthouse. Each one exists only once, and the rivals can buy it before you.
 
 ## Luxury and status
 
-6. **Art.** Paintings by made-up Norwegian artists that rise or fall in value. They can be lent to a museum for status.
+5. **Art.** Paintings by made-up Norwegian artists that rise or fall in value. They can be lent to a museum for status.
 
 ## Parked (not chosen yet)
 

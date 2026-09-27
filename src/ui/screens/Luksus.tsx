@@ -19,14 +19,19 @@ import type { LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
+import { useState } from 'react'
+import { Klubb, Klubbkort } from './Klubb'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
 export function Luksus({ s }: { s: Spilltilstand }) {
+  const [klubb, settKlubb] = useState(false)
+  if (klubb) return <Klubb s={s} tilbake={() => settKlubb(false)} />
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>
       <Status s={s} />
+      <Klubbkort s={s} aapne={() => settKlubb(true)} />
 
       <div className="lagerrad">
         {LAGERLISTE.map((l) => {

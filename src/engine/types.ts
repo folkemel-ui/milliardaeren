@@ -380,6 +380,75 @@ export interface Spilltilstand {
   /** Oppstartsselskapene: de som søker penger nå, og de som nylig er avsluttet. */
   startups: Startup[]
   nesteStartupId: number
+  /** Fotballklubben du eier, eller null. */
+  klubb: Klubb | null
+  /** Trofeene du har vunnet — de blir i skapet selv om du selger klubben. */
+  trofeer: Trofe[]
+}
+
+// ─────────────────────────────────────────────── Fotballklubb
+
+export type Taktikk = 'forsvar' | 'balansert' | 'angrep'
+
+export interface Spiller {
+  id: number
+  navn: string
+  /** 1–99. */
+  styrke: number
+  alder: number
+}
+
+/** Et lag i serien, med tabellen sin. Lag nummer 0 er alltid ditt. */
+export interface Lag {
+  navn: string
+  /** Styrken til de andre lagene. Ditt regnes ut fra troppen. */
+  styrke: number
+  spilt: number
+  vunnet: number
+  uavgjort: number
+  tapt: number
+  maalFor: number
+  maalMot: number
+}
+
+export interface Kamp {
+  sesong: number
+  runde: number
+  motstander: string
+  hjemme: boolean
+  maalFor: number
+  maalMot: number
+}
+
+export interface Trofe {
+  navn: string
+  sesong: number
+  klubb: string
+}
+
+export interface Klubb {
+  navn: string
+  /** 0 = 4. divisjon … 4 = Eliteserien. */
+  divisjon: number
+  sesong: number
+  /** Neste runde som skal spilles (0–8). */
+  runde: number
+  lag: Lag[]
+  spillere: Spiller[]
+  /** Spillerne som er til salgs i dag. */
+  marked: Spiller[]
+  taktikk: Taktikk
+  /** Klubbens egen terning, så en klubb ikke endrer resten av spillet. */
+  frø: number
+  nesteSpillerId: number
+  kamper: Kamp[]
+  /** Pengene denne sesongen. */
+  billetter: number
+  sponsor: number
+  lonn: number
+  /** Tellere til prestasjonene. */
+  seire: number
+  opprykk: number
 }
 
 // ─────────────────────────────────────────────── Startups

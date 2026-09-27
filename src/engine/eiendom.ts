@@ -12,6 +12,7 @@ import type {
   Luksusgjenstand,
   Spilltilstand,
 } from './types'
+import { klubbstatus } from './klubb'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -236,8 +237,9 @@ export const STATUS_INNTEKT = 0.02
 /** … og så mye lavere rente (prosentpoeng per time). */
 export const STATUS_RENTEKUTT = 0.002
 
+/** Status fra luksusen, pluss klubbens divisjon og trofeene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

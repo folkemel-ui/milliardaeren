@@ -28,6 +28,7 @@ import {
 import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import { fusjonsfaktor } from './fusjon'
 import { startupverdi } from './startups'
+import { klubbverdi } from './klubb'
 import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -139,7 +140,8 @@ export function eiendeler(s: Spilltilstand): number {
     eiendomsverdi(s) +
     luksusverdi(s) +
     rivalverdi(s) +
-    startupverdi(s)
+    startupverdi(s) +
+    klubbverdi(s)
   )
 }
 

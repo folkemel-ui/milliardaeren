@@ -10,7 +10,7 @@
 
 import { BEDRIFTSTYPER, STIGEN } from './innhold'
 import { dagnummer } from './kalender'
-import { tilfeldig } from './rng'
+import { hashTekst, tilfeldig } from './rng'
 import type { Bedrift, BedriftstypeId, Bedriftstype, Rival, Spilltilstand } from './types'
 
 /** Hver fusjon ganger bedriftens inntekt med dette. */
@@ -87,19 +87,9 @@ export function prisantydning(s: Spilltilstand, rb: Rivalbedrift): number {
   return Math.round(Math.max(rb.verdi, (din?.investert ?? 0) * PRIS_MOT_DIN))
 }
 
-/** FNV-1a — en stabil tallverdi av en tekst, så dagens pris kan trekkes uten terning. */
-function hash(tekst: string): number {
-  let h = 2166136261
-  for (let i = 0; i < tekst.length; i++) {
-    h ^= tekst.charCodeAt(i)
-    h = Math.imul(h, 16777619)
-  }
-  return h | 0
-}
-
 /** Prisen rivalen egentlig vil ha i dag. Den er skjult for spilleren. */
 export function rivalensPris(s: Spilltilstand, r: Rival, rb: Rivalbedrift): number {
-  const u = tilfeldig(hash(`${r.id}:${rb.type}:${dagnummer(s.sek)}`))
+  const u = tilfeldig(hashTekst(`${r.id}:${rb.type}:${dagnummer(s.sek)}`))
   return Math.round(prisantydning(s, rb) * (PRIS_MIN + u * (PRIS_MAKS - PRIS_MIN)))
 }
 

@@ -14,6 +14,7 @@ import { selskapsnyheter } from './selskapsnyheter'
 import { dagsskifteOppgjor } from './oppgjor'
 import { skattVedDagsskifte } from './skatt'
 import { startupsVedDagsskifte } from './startups'
+import { klubbVedDagsskifte } from './klubb'
 import { forbesliste } from './rivaler'
 import { FORMER, fusjonsnokler } from './fusjon'
 import { nettoformue } from './formler'
@@ -214,12 +215,14 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const oppgjor = dagsskifteOppgjor(s)
   const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
   const startupsaker = startupsVedDagsskifte(s, t)
+  const klubbsaker = klubbVedDagsskifte(s)
   // Rekkefølgen er viktigheten: deg selv og skatten først, så nyheter som
   // flytter kurser, kappløpet, dagens bevegelser og sladder. Lokalstoff fyller
   // på når det er stille.
   const saker = [
     ...omDeg(s, før),
     ...skattesaker,
+    ...klubbsaker,
     ...startupsaker.filter((x) => x.type === 'deg'),
     ...nyheter,
     ...omRivalene(s, før),

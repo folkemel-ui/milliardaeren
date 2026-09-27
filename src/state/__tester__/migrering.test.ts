@@ -128,6 +128,10 @@ describe('migrering', () => {
     expect(r.tilstand.bedrifter[0]).toMatchObject({ tjent: 0, inntektHistorikk: [] })
     expect(r.tilstand.sparing).toBe(0)
     expect(r.tilstand.eiendomKostpris.hybel).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+    // 12 → 13: ingen klubb, ingen trofeer. 11 → 12: ingen startups.
+    expect(r.tilstand.klubb).toBeNull()
+    expect(r.tilstand.trofeer).toEqual([])
+    expect(r.tilstand.startups).toEqual([])
     // 10 → 11: ingen fusjoner, ingen salg og ingen bud.
     expect(r.tilstand.bedrifter[0].fusjoner).toBe(0)
     expect(r.tilstand.rivaler.every((x) => x.solgt.length === 0 && Object.keys(x.bud).length === 0)).toBe(true)

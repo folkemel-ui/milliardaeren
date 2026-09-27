@@ -49,6 +49,11 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', emoji: '🧳', klart: (s) => byerUtenlands(s).size >= 1 },
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', emoji: '🌍', klart: (s) => byerUtenlands(s).size >= UTENLANDSBYER.length },
   { id: 'fusjon', navn: 'Fusjonist', beskrivelse: 'Slå sammen en rivals bedrift med din egen', emoji: '🧩', klart: (s) => s.bedrifter.some((b) => (b.fusjoner ?? 0) > 0) },
+  { id: 'klubbeier', navn: 'Klubbeier', beskrivelse: 'Kjøp en fotballklubb', emoji: '⚽', klart: (s) => !!s.klubb },
+  { id: 'forste-seier', navn: 'Tre poeng', beskrivelse: 'Vinn din første kamp', emoji: '🥅', klart: (s) => (s.klubb?.seire ?? 0) > 0 },
+  { id: 'opprykk', navn: 'Opprykk', beskrivelse: 'Rykk opp en divisjon', emoji: '📣', klart: (s) => (s.klubb?.opprykk ?? 0) > 0 },
+  { id: 'seriemester', navn: 'Seriemester', beskrivelse: 'Vinn en serie', emoji: '🏆', klart: (s) => (s.trofeer?.length ?? 0) > 0 },
+  { id: 'eliteserie-gull', navn: 'Gull i Eliteserien', beskrivelse: 'Vinn Eliteserien', emoji: '🥇', klart: (s) => (s.trofeer ?? []).some((t) => t.navn.includes('Eliteserien')) },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', emoji: '🛢️', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
 ]
 

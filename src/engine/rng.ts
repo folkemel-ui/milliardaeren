@@ -10,6 +10,16 @@ export function tilfeldig(fro: number): number {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296
 }
 
+/** FNV-1a — en stabil tallverdi av en tekst, til frø som ikke skal avhenge av terningen. */
+export function hashTekst(tekst: string): number {
+  let h = 2166136261
+  for (let i = 0; i < tekst.length; i++) {
+    h ^= tekst.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h | 0
+}
+
 /** Liten hjelpeklasse så simuleringen slipper å tråkle frøet gjennom alt. */
 export class Terning {
   constructor(public fro: number) {}

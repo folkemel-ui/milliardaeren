@@ -11,7 +11,7 @@ import { START_RIVALER } from './rivaler'
 import type { Dagsbilde, Periodestart, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 12
+export const SPILLVERSJON = 13
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -77,6 +77,8 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     nesteOrdreId: 1,
     startups: [],
     nesteStartupId: 1,
+    klubb: null,
+    trofeer: [],
   }
   s.forrigeDag = lagDagsbilde(s)
   s.ukestart = periodestart(s)

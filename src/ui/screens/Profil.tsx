@@ -12,6 +12,32 @@ import { Skattekort } from '../komponenter/Skattekort'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
 
+function Trofeskap({ s }: { s: Spilltilstand }) {
+  const trofeer = s.trofeer ?? []
+  if (trofeer.length === 0) return null
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Trofeskapet</h2>
+        <span className="dempet liten">{trofeer.length}</span>
+      </div>
+      <ul className="trofeer">
+        {[...trofeer].reverse().map((t, i) => (
+          <li key={i}>
+            <span aria-hidden="true">🏆</span>
+            <span>
+              <strong>{t.navn}</strong>
+              <span className="dempet liten">
+                {t.klubb} · sesong {t.sesong}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function Prestasjonsliste({ s }: { s: Spilltilstand }) {
   const klart = PRESTASJONER.filter((p) => s.prestasjoner[p.id] !== undefined).length
   return (
@@ -147,6 +173,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
 
       <Skattekort s={s} />
       <Regnskap s={s} />
+      <Trofeskap s={s} />
       <Prestasjonsliste s={s} />
       <Rekordbok s={s} />
       <Utseende />

@@ -161,6 +161,8 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       forrigeDag: { ...forrigeDag, verdier: { ...(forrigeDag.verdier as Raatilstand), startup: 0 } },
     }
   },
+  /* 12 → 13: fotballklubb. Ingen klubb og ingen trofeer ennå. */
+  12: (s) => ({ ...s, klubb: null, trofeer: [] }),
 }
 
 export type MigreringsResultat =
