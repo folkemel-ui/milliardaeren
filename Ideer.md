@@ -12,35 +12,60 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 3. **Startups.** Invest in rounds (seed, Series A, B and so on). Your share gets diluted when new money comes in. The company can go bankrupt, be sold or go public on the stock exchange.
 
+4. **Unique upgrades per industry.** One-time purchases that fit each business: a juice press for the lemonade stand, a coffee machine for the café, a spa for the hotel, new drilling rigs for the oil company. Each gives a multiplier (e.g. ×1.5 or ×2) and becomes available at a certain level. It gives the business cards more to strive for between the milestones.
+
+5. **Business detail page.** Tap a business card to open its own page with stats and history: income over time, total earned, when it was started, staff and manager, upgrades and milestones. Today staff and manager are in a fold-out panel on the card.
+
 ## Investments
 
-4. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
+6. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
 
-## Progression
+7. **Company news that moves prices.** The paper reports quarterly results, contracts or scandals for the listed companies, and the price reacts. Sometimes the news comes in the morning paper before the price has moved fully, so reading the paper pays off. It builds on the newspaper and the market from Packs 3 and 5.
 
-5. **Achievements and a record book.** Milestones (first million, first billion, 10 businesses and so on) and personal records such as the biggest single trade and the fastest route to a billion.
+8. **Your holdings under «Dine aksjer» / «Din krypto».** When you buy something, for example Fjellkraft, a copy of its row appears under the «Dine aksjer» card (or «Din krypto»). The original stays in the market list below with its price as before. The copy shows:
+   - how much money you have in the stock right now (number owned × price)
+   - how much you've gained or lost in kroner, in green (+) or red (−)
+   - the same gain or loss in %
+
+   Tapping the copy opens the same detail page as the original. When you sell everything, the copy disappears.
+
+9. **Fuller portfolio summary.** One summary across everything: total value, change today and total return, split into stocks, crypto and property. Today each tab only shows its own value and total gain.
+
+## Bank
+
+10. **Savings account.** Interest on unused cash: low, but risk-free. A place to park money while you save for something big, and an alternative to stocks for those who don't want risk. The interest can be shown in the top bar's income per second.
+
+## Property
+
+11. **Map view for Property.** A simple, stylized map of Norway (Bergen, Oslo, Stavanger, Geilo, Trondheim, Lofoten) with your properties as markers you can tap. It shows at a glance where your empire is, and makes a natural starting point for Travel later.
+
+12. **Renovating properties.** Spend money to raise the standard (normal → renovated → luxury), which gives higher rent and value. Each level costs more and takes a few in-game days. It gives property its own upgrade path, like levels for businesses.
 
 ## Luxury and status
 
-6. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both.
+13. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both.
 
 ## Risk
 
-7. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
+14. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
 
-8. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+15. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+
+## Newspaper and calendar
+
+16. **Status titles in the paper.** The higher your status, the more the paper writes about you: "Tycoon seen at Aker Brygge", "The magnate buys again". It uses your status level name and what you own, so the paper feels like it's about you.
+
+17. **Weekly summary on Sundays.** A special Sunday edition with the week's biggest winner and loser on the stock exchange, your net worth change over the week and "the week in numbers" (earned, rent, dividends, interest).
+
+18. **Month-end and year-end reports.** At the end of each in-game month, a report of income, expenses, the best business and net worth change. At year-end, a bigger annual report comparing it with the year before. A natural place for taxes later.
 
 ## Presentation
 
-9. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
-
-10. **Newspaper.** A daily headline feed that reacts to the market, events and what the player does ("Crypto crashes 40 %", "Unknown investor buys football club").
+19. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
 
 ## Layout
 
-11. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
-
-12. **Date and time bar.** Shows the in-game day and week, which is useful for dividends, rent, taxes and match days.
+20. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
 ## Parked (not chosen yet)
 
@@ -56,6 +81,41 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Sound.** Synthesized coin and level-up sounds using Web Audio.
 - **Other sports clubs.** Hockey and basketball, in addition to football.
 
+**Expansions of what exists**
+- **Specialization at level 50.** Choose a direction per business, for example *Volume* (more income) or *Premium* (higher value and status). The choice is permanent.
+- **Opening hours and rush hours.** The kiosk earns most in the evening, the café in the morning and the restaurant at dinner, using the game clock.
+- **Weekday effects.** Restaurants and hotels earn more at the weekend, banks and offices on weekdays.
+- **Staff with names and skills.** Junior, experienced or star; stars cost more but give more.
+- **Managers with traits.** Careful (safe offline income), Aggressive (more income, risk of mistakes) or Night owl (longer offline cap).
+- **Business history.** A graph per business of income over time, when it was started and total earned.
+- **Selling businesses.** Sell to a buyer at a price based on income, with bids that vary.
+- **Industry trends.** Weeks where "coffee is hot" (+20 % for cafés) or "oil price falls", announced in the paper.
+- **Quarterly reports for companies.** Good, as expected or weak results that make prices jump and change dividends.
+- **Limit orders.** "Buy NLT if the price falls to 450"; a first step toward auto-trading.
+- **Watchlist.** Star the stocks and coins you follow so they show at the top.
+- **Stock detail: history and key figures.** Highest and lowest price, dividend yield and your own trades marked on the chart.
+- **Crypto events.** Listing on a big exchange, hacked exchange, and "rug pull" for the smallest coins.
+- **Index funds.** A fund that follows all 8 stocks, for safer saving.
+- **Short selling.** Bet against a stock; risky and requires a loan.
+- **Fixed or variable rate.** A variable rate follows a policy rate announced in the paper.
+- **Credit rating.** AAA to C based on how you handle debt; affects interest and credit limit.
+- **Mortgages.** Borrow against specific properties at a better rate.
+- **Vacancy and tenants.** Properties can stand empty and bad tenants cost money; a property manager reduces the risk.
+- **Regional price differences.** Separate property indexes for Oslo, Bergen, Stavanger and the mountains.
+- **Building your own.** Buy a plot and build over several in-game days: cheaper, but ties up money.
+- **Holiday home effect.** The cabin and island give status, and weekend rental income.
+- **Car value that changes.** Classic cars rise in value, new cars lose value.
+- **Using your items.** A boat trip on Sunday for status that day, a jet to "a meeting".
+- **Collection bonuses.** All the cars gives "Car collector", all the watches "Watch nerd", and so on.
+- **Events you can attend.** Charity gala, yacht race, opera premiere: cost money, give status, appear in the paper.
+- **Holidays.** Easter, 17 May (sausage stand +200 %), Christmas.
+- **Seasons and weather.** The weather in the paper affects business: sun for the lemonade stand, snow for the cabin.
+- **Paper ads.** Offers in the paper, for example "Cabin for sale at 20 % discount, today only".
+- **Rewards for achievements.** Small permanent bonuses or cash rewards.
+- **Hidden achievements.** "Bought at the bottom", "Night owl" and so on.
+- **Titles for your largest business.** "Lemonade king", "Sausage baron" and so on, shown on Profile.
+- **Statistics page.** Income per source (businesses, rent, dividends) as a graph over time.
+
 **Layout ideas**
 - **Colorful cartoon style.** Bright colors, rounded shapes and big icons.
 - **Light/dark toggle** in the settings, switching between the two themes above.
@@ -64,10 +124,7 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Progress bar per business** that fills up and pays out when full.
 - **Buy ×1 / ×10 / ×100 / Max** toggle.
 - **Locked businesses: show all of them.** Today only the next locked one is shown.
-- **Business detail page** with stats and history. Today staff and manager are in a fold-out panel on the card.
 - **Stock chart time ranges.** Today the chart always shows the last 2 hours.
-- **Portfolio summary: fuller version** with today's change and total return across everything. Today each tab shows its value and total gain.
-- **Map view for Property.**
 - **Showroom for Luxury** that you swipe through.
 - **Garage, harbor and hangar grid** with slots.
 - **Football club screen** with the league table, next match, squad and trophy cabinet.

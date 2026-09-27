@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest'
+﻿import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { kjopPapir, laan, nedbetal, selgPapir } from '../handlinger'
 import { belaaningsgrad, maksKjop, maksNyttLaan, nettoformue, papirverdi } from '../formler'
-import { AKSJER, KRYPTO, lagMarked, MAKS_KURSHISTORIKK, PAPIRER, UTBYTTE_SEK } from '../marked'
+import { AKSJER, KRYPTO, lagMarked, MAKS_KURSHISTORIKK, PAPIRER } from '../marked'
+import { DAG_SEK } from '../kalender'
 import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../innhold'
 import type { PapirId, Spilltilstand } from '../types'
 
@@ -75,7 +76,7 @@ describe('handel', () => {
 
   it('aksjer betaler utbytte', () => {
     const s = kjøpt(rik(), 'FJK', 1_000)
-    const etter = simuler(s, UTBYTTE_SEK)
+    const etter = simuler(s, DAG_SEK)
     expect(etter.totaltUtbytte).toBeGreaterThan(0)
   })
 

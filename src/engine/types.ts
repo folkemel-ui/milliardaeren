@@ -137,6 +137,37 @@ export interface Luksusgjenstand {
 
 export type LagerId = 'garasje' | 'havn' | 'hangar'
 
+// ─────────────────────────────────────────────── Avis, prestasjoner og rekorder
+
+export interface Overskrift {
+  tittel: string
+  tekst: string
+  /** Hva saken handler om — styrer plassering og utseende. */
+  type: 'deg' | 'marked' | 'lokalt'
+}
+
+export interface Avisutgave {
+  /** Spilldagen utgaven kom ut (0 = første dag). */
+  dag: number
+  saker: Overskrift[]
+}
+
+/** Et øyeblikksbilde ved forrige dagsskifte, så avisen kan melde hva som har endret seg. */
+export interface Dagsbilde {
+  kurser: Record<PapirId, number>
+  eiendomsindeks: number
+  bedrifter: BedriftstypeId[]
+  eiendommer: number
+  luksus: LuksusId[]
+  sek: number
+}
+
+export interface Rekorder {
+  hoyesteInntekt: number
+  storsteHandel: number
+  storsteGevinst: number
+}
+
 export interface Hendelse {
   sek: number
   tittel: string
@@ -181,4 +212,12 @@ export interface Spilltilstand {
   luksus: LuksusId[]
   /** Plasser i garasjen, havna og hangaren. */
   lager: Record<LagerId, number>
+  /** De siste utgavene av avisen, nyeste sist. */
+  avis: Avisutgave[]
+  /** Dagen i den nyeste utgaven du har lest. */
+  avisLest: number
+  forrigeDag: Dagsbilde
+  /** Prestasjonene du har klart, med spillsekundet de kom. */
+  prestasjoner: Record<string, number>
+  rekorder: Rekorder
 }

@@ -6,7 +6,8 @@ import {
   papirverdi,
   rentePerSek,
 } from '../../engine/formler'
-import { kjopPapir, laan, nedbetal, selgPapir } from '../../engine/handlinger'
+import { borsenStengt, kjopPapir, laan, nedbetal, selgPapir } from '../../engine/handlinger'
+import { erHelg } from '../../engine/kalender'
 import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../../engine/innhold'
 import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
 import type { PapirId, Spilltilstand } from '../../engine/types'
@@ -60,6 +61,7 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
 
   return (
     <>
+      {klasse === 'aksje' && erHelg(s.sek) && <p className="kort stengt">Børsen er stengt i helgen. Kursene står stille til mandag.</p>}
       <div className="kort portefolje">
         <div>
           <span className="etikett">{klasse === 'aksje' ? 'Dine aksjer' : 'Din krypto'}</span>
@@ -141,7 +143,7 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
             <h1 className="skjerm-tittel">{p.navn}</h1>
             <span className="dempet liten">
               {RISIKO_TEKST[p.risiko]}
-              {p.utbytte > 0 && ` · Utbytte ${tall(p.utbytte * 100, 2)} % hvert 10. min`}
+              {p.utbytte > 0 && ` · Utbytte ${tall(p.utbytte * 100, 3)} % hver børsdag`}
             </span>
           </div>
         </div>
@@ -171,7 +173,11 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
         </dl>
       )}
 
-      <Handelsboks s={s} id={id} />
+      {borsenStengt(s, id) ? (
+        <p className="kort stengt">Børsen er stengt i helgen. Den åpner mandag morgen — kryptoen kan du handle hele uka.</p>
+      ) : (
+        <Handelsboks s={s} id={id} />
+      )}
     </section>
   )
 }

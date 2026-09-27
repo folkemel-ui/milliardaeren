@@ -81,6 +81,30 @@ describe('migrering', () => {
     expect(nettoformue(r.tilstand)).toBe(6_500)
   })
 
+  it('løfter en versjon 4-lagring til versjon 5 og stempler prestasjoner du alt har', () => {
+    const s4 = migrer({
+      versjon: 2,
+      frø: 99,
+      sek: 900,
+      kontanter: 50_000,
+      bedrifter: [{ id: 'b1', type: 'saftbod', nivaa: 5, startetSek: 0, ansatte: 1, leder: true, investert: 1_500 }],
+      nesteId: 2,
+      historikk: { intervall: 10, punkter: [{ sek: 0, verdi: 1_250 }] },
+      totaltTjent: 49_000,
+      hoyesteFormue: 51_500,
+    }, 4)
+    expect(s4.ok).toBe(true)
+    if (!s4.ok) return
+    const r = migrer(JSON.parse(JSON.stringify(s4.tilstand)))
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.tilstand.versjon).toBe(SPILLVERSJON)
+    expect(r.tilstand.avis).toEqual([])
+    expect(r.tilstand.forrigeDag.sek).toBe(900)
+    expect(Object.keys(r.tilstand.prestasjoner).sort()).toEqual(['fem-sifre', 'forste-ansatt', 'forste-leder', 'forste-steg'])
+    expect(nettoformue(r.tilstand)).toBe(51_500)
+  })
+
   it('løfter en ekte versjon 1-lagring helt frem', () => {
     const v1 = {
       versjon: 1,

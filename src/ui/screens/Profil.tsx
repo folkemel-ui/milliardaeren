@@ -1,11 +1,69 @@
 import { useState } from 'react'
 import { nettoformue } from '../../engine/formler'
 import { MAAL } from '../../engine/innhold'
+import { PRESTASJONER } from '../../engine/prestasjoner'
 import type { Spilltilstand } from '../../engine/types'
 import { startPaaNytt } from '../../state/lager'
-import { formue, kroner, tall, varighet } from '../format'
+import { formue, kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { Formuegraf } from '../komponenter/Formuegraf'
 import { RulleTall } from '../komponenter/RulleTall'
+
+function Prestasjonsliste({ s }: { s: Spilltilstand }) {
+  const klart = PRESTASJONER.filter((p) => s.prestasjoner[p.id] !== undefined).length
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Prestasjoner</h2>
+        <span className="dempet liten">
+          {klart} / {PRESTASJONER.length}
+        </span>
+      </div>
+      <ul className="prestasjoner">
+        {PRESTASJONER.map((p) => {
+          const når = s.prestasjoner[p.id]
+          return (
+            <li key={p.id} className={når === undefined ? 'prestasjon' : 'prestasjon klart'} title={p.beskrivelse}>
+              <span className="prestasjon-emoji" aria-hidden="true">
+                {når === undefined ? '🔒' : p.emoji}
+              </span>
+              <span className="prestasjon-navn">{p.navn}</span>
+              <span className="prestasjon-besk">{p.beskrivelse}</span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+function Rekordbok({ s }: { s: Spilltilstand }) {
+  const r = s.rekorder
+  const tilMillion = s.prestasjoner.millionaer
+  const tilMilliard = s.prestasjoner.milliardaer
+  const rader: [string, string][] = [
+    ['Høyeste nettoformue', formue(s.hoyesteFormue)],
+    ['Høyeste inntekt', perSek(r.hoyesteInntekt)],
+    ['Største handel', r.storsteHandel > 0 ? kortKroner(r.storsteHandel) : '—'],
+    ['Største gevinst på et salg', r.storsteGevinst > 0 ? kortKroner(r.storsteGevinst) : '—'],
+    ['Tid til første million', tilMillion !== undefined ? varighet(tilMillion) : '—'],
+    ['Tid til milliarden', tilMilliard !== undefined ? varighet(tilMilliard) : '—'],
+    ['Utbytte totalt', kortKroner(s.totaltUtbytte)],
+    ['Leie totalt', kortKroner(s.totaltLeie)],
+  ]
+  return (
+    <div className="kort">
+      <h2 className="kort-tittel">Rekordboka</h2>
+      <dl className="rekorder">
+        {rader.map(([navn, verdi]) => (
+          <div key={navn}>
+            <dt>{navn}</dt>
+            <dd>{verdi}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
 
 /** Fremdrift mot milliarden på logaritmisk skala: hvert nuller er like langt. */
 function fremdrift(n: number): number {
@@ -58,6 +116,9 @@ export function Profil({ s }: { s: Spilltilstand }) {
           <dd>{s.bedrifter.length}</dd>
         </div>
       </dl>
+
+      <Prestasjonsliste s={s} />
+      <Rekordbok s={s} />
 
       <div className="kort">
         {bekreft ? (

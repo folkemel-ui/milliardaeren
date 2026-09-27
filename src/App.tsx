@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Avis } from './ui/komponenter/Avis'
 import { startSpillokke, useSpill } from './state/lager'
 import { Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
@@ -23,6 +24,8 @@ function husketFane(): Fane {
 export default function App() {
   const s = useSpill()
   const [fane, settFane] = useState<Fane>(husketFane)
+  const [avisÅpen, settAvisÅpen] = useState(false)
+  const lukkAvis = useCallback(() => settAvisÅpen(false), [])
 
   useEffect(startSpillokke, [])
 
@@ -38,7 +41,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Toppfelt s={s} tilProfil={() => velg('profil')} />
+      <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} />
       <main className="innhold">
         {fane === 'bedrifter' && <Bedrifter s={s} />}
         {fane === 'investeringer' && <Investeringer s={s} />}
@@ -47,6 +50,7 @@ export default function App() {
         {fane === 'profil' && <Profil s={s} />}
       </main>
       <Fanemeny aktiv={fane} velg={velg} />
+      {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
     </div>
   )
 }

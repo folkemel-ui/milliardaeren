@@ -26,6 +26,7 @@ import {
   utvidelsespris,
 } from './eiendom'
 import { BEDRIFTSTYPER } from './innhold'
+import { erHelg } from './kalender'
 import { PAPIRER, rundAntall } from './marked'
 import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, PapirId, Spilltilstand } from './types'
 
@@ -83,24 +84,37 @@ export function ansett(s: Spilltilstand, id: string): Utfall {
 
 // ─────────────────────────────────────────────── Aksjer og krypto
 
+/** Aksjer kan ikke handles i helgen; krypto kan. */
+export function borsenStengt(s: Spilltilstand, id: PapirId): boolean {
+  return PAPIRER[id].klasse === 'aksje' && erHelg(s.sek)
+}
+
+const STENGT = 'Børsen er stengt i helgen. Den åpner mandag morgen.'
+
 export function kjopPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall {
   if (!PAPIRER[id]) return feil('Ukjent papir.')
+  if (borsenStengt(s, id)) return feil(STENGT)
   const a = rundAntall(id, antall)
   if (a <= 0) return feil('Velg hvor mye du vil kjøpe.')
   if (a > maksKjop(s, id)) return feil('Du har ikke råd.')
   const n = structuredClone(s)
-  utforKjop(n, id, a)
+  const kostnad = utforKjop(n, id, a)
+  n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, kostnad)
   return { ok: true, tilstand: n }
 }
 
 export function selgPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall {
   const b = s.beholdning[id]
   if (!b) return feil('Du eier ingen.')
+  if (borsenStengt(s, id)) return feil(STENGT)
   // Et salg av (nesten) alt selger alt, så det ikke blir liggende støv igjen.
   const a = antall >= b.antall - 1e-9 ? b.antall : rundAntall(id, antall)
   if (a <= 0) return feil('Velg hvor mye du vil selge.')
   const n = structuredClone(s)
-  utforSalg(n, id, a)
+  const inntekt = utforSalg(n, id, a)
+  const gevinst = inntekt - b.kostpris * (a / b.antall)
+  n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, inntekt)
+  n.rekorder.storsteGevinst = Math.max(n.rekorder.storsteGevinst, gevinst)
   return { ok: true, tilstand: n }
 }
 
@@ -162,6 +176,16 @@ export function utvidLager(s: Spilltilstand, lager: LagerId): Utfall {
   const n = structuredClone(s)
   n.kontanter -= pris
   n.lager[lager] += 1
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Avisen
+
+export function lesAvis(s: Spilltilstand): Utfall {
+  const siste = s.avis[s.avis.length - 1]
+  if (!siste || s.avisLest >= siste.dag) return feil('Ingen nye utgaver.')
+  const n = structuredClone(s)
+  n.avisLest = siste.dag
   return { ok: true, tilstand: n }
 }
 

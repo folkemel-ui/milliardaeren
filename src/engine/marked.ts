@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Markedet: aksjer og krypto. Hver kurs er en seedet tilfeldig vandring rundt
  * en sakte stigende «riktig verdi» — avviket trekkes tilbake mot null over tid,
  * så kursene hverken dør ut eller løper løpsk. Kryptoen har i tillegg hopp og
@@ -15,8 +15,6 @@ const DT = MARKED_TIKK_SEK / 3600
 /** Et historikkpunkt hvert sjette tikk (30 s), og 240 av dem: to timer. */
 export const HISTORIKK_TIKK = 6
 export const MAKS_KURSHISTORIKK = 240
-/** Utbytte utbetales så ofte. */
-export const UTBYTTE_SEK = 600
 /** Kurtasje på hver handel. */
 export const KURTASJE = 0.005
 /** En enkelt handel kan flytte kursen høyst så mye (i logaritmisk avvik). */
@@ -24,11 +22,11 @@ export const MAKS_KURSTRYKK = 0.15
 
 export const PAPIRER: Record<PapirId, Papir> = {
   // ── Aksjer. Lav risiko betaler mest utbytte; høy risiko svinger mest.
-  NFS: { id: 'NFS', navn: 'Nordfjord Sjømat', klasse: 'aksje', risiko: 'lav', startkurs: 180, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.001, dybde: 2e9, hopp: 0 },
-  FJK: { id: 'FJK', navn: 'Fjellkraft', klasse: 'aksje', risiko: 'lav', startkurs: 95, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.0012, dybde: 2e9, hopp: 0 },
-  VTK: { id: 'VTK', navn: 'Vikingtelekom', klasse: 'aksje', risiko: 'lav', startkurs: 42, drift: 0.02, volatilitet: 0.035, reversjon: 0.5, utbytte: 0.001, dybde: 1.5e9, hopp: 0 },
-  BSH: { id: 'BSH', navn: 'Bergen Shipping', klasse: 'aksje', risiko: 'middels', startkurs: 260, drift: 0.03, volatilitet: 0.06, reversjon: 0.4, utbytte: 0.0005, dybde: 1e9, hopp: 0 },
-  POL: { id: 'POL', navn: 'Polaris Olje', klasse: 'aksje', risiko: 'middels', startkurs: 310, drift: 0.03, volatilitet: 0.07, reversjon: 0.4, utbytte: 0.0006, dybde: 1e9, hopp: 0 },
+  NFS: { id: 'NFS', navn: 'Nordfjord Sjømat', klasse: 'aksje', risiko: 'lav', startkurs: 180, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0007, dybde: 2e9, hopp: 0 },
+  FJK: { id: 'FJK', navn: 'Fjellkraft', klasse: 'aksje', risiko: 'lav', startkurs: 95, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.00085, dybde: 2e9, hopp: 0 },
+  VTK: { id: 'VTK', navn: 'Vikingtelekom', klasse: 'aksje', risiko: 'lav', startkurs: 42, drift: 0.02, volatilitet: 0.035, reversjon: 0.5, utbytte: 0.0007, dybde: 1.5e9, hopp: 0 },
+  BSH: { id: 'BSH', navn: 'Bergen Shipping', klasse: 'aksje', risiko: 'middels', startkurs: 260, drift: 0.03, volatilitet: 0.06, reversjon: 0.4, utbytte: 0.00035, dybde: 1e9, hopp: 0 },
+  POL: { id: 'POL', navn: 'Polaris Olje', klasse: 'aksje', risiko: 'middels', startkurs: 310, drift: 0.03, volatilitet: 0.07, reversjon: 0.4, utbytte: 0.0004, dybde: 1e9, hopp: 0 },
   NLT: { id: 'NLT', navn: 'Nordlys Tech', klasse: 'aksje', risiko: 'høy', startkurs: 520, drift: 0.05, volatilitet: 0.12, reversjon: 0.3, utbytte: 0, dybde: 4e8, hopp: 0.0005 },
   AUB: { id: 'AUB', navn: 'Aurora Bioteknologi', klasse: 'aksje', risiko: 'høy', startkurs: 75, drift: 0.04, volatilitet: 0.15, reversjon: 0.3, utbytte: 0, dybde: 3e8, hopp: 0.001 },
   TRS: { id: 'TRS', navn: 'Trollspill', klasse: 'aksje', risiko: 'høy', startkurs: 140, drift: 0.05, volatilitet: 0.13, reversjon: 0.3, utbytte: 0, dybde: 3e8, hopp: 0.0005 },
@@ -65,13 +63,17 @@ export function kursFra(fundament: number, avvik: number): number {
   return fundament * Math.exp(avvik)
 }
 
-/** Ett markedstikk på en tilstand simuleringen eier: papirene, så eiendomsindeksen. */
-export function markedstikk(m: Marked, t: Terning): void {
-  papirtikk(m, t)
+/**
+ * Ett markedstikk på en tilstand simuleringen eier: papirene, så
+ * eiendomsindeksen. I helgen er børsen stengt — aksjene står stille, mens
+ * kryptoen og eiendomsprisene går som før.
+ */
+export function markedstikk(m: Marked, t: Terning, helg = false): void {
+  papirtikk(m, t, helg)
   eiendomstikk(m.eiendom, m.tikk, t)
 }
 
-function papirtikk(m: Marked, t: Terning): void {
+function papirtikk(m: Marked, t: Terning, helg = false): void {
   m.tikk += 1
   const st = m.stemning
   m.stemning = Math.max(-1, Math.min(1, st - STEMNING_REVERSJON * st * DT + STEMNING_VOLATILITET * Math.sqrt(DT) * normal(t)))
@@ -79,15 +81,18 @@ function papirtikk(m: Marked, t: Terning): void {
   for (const id of Object.keys(PAPIRER) as PapirId[]) {
     const p = PAPIRER[id]
     const k = m.kurser[id]
-    const drift = p.drift + (p.klasse === 'krypto' ? STEMNINGSKRAFT * m.stemning : 0)
-    k.fundament *= Math.exp(drift * DT)
-    k.avvik += -p.reversjon * k.avvik * DT + p.volatilitet * Math.sqrt(DT) * normal(t)
-    if (p.hopp > 0 && t.sjanse(p.hopp)) {
-      // Hopp i stemningens retning er litt mer sannsynlige.
-      const opp = t.sjanse(0.5 + 0.2 * (p.klasse === 'krypto' ? m.stemning : 0))
-      k.avvik += (opp ? 1 : -1) * t.mellom(HOPP_MIN, HOPP_MAKS)
+    // Stengt børs: kursen står, men historikken får fortsatt punkter, så grafen viser helgen som flat.
+    if (!(helg && p.klasse === 'aksje')) {
+      const drift = p.drift + (p.klasse === 'krypto' ? STEMNINGSKRAFT * m.stemning : 0)
+      k.fundament *= Math.exp(drift * DT)
+      k.avvik += -p.reversjon * k.avvik * DT + p.volatilitet * Math.sqrt(DT) * normal(t)
+      if (p.hopp > 0 && t.sjanse(p.hopp)) {
+        // Hopp i stemningens retning er litt mer sannsynlige.
+        const opp = t.sjanse(0.5 + 0.2 * (p.klasse === 'krypto' ? m.stemning : 0))
+        k.avvik += (opp ? 1 : -1) * t.mellom(HOPP_MIN, HOPP_MAKS)
+      }
+      k.kurs = kursFra(k.fundament, k.avvik)
     }
-    k.kurs = kursFra(k.fundament, k.avvik)
     if (m.tikk % HISTORIKK_TIKK === 0) {
       k.historikk.push(k.kurs)
       if (k.historikk.length > MAKS_KURSHISTORIKK) k.historikk.shift()

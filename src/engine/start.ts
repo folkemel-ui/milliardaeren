@@ -4,10 +4,11 @@ import { nettoformue } from './formler'
 import { BEDRIFTSTYPER, STARTKAPITAL } from './innhold'
 import { lagMarked } from './marked'
 import { START_LAGER } from './eiendom'
-import type { Spilltilstand } from './types'
+import { lagDagsbilde } from './avis'
+import type { Dagsbilde, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 4
+export const SPILLVERSJON = 5
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -36,7 +37,14 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     totaltLeie: 0,
     luksus: [],
     lager: { ...START_LAGER },
+    avis: [],
+    avisLest: 0,
+    // Fylles rett under — bildet trenger en ferdig tilstand å ta bilde av.
+    forrigeDag: null as unknown as Dagsbilde,
+    prestasjoner: {},
+    rekorder: { hoyesteInntekt: 0, storsteHandel: 0, storsteGevinst: 0 },
   }
+  s.forrigeDag = lagDagsbilde(s)
   s.hoyesteFormue = nettoformue(s)
   s.historikk.punkter.push({ sek: 0, verdi: s.hoyesteFormue })
   return s

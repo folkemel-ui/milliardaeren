@@ -15,6 +15,8 @@ import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { lagEiendomsindeks, lagMarked } from '../engine/marked'
 import { START_LAGER } from '../engine/eiendom'
+import { lagDagsbilde } from '../engine/avis'
+import { sjekkPrestasjoner } from '../engine/prestasjoner'
 import type { BedriftstypeId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -58,6 +60,22 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       luksus: [],
       lager: { ...START_LAGER },
     }
+  },
+  /* 4 → 5: kalender, avis, prestasjoner og rekorder. Avisen starter tom og
+     tar dagsbildet nå, så første utgave melder det som skjer fra i dag.
+     Prestasjonene du allerede har gjort deg fortjent til, stemples med én
+     gang — med dagens tidspunkt, siden vi ikke vet når de egentlig skjedde. */
+  4: (s) => {
+    const n = {
+      ...s,
+      avis: [],
+      avisLest: 0,
+      prestasjoner: {},
+      rekorder: { hoyesteInntekt: 0, storsteHandel: 0, storsteGevinst: 0 },
+    } as unknown as Spilltilstand
+    n.forrigeDag = lagDagsbilde(n)
+    sjekkPrestasjoner(n)
+    return n as unknown as Raatilstand
   },
 }
 
