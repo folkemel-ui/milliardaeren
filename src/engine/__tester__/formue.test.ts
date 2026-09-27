@@ -13,7 +13,7 @@ describe('start som en ingen', () => {
 })
 
 describe('nettoformue', () => {
-  it('er kontanter pluss bedriftenes verdi', () => {
+  it('er kontanter pluss det som er investert i bedriftene', () => {
     const s = nyttSpill()
     expect(nettoformue(s)).toBe(STARTKAPITAL + 250)
   })
@@ -21,6 +21,11 @@ describe('nettoformue', () => {
   it('vokser med inntekten', () => {
     const s = simuler(nyttSpill(), 60)
     expect(nettoformue(s)).toBe(STARTKAPITAL + 250 + 60)
+  })
+
+  it('høyeste formue følger med', () => {
+    const s = simuler(nyttSpill(), 60)
+    expect(s.hoyesteFormue).toBe(nettoformue(s))
   })
 })
 

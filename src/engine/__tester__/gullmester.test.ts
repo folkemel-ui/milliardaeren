@@ -1,11 +1,11 @@
 /**
- * Golden master: et fast antall sekunder fra standardoppstillingen, med
- * sluttilstandens nøkkeltall låst i gullmester.fasit.json. Enhver utilsiktet
- * endring i motorens økonomi gir rød test her — det er hele poenget.
+ * Golden master: boten spiller et fast antall sekunder fra standardoppstillingen,
+ * og sluttilstandens nøkkeltall er låst i gullmester.fasit.json. Enhver
+ * utilsiktet endring i motorens økonomi gir rød test her — det er hele poenget.
  *
  * Endrer du motoren MED VILJE, oppdater fasiten og forklar det i commit-meldingen:
  *
- *     OPPDATER_FASIT=1 npm test
+ *     $env:OPPDATER_FASIT=1; npm test
  */
 
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -15,29 +15,32 @@ import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { inntektPerSek, nettoformue } from '../formler'
 import type { Spilltilstand } from '../types'
+import { botSpill } from './bot'
 
 const FASIT_STI = fileURLToPath(new URL('./gullmester.fasit.json', import.meta.url))
 /** Fire timer spilletid. */
 const SEKUNDER = 4 * 60 * 60
 
+const avrund = (n: number) => Math.round(n * 100) / 100
+
 function fingeravtrykk(s: Spilltilstand) {
   return {
     sek: s.sek,
     frø: s.frø,
-    kontanter: s.kontanter,
-    totaltTjent: s.totaltTjent,
-    nettoformue: nettoformue(s),
-    inntektPerSek: inntektPerSek(s),
-    antallBedrifter: s.bedrifter.length,
+    kontanter: avrund(s.kontanter),
+    totaltTjent: avrund(s.totaltTjent),
+    nettoformue: avrund(nettoformue(s)),
+    hoyesteFormue: avrund(s.hoyesteFormue),
+    inntektPerSek: avrund(inntektPerSek(s)),
+    bedrifter: s.bedrifter.map((b) => `${b.type} nivå ${b.nivaa}, ${b.ansatte} ansatte`),
     historikkIntervall: s.historikk.intervall,
     historikkPunkter: s.historikk.punkter.length,
-    sisteHistorikkpunkt: s.historikk.punkter[s.historikk.punkter.length - 1],
   }
 }
 
 describe('golden master', () => {
-  it(`${SEKUNDER} sekunder fra standardoppstillingen treffer fasiten eksakt`, () => {
-    const avtrykk = fingeravtrykk(simuler(nyttSpill(), SEKUNDER))
+  it(`boten spiller ${SEKUNDER} sekunder og treffer fasiten eksakt`, () => {
+    const avtrykk = fingeravtrykk(botSpill(nyttSpill(), SEKUNDER))
 
     if (process.env.OPPDATER_FASIT) {
       writeFileSync(FASIT_STI, JSON.stringify(avtrykk, null, 2) + '\n')

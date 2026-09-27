@@ -1,15 +1,17 @@
 {
   "sek": 14400,
   "frø": 20260927,
-  "kontanter": 15400,
-  "totaltTjent": 14400,
-  "nettoformue": 15650,
-  "inntektPerSek": 1,
-  "antallBedrifter": 1,
+  "kontanter": 8927256.3,
+  "totaltTjent": 55609170.3,
+  "nettoformue": 55610420.3,
+  "hoyesteFormue": 55610420.3,
+  "inntektPerSek": 9762.92,
+  "bedrifter": [
+    "saftbod nivå 70, 2 ansatte",
+    "polsebod nivå 61, 2 ansatte",
+    "kiosk nivå 43, 1 ansatte",
+    "kafe nivå 34, 1 ansatte"
+  ],
   "historikkIntervall": 80,
-  "historikkPunkter": 181,
-  "sisteHistorikkpunkt": {
-    "sek": 14400,
-    "verdi": 15650
-  }
+  "historikkPunkter": 181
 }

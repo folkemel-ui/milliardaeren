@@ -3,15 +3,31 @@
  * JSON uten tap. Endres formen, bumpes SPILLVERSJON og en migrering skrives.
  */
 
-export type BedriftstypeId = 'saftbod'
+export type BedriftstypeId =
+  | 'saftbod'
+  | 'polsebod'
+  | 'kiosk'
+  | 'kafe'
+  | 'restaurant'
+  | 'hotell'
+  | 'bank'
+  | 'oljeselskap'
 
 export interface Bedriftstype {
   id: BedriftstypeId
   navn: string
-  /** Inntekt per sekund på nivå 1. */
-  inntektPerSek: number
-  /** Hva bedriften er verdt på nivå 1 — teller med i nettoformuen. */
-  grunnverdi: number
+  /** Midlertidig ikon til SVG-ikonene kommer. */
+  emoji: string
+  /** Hva det koster å starte bedriften. Du kan eie én av hver type. */
+  pris: number
+  /** Inntekt per sekund på nivå 1, uten ansatte. */
+  grunninntekt: number
+  /** Pris for å gå fra nivå 1 til 2. */
+  oppgraderingspris: number
+  /** Hvor mye dyrere hvert nivå blir enn det forrige. */
+  vekst: number
+  /** Høyeste nettoformue du må ha nådd for å kunne kjøpe typen. */
+  laasesOppVed: number
 }
 
 export interface Bedrift {
@@ -20,6 +36,11 @@ export interface Bedrift {
   nivaa: number
   /** Spillsekundet bedriften ble startet eller kjøpt. */
   startetSek: number
+  ansatte: number
+  /** En leder holder bedriften i gang mens du er borte. */
+  leder: boolean
+  /** Alt du har brukt på bedriften: kjøp, nivåer, ansettelser og leder. Er bedriftens bokførte verdi. */
+  investert: number
 }
 
 export interface Formuepunkt {
@@ -36,7 +57,7 @@ export interface Formuehistorikk {
 export interface Spilltilstand {
   versjon: number
   frø: number
-  /** Spilletid i hele sekunder. Motoren teller bare tid mens spillet er åpent. */
+  /** Spilletid i hele sekunder: tid med appen åpen, pluss tid borte (med tak). */
   sek: number
   kontanter: number
   bedrifter: Bedrift[]
@@ -44,4 +65,6 @@ export interface Spilltilstand {
   nesteId: number
   historikk: Formuehistorikk
   totaltTjent: number
+  /** Den høyeste nettoformuen du har hatt. Låser opp bransjer — og låser aldri igjen. */
+  hoyesteFormue: number
 }

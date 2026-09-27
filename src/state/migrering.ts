@@ -12,12 +12,31 @@
  */
 
 import { SPILLVERSJON } from '../engine/start'
-import type { Spilltilstand } from '../engine/types'
+import { BEDRIFTSTYPER } from '../engine/innhold'
+import type { BedriftstypeId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
 
-/** Nøkkel N løfter en lagring fra versjon N til N+1. Tom til første bump. */
-export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {}
+/** Nøkkel N løfter en lagring fra versjon N til N+1. */
+export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
+  /* 1 → 2: bransjestigen, ansatte og ledere. Bedriftene får null ansatte og
+     ingen leder, og bokføres til typens pris — i versjon 1 fantes bare nivå 1,
+     og saftboden var verdt 250 kr. Høyeste formue hentes fra historikken, som
+     har logget nettoformuen hele tiden. */
+  1: (s) => {
+    const punkter = ((s.historikk as Raatilstand)?.punkter as { verdi: number }[]) ?? []
+    return {
+      ...s,
+      bedrifter: (s.bedrifter as Raatilstand[]).map((b) => ({
+        ansatte: 0,
+        leder: false,
+        investert: BEDRIFTSTYPER[b.type as BedriftstypeId].pris,
+        ...b,
+      })),
+      hoyesteFormue: Math.max(s.kontanter as number, ...punkter.map((p) => p.verdi)),
+    }
+  },
+}
 
 export type MigreringsResultat =
   | { ok: true; tilstand: Spilltilstand; migrert: boolean }

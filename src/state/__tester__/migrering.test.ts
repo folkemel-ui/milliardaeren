@@ -32,6 +32,27 @@ describe('migrering', () => {
     expect(inn).toEqual({ versjon: 1 })
   })
 
+  it('løfter en ekte versjon 1-lagring til versjon 2', () => {
+    const v1 = {
+      versjon: 1,
+      frø: 20260927,
+      sek: 120,
+      kontanter: 1_120,
+      bedrifter: [{ id: 'b1', type: 'saftbod', nivaa: 1, startetSek: 0 }],
+      nesteId: 2,
+      historikk: { intervall: 10, punkter: [{ sek: 0, verdi: 1_250 }, { sek: 120, verdi: 1_370 }] },
+      totaltTjent: 120,
+    }
+    const r = migrer(v1)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.migrert).toBe(true)
+    expect(r.tilstand.versjon).toBe(SPILLVERSJON)
+    expect(r.tilstand.bedrifter[0]).toMatchObject({ nivaa: 1, ansatte: 0, leder: false, investert: 250 })
+    expect(r.tilstand.hoyesteFormue).toBe(1_370)
+    expect(r.tilstand.kontanter).toBe(1_120)
+  })
+
   it('avviser en lagring når et trinn mangler', () => {
     const r = migrer({ versjon: 1 }, 3, { 2: (s) => s })
     expect(r.ok).toBe(false)

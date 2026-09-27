@@ -3,13 +3,16 @@
  * rammeverk — spillet har én tilstand, og alle endringer går gjennom motoren.
  *
  * Klokken bor her, ikke i motoren: lageret måler ekte tid og ber motoren
- * simulere hele sekunder. Tiden står stille når spillet er lukket eller
- * skjult — inntekt mens du er borte kommer med ledere senere.
+ * simulere hele sekunder. Når spillet er lukket eller skjult, regnes tiden
+ * borte ut når du kommer tilbake — da går bare bedriftene med leder, og bare
+ * opp til taket.
  */
 
 import { useSyncExternalStore } from 'react'
 import { nyttSpill } from '../engine/start'
 import { simuler } from '../engine/simulering'
+import { BORTE_TAK_SEK } from '../engine/innhold'
+import type { Utfall } from '../engine/handlinger'
 import { migrer } from './migrering'
 import type { Spilltilstand } from '../engine/types'
 
@@ -17,6 +20,9 @@ const LAGERNOKKEL = 'milliardaer.lagring'
 /* «Start på nytt» sletter aldri: det forrige spillet legges her. */
 const ANGRENOKKEL = 'milliardaer.lagring.angre'
 const BERGENOKKEL = 'milliardaer.lagring.korrupt'
+/* Veggklokken da spillet sist ble lagret. Holdes utenfor spilltilstanden, så
+   motoren aldri ser ekte tid. */
+const SIST_AKTIV_NOKKEL = 'milliardaer.sistAktiv'
 
 /** Lengre pauser enn dette (f.eks. en nettleser som har strupet fanen) teller ikke. */
 const MAKS_SEK_PER_STEG = 5
@@ -56,12 +62,32 @@ function lastFraDisk(): Spilltilstand | null {
 function skrivTilDisk(s: Spilltilstand): void {
   try {
     localStorage.setItem(LAGERNOKKEL, JSON.stringify(s))
+    localStorage.setItem(SIST_AKTIV_NOKKEL, String(Date.now()))
   } catch {
     // Full disk eller privat modus — spillet fungerer, det lagres bare ikke.
   }
 }
 
-let tilstand: Spilltilstand = lastFraDisk() ?? nyttSpill()
+/** Sekunder siden spillet sist ble lagret, eller 0 hvis det ikke vites. */
+function sekunderBorte(): number {
+  try {
+    const sist = Number(localStorage.getItem(SIST_AKTIV_NOKKEL))
+    if (!sist) return 0
+    return Math.max(0, Math.floor((Date.now() - sist) / 1000))
+  } catch {
+    return 0
+  }
+}
+
+/** Kjører tiden du var borte: bare bedrifter med leder, og aldri mer enn taket. */
+function taIgjenBorteTid(s: Spilltilstand): Spilltilstand {
+  return simuler(s, Math.min(sekunderBorte(), BORTE_TAK_SEK), true)
+}
+
+let tilstand: Spilltilstand = (() => {
+  const lagret = lastFraDisk()
+  return lagret ? taIgjenBorteTid(lagret) : nyttSpill()
+})()
 const lyttere = new Set<() => void>()
 
 function sett(neste: Spilltilstand): void {
@@ -82,6 +108,14 @@ export function useSpill(): Spilltilstand {
 
 export function lagre(): void {
   skrivTilDisk(tilstand)
+}
+
+/** Kjører en handling fra motoren. Returnerer feilmeldingen hvis den ble avvist. */
+export function utfor(u: Utfall): string | null {
+  if (!u.ok) return u.feil
+  sett(u.tilstand)
+  lagre()
+  return null
 }
 
 // ─────────────────────────────────────────────── Spilløkken
@@ -118,9 +152,18 @@ let startet = false
 export function startSpillokke(): void {
   if (startet) return
   startet = true
+  // Lagre med en gang, så klokken for tid borte alltid er satt.
+  lagre()
   setInterval(steg, 200)
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) lagre()
+    if (document.hidden) {
+      lagre()
+    } else {
+      sett(taIgjenBorteTid(tilstand))
+      restMs = 0
+      sisteMaaling = null
+      lagre()
+    }
   })
   window.addEventListener('pagehide', lagre)
 }

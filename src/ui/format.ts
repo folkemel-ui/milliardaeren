@@ -38,7 +38,7 @@ export function varighet(sek: number): string {
   const t = Math.floor((sek % 86_400) / 3_600)
   const m = Math.floor((sek % 3_600) / 60)
   if (d > 0) return `${d} d ${t} t`
-  if (t > 0) return `${t} t ${m} min`
+  if (t > 0) return m > 0 ? `${t} t ${m} min` : `${t} t`
   if (m > 0) return `${m} min`
   return `${sek} s`
 }

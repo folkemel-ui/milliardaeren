@@ -281,23 +281,60 @@ figure {
   gap: 10px;
 }
 
+.seksjon-tittel {
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tekst-dempet);
+}
+
+.bedrift-ikon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--flate-2);
+}
+
+.bedrift-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.dempet-ikon {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
 .bedriftskort {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bedriftskort-topp,
+.kjopskort {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 12px;
 }
 
-.bedriftskort-ikon {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  background: var(--flate-2);
+.bedriftskort-midt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .bedriftskort-midt h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 16px;
   font-weight: 700;
 }
@@ -306,12 +343,86 @@ figure {
   font-size: 13px;
 }
 
-.bedriftskort-tall {
+.merke-leder {
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--gull-mørk);
+  color: var(--gull);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.merke-ok {
+  color: var(--pluss);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.milepael {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  font-size: 13px;
-  text-align: right;
+  gap: 5px;
+}
+
+.milepael-spor {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.milepael-fyll {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gull-mørk), var(--gull));
+  transition: width 0.3s ease-out;
+}
+
+.kjopskort .milepael-spor {
+  margin-top: 6px;
+}
+
+.bedriftskort-knapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.kjopskort.laast {
+  border-style: dashed;
+  background: transparent;
+}
+
+.laas {
+  color: var(--tekst-dempet);
+}
+
+.personale {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--kant);
+}
+
+.personale-rad {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.personale-rad h3 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.personale-rad p {
+  margin: 0;
 }
 
 /* ─────────────────────────────────────────────── Profil */
@@ -434,6 +545,49 @@ figure {
   background: var(--flate-2);
   border: 1px solid var(--kant);
   font-weight: 600;
+}
+
+.knapp-gull {
+  background: var(--gull);
+  border-color: var(--gull);
+  color: #1a1508;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: transform 0.08s, background 0.15s;
+}
+
+.knapp-gull:active:not(:disabled) {
+  transform: scale(0.97);
+  background: var(--gull-lys);
+}
+
+.knapp:disabled {
+  background: var(--flate-2);
+  border-color: var(--kant);
+  color: var(--tekst-dempet);
+  cursor: default;
+}
+
+.knapp-liten {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.knapp-ikon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+  color: var(--tekst-dempet);
+}
+
+.knapp-ikon svg {
+  transition: transform 0.2s;
+}
+
+.knapp-ikon.åpen svg {
+  transform: rotate(180deg);
 }
 
 .knapp-sekundær {
