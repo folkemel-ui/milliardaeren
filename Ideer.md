@@ -9,6 +9,8 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
 - **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging businesses (needs a rethink first)
+- **Pack 12 – More to own:** More rungs on the industry ladder · Farms and forest · Landmark buildings · Art
+- **Later:** Hotels abroad and holiday apartments (after Travel)
 
 ## Businesses
 
@@ -18,9 +20,21 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 3. **Startups.** Invest in rounds (seed, Series A, B and so on). Your share gets diluted when new money comes in. The company can go bankrupt, be sold or go public on the stock exchange.
 
+4. **More rungs on the industry ladder.** New businesses between and after today's ones, for example a food truck, bakery, gym, car dealership, shipping company, airline and bank, plus Norwegian specials such as a fish farm, ferry company and ski resort. Each needs a place on the ladder, an illustration and a check with the balance bench.
+
+## Property
+
+5. **Farms and forest.** Land that grows slowly in value and gives a yearly income from timber and crops.
+
+6. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. They could be sold only after the Travel item has unlocked those places.
+
+7. **Landmark buildings.** Unique and very expensive buildings, such as a tall tower in Oslo or a lighthouse. Each one exists only once, and the rivals can buy it before you.
+
 ## Luxury and status
 
-4. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both. Since Pack 8 the Property tab has a map of Norway, which could be extended with new cities and countries.
+8. **Art.** Paintings by made-up Norwegian artists that rise or fall in value. They can be lent to a museum for status.
+
+9. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both. Since Pack 8 the Property tab has a map of Norway, which could be extended with new cities and countries.
 
 ## Parked (not chosen yet)
 
