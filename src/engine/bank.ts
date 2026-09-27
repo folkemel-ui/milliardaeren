@@ -23,6 +23,8 @@ export function leggTilHendelse(s: Spilltilstand, h: Omit<Hendelse, 'sek'>): voi
 export function betalRente(s: Spilltilstand): void {
   const rente = rentePerSek(s)
   if (rente <= 0) return
+  // Påløpt rente er en utgift, enten den betales nå eller legges til gjelden.
+  s.totaltRentebetalt += rente
   const fraKontanter = Math.min(rente, Math.max(0, s.kontanter))
   s.kontanter -= fraKontanter
   const fraSparing = Math.min(rente - fraKontanter, s.sparing)

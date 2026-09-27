@@ -6,16 +6,18 @@
  */
 
 import { BEDRIFTSTYPER } from './innhold'
-import { EIENDOMSSTIGEN, LUKSUS } from './eiendom'
+import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, statusnivaa } from './eiendom'
 import { AKSJER, KRYPTO, PAPIRER } from './marked'
 import { PRESTASJONER } from './prestasjoner'
 import { klasseverdier, nullPerKlasse } from './portefolje'
+import { selskapsnyheter } from './selskapsnyheter'
+import { dagsskifteOppgjor } from './oppgjor'
 import type { Terning } from './rng'
-import type { Avisutgave, Dagsbilde, Overskrift, PapirId, Spilltilstand } from './types'
+import type { Avisutgave, Dagsbilde, LuksusId, Overskrift, PapirId, Spilltilstand } from './types'
 import { dagnummer } from './kalender'
 
 export const MAKS_UTGAVER = 7
-const MAKS_SAKER = 4
+const MAKS_SAKER = 5
 const MIN_SAKER = 3
 
 export function lagDagsbilde(s: Spilltilstand): Dagsbilde {
@@ -34,20 +36,40 @@ export function lagDagsbilde(s: Spilltilstand): Dagsbilde {
 
 const prosent = (andel: number) => `${Math.round(Math.abs(andel) * 100)} %`
 
+/**
+ * Hva avisa kaller deg, etter statusnivå. Jo høyere status, jo mer skriver
+ * avisa om deg — og jo mindre anonymt.
+ */
+const TITLER = [
+  'Den unge gründeren',
+  'Lokalkjendisen',
+  'Den lovende gründeren',
+  'Forretningsprofilen',
+  'Rikmannen',
+  'Magnaten',
+  'Tycoonen',
+  'Legenden',
+]
+
+export function tittel(s: Spilltilstand): string {
+  return TITLER[statusnivaa(s)]
+}
+
 /** Sakene om deg selv: nye bedrifter, eiendom, luksus og prestasjoner. */
 function omDeg(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
+  const t = tittel(s)
   const saker: Overskrift[] = []
   for (const p of PRESTASJONER) {
     const når = s.prestasjoner[p.id]
     if (når === undefined || når <= før.sek) continue
-    if (p.id === 'millionaer') saker.push({ type: 'deg', tittel: 'Ny millionær i byen!', tekst: 'Den unge gründeren som startet med en saftbod, har passert sin første million.' })
+    if (p.id === 'millionaer') saker.push({ type: 'deg', tittel: 'Ny millionær i byen!', tekst: `${t} som startet med en saftbod, har passert sin første million.` })
     else if (p.id === 'milliardaer') saker.push({ type: 'deg', tittel: 'MILLIARDÆR', tekst: 'Fra saftbod til milliard. Landets nyeste milliardær har nådd målet — og markedet holder pusten.' })
-    else if (p.id === 'marginkrav') saker.push({ type: 'deg', tittel: 'Banken tvangsselger for kjent investor', tekst: 'Etter en tøff dag i markedet måtte banken selge unna for å dekke et lån.' })
+    else if (p.id === 'marginkrav') saker.push({ type: 'deg', tittel: 'Banken tvangsselger for kjent investor', tekst: `Etter en tøff dag i markedet måtte banken selge unna for ${t.toLowerCase()}.` })
   }
   for (const type of s.bedrifter.map((b) => b.type)) {
     if (!før.bedrifter.includes(type)) {
       const navn = BEDRIFTSTYPER[type].navn.toLowerCase()
-      saker.push({ type: 'deg', tittel: `Lokal gründer åpner ${navn}`, tekst: `Den ekspansive forretningspersonen satser videre med en ny ${navn}.` })
+      saker.push({ type: 'deg', tittel: `${t} åpner ${navn}`, tekst: `Imperiet vokser: nå med egen ${navn}.` })
     }
   }
   const nyeEiendommer = Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0) - før.eiendommer
@@ -55,17 +77,39 @@ function omDeg(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
     const dyreste = [...EIENDOMSSTIGEN].reverse().find((id) => (s.eiendommer[id] ?? 0) > 0)
     saker.push({
       type: 'deg',
-      tittel: nyeEiendommer === 1 ? 'Eiendomsinvestor slår til igjen' : `Investor kjøper ${nyeEiendommer} eiendommer på én dag`,
-      tekst: dyreste ? `Porteføljen strekker seg nå helt til ${dyreste === 'oy' ? 'Lofoten' : 'nye bydeler'}.` : '',
+      tittel: nyeEiendommer === 1 ? `${t} kjøper eiendom igjen` : `${t} kjøper ${nyeEiendommer} eiendommer på én dag`,
+      tekst: dyreste ? `Porteføljen strekker seg nå helt til ${EIENDOMSTYPER[dyreste].sted}.` : '',
     })
   }
   for (const id of s.luksus) {
     if (!før.luksus.includes(id)) {
-      saker.push({ type: 'deg', tittel: `Spottet: ${LUKSUS[id].navn.toLowerCase()} i sentrum`, tekst: 'Naboene lurer på hvem den tilhører. Vi har våre mistanker.' })
+      saker.push({ type: 'deg', tittel: `Spottet: ${LUKSUS[id].navn.toLowerCase()} i sentrum`, tekst: `Naboene lurer på hvem den tilhører. Vi tror det er ${t.toLowerCase()}.` })
       break
     }
   }
   return saker
+}
+
+/**
+ * Sosietetsstoff: fra statusnivå 2 skriver avisa om livet ditt — oftere jo
+ * høyere status, og om det du faktisk eier.
+ */
+function sosietet(s: Spilltilstand, t: Terning): Overskrift[] {
+  const nivaa = statusnivaa(s)
+  if (nivaa < 2 || !t.sjanse(Math.min(0.7, 0.1 * nivaa))) return []
+  const hvem = tittel(s)
+  const har = (id: LuksusId) => s.luksus.includes(id)
+  const kandidater: Overskrift[] = [
+    { type: 'deg', tittel: `${hvem} på premiere i Operaen`, tekst: 'Antrekket fikk mer oppmerksomhet enn forestillingen.' },
+    { type: 'deg', tittel: `${hvem} sett på Aker Brygge`, tekst: 'Lunsjen skal ha kostet mer enn en gjennomsnittlig månedslønn.' },
+    { type: 'deg', tittel: `${hvem} gir millionbeløp til barnesykehuset`, tekst: 'Gaven ble overrakt uten pressefolk — men vi fikk det med oss.' },
+  ]
+  if (har('superyacht') || har('motorbaat')) kandidater.push({ type: 'deg', tittel: `${hvem} på båttur i Oslofjorden`, tekst: 'Sommerens mest omtalte fartøy ble observert utenfor Hvaler.' })
+  if (har('forretningsjet') || har('langdistansejet') || har('propellfly')) kandidater.push({ type: 'deg', tittel: `${hvem} fløy privatfly til Lofoten`, tekst: 'Flyplassen i Svolvær har sjelden hatt så fint besøk.' })
+  if (har('superbil') || har('hyperbil')) kandidater.push({ type: 'deg', tittel: `${hvem} i superbil på Karl Johan`, tekst: 'Turistene trodde det var en filminnspilling.' })
+  if (s.eiendommer.hytte) kandidater.push({ type: 'deg', tittel: `${hvem} tar helg på Geilo`, tekst: 'Hytta skal være pusset opp for en formue.' })
+  if (s.eiendommer.oy) kandidater.push({ type: 'deg', tittel: 'Fest på privatøya i Lofoten', tekst: 'Gjestelista er hemmelig. Helikopterne var ikke.' })
+  return [t.velg(kandidater)]
 }
 
 /** Sakene om markedet: dagens største bevegelser. */
@@ -121,10 +165,18 @@ const LOKALT: Overskrift[] = [
   { type: 'lokalt', tittel: 'Bergen vinner seriegull', tekst: 'Byen feiret til langt på natt — i regnet, selvfølgelig.' },
 ]
 
-/** Lager dagens utgave og legger den i avisen. Muterer — brukes på kopier. */
+/**
+ * Dagsskiftet i avisredaksjonen: dagens selskapsnyheter settes i gang,
+ * perioder som er slutt gjøres opp, og utgaven settes sammen og legges i
+ * avisen. Muterer — brukes på kopier.
+ */
 export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const før = s.forrigeDag
-  const saker = [...omDeg(s, før), ...omMarkedet(s, før)].slice(0, MAKS_SAKER)
+  const nyheter = selskapsnyheter(s, t)
+  const oppgjor = dagsskifteOppgjor(s)
+  // Rekkefølgen er viktigheten: deg selv først, så nyheter som flytter kurser,
+  // så dagens bevegelser og sladder. Lokalstoff fyller på når det er stille.
+  const saker = [...omDeg(s, før), ...nyheter, ...omMarkedet(s, før), ...sosietet(s, t)].slice(0, MAKS_SAKER)
   const brukt = new Set(saker.map((x) => x.tittel))
   while (saker.length < MIN_SAKER) {
     const sak = t.velg(LOKALT)
@@ -133,6 +185,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     saker.push(sak)
   }
   const utgave: Avisutgave = { dag: dagnummer(s.sek), saker }
+  if (oppgjor.length) utgave.oppgjor = oppgjor
   s.avis.push(utgave)
   if (s.avis.length > MAKS_UTGAVER) s.avis.splice(0, s.avis.length - MAKS_UTGAVER)
   // Ny dag: nytt utgangspunkt for avisen og for porteføljens «i dag».

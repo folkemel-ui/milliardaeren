@@ -171,6 +171,7 @@ export function kjopLuksus(s: Spilltilstand, id: LuksusId): Utfall {
   if (s.kontanter < g.pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   n.kontanter -= g.pris
+  n.totaltForbruk += g.pris
   n.luksus.push(id)
   return { ok: true, tilstand: n }
 }
@@ -188,6 +189,7 @@ export function utvidLager(s: Spilltilstand, lager: LagerId): Utfall {
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   n.kontanter -= pris
+  n.totaltForbruk += pris
   n.lager[lager] += 1
   return { ok: true, tilstand: n }
 }

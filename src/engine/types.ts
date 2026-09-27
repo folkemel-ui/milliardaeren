@@ -83,6 +83,8 @@ export interface Kurs {
   avvik: number
   /** Kursen hvert 30. sekund, de siste to timene. */
   historikk: number[]
+  /** En selskapsnyhet som ennå ikke er ferdig priset inn: logaritmisk bevegelse igjen, fordelt på tikk. */
+  nyhet?: { igjen: number; tikk: number }
 }
 
 export interface Marked {
@@ -154,6 +156,43 @@ export interface Avisutgave {
   /** Spilldagen utgaven kom ut (0 = første dag). */
   dag: number
   saker: Overskrift[]
+  /** Uke-, måneds- og årsoppgjør som ble gjort opp denne dagen. */
+  oppgjor?: Oppgjor[]
+}
+
+/** Tellerstanden ved starten av en periode (uke, måned, år). Oppgjøret er differansen. */
+export interface Periodestart {
+  dag: number
+  formue: number
+  tjent: number
+  leie: number
+  utbytte: number
+  sparerente: number
+  rentebetalt: number
+  forbruk: number
+  /** Hva hver bedrift hadde tjent totalt ved periodens start, etter id. */
+  bedrifter: Record<string, number>
+  kurser: Record<PapirId, number>
+}
+
+export interface Oppgjor {
+  periode: 'uke' | 'maaned' | 'aar'
+  /** «uke 7», «januar 2027», «2027». */
+  navn: string
+  fraDag: number
+  tilDag: number
+  bedrifter: number
+  leie: number
+  utbytte: number
+  sparerente: number
+  renter: number
+  forbruk: number
+  formueFor: number
+  formueEtter: number
+  besteBedrift: { type: BedriftstypeId; tjent: number } | null
+  /** Ukas beste og verste aksje (bare for uker). */
+  vinner?: { id: PapirId; endring: number }
+  taper?: { id: PapirId; endring: number }
 }
 
 /** Et øyeblikksbilde ved forrige dagsskifte, så avisen kan melde hva som har endret seg. */
@@ -235,4 +274,13 @@ export interface Spilltilstand {
   /** Prestasjonene du har klart, med spillsekundet de kom. */
   prestasjoner: Record<string, number>
   rekorder: Rekorder
+  /** Renter betalt på lån, totalt. */
+  totaltRentebetalt: number
+  /** Brukt på luksus og lagerplass, totalt. */
+  totaltForbruk: number
+  ukestart: Periodestart
+  maanedstart: Periodestart
+  aarstart: Periodestart
+  /** Oppgjørene som er gjort, nyeste sist. */
+  oppgjor: Oppgjor[]
 }

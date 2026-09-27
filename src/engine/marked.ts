@@ -85,6 +85,14 @@ function papirtikk(m: Marked, t: Terning, helg = false): void {
     if (!(helg && p.klasse === 'aksje')) {
       const drift = p.drift + (p.klasse === 'krypto' ? STEMNINGSKRAFT * m.stemning : 0)
       k.fundament *= Math.exp(drift * DT)
+      // En selskapsnyhet prises inn litt for hvert tikk, til den er ferdig.
+      if (k.nyhet) {
+        const steg = k.nyhet.igjen / k.nyhet.tikk
+        k.fundament *= Math.exp(steg)
+        k.nyhet.igjen -= steg
+        k.nyhet.tikk -= 1
+        if (k.nyhet.tikk <= 0) delete k.nyhet
+      }
       k.avvik += -p.reversjon * k.avvik * DT + p.volatilitet * Math.sqrt(DT) * normal(t)
       if (p.hopp > 0 && t.sjanse(p.hopp)) {
         // Hopp i stemningens retning er litt mer sannsynlige.

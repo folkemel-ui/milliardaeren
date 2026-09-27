@@ -128,6 +128,10 @@ describe('migrering', () => {
     expect(r.tilstand.bedrifter[0]).toMatchObject({ tjent: 0, inntektHistorikk: [] })
     expect(r.tilstand.sparing).toBe(0)
     expect(r.tilstand.eiendomKostpris.hybel).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+    // 7 → 8: periodene starter nå, uten oppgjør.
+    expect(r.tilstand.oppgjor).toEqual([])
+    expect(r.tilstand.ukestart.dag).toBe(3)
+    expect(r.tilstand.totaltRentebetalt).toBe(0)
     // 6 → 7: «i dag» starter på null for alle klasser.
     expect(r.tilstand.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, sparing: 0 })
     expect(r.tilstand.forrigeDag.verdier.eiendom).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)

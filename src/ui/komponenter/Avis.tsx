@@ -3,6 +3,7 @@ import { lesAvis } from '../../engine/handlinger'
 import type { Avisutgave, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { datotekst } from '../kalender'
+import { OppgjorBlokk, oppgjorTittel } from './Oppgjor'
 
 /** Børstidende: dagens utgave øverst, de forrige under. Å åpne avisen merker den som lest. */
 export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
@@ -31,13 +32,13 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
         </header>
 
         {!siste && <p className="avis-tom">Trykkeriet går i natt. Kom tilbake i morgen for dagens nyheter.</p>}
-        {siste && <Utgave utgave={siste} forside />}
+        {siste && <Utgave utgave={siste} s={s} forside />}
 
         {utgaver.length > 1 && (
           <>
             <h2 className="avis-tidligere">Tidligere utgaver</h2>
             {utgaver.slice(1).map((u) => (
-              <Utgave key={u.dag} utgave={u} />
+              <Utgave key={u.dag} utgave={u} s={s} />
             ))}
           </>
         )}
@@ -46,7 +47,7 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
   )
 }
 
-function Utgave({ utgave, forside = false }: { utgave: Avisutgave; forside?: boolean }) {
+function Utgave({ utgave, s, forside = false }: { utgave: Avisutgave; s: Spilltilstand; forside?: boolean }) {
   const [hoved, ...resten] = utgave.saker
   return (
     <section className={forside ? 'utgave forside' : 'utgave'}>
@@ -65,15 +66,25 @@ function Utgave({ utgave, forside = false }: { utgave: Avisutgave; forside?: boo
               </div>
             ))}
           </div>
+          {utgave.oppgjor?.map((o) => (
+            <OppgjorBlokk key={o.periode} o={o} s={s} />
+          ))}
         </>
       ) : (
-        <ul className="overskrifter">
-          {utgave.saker.map((sak, i) => (
-            <li key={i} className={sak.type}>
-              {sak.tittel}
-            </li>
+        <>
+          <ul className="overskrifter">
+            {utgave.saker.map((sak, i) => (
+              <li key={i} className={sak.type}>
+                {sak.tittel}
+              </li>
+            ))}
+          </ul>
+          {utgave.oppgjor?.map((o) => (
+            <p key={o.periode} className="utgave-oppgjor">
+              📊 {oppgjorTittel(o)} — se Regnskap på Profil
+            </p>
           ))}
-        </ul>
+        </>
       )}
     </section>
   )

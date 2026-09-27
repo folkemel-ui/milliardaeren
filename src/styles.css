@@ -1278,6 +1278,122 @@ figure {
   line-height: 1.5;
 }
 
+/* ─────────────────────────────────────────────── Oppgjør
+   Samme markup i avisa (papir) og i regnskapet (mørkt kort); fargene arves. */
+
+.oppgjor {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--oppgjor-kant, var(--kant));
+}
+
+.avis .oppgjor {
+  --oppgjor-kant: #cfc6b3;
+  padding: 12px;
+  border: 2px solid #1c1a16;
+  background: #ebe4d3;
+}
+
+.oppgjor-tittel {
+  margin: 0;
+  font-size: 18px;
+}
+
+.oppgjor-periode {
+  margin-top: 2px;
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.oppgjor-tall {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.oppgjor-tall div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.oppgjor-tall .sum {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--oppgjor-kant, var(--kant));
+  font-weight: 700;
+}
+
+.oppgjor-tall dd {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.avis .oppgjor .pluss {
+  color: #1d7a3e;
+}
+
+.avis .oppgjor .minus {
+  color: #a3241a;
+}
+
+.oppgjor-merknad {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.utgave-oppgjor {
+  margin-top: 6px;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.regnskap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.regnskap-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.regnskap-liste li {
+  border-bottom: 1px solid var(--kant);
+}
+
+.regnskap-liste li:last-child {
+  border-bottom: 0;
+}
+
+.regnskap-rad {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+  width: 100%;
+  padding: 10px 0;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.regnskap-navn {
+  font-weight: 600;
+}
+
+.regnskap .oppgjor {
+  margin-top: 0;
+  padding: 0 0 12px;
+  border-top: 0;
+}
+
 /* ─────────────────────────────────────────────── Prestasjoner og rekorder */
 
 .prestasjoner {

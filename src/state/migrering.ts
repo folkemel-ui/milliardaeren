@@ -18,6 +18,7 @@ import { EIENDOMSTYPER, START_LAGER } from '../engine/eiendom'
 import { lagDagsbilde } from '../engine/avis'
 import { sjekkPrestasjoner } from '../engine/prestasjoner'
 import { klasseverdier, nullPerKlasse } from '../engine/portefolje'
+import { periodestart } from '../engine/oppgjor'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -103,6 +104,16 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
   6: (s) => {
     const n = { ...s, dagensFlyt: nullPerKlasse() } as unknown as Spilltilstand
     n.forrigeDag = { ...n.forrigeDag, verdier: klasseverdier(n) }
+    return n as unknown as Raatilstand
+  },
+  /* 7 → 8: uke-, måneds- og årsoppgjør. Tellerne for renter og forbruk
+     starter på null, og alle tre periodene starter nå — det første oppgjøret
+     dekker bare tiden fra oppdateringen, og sier det ærlig med fraDag. */
+  7: (s) => {
+    const n = { ...s, totaltRentebetalt: 0, totaltForbruk: 0, oppgjor: [] } as unknown as Spilltilstand
+    n.ukestart = periodestart(n)
+    n.maanedstart = periodestart(n)
+    n.aarstart = periodestart(n)
     return n as unknown as Raatilstand
   },
 }

@@ -7,6 +7,7 @@ import { startPaaNytt } from '../../state/lager'
 import { formue, kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { Formuegraf } from '../komponenter/Formuegraf'
 import { RulleTall } from '../komponenter/RulleTall'
+import { Regnskap } from '../komponenter/Regnskap'
 
 function Prestasjonsliste({ s }: { s: Spilltilstand }) {
   const klart = PRESTASJONER.filter((p) => s.prestasjoner[p.id] !== undefined).length
@@ -117,6 +118,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
         </div>
       </dl>
 
+      <Regnskap s={s} />
       <Prestasjonsliste s={s} />
       <Rekordbok s={s} />
 

@@ -65,7 +65,7 @@ describe('avisen', () => {
     s = kjopLuksus(s, 'gullklokke')
     const etter = simuler(s, DAG_SEK)
     const titler = etter.avis[0].saker.map((x) => x.tittel)
-    expect(titler.some((t) => t.includes('Eiendomsinvestor'))).toBe(true)
+    expect(titler.some((t) => t.includes('kjøper eiendom'))).toBe(true)
     expect(titler.some((t) => t.includes('gullklokke'))).toBe(true)
   })
 
