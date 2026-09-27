@@ -8,19 +8,19 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging businesses (needs a rethink first)
+- **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging with rival businesses
 - **Pack 12 – More to own:** More rungs on the industry ladder · Farms and forest · Landmark buildings · Art
 - **Later:** Hotels abroad and holiday apartments (after Travel)
 
 ## Businesses
 
-1. **Merging businesses.** Merge two businesses of the same type and level into one bigger one with a bonus. Note: since Pack 2 you can only own one of each type (extra copies broke the balance). Merging therefore needs a rethink first, for example allowing copies again but only as merge material, or merging two different types into a chain.
+1. **Merging with rival businesses.** The four rivals each own businesses in the same industries as you, shown on the Rivals tab. You can make an offer for one of them; the price depends on its level and income, and the rival can say no or ask for more. If the deal goes through, the business merges into yours of the same type: you get a permanent income bonus, and the rival's net worth drops on the Forbes list. The merge is covered in the paper. One business per type stays as it is. Note: today a rival is only a net worth and a holding company (Pack 9), so the rivals first need a list of businesses that grows with their net worth. The existing hostile takeover of a whole holding company should then hand over its businesses too.
 
 2. **Football club.** Buy a club in a low division. Buy players, win matches, get promoted and win trophies. It gives prestige and income from tickets and sponsors, but player wages are a big cost.
 
 3. **Startups.** Invest in rounds (seed, Series A, B and so on). Your share gets diluted when new money comes in. The company can go bankrupt, be sold or go public on the stock exchange.
 
-4. **More rungs on the industry ladder.** New businesses between and after today's ones, for example a food truck, bakery, gym, car dealership, shipping company, airline and bank, plus Norwegian specials such as a fish farm, ferry company and ski resort. Each needs a place on the ladder, an illustration and a check with the balance bench.
+4. **More rungs on the industry ladder.** New businesses between and after today's ones, for example a food truck, bakery, gym, car dealership, shipping company and airline, plus Norwegian specials such as a fish farm, ferry company and ski resort. Each needs a place on the ladder, an illustration and a check with the balance bench.
 
 ## Property
 
