@@ -10,6 +10,8 @@ import { MARKED_TIKK_SEK, markedstikk, PAPIRER } from './marked'
 import { erDagsskifte, erHelg } from './kalender'
 import { gisUtAvis } from './avis'
 import { sjekkPrestasjoner } from './prestasjoner'
+import { rivaltikk, rivalutbyttePerSek } from './rivaler'
+import { sjekkOrdre } from './ordre'
 import { Terning } from './rng'
 import type { PapirId, Spilltilstand } from './types'
 
@@ -53,6 +55,10 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const sparerente = sparerentePerSek(s)
   s.sparing += sparerente
   s.totaltSparerente += sparerente
+  // Rivalselskapene du eier andeler i, betaler utbytte løpende.
+  const rivalutbytte = rivalutbyttePerSek(s)
+  s.kontanter += rivalutbytte
+  s.totaltUtbytte += rivalutbytte
   // Leien kommer uansett — eiendom trenger ingen leder.
   const leie = leiePerSek(s)
   s.kontanter += leie
@@ -62,7 +68,11 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   // Oppussing som er ferdig nå, gir ny standard fra neste sekund.
   sjekkOppussing(s)
 
-  if (s.sek % MARKED_TIKK_SEK === 0) markedstikk(s.marked, terning, erHelg(s.sek))
+  if (s.sek % MARKED_TIKK_SEK === 0) {
+    markedstikk(s.marked, terning, erHelg(s.sek))
+    rivaltikk(s, terning, MARKED_TIKK_SEK / 3600)
+    sjekkOrdre(s)
+  }
   // Utbytte hver morgen børsen er åpen.
   if (erDagsskifte(s.sek) && !erHelg(s.sek)) betalUtbytte(s)
   sjekkMargin(s)

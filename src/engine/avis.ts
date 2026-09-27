@@ -12,6 +12,9 @@ import { PRESTASJONER } from './prestasjoner'
 import { klasseverdier, nullPerKlasse } from './portefolje'
 import { selskapsnyheter } from './selskapsnyheter'
 import { dagsskifteOppgjor } from './oppgjor'
+import { skattVedDagsskifte } from './skatt'
+import { forbesliste } from './rivaler'
+import { nettoformue } from './formler'
 import type { Terning } from './rng'
 import type { Avisutgave, Dagsbilde, LuksusId, Overskrift, PapirId, Spilltilstand } from './types'
 import { dagnummer } from './kalender'
@@ -31,7 +34,30 @@ export function lagDagsbilde(s: Spilltilstand): Dagsbilde {
     luksus: [...s.luksus],
     sek: s.sek,
     verdier: klasseverdier(s),
+    rang: forbesliste(s, nettoformue(s)).findIndex((p) => p.deg) + 1,
+    overtatte: (s.rivaler ?? []).filter((r) => r.overtatt).map((r) => r.id),
   }
+}
+
+/** Sakene om kappløpet: forbikjøringer på Forbes-lista og oppkjøp. */
+function omRivalene(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
+  const saker: Overskrift[] = []
+  const hvem = tittel(s)
+  for (const r of s.rivaler) {
+    if (r.overtatt && !(før.overtatte ?? []).includes(r.id)) {
+      saker.push({ type: 'deg', tittel: `${hvem} kjøper opp ${r.selskap}`, tekst: `Et fiendtlig oppkjøp: ${r.navn} har mistet kontrollen over sitt eget selskap.` })
+    }
+  }
+  const liste = forbesliste(s, nettoformue(s))
+  const rang = liste.findIndex((p) => p.deg) + 1
+  if (før.rang && rang < før.rang) {
+    const forbi = liste[rang]
+    if (forbi) saker.push({ type: 'deg', tittel: `${hvem} forbi ${forbi.navn}`, tekst: `Ny plass ${rang} på Forbes-lista.` })
+  } else if (før.rang && rang > før.rang) {
+    const over = liste[rang - 2]
+    if (over) saker.push({ type: 'marked', tittel: `${over.navn} går forbi ${hvem.toLowerCase()}`, tekst: `Kappløpet på Forbes-lista hardner til — du er nå nummer ${rang}.` })
+  }
+  return saker
 }
 
 const prosent = (andel: number) => `${Math.round(Math.abs(andel) * 100)} %`
@@ -174,9 +200,18 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const før = s.forrigeDag
   const nyheter = selskapsnyheter(s, t)
   const oppgjor = dagsskifteOppgjor(s)
-  // Rekkefølgen er viktigheten: deg selv først, så nyheter som flytter kurser,
-  // så dagens bevegelser og sladder. Lokalstoff fyller på når det er stille.
-  const saker = [...omDeg(s, før), ...nyheter, ...omMarkedet(s, før), ...sosietet(s, t)].slice(0, MAKS_SAKER)
+  const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
+  // Rekkefølgen er viktigheten: deg selv og skatten først, så nyheter som
+  // flytter kurser, kappløpet, dagens bevegelser og sladder. Lokalstoff fyller
+  // på når det er stille.
+  const saker = [
+    ...omDeg(s, før),
+    ...skattesaker,
+    ...nyheter,
+    ...omRivalene(s, før),
+    ...omMarkedet(s, før),
+    ...sosietet(s, t),
+  ].slice(0, MAKS_SAKER)
   const brukt = new Set(saker.map((x) => x.tittel))
   while (saker.length < MIN_SAKER) {
     const sak = t.velg(LOKALT)

@@ -7,10 +7,11 @@ import { START_LAGER } from './eiendom'
 import { lagDagsbilde } from './avis'
 import { nullPerKlasse } from './portefolje'
 import { periodestart } from './oppgjor'
+import { START_RIVALER } from './rivaler'
 import type { Dagsbilde, Periodestart, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 9
+export const SPILLVERSJON = 10
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -69,6 +70,10 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     maanedstart: null as unknown as Periodestart,
     aarstart: null as unknown as Periodestart,
     oppgjor: [],
+    skatt: { regninger: [], offshore: false, unndratt: 0, totaltBetalt: 0, nesteId: 1 },
+    rivaler: structuredClone(START_RIVALER),
+    ordre: [],
+    nesteOrdreId: 1,
   }
   s.forrigeDag = lagDagsbilde(s)
   s.ukestart = periodestart(s)

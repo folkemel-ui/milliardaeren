@@ -1,8 +1,8 @@
-import { nettoformue, nettoPerSek } from '../../engine/formler'
+﻿import { nettoformue, nettoPerSek } from '../../engine/formler'
 import { statusnivaa } from '../../engine/eiendom'
 import { dagnummer, erHelg } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
-import { formue, perSek } from '../format'
+import { kompakt, perSek } from '../format'
 import { klokke, kortDato, ukenummer } from '../kalender'
 import { IkonProfil } from './Ikoner'
 import { RulleTall } from './RulleTall'
@@ -22,14 +22,14 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
         <div className="toppfelt-kontanter">
           <span className="etikett">Kontanter</span>
           <span className="tall-mellom">
-            <RulleTall verdi={s.kontanter} format={formue} />
+            <RulleTall verdi={s.kontanter} format={kompakt} />
           </span>
           <span className={nettoPerSek(s) < 0 ? 'tempo negativ' : 'tempo'}>{perSek(nettoPerSek(s))}</span>
         </div>
         <div className="toppfelt-formue">
           <span className="etikett">Nettoformue</span>
           <span className="tall-stort gull">
-            <RulleTall verdi={nettoformue(s)} format={formue} />
+            <RulleTall verdi={nettoformue(s)} format={kompakt} />
           </span>
         </div>
         <button className="toppfelt-profil" onClick={tilProfil} aria-label={`Profil, statusnivå ${statusnivaa(s)}`}>
@@ -42,7 +42,13 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
         <span className="dato">
           {kortDato(dag)} <span className="dempet">· uke {ukenummer(dag)} · {klokke(s.sek)}</span>
         </span>
-        {erHelg(s.sek) && <span className="helg">Børsen stengt</span>}
+        {s.skatt.regninger.length > 0 ? (
+          <button className="skattebrikke" onClick={tilProfil} aria-label="Ubetalt skatt — gå til Profil">
+            🧾 Skatt
+          </button>
+        ) : (
+          erHelg(s.sek) && <span className="helg">Børsen stengt</span>
+        )}
         <button className="avisknapp" onClick={åpneAvis} aria-label={ulest ? 'Avisen, ny utgave' : 'Avisen'}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <rect x="3" y="4" width="15" height="16" rx="1.5" />

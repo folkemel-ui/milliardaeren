@@ -12,10 +12,11 @@ import { eiendomspris, EIENDOMSSTIGEN, eiendomsverdi } from './eiendom'
 import { papirverdi } from './formler'
 import type { Aktivaklasse, Beholdning, PapirId, Spilltilstand } from './types'
 import { PAPIRER } from './marked'
+import { rivalverdi } from './rivaler'
 
 export type { Aktivaklasse }
 
-export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'eiendom', 'sparing']
+export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'eiendom', 'rival', 'sparing']
 
 export interface Postering {
   klasse: Aktivaklasse
@@ -27,7 +28,7 @@ export interface Postering {
 }
 
 export function nullPerKlasse(): Record<Aktivaklasse, number> {
-  return { aksje: 0, krypto: 0, eiendom: 0, sparing: 0 }
+  return { aksje: 0, krypto: 0, eiendom: 0, rival: 0, sparing: 0 }
 }
 
 export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
@@ -35,6 +36,7 @@ export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
     aksje: papirverdi(s, 'aksje'),
     krypto: papirverdi(s, 'krypto'),
     eiendom: eiendomsverdi(s),
+    rival: rivalverdi(s),
     sparing: s.sparing,
   }
 }
@@ -50,6 +52,7 @@ function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
     // saldoen, så et uttak ikke etterlater «avkastning» på en tom konto.
     return Math.max(0, s.sparing - s.totaltSparerente)
   }
+  if (klasse === 'rival') return (s.rivaler ?? []).reduce((sum, r) => sum + r.kostpris, 0)
   if (klasse === 'eiendom') {
     let sum = 0
     for (const id of EIENDOMSSTIGEN) {
@@ -71,7 +74,7 @@ export function portefolje(s: Spilltilstand): Postering[] {
     klasse,
     verdi: verdier[klasse],
     kostpris: kostpris(s, klasse),
-    iDag: verdier[klasse] - s.forrigeDag.verdier[klasse] - s.dagensFlyt[klasse],
+    iDag: verdier[klasse] - (s.forrigeDag.verdier[klasse] ?? 0) - (s.dagensFlyt[klasse] ?? 0),
   }))
 }
 

@@ -7,6 +7,7 @@
 import { eiendomspris, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
+import { SALGSHONORAR, selskapsverdi } from './rivaler'
 import type { EiendomId, LuksusId, PapirId, Spilltilstand } from './types'
 
 /** Selger én eiendom til dagens pris, minus meglerhonorar. Returnerer hva du fikk. */
@@ -27,6 +28,18 @@ export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
     delete n.eiendomStandard[id]
     delete n.oppussing[id]
   }
+  return inntekt
+}
+
+/** Selger hele eierandelen i et rivalselskap, minus honorar. Returnerer hva du fikk. */
+export function utforRivalsalg(n: Spilltilstand, id: string): number {
+  const r = n.rivaler.find((x) => x.id === id)!
+  const inntekt = r.andel * selskapsverdi(r) * (1 - SALGSHONORAR)
+  n.kontanter += inntekt
+  flyt(n, 'rival', -inntekt)
+  r.andel = 0
+  r.kostpris = 0
+  r.overtatt = false
   return inntekt
 }
 

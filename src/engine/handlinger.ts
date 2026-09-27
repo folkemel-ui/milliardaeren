@@ -15,7 +15,8 @@ import {
   nesteForbedring,
   oppgraderingspris,
 } from './formler'
-import { utforEiendomssalg, utforKjop, utforLuksussalg, utforSalg } from './handel'
+import { utforEiendomssalg, utforKjop, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import { BLOKK, blokkpris, oppkjopspris } from './rivaler'
 import {
   brukteplasser,
   EIENDOM_SYNLIG_VED,
@@ -34,7 +35,7 @@ import { BEDRIFTSTYPER } from './innhold'
 import { DAG_SEK, erHelg } from './kalender'
 import { flyt } from './portefolje'
 import { PAPIRER, rundAntall } from './marked'
-import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, PapirId, Spilltilstand } from './types'
+import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, Ordretype, PapirId, Spilltilstand } from './types'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
 
@@ -229,6 +230,98 @@ export function utvidLager(s: Spilltilstand, lager: LagerId): Utfall {
   n.kontanter -= pris
   n.totaltForbruk += pris
   n.lager[lager] += 1
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Skatt
+
+export function betalSkatt(s: Spilltilstand, id: number): Utfall {
+  const r = s.skatt.regninger.find((x) => x.id === id)
+  if (!r) return feil('Fant ikke regningen.')
+  if (s.kontanter < r.belop) return feil('Du har ikke nok kontanter.')
+  const n = structuredClone(s)
+  n.kontanter -= r.belop
+  n.skatt.totaltBetalt += r.belop
+  n.skatt.regninger = n.skatt.regninger.filter((x) => x.id !== id)
+  return { ok: true, tilstand: n }
+}
+
+export function settOffshore(s: Spilltilstand, på: boolean): Utfall {
+  if (s.skatt.offshore === på) return feil(på ? 'Offshore er allerede i bruk.' : 'Offshore er allerede av.')
+  const n = structuredClone(s)
+  n.skatt.offshore = på
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Rivaler
+
+function finnRival(s: Spilltilstand, id: string) {
+  return s.rivaler.find((r) => r.id === id)
+}
+
+/** Kjøper en blokk på 10 % i en rivals selskap, opp til halvparten. */
+export function kjopRivalblokk(s: Spilltilstand, id: string): Utfall {
+  const r = finnRival(s, id)
+  if (!r) return feil('Fant ikke rivalen.')
+  if (r.overtatt) return feil('Du eier allerede hele selskapet.')
+  if (r.andel >= 0.5 - 1e-9) return feil('Over 50 % krever et fiendtlig oppkjøp av resten.')
+  const pris = blokkpris(r)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const nr = finnRival(n, id)!
+  n.kontanter -= pris
+  nr.andel = Math.round((nr.andel + BLOKK) * 10) / 10
+  nr.kostpris += pris
+  flyt(n, 'rival', pris)
+  return { ok: true, tilstand: n }
+}
+
+/** Fiendtlig oppkjøp: med minst 50 % kan du kjøpe resten med premie og eie hele selskapet. */
+export function overtaRival(s: Spilltilstand, id: string): Utfall {
+  const r = finnRival(s, id)
+  if (!r) return feil('Fant ikke rivalen.')
+  if (r.overtatt) return feil('Du eier allerede hele selskapet.')
+  if (r.andel < 0.5 - 1e-9) return feil('Du må eie minst 50 % før du kan kjøpe resten.')
+  const pris = oppkjopspris(r)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const nr = finnRival(n, id)!
+  n.kontanter -= pris
+  nr.andel = 1
+  nr.kostpris += pris
+  nr.overtatt = true
+  flyt(n, 'rival', pris)
+  return { ok: true, tilstand: n }
+}
+
+export function selgRivalandel(s: Spilltilstand, id: string): Utfall {
+  const r = finnRival(s, id)
+  if (!r || r.andel <= 0) return feil('Du eier ingen andel.')
+  const n = structuredClone(s)
+  utforRivalsalg(n, id)
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Automatiske ordre
+
+export const MAKS_ORDRE = 20
+
+export function nyOrdre(s: Spilltilstand, papir: PapirId, type: Ordretype, grense: number, antall: number): Utfall {
+  if (!PAPIRER[papir]) return feil('Ukjent papir.')
+  if (!(grense > 0)) return feil('Sett en grense over null.')
+  const a = rundAntall(papir, antall)
+  if (a <= 0) return feil('Velg hvor mange ordren gjelder.')
+  if (type !== 'kjop' && !s.beholdning[papir]) return feil('Du eier ingen å selge.')
+  if (s.ordre.length >= MAKS_ORDRE) return feil(`Du kan ha høyst ${MAKS_ORDRE} aktive ordre.`)
+  const n = structuredClone(s)
+  n.ordre.push({ id: n.nesteOrdreId++, papir, type, grense, antall: a })
+  return { ok: true, tilstand: n }
+}
+
+export function slettOrdre(s: Spilltilstand, id: number): Utfall {
+  if (!s.ordre.some((o) => o.id === id)) return feil('Fant ikke ordren.')
+  const n = structuredClone(s)
+  n.ordre = n.ordre.filter((o) => o.id !== id)
   return { ok: true, tilstand: n }
 }
 

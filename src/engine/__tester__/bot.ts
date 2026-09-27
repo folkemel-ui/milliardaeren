@@ -4,7 +4,7 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { ansett, kjopBedrift, kjopForbedring, oppgrader, type Utfall } from '../handlinger'
+import { ansett, betalSkatt, kjopBedrift, kjopForbedring, oppgrader, type Utfall } from '../handlinger'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
@@ -52,8 +52,12 @@ function kandidater(s: Spilltilstand): Kandidat[] {
   return liste
 }
 
-/** Gjør beste kjøp så lenge det er råd til det. */
+/** Betaler skatten i tide, så gjør beste kjøp så lenge det er råd til det. */
 export function botTrekk(s: Spilltilstand): Spilltilstand {
+  for (const r of s.skatt.regninger) {
+    const u = betalSkatt(s, r.id)
+    if (u.ok) s = u.tilstand
+  }
   for (let i = 0; i < 1_000; i++) {
     const beste = kandidater(s)
       .filter((k) => k.gevinst > 0)

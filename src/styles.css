@@ -989,6 +989,12 @@ figure {
   --klasse-krypto: #a78bfa;
   --klasse-eiendom: #38bdf8;
   --klasse-sparing: var(--pluss);
+  --klasse-rival: #f472b6;
+}
+
+.fordeling-del.rival,
+.klasse-prikk.rival {
+  background: var(--klasse-rival);
 }
 
 .oversikt {
@@ -1276,6 +1282,183 @@ figure {
   padding-left: 18px;
   font-size: 15px;
   line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────────── Skatt, rivaler og ordre */
+
+.skattebrikke {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--minus) 20%, transparent);
+  color: var(--minus);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.skattekort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.regninger,
+.ordreliste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.regninger li,
+.ordreliste li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.regninger li > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.regninger li.etterskatt {
+  box-shadow: inset 0 0 0 1px var(--minus);
+}
+
+.offshore {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kant);
+}
+
+.offshore p {
+  margin: 2px 0 0;
+}
+
+.segment-fem button {
+  font-size: 13px;
+}
+
+.forbes {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.forbes li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--kant);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.forbes li:last-child {
+  border-bottom: 0;
+}
+
+.forbes li.deg {
+  color: var(--gull);
+  font-weight: 700;
+}
+
+.forbes-plass {
+  color: var(--tekst-dempet);
+  font-weight: 700;
+}
+
+.rivalkort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rivalkort.eid {
+  border-color: var(--gull-mørk);
+}
+
+.rival-topp {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rival-topp h2 {
+  font-size: 16px;
+}
+
+.rival-andel {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.andelsbar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.andelsbar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gull-mørk), var(--gull));
+}
+
+.andelsbar-strek {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: var(--tekst-dempet);
+}
+
+.rival-knapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rival-knapper .knapp {
+  flex: 1;
+}
+
+.ordrer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ordrer .segment button {
+  font-size: 12px;
+}
+
+.ordre-felt {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ordre-felt input {
+  width: 100%;
+  min-width: 0;
 }
 
 /* ─────────────────────────────────────────────── Oppgjør

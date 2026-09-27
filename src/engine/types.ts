@@ -219,14 +219,66 @@ export interface Dagsbilde {
   sek: number
   /** Porteføljens verdi per klasse ved dagens start. */
   verdier: Record<Aktivaklasse, number>
+  /** Din plass på Forbes-lista (1 = rikest). Mangler i lagringer fra før rivalene. */
+  rang?: number
+  /** Rivalene du hadde kjøpt opp ved dagens start. */
+  overtatte?: string[]
 }
 
-export type Aktivaklasse = 'aksje' | 'krypto' | 'eiendom' | 'sparing'
+export type Aktivaklasse = 'aksje' | 'krypto' | 'eiendom' | 'sparing' | 'rival'
 
 export interface Rekorder {
   hoyesteInntekt: number
   storsteHandel: number
   storsteGevinst: number
+}
+
+// ─────────────────────────────────────────────── Skatt, rivaler og ordre
+
+export interface Skatteregning {
+  id: number
+  navn: string
+  belop: number
+  forfallSek: number
+  type: 'skatt' | 'etterskatt'
+}
+
+export interface Skatt {
+  regninger: Skatteregning[]
+  /** Overskuddet føres via et selskap i et skatteparadis: halv skatt, men risiko for bokettersyn. */
+  offshore: boolean
+  /** Skatt spart via offshore som skattemyndighetene ennå ikke har funnet. */
+  unndratt: number
+  totaltBetalt: number
+  nesteId: number
+}
+
+export interface Rival {
+  id: string
+  navn: string
+  selskap: string
+  formue: number
+  /** Formuen rivalen vokser mot, men aldri helt når. */
+  tak: number
+  /** Vekst per time når rivalen er liten. */
+  vekst: number
+  /** Din eierandel i rivalens selskap (0–1). */
+  andel: number
+  /** Det du har betalt for andelen. */
+  kostpris: number
+  /** Du eier hele selskapet. */
+  overtatt: boolean
+}
+
+export type Ordretype = 'kjop' | 'selg-over' | 'selg-under'
+
+export interface Ordre {
+  id: number
+  papir: PapirId
+  type: Ordretype
+  /** Kursen ordren utløses på. */
+  grense: number
+  antall: number
 }
 
 export interface Hendelse {
@@ -301,4 +353,8 @@ export interface Spilltilstand {
   aarstart: Periodestart
   /** Oppgjørene som er gjort, nyeste sist. */
   oppgjor: Oppgjor[]
+  skatt: Skatt
+  rivaler: Rival[]
+  ordre: Ordre[]
+  nesteOrdreId: number
 }

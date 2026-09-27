@@ -26,6 +26,21 @@ export function formue(n: number): string {
   return Math.abs(n) >= 1e6 ? kortKroner(n) : kroner(n)
 }
 
+/**
+ * For toppfeltet, der to tall skal stå side om side: færre desimaler jo
+ * større tallet er, så det aldri blir lengre enn «kr 999 mill».
+ */
+export function kompakt(n: number): string {
+  const abs = Math.abs(n)
+  const kort = (verdi: number, enhet: string) => {
+    const a = Math.abs(verdi)
+    return `kr ${tall(verdi, a < 10 ? 2 : a < 100 ? 1 : 0)} ${enhet}`
+  }
+  if (abs >= 1e9) return kort(n / 1e9, 'mrd')
+  if (abs >= 1e6) return kort(n / 1e6, 'mill')
+  return kroner(n)
+}
+
 export function perSek(n: number): string {
   const abs = Math.abs(n)
   const tekst = abs >= 1e6 ? kortKroner(abs) : `kr ${tall(abs, abs < 10 && abs % 1 !== 0 ? 1 : 0)}`
@@ -56,8 +71,9 @@ export function antall(n: number): string {
   if (Number.isInteger(n)) return tall(n)
   const abs = Math.abs(n)
   if (abs >= 100) return tall(Math.floor(n))
-  if (abs >= 1) return tall(n, 2)
-  return tall(n, 4)
+  // Under én: opptil fire desimaler, men uten nuller på slutten («0,5», ikke «0,5000»).
+  const desimaler = abs >= 1 ? 2 : 4
+  return n.toLocaleString('nb-NO', { maximumFractionDigits: desimaler })
 }
 
 /** «2 t 5 min», «45 s». */

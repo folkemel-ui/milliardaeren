@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 9 – Risk and competition:** Taxes and a tax audit (builds on the year-end report) · Rivals · Auto-trading
 - **Pack 10 – Look and feel:** SVG icons · Light "clean finance" theme
 - **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging businesses (needs a rethink first)
 
@@ -20,27 +19,17 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 3. **Startups.** Invest in rounds (seed, Series A, B and so on). Your share gets diluted when new money comes in. The company can go bankrupt, be sold or go public on the stock exchange.
 
-## Investments
-
-4. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
-
 ## Luxury and status
 
-5. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both. Since Pack 8 the Property tab has a map of Norway, which could be extended with new cities and countries.
-
-## Risk
-
-6. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure. Since Pack 7 the game has year-end reports with income per source, a natural basis for the tax bill.
-
-7. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+4. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both. Since Pack 8 the Property tab has a map of Norway, which could be extended with new cities and countries.
 
 ## Presentation
 
-8. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
+5. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
 
 ## Layout
 
-9. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
+6. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
 ## Parked (not chosen yet)
 

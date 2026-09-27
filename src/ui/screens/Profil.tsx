@@ -8,6 +8,8 @@ import { formue, kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { Formuegraf } from '../komponenter/Formuegraf'
 import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
+import { Skattekort } from '../komponenter/Skattekort'
+import { forbesliste } from '../../engine/rivaler'
 
 function Prestasjonsliste({ s }: { s: Spilltilstand }) {
   const klart = PRESTASJONER.filter((p) => s.prestasjoner[p.id] !== undefined).length
@@ -83,6 +85,9 @@ export function Profil({ s }: { s: Spilltilstand }) {
         <span className="tall-kjempe gull">
           <RulleTall verdi={verdi} format={formue} />
         </span>
+        <span className="dempet liten">
+          Nr. {forbesliste(s, verdi).findIndex((p) => p.deg) + 1} på Forbes-lista
+        </span>
         <Formuegraf punkter={s.historikk.punkter} naa={{ sek: s.sek, verdi }} />
       </div>
 
@@ -118,6 +123,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
         </div>
       </dl>
 
+      <Skattekort s={s} />
       <Regnskap s={s} />
       <Prestasjonsliste s={s} />
       <Rekordbok s={s} />

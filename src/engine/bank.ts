@@ -4,7 +4,8 @@
  */
 
 import { bedriftsverdi, belaaningsgrad, rentePerSek } from './formler'
-import { utforEiendomssalg, utforLuksussalg, utforSalg } from './handel'
+import { utforEiendomssalg, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import { selskapsverdi } from './rivaler'
 import { flyt } from './portefolje'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
 import { BEDRIFTSTYPER, MAKS_BELAANING, MAKS_HENDELSER, MARGINKRAV, TVANGSSALG_ANDEL } from './innhold'
@@ -65,6 +66,13 @@ export function sjekkMargin(s: Spilltilstand): void {
     utforSalg(s, id, s.beholdning[id]!.antall)
     nedbetalMed(s, s.kontanter)
     solgt.push(PAPIRER[id].navn)
+  }
+  // Så eierandeler i rivalselskaper, den største først.
+  for (const r of [...(s.rivaler ?? [])].filter((x) => x.andel > 0).sort((a, b) => b.andel * selskapsverdi(b) - a.andel * selskapsverdi(a))) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    utforRivalsalg(s, r.id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(`andelen i ${r.selskap}`)
   }
   // Så eiendom, den dyreste først, én og én.
   for (const id of [...EIENDOMSSTIGEN].reverse()) {

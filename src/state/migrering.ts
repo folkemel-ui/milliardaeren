@@ -19,6 +19,7 @@ import { lagDagsbilde } from '../engine/avis'
 import { sjekkPrestasjoner } from '../engine/prestasjoner'
 import { klasseverdier, nullPerKlasse } from '../engine/portefolje'
 import { periodestart } from '../engine/oppgjor'
+import { START_RIVALER } from '../engine/rivaler'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -125,6 +126,21 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     eiendomStandard: {},
     oppussing: {},
   }),
+  /* 9 → 10: skatt, rivaler og automatiske ordre. Ingen skatt skyldes for
+     tiden før oppdateringen, rivalene starter der alle nye spill starter, og
+     porteføljen får en klasse for eierandeler i rivalselskaper. */
+  9: (s) => {
+    const forrigeDag = s.forrigeDag as Raatilstand
+    return {
+      ...s,
+      skatt: { regninger: [], offshore: false, unndratt: 0, totaltBetalt: 0, nesteId: 1 },
+      rivaler: structuredClone(START_RIVALER),
+      ordre: [],
+      nesteOrdreId: 1,
+      dagensFlyt: { ...(s.dagensFlyt as Raatilstand), rival: 0 },
+      forrigeDag: { ...forrigeDag, verdier: { ...(forrigeDag.verdier as Raatilstand), rival: 0 } },
+    }
+  },
 }
 
 export type MigreringsResultat =

@@ -117,14 +117,14 @@ describe('porteføljen', () => {
     const u = kjopPapir(rik(), 'NFS', 1000)
     if (!u.ok) throw new Error(u.feil)
     const neste = simuler(u.tilstand, DAG_SEK)
-    expect(neste.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, sparing: 0 })
+    expect(neste.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, rival: 0, sparing: 0 })
     expect(neste.forrigeDag.verdier.aksje).toBeGreaterThan(0)
   })
 
   it('sparerenten er dagens endring på sparekontoen, ikke innskuddet', () => {
     const s = ok(settInn(rik(1_000_000), 1_000_000))
     const etter = simuler(s, 60, true)
-    const sparing = portefolje(etter)[3]
+    const sparing = portefolje(etter).find((p) => p.klasse === 'sparing')!
     expect(sparing.iDag).toBeCloseTo(etter.totaltSparerente)
   })
 

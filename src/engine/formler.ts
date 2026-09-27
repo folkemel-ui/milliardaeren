@@ -25,6 +25,7 @@ import {
   STATUS_RENTEKUTT,
   statusnivaa,
 } from './eiendom'
+import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -110,9 +111,9 @@ export function sparerentePerSek(s: Spilltilstand): number {
   return (s.sparing * SPARERENTE_PER_TIME) / 3600
 }
 
-/** Det som faktisk kommer inn hvert sekund: bedriftene, leien og sparerenten, minus lånerenter. */
+/** Det som faktisk kommer inn hvert sekund: bedriftene, leien, sparerenten og rivalutbyttet, minus lånerenter. */
 export function nettoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) - rentePerSek(s)
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) - rentePerSek(s)
 }
 
 // ─────────────────────────────────────────────── Formue
@@ -134,7 +135,8 @@ export function eiendeler(s: Spilltilstand): number {
     s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) +
     papirverdi(s) +
     eiendomsverdi(s) +
-    luksusverdi(s)
+    luksusverdi(s) +
+    rivalverdi(s)
   )
 }
 
