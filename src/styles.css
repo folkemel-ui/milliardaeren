@@ -25,11 +25,37 @@
   --pluss: #5cd68a;
   --minus: #f27474;
   --fare: #e05a5a;
+  --varsel: #f0b44c;
+  /* Tekst og ikoner som står på gull. */
+  --paa-gull: #1a1508;
 
   --radius: 14px;
-  --topp-høyde: 76px;
   --meny-høyde: 64px;
   --kolonne: 480px;
+}
+
+/* Lyst «ren finans»-tema: hvitt og lysegrått, mørk tekst, et mørkere gull som
+   holder kontrast på hvitt, og grønt og rødt som leses godt på lys bunn.
+   Settes med data-theme="light" på <html>; valget huskes i nettleseren. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bakgrunn: #f4f5f7;
+  --flate: #ffffff;
+  --flate-2: #eceef2;
+  --kant: #dcdfe5;
+  --tekst: #15171c;
+  --tekst-dempet: #5f6773;
+  --gull: #a67c00;
+  --gull-lys: #c99a0e;
+  --gull-mørk: #7d5d00;
+  --pluss: #13803a;
+  --minus: #c42b2b;
+  --fare: #cf2f2f;
+  --varsel: #b45309;
+  --paa-gull: #ffffff;
+  --klasse-krypto: #7c3aed;
+  --klasse-eiendom: #0284c7;
+  --klasse-rival: #db2777;
 }
 
 /* ─────────────────────────────────────────────── Grunnlag */
@@ -145,8 +171,8 @@ figure {
 .helg {
   padding: 1px 7px;
   border-radius: 999px;
-  background: color-mix(in srgb, #f0b44c 18%, transparent);
-  color: #f0b44c;
+  background: color-mix(in srgb, var(--varsel) 18%, transparent);
+  color: var(--varsel);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
@@ -356,11 +382,6 @@ figure {
   height: 52px;
   border-radius: 12px;
   background: var(--flate-2);
-}
-
-.bedrift-emoji {
-  font-size: 28px;
-  line-height: 1;
 }
 
 .dempet-ikon {
@@ -609,7 +630,7 @@ figure {
 .knapp-gull {
   background: var(--gull);
   border-color: var(--gull);
-  color: #1a1508;
+  color: var(--paa-gull);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   transition: transform 0.08s, background 0.15s;
@@ -678,7 +699,7 @@ figure {
 }
 
 .advarsel {
-  color: #f0b44c;
+  color: var(--varsel);
 }
 
 .kritisk {
@@ -791,7 +812,7 @@ figure {
   position: relative;
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--minus), #f0b44c 50%, var(--pluss));
+  background: linear-gradient(90deg, var(--minus), var(--varsel) 50%, var(--pluss));
 }
 
 .stemning-merke {
@@ -932,7 +953,7 @@ figure {
 }
 
 .belaaning-fyll.advarsel {
-  background: #f0b44c;
+  background: var(--varsel);
 }
 
 .belaaning-fyll.kritisk {
@@ -973,7 +994,7 @@ figure {
 }
 
 .hendelse.advarsel {
-  border-color: #f0b44c;
+  border-color: var(--varsel);
   color: inherit;
 }
 
@@ -1130,7 +1151,7 @@ figure {
 
 .milepaeler li.nådd .milepael-merke {
   background: var(--gull);
-  color: #1a1508;
+  color: var(--paa-gull);
 }
 
 .milepaeler li.neste .milepael-merke {
@@ -1139,8 +1160,8 @@ figure {
 }
 
 .stengt {
-  border-color: color-mix(in srgb, #f0b44c 50%, var(--kant));
-  color: #f0b44c;
+  border-color: color-mix(in srgb, var(--varsel) 50%, var(--kant));
+  color: var(--varsel);
   font-size: 13px;
 }
 
@@ -1282,6 +1303,63 @@ figure {
   padding-left: 18px;
   font-size: 15px;
   line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────────── Galleriet (?galleri) */
+
+.galleri {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.galleri-rutenett {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.galleri-kort {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--flate);
+  border: 1px solid var(--kant);
+}
+
+.galleri-stor {
+  background: var(--flate-2);
+  border-radius: 10px;
+  line-height: 0;
+}
+
+.galleri-små {
+  display: flex;
+  gap: 8px;
+}
+
+.galleri-små span {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+}
+
+.galleri-mork {
+  background: #211e1a;
+}
+
+.galleri-lys {
+  background: #eceef2;
+}
+
+.galleri-kort figcaption {
+  font-weight: 600;
 }
 
 /* ─────────────────────────────────────────────── Skatt, rivaler og ordre */
@@ -1739,7 +1817,7 @@ figure {
 }
 
 .kart-antall {
-  fill: #1a1508;
+  fill: var(--paa-gull);
   font-size: 9px;
   font-weight: 800;
   pointer-events: none;
@@ -1782,7 +1860,7 @@ figure {
 
 .merke-standard.s2 {
   background: var(--gull);
-  color: #1a1508;
+  color: var(--paa-gull);
 }
 
 .knapp-oppussing {
@@ -1887,7 +1965,7 @@ figure {
   height: 44px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, var(--gull-lys), var(--gull) 55%, var(--gull-mørk));
-  color: #1a1508;
+  color: var(--paa-gull);
   font-size: 20px;
   font-weight: 800;
 }
@@ -1946,7 +2024,7 @@ figure {
   padding: 0 4px;
   border-radius: 999px;
   background: var(--gull);
-  color: #1a1508;
+  color: var(--paa-gull);
   font-size: 11px;
   font-weight: 800;
 }

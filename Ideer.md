@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 10 – Look and feel:** SVG icons · Light "clean finance" theme
 - **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging businesses (needs a rethink first)
 
 ## Businesses
@@ -22,14 +21,6 @@ A suggested order, grouped so each pack feels complete when played. The order is
 ## Luxury and status
 
 4. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both. Since Pack 8 the Property tab has a map of Norway, which could be extended with new cities and countries.
-
-## Presentation
-
-5. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
-
-## Layout
-
-6. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
 ## Parked (not chosen yet)
 
@@ -82,7 +73,6 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 
 **Layout ideas**
 - **Colorful cartoon style.** Bright colors, rounded shapes and big icons.
-- **Light/dark toggle** in the settings, switching between the two themes above.
 - **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth.
 - **Notification badges** on tabs when something needs attention.
 - **Progress bar per business** that fills up and pays out when full.

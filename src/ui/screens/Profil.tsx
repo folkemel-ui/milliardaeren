@@ -9,6 +9,7 @@ import { Formuegraf } from '../komponenter/Formuegraf'
 import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
 import { Skattekort } from '../komponenter/Skattekort'
+import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
 
 function Prestasjonsliste({ s }: { s: Spilltilstand }) {
@@ -73,6 +74,27 @@ function fremdrift(n: number): number {
   return Math.min(1, Math.max(0, Math.log10(Math.max(1, n)) / Math.log10(MAAL)))
 }
 
+function Utseende() {
+  const [tema, settValgt] = useState<Tema>(lesTema)
+  const velg = (t: Tema) => {
+    settTema(t)
+    settValgt(t)
+  }
+  return (
+    <div className="kort utseende">
+      <h2 className="kort-tittel">Utseende</h2>
+      <div className="segment">
+        <button className={tema === 'mork' ? 'aktiv' : ''} onClick={() => velg('mork')}>
+          🌙 Mørkt
+        </button>
+        <button className={tema === 'lys' ? 'aktiv' : ''} onClick={() => velg('lys')}>
+          ☀️ Lyst
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function Profil({ s }: { s: Spilltilstand }) {
   const [bekreft, settBekreft] = useState(false)
   const verdi = nettoformue(s)
@@ -127,6 +149,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
       <Regnskap s={s} />
       <Prestasjonsliste s={s} />
       <Rekordbok s={s} />
+      <Utseende />
 
       <div className="kort">
         {bekreft ? (

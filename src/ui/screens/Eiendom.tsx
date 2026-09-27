@@ -19,6 +19,7 @@ import { utfor } from '../../state/lager'
 import { endring, kortKroner, perSek, tall, varighet } from '../format'
 import { Minigraf } from '../komponenter/Linjegraf'
 import { Norgeskart } from '../komponenter/Norgeskart'
+import { BedriftIkon } from '../komponenter/BedriftIkon'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
   const [by, settBy] = useState<By | null>(null)
@@ -67,9 +68,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
         {by && viste.length === 0 && <p className="kort kort-tomt">Ingen eiendommer til salgs i {by} ennå.</p>}
         {!by && nesteSkjult && (
           <li className="kort kjopskort laast">
-            <div className="bedrift-ikon dempet-ikon" aria-hidden="true">
-              <span className="bedrift-emoji">{EIENDOMSTYPER[nesteSkjult].emoji}</span>
-            </div>
+            <BedriftIkon type={nesteSkjult} dempet />
             <div className="bedriftskort-midt">
               <h2>{EIENDOMSTYPER[nesteSkjult].navn}</h2>
               <span className="dempet liten">
@@ -103,9 +102,7 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
   return (
     <li className="kort bedriftskort">
       <div className="bedriftskort-topp">
-        <div className="bedrift-ikon" aria-hidden="true">
-          <span className="bedrift-emoji">{t.emoji}</span>
-        </div>
+        <BedriftIkon type={id} />
         <div className="bedriftskort-midt">
           <h2>
             {t.navn}

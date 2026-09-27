@@ -1,12 +1,10 @@
-import { BEDRIFTSTYPER } from '../../engine/innhold'
-import type { BedriftstypeId } from '../../engine/types'
-import { IkonSaftbod } from './Ikoner'
+import { Illustrasjon } from './Illustrasjoner'
 
-/** Bedriftens ikon i en rund flis. Emoji er plassholdere til SVG-ikonene kommer. */
-export function BedriftIkon({ type, dempet = false }: { type: BedriftstypeId; dempet?: boolean }) {
+/** Illustrasjonen i en rund flis — for bedrifter, eiendom og luksus. */
+export function BedriftIkon({ type, dempet = false }: { type: string; dempet?: boolean }) {
   return (
     <div className={dempet ? 'bedrift-ikon dempet-ikon' : 'bedrift-ikon'} aria-hidden="true">
-      {type === 'saftbod' ? <IkonSaftbod størrelse={44} /> : <span className="bedrift-emoji">{BEDRIFTSTYPER[type].emoji}</span>}
+      <Illustrasjon id={type} størrelse={44} />
     </div>
   )
 }

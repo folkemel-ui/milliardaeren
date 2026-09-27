@@ -18,6 +18,7 @@ import { kjopLuksus, selgLuksus, utvidLager } from '../../engine/handlinger'
 import type { LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
+import { BedriftIkon } from '../komponenter/BedriftIkon'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
@@ -95,9 +96,7 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
 
   return (
     <li className={eier ? 'kort kjopskort eid' : 'kort kjopskort'}>
-      <div className="bedrift-ikon" aria-hidden="true">
-        <span className="bedrift-emoji">{g.emoji}</span>
-      </div>
+      <BedriftIkon type={id} />
       <div className="bedriftskort-midt">
         <h2>{g.navn}</h2>
         <span className="gull liten">+{g.status} status</span>
