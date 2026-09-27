@@ -3,10 +3,11 @@
 import { nettoformue } from './formler'
 import { BEDRIFTSTYPER, STARTKAPITAL } from './innhold'
 import { lagMarked } from './marked'
+import { START_LAGER } from './eiendom'
 import type { Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 3
+export const SPILLVERSJON = 4
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -31,6 +32,10 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     gjeld: 0,
     totaltUtbytte: 0,
     hendelser: [],
+    eiendommer: {},
+    totaltLeie: 0,
+    luksus: [],
+    lager: { ...START_LAGER },
   }
   s.hoyesteFormue = nettoformue(s)
   s.historikk.punkter.push({ sek: 0, verdi: s.hoyesteFormue })

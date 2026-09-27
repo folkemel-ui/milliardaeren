@@ -14,6 +14,14 @@ import {
   RENTE_PER_TIME,
 } from './innhold'
 import { handelskurs, KURTASJE, PAPIRER, rundAntall } from './marked'
+import {
+  eiendomsverdi,
+  leiePerSek,
+  luksusverdi,
+  STATUS_INNTEKT,
+  STATUS_RENTEKUTT,
+  statusnivaa,
+} from './eiendom'
 import type { Bedrift, BedriftstypeId, Beholdning, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -62,16 +70,27 @@ export function bedriftsverdi(b: Bedrift): number {
  * leder — de andre er stengt, og da betales heller ingen lønn.
  */
 export function inntektPerSek(s: Spilltilstand, borte = false): number {
-  return s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b)), 0)
+  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b)), 0)
+  return sum * statusfaktor(s)
+}
+
+/** Statusen din gir bedriftene litt mer inntekt. */
+export function statusfaktor(s: Spilltilstand): number {
+  return 1 + STATUS_INNTEKT * statusnivaa(s)
+}
+
+/** Renten per time, etter statusrabatt. */
+export function rentesats(s: Spilltilstand): number {
+  return RENTE_PER_TIME - STATUS_RENTEKUTT * statusnivaa(s)
 }
 
 export function rentePerSek(s: Spilltilstand): number {
-  return (s.gjeld * RENTE_PER_TIME) / 3600
+  return (s.gjeld * rentesats(s)) / 3600
 }
 
-/** Det som faktisk kommer inn hvert sekund: bedriftene minus renter. */
+/** Det som faktisk kommer inn hvert sekund: bedriftene og leien, minus renter. */
 export function nettoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) - rentePerSek(s)
+  return inntektPerSek(s) + leiePerSek(s) - rentePerSek(s)
 }
 
 // ─────────────────────────────────────────────── Formue
@@ -87,13 +106,16 @@ export function papirverdi(s: Spilltilstand, klasse?: 'aksje' | 'krypto'): numbe
 
 /** Alt du eier, før gjeld. */
 export function eiendeler(s: Spilltilstand): number {
-  return s.kontanter + s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) + papirverdi(s)
+  return (
+    s.kontanter +
+    s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) +
+    papirverdi(s) +
+    eiendomsverdi(s) +
+    luksusverdi(s)
+  )
 }
 
-/**
- * Nettoformuen er spillets poengsum: alt du eier minus det du skylder.
- * Eiendom og luksus legges til her etter hvert.
- */
+/** Nettoformuen er spillets poengsum: alt du eier minus det du skylder. */
 export function nettoformue(s: Spilltilstand): number {
   return eiendeler(s) - s.gjeld
 }

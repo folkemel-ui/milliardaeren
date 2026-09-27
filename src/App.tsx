@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { startSpillokke, useSpill } from './state/lager'
 import { Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
-import { IkonEiendom, IkonLuksus } from './ui/komponenter/Ikoner'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
 import { Bedrifter } from './ui/screens/Bedrifter'
+import { Eiendom } from './ui/screens/Eiendom'
 import { Investeringer } from './ui/screens/Investeringer'
-import { KommerSnart } from './ui/screens/KommerSnart'
+import { Luksus } from './ui/screens/Luksus'
 import { Profil } from './ui/screens/Profil'
 
 const FANENOKKEL = 'milliardaer.fane'
@@ -42,20 +42,8 @@ export default function App() {
       <main className="innhold">
         {fane === 'bedrifter' && <Bedrifter s={s} />}
         {fane === 'investeringer' && <Investeringer s={s} />}
-        {fane === 'eiendom' && (
-          <KommerSnart
-            tittel="Eiendom"
-            ikon={<IkonEiendom størrelse={48} />}
-            tekst="Leiligheter, kontorbygg og øyer som gir leieinntekter."
-          />
-        )}
-        {fane === 'luksus' && (
-          <KommerSnart
-            tittel="Luksus"
-            ikon={<IkonLuksus størrelse={48} />}
-            tekst="Biler, yachter, privatfly og klokker som hever statusen din."
-          />
-        )}
+        {fane === 'eiendom' && <Eiendom s={s} />}
+        {fane === 'luksus' && <Luksus s={s} />}
         {fane === 'profil' && <Profil s={s} />}
       </main>
       <Fanemeny aktiv={fane} velg={velg} />

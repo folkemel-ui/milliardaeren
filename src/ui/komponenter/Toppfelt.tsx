@@ -1,6 +1,7 @@
 import { nettoformue, nettoPerSek } from '../../engine/formler'
+import { statusnivaa } from '../../engine/eiendom'
 import type { Spilltilstand } from '../../engine/types'
-import { formue, kroner, perSek } from '../format'
+import { formue, perSek } from '../format'
 import { IkonProfil } from './Ikoner'
 import { RulleTall } from './RulleTall'
 
@@ -11,7 +12,7 @@ export function Toppfelt({ s, tilProfil }: { s: Spilltilstand; tilProfil: () => 
       <div className="toppfelt-kontanter">
         <span className="etikett">Kontanter</span>
         <span className="tall-mellom">
-          <RulleTall verdi={s.kontanter} format={kroner} />
+          <RulleTall verdi={s.kontanter} format={formue} />
         </span>
         <span className={nettoPerSek(s) < 0 ? 'tempo negativ' : 'tempo'}>{perSek(nettoPerSek(s))}</span>
       </div>
@@ -21,8 +22,9 @@ export function Toppfelt({ s, tilProfil }: { s: Spilltilstand; tilProfil: () => 
           <RulleTall verdi={nettoformue(s)} format={formue} />
         </span>
       </div>
-      <button className="toppfelt-profil" onClick={tilProfil} aria-label="Profil">
+      <button className="toppfelt-profil" onClick={tilProfil} aria-label={`Profil, statusnivå ${statusnivaa(s)}`}>
         <IkonProfil størrelse={22} />
+        {statusnivaa(s) > 0 && <span className="profil-nivaa">{statusnivaa(s)}</span>}
       </button>
     </header>
   )

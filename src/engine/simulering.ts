@@ -5,6 +5,7 @@
 
 import { betalRente, sjekkMargin } from './bank'
 import { inntektPerSek, nettoformue } from './formler'
+import { leiePerSek } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, PAPIRER, UTBYTTE_SEK } from './marked'
 import { Terning } from './rng'
 import type { PapirId, Spilltilstand } from './types'
@@ -30,6 +31,10 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const inntekt = inntektPerSek(s, borte)
   s.kontanter += inntekt
   s.totaltTjent += inntekt
+  // Leien kommer uansett — eiendom trenger ingen leder.
+  const leie = leiePerSek(s)
+  s.kontanter += leie
+  s.totaltLeie += leie
   betalRente(s)
   s.sek += 1
 

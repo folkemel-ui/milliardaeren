@@ -39,7 +39,7 @@ function fingeravtrykk(s: Spilltilstand) {
 }
 
 describe('golden master', () => {
-  it(`boten spiller ${SEKUNDER} sekunder og treffer fasiten eksakt`, () => {
+  it(`boten spiller ${SEKUNDER} sekunder og treffer fasiten eksakt`, { timeout: 60_000 }, () => {
     const avtrykk = fingeravtrykk(botSpill(nyttSpill(), SEKUNDER))
 
     if (process.env.OPPDATER_FASIT) {

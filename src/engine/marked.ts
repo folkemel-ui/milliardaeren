@@ -8,7 +8,7 @@
  */
 
 import { Terning } from './rng'
-import type { Marked, Papir, PapirId, Spilltilstand } from './types'
+import type { Kurs, Marked, Papir, PapirId, Spilltilstand } from './types'
 
 export const MARKED_TIKK_SEK = 5
 const DT = MARKED_TIKK_SEK / 3600
@@ -65,8 +65,13 @@ export function kursFra(fundament: number, avvik: number): number {
   return fundament * Math.exp(avvik)
 }
 
-/** Ett markedstikk på en tilstand simuleringen eier. */
+/** Ett markedstikk på en tilstand simuleringen eier: papirene, så eiendomsindeksen. */
 export function markedstikk(m: Marked, t: Terning): void {
+  papirtikk(m, t)
+  eiendomstikk(m.eiendom, m.tikk, t)
+}
+
+function papirtikk(m: Marked, t: Terning): void {
   m.tikk += 1
   const st = m.stemning
   m.stemning = Math.max(-1, Math.min(1, st - STEMNING_REVERSJON * st * DT + STEMNING_VOLATILITET * Math.sqrt(DT) * normal(t)))
@@ -90,6 +95,41 @@ export function markedstikk(m: Marked, t: Terning): void {
   }
 }
 
+// ─────────────────────────────────────────────── Eiendomsindeksen
+
+/**
+ * Eiendomsprisene: en langsom indeks som starter på 1 og vokser svakt, med
+ * små svingninger — og en sjelden gang et boligkrakk.
+ */
+const EIENDOM = { drift: 0.01, volatilitet: 0.03, reversjon: 0.15, krakk: 0.0003, krakkMin: 0.1, krakkMaks: 0.25 }
+
+function eiendomstikk(k: Kurs, tikk: number, t: Terning): void {
+  k.fundament *= Math.exp(EIENDOM.drift * DT)
+  k.avvik += -EIENDOM.reversjon * k.avvik * DT + EIENDOM.volatilitet * Math.sqrt(DT) * normal(t)
+  if (t.sjanse(EIENDOM.krakk)) k.avvik -= t.mellom(EIENDOM.krakkMin, EIENDOM.krakkMaks)
+  k.kurs = kursFra(k.fundament, k.avvik)
+  if (tikk % HISTORIKK_TIKK === 0) {
+    k.historikk.push(k.kurs)
+    if (k.historikk.length > MAKS_KURSHISTORIKK) k.historikk.shift()
+  }
+}
+
+/**
+ * En fersk, oppvarmet eiendomsindeks. Varmes opp for seg selv, så markedet
+ * ellers blir helt likt det det var før indeksen fantes.
+ */
+export function lagEiendomsindeks(frø: number): { indeks: Kurs; frø: number } {
+  const indeks: Kurs = { kurs: 1, fundament: 1, avvik: 0, historikk: [] }
+  const t = new Terning(frø)
+  for (let i = 1; i <= OPPVARMING_TIKK; i++) eiendomstikk(indeks, i, t)
+  // Start på 1 etter oppvarmingen, så prisene i katalogen gjelder fra dag én.
+  const skala = 1 / indeks.kurs
+  indeks.fundament *= skala
+  indeks.kurs = 1
+  indeks.historikk = indeks.historikk.map((v) => v * skala)
+  return { indeks, frø: t.fro }
+}
+
 /** Et ferskt marked, varmet opp så grafene har historikk fra start. Returnerer frøet etterpå. */
 export function lagMarked(frø: number): { marked: Marked; frø: number } {
   const kurser = {} as Marked['kurser']
@@ -97,9 +137,10 @@ export function lagMarked(frø: number): { marked: Marked; frø: number } {
     const s = PAPIRER[id].startkurs
     kurser[id] = { kurs: s, fundament: s, avvik: 0, historikk: [] }
   }
-  const marked: Marked = { tikk: 0, stemning: 0, kurser }
-  const t = new Terning(frø)
-  for (let i = 0; i < OPPVARMING_TIKK; i++) markedstikk(marked, t)
+  const { indeks, frø: etterIndeks } = lagEiendomsindeks(frø)
+  const marked: Marked = { tikk: 0, stemning: 0, kurser, eiendom: indeks }
+  const t = new Terning(etterIndeks)
+  for (let i = 0; i < OPPVARMING_TIKK; i++) papirtikk(marked, t)
   marked.tikk = 0
   return { marked, frø: t.fro }
 }

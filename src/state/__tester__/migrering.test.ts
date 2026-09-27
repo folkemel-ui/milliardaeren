@@ -55,6 +55,32 @@ describe('migrering', () => {
     expect(nettoformue(r.tilstand)).toBe(6_500)
   })
 
+  it('løfter en versjon 3-lagring til versjon 4 med eiendomsindeks og uendret formue', () => {
+    const v3 = migrer({
+      versjon: 2,
+      frø: 777,
+      sek: 600,
+      kontanter: 5_000,
+      bedrifter: [{ id: 'b1', type: 'saftbod', nivaa: 5, startetSek: 0, ansatte: 1, leder: true, investert: 1_500 }],
+      nesteId: 2,
+      historikk: { intervall: 10, punkter: [{ sek: 0, verdi: 1_250 }] },
+      totaltTjent: 4_000,
+      hoyesteFormue: 6_500,
+    }, 3)
+    expect(v3.ok).toBe(true)
+    if (!v3.ok) return
+    const r = migrer(JSON.parse(JSON.stringify(v3.tilstand)))
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.tilstand.versjon).toBe(SPILLVERSJON)
+    expect(r.tilstand.marked.eiendom.kurs).toBe(1)
+    expect(r.tilstand.marked.eiendom.historikk.length).toBeGreaterThan(100)
+    expect(r.tilstand.marked.kurser).toEqual(v3.tilstand.marked.kurser)
+    expect(r.tilstand.lager).toEqual({ garasje: 1, havn: 0, hangar: 0 })
+    expect(r.tilstand.luksus).toEqual([])
+    expect(nettoformue(r.tilstand)).toBe(6_500)
+  })
+
   it('løfter en ekte versjon 1-lagring helt frem', () => {
     const v1 = {
       versjon: 1,

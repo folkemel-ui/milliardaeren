@@ -13,10 +13,21 @@ import {
   maksNyttLaan,
   oppgraderingspris,
 } from './formler'
-import { utforKjop, utforSalg } from './handel'
+import { utforEiendomssalg, utforKjop, utforLuksussalg, utforSalg } from './handel'
+import {
+  brukteplasser,
+  EIENDOM_SYNLIG_VED,
+  eiendomspris,
+  EIENDOMSTYPER,
+  LAGER,
+  LAGER_FOR,
+  LUKSUS,
+  statusnivaa,
+  utvidelsespris,
+} from './eiendom'
 import { BEDRIFTSTYPER } from './innhold'
 import { PAPIRER, rundAntall } from './marked'
-import type { Bedrift, BedriftstypeId, PapirId, Spilltilstand } from './types'
+import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, PapirId, Spilltilstand } from './types'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
 
@@ -90,6 +101,67 @@ export function selgPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall
   if (a <= 0) return feil('Velg hvor mye du vil selge.')
   const n = structuredClone(s)
   utforSalg(n, id, a)
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Eiendom
+
+export function eiendomSynlig(s: Spilltilstand, id: EiendomId): boolean {
+  return s.hoyesteFormue >= EIENDOMSTYPER[id].pris * EIENDOM_SYNLIG_VED
+}
+
+export function kjopEiendom(s: Spilltilstand, id: EiendomId): Utfall {
+  const t = EIENDOMSTYPER[id]
+  if (!t) return feil('Ukjent eiendom.')
+  if (!eiendomSynlig(s, id)) return feil(`${t.navn} er ikke til salgs for deg ennå.`)
+  if (statusnivaa(s) < t.statuskrav) return feil(`Du trenger statusnivå ${t.statuskrav} for å kjøpe ${t.navn.toLowerCase()}.`)
+  if ((s.eiendommer[id] ?? 0) >= t.maksAntall) return feil(`Du eier allerede alle ${t.maksAntall} som er til salgs.`)
+  const pris = eiendomspris(s, id)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.eiendommer[id] = (n.eiendommer[id] ?? 0) + 1
+  return { ok: true, tilstand: n }
+}
+
+export function selgEiendom(s: Spilltilstand, id: EiendomId): Utfall {
+  if (!s.eiendommer[id]) return feil('Du eier ingen.')
+  const n = structuredClone(s)
+  utforEiendomssalg(n, id)
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Luksus og lager
+
+export function kjopLuksus(s: Spilltilstand, id: LuksusId): Utfall {
+  const g = LUKSUS[id]
+  if (!g) return feil('Ukjent gjenstand.')
+  if (s.luksus.includes(id)) return feil(`Du eier allerede ${g.navn.toLowerCase()}.`)
+  const lager = LAGER_FOR[g.kategori]
+  if (lager && brukteplasser(s, lager) >= s.lager[lager]) {
+    return feil(`Du har ikke plass. Bygg ut ${LAGER[lager].bestemt} først.`)
+  }
+  if (s.kontanter < g.pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= g.pris
+  n.luksus.push(id)
+  return { ok: true, tilstand: n }
+}
+
+export function selgLuksus(s: Spilltilstand, id: LuksusId): Utfall {
+  if (!s.luksus.includes(id)) return feil('Du eier den ikke.')
+  const n = structuredClone(s)
+  utforLuksussalg(n, id)
+  return { ok: true, tilstand: n }
+}
+
+export function utvidLager(s: Spilltilstand, lager: LagerId): Utfall {
+  if (!LAGER[lager]) return feil('Ukjent lager.')
+  const pris = utvidelsespris(s, lager)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.lager[lager] += 1
   return { ok: true, tilstand: n }
 }
 

@@ -14,39 +14,33 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 ## Investments
 
-4. **Real estate.** Apartments, office buildings and islands in different cities. They earn rent every month and their value can rise or fall with the market.
-
-5. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
+4. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
 
 ## Progression
 
-6. **Achievements and a record book.** Milestones (first million, first billion, 10 businesses and so on) and personal records such as the biggest single trade and the fastest route to a billion.
+5. **Achievements and a record book.** Milestones (first million, first billion, 10 businesses and so on) and personal records such as the biggest single trade and the fastest route to a billion.
 
 ## Luxury and status
 
-7. **Luxury collection.** Cars, yachts, private jets and watches. They count toward net worth and raise your status level, which gives small bonuses (such as better loan terms and access to exclusive properties).
-
-8. **Garage, harbor and hangar.** Space is limited, so you have to build more room to store more cars, boats and planes. This adds a cost that stops endless buying.
-
-9. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets.
+6. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both.
 
 ## Risk
 
-10. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
+7. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
 
-11. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+8. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
 
 ## Presentation
 
-12. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
+9. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
 
-13. **Newspaper.** A daily headline feed that reacts to the market, events and what the player does ("Crypto crashes 40 %", "Unknown investor buys football club").
+10. **Newspaper.** A daily headline feed that reacts to the market, events and what the player does ("Crypto crashes 40 %", "Unknown investor buys football club").
 
 ## Layout
 
-14. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
+11. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
-15. **Date and time bar.** Shows the in-game day and week, which is useful for dividends, rent, taxes and match days.
+12. **Date and time bar.** Shows the in-game day and week, which is useful for dividends, rent, taxes and match days.
 
 ## Parked (not chosen yet)
 

@@ -13,7 +13,8 @@
 
 import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
-import { lagMarked } from '../engine/marked'
+import { lagEiendomsindeks, lagMarked } from '../engine/marked'
+import { START_LAGER } from '../engine/eiendom'
 import type { BedriftstypeId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -42,6 +43,21 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
   2: (s) => {
     const { marked, frø } = lagMarked(s.frø as number)
     return { ...s, frø, marked, beholdning: {}, gjeld: 0, totaltUtbytte: 0, hendelser: [] }
+  },
+  /* 3 → 4: eiendom, luksus og lager. Eiendomsindeksen legges til markedet
+     (varmet opp fra spillets frø, starter på 1), ingen eiendom eller luksus,
+     og garasjen med sin ene plass — så nettoformuen er uendret. */
+  3: (s) => {
+    const { indeks, frø } = lagEiendomsindeks(s.frø as number)
+    return {
+      ...s,
+      frø,
+      marked: { ...(s.marked as Raatilstand), eiendom: indeks },
+      eiendommer: {},
+      totaltLeie: 0,
+      luksus: [],
+      lager: { ...START_LAGER },
+    }
   },
 }
 

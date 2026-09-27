@@ -4,8 +4,27 @@
  * samme kurtasje og flytter kursen likt. Ingen sjekker her — det gjør de som kaller.
  */
 
+import { eiendomspris, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE } from './marked'
-import type { PapirId, Spilltilstand } from './types'
+import type { EiendomId, LuksusId, PapirId, Spilltilstand } from './types'
+
+/** Selger én eiendom til dagens pris, minus meglerhonorar. Returnerer hva du fikk. */
+export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
+  const inntekt = eiendomspris(n, id) * (1 - MEGLERHONORAR)
+  n.kontanter += inntekt
+  const igjen = (n.eiendommer[id] ?? 0) - 1
+  if (igjen > 0) n.eiendommer[id] = igjen
+  else delete n.eiendommer[id]
+  return inntekt
+}
+
+/** Selger en luksusgjenstand til restverdien. */
+export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
+  const inntekt = restverdi(id)
+  n.kontanter += inntekt
+  n.luksus = n.luksus.filter((l) => l !== id)
+  return inntekt
+}
 
 /** Kjøper `antall` og returnerer hva det kostet, kurtasje inkludert. */
 export function utforKjop(n: Spilltilstand, id: PapirId, antall: number): number {

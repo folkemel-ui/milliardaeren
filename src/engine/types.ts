@@ -86,6 +86,8 @@ export interface Marked {
   /** Kryptostemningen, fra −1 (frykt) til 1 (grådighet). */
   stemning: number
   kurser: Record<PapirId, Kurs>
+  /** Eiendomsindeksen: starter på 1, og alle eiendomsverdier og leier ganges med den. */
+  eiendom: Kurs
 }
 
 export interface Beholdning {
@@ -93,6 +95,47 @@ export interface Beholdning {
   /** Samlet kostpris, inkludert kurtasje. Gir snittpris og gevinst. */
   kostpris: number
 }
+
+// ─────────────────────────────────────────────── Eiendom og luksus
+
+export type EiendomId =
+  | 'hybel' | 'leilighet' | 'rekkehus' | 'hytte'
+  | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
+
+export interface Eiendomstype {
+  id: EiendomId
+  navn: string
+  sted: string
+  emoji: string
+  /** Pris når eiendomsindeksen står på 1. */
+  pris: number
+  /** Leie per time, som andel av prisen. Følger indeksen. */
+  avkastning: number
+  /** Så mange kan du eie av typen. */
+  maksAntall: number
+  /** Statusnivået som kreves for å få kjøpe. */
+  statuskrav: number
+}
+
+export type LuksusKategori = 'bil' | 'klokke' | 'baat' | 'fly'
+
+export type LuksusId =
+  | 'stasjonsvogn' | 'elbil' | 'superbil' | 'hyperbil'
+  | 'gullklokke' | 'mesterverk' | 'diamantklokke'
+  | 'snekke' | 'motorbaat' | 'superyacht'
+  | 'propellfly' | 'forretningsjet' | 'langdistansejet'
+
+export interface Luksusgjenstand {
+  id: LuksusId
+  navn: string
+  kategori: LuksusKategori
+  emoji: string
+  pris: number
+  /** Statuspoeng gjenstanden gir så lenge du eier den. */
+  status: number
+}
+
+export type LagerId = 'garasje' | 'havn' | 'hangar'
 
 export interface Hendelse {
   sek: number
@@ -131,4 +174,11 @@ export interface Spilltilstand {
   totaltUtbytte: number
   /** Siste hendelser, nyeste sist. Kappet i lengde. */
   hendelser: Hendelse[]
+  /** Antall eiendommer du eier av hver type. */
+  eiendommer: Partial<Record<EiendomId, number>>
+  totaltLeie: number
+  /** Luksusgjenstandene du eier. Én av hver. */
+  luksus: LuksusId[]
+  /** Plasser i garasjen, havna og hangaren. */
+  lager: Record<LagerId, number>
 }

@@ -4,7 +4,8 @@
  */
 
 import { bedriftsverdi, belaaningsgrad, rentePerSek } from './formler'
-import { utforSalg } from './handel'
+import { utforEiendomssalg, utforLuksussalg, utforSalg } from './handel'
+import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
 import { BEDRIFTSTYPER, MAKS_BELAANING, MAKS_HENDELSER, MARGINKRAV, TVANGSSALG_ANDEL } from './innhold'
 import { PAPIRER } from './marked'
 import type { Hendelse, PapirId, Spilltilstand } from './types'
@@ -32,8 +33,9 @@ function nedbetalMed(s: Spilltilstand, belop: number): void {
 
 /**
  * Marginkravet: er gjelden over grensen, tar banken først kontantene dine,
- * så investeringene — de største postene først — til belåningen er tilbake
- * på det du fikk låne. Holder ikke det, tar banken over bedrifter (den mest
+ * så investeringene — de største postene først — og deretter eiendom og
+ * luksus, til belåningen er tilbake på det du fikk låne. Holder ikke det,
+ * tar banken over bedrifter (den mest
  * verdifulle først) for halvparten av det du investerte. Den siste bedriften
  * får du alltid beholde.
  */
@@ -50,6 +52,21 @@ export function sjekkMargin(s: Spilltilstand): void {
     utforSalg(s, id, s.beholdning[id]!.antall)
     nedbetalMed(s, s.kontanter)
     solgt.push(PAPIRER[id].navn)
+  }
+  // Så eiendom, den dyreste først, én og én.
+  for (const id of [...EIENDOMSSTIGEN].reverse()) {
+    while ((s.eiendommer[id] ?? 0) > 0 && belaaningsgrad(s) > MAKS_BELAANING) {
+      utforEiendomssalg(s, id)
+      nedbetalMed(s, s.kontanter)
+      solgt.push(EIENDOMSTYPER[id].navn.toLowerCase())
+    }
+  }
+  // Så luksus, den mest verdifulle først.
+  for (const id of [...s.luksus].sort((a, b) => restverdi(b) - restverdi(a))) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    utforLuksussalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(LUKSUS[id].navn.toLowerCase())
   }
   if (solgt.length > 0) {
     leggTilHendelse(s, {
