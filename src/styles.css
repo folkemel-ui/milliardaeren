@@ -614,6 +614,323 @@ figure {
   justify-content: flex-end;
 }
 
+/* ─────────────────────────────────────────────── Investeringer */
+
+.minus {
+  color: var(--minus);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tempo.negativ {
+  color: var(--minus);
+}
+
+.advarsel {
+  color: #f0b44c;
+}
+
+.kritisk {
+  color: var(--minus);
+}
+
+.kort-tittel {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.segment {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--flate);
+  border: 1px solid var(--kant);
+}
+
+.segment button {
+  min-height: 36px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tekst-dempet);
+}
+
+.segment button.aktiv {
+  background: var(--flate-2);
+  color: var(--gull);
+  box-shadow: inset 0 0 0 1px var(--kant);
+}
+
+.segment button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.portefolje {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.portefolje > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.papirliste {
+  gap: 8px;
+}
+
+.papirrad {
+  display: grid;
+  grid-template-columns: auto 1fr 60px auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+}
+
+.ticker {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--flate-2);
+  color: var(--gull);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.papirrad-navn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.papirrad-navn strong {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.minigraf {
+  width: 60px;
+  height: 24px;
+}
+
+.papirrad-kurs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stemning-spor {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--minus), #f0b44c 50%, var(--pluss));
+}
+
+.stemning-merke {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--tekst);
+  border: 3px solid var(--bakgrunn);
+  transform: translate(-50%, -50%);
+  transition: left 0.6s ease-out;
+}
+
+.stemning-ender {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.tilbake {
+  align-self: flex-start;
+  min-height: 36px;
+  color: var(--gull);
+  font-weight: 600;
+}
+
+.detalj-topp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detalj-kurs {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.handel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.felt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.felt input {
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--kant);
+  background: var(--bakgrunn);
+  color: var(--tekst);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.felt input:focus {
+  outline: 2px solid var(--gull);
+  outline-offset: 0;
+}
+
+.andelsknapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.handel-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.handel-sum div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.handel-sum dt {
+  color: var(--tekst-dempet);
+}
+
+.handel-sum dd {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.feilmelding {
+  color: var(--minus);
+  font-size: 13px;
+}
+
+.bank {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bank-rad {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.bank-rad > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.bank-rente {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.belaaning-spor {
+  position: relative;
+  height: 10px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: var(--flate-2);
+}
+
+.belaaning-fyll {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pluss);
+  transition: width 0.4s ease-out;
+}
+
+.belaaning-fyll.advarsel {
+  background: #f0b44c;
+}
+
+.belaaning-fyll.kritisk {
+  background: var(--minus);
+}
+
+.belaaning-strek {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--tekst-dempet);
+}
+
+.belaaning-strek.fare {
+  background: var(--minus);
+}
+
+.hendelser {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hendelse {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--kant);
+}
+
+.hendelse p {
+  grid-column: 1 / -1;
+}
+
+.hendelse.advarsel {
+  border-color: #f0b44c;
+  color: inherit;
+}
+
+.hendelse.kritisk {
+  border-color: var(--minus);
+  color: inherit;
+}
+
 /* ─────────────────────────────────────────────── Kommer snart */
 
 .kommer-snart {

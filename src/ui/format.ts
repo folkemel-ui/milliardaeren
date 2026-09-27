@@ -28,8 +28,26 @@ export function formue(n: number): string {
 
 export function perSek(n: number): string {
   const abs = Math.abs(n)
-  const tekst = abs >= 1e6 ? kortKroner(n) : `kr ${tall(n, abs < 10 && n % 1 !== 0 ? 1 : 0)}`
-  return `${n >= 0 ? '+' : '−'}${tekst.replace('-', '')}/s`
+  const tekst = abs >= 1e6 ? kortKroner(abs) : `kr ${tall(abs, abs < 10 && abs % 1 !== 0 ? 1 : 0)}`
+  return `${n >= 0 ? '+' : '−'}${tekst}/s`
+}
+
+/** Kurs: to desimaler under tusen, ellers hele kroner. Småmynter får fire. */
+export function kurs(n: number): string {
+  if (Math.abs(n) >= 1000) return `kr ${tall(n)}`
+  if (Math.abs(n) < 1) return `kr ${tall(n, 4)}`
+  return `kr ${tall(n, 2)}`
+}
+
+/** «+3,2 %», «−1,0 %». */
+export function endring(andel: number): string {
+  const tekst = tall(Math.abs(andel * 100), 1)
+  return `${andel >= 0 ? '+' : '−'}${tekst} %`
+}
+
+/** Antall aksjer eller mynter: brøkdeler bare når det trengs. */
+export function antall(n: number): string {
+  return Number.isInteger(n) ? tall(n) : tall(n, 4)
 }
 
 /** «2 t 5 min», «45 s». */

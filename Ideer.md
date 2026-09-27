@@ -14,45 +14,39 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 ## Investments
 
-4. **Stock exchange.** 8–10 fictional companies with seeded price movements, weekly dividends and three risk levels. Buy and sell with a small fee.
+4. **Real estate.** Apartments, office buildings and islands in different cities. They earn rent every month and their value can rise or fall with the market.
 
-5. **Crypto market.** Much bigger swings, trading every day of the week, and a sentiment meter. Large orders move the price for several days.
-
-6. **Real estate.** Apartments, office buildings and islands in different cities. They earn rent every month and their value can rise or fall with the market.
-
-7. **Bank and loans.** Borrow to grow faster, with interest and a credit limit based on net worth. Too much debt leads to margin calls and, at worst, bankruptcy.
-
-8. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
+5. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
 
 ## Progression
 
-9. **Achievements and a record book.** Milestones (first million, first billion, 10 businesses and so on) and personal records such as the biggest single trade and the fastest route to a billion.
+6. **Achievements and a record book.** Milestones (first million, first billion, 10 businesses and so on) and personal records such as the biggest single trade and the fastest route to a billion.
 
 ## Luxury and status
 
-10. **Luxury collection.** Cars, yachts, private jets and watches. They count toward net worth and raise your status level, which gives small bonuses (such as better loan terms and access to exclusive properties).
+7. **Luxury collection.** Cars, yachts, private jets and watches. They count toward net worth and raise your status level, which gives small bonuses (such as better loan terms and access to exclusive properties).
 
-11. **Garage, harbor and hangar.** Space is limited, so you have to build more room to store more cars, boats and planes. This adds a cost that stops endless buying.
+8. **Garage, harbor and hangar.** Space is limited, so you have to build more room to store more cars, boats and planes. This adds a cost that stops endless buying.
 
-12. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets.
+9. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets.
 
 ## Risk
 
-13. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
+10. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
 
-14. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+11. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
 
 ## Presentation
 
-15. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
+12. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
 
-16. **Newspaper.** A daily headline feed that reacts to the market, events and what the player does ("Crypto crashes 40 %", "Unknown investor buys football club").
+13. **Newspaper.** A daily headline feed that reacts to the market, events and what the player does ("Crypto crashes 40 %", "Unknown investor buys football club").
 
 ## Layout
 
-17. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
+14. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
-18. **Date and time bar.** Shows the in-game day and week, which is useful for dividends, rent, taxes and match days.
+15. **Date and time bar.** Shows the in-game day and week, which is useful for dividends, rent, taxes and match days.
 
 ## Parked (not chosen yet)
 
@@ -71,18 +65,14 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 **Layout ideas**
 - **Colorful cartoon style.** Bright colors, rounded shapes and big icons.
 - **Light/dark toggle** in the settings, switching between the two themes above.
-- **Five tabs with icons and text:** Businesses, Investments, Property, Luxury, Profile.
 - **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth.
 - **Notification badges** on tabs when something needs attention.
-- **Business cards.** Icon, name, level, income per second and a big Upgrade button with the price.
 - **Progress bar per business** that fills up and pays out when full.
 - **Buy ×1 / ×10 / ×100 / Max** toggle.
-- **Locked businesses** shown greyed out with their unlock requirement.
-- **Business detail page** with staff, manager, merging and stats.
-- **Investment sub-tabs:** Stocks, Crypto, Startups, Bank.
-- **Stock list with sparklines.**
-- **Full stock chart** with time ranges and Buy/Sell buttons.
-- **Portfolio summary** showing total value, today's change and total return.
+- **Locked businesses: show all of them.** Today only the next locked one is shown.
+- **Business detail page** with stats and history. Today staff and manager are in a fold-out panel on the card.
+- **Stock chart time ranges.** Today the chart always shows the last 2 hours.
+- **Portfolio summary: fuller version** with today's change and total return across everything. Today each tab shows its value and total gain.
 - **Map view for Property.**
 - **Showroom for Luxury** that you swipe through.
 - **Garage, harbor and hangar grid** with slots.
@@ -92,5 +82,4 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Toast messages** for events.
 - **Newspaper pop-up** each new in-game day.
 - **Welcome-back screen** when the app opens.
-- **Phone frame on PC:** a centered column about 420 px wide.
 - **Wide layout on PC** with a sidebar and two columns.

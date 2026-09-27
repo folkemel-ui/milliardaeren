@@ -9,9 +9,12 @@ import {
   BEDRIFTSTYPER,
   LEDER_MINSTEPRIS,
   MAKS_ANSATTE,
+  MAKS_BELAANING,
   MILEPAELER,
+  RENTE_PER_TIME,
 } from './innhold'
-import type { Bedrift, BedriftstypeId, Spilltilstand } from './types'
+import { handelskurs, KURTASJE, PAPIRER, rundAntall } from './marked'
+import type { Bedrift, BedriftstypeId, Beholdning, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
 
@@ -55,19 +58,76 @@ export function bedriftsverdi(b: Bedrift): number {
 }
 
 /**
- * Samlet inntekt per sekund. Når du er borte, går bare bedriftene med leder —
- * de andre er stengt, og da betales heller ingen lønn.
+ * Samlet inntekt per sekund fra bedriftene. Når du er borte, går bare de med
+ * leder — de andre er stengt, og da betales heller ingen lønn.
  */
 export function inntektPerSek(s: Spilltilstand, borte = false): number {
   return s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b)), 0)
 }
 
+export function rentePerSek(s: Spilltilstand): number {
+  return (s.gjeld * RENTE_PER_TIME) / 3600
+}
+
+/** Det som faktisk kommer inn hvert sekund: bedriftene minus renter. */
+export function nettoPerSek(s: Spilltilstand): number {
+  return inntektPerSek(s) - rentePerSek(s)
+}
+
+// ─────────────────────────────────────────────── Formue
+
+export function papirverdi(s: Spilltilstand, klasse?: 'aksje' | 'krypto'): number {
+  let sum = 0
+  for (const [id, b] of Object.entries(s.beholdning) as [PapirId, Beholdning][]) {
+    if (klasse && PAPIRER[id].klasse !== klasse) continue
+    sum += b.antall * s.marked.kurser[id].kurs
+  }
+  return sum
+}
+
+/** Alt du eier, før gjeld. */
+export function eiendeler(s: Spilltilstand): number {
+  return s.kontanter + s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) + papirverdi(s)
+}
+
 /**
- * Nettoformuen er spillets poengsum: kontanter pluss alt du eier.
- * Investeringer, eiendom, luksus og gjeld legges til her etter hvert.
+ * Nettoformuen er spillets poengsum: alt du eier minus det du skylder.
+ * Eiendom og luksus legges til her etter hvert.
  */
 export function nettoformue(s: Spilltilstand): number {
-  return s.kontanter + s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0)
+  return eiendeler(s) - s.gjeld
+}
+
+// ─────────────────────────────────────────────── Banken
+
+/** Gjeld som andel av eiendelene. */
+export function belaaningsgrad(s: Spilltilstand): number {
+  const e = eiendeler(s)
+  return e > 0 ? s.gjeld / e : s.gjeld > 0 ? Infinity : 0
+}
+
+/**
+ * Hvor mye du kan låne nå. Et lån øker både eiendeler og gjeld, så grensen
+ * (gjeld ≤ andel · eiendeler) gir: nytt lån ≤ (andel · E − G) / (1 − andel).
+ */
+export function maksNyttLaan(s: Spilltilstand): number {
+  return Math.max(0, Math.floor((MAKS_BELAANING * eiendeler(s) - s.gjeld) / (1 - MAKS_BELAANING)))
+}
+
+// ─────────────────────────────────────────────── Handel
+
+/** Hvor mange du har råd til å kjøpe, med kurtasje og kurstrykk regnet med. */
+export function maksKjop(s: Spilltilstand, id: PapirId): number {
+  const kurs = s.marked.kurser[id].kurs
+  let antall = s.kontanter / (kurs * (1 + KURTASJE))
+  for (let i = 0; i < 8; i++) antall = s.kontanter / (handelskurs(s, id, antall) * (1 + KURTASJE))
+  antall = rundAntall(id, antall)
+  // Kappingen er konservativ, men sjekk likevel — avrunding skal aldri gi en avvist ordre.
+  const steg = PAPIRER[id].klasse === 'aksje' ? 1 : 0.0001
+  while (antall > 0 && antall * handelskurs(s, id, antall) * (1 + KURTASJE) > s.kontanter) {
+    antall = rundAntall(id, antall - steg)
+  }
+  return Math.max(0, antall)
 }
 
 // ─────────────────────────────────────────────── Kjøp

@@ -1,4 +1,4 @@
-import { inntektPerSek, nettoformue } from '../../engine/formler'
+import { nettoformue, nettoPerSek } from '../../engine/formler'
 import type { Spilltilstand } from '../../engine/types'
 import { formue, kroner, perSek } from '../format'
 import { IkonProfil } from './Ikoner'
@@ -13,7 +13,7 @@ export function Toppfelt({ s, tilProfil }: { s: Spilltilstand; tilProfil: () => 
         <span className="tall-mellom">
           <RulleTall verdi={s.kontanter} format={kroner} />
         </span>
-        <span className="tempo">{perSek(inntektPerSek(s))}</span>
+        <span className={nettoPerSek(s) < 0 ? 'tempo negativ' : 'tempo'}>{perSek(nettoPerSek(s))}</span>
       </div>
       <div className="toppfelt-formue">
         <span className="etikett">Nettoformue</span>

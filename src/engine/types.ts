@@ -43,6 +43,64 @@ export interface Bedrift {
   investert: number
 }
 
+// ─────────────────────────────────────────────── Markedet
+
+export type PapirId =
+  | 'NFS' | 'FJK' | 'VTK' | 'BSH' | 'POL' | 'NLT' | 'AUB' | 'TRS'
+  | 'BMT' | 'FJD' | 'NSL' | 'TRM' | 'VKT' | 'LKS'
+
+export type Risiko = 'lav' | 'middels' | 'høy'
+
+/** En aksje eller en kryptomynt. Rater er per time spilltid. */
+export interface Papir {
+  id: PapirId
+  navn: string
+  klasse: 'aksje' | 'krypto'
+  risiko: Risiko
+  startkurs: number
+  /** Hvor fort den «riktige verdien» vokser. */
+  drift: number
+  /** Hvor mye kursen svinger rundt den. */
+  volatilitet: number
+  /** Hvor fort avviket trekkes tilbake mot riktig verdi. */
+  reversjon: number
+  /** Andel av kursen som betales i utbytte hver utbetaling. */
+  utbytte: number
+  /** Kroner som skal til for å flytte kursen ~100 % (logaritmisk). */
+  dybde: number
+  /** Sjanse per markedstikk for et plutselig hopp. */
+  hopp: number
+}
+
+export interface Kurs {
+  kurs: number
+  fundament: number
+  /** Logaritmisk avvik fra fundamentet: kurs = fundament · e^avvik. */
+  avvik: number
+  /** Kursen hvert 30. sekund, de siste to timene. */
+  historikk: number[]
+}
+
+export interface Marked {
+  tikk: number
+  /** Kryptostemningen, fra −1 (frykt) til 1 (grådighet). */
+  stemning: number
+  kurser: Record<PapirId, Kurs>
+}
+
+export interface Beholdning {
+  antall: number
+  /** Samlet kostpris, inkludert kurtasje. Gir snittpris og gevinst. */
+  kostpris: number
+}
+
+export interface Hendelse {
+  sek: number
+  tittel: string
+  tekst: string
+  alvor: 'info' | 'advarsel' | 'kritisk'
+}
+
 export interface Formuepunkt {
   sek: number
   verdi: number
@@ -67,4 +125,10 @@ export interface Spilltilstand {
   totaltTjent: number
   /** Den høyeste nettoformuen du har hatt. Låser opp bransjer — og låser aldri igjen. */
   hoyesteFormue: number
+  marked: Marked
+  beholdning: Partial<Record<PapirId, Beholdning>>
+  gjeld: number
+  totaltUtbytte: number
+  /** Siste hendelser, nyeste sist. Kappet i lengde. */
+  hendelser: Hendelse[]
 }

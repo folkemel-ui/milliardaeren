@@ -13,6 +13,7 @@
 
 import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
+import { lagMarked } from '../engine/marked'
 import type { BedriftstypeId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -35,6 +36,12 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       })),
       hoyesteFormue: Math.max(s.kontanter as number, ...punkter.map((p) => p.verdi)),
     }
+  },
+  /* 2 → 3: markedet og banken. Et ferskt, oppvarmet marked fra spillets eget
+     frø, ingen beholdning og ingen gjeld — så nettoformuen er uendret. */
+  2: (s) => {
+    const { marked, frø } = lagMarked(s.frø as number)
+    return { ...s, frø, marked, beholdning: {}, gjeld: 0, totaltUtbytte: 0, hendelser: [] }
   },
 }
 

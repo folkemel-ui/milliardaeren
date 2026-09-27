@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { migrer, type Raatilstand } from '../migrering'
 import { SPILLVERSJON, nyttSpill } from '../../engine/start'
+import { nettoformue } from '../../engine/formler'
 
 describe('migrering', () => {
   it('slipper en lagring fra gjeldende versjon gjennom urørt', () => {
@@ -32,7 +33,29 @@ describe('migrering', () => {
     expect(inn).toEqual({ versjon: 1 })
   })
 
-  it('løfter en ekte versjon 1-lagring til versjon 2', () => {
+  it('løfter en versjon 2-lagring til versjon 3 med marked og uendret nettoformue', () => {
+    const v2 = {
+      versjon: 2,
+      frø: 555,
+      sek: 600,
+      kontanter: 5_000,
+      bedrifter: [{ id: 'b1', type: 'saftbod', nivaa: 5, startetSek: 0, ansatte: 1, leder: true, investert: 1_500 }],
+      nesteId: 2,
+      historikk: { intervall: 10, punkter: [{ sek: 0, verdi: 1_250 }] },
+      totaltTjent: 4_000,
+      hoyesteFormue: 6_500,
+    }
+    const r = migrer(v2)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.tilstand.versjon).toBe(SPILLVERSJON)
+    expect(r.tilstand.gjeld).toBe(0)
+    expect(r.tilstand.beholdning).toEqual({})
+    expect(r.tilstand.marked.kurser.BMT.historikk.length).toBeGreaterThan(100)
+    expect(nettoformue(r.tilstand)).toBe(6_500)
+  })
+
+  it('løfter en ekte versjon 1-lagring helt frem', () => {
     const v1 = {
       versjon: 1,
       frø: 20260927,

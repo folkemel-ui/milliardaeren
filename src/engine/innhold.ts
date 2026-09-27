@@ -76,3 +76,17 @@ export const LEDER_MINSTEPRIS = 500
 
 /** Bedrifter med leder tjener penger mens du er borte — opp til så mange sekunder. */
 export const BORTE_TAK_SEK = 2 * 60 * 60
+
+// ─────────────────────────────────────────────── Banken
+
+/** Rente på lån, per time spilltid. Trekkes hvert sekund. */
+export const RENTE_PER_TIME = 0.03
+/** Du kan låne til gjelden er så stor andel av alt du eier. */
+export const MAKS_BELAANING = 0.5
+/** Over denne andelen selger banken investeringene dine … */
+export const MARGINKRAV = 0.75
+/** … og tar over bedrifter til 50 % av det du investerte, hvis det ikke holder. */
+export const TVANGSSALG_ANDEL = 0.5
+
+/** Så mange hendelser huskes. */
+export const MAKS_HENDELSER = 30

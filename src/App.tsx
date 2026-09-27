@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { startSpillokke, useSpill } from './state/lager'
 import { Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
-import { IkonEiendom, IkonInvesteringer, IkonLuksus } from './ui/komponenter/Ikoner'
+import { IkonEiendom, IkonLuksus } from './ui/komponenter/Ikoner'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
 import { Bedrifter } from './ui/screens/Bedrifter'
+import { Investeringer } from './ui/screens/Investeringer'
 import { KommerSnart } from './ui/screens/KommerSnart'
 import { Profil } from './ui/screens/Profil'
 
@@ -40,13 +41,7 @@ export default function App() {
       <Toppfelt s={s} tilProfil={() => velg('profil')} />
       <main className="innhold">
         {fane === 'bedrifter' && <Bedrifter s={s} />}
-        {fane === 'investeringer' && (
-          <KommerSnart
-            tittel="Investeringer"
-            ikon={<IkonInvesteringer størrelse={48} />}
-            tekst="Aksjer, krypto, oppstartsselskaper og banken."
-          />
-        )}
+        {fane === 'investeringer' && <Investeringer s={s} />}
         {fane === 'eiendom' && (
           <KommerSnart
             tittel="Eiendom"
