@@ -1,0 +1,15 @@
+{
+  "sek": 14400,
+  "frø": 20260927,
+  "kontanter": 15400,
+  "totaltTjent": 14400,
+  "nettoformue": 15650,
+  "inntektPerSek": 1,
+  "antallBedrifter": 1,
+  "historikkIntervall": 80,
+  "historikkPunkter": 181,
+  "sisteHistorikkpunkt": {
+    "sek": 14400,
+    "verdi": 15650
+  }
+}

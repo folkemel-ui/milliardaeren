@@ -1,0 +1,495 @@
+/* ─────────────────────────────────────────────── Skrift */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonter/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* ─────────────────────────────────────────────── Fargetokens
+   Mørkt «luksus»-tema er standard. Alle farger går gjennom tokens, så et lyst
+   tema senere bare er en ny blokk med de samme navnene under [data-theme]. */
+
+:root {
+  color-scheme: dark;
+  --bakgrunn: #0d0c0a;
+  --flate: #181613;
+  --flate-2: #211e1a;
+  --kant: #2e2a23;
+  --tekst: #f4efe4;
+  --tekst-dempet: #9d9587;
+  --gull: #d4af37;
+  --gull-lys: #ecd07a;
+  --gull-mørk: #8f7420;
+  --pluss: #5cd68a;
+  --minus: #f27474;
+  --fare: #e05a5a;
+
+  --radius: 14px;
+  --topp-høyde: 76px;
+  --meny-høyde: 64px;
+  --kolonne: 480px;
+}
+
+/* ─────────────────────────────────────────────── Grunnlag */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bakgrunn);
+  color: var(--tekst);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gull);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+p,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────── Appskallet
+   Telefonbredt: én kolonne, sentrert på større skjermer. */
+
+.app {
+  max-width: var(--kolonne);
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bakgrunn);
+}
+
+@media (min-width: 520px) {
+  .app {
+    border-inline: 1px solid var(--kant);
+  }
+}
+
+.innhold {
+  flex: 1;
+  padding: 16px 16px calc(var(--meny-høyde) + 24px + env(safe-area-inset-bottom));
+}
+
+/* ─────────────────────────────────────────────── Toppfeltet */
+
+.toppfelt {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--topp-høyde);
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background: color-mix(in srgb, var(--bakgrunn) 88%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--kant);
+}
+
+.toppfelt-kontanter {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.toppfelt-formue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.toppfelt-profil {
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gull-mørk);
+  color: var(--gull);
+  background: var(--flate);
+}
+
+.etikett {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tekst-dempet);
+}
+
+.tall-mellom,
+.tall-stort,
+.tall-kjempe,
+.tempo {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tall-mellom {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tall-stort {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tall-kjempe {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tempo {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pluss);
+}
+
+.gull {
+  color: var(--gull);
+}
+
+.pluss {
+  color: var(--pluss);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dempet {
+  color: var(--tekst-dempet);
+}
+
+.liten {
+  font-size: 12px;
+}
+
+/* ─────────────────────────────────────────────── Fanemenyen */
+
+.fanemeny {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 100%;
+  max-width: var(--kolonne);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(in srgb, var(--flate) 94%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--kant);
+}
+
+.fane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: var(--meny-høyde);
+  color: var(--tekst-dempet);
+  font-size: 10.5px;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.fane.aktiv {
+  color: var(--gull);
+}
+
+.fane span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────── Skjermer og kort */
+
+.skjerm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skjerm-tittel {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.kort {
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.kort-tomt {
+  border-style: dashed;
+  background: transparent;
+  color: var(--tekst-dempet);
+  text-align: center;
+  font-size: 13px;
+}
+
+.kortliste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bedriftskort {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.bedriftskort-ikon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: var(--flate-2);
+}
+
+.bedriftskort-midt h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.bedriftskort-midt .dempet {
+  font-size: 13px;
+}
+
+.bedriftskort-tall {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 13px;
+  text-align: right;
+}
+
+/* ─────────────────────────────────────────────── Profil */
+
+.profil-formue {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Y-aksen får sin egen kolonne, så etikettene aldri ligger oppå linjen. */
+.graf {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'y plott'
+    '. x';
+  column-gap: 8px;
+  margin-top: 10px;
+}
+
+.graf svg {
+  grid-area: plott;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 140px;
+}
+
+.graf-linje {
+  stroke: var(--gull);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+
+.graf-rutenett {
+  stroke: var(--kant);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.graf-akse-y {
+  grid-area: y;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 11px;
+  color: var(--tekst-dempet);
+  font-variant-numeric: tabular-nums;
+}
+
+.graf-akse-x {
+  grid-area: x;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--tekst-dempet);
+}
+
+.graf-tom {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--tekst-dempet);
+}
+
+.maal-topp {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.maal-spor {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.maal-fyll {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gull-mørk), var(--gull), var(--gull-lys));
+  transition: width 0.6s ease-out;
+}
+
+.maal-topp + .maal-spor + p {
+  margin-top: 8px;
+}
+
+.statistikk {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.statistikk dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tekst-dempet);
+}
+
+.statistikk dd {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────── Knapper */
+
+.knapp {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+  font-weight: 600;
+}
+
+.knapp-sekundær {
+  width: 100%;
+  color: var(--tekst-dempet);
+}
+
+.knapp-fare {
+  background: var(--fare);
+  border-color: var(--fare);
+  color: #fff;
+}
+
+.bekreft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.knapperad {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ─────────────────────────────────────────────── Kommer snart */
+
+.kommer-snart {
+  align-items: center;
+  text-align: center;
+  padding-top: 48px;
+}
+
+.kommer-snart-ikon {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  color: var(--gull);
+}
+
+.merkelapp {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--gull-mørk);
+  color: var(--gull);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

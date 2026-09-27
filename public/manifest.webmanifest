@@ -1,0 +1,15 @@
+{
+  "name": "Milliardær",
+  "short_name": "Milliardær",
+  "description": "Fra 1 000 kr og en saftbod til milliardær.",
+  "lang": "no",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0c0a",
+  "theme_color": "#0d0c0a",
+  "icons": [
+    { "src": "ikon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
