@@ -15,6 +15,9 @@ import { dagsskifteOppgjor } from './oppgjor'
 import { skattVedDagsskifte } from './skatt'
 import { startupsVedDagsskifte } from './startups'
 import { klubbVedDagsskifte } from './klubb'
+import { jordVedDagsskifte } from './jord'
+import { landemerkerVedDagsskifte } from './landemerker'
+import { kunstVedDagsskifte } from './kunst'
 import { forbesliste } from './rivaler'
 import { FORMER, fusjonsnokler } from './fusjon'
 import { nettoformue } from './formler'
@@ -216,6 +219,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
   const startupsaker = startupsVedDagsskifte(s, t)
   const klubbsaker = klubbVedDagsskifte(s)
+  const andre = [...jordVedDagsskifte(s), ...landemerkerVedDagsskifte(s), ...kunstVedDagsskifte(s)]
   // Rekkefølgen er viktigheten: deg selv og skatten først, så nyheter som
   // flytter kurser, kappløpet, dagens bevegelser og sladder. Lokalstoff fyller
   // på når det er stille.
@@ -223,11 +227,13 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...omDeg(s, før),
     ...skattesaker,
     ...klubbsaker,
+    ...andre.filter((x) => x.type === 'deg'),
     ...startupsaker.filter((x) => x.type === 'deg'),
     ...nyheter,
     ...omRivalene(s, før),
     ...omMarkedet(s, før),
     ...startupsaker.filter((x) => x.type !== 'deg'),
+    ...andre.filter((x) => x.type !== 'deg'),
     ...sosietet(s, t),
   ].slice(0, MAKS_SAKER)
   const brukt = new Set(saker.map((x) => x.tittel))

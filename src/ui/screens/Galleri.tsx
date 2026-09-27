@@ -1,5 +1,7 @@
 import { BEDRIFTSTYPER } from '../../engine/innhold'
 import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
+import { JORD } from '../../engine/jord'
+import { LANDEMERKER } from '../../engine/landemerker'
 import { Illustrasjon, ILLUSTRASJONSIDER } from '../komponenter/Illustrasjoner'
 
 /** Navn til galleriet, fra katalogene i motoren. */
@@ -8,6 +10,8 @@ function navn(id: string): string {
     BEDRIFTSTYPER[id as keyof typeof BEDRIFTSTYPER]?.navn ??
     EIENDOMSTYPER[id as keyof typeof EIENDOMSTYPER]?.navn ??
     LUKSUS[id as keyof typeof LUKSUS]?.navn ??
+    JORD[id as keyof typeof JORD]?.navn ??
+    LANDEMERKER[id as keyof typeof LANDEMERKER]?.navn ??
     id
   )
 }

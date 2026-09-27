@@ -23,6 +23,7 @@ import { endring, kortKroner, perSek, tall, varighet } from '../format'
 import { Minigraf } from '../komponenter/Linjegraf'
 import { Norgeskart } from '../komponenter/Norgeskart'
 import { Verdenskart } from '../komponenter/Verdenskart'
+import { Jordliste, Landemerkeliste } from '../komponenter/JordOgLandemerker'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
@@ -105,6 +106,9 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
           </li>
         )}
       </ul>
+
+      <Jordliste s={s} by={by} />
+      {!by && <Landemerkeliste s={s} />}
     </section>
   )
 }

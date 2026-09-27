@@ -6,6 +6,8 @@
 
 import { inntektPerSek } from './formler'
 import { byerUtenlands, statusnivaa, UTENLANDSBYER } from './eiendom'
+import { mineLandemerker, LANDEMERKELISTE } from './landemerker'
+import { mineMalerier } from './kunst'
 import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
 
@@ -48,6 +50,12 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'legende', navn: 'Legende', beskrivelse: 'Nå høyeste statusnivå', emoji: '🌟', klart: (s) => statusnivaa(s) >= 7 },
   { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', emoji: '🧳', klart: (s) => byerUtenlands(s).size >= 1 },
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', emoji: '🌍', klart: (s) => byerUtenlands(s).size >= UTENLANDSBYER.length },
+  { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', emoji: '🌾', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },
+  { id: 'tommerhogger', navn: 'Tømmerhogger', beskrivelse: 'Hogg en skog', emoji: '🪓', klart: (s) => s.hendelser.some((h) => h.tittel === 'Hogst') },
+  { id: 'landemerke', navn: 'Landemerke', beskrivelse: 'Eie et landemerke', emoji: '🗼', klart: (s) => mineLandemerker(s).length > 0 },
+  { id: 'alle-landemerker', navn: 'Nasjonalskatt', beskrivelse: 'Eie alle landemerkene samtidig', emoji: '🏰', klart: (s) => mineLandemerker(s).length === LANDEMERKELISTE.length },
+  { id: 'kunstsamler', navn: 'Kunstsamler', beskrivelse: 'Eie tre malerier', emoji: '🖼️', klart: (s) => mineMalerier(s).length >= 3 },
+  { id: 'mesen', navn: 'Mesen', beskrivelse: 'Lån ut et maleri til et museum', emoji: '🏛️', klart: (s) => mineMalerier(s).some((id) => s.kunst.eide[id]!.utlant) },
   { id: 'fusjon', navn: 'Fusjonist', beskrivelse: 'Slå sammen en rivals bedrift med din egen', emoji: '🧩', klart: (s) => s.bedrifter.some((b) => (b.fusjoner ?? 0) > 0) },
   { id: 'klubbeier', navn: 'Klubbeier', beskrivelse: 'Kjøp en fotballklubb', emoji: '⚽', klart: (s) => !!s.klubb },
   { id: 'forste-seier', navn: 'Tre poeng', beskrivelse: 'Vinn din første kamp', emoji: '🥅', klart: (s) => (s.klubb?.seire ?? 0) > 0 },
@@ -55,6 +63,7 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'seriemester', navn: 'Seriemester', beskrivelse: 'Vinn en serie', emoji: '🏆', klart: (s) => (s.trofeer?.length ?? 0) > 0 },
   { id: 'eliteserie-gull', navn: 'Gull i Eliteserien', beskrivelse: 'Vinn Eliteserien', emoji: '🥇', klart: (s) => (s.trofeer ?? []).some((t) => t.navn.includes('Eliteserien')) },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', emoji: '🛢️', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
+  { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter — toppen av stigen', emoji: '⛷️', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
 ]
 
 /** Stempler nye prestasjoner og oppdaterer rekordene. Muterer — brukes på kopier. */

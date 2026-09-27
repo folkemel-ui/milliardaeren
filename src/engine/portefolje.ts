@@ -14,6 +14,8 @@ import type { Aktivaklasse, Beholdning, PapirId, Spilltilstand } from './types'
 import { PAPIRER } from './marked'
 import { rivalverdi } from './rivaler'
 import { startupKostpris, startupverdi } from './startups'
+import { jordKostpris } from './jord'
+import { landemerkeKostpris } from './landemerker'
 
 export type { Aktivaklasse }
 
@@ -62,7 +64,7 @@ function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
       const antall = s.eiendommer[id] ?? 0
       if (antall) sum += s.eiendomKostpris[id] ?? antall * eiendomspris(s, id)
     }
-    return sum
+    return sum + jordKostpris(s) + landemerkeKostpris(s)
   }
   let sum = 0
   for (const [id, b] of Object.entries(s.beholdning) as [PapirId, Beholdning][]) {

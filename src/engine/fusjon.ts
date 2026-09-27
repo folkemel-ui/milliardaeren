@@ -48,6 +48,10 @@ export const FORMER: Record<BedriftstypeId, { en: string; den: string }> = {
   hotell: { en: 'et hotell', den: 'hotellet' },
   bank: { en: 'en bank', den: 'banken' },
   oljeselskap: { en: 'et oljeselskap', den: 'oljeselskapet' },
+  rederi: { en: 'et rederi', den: 'rederiet' },
+  fiskeoppdrett: { en: 'et fiskeoppdrett', den: 'fiskeoppdrettet' },
+  flyselskap: { en: 'et flyselskap', den: 'flyselskapet' },
+  skisenter: { en: 'et skisenter', den: 'skisenteret' },
 }
 
 export interface Rivalbedrift {

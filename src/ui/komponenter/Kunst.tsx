@@ -1,0 +1,100 @@
+import { kjopMaleri, museum, selgMaleri } from '../../engine/handlinger'
+import {
+  KJOPSSALAER,
+  kjopsprisMaleri,
+  KUNSTNERE,
+  kunstverdi,
+  MALERIER,
+  MALERILISTE,
+  maleripris,
+  salgsprisMaleri,
+  SALGSSALAER,
+} from '../../engine/kunst'
+import type { MaleriId, Spilltilstand } from '../../engine/types'
+import { utfor } from '../../state/lager'
+import { endring, fortegnKroner, kortKroner, tall } from '../format'
+
+/** Et lite maleri i gullramme, tegnet av maleriets tre farger. Formen følger id-en, så hvert er ulikt. */
+export function Miniatyr({ id, størrelse = 44 }: { id: MaleriId; størrelse?: number }) {
+  const [himmel, land, detalj] = MALERIER[id].farger
+  const n = MALERILISTE.indexOf(id)
+  const horisont = 22 + (n % 3) * 4
+  return (
+    <svg width={størrelse} height={størrelse} viewBox="0 0 48 48" aria-hidden="true">
+      <rect x="2" y="2" width="44" height="44" rx="2" fill="#b8860b" />
+      <rect x="4.5" y="4.5" width="39" height="39" fill="#e3c26b" />
+      <rect x="7" y="7" width="34" height="34" fill={himmel} />
+      <polygon points={`7,${horisont + 6} ${14 + n},${horisont - 4} ${24 - (n % 4)},${horisont + 3} ${32 + (n % 3)},${horisont - 6} 41,${horisont + 2} 41,41 7,41`} fill={land} />
+      {n % 2 === 0 ? (
+        <circle cx={30 - n} cy={14 + (n % 3) * 2} r={3 + (n % 3)} fill={detalj} />
+      ) : (
+        <rect x={12 + n} y={horisont + 4} width="5" height="9" fill={detalj} />
+      )}
+    </svg>
+  )
+}
+
+export function Kunst({ s }: { s: Spilltilstand }) {
+  const verdi = kunstverdi(s)
+  return (
+    <div className="skjerm">
+      <h2 className="seksjon-tittel">Kunst</h2>
+      <p className="dempet liten">
+        Prisene går opp og ned hver dag, og hver kunstner har sin egen trend. Auksjonshuset tar {tall(KJOPSSALAER * 100)} % når du kjøper
+        og {tall(SALGSSALAER * 100)} % når du selger. På museum gir et maleri dobbel status, men da kan det ikke selges — og det tar en dag
+        å hente det hjem.
+        {verdi > 0 && ` Samlingen din er verdt ${kortKroner(verdi)}.`}
+      </p>
+      <ul className="kortliste">
+        {MALERILISTE.map((id) => (
+          <Maleri key={id} s={s} id={id} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function Maleri({ s, id }: { s: Spilltilstand; id: MaleriId }) {
+  const m = MALERIER[id]
+  const eid = s.kunst.eide[id]
+  const pris = maleripris(s, id)
+  const siden = pris / m.startpris - 1
+  return (
+    <li className={eid ? 'kort maleri eid' : 'kort maleri'}>
+      <div className="bedriftskort-topp">
+        <div className="bedrift-ikon" aria-hidden="true">
+          <Miniatyr id={id} />
+        </div>
+        <div className="bedriftskort-midt">
+          <h2>{m.navn}</h2>
+          <span className="dempet liten">
+            {KUNSTNERE[m.kunstner].navn}, {m.aar}
+          </span>
+        </div>
+        <div className="eiendom-tall">
+          <span>{kortKroner(pris)}</span>
+          <span className={siden >= 0 ? 'pluss liten' : 'minus liten'}>{endring(siden)} i alt</span>
+        </div>
+      </div>
+      <p className="dempet liten">
+        <span className="gull">+{eid?.utlant ? m.status * 2 : m.status} status</span>
+        {eid && ` · kjøpt for ${kortKroner(eid.kostpris)}, ${fortegnKroner(pris - eid.kostpris)}`}
+        {eid?.utlant && (eid.hentes ? ' · kommer hjem i morgen' : ' · henger på museum')}
+      </p>
+      {eid ? (
+        <div className="eiendom-knapper">
+          <button className="knapp" disabled={eid.hentes} onClick={() => utfor(museum(s, id))}>
+            {eid.utlant ? (eid.hentes ? 'På vei hjem' : 'Hent hjem') : 'Lån ut til museum'}
+          </button>
+          <button className="knapp" disabled={eid.utlant} onClick={() => utfor(selgMaleri(s, id))}>
+            Selg · {kortKroner(salgsprisMaleri(s, id))}
+          </button>
+        </div>
+      ) : (
+        <button className="knapp knapp-gull bred" disabled={s.kontanter < kjopsprisMaleri(s, id)} onClick={() => utfor(kjopMaleri(s, id))}>
+          Kjøp · {kortKroner(kjopsprisMaleri(s, id))}
+        </button>
+      )}
+    </li>
+  )
+}

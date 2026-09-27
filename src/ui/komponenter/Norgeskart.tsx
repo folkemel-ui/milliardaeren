@@ -1,4 +1,5 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
+import { JORD, JORDLISTE } from '../../engine/jord'
 import type { By, NorskBy, Spilltilstand } from '../../engine/types'
 
 /*
@@ -39,12 +40,17 @@ const BYER: Record<NorskBy, { pos: [number, number]; etikett: 'høyre' | 'venstr
   Geilo: { pos: [8.21, 60.53], etikett: 'over' },
   Trondheim: { pos: [10.4, 63.43], etikett: 'høyre' },
   Lofoten: { pos: [14.56, 68.23], etikett: 'venstre' },
+  Hedmarken: { pos: [11.07, 60.79], etikett: 'høyre' },
+  Trysil: { pos: [12.27, 61.31], etikett: 'høyre' },
+  Lista: { pos: [6.7, 58.1], etikett: 'høyre' },
+  Namdalen: { pos: [11.5, 64.47], etikett: 'høyre' },
 }
 
 /** Hvor mange eiendommer du eier i hver by. */
 function perBy(s: Spilltilstand): Partial<Record<By, number>> {
   const antall: Partial<Record<By, number>> = {}
   for (const id of EIENDOMSSTIGEN) antall[EIENDOMSTYPER[id].by] = (antall[EIENDOMSTYPER[id].by] ?? 0) + (s.eiendommer[id] ?? 0)
+  for (const id of JORDLISTE) if (s.jord?.[id]) antall[JORD[id].by] = (antall[JORD[id].by] ?? 0) + 1
   return antall
 }
 

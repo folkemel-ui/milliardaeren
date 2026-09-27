@@ -45,11 +45,29 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
     id: 'oljeselskap', navn: 'Oljeselskap', emoji: '🛢️',
     pris: 5_000_000_000, grunninntekt: 100_000, oppgraderingspris: 5_000_000_000, vekst: 1.1, laasesOppVed: 2_500_000_000,
   },
+  // Sluttspillet etter milliarden: hvert trinn er rundt fire–fem ganger det forrige.
+  rederi: {
+    id: 'rederi', navn: 'Rederi', emoji: '🚢',
+    pris: 25_000_000_000, grunninntekt: 400_000, oppgraderingspris: 20_000_000_000, vekst: 1.1, laasesOppVed: 15_000_000_000,
+  },
+  fiskeoppdrett: {
+    id: 'fiskeoppdrett', navn: 'Fiskeoppdrett', emoji: '🐟',
+    pris: 100_000_000_000, grunninntekt: 1_400_000, oppgraderingspris: 80_000_000_000, vekst: 1.1, laasesOppVed: 60_000_000_000,
+  },
+  flyselskap: {
+    id: 'flyselskap', navn: 'Flyselskap', emoji: '🛬',
+    pris: 400_000_000_000, grunninntekt: 5_000_000, oppgraderingspris: 300_000_000_000, vekst: 1.1, laasesOppVed: 250_000_000_000,
+  },
+  skisenter: {
+    id: 'skisenter', navn: 'Skisenter', emoji: '⛷️',
+    pris: 1_500_000_000_000, grunninntekt: 17_000_000, oppgraderingspris: 1_200_000_000_000, vekst: 1.1, laasesOppVed: 1_000_000_000_000,
+  },
 }
 
 /** Stigen i rekkefølge. */
 export const STIGEN: BedriftstypeId[] = [
   'saftbod', 'polsebod', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap',
+  'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
 ]
 
 /** Nivåene der inntekten dobles. */
@@ -108,6 +126,26 @@ export const FORBEDRINGER: Record<BedriftstypeId, Forbedring[]> = {
     ['Nye borerigger', 'Mer olje fra de samme feltene.'],
     ['Undervannsroboter', 'Vedlikehold uten å stenge produksjonen.'],
     ['Nytt felt i Nordsjøen', 'Et av de største funnene på tiår.'],
+  ]),
+  rederi: forbedringer([
+    ['LNG-skip', 'Nye skip på flytende gass — billigere drivstoff, strengere krav oppfylt.'],
+    ['Egen containerhavn', 'Ingen venter på kaiplass lenger.'],
+    ['Flåte med vindseil', 'Skipene seiler på vinden over Atlanteren.'],
+  ]),
+  fiskeoppdrett: forbedringer([
+    ['Lukkede merder', 'Ingen lakselus, ingen rømming, fornøyde myndigheter.'],
+    ['Havmerd på dypt vann', 'Plass til millioner av fisk langt til havs.'],
+    ['Eget slakteri og eksport', 'Fra merd til sushibar i Tokyo på to døgn.'],
+  ]),
+  flyselskap: forbedringer([
+    ['Nye langdistansefly', 'Mindre drivstoff per passasjer, flere ruter.'],
+    ['Lounge på Gardermoen', 'Forretningsreisende betaler godt for roen.'],
+    ['Direkteruter til Asia', 'Seter solgt ut måneder i forveien.'],
+  ]),
+  skisenter: forbedringer([
+    ['Ny gondolbane', 'Fra dalen til toppen på seks minutter.'],
+    ['Snøkanoner', 'Sesongen starter i oktober, uansett vær.'],
+    ['Vinter-OL-arena', 'Verden ser på — og bestiller hytte.'],
   ]),
 }
 

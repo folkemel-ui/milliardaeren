@@ -307,6 +307,220 @@ function Oy({ størrelse = 48 }: P) {
   )
 }
 
+// ─────────────────────────────────────────────── Bedrifter etter milliarden
+
+/** Rederi: containerskip på blått hav. */
+function Rederi({ størrelse = 48 }: P) {
+  const kontainere: [number, number, string][] = [
+    [12, 22, '#e76f51'], [18, 22, '#2a9d8f'], [24, 22, '#f4a261'], [30, 22, '#3b82c4'],
+    [15, 17, '#e9c46a'], [21, 17, '#d64545'], [27, 17, '#2a9d8f'],
+  ]
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="34" width="48" height="14" fill="#1e6fa8" />
+      <polygon points="4,27 44,27 40,36 8,36" fill="#1f2937" />
+      <rect x="4" y="27" width="40" height="2" fill="#b91c1c" />
+      {kontainere.map(([x, y, farge]) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width="5.4" height="5" fill={farge} stroke="#111827" strokeWidth="0.4" />
+      ))}
+      <rect x="36" y="15" width="6" height="12" fill="#f5f5f4" />
+      <rect x="37" y="17" width="4" height="1.6" fill="#1e3a5f" />
+      <rect x="38.5" y="11" width="1.6" height="4" fill="#374151" />
+      <polyline points="5,41 9,40 13,41" fill="none" stroke="#7fb8e0" strokeWidth="1" strokeLinecap="round" />
+      <polyline points="30,44 34,43 38,44" fill="none" stroke="#7fb8e0" strokeWidth="1" strokeLinecap="round" />
+    </Svg>
+  )
+}
+
+/** Fiskeoppdrett: runde merder i fjorden, med en laks som hopper. */
+function Fiskeoppdrett({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <polygon points="0,20 10,8 18,16 28,4 38,14 48,8 48,24 0,24" fill="#4b5563" />
+      <polygon points="24.6,7.8 28,4 31.6,7.6 29.6,6.8 28,8.4 26.4,7" fill="#ffffff" />
+      <rect x="0" y="22" width="48" height="26" fill="#1e6fa8" />
+      {[[13, 33], [33, 33], [23, 42]].map(([x, y]) => (
+        <g key={`${x}-${y}`}>
+          <ellipse cx={x} cy={y} rx="8.5" ry="3.2" fill="none" stroke="#f5d000" strokeWidth="1.6" />
+          <ellipse cx={x} cy={y} rx="6" ry="2" fill="#164e7a" />
+        </g>
+      ))}
+      <path d="M20 27 Q24 21 28 25" fill="none" stroke="#f08a5d" strokeWidth="2.6" strokeLinecap="round" />
+      <polygon points="28,25 30.5,23.5 30,27" fill="#f08a5d" />
+    </Svg>
+  )
+}
+
+/** Flyselskap: rutefly som tar av over rullebanen. */
+function Flyselskap({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="40" width="48" height="8" fill="#6b7280" />
+      {[6, 16, 26, 36].map((x) => (
+        <rect key={x} x={x} y="43.4" width="6" height="1.2" fill="#f5f5f4" />
+      ))}
+      <g transform="rotate(-18 24 22)">
+        <rect x="6" y="19" width="34" height="7" rx="3.5" fill="#f5f5f4" />
+        <polygon points="36,19 44,11 46,11 42,19" fill="#d64545" />
+        <polygon points="18,24 30,24 20,34 16,34" fill="#cbd5e1" />
+        <polygon points="20,19 28,19 20,12 17,12" fill="#cbd5e1" />
+        {[10, 14, 18, 22, 26, 30].map((x) => (
+          <circle key={x} cx={x} cy="21.4" r="0.9" fill="#1e3a5f" />
+        ))}
+        <path d="M6 22.5 Q6 19 9.5 19 L9.5 22.5 Z" fill="#1e3a5f" />
+      </g>
+    </Svg>
+  )
+}
+
+/** Skisenter: snøfjell med heis og løyper. */
+function Skisenter({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="0" width="48" height="48" fill="#bfe3f5" />
+      <polygon points="0,44 18,8 30,24 36,16 48,32 48,48 0,48" fill="#f8fafc" />
+      <polygon points="12,20 18,8 24,16 20,15 17,19" fill="#ffffff" />
+      <path d="M18 10 Q12 24 22 30 Q30 36 24 46" fill="none" stroke="#3b82c4" strokeWidth="1.4" strokeDasharray="2 1.5" />
+      <path d="M34 18 Q40 28 34 36 Q30 42 36 47" fill="none" stroke="#d64545" strokeWidth="1.4" strokeDasharray="2 1.5" />
+      <line x1="4" y1="44" x2="30" y2="14" stroke="#374151" strokeWidth="0.8" />
+      {[[10, 37], [17, 29], [24, 21]].map(([x, y]) => (
+        <g key={x}>
+          <line x1={x} y1={y} x2={x} y2={y + 3} stroke="#374151" strokeWidth="0.6" />
+          <rect x={x - 2} y={y + 3} width="4" height="2.6" rx="0.8" fill="#d64545" />
+        </g>
+      ))}
+      <polygon points="2,48 6,40 10,48" fill="#166534" />
+      <polygon points="38,48 42,39 46,48" fill="#166534" />
+    </Svg>
+  )
+}
+
+// ─────────────────────────────────────────────── Jord og skog
+
+/** Gård: rød låve og gult kornåker. */
+function Gard({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="30" width="48" height="18" fill="#e9c46a" />
+      {[34, 38, 42, 46].map((y) => (
+        <rect key={y} x="0" y={y} width="48" height="1" fill="#d4a93c" />
+      ))}
+      <rect x="0" y="28" width="48" height="3" fill="#4d8b3a" />
+      <rect x="8" y="16" width="20" height="14" fill="#b91c1c" />
+      <polygon points="6,17 18,7 30,17" fill="#7f1d1d" />
+      <rect x="14" y="21" width="8" height="9" fill="#f5f5f4" />
+      <line x1="14" y1="21" x2="22" y2="30" stroke="#b91c1c" strokeWidth="1" />
+      <line x1="22" y1="21" x2="14" y2="30" stroke="#b91c1c" strokeWidth="1" />
+      <rect x="33" y="12" width="7" height="18" rx="3.5" fill="#9ca3af" />
+      <rect x="33" y="12" width="7" height="3" rx="1.5" fill="#6b7280" />
+    </Svg>
+  )
+}
+
+/** Skog: tette grantrær i åsen. */
+function Skog({ størrelse = 48 }: P) {
+  const trær: [number, number, number][] = [
+    [8, 18, 1], [20, 12, 1.2], [32, 16, 1.1], [42, 20, 0.9], [14, 24, 1], [27, 23, 1.15], [38, 27, 1],
+  ]
+  return (
+    <Svg størrelse={størrelse}>
+      <polygon points="0,30 14,20 30,26 48,18 48,48 0,48" fill="#3f6f3a" />
+      {trær.map(([x, y, k]) => (
+        <g key={`${x}-${y}`}>
+          <rect x={x - 0.8} y={y + 14 * k} width="1.6" height={4 * k} fill="#78350f" />
+          <polygon points={`${x},${y} ${x + 6 * k},${y + 8 * k} ${x - 6 * k},${y + 8 * k}`} fill="#1f5f3a" />
+          <polygon points={`${x},${y + 4 * k} ${x + 7 * k},${y + 14 * k} ${x - 7 * k},${y + 14 * k}`} fill="#236b40" />
+        </g>
+      ))}
+    </Svg>
+  )
+}
+
+// ─────────────────────────────────────────────── Landemerker
+
+/** Fyr: rødt og hvitt tårn på en skjær, med lysstråle. */
+function Fyret({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="0" width="48" height="48" fill="#1e293b" />
+      <polygon points="24,9 48,2 48,16" fill="#fde68a" opacity="0.55" />
+      <rect x="0" y="38" width="48" height="10" fill="#1e6fa8" />
+      <polygon points="10,40 16,33 32,33 38,40" fill="#4b5563" />
+      <polygon points="19,34 21,12 27,12 29,34" fill="#f5f5f4" />
+      <polygon points="19.6,28 20.2,22 27.8,22 28.4,28" fill="#d64545" />
+      <polygon points="20.8,17 21.2,13 26.8,13 27.2,17" fill="#d64545" />
+      <rect x="20" y="7" width="8" height="5" fill="#fde047" />
+      <polygon points="19,7 24,3 29,7" fill="#d64545" />
+      <rect x="19" y="11.5" width="10" height="1.4" fill="#1f2937" />
+    </Svg>
+  )
+}
+
+/** Hoppbakke: stor bakke med tårn og en hopper i lufta. */
+function Hoppbakken({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="0" width="48" height="48" fill="#bfe3f5" />
+      <path d="M6 6 L10 6 Q20 26 28 30 Q36 34 48 36 L48 48 L0 48 L0 40 Q18 30 6 6 Z" fill="#f8fafc" />
+      <path d="M6 6 L10 6 Q20 26 28 30" fill="none" stroke="#6b7280" strokeWidth="1.2" />
+      <rect x="4" y="2" width="8" height="5" fill="#6b7280" />
+      <rect x="6" y="0" width="4" height="2" fill="#d64545" />
+      <g transform="rotate(-20 34 14)">
+        <rect x="30" y="13" width="9" height="2.4" rx="1.2" fill="#d64545" />
+        <circle cx="40" cy="13.6" r="1.6" fill="#1f2937" />
+        <line x1="27" y1="17" x2="42" y2="15" stroke="#1f2937" strokeWidth="0.9" />
+        <line x1="27" y1="18.6" x2="42" y2="16.6" stroke="#1f2937" strokeWidth="0.9" />
+      </g>
+      <rect x="0" y="44" width="48" height="4" fill="#4d8b3a" />
+    </Svg>
+  )
+}
+
+/** Borg: middelalderborg i stein med tårn og flagg. */
+function Borgen({ størrelse = 48 }: P) {
+  const tinder = (x: number, y: number, b: number) =>
+    Array.from({ length: Math.floor(b / 3) }, (_, i) => <rect key={`${x}-${i}`} x={x + i * 3} y={y - 2} width="1.8" height="2" fill="#8b8a85" />)
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="42" width="48" height="6" fill="#4d8b3a" />
+      <rect x="10" y="22" width="28" height="20" fill="#a8a29e" />
+      {tinder(10, 22, 28)}
+      <rect x="4" y="14" width="9" height="28" fill="#8b8a85" />
+      {tinder(4, 14, 9)}
+      <rect x="35" y="14" width="9" height="28" fill="#8b8a85" />
+      {tinder(35, 14, 9)}
+      <path d="M20 42 V33 A4 4 0 0 1 28 33 V42 Z" fill="#44403c" />
+      <rect x="7" y="20" width="2.4" height="4" fill="#1f2937" />
+      <rect x="38.6" y="20" width="2.4" height="4" fill="#1f2937" />
+      <rect x="23.4" y="4" width="1.2" height="16" fill="#44403c" />
+      <polygon points="24.6,4 32,6.5 24.6,9" fill="#d64545" />
+      <rect x="16" y="26" width="2.4" height="3.6" fill="#1f2937" />
+      <rect x="29.6" y="26" width="2.4" height="3.6" fill="#1f2937" />
+    </Svg>
+  )
+}
+
+/** Oslotårnet: vridd glasstårn ved sjøen. */
+function Tarnet({ størrelse = 48 }: P) {
+  const etasjer: ReactNode[] = []
+  for (let i = 0; i < 12; i++) {
+    const y = 6 + i * 3
+    const skift = Math.sin(i / 2) * 2
+    etasjer.push(<rect key={i} x={17 + skift} y={y} width="14" height="2.4" fill={i % 2 ? '#7dd3fc' : '#38bdf8'} />)
+  }
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="42" width="48" height="6" fill="#2563eb" />
+      <polyline points="4,45 8,44 12,45" fill="none" stroke="#93c5fd" strokeWidth="1" strokeLinecap="round" />
+      <rect x="5" y="30" width="9" height="12" fill="#94a3b8" />
+      <rect x="35" y="26" width="8" height="16" fill="#94a3b8" />
+      {etasjer}
+      <rect x="23.4" y="1" width="1.2" height="5" fill="#9ca3af" />
+      <rect x="16" y="41" width="16" height="1.6" fill="#475569" />
+    </Svg>
+  )
+}
+
 // ─────────────────────────────────────────────── Eiendom utenlands
 
 /** Stockholm: okergul bygård med kobbergrønt tak og tårn. */
@@ -730,6 +944,18 @@ const ILLUSTRASJONER: Record<string, (p: P) => ReactNode> = {
   london: London,
   dubai: Dubai,
   newyork: NewYork,
+  rederi: Rederi,
+  fiskeoppdrett: Fiskeoppdrett,
+  flyselskap: Flyselskap,
+  skisenter: Skisenter,
+  'gard-hedmarken': Gard,
+  'gard-lista': Gard,
+  'skog-trysil': Skog,
+  'skog-namdalen': Skog,
+  fyret: Fyret,
+  hoppbakken: Hoppbakken,
+  borgen: Borgen,
+  tarnet: Tarnet,
   stasjonsvogn: Stasjonsvogn,
   elbil: Elbil,
   superbil: Superbil,

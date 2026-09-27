@@ -12,6 +12,10 @@ export type BedriftstypeId =
   | 'hotell'
   | 'bank'
   | 'oljeselskap'
+  | 'rederi'
+  | 'fiskeoppdrett'
+  | 'flyselskap'
+  | 'skisenter'
 
 export interface Bedriftstype {
   id: BedriftstypeId
@@ -122,7 +126,7 @@ export type EiendomId =
   | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
   | 'stockholm' | 'kobenhavn' | 'berlin' | 'london' | 'dubai' | 'newyork'
 
-export type NorskBy = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten'
+export type NorskBy = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten' | 'Hedmarken' | 'Lista' | 'Trysil' | 'Namdalen'
 export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Dubai' | 'New York'
 export type By = NorskBy | Utenlandsby
 
@@ -384,6 +388,50 @@ export interface Spilltilstand {
   klubb: Klubb | null
   /** Trofeene du har vunnet — de blir i skapet selv om du selger klubben. */
   trofeer: Trofe[]
+  /** Gårder og skoger du eier. */
+  jord: Partial<Record<JordId, Jordstykke>>
+  /** Alt gårdene og skogene har gitt: avlinger og tømmer. */
+  totaltHost: number
+  /** Landemerkene som er solgt — til deg eller til en rival. Mangler de, er de til salgs. */
+  landemerker: Partial<Record<LandemerkeId, Landemerkeeie>>
+  kunst: Kunstmarked
+}
+
+// ─────────────────────────────────────────────── Jord, landemerker og kunst
+
+export type JordId = 'gard-hedmarken' | 'gard-lista' | 'skog-trysil' | 'skog-namdalen'
+
+export interface Jordstykke {
+  kostpris: number
+  /** Når skogen sist ble plantet (kjøpt eller hogd). Tømmeret vokser fra da. */
+  plantetSek: number
+}
+
+export type LandemerkeId = 'fyret' | 'hoppbakken' | 'borgen' | 'tarnet'
+
+export interface Landemerkeeie {
+  /** «deg», eller id-en til rivalen som eier det. */
+  eier: string
+  kostpris: number
+}
+
+export type MaleriId =
+  | 'morgenlys' | 'fiskeverket' | 'blaatimen' | 'byen-sover' | 'nordlys-over-vaagen'
+  | 'kvinne-i-roedt' | 'stormen' | 'sommernatt' | 'skrik-i-byen'
+
+export interface Kunstverk {
+  kostpris: number
+  /** Henger på museum: mer status, men kan ikke selges. */
+  utlant: boolean
+  /** Hentes hjem ved neste dagsskifte. */
+  hentes: boolean
+}
+
+export interface Kunstmarked {
+  kurser: Record<MaleriId, number>
+  eide: Partial<Record<MaleriId, Kunstverk>>
+  /** Kunstmarkedets egen terning. */
+  frø: number
 }
 
 // ─────────────────────────────────────────────── Fotballklubb

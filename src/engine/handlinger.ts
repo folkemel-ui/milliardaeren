@@ -22,6 +22,7 @@ import {
   EIENDOM_SYNLIG_VED,
   eiendomspris,
   EIENDOMSTYPER,
+  MEGLERHONORAR,
   flyFor,
   kanReiseTil,
   LAGER,
@@ -52,6 +53,9 @@ import {
 } from './fusjon'
 import { flyt } from './portefolje'
 import { ledigIRunde } from './startups'
+import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
+import { eierDu, kjopsprisLandemerke, LANDEMERKE_HONORAR, landemerkepris, LANDEMERKER } from './landemerker'
+import { kjopsprisMaleri, MALERIER, salgsprisMaleri } from './kunst'
 import {
   KLUBB_LAAST_OPP,
   KLUBBNAVN,
@@ -66,7 +70,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { PAPIRER, rundAntall } from './marked'
-import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, Ordretype, PapirId, Spilltilstand, Taktikk } from './types'
+import type { Bedrift, BedriftstypeId, EiendomId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Spilltilstand, Taktikk } from './types'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
 
@@ -481,6 +485,120 @@ export function settTaktikk(s: Spilltilstand, taktikk: Taktikk): Utfall {
   if (s.klubb.taktikk === taktikk) return feil('Den taktikken er allerede valgt.')
   const n = structuredClone(s)
   n.klubb!.taktikk = taktikk
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Jord og skog
+
+export function jordSynlig(s: Spilltilstand, id: JordId): boolean {
+  return s.hoyesteFormue >= JORD[id].pris * JORD_SYNLIG_VED
+}
+
+/** Kjøper en gård eller en skog. En skog kjøpes nyplantet — tømmeret vokser fra nå. */
+export function kjopJord(s: Spilltilstand, id: JordId): Utfall {
+  const t = JORD[id]
+  if (!t) return feil('Ukjent jord.')
+  if (s.jord[id]) return feil(`Du eier allerede ${t.navn.toLowerCase()}.`)
+  if (!jordSynlig(s, id)) return feil(`${t.navn} er ikke til salgs for deg ennå.`)
+  const pris = landverdi(s, id)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.jord[id] = { kostpris: pris, plantetSek: n.sek }
+  flyt(n, 'eiendom', pris)
+  return { ok: true, tilstand: n }
+}
+
+/** Selger jorda, med tømmeret som står, minus meglerhonorar. */
+export function selgJord(s: Spilltilstand, id: JordId): Utfall {
+  if (!s.jord[id]) return feil('Du eier den ikke.')
+  const n = structuredClone(s)
+  const inntekt = (landverdi(n, id) + tommerverdi(n, id)) * (1 - MEGLERHONORAR)
+  n.kontanter += inntekt
+  delete n.jord[id]
+  flyt(n, 'eiendom', -inntekt)
+  return { ok: true, tilstand: n }
+}
+
+/** Hogger skogen: tømmeret selges, og ny skog plantes. */
+export function hoggSkog(s: Spilltilstand, id: JordId): Utfall {
+  if (!s.jord[id]) return feil('Du eier ikke skogen.')
+  if (JORD[id].type !== 'skog') return feil('Det er ingen skog å hogge der.')
+  const n = structuredClone(s)
+  const tommer = tommerverdi(n, id)
+  if (tommer < 1) return feil('Skogen er nyplantet — det er ingenting å hogge ennå.')
+  n.kontanter += tommer
+  n.totaltHost += tommer
+  n.totaltLeie += tommer
+  n.jord[id]!.plantetSek = n.sek
+  flyt(n, 'eiendom', -tommer)
+  leggTilHendelse(n, { tittel: 'Hogst', tekst: `${JORD[id].navn} er hogd. Tømmeret ga ${Math.round(tommer).toLocaleString('nb-NO')} kr, og ny skog er plantet.`, alvor: 'info' })
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Landemerker
+
+/** Kjøper et landemerke — fra markedet, eller fra rivalen som eier det, med premie. */
+export function kjopLandemerke(s: Spilltilstand, id: LandemerkeId): Utfall {
+  const l = LANDEMERKER[id]
+  if (!l) return feil('Ukjent landemerke.')
+  if (eierDu(s, id)) return feil(`Du eier allerede ${l.navn}.`)
+  const pris = kjopsprisLandemerke(s, id)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const eier = n.landemerker[id]?.eier
+  const rival = eier ? n.rivaler.find((r) => r.id === eier) : undefined
+  // Rivalen bytter bygget mot pengene — og tjener premien.
+  if (rival) rival.formue += pris - landemerkepris(n, id)
+  n.kontanter -= pris
+  n.landemerker[id] = { eier: 'deg', kostpris: pris }
+  flyt(n, 'eiendom', pris)
+  return { ok: true, tilstand: n }
+}
+
+export function selgLandemerke(s: Spilltilstand, id: LandemerkeId): Utfall {
+  if (!eierDu(s, id)) return feil('Du eier det ikke.')
+  const n = structuredClone(s)
+  const inntekt = landemerkepris(n, id) * (1 - LANDEMERKE_HONORAR)
+  n.kontanter += inntekt
+  delete n.landemerker[id]
+  flyt(n, 'eiendom', -inntekt)
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Kunst
+
+export function kjopMaleri(s: Spilltilstand, id: MaleriId): Utfall {
+  if (!MALERIER[id]) return feil('Ukjent maleri.')
+  if (s.kunst.eide[id]) return feil('Du eier det allerede.')
+  const pris = kjopsprisMaleri(s, id)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.totaltForbruk += pris - n.kunst.kurser[id]
+  n.kunst.eide[id] = { kostpris: pris, utlant: false, hentes: false }
+  return { ok: true, tilstand: n }
+}
+
+export function selgMaleri(s: Spilltilstand, id: MaleriId): Utfall {
+  const v = s.kunst.eide[id]
+  if (!v) return feil('Du eier det ikke.')
+  if (v.utlant) return feil('Maleriet henger på museum. Hent det hjem først.')
+  const n = structuredClone(s)
+  n.kontanter += salgsprisMaleri(n, id)
+  delete n.kunst.eide[id]
+  return { ok: true, tilstand: n }
+}
+
+/** Låner ut til museet, eller ber om å få det hjem — det kommer ved neste dagsskifte. */
+export function museum(s: Spilltilstand, id: MaleriId): Utfall {
+  const v = s.kunst.eide[id]
+  if (!v) return feil('Du eier det ikke.')
+  if (v.hentes) return feil('Maleriet er allerede på vei hjem.')
+  const n = structuredClone(s)
+  const nv = n.kunst.eide[id]!
+  if (nv.utlant) nv.hentes = true
+  else nv.utlant = true
   return { ok: true, tilstand: n }
 }
 

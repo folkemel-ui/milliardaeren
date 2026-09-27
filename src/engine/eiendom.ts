@@ -13,6 +13,9 @@ import type {
   Spilltilstand,
 } from './types'
 import { klubbstatus } from './klubb'
+import { jordverdi } from './jord'
+import { landemerkeleiePerSek, landemerkestatus, landemerkeverdi } from './landemerker'
+import { kunststatus } from './kunst'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -109,10 +112,11 @@ export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
   return antall * EIENDOMSTYPER[id].pris * s.marked.eiendom.kurs * neste.kostnad
 }
 
+/** Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker. */
 export function eiendomsverdi(s: Spilltilstand): number {
   let sum = 0
   for (const id of EIENDOMSSTIGEN) sum += (s.eiendommer[id] ?? 0) * eiendomspris(s, id)
-  return sum
+  return sum + jordverdi(s) + landemerkeverdi(s)
 }
 
 /** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren. */
@@ -128,7 +132,7 @@ export function leiePerSek(s: Spilltilstand): number {
     if (s.oppussing?.[id]) continue
     sum += (s.eiendommer[id] ?? 0) * leieHverPerSek(s, id)
   }
-  return sum
+  return sum + landemerkeleiePerSek(s)
 }
 
 /** Fullfører oppussinger som er ferdige. Muterer — brukes på kopier. */
@@ -237,9 +241,9 @@ export const STATUS_INNTEKT = 0.02
 /** … og så mye lavere rente (prosentpoeng per time). */
 export const STATUS_RENTEKUTT = 0.002
 
-/** Status fra luksusen, pluss klubbens divisjon og trofeene. */
+/** Status fra luksusen, klubben og trofeene, landemerkene og kunsten. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

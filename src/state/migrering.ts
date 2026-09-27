@@ -20,6 +20,7 @@ import { sjekkPrestasjoner } from '../engine/prestasjoner'
 import { klasseverdier, nullPerKlasse } from '../engine/portefolje'
 import { periodestart } from '../engine/oppgjor'
 import { START_RIVALER } from '../engine/rivaler'
+import { lagKunst } from '../engine/kunst'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -163,6 +164,9 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
   },
   /* 12 → 13: fotballklubb. Ingen klubb og ingen trofeer ennå. */
   12: (s) => ({ ...s, klubb: null, trofeer: [] }),
+  /* 13 → 14: jord, landemerker og kunst. Ingenting eid ennå, alle landemerker
+     til salgs, og kunstmarkedet starter på startprisene. */
+  13: (s) => ({ ...s, jord: {}, totaltHost: 0, landemerker: {}, kunst: lagKunst(s.frø as number) }),
 }
 
 export type MigreringsResultat =

@@ -21,6 +21,7 @@ import { kortKroner, tall } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { useState } from 'react'
 import { Klubb, Klubbkort } from './Klubb'
+import { Kunst } from '../komponenter/Kunst'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
@@ -61,6 +62,8 @@ export function Luksus({ s }: { s: Spilltilstand }) {
           </ul>
         </div>
       ))}
+
+      <Kunst s={s} />
     </section>
   )
 }
