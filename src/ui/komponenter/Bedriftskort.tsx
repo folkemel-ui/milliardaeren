@@ -51,6 +51,7 @@ export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; å
           <span className="dempet">
             Nivå {b.nivaa}
             {b.ansatte > 0 && ` · ${b.ansatte} ansatte`}
+            {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'}`}
           </span>
         </div>
         <span className="pluss">{perSek(bedriftInntektPerSek(b) * statusfaktor(s))}</span>

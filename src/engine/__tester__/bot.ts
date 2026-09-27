@@ -1,10 +1,11 @@
 /**
  * En enkel, grådig spiller for tester og balansering. Den ser på alle kjøp
- * (oppgradering, ansettelse, ny bedrift), velger det som tjener seg inn
+ * (oppgradering, ansettelse, ny bedrift, fusjon), velger det som tjener seg inn
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { ansett, betalSkatt, kjopBedrift, kjopForbedring, oppgrader, type Utfall } from '../handlinger'
+import { ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, type Utfall } from '../handlinger'
+import { BUD, dagensForhandling, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
@@ -39,6 +40,26 @@ function kandidater(s: Spilltilstand): Kandidat[] {
     if (b.ansatte < maksAnsatte(b)) {
       const ans: Bedrift = { ...b, ansatte: b.ansatte + 1 }
       liste.push({ pris: ansettelsespris(b), gevinst: bedriftInntektPerSek(ans) - naa, utfor: (t) => ansett(t, b.id) })
+    }
+  }
+  // Fusjoner: boten byr alltid sjenerøst, og godtar et motbud med én gang.
+  const sjenerost = BUD.find((b) => b.id === 'sjenerost')!.faktor
+  for (const r of s.rivaler) {
+    for (const rb of rivalbedrifter(r)) {
+      const din = s.bedrifter.find((b) => b.type === rb.type)
+      const f = dagensForhandling(s, r, rb.type)
+      if (!din || (f && f.motbud === null)) continue
+      liste.push({
+        pris: f?.motbud ?? Math.round(prisantydning(s, rb) * sjenerost),
+        gevinst: bedriftInntektPerSek(din) * (FUSJONSFAKTOR - 1),
+        utfor: (t) => {
+          if (f) return godtaMotbud(t, r.id, rb.type)
+          const u = byPaaBedrift(t, r.id, rb.type, 'sjenerost')
+          if (!u.ok || !dagensForhandling(u.tilstand, u.tilstand.rivaler.find((x) => x.id === r.id)!, rb.type)) return u
+          const g = godtaMotbud(u.tilstand, r.id, rb.type)
+          return g.ok ? g : u
+        },
+      })
     }
   }
   for (const type of STIGEN) {

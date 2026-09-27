@@ -1,6 +1,6 @@
 /**
  * Porteføljen: alt du har investert utenfor bedriftene — aksjer, krypto,
- * eiendom og sparekontoen — med verdi, avkastning og dagens endring.
+ * eiendom, rivalselskaper, startups og sparekontoen — med verdi, avkastning og dagens endring.
  *
  * «I dag» er verdien nå minus verdien ved dagens start, minus pengene du har
  * flyttet inn i dag (kjøp og innskudd) og pluss det du har tatt ut (salg og
@@ -13,10 +13,11 @@ import { papirverdi } from './formler'
 import type { Aktivaklasse, Beholdning, PapirId, Spilltilstand } from './types'
 import { PAPIRER } from './marked'
 import { rivalverdi } from './rivaler'
+import { startupKostpris, startupverdi } from './startups'
 
 export type { Aktivaklasse }
 
-export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'eiendom', 'rival', 'sparing']
+export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'eiendom', 'rival', 'startup', 'sparing']
 
 export interface Postering {
   klasse: Aktivaklasse
@@ -28,7 +29,7 @@ export interface Postering {
 }
 
 export function nullPerKlasse(): Record<Aktivaklasse, number> {
-  return { aksje: 0, krypto: 0, eiendom: 0, rival: 0, sparing: 0 }
+  return { aksje: 0, krypto: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 }
 }
 
 export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
@@ -37,13 +38,14 @@ export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
     krypto: papirverdi(s, 'krypto'),
     eiendom: eiendomsverdi(s),
     rival: rivalverdi(s),
+    startup: startupverdi(s),
     sparing: s.sparing,
   }
 }
 
 /** Bokfører penger inn i (+) eller ut av (−) en klasse. Muterer — brukes på kopier. */
 export function flyt(s: Spilltilstand, klasse: Aktivaklasse, belop: number): void {
-  s.dagensFlyt[klasse] += belop
+  s.dagensFlyt[klasse] = (s.dagensFlyt[klasse] ?? 0) + belop
 }
 
 function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
@@ -52,6 +54,7 @@ function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
     // saldoen, så et uttak ikke etterlater «avkastning» på en tom konto.
     return Math.max(0, s.sparing - s.totaltSparerente)
   }
+  if (klasse === 'startup') return startupKostpris(s)
   if (klasse === 'rival') return (s.rivaler ?? []).reduce((sum, r) => sum + r.kostpris, 0)
   if (klasse === 'eiendom') {
     let sum = 0

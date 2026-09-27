@@ -4,6 +4,9 @@ import {
   EIENDOMSSTIGEN,
   EIENDOMSTYPER,
   eiendomspris,
+  flyFor,
+  kanReiseTil,
+  LUKSUS,
   eiendomsverdi,
   leieHverPerSek,
   leiePerSek,
@@ -19,10 +22,12 @@ import { utfor } from '../../state/lager'
 import { endring, kortKroner, perSek, tall, varighet } from '../format'
 import { Minigraf } from '../komponenter/Linjegraf'
 import { Norgeskart } from '../komponenter/Norgeskart'
+import { Verdenskart } from '../komponenter/Verdenskart'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
   const [by, settBy] = useState<By | null>(null)
+  const [kart, settKart] = useState<'norge' | 'verden'>('norge')
   const synlige = EIENDOMSSTIGEN.filter((id) => eiendomSynlig(s, id))
   const viste = by ? synlige.filter((id) => EIENDOMSTYPER[id].by === by) : synlige
   const nesteSkjult = EIENDOMSSTIGEN.find((id) => !eiendomSynlig(s, id))
@@ -44,7 +49,23 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
             <span className="pluss">{perSek(leiePerSek(s))}</span>
           </div>
         </div>
-        <Norgeskart s={s} valgt={by} velg={settBy} />
+        <div className="segment" role="tablist" aria-label="Kart">
+          {(['norge', 'verden'] as const).map((k) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={kart === k}
+              className={kart === k ? 'aktiv' : ''}
+              onClick={() => {
+                settKart(k)
+                settBy(null)
+              }}
+            >
+              {k === 'norge' ? 'Norge' : 'Verden'}
+            </button>
+          ))}
+        </div>
+        {kart === 'norge' ? <Norgeskart s={s} valgt={by} velg={settBy} /> : <Verdenskart s={s} valgt={by} velg={settBy} />}
         <div className="indeks">
           <div>
             <span className="etikett">Eiendomsprisene</span>
@@ -95,6 +116,8 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
   const st = standard(s, id)
   const fullt = eier >= t.maksAntall
   const manglerStatus = statusnivaa(s) < t.statuskrav
+  const fly = flyFor(id)
+  const manglerFly = !kanReiseTil(s, id)
   const oppussing = s.oppussing[id]
   const oppussingPris = oppussingspris(s, id)
   const nesteStandard = STANDARDER[st + 1]
@@ -120,6 +143,7 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
       <p className="dempet liten">
         Avkastning {tall(t.avkastning * STANDARDER[st].leie * 100)} % per time
         {t.statuskrav > 0 && ` · krever statusnivå ${t.statuskrav}`}
+        {fly && ` · krever ${LUKSUS[fly].navn.toLowerCase()}`}
       </p>
 
       {oppussing ? (
@@ -134,10 +158,16 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
           <div className={eier > 0 ? 'eiendom-knapper' : 'eiendom-knapper en'}>
             <button
               className="knapp knapp-gull"
-              disabled={fullt || manglerStatus || s.kontanter < pris}
+              disabled={fullt || manglerStatus || manglerFly || s.kontanter < pris}
               onClick={() => utfor(kjopEiendom(s, id))}
             >
-              {fullt ? 'Alle kjøpt' : manglerStatus ? `Krever status ${t.statuskrav}` : `Kjøp · ${kortKroner(pris)}`}
+              {fullt
+                ? 'Alle kjøpt'
+                : manglerStatus
+                  ? `Krever status ${t.statuskrav}`
+                  : manglerFly && fly
+                    ? `${LUKSUS[fly].emoji} Krever ${LUKSUS[fly].navn.toLowerCase()}`
+                    : `Kjøp · ${kortKroner(pris)}`}
             </button>
             {eier > 0 && (
               <button className="knapp" onClick={() => utfor(selgEiendom(s, id))}>

@@ -11,6 +11,9 @@ import {
 } from '../../engine/formler'
 import {
   borsenStengt,
+  byPaaBedrift,
+  godtaMotbud,
+  investerIStartup,
   kjopPapir,
   kjopRivalblokk,
   laan,
@@ -26,20 +29,34 @@ import {
 import { ORDRETYPER } from '../../engine/ordre'
 import { BLOKK, blokkpris, forbesliste, oppkjopspris, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../engine/rivaler'
 import { erHelg } from '../../engine/kalender'
-import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME, SPARERENTE_PER_TIME } from '../../engine/innhold'
+import { BUD, type BudId, dagensForhandling, FORMER, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../../engine/fusjon'
+import { BEDRIFTSTYPER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME, SPARERENTE_PER_TIME } from '../../engine/innhold'
 import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
 import { portefolje, sum, type Aktivaklasse } from '../../engine/portefolje'
-import type { Ordretype, PapirId, Spilltilstand } from '../../engine/types'
+import type { BedriftstypeId, Ordretype, PapirId, Rival, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { antall as fmtAntall, endring, fortegnKroner, kortKroner, kroner, kurs as fmtKurs, perSek, tall, varighet } from '../format'
 import { Linjegraf, Minigraf } from '../komponenter/Linjegraf'
+import { Illustrasjon } from '../komponenter/Illustrasjoner'
+import {
+  aktive,
+  DIN_DEL_AV_RUNDEN,
+  ide,
+  INNTRYKK,
+  ledigIRunde,
+  RUNDEANDEL,
+  RUNDER,
+  STARTUP_LAAST_OPP,
+  tidTilNesteRunde,
+} from '../../engine/startups'
 
-type Underfane = 'oversikt' | 'aksjer' | 'krypto' | 'rivaler' | 'bank'
+type Underfane = 'oversikt' | 'aksjer' | 'krypto' | 'startups' | 'rivaler' | 'bank'
 
 const UNDERFANER: { id: Underfane; navn: string }[] = [
   { id: 'oversikt', navn: 'Oversikt' },
   { id: 'aksjer', navn: 'Aksjer' },
   { id: 'krypto', navn: 'Krypto' },
+  { id: 'startups', navn: 'Startups' },
   { id: 'rivaler', navn: 'Rivaler' },
   { id: 'bank', navn: 'Bank' },
 ]
@@ -48,6 +65,7 @@ const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Underfane> = {
   aksje: 'aksjer',
   krypto: 'krypto',
   rival: 'rivaler',
+  startup: 'startups',
   sparing: 'bank',
 }
 
@@ -67,7 +85,7 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
 
   return (
     <section className="skjerm">
-      <div className="segment segment-fem" role="tablist">
+      <div className="segment segment-seks" role="tablist">
         {UNDERFANER.map((f) => (
           <button key={f.id} role="tab" aria-selected={fane === f.id} className={fane === f.id ? 'aktiv' : ''} onClick={() => settFane(f.id)}>
             {f.navn}
@@ -77,6 +95,7 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
       {fane === 'oversikt' && (
         <Oversikt s={s} velg={(k) => (k === 'eiendom' ? tilEiendom() : settFane(TIL_UNDERFANE[k]))} />
       )}
+      {fane === 'startups' && <Startups s={s} />}
       {fane === 'rivaler' && <Rivaler s={s} />}
       {fane === 'aksjer' && <Papirliste s={s} klasse="aksje" velg={settValgt} />}
       {fane === 'krypto' && (
@@ -97,6 +116,7 @@ const KLASSENAVN: Record<Aktivaklasse, string> = {
   krypto: 'Krypto',
   eiendom: 'Eiendom',
   rival: 'Rivalselskaper',
+  startup: 'Startups',
   sparing: 'Sparekonto',
 }
 
@@ -483,6 +503,113 @@ function Ordrer({ s, id }: { s: Spilltilstand; id: PapirId }) {
   )
 }
 
+// ─────────────────────────────────────────────── Startups
+
+const SLUTT: Record<string, string> = { konkurs: 'Konkurs', solgt: 'Kjøpt opp', bors: 'Børsnotert' }
+
+function Startups({ s }: { s: Spilltilstand }) {
+  const liste = aktive(s)
+  const avsluttet = (s.startups ?? []).filter((st) => st.status !== 'aktiv').reverse()
+  if (s.hoyesteFormue < STARTUP_LAAST_OPP && liste.length === 0) {
+    return (
+      <div className="kort">
+        <h2 className="kort-tittel">Startups</h2>
+        <p className="dempet">Gründerne tar kontakt når du har nådd {kortKroner(STARTUP_LAAST_OPP)}.</p>
+      </div>
+    )
+  }
+  return (
+    <>
+      <p className="dempet liten">
+        Oppstartsselskaper henter penger i runder. Hver runde varer én spilldag, og du kan ta opptil {tall(DIN_DEL_AV_RUNDEN * 100)} % av
+        den. Ved dagsskiftet går selskapet videre, går konkurs eller blir kjøpt opp. Nye penger i hver runde gjør andelen din{' '}
+        {tall(RUNDEANDEL * 100)} % mindre. Etter serie C går selskapet på børs, og du får betalt.
+      </p>
+      {liste.length === 0 && <p className="dempet">Ingen søker penger akkurat nå. Nye gründere dukker opp ved dagsskiftene.</p>}
+      <ul className="kortliste">
+        {liste.map((st) => {
+          const { navn, beskrivelse, emoji } = ide(st)
+          const ledig = ledigIRunde(st)
+          const valg = [...new Set([ledig / 4, ledig / 2, ledig].map((b) => Math.floor(b)))].filter((b) => b > 0)
+          return (
+            <li key={st.id} className="kort startupkort">
+              <div className="rival-topp">
+                <div className="rivalbedrift-topp">
+                  <span className="startup-emoji" aria-hidden="true">{emoji}</span>
+                  <div>
+                    <h2>{navn}</h2>
+                    <span className="dempet liten">{INNTRYKK[st.inntrykk]}</span>
+                  </div>
+                </div>
+                <div className="papirrad-kurs">
+                  <span>{kortKroner(st.verdi)}</span>
+                  <span className="dempet liten">verdsatt</span>
+                </div>
+              </div>
+              <p className="dempet liten startup-besk">{beskrivelse}</p>
+              <ol className="runder" aria-label={`Runde ${st.runde + 1} av ${RUNDER.length}`}>
+                {RUNDER.map((r, i) => (
+                  <li key={r.navn} className={i < st.runde ? 'ferdig' : i === st.runde ? 'naa' : ''}>
+                    {r.navn}
+                  </li>
+                ))}
+              </ol>
+              {st.andel > 0 && (
+                <div className="rival-andel">
+                  <span>
+                    Din andel: <strong>{tall(st.andel * 100, 2)} %</strong> · {kortKroner(st.andel * st.verdi)}
+                  </span>
+                  <span className={st.andel * st.verdi >= st.investert ? 'pluss liten' : 'minus liten'}>
+                    {fortegnKroner(st.andel * st.verdi - st.investert)}
+                  </span>
+                </div>
+              )}
+              <span className="dempet liten">
+                {RUNDER[st.runde].navn} avgjøres om {varighet(tidTilNesteRunde(s))}
+                {ledig <= 0 && ' · du har tatt din del av runden'}
+              </span>
+              {valg.length > 0 && (
+                <div className="bud-knapper">
+                  {valg.map((b, i) => (
+                    <button
+                      key={b}
+                      className={i === valg.length - 1 ? 'knapp knapp-gull knapp-bud' : 'knapp knapp-bud'}
+                      disabled={s.kontanter < b}
+                      onClick={() => utfor(investerIStartup(s, st.id, b))}
+                    >
+                      <span>{i === valg.length - 1 ? 'Maks' : 'Invester'}</span>
+                      <strong>{kortKroner(b)}</strong>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {avsluttet.length > 0 && (
+        <div className="kort">
+          <h2 className="kort-tittel">Avsluttet</h2>
+          <ul className="startup-slutt">
+            {avsluttet.map((st) => (
+              <li key={st.id}>
+                <span>
+                  {ide(st).emoji} {ide(st).navn} <span className="dempet liten">· {SLUTT[st.status]}</span>
+                </span>
+                {st.investert > 0 ? (
+                  <span className={(st.utbetalt ?? 0) >= st.investert ? 'pluss' : 'minus'}>{fortegnKroner((st.utbetalt ?? 0) - st.investert)}</span>
+                ) : (
+                  <span className="dempet liten">Du var ikke med</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  )
+}
+
 // ─────────────────────────────────────────────── Rivaler
 
 function Rivaler({ s }: { s: Spilltilstand }) {
@@ -504,7 +631,11 @@ function Rivaler({ s }: { s: Spilltilstand }) {
 
       <p className="dempet liten">
         Kjøp deg inn i rivalenes holdingselskaper i blokker på {tall(BLOKK * 100)} %. Andelene gir {tall(RIVALUTBYTTE * 100)} %
-        utbytte per time. Med halvparten kan du ta resten med et fiendtlig oppkjøp.
+        utbytte per time. Med halvparten kan du ta resten med et fiendtlig oppkjøp — da får du bedriftene deres med på kjøpet.
+      </p>
+      <p className="dempet liten">
+        Du kan også by på bedriftene rivalene eier. Kjøper du en, slås den sammen med din egen i samme bransje, og inntekten
+        ganges med {tall(FUSJONSFAKTOR, 1)}. Ett bud per bedrift per dag.
       </p>
 
       <ul className="kortliste">
@@ -558,6 +689,7 @@ function Rivaler({ s }: { s: Spilltilstand }) {
                   </button>
                 )}
               </div>
+              <Rivalbedrifter s={s} r={r} />
             </li>
           )
         })}
@@ -565,6 +697,91 @@ function Rivaler({ s }: { s: Spilltilstand }) {
     </>
   )
 }
+
+/** Bedriftene en rival eier, med bud, motbud og avslag. */
+function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
+  const [melding, settMelding] = useState<string | null>(null)
+  const liste = rivalbedrifter(r)
+  if (r.overtatt) return null
+
+  function by(type: BedriftstypeId, bud: BudId) {
+    const u = byPaaBedrift(s, r.id, type, bud)
+    const feil = utfor(u)
+    const avtale = u.ok && (u.tilstand.rivaler.find((x) => x.id === r.id)?.solgt ?? []).includes(type)
+    settMelding(feil ?? (avtale ? `Avtale! ${stor(FORMER[type].den)} er slått sammen med virksomheten din.` : null))
+  }
+
+  function godta(type: BedriftstypeId) {
+    const feil = utfor(godtaMotbud(s, r.id, type))
+    settMelding(feil ?? `Avtale! ${stor(FORMER[type].den)} er slått sammen med virksomheten din.`)
+  }
+
+  return (
+    <details className="rivalbedrifter">
+      <summary>
+        Bedriftene til {r.navn.split(' ')[0]} <span className="dempet">({liste.length})</span>
+      </summary>
+      {melding && <p className="rival-melding">{melding}</p>}
+      {liste.length === 0 ? (
+        <p className="dempet liten">{r.navn} eier ingen bedrifter som er til salgs.</p>
+      ) : (
+        <ul>
+          {liste.map((rb) => {
+            const din = s.bedrifter.find((b) => b.type === rb.type)
+            const f = dagensForhandling(s, r, rb.type)
+            const antydning = prisantydning(s, rb)
+            return (
+              <li key={rb.type}>
+                <div className="rivalbedrift-topp">
+                  <Illustrasjon id={rb.type} størrelse={32} />
+                  <div>
+                    <strong>{BEDRIFTSTYPER[rb.type].navn}</strong>
+                    <span className="dempet liten">
+                      Nivå {rb.nivaa} · prisantydning {kortKroner(antydning)}
+                    </span>
+                  </div>
+                </div>
+                {!din ? (
+                  <p className="dempet liten">Du må eie {FORMER[rb.type].en} selv for å slå dem sammen.</p>
+                ) : f?.motbud ? (
+                  <div className="rival-knapper">
+                    <span className="liten">
+                      {r.navn.split(' ')[0]} vil ha <strong>{kortKroner(f.motbud)}</strong>
+                    </span>
+                    <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < f.motbud} onClick={() => godta(rb.type)}>
+                      Godta
+                    </button>
+                  </div>
+                ) : f ? (
+                  <p className="dempet liten">Sa nei. Prøv igjen i morgen.</p>
+                ) : (
+                  <div className="bud-knapper">
+                    {BUD.map((b) => {
+                      const tilbud = antydning * b.faktor
+                      return (
+                        <button
+                          key={b.id}
+                          className={b.id === 'sjenerost' ? 'knapp knapp-gull knapp-bud' : 'knapp knapp-bud'}
+                          disabled={s.kontanter < tilbud}
+                          onClick={() => by(rb.type, b.id)}
+                        >
+                          <span>{b.navn}</span>
+                          <strong>{kortKroner(tilbud)}</strong>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </details>
+  )
+}
+
+const stor = (t: string) => t[0].toUpperCase() + t.slice(1)
 
 // ─────────────────────────────────────────────── Banken
 

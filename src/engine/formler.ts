@@ -26,6 +26,8 @@ import {
   statusnivaa,
 } from './eiendom'
 import { rivalutbyttePerSek, rivalverdi } from './rivaler'
+import { fusjonsfaktor } from './fusjon'
+import { startupverdi } from './startups'
 import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -62,9 +64,9 @@ export function forbedringspris(b: Bedrift, f: Forbedring): number {
   return Math.round(t.oppgraderingspris * t.vekst ** (f.nivaa - 1) * FORBEDRING_PRISFAKTOR)
 }
 
-/** Inntekten fra nivået og forbedringene, før ansatte og lønn. */
+/** Inntekten fra nivået, forbedringene og fusjonene, før ansatte og lønn. */
 export function basisinntekt(b: Bedrift): number {
-  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b)
+  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b) * fusjonsfaktor(b)
 }
 
 export function bedriftLonn(b: Bedrift): number {
@@ -136,7 +138,8 @@ export function eiendeler(s: Spilltilstand): number {
     papirverdi(s) +
     eiendomsverdi(s) +
     luksusverdi(s) +
-    rivalverdi(s)
+    rivalverdi(s) +
+    startupverdi(s)
   )
 }
 

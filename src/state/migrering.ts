@@ -141,6 +141,26 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       forrigeDag: { ...forrigeDag, verdier: { ...(forrigeDag.verdier as Raatilstand), rival: 0 } },
     }
   },
+  /* 10 → 11: fusjoner. Ingen bedrift er slått sammen med noe ennå, rivalene
+     har ikke solgt noe, og ingen bud er gitt — rivalenes bedrifter regnes ut
+     fra formuen, så de dukker opp med én gang. */
+  10: (s) => ({
+    ...s,
+    bedrifter: (s.bedrifter as Raatilstand[]).map((b) => ({ fusjoner: 0, ...b })),
+    rivaler: (s.rivaler as Raatilstand[]).map((r) => ({ solgt: [], bud: {}, ...r })),
+  }),
+  /* 11 → 12: startups. Ingen selskaper ennå — det første dukker opp ved et
+     dagsskifte — og porteføljen får en klasse for dem. */
+  11: (s) => {
+    const forrigeDag = s.forrigeDag as Raatilstand
+    return {
+      ...s,
+      startups: [],
+      nesteStartupId: 1,
+      dagensFlyt: { ...(s.dagensFlyt as Raatilstand), startup: 0 },
+      forrigeDag: { ...forrigeDag, verdier: { ...(forrigeDag.verdier as Raatilstand), startup: 0 } },
+    }
+  },
 }
 
 export type MigreringsResultat =

@@ -13,7 +13,9 @@ import { klasseverdier, nullPerKlasse } from './portefolje'
 import { selskapsnyheter } from './selskapsnyheter'
 import { dagsskifteOppgjor } from './oppgjor'
 import { skattVedDagsskifte } from './skatt'
+import { startupsVedDagsskifte } from './startups'
 import { forbesliste } from './rivaler'
+import { FORMER, fusjonsnokler } from './fusjon'
 import { nettoformue } from './formler'
 import type { Terning } from './rng'
 import type { Avisutgave, Dagsbilde, LuksusId, Overskrift, PapirId, Spilltilstand } from './types'
@@ -36,6 +38,7 @@ export function lagDagsbilde(s: Spilltilstand): Dagsbilde {
     verdier: klasseverdier(s),
     rang: forbesliste(s, nettoformue(s)).findIndex((p) => p.deg) + 1,
     overtatte: (s.rivaler ?? []).filter((r) => r.overtatt).map((r) => r.id),
+    fusjoner: fusjonsnokler(s),
   }
 }
 
@@ -46,6 +49,15 @@ function omRivalene(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
   for (const r of s.rivaler) {
     if (r.overtatt && !(før.overtatte ?? []).includes(r.id)) {
       saker.push({ type: 'deg', tittel: `${hvem} kjøper opp ${r.selskap}`, tekst: `Et fiendtlig oppkjøp: ${r.navn} har mistet kontrollen over sitt eget selskap.` })
+    }
+  }
+  // Fusjoner: bare de som ikke kom med et oppkjøp — det har alt fått sin sak.
+  const kjente = new Set(før.fusjoner ?? fusjonsnokler(s))
+  for (const r of s.rivaler) {
+    if (r.overtatt) continue
+    for (const type of r.solgt ?? []) {
+      if (kjente.has(`${r.id}:${type}`)) continue
+      saker.push({ type: 'deg', tittel: `${r.navn.split(' ')[1]} selger ${FORMER[type].den} til ${hvem.toLowerCase()}`, tekst: 'Bedriftene slås sammen. Konkurrentene frykter en ny gigant i bransjen.' })
     }
   }
   const liste = forbesliste(s, nettoformue(s))
@@ -201,15 +213,18 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const nyheter = selskapsnyheter(s, t)
   const oppgjor = dagsskifteOppgjor(s)
   const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
+  const startupsaker = startupsVedDagsskifte(s, t)
   // Rekkefølgen er viktigheten: deg selv og skatten først, så nyheter som
   // flytter kurser, kappløpet, dagens bevegelser og sladder. Lokalstoff fyller
   // på når det er stille.
   const saker = [
     ...omDeg(s, før),
     ...skattesaker,
+    ...startupsaker.filter((x) => x.type === 'deg'),
     ...nyheter,
     ...omRivalene(s, før),
     ...omMarkedet(s, før),
+    ...startupsaker.filter((x) => x.type !== 'deg'),
     ...sosietet(s, t),
   ].slice(0, MAKS_SAKER)
   const brukt = new Set(saker.map((x) => x.tittel))

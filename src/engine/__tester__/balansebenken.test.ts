@@ -24,7 +24,7 @@ describe('balansebenken', () => {
 
     if (process.env.BENK) {
       console.table(MAAL.map((m) => ({ formue: m.toLocaleString('nb-NO'), tid: naadd[m] ? varighet(naadd[m]) : '—' })))
-      console.log(sluttBedrifter.map((b) => `${b.type}:${b.nivaa}/${b.ansatte}`).join(' '))
+      console.log(sluttBedrifter.map((b) => `${b.type}:${b.nivaa}/${b.ansatte}${b.fusjoner ? `+${b.fusjoner}f` : ''}`).join(' '))
     }
 
     // Første million skal ta minst en halvtime aktiv spilling, og milliarden skal kunne nås.

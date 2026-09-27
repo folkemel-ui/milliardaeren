@@ -24,10 +24,16 @@ export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
   leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', emoji: '🏠', pris: 2_500_000, avkastning: 0.28, maksAntall: 6, statuskrav: 0 },
   rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', emoji: '🏘️', pris: 6_000_000, avkastning: 0.26, maksAntall: 5, statuskrav: 0 },
   hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', emoji: '🏔️', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
+  stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', emoji: '🇸🇪', pris: 30_000_000, avkastning: 0.24, maksAntall: 3, statuskrav: 0, reise: 1 },
   kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', emoji: '🏢', pris: 80_000_000, avkastning: 0.25, maksAntall: 4, statuskrav: 0 },
+  kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', emoji: '🇩🇰', pris: 150_000_000, avkastning: 0.23, maksAntall: 3, statuskrav: 0, reise: 1 },
   kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', emoji: '🛍️', pris: 400_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
+  berlin: { id: 'berlin', navn: 'Bygård i Mitte', sted: 'Mitte, Berlin', by: 'Berlin', emoji: '🇩🇪', pris: 500_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0, reise: 2 },
+  london: { id: 'london', navn: 'Byhus i Mayfair', sted: 'Mayfair, London', by: 'London', emoji: '🇬🇧', pris: 1_200_000_000, avkastning: 0.21, maksAntall: 2, statuskrav: 0, reise: 2 },
   naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', emoji: '🏙️', pris: 1_500_000_000, avkastning: 0.2, maksAntall: 2, statuskrav: 3 },
+  dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', emoji: '🇦🇪', pris: 4_000_000_000, avkastning: 0.19, maksAntall: 2, statuskrav: 0, reise: 3 },
   oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', emoji: '🏝️', pris: 6_000_000_000, avkastning: 0.1, maksAntall: 1, statuskrav: 5 },
+  newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', emoji: '🇺🇸', pris: 12_000_000_000, avkastning: 0.16, maksAntall: 1, statuskrav: 0, reise: 3 },
 }
 
 export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
@@ -36,6 +42,35 @@ export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
 export const EIENDOM_SYNLIG_VED = 0.8
 /** Meglerhonorar når du selger. */
 export const MEGLERHONORAR = 0.03
+
+// ─────────────────────────────────────────────── Reiser
+
+/** Flyene, i rekkefølge: hvert fly når like langt som de før det, og litt til. */
+export const FLY_REKKEFOLGE: LuksusId[] = ['propellfly', 'forretningsjet', 'langdistansejet']
+
+/** Hvor langt du kan reise: 0 uten fly, ellers nummeret på det beste flyet du eier. */
+export function reiseNivaa(s: Spilltilstand): number {
+  return FLY_REKKEFOLGE.reduce((beste, id, i) => (s.luksus.includes(id) ? i + 1 : beste), 0)
+}
+
+/** Flyet som skal til for å kjøpe en eiendom, eller null når den er i Norge. */
+export function flyFor(id: EiendomId): LuksusId | null {
+  const reise = EIENDOMSTYPER[id].reise
+  return reise ? FLY_REKKEFOLGE[reise - 1] : null
+}
+
+export function kanReiseTil(s: Spilltilstand, id: EiendomId): boolean {
+  return reiseNivaa(s) >= (EIENDOMSTYPER[id].reise ?? 0)
+}
+
+/** Utenlandsbyene du eier eiendom i. */
+export function byerUtenlands(s: Spilltilstand): Set<string> {
+  const byer = new Set<string>()
+  for (const id of EIENDOMSSTIGEN) if (EIENDOMSTYPER[id].reise && (s.eiendommer[id] ?? 0) > 0) byer.add(EIENDOMSTYPER[id].by)
+  return byer
+}
+
+export const UTENLANDSBYER = [...new Set(EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].reise).map((id) => EIENDOMSTYPER[id].by))]
 
 // ─────────────────────────────────────────────── Standard og oppussing
 

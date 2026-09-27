@@ -5,7 +5,7 @@
  */
 
 import { inntektPerSek } from './formler'
-import { statusnivaa } from './eiendom'
+import { byerUtenlands, statusnivaa, UTENLANDSBYER } from './eiendom'
 import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
 
@@ -46,6 +46,9 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'litt-luksus', navn: 'Litt luksus', beskrivelse: 'Kjøp noe du ikke trenger', emoji: '🛍️', klart: (s) => s.luksus.length >= 1 },
   { id: 'rikmann', navn: 'Rikmann', beskrivelse: 'Nå statusnivå 4', emoji: '🎩', klart: (s) => statusnivaa(s) >= 4 },
   { id: 'legende', navn: 'Legende', beskrivelse: 'Nå høyeste statusnivå', emoji: '🌟', klart: (s) => statusnivaa(s) >= 7 },
+  { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', emoji: '🧳', klart: (s) => byerUtenlands(s).size >= 1 },
+  { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', emoji: '🌍', klart: (s) => byerUtenlands(s).size >= UTENLANDSBYER.length },
+  { id: 'fusjon', navn: 'Fusjonist', beskrivelse: 'Slå sammen en rivals bedrift med din egen', emoji: '🧩', klart: (s) => s.bedrifter.some((b) => (b.fusjoner ?? 0) > 0) },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', emoji: '🛢️', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
 ]
 

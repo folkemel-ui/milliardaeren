@@ -128,6 +128,9 @@ describe('migrering', () => {
     expect(r.tilstand.bedrifter[0]).toMatchObject({ tjent: 0, inntektHistorikk: [] })
     expect(r.tilstand.sparing).toBe(0)
     expect(r.tilstand.eiendomKostpris.hybel).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+    // 10 → 11: ingen fusjoner, ingen salg og ingen bud.
+    expect(r.tilstand.bedrifter[0].fusjoner).toBe(0)
+    expect(r.tilstand.rivaler.every((x) => x.solgt.length === 0 && Object.keys(x.bud).length === 0)).toBe(true)
     // 9 → 10: ingen skatt, ferske rivaler, ingen ordre, rival-klasse i porteføljen.
     expect(r.tilstand.skatt.regninger).toEqual([])
     expect(r.tilstand.rivaler).toHaveLength(4)
@@ -142,7 +145,7 @@ describe('migrering', () => {
     expect(r.tilstand.ukestart.dag).toBe(3)
     expect(r.tilstand.totaltRentebetalt).toBe(0)
     // 6 → 7: «i dag» starter på null for alle klasser.
-    expect(r.tilstand.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, rival: 0, sparing: 0 })
+    expect(r.tilstand.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 })
     expect(r.tilstand.forrigeDag.verdier.eiendom).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
   })
 

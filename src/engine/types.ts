@@ -47,6 +47,8 @@ export interface Bedrift {
   inntektHistorikk: number[]
   /** Hvor mange av bransjens unike forbedringer som er kjøpt (de kjøpes i rekkefølge). */
   forbedringer: number
+  /** Hvor mange rivalbedrifter som er slått sammen med denne. Hver ganger inntekten. */
+  fusjoner: number
 }
 
 export interface Forbedring {
@@ -118,8 +120,11 @@ export interface Beholdning {
 export type EiendomId =
   | 'hybel' | 'leilighet' | 'rekkehus' | 'hytte'
   | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
+  | 'stockholm' | 'kobenhavn' | 'berlin' | 'london' | 'dubai' | 'newyork'
 
-export type By = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten'
+export type NorskBy = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten'
+export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Dubai' | 'New York'
+export type By = NorskBy | Utenlandsby
 
 export interface Eiendomstype {
   id: EiendomId
@@ -135,6 +140,8 @@ export interface Eiendomstype {
   maksAntall: number
   /** Statusnivået som kreves for å få kjøpe. */
   statuskrav: number
+  /** Utenlands: flyet du må eie for å komme dit og kjøpe (1 propellfly, 2 forretningsjet, 3 langdistansejet). */
+  reise?: number
 }
 
 export type LuksusKategori = 'bil' | 'klokke' | 'baat' | 'fly'
@@ -223,9 +230,11 @@ export interface Dagsbilde {
   rang?: number
   /** Rivalene du hadde kjøpt opp ved dagens start. */
   overtatte?: string[]
+  /** Fusjonene du hadde gjort ved dagens start, som «rivalId:bransje». */
+  fusjoner?: string[]
 }
 
-export type Aktivaklasse = 'aksje' | 'krypto' | 'eiendom' | 'sparing' | 'rival'
+export type Aktivaklasse = 'aksje' | 'krypto' | 'eiendom' | 'sparing' | 'rival' | 'startup'
 
 export interface Rekorder {
   hoyesteInntekt: number
@@ -268,6 +277,17 @@ export interface Rival {
   kostpris: number
   /** Du eier hele selskapet. */
   overtatt: boolean
+  /** Bransjene rivalen har mistet til deg — de kommer aldri tilbake. */
+  solgt: BedriftstypeId[]
+  /** Dagens forhandlinger per bransje: ett bud per dag. */
+  bud: Partial<Record<BedriftstypeId, Forhandling>>
+}
+
+export interface Forhandling {
+  /** Spilldagen budet ble gitt. */
+  dag: number
+  /** Prisen rivalen vil ha i stedet, eller null når rivalen sa blankt nei. */
+  motbud: number | null
 }
 
 export type Ordretype = 'kjop' | 'selg-over' | 'selg-under'
@@ -357,4 +377,36 @@ export interface Spilltilstand {
   rivaler: Rival[]
   ordre: Ordre[]
   nesteOrdreId: number
+  /** Oppstartsselskapene: de som søker penger nå, og de som nylig er avsluttet. */
+  startups: Startup[]
+  nesteStartupId: number
+}
+
+// ─────────────────────────────────────────────── Startups
+
+export type Startupstatus = 'aktiv' | 'konkurs' | 'solgt' | 'bors'
+
+export interface Startup {
+  id: number
+  /** Indeks i STARTUP_IDEER — navn, beskrivelse og emoji. */
+  ide: number
+  /** Indeks i RUNDER: 0 pre-seed … 4 serie C. */
+  runde: number
+  /** Selskapets verdi etter pengene i denne runden. */
+  verdi: number
+  /** Din eierandel (0–1). */
+  andel: number
+  /** Alt du har betalt inn. */
+  investert: number
+  /** Det du har betalt inn i runden som pågår — det er et tak per runde. */
+  investertIRunde: number
+  /** Skjult: 0–1. Et godt team går sjeldnere konkurs. */
+  kvalitet: number
+  /** Det du får se: et støyete inntrykk av teamet, 0–2. */
+  inntrykk: number
+  status: Startupstatus
+  startetSek: number
+  /** Når selskapet ble avsluttet, og hva du fikk utbetalt. */
+  sluttSek?: number
+  utbetalt?: number
 }

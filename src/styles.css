@@ -56,6 +56,7 @@
   --klasse-krypto: #7c3aed;
   --klasse-eiendom: #0284c7;
   --klasse-rival: #db2777;
+  --klasse-startup: #ea580c;
 }
 
 /* ─────────────────────────────────────────────── Grunnlag */
@@ -1011,11 +1012,17 @@ figure {
   --klasse-eiendom: #38bdf8;
   --klasse-sparing: var(--pluss);
   --klasse-rival: #f472b6;
+  --klasse-startup: #fb923c;
 }
 
 .fordeling-del.rival,
 .klasse-prikk.rival {
   background: var(--klasse-rival);
+}
+
+.fordeling-del.startup,
+.klasse-prikk.startup {
+  background: var(--klasse-startup);
 }
 
 .oversikt {
@@ -1427,6 +1434,15 @@ figure {
   font-size: 13px;
 }
 
+.segment-seks {
+  gap: 2px;
+}
+
+.segment-seks button {
+  font-size: 12px;
+  padding: 0 2px;
+}
+
 .forbes {
   margin: 10px 0 0;
   padding: 0;
@@ -1516,6 +1532,149 @@ figure {
 
 .rival-knapper .knapp {
   flex: 1;
+}
+
+.rival-knapper > span {
+  align-self: center;
+  flex: 1;
+}
+
+.rivalbedrifter {
+  border-top: 1px solid var(--kant);
+  padding-top: 10px;
+}
+
+.rivalbedrifter summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rivalbedrifter ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rivalbedrifter li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rivalbedrifter li p {
+  margin: 0;
+}
+
+.rivalbedrift-topp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rivalbedrift-topp > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.bud-knapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.knapp-bud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 48px;
+  padding: 6px 4px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.knapp-bud strong {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.startupkort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.startup-emoji {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--flate-2);
+  font-size: 22px;
+}
+
+.startup-besk {
+  margin: 0;
+}
+
+.runder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.runder li {
+  padding: 4px 0;
+  border-radius: 6px;
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.runder li.ferdig {
+  color: var(--gull);
+}
+
+.runder li.naa {
+  background: var(--gull);
+  color: var(--paa-gull);
+  font-weight: 700;
+}
+
+.startup-slutt {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.startup-slutt li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.rival-melding {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+  color: var(--gull);
+  font-size: 13px;
 }
 
 .ordrer {
@@ -1833,6 +1992,44 @@ figure {
 .kart-by.eid .kart-navn,
 .kart-by.valgt .kart-navn {
   fill: var(--tekst);
+}
+
+.verdenskart-ramme {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.verdenskart-ramme figcaption {
+  text-align: center;
+}
+
+.verdenskart {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.kart-rute {
+  fill: none;
+  stroke: var(--gull-mørk);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+
+.kart-rute.stengt {
+  stroke: var(--kant);
+}
+
+.kart-by.stengt .kart-prikk {
+  fill: var(--flate-2);
+  stroke: var(--kant);
+}
+
+.kart-by.hjem {
+  cursor: default;
 }
 
 .filterbrikke {

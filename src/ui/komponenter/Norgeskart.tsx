@@ -1,5 +1,5 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
-import type { By, Spilltilstand } from '../../engine/types'
+import type { By, NorskBy, Spilltilstand } from '../../engine/types'
 
 /*
  * Et stilisert Norgeskart tegnet fra ekte koordinater (lengde, bredde),
@@ -32,7 +32,7 @@ const LOFOTEN: [number, number][] = [
   [12.9, 67.9], [13.8, 68.1], [14.6, 68.2], [15.3, 68.3], [15.1, 68.5], [14.2, 68.45], [13.3, 68.2], [12.9, 68.0],
 ]
 
-const BYER: Record<By, { pos: [number, number]; etikett: 'høyre' | 'venstre' | 'over' }> = {
+const BYER: Record<NorskBy, { pos: [number, number]; etikett: 'høyre' | 'venstre' | 'over' }> = {
   Bergen: { pos: [5.32, 60.39], etikett: 'venstre' },
   Stavanger: { pos: [5.73, 58.97], etikett: 'høyre' },
   Oslo: { pos: [10.75, 59.91], etikett: 'høyre' },
@@ -42,9 +42,9 @@ const BYER: Record<By, { pos: [number, number]; etikett: 'høyre' | 'venstre' | 
 }
 
 /** Hvor mange eiendommer du eier i hver by. */
-function perBy(s: Spilltilstand): Record<By, number> {
-  const antall = { Bergen: 0, Stavanger: 0, Oslo: 0, Geilo: 0, Trondheim: 0, Lofoten: 0 }
-  for (const id of EIENDOMSSTIGEN) antall[EIENDOMSTYPER[id].by] += s.eiendommer[id] ?? 0
+function perBy(s: Spilltilstand): Partial<Record<By, number>> {
+  const antall: Partial<Record<By, number>> = {}
+  for (const id of EIENDOMSSTIGEN) antall[EIENDOMSTYPER[id].by] = (antall[EIENDOMSTYPER[id].by] ?? 0) + (s.eiendommer[id] ?? 0)
   return antall
 }
 
@@ -55,9 +55,9 @@ export function Norgeskart({ s, valgt, velg }: { s: Spilltilstand; valgt: By | n
     <svg className="norgeskart" viewBox="-44 0 304 280" role="group" aria-label="Kart over eiendommene dine">
       <polygon points={FASTLAND.map(px).join(' ')} className="kart-land" />
       <polygon points={LOFOTEN.map(px).join(' ')} className="kart-land" />
-      {(Object.keys(BYER) as By[]).map((by) => {
+      {(Object.keys(BYER) as NorskBy[]).map((by) => {
         const [x, y] = px(BYER[by].pos).split(',').map(Number)
-        const n = antall[by]
+        const n = antall[by] ?? 0
         const r = n > 0 ? Math.min(11, 5 + n * 1.2) : 4
         const e = BYER[by].etikett
         return (

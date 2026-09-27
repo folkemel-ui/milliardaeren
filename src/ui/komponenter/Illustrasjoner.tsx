@@ -307,6 +307,148 @@ function Oy({ størrelse = 48 }: P) {
   )
 }
 
+// ─────────────────────────────────────────────── Eiendom utenlands
+
+/** Stockholm: okergul bygård med kobbergrønt tak og tårn. */
+function Stockholm({ størrelse = 48 }: P) {
+  const vinduer: ReactNode[] = []
+  for (const y of [20, 27, 34]) for (const x of [9, 16, 23, 30, 37]) vinduer.push(<rect key={`${x}-${y}`} x={x} y={y} width="3.5" height="4.5" fill="#fef3c7" stroke="#92400e" strokeWidth="0.5" />)
+  return (
+    <Svg størrelse={størrelse}>
+      <polygon points="31,11 35,4 39,11" fill="#4d9e8a" />
+      <rect x="31" y="11" width="8" height="5" fill="#e0b050" />
+      <rect x="5" y="16" width="38" height="27" fill="#e0b050" />
+      <polygon points="3,17 8,10 40,10 45,17" fill="#4d9e8a" />
+      <rect x="5" y="16" width="38" height="1.4" fill="#b8862b" />
+      {vinduer}
+      <path d="M21 43 V38 A3 3 0 0 1 27 38 V43 Z" fill="#7a3e16" />
+      <rect x="3" y="43" width="42" height="2" fill="#9ca3af" />
+    </Svg>
+  )
+}
+
+/** København: fargerike, smale hus ved kanalen i Nyhavn. */
+function Kobenhavn({ størrelse = 48 }: P) {
+  const hus: [number, number, string][] = [
+    [3, 14, '#e76f51'],
+    [13, 10, '#f4c95d'],
+    [21, 16, '#4f9dd9'],
+    [30, 12, '#e9a0b0'],
+    [38, 15, '#6fbf73'],
+  ]
+  return (
+    <Svg størrelse={størrelse}>
+      {hus.map(([x, y, farge], i) => {
+        const b = i === 1 ? 8 : i === 3 ? 8 : 9
+        return (
+          <g key={x}>
+            <rect x={x} y={y} width={b} height={36 - y} fill={farge} />
+            <polygon points={`${x},${y} ${x + b / 2},${y - 4} ${x + b},${y}`} fill={farge} />
+            <rect x={x + 2} y={y + 3} width="2" height="3" fill="#fffbeb" />
+            <rect x={x + b - 4} y={y + 3} width="2" height="3" fill="#fffbeb" />
+            <rect x={x + 2} y={y + 10} width="2" height="3" fill="#fffbeb" />
+            <rect x={x + b - 4} y={y + 10} width="2" height="3" fill="#fffbeb" />
+          </g>
+        )
+      })}
+      <rect x="0" y="36" width="48" height="12" fill="#1e6fa8" />
+      <polyline points="4,40 8,39 12,40" fill="none" stroke="#7fb8e0" strokeWidth="1" strokeLinecap="round" />
+      <polyline points="28,44 32,43 36,44" fill="none" stroke="#7fb8e0" strokeWidth="1" strokeLinecap="round" />
+      <rect x="18" y="31" width="1.2" height="9" fill="#78350f" />
+      <polygon points="19.2,32 26,37 19.2,37" fill="#ffffff" />
+    </Svg>
+  )
+}
+
+/** Berlin: bygård i Mitte med TV-tårnet bak. */
+function Berlin({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="35.4" y="3" width="1.2" height="10" fill="#9ca3af" />
+      <circle cx="36" cy="14.5" r="3.4" fill="#c0c5cc" />
+      <rect x="35" y="17" width="2" height="18" fill="#c0c5cc" />
+      <rect x="4" y="18" width="30" height="25" fill="#d6c7a8" />
+      <rect x="3" y="16" width="32" height="3" fill="#8a7a5c" />
+      {[22, 29, 36].map((y) =>
+        [7, 13, 19, 25].map((x) => <rect key={`${x}-${y}`} x={x} y={y} width="3.5" height="4.5" fill="#374151" />),
+      )}
+      <rect x="30" y="24" width="18" height="19" fill="#9aa5b1" />
+      {[27, 32, 37].map((y) => (
+        <rect key={y} x="32" y={y} width="14" height="2.4" fill="#4b5563" />
+      ))}
+      <rect x="2" y="43" width="46" height="2" fill="#9ca3af" />
+    </Svg>
+  )
+}
+
+/** London: hvitt byhus med søyler, svart dør og gjerde. */
+function London({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="8" y="8" width="32" height="35" fill="#f5f2ea" />
+      <rect x="7" y="6" width="34" height="3" fill="#d6d0c4" />
+      <rect x="10" y="3" width="4" height="4" fill="#b45309" />
+      <rect x="34" y="3" width="4" height="4" fill="#b45309" />
+      {[12, 20].map((y) =>
+        [12, 21.5, 31].map((x) => <rect key={`${x}-${y}`} x={x} y={y} width="5" height="6" fill="#1f2937" />),
+      )}
+      <rect x="17" y="29" width="14" height="2" fill="#d6d0c4" />
+      <rect x="18" y="31" width="2" height="12" fill="#e8e3d8" />
+      <rect x="28" y="31" width="2" height="12" fill="#e8e3d8" />
+      <rect x="21" y="32" width="6" height="11" fill="#111827" />
+      <circle cx="26" cy="38" r="0.7" fill="#d4af37" />
+      <rect x="4" y="40" width="40" height="0.8" fill="#111827" />
+      {[5, 8, 11, 14, 34, 37, 40, 43].map((x) => (
+        <rect key={x} x={x - 0.4} y="38" width="0.8" height="5" fill="#111827" />
+      ))}
+      <rect x="3" y="43" width="42" height="2" fill="#9ca3af" />
+    </Svg>
+  )
+}
+
+/** Dubai: hvit villa med basseng og palme. */
+function Dubai({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="0" y="36" width="48" height="12" fill="#e9d3a0" />
+      <rect x="10" y="22" width="30" height="14" fill="#fafaf9" />
+      <rect x="18" y="14" width="18" height="8" fill="#fafaf9" />
+      <rect x="16" y="13" width="22" height="1.6" fill="#d6d3d1" />
+      <rect x="8" y="21" width="34" height="1.6" fill="#d6d3d1" />
+      <rect x="20" y="16" width="14" height="4" fill="#5eb4d9" />
+      <rect x="13" y="25" width="10" height="8" fill="#5eb4d9" />
+      <rect x="26" y="25" width="11" height="11" fill="#78716c" />
+      <rect x="14" y="38" width="22" height="5" rx="1.5" fill="#22b8cf" />
+      <rect x="16" y="39.5" width="8" height="0.8" fill="#a5f3fc" />
+      <path d="M6 36 Q5 26 7 18" fill="none" stroke="#92602a" strokeWidth="1.6" />
+      <path d="M7 18 Q1 16 -1 21 M7 18 Q12 14 15 18 M7 18 Q4 12 0 12 M7 18 Q9 11 14 11" fill="none" stroke="#2f8a3b" strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  )
+}
+
+/** New York: skyskraper med opplyst toppleilighet. */
+function NewYork({ størrelse = 48 }: P) {
+  const vinduer: ReactNode[] = []
+  for (let y = 16; y < 42; y += 3.5) vinduer.push(<rect key={y} x="19" y={y} width="12" height="1.4" fill="#475569" />)
+  return (
+    <Svg størrelse={størrelse}>
+      <rect x="3" y="24" width="10" height="20" fill="#64748b" />
+      <rect x="36" y="20" width="9" height="24" fill="#64748b" />
+      <rect x="23.6" y="1" width="1" height="5" fill="#9ca3af" />
+      <polygon points="20,12 24,5 28,5 32,12" fill="#94a3b8" />
+      <rect x="17" y="12" width="16" height="32" fill="#94a3b8" />
+      <rect x="18" y="10" width="14" height="5" fill="#fcd34d" />
+      <rect x="18" y="10" width="14" height="0.8" fill="#d4af37" />
+      {vinduer}
+      <rect x="5" y="27" width="6" height="1" fill="#94a3b8" />
+      <rect x="5" y="32" width="6" height="1" fill="#94a3b8" />
+      <rect x="38" y="24" width="5" height="1" fill="#94a3b8" />
+      <rect x="38" y="29" width="5" height="1" fill="#94a3b8" />
+      <rect x="2" y="44" width="44" height="2" fill="#9ca3af" />
+    </Svg>
+  )
+}
+
 // ─────────────────────────────────────────────── Luksus: biler
 
 function Hjul({ x, r = 4.5, felg = '#9ca3af' }: { x: number; r?: number; felg?: string }) {
@@ -582,6 +724,12 @@ const ILLUSTRASJONER: Record<string, (p: P) => ReactNode> = {
   kjopesenter: Kjopesenter,
   naeringsbygg: Naeringsbygg,
   oy: Oy,
+  stockholm: Stockholm,
+  kobenhavn: Kobenhavn,
+  berlin: Berlin,
+  london: London,
+  dubai: Dubai,
+  newyork: NewYork,
   stasjonsvogn: Stasjonsvogn,
   elbil: Elbil,
   superbil: Superbil,

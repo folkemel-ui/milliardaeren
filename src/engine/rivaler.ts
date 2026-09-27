@@ -10,10 +10,10 @@ import type { Terning } from './rng'
 import type { Rival, Spilltilstand } from './types'
 
 export const START_RIVALER: Rival[] = [
-  { id: 'gronn', navn: 'Harald Grønn', selskap: 'Grønn Holding', formue: 20_000, tak: 3e9, vekst: 0.6, andel: 0, kostpris: 0, overtatt: false },
-  { id: 'lunde', navn: 'Ingrid Lunde', selskap: 'Lunde Invest', formue: 500_000, tak: 12e9, vekst: 0.45, andel: 0, kostpris: 0, overtatt: false },
-  { id: 'fjeld', navn: 'Sverre Fjeld', selskap: 'Fjeld Kapital', formue: 30e6, tak: 40e9, vekst: 0.3, andel: 0, kostpris: 0, overtatt: false },
-  { id: 'aas', navn: 'Marit Aas', selskap: 'Aas Industrier', formue: 2e9, tak: 150e9, vekst: 0.12, andel: 0, kostpris: 0, overtatt: false },
+  { id: 'gronn', navn: 'Harald Grønn', selskap: 'Grønn Holding', formue: 20_000, tak: 3e9, vekst: 0.6, andel: 0, kostpris: 0, overtatt: false, solgt: [], bud: {} },
+  { id: 'lunde', navn: 'Ingrid Lunde', selskap: 'Lunde Invest', formue: 500_000, tak: 12e9, vekst: 0.45, andel: 0, kostpris: 0, overtatt: false, solgt: [], bud: {} },
+  { id: 'fjeld', navn: 'Sverre Fjeld', selskap: 'Fjeld Kapital', formue: 30e6, tak: 40e9, vekst: 0.3, andel: 0, kostpris: 0, overtatt: false, solgt: [], bud: {} },
+  { id: 'aas', navn: 'Marit Aas', selskap: 'Aas Industrier', formue: 2e9, tak: 150e9, vekst: 0.12, andel: 0, kostpris: 0, overtatt: false, solgt: [], bud: {} },
 ]
 
 /** Selskapet er verdt så stor andel av eierens formue. */

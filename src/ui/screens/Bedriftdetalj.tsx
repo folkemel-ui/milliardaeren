@@ -1,5 +1,6 @@
 import { bedriftInntektPerSek, forbedringspris, nesteMilepael, oppgraderingspris, statusfaktor } from '../../engine/formler'
 import { kjopForbedring, oppgrader } from '../../engine/handlinger'
+import { fusjonsfaktor } from '../../engine/fusjon'
 import { BEDRIFTSTYPER, FORBEDRINGER, MILEPAELER } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
 import { INNTEKT_HISTORIKK_SEK } from '../../engine/simulering'
@@ -39,6 +40,7 @@ export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift;
             <span className="dempet">
               Nivå {b.nivaa}
               {b.ansatte > 0 && ` · ${b.ansatte} ansatte`}
+              {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'} (×${tall(fusjonsfaktor(b), 2)} inntekt)`}
             </span>
           </div>
         </div>
