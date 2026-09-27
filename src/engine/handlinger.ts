@@ -11,6 +11,8 @@ import {
   maksAnsatte,
   maksKjop,
   maksNyttLaan,
+  forbedringspris,
+  nesteForbedring,
   oppgraderingspris,
 } from './formler'
 import { utforEiendomssalg, utforKjop, utforLuksussalg, utforSalg } from './handel'
@@ -22,11 +24,14 @@ import {
   LAGER,
   LAGER_FOR,
   LUKSUS,
+  oppussingspris,
+  standard,
+  STANDARDER,
   statusnivaa,
   utvidelsespris,
 } from './eiendom'
 import { BEDRIFTSTYPER } from './innhold'
-import { erHelg } from './kalender'
+import { DAG_SEK, erHelg } from './kalender'
 import { flyt } from './portefolje'
 import { PAPIRER, rundAntall } from './marked'
 import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, PapirId, Spilltilstand } from './types'
@@ -71,6 +76,7 @@ export function kjopBedrift(s: Spilltilstand, type: BedriftstypeId): Utfall {
     investert: t.pris,
     tjent: 0,
     inntektHistorikk: [],
+    forbedringer: 0,
   })
   n.nesteId += 1
   return { ok: true, tilstand: n }
@@ -81,6 +87,17 @@ export function oppgrader(s: Spilltilstand, id: string): Utfall {
   if (!b) return feil('Fant ikke bedriften.')
   return investerI(s, id, oppgraderingspris(b), (n) => {
     n.nivaa += 1
+  })
+}
+
+export function kjopForbedring(s: Spilltilstand, id: string): Utfall {
+  const b = finn(s, id)
+  if (!b) return feil('Fant ikke bedriften.')
+  const f = nesteForbedring(b)
+  if (!f) return feil('Alle forbedringene er kjøpt.')
+  if (b.nivaa < f.nivaa) return feil(`${f.navn} krever nivå ${f.nivaa}.`)
+  return investerI(s, id, forbedringspris(b, f), (n) => {
+    n.forbedringer += 1
   })
 }
 
@@ -141,6 +158,7 @@ export function kjopEiendom(s: Spilltilstand, id: EiendomId): Utfall {
   if (!eiendomSynlig(s, id)) return feil(`${t.navn} er ikke til salgs for deg ennå.`)
   if (statusnivaa(s) < t.statuskrav) return feil(`Du trenger statusnivå ${t.statuskrav} for å kjøpe ${t.navn.toLowerCase()}.`)
   if ((s.eiendommer[id] ?? 0) >= t.maksAntall) return feil(`Du eier allerede alle ${t.maksAntall} som er til salgs.`)
+  if (s.oppussing[id]) return feil('Vent til oppussingen er ferdig.')
   const pris = eiendomspris(s, id)
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
@@ -153,8 +171,28 @@ export function kjopEiendom(s: Spilltilstand, id: EiendomId): Utfall {
 
 export function selgEiendom(s: Spilltilstand, id: EiendomId): Utfall {
   if (!s.eiendommer[id]) return feil('Du eier ingen.')
+  if (s.oppussing[id]) return feil('Vent til oppussingen er ferdig.')
   const n = structuredClone(s)
   utforEiendomssalg(n, id)
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Pusser opp alle enhetene av en type ett trinn. Pengene går ut nå, standarden
+ * kommer når håndverkerne er ferdige — og så lenge står enhetene tomme.
+ * Kostnaden legges til kostprisen, så avkastningen regnes riktig.
+ */
+export function pussOpp(s: Spilltilstand, id: EiendomId): Utfall {
+  if (!s.eiendommer[id]) return feil('Du eier ingen å pusse opp.')
+  if (s.oppussing[id]) return feil('Oppussingen er allerede i gang.')
+  const pris = oppussingspris(s, id)
+  if (pris === null) return feil('Høyeste standard er allerede nådd.')
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const neste = standard(s, id) + 1
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.eiendomKostpris[id] = (n.eiendomKostpris[id] ?? 0) + pris
+  n.oppussing[id] = { standard: neste, ferdigSek: n.sek + STANDARDER[neste].dager * DAG_SEK }
   return { ok: true, tilstand: n }
 }
 

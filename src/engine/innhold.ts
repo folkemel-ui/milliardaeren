@@ -1,6 +1,6 @@
 ﻿/** Spillets innhold: tall som beskriver verden, ikke tilstand. */
 
-import type { Bedriftstype, BedriftstypeId } from './types'
+import type { Bedriftstype, BedriftstypeId, Forbedring } from './types'
 
 export const STARTKAPITAL = 1_000
 
@@ -54,6 +54,62 @@ export const STIGEN: BedriftstypeId[] = [
 
 /** Nivåene der inntekten dobles. */
 export const MILEPAELER = [25, 50, 100]
+
+// ─────────────────────────────────────────────── Unike forbedringer
+
+/** Nivåene forbedringene låses opp på, og hvor mye hver ganger inntekten med. */
+const FORBEDRING_NIVAA = [10, 40, 80]
+const FORBEDRING_FAKTOR = [1.5, 1.5, 2]
+/** En forbedring koster så mange vanlige oppgraderinger på nivået den låses opp. */
+export const FORBEDRING_PRISFAKTOR = 30
+
+function forbedringer(liste: [string, string][]): Forbedring[] {
+  return liste.map(([navn, beskrivelse], i) => ({ navn, beskrivelse, nivaa: FORBEDRING_NIVAA[i], faktor: FORBEDRING_FAKTOR[i] }))
+}
+
+/** Tre forbedringer per bransje, i rekkefølge. Hver ganger inntekten. */
+export const FORBEDRINGER: Record<BedriftstypeId, Forbedring[]> = {
+  saftbod: forbedringer([
+    ['Saftpresse', 'Ferskpresset i stedet for fra kartong. Kundene merker forskjellen.'],
+    ['Isbitmaskin', 'Iskald saft selv i juli.'],
+    ['Egen sukkerfri linje', 'Et helt nytt kundesegment står i kø.'],
+  ]),
+  polsebod: forbedringer([
+    ['Grillplate i stål', 'Dobbelt så mange pølser i timen.'],
+    ['Hjemmelaget sennep', 'Oppskriften er hemmelig. Køen er det ikke.'],
+    ['Food truck', 'Boden ruller dit folket er.'],
+  ]),
+  kiosk: forbedringer([
+    ['Kaffeautomat', 'Morgenkunder på vei til jobb.'],
+    ['Pakkeutlevering', 'Alle som henter pakker, kjøper noe på veien ut.'],
+    ['Døgnåpent', 'Nattravnene betaler godt.'],
+  ]),
+  kafe: forbedringer([
+    ['Espressomaskin', 'Italiensk, skinnende og dyr — som kaffen.'],
+    ['Eget bakeri', 'Kanelbollene selger seg selv.'],
+    ['Takterrasse', 'Utsikten er med i prisen.'],
+  ]),
+  restaurant: forbedringer([
+    ['Kjendiskokk', 'Kokken har vært på TV. Bordene er fullbooket.'],
+    ['Vinkjeller', 'Vinlisten er lengre enn menyen.'],
+    ['Michelinstjerne', 'Guiden har vært på besøk. Prisene har steget.'],
+  ]),
+  hotell: forbedringer([
+    ['Spa', 'Gjestene blir en natt ekstra.'],
+    ['Konferansesenter', 'Næringslivet leier hele etasjer.'],
+    ['Takbar', 'Byens mest populære utsikt.'],
+  ]),
+  bank: forbedringer([
+    ['Nettbank', 'Kundene slipper kø — og filialene er billigere å drive.'],
+    ['Formuesforvaltning', 'De rikeste kundene betaler for råd.'],
+    ['Investeringsbank', 'Børsnoteringer og oppkjøp gir de største honorarene.'],
+  ]),
+  oljeselskap: forbedringer([
+    ['Nye borerigger', 'Mer olje fra de samme feltene.'],
+    ['Undervannsroboter', 'Vedlikehold uten å stenge produksjonen.'],
+    ['Nytt felt i Nordsjøen', 'Et av de største funnene på tiår.'],
+  ]),
+}
 
 // ─────────────────────────────────────────────── Ansatte og ledere
 

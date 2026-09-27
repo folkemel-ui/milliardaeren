@@ -1,6 +1,6 @@
-import { bedriftInntektPerSek, nesteMilepael, oppgraderingspris, statusfaktor } from '../../engine/formler'
-import { oppgrader } from '../../engine/handlinger'
-import { BEDRIFTSTYPER, MILEPAELER } from '../../engine/innhold'
+import { bedriftInntektPerSek, forbedringspris, nesteMilepael, oppgraderingspris, statusfaktor } from '../../engine/formler'
+import { kjopForbedring, oppgrader } from '../../engine/handlinger'
+import { BEDRIFTSTYPER, FORBEDRINGER, MILEPAELER } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
 import { INNTEKT_HISTORIKK_SEK } from '../../engine/simulering'
 import type { Bedrift, Spilltilstand } from '../../engine/types'
@@ -76,6 +76,37 @@ export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift;
           </dd>
         </div>
       </dl>
+
+      <div className="kort">
+        <h2 className="kort-tittel">Forbedringer</h2>
+        <ul className="forbedringer">
+          {FORBEDRINGER[b.type].map((f, i) => {
+            const kjøpt = i < b.forbedringer
+            const neste = i === b.forbedringer
+            const låstOpp = b.nivaa >= f.nivaa
+            const pris = forbedringspris(b, f)
+            return (
+              <li key={f.navn} className={kjøpt ? 'kjøpt' : ''}>
+                <div>
+                  <strong>
+                    {f.navn} <span className="gull">×{tall(f.faktor, 1)}</span>
+                  </strong>
+                  <p className="dempet liten">{f.beskrivelse}</p>
+                </div>
+                {kjøpt ? (
+                  <span className="merke-ok">✓ Kjøpt</span>
+                ) : neste && låstOpp ? (
+                  <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(kjopForbedring(s, b.id))}>
+                    {kortKroner(pris)}
+                  </button>
+                ) : (
+                  <span className="dempet liten laast-merke">🔒 Nivå {f.nivaa}</span>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </div>
 
       <div className="kort">
         <h2 className="kort-tittel">Milepæler</h2>

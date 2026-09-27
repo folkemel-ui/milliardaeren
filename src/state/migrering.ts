@@ -116,6 +116,15 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     n.aarstart = periodestart(n)
     return n as unknown as Raatilstand
   },
+  /* 8 → 9: unike forbedringer og oppussing. Ingen forbedringer kjøpt, alle
+     eiendommer på normal standard og ingen oppussing i gang — ingenting
+     endrer seg for et pågående spill før du selv kjøper noe. */
+  8: (s) => ({
+    ...s,
+    bedrifter: (s.bedrifter as Raatilstand[]).map((b) => ({ forbedringer: 0, ...b })),
+    eiendomStandard: {},
+    oppussing: {},
+  }),
 }
 
 export type MigreringsResultat =

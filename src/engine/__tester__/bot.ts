@@ -4,13 +4,15 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { ansett, kjopBedrift, oppgrader, type Utfall } from '../handlinger'
+import { ansett, kjopBedrift, kjopForbedring, oppgrader, type Utfall } from '../handlinger'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
   eierType,
   erLaastOpp,
+  forbedringspris,
   maksAnsatte,
+  nesteForbedring,
   oppgraderingspris,
 } from '../formler'
 import { BEDRIFTSTYPER, STIGEN } from '../innhold'
@@ -29,6 +31,11 @@ function kandidater(s: Spilltilstand): Kandidat[] {
     const naa = bedriftInntektPerSek(b)
     const opp: Bedrift = { ...b, nivaa: b.nivaa + 1 }
     liste.push({ pris: oppgraderingspris(b), gevinst: bedriftInntektPerSek(opp) - naa, utfor: (t) => oppgrader(t, b.id) })
+    const f = nesteForbedring(b)
+    if (f && b.nivaa >= f.nivaa) {
+      const med: Bedrift = { ...b, forbedringer: b.forbedringer + 1 }
+      liste.push({ pris: forbedringspris(b, f), gevinst: bedriftInntektPerSek(med) - naa, utfor: (t) => kjopForbedring(t, b.id) })
+    }
     if (b.ansatte < maksAnsatte(b)) {
       const ans: Bedrift = { ...b, ansatte: b.ansatte + 1 }
       liste.push({ pris: ansettelsespris(b), gevinst: bedriftInntektPerSek(ans) - naa, utfor: (t) => ansett(t, b.id) })

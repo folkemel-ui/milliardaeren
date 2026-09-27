@@ -1514,6 +1514,169 @@ figure {
   grid-template-columns: 1fr;
 }
 
+.norgeskart {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.kart-land {
+  fill: var(--flate-2);
+  stroke: var(--kant);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.kart-by {
+  cursor: pointer;
+  outline: none;
+}
+
+.kart-treff {
+  fill: transparent;
+}
+
+.kart-prikk {
+  fill: var(--flate);
+  stroke: var(--tekst-dempet);
+  stroke-width: 1.5;
+  transition: r 0.2s;
+}
+
+.kart-by.eid .kart-prikk {
+  fill: var(--gull);
+  stroke: var(--gull-lys);
+}
+
+.kart-by.valgt .kart-prikk,
+.kart-by:focus-visible .kart-prikk {
+  stroke: var(--tekst);
+  stroke-width: 2.5;
+}
+
+.kart-antall {
+  fill: #1a1508;
+  font-size: 9px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.kart-navn {
+  fill: var(--tekst-dempet);
+  font-size: 10px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.kart-by.eid .kart-navn,
+.kart-by.valgt .kart-navn {
+  fill: var(--tekst);
+}
+
+.filterbrikke {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gull-mørk);
+  color: var(--gull);
+  font-size: 13px;
+}
+
+.merke-standard {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.merke-standard.s1 {
+  border: 1px solid var(--klasse-eiendom);
+  color: var(--klasse-eiendom);
+}
+
+.merke-standard.s2 {
+  background: var(--gull);
+  color: #1a1508;
+}
+
+.knapp-oppussing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: 13px;
+  text-align: left;
+}
+
+.oppussing-pågår {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--klasse-eiendom) 12%, transparent);
+  font-size: 14px;
+}
+
+/* ─────────────────────────────────────────────── Forbedringer */
+
+.forbedring-knapp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--gull);
+  background: color-mix(in srgb, var(--gull) 10%, transparent);
+  color: var(--tekst);
+  font-size: 13px;
+  text-align: left;
+}
+
+.forbedring-knapp > span:last-child {
+  color: var(--gull);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.forbedring-knapp:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.forbedringer {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.forbedringer li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.forbedringer li p {
+  margin: 2px 0 0;
+}
+
+.forbedringer li.kjøpt strong {
+  color: var(--gull);
+}
+
+.laast-merke {
+  white-space: nowrap;
+}
+
 /* ─────────────────────────────────────────────── Luksus */
 
 .status {

@@ -3,11 +3,13 @@ import {
   bedriftInntektPerSek,
   lederpris,
   maksAnsatte,
+  forbedringspris,
+  nesteForbedring,
   nesteMilepael,
   oppgraderingspris,
   statusfaktor,
 } from '../../engine/formler'
-import { ansett, ansettLeder, oppgrader } from '../../engine/handlinger'
+import { ansett, ansettLeder, kjopForbedring, oppgrader } from '../../engine/handlinger'
 import {
   ANSATT_BONUS,
   ANSATT_LONN,
@@ -33,6 +35,9 @@ export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; å
   const type = BEDRIFTSTYPER[b.type]
   const pris = oppgraderingspris(b)
   const neste = nesteMilepael(b.nivaa)
+  // En forbedring som er låst opp men ikke kjøpt, får egen knapp rett på kortet.
+  const f = nesteForbedring(b)
+  const klarForbedring = f && b.nivaa >= f.nivaa ? f : null
 
   return (
     <li className="kort bedriftskort">
@@ -57,6 +62,19 @@ export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; å
         </div>
         <span className="dempet liten">{neste ? `×2 inntekt ved nivå ${neste}` : 'Alle milepæler nådd'}</span>
       </div>
+
+      {klarForbedring && (
+        <button
+          className="forbedring-knapp"
+          disabled={s.kontanter < forbedringspris(b, klarForbedring)}
+          onClick={() => utfor(kjopForbedring(s, b.id))}
+        >
+          <span>
+            ✨ <strong>{klarForbedring.navn}</strong> · ×{tall(klarForbedring.faktor, 1)} inntekt
+          </span>
+          <span>{kortKroner(forbedringspris(b, klarForbedring))}</span>
+        </button>
+      )}
 
       <div className="bedriftskort-knapper">
         <button className="knapp knapp-gull" disabled={s.kontanter < pris} onClick={() => utfor(oppgrader(s, b.id))}>

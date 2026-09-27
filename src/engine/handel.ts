@@ -21,8 +21,11 @@ export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
     // Snittprisen står fast: kostprisen krymper i takt med antallet.
     n.eiendomKostpris[id] = (n.eiendomKostpris[id] ?? 0) * (igjen / antall)
   } else {
+    // Den siste enheten er solgt: standarden og en eventuell oppussing følger med.
     delete n.eiendommer[id]
     delete n.eiendomKostpris[id]
+    delete n.eiendomStandard[id]
+    delete n.oppussing[id]
   }
   return inntekt
 }

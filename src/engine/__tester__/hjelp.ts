@@ -32,6 +32,7 @@ export function bedrift(type: BedriftstypeId, felt: Partial<Bedrift> = {}): Bedr
     investert: 0,
     tjent: 0,
     inntektHistorikk: [],
+    forbedringer: 0,
     ...felt,
   }
 }

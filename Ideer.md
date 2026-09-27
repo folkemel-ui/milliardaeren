@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 8 – Deeper businesses and property:** Unique upgrades per industry · Renovating properties · Map view for Property
 - **Pack 9 – Risk and competition:** Taxes and a tax audit (builds on the year-end report) · Rivals · Auto-trading
 - **Pack 10 – Look and feel:** SVG icons · Light "clean finance" theme
 - **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging businesses (needs a rethink first)
@@ -21,35 +20,27 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 3. **Startups.** Invest in rounds (seed, Series A, B and so on). Your share gets diluted when new money comes in. The company can go bankrupt, be sold or go public on the stock exchange.
 
-4. **Unique upgrades per industry.** One-time purchases that fit each business: a juice press for the lemonade stand, a coffee machine for the café, a spa for the hotel, new drilling rigs for the oil company. Each gives a multiplier (e.g. ×1.5 or ×2) and becomes available at a certain level. It gives the business cards more to strive for between the milestones.
-
 ## Investments
 
-5. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
-
-## Property
-
-6. **Map view for Property.** A simple, stylized map of Norway (Bergen, Oslo, Stavanger, Geilo, Trondheim, Lofoten) with your properties as markers you can tap. It shows at a glance where your empire is, and makes a natural starting point for Travel later.
-
-7. **Renovating properties.** Spend money to raise the standard (normal → renovated → luxury), which gives higher rent and value. Each level costs more and takes a few in-game days. It gives property its own upgrade path, like levels for businesses.
+4. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
 
 ## Luxury and status
 
-8. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both.
+5. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both. Since Pack 8 the Property tab has a map of Norway, which could be extended with new cities and countries.
 
 ## Risk
 
-9. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure. Since Pack 7 the game has year-end reports with income per source, a natural basis for the tax bill.
+6. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure. Since Pack 7 the game has year-end reports with income per source, a natural basis for the tax bill.
 
-10. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+7. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
 
 ## Presentation
 
-11. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
+8. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
 
 ## Layout
 
-12. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
+9. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
 ## Parked (not chosen yet)
 

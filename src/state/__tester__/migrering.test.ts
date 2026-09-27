@@ -128,6 +128,10 @@ describe('migrering', () => {
     expect(r.tilstand.bedrifter[0]).toMatchObject({ tjent: 0, inntektHistorikk: [] })
     expect(r.tilstand.sparing).toBe(0)
     expect(r.tilstand.eiendomKostpris.hybel).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+    // 8 → 9: ingen forbedringer, normal standard, ingen oppussing.
+    expect(r.tilstand.bedrifter[0].forbedringer).toBe(0)
+    expect(r.tilstand.eiendomStandard).toEqual({})
+    expect(r.tilstand.oppussing).toEqual({})
     // 7 → 8: periodene starter nå, uten oppgjør.
     expect(r.tilstand.oppgjor).toEqual([])
     expect(r.tilstand.ukestart.dag).toBe(3)

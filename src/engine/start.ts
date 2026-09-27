@@ -10,7 +10,7 @@ import { periodestart } from './oppgjor'
 import type { Dagsbilde, Periodestart, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 8
+export const SPILLVERSJON = 9
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -34,6 +34,7 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
         investert: BEDRIFTSTYPER.saftbod.pris,
         tjent: 0,
         inntektHistorikk: [],
+        forbedringer: 0,
       },
     ],
     nesteId: 2,
@@ -47,6 +48,8 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     hendelser: [],
     eiendommer: {},
     eiendomKostpris: {},
+    eiendomStandard: {},
+    oppussing: {},
     totaltLeie: 0,
     sparing: 0,
     totaltSparerente: 0,

@@ -7,6 +7,8 @@ import {
   ANSETTELSE_FAKTOR,
   ANSETTELSE_VEKST,
   BEDRIFTSTYPER,
+  FORBEDRING_PRISFAKTOR,
+  FORBEDRINGER,
   LEDER_MINSTEPRIS,
   MAKS_ANSATTE,
   MAKS_BELAANING,
@@ -23,7 +25,7 @@ import {
   STATUS_RENTEKUTT,
   statusnivaa,
 } from './eiendom'
-import type { Bedrift, BedriftstypeId, Beholdning, PapirId, Spilltilstand } from './types'
+import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
 
@@ -44,9 +46,24 @@ export function oppgraderingspris(b: Bedrift): number {
 
 // ─────────────────────────────────────────────── Inntekt
 
-/** Inntekten fra nivået alene, før ansatte og lønn. */
+/** Produktet av forbedringene som er kjøpt. */
+export function forbedringsfaktor(b: Bedrift): number {
+  return FORBEDRINGER[b.type].slice(0, b.forbedringer).reduce((f, x) => f * x.faktor, 1)
+}
+
+/** Neste forbedring som kan kjøpes (kanskje ikke låst opp ennå), eller null når alle er kjøpt. */
+export function nesteForbedring(b: Bedrift): Forbedring | null {
+  return FORBEDRINGER[b.type][b.forbedringer] ?? null
+}
+
+export function forbedringspris(b: Bedrift, f: Forbedring): number {
+  const t = BEDRIFTSTYPER[b.type]
+  return Math.round(t.oppgraderingspris * t.vekst ** (f.nivaa - 1) * FORBEDRING_PRISFAKTOR)
+}
+
+/** Inntekten fra nivået og forbedringene, før ansatte og lønn. */
 export function basisinntekt(b: Bedrift): number {
-  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa)
+  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b)
 }
 
 export function bedriftLonn(b: Bedrift): number {

@@ -20,14 +20,14 @@ import type {
  * Avkastningen er lavere enn i bedriftene, men den krever ingenting av deg.
  */
 export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
-  hybel: { id: 'hybel', navn: 'Hybel', sted: 'Møhlenpris, Bergen', emoji: '🛏️', pris: 250_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
-  leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', emoji: '🏠', pris: 2_500_000, avkastning: 0.28, maksAntall: 6, statuskrav: 0 },
-  rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', emoji: '🏘️', pris: 6_000_000, avkastning: 0.26, maksAntall: 5, statuskrav: 0 },
-  hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', emoji: '🏔️', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
-  kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', emoji: '🏢', pris: 80_000_000, avkastning: 0.25, maksAntall: 4, statuskrav: 0 },
-  kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', emoji: '🛍️', pris: 400_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
-  naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', emoji: '🏙️', pris: 1_500_000_000, avkastning: 0.2, maksAntall: 2, statuskrav: 3 },
-  oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', emoji: '🏝️', pris: 6_000_000_000, avkastning: 0.1, maksAntall: 1, statuskrav: 5 },
+  hybel: { id: 'hybel', navn: 'Hybel', sted: 'Møhlenpris, Bergen', by: 'Bergen', emoji: '🛏️', pris: 250_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
+  leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', emoji: '🏠', pris: 2_500_000, avkastning: 0.28, maksAntall: 6, statuskrav: 0 },
+  rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', emoji: '🏘️', pris: 6_000_000, avkastning: 0.26, maksAntall: 5, statuskrav: 0 },
+  hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', emoji: '🏔️', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
+  kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', emoji: '🏢', pris: 80_000_000, avkastning: 0.25, maksAntall: 4, statuskrav: 0 },
+  kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', emoji: '🛍️', pris: 400_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
+  naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', emoji: '🏙️', pris: 1_500_000_000, avkastning: 0.2, maksAntall: 2, statuskrav: 3 },
+  oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', emoji: '🏝️', pris: 6_000_000_000, avkastning: 0.1, maksAntall: 1, statuskrav: 5 },
 }
 
 export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
@@ -37,8 +37,40 @@ export const EIENDOM_SYNLIG_VED = 0.8
 /** Meglerhonorar når du selger. */
 export const MEGLERHONORAR = 0.03
 
+// ─────────────────────────────────────────────── Standard og oppussing
+
+/**
+ * Standardene en eiendomstype kan pusses opp til. Oppussing gir mer leie og
+ * høyere verdi, men koster en andel av prisen per enhet og tar noen dager —
+ * uten leie mens håndverkerne holder på.
+ */
+export const STANDARDER = [
+  { navn: 'Normal', leie: 1, verdi: 1, kostnad: 0, dager: 0 },
+  { navn: 'Oppusset', leie: 1.3, verdi: 1.15, kostnad: 0.25, dager: 2 },
+  { navn: 'Luksus', leie: 1.7, verdi: 1.35, kostnad: 0.4, dager: 3 },
+]
+
+/*
+ * `?.` på eiendomStandard og oppussing er med vilje: migreringskjeden kjører
+ * dagens motorkode på lagringer fra før feltene fantes (f.eks. regnes
+ * nettoformuen ut i trinn 4 → 5). Da betyr et manglende felt «normal
+ * standard» og «ingen oppussing».
+ */
+export function standard(s: Spilltilstand, id: EiendomId): number {
+  return s.eiendomStandard?.[id] ?? 0
+}
+
+/** Pris (og verdi) for én enhet: katalogpris × eiendomsindeks × standardens verdifaktor. */
 export function eiendomspris(s: Spilltilstand, id: EiendomId): number {
-  return EIENDOMSTYPER[id].pris * s.marked.eiendom.kurs
+  return EIENDOMSTYPER[id].pris * s.marked.eiendom.kurs * STANDARDER[standard(s, id)].verdi
+}
+
+/** Hva det koster å pusse opp alle enhetene av en type ett trinn, eller null når det ikke går. */
+export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
+  const neste = STANDARDER[standard(s, id) + 1]
+  const antall = s.eiendommer[id] ?? 0
+  if (!neste || antall === 0) return null
+  return antall * EIENDOMSTYPER[id].pris * s.marked.eiendom.kurs * neste.kostnad
 }
 
 export function eiendomsverdi(s: Spilltilstand): number {
@@ -47,13 +79,31 @@ export function eiendomsverdi(s: Spilltilstand): number {
   return sum
 }
 
+/** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren. */
+export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
+  const t = EIENDOMSTYPER[id]
+  return (t.pris * s.marked.eiendom.kurs * t.avkastning * STANDARDER[standard(s, id)].leie) / 3600
+}
+
 export function leiePerSek(s: Spilltilstand): number {
   let sum = 0
   for (const id of EIENDOMSSTIGEN) {
-    const t = EIENDOMSTYPER[id]
-    sum += ((s.eiendommer[id] ?? 0) * eiendomspris(s, id) * t.avkastning) / 3600
+    // Under oppussing står enhetene tomme.
+    if (s.oppussing?.[id]) continue
+    sum += (s.eiendommer[id] ?? 0) * leieHverPerSek(s, id)
   }
   return sum
+}
+
+/** Fullfører oppussinger som er ferdige. Muterer — brukes på kopier. */
+export function sjekkOppussing(s: Spilltilstand): void {
+  for (const id of EIENDOMSSTIGEN) {
+    const o = s.oppussing[id]
+    if (o && s.sek >= o.ferdigSek) {
+      s.eiendomStandard[id] = o.standard
+      delete s.oppussing[id]
+    }
+  }
 }
 
 // ─────────────────────────────────────────────── Luksus

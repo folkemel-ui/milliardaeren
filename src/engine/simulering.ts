@@ -5,7 +5,7 @@
 
 import { betalRente, sjekkMargin } from './bank'
 import { bedriftInntektPerSek, inntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
-import { leiePerSek } from './eiendom'
+import { leiePerSek, sjekkOppussing } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, PAPIRER } from './marked'
 import { erDagsskifte, erHelg } from './kalender'
 import { gisUtAvis } from './avis'
@@ -59,6 +59,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   s.totaltLeie += leie
   betalRente(s)
   s.sek += 1
+  // Oppussing som er ferdig nå, gir ny standard fra neste sekund.
+  sjekkOppussing(s)
 
   if (s.sek % MARKED_TIKK_SEK === 0) markedstikk(s.marked, terning, erHelg(s.sek))
   // Utbytte hver morgen børsen er åpen.

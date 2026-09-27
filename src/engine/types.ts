@@ -45,6 +45,17 @@ export interface Bedrift {
   tjent: number
   /** Inntekt per sekund, målt hvert minutt — de siste to timene. */
   inntektHistorikk: number[]
+  /** Hvor mange av bransjens unike forbedringer som er kjøpt (de kjøpes i rekkefølge). */
+  forbedringer: number
+}
+
+export interface Forbedring {
+  navn: string
+  beskrivelse: string
+  /** Nivået bedriften må ha nådd. */
+  nivaa: number
+  /** Inntekten ganges med dette. */
+  faktor: number
 }
 
 // ─────────────────────────────────────────────── Markedet
@@ -108,10 +119,13 @@ export type EiendomId =
   | 'hybel' | 'leilighet' | 'rekkehus' | 'hytte'
   | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
 
+export type By = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten'
+
 export interface Eiendomstype {
   id: EiendomId
   navn: string
   sted: string
+  by: By
   emoji: string
   /** Pris når eiendomsindeksen står på 1. */
   pris: number
@@ -256,6 +270,10 @@ export interface Spilltilstand {
   eiendommer: Partial<Record<EiendomId, number>>
   /** Hva du har betalt for eiendommene du eier, per type. Gir avkastningen. */
   eiendomKostpris: Partial<Record<EiendomId, number>>
+  /** Standarden per eiendomstype: 0 normal, 1 oppusset, 2 luksus. Gjelder alle enhetene av typen. */
+  eiendomStandard: Partial<Record<EiendomId, number>>
+  /** Pågående oppussinger: hvilken standard det pusses opp til, og når det er ferdig. */
+  oppussing: Partial<Record<EiendomId, { standard: number; ferdigSek: number }>>
   totaltLeie: number
   /** Penger på sparekontoen. */
   sparing: number

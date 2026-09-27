@@ -1,12 +1,29 @@
-import { EIENDOM_SYNLIG_VED, EIENDOMSSTIGEN, EIENDOMSTYPER, eiendomspris, eiendomsverdi, leiePerSek, MEGLERHONORAR, statusnivaa } from '../../engine/eiendom'
-import { eiendomSynlig, kjopEiendom, selgEiendom } from '../../engine/handlinger'
-import type { EiendomId, Spilltilstand } from '../../engine/types'
+import { useState } from 'react'
+import {
+  EIENDOM_SYNLIG_VED,
+  EIENDOMSSTIGEN,
+  EIENDOMSTYPER,
+  eiendomspris,
+  eiendomsverdi,
+  leieHverPerSek,
+  leiePerSek,
+  MEGLERHONORAR,
+  oppussingspris,
+  standard,
+  STANDARDER,
+  statusnivaa,
+} from '../../engine/eiendom'
+import { eiendomSynlig, kjopEiendom, pussOpp, selgEiendom } from '../../engine/handlinger'
+import type { By, EiendomId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { endring, kortKroner, perSek, tall } from '../format'
+import { endring, kortKroner, perSek, tall, varighet } from '../format'
 import { Minigraf } from '../komponenter/Linjegraf'
+import { Norgeskart } from '../komponenter/Norgeskart'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
+  const [by, settBy] = useState<By | null>(null)
   const synlige = EIENDOMSSTIGEN.filter((id) => eiendomSynlig(s, id))
+  const viste = by ? synlige.filter((id) => EIENDOMSTYPER[id].by === by) : synlige
   const nesteSkjult = EIENDOMSSTIGEN.find((id) => !eiendomSynlig(s, id))
   const indeks = s.marked.eiendom
   const indeksEndring = indeks.historikk.length ? indeks.kurs / indeks.historikk[0] - 1 : 0
@@ -26,6 +43,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
             <span className="pluss">{perSek(leiePerSek(s))}</span>
           </div>
         </div>
+        <Norgeskart s={s} valgt={by} velg={settBy} />
         <div className="indeks">
           <div>
             <span className="etikett">Eiendomsprisene</span>
@@ -33,14 +51,21 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
           </div>
           <Minigraf verdier={[...indeks.historikk, indeks.kurs]} />
         </div>
-        <p className="dempet liten">Leien kommer også mens du er borte — eiendom trenger ingen leder.</p>
+        <p className="dempet liten">Leien kommer også mens du er borte — eiendom trenger ingen leder. Trykk på en by for å vise bare den.</p>
       </div>
 
+      {by && (
+        <button className="filterbrikke" onClick={() => settBy(null)}>
+          Viser {by} · <strong>Vis alle</strong> ✕
+        </button>
+      )}
+
       <ul className="kortliste">
-        {synlige.map((id) => (
+        {viste.map((id) => (
           <Eiendomskort key={id} s={s} id={id} />
         ))}
-        {nesteSkjult && (
+        {by && viste.length === 0 && <p className="kort kort-tomt">Ingen eiendommer til salgs i {by} ennå.</p>}
+        {!by && nesteSkjult && (
           <li className="kort kjopskort laast">
             <div className="bedrift-ikon dempet-ikon" aria-hidden="true">
               <span className="bedrift-emoji">{EIENDOMSTYPER[nesteSkjult].emoji}</span>
@@ -68,9 +93,12 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
   const t = EIENDOMSTYPER[id]
   const eier = s.eiendommer[id] ?? 0
   const pris = eiendomspris(s, id)
-  const leieHver = (pris * t.avkastning) / 3600
+  const st = standard(s, id)
   const fullt = eier >= t.maksAntall
   const manglerStatus = statusnivaa(s) < t.statuskrav
+  const oppussing = s.oppussing[id]
+  const oppussingPris = oppussingspris(s, id)
+  const nesteStandard = STANDARDER[st + 1]
 
   return (
     <li className="kort bedriftskort">
@@ -79,34 +107,58 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
           <span className="bedrift-emoji">{t.emoji}</span>
         </div>
         <div className="bedriftskort-midt">
-          <h2>{t.navn}</h2>
+          <h2>
+            {t.navn}
+            {st > 0 && <span className={`merke-standard s${st}`}>{STANDARDER[st].navn}</span>}
+          </h2>
           <span className="dempet">{t.sted}</span>
         </div>
         <div className="eiendom-tall">
-          <span className="pluss">{perSek(leieHver)}</span>
+          {oppussing ? <span className="dempet">Ingen leie</span> : <span className="pluss">{perSek(leieHverPerSek(s, id))}</span>}
           <span className="dempet liten">
             {eier} / {t.maksAntall} eid
           </span>
         </div>
       </div>
       <p className="dempet liten">
-        Avkastning {tall(t.avkastning * 100)} % per time
+        Avkastning {tall(t.avkastning * STANDARDER[st].leie * 100)} % per time
         {t.statuskrav > 0 && ` · krever statusnivå ${t.statuskrav}`}
       </p>
-      <div className={eier > 0 ? 'eiendom-knapper' : 'eiendom-knapper en'}>
-        <button
-          className="knapp knapp-gull"
-          disabled={fullt || manglerStatus || s.kontanter < pris}
-          onClick={() => utfor(kjopEiendom(s, id))}
-        >
-          {fullt ? 'Alle kjøpt' : manglerStatus ? `Krever status ${t.statuskrav}` : `Kjøp · ${kortKroner(pris)}`}
-        </button>
-        {eier > 0 && (
-          <button className="knapp" onClick={() => utfor(selgEiendom(s, id))}>
-            Selg · {kortKroner(pris * (1 - MEGLERHONORAR))}
-          </button>
-        )}
-      </div>
+
+      {oppussing ? (
+        <div className="oppussing-pågår">
+          <span>
+            🛠️ Pusses opp til <strong>{STANDARDER[oppussing.standard].navn.toLowerCase()}</strong>
+          </span>
+          <span className="dempet liten">Ferdig om {varighet(Math.max(0, oppussing.ferdigSek - s.sek))} · ingen leie så lenge</span>
+        </div>
+      ) : (
+        <>
+          <div className={eier > 0 ? 'eiendom-knapper' : 'eiendom-knapper en'}>
+            <button
+              className="knapp knapp-gull"
+              disabled={fullt || manglerStatus || s.kontanter < pris}
+              onClick={() => utfor(kjopEiendom(s, id))}
+            >
+              {fullt ? 'Alle kjøpt' : manglerStatus ? `Krever status ${t.statuskrav}` : `Kjøp · ${kortKroner(pris)}`}
+            </button>
+            {eier > 0 && (
+              <button className="knapp" onClick={() => utfor(selgEiendom(s, id))}>
+                Selg · {kortKroner(pris * (1 - MEGLERHONORAR))}
+              </button>
+            )}
+          </div>
+          {eier > 0 && nesteStandard && oppussingPris !== null && (
+            <button className="knapp knapp-oppussing" disabled={s.kontanter < oppussingPris} onClick={() => utfor(pussOpp(s, id))}>
+              <span>
+                Pusse opp til {nesteStandard.navn.toLowerCase()} · +{tall((nesteStandard.leie / STANDARDER[st].leie - 1) * 100)} % leie ·{' '}
+                {nesteStandard.dager} dager
+              </span>
+              <strong>{kortKroner(oppussingPris)}</strong>
+            </button>
+          )}
+        </>
+      )}
     </li>
   )
 }
