@@ -5,10 +5,11 @@ import { BEDRIFTSTYPER, STARTKAPITAL } from './innhold'
 import { lagMarked } from './marked'
 import { START_LAGER } from './eiendom'
 import { lagDagsbilde } from './avis'
+import { nullPerKlasse } from './portefolje'
 import type { Dagsbilde, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 5
+export const SPILLVERSJON = 7
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -22,7 +23,17 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     kontanter: STARTKAPITAL,
     // Saftboden er gratis, men bokføres til det den er verdt.
     bedrifter: [
-      { id: 'b1', type: 'saftbod', nivaa: 1, startetSek: 0, ansatte: 0, leder: false, investert: BEDRIFTSTYPER.saftbod.pris },
+      {
+        id: 'b1',
+        type: 'saftbod',
+        nivaa: 1,
+        startetSek: 0,
+        ansatte: 0,
+        leder: false,
+        investert: BEDRIFTSTYPER.saftbod.pris,
+        tjent: 0,
+        inntektHistorikk: [],
+      },
     ],
     nesteId: 2,
     historikk: { intervall: HISTORIKK_INTERVALL, punkter: [] },
@@ -34,13 +45,17 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     totaltUtbytte: 0,
     hendelser: [],
     eiendommer: {},
+    eiendomKostpris: {},
     totaltLeie: 0,
+    sparing: 0,
+    totaltSparerente: 0,
     luksus: [],
     lager: { ...START_LAGER },
     avis: [],
     avisLest: 0,
     // Fylles rett under — bildet trenger en ferdig tilstand å ta bilde av.
     forrigeDag: null as unknown as Dagsbilde,
+    dagensFlyt: nullPerKlasse(),
     prestasjoner: {},
     rekorder: { hoyesteInntekt: 0, storsteHandel: 0, storsteGevinst: 0 },
   }

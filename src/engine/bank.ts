@@ -5,6 +5,7 @@
 
 import { bedriftsverdi, belaaningsgrad, rentePerSek } from './formler'
 import { utforEiendomssalg, utforLuksussalg, utforSalg } from './handel'
+import { flyt } from './portefolje'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
 import { BEDRIFTSTYPER, MAKS_BELAANING, MAKS_HENDELSER, MARGINKRAV, TVANGSSALG_ANDEL } from './innhold'
 import { PAPIRER } from './marked'
@@ -15,13 +16,19 @@ export function leggTilHendelse(s: Spilltilstand, h: Omit<Hendelse, 'sek'>): voi
   if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
 }
 
-/** Renten trekkes fra kontantene. Har du ikke nok, legges resten til gjelden. */
+/**
+ * Renten trekkes fra kontantene, så fra sparekontoen. Har du ikke nok,
+ * legges resten til gjelden.
+ */
 export function betalRente(s: Spilltilstand): void {
   const rente = rentePerSek(s)
   if (rente <= 0) return
-  const betalt = Math.min(rente, Math.max(0, s.kontanter))
-  s.kontanter -= betalt
-  s.gjeld += rente - betalt
+  const fraKontanter = Math.min(rente, Math.max(0, s.kontanter))
+  s.kontanter -= fraKontanter
+  const fraSparing = Math.min(rente - fraKontanter, s.sparing)
+  s.sparing -= fraSparing
+  flyt(s, 'sparing', -fraSparing)
+  s.gjeld += rente - fraKontanter - fraSparing
 }
 
 /** Bruker kontanter til å nedbetale, men aldri mer enn gjelden. */
@@ -32,7 +39,7 @@ function nedbetalMed(s: Spilltilstand, belop: number): void {
 }
 
 /**
- * Marginkravet: er gjelden over grensen, tar banken først kontantene dine,
+ * Marginkravet: er gjelden over grensen, tar banken først kontantene og sparepengene dine,
  * så investeringene — de største postene først — og deretter eiendom og
  * luksus, til belåningen er tilbake på det du fikk låne. Holder ikke det,
  * tar banken over bedrifter (den mest
@@ -42,6 +49,10 @@ function nedbetalMed(s: Spilltilstand, belop: number): void {
 export function sjekkMargin(s: Spilltilstand): void {
   if (s.gjeld <= 0 || belaaningsgrad(s) <= MARGINKRAV) return
 
+  // Sparekontoen tømmes inn på brukskontoen først.
+  flyt(s, 'sparing', -s.sparing)
+  s.kontanter += s.sparing
+  s.sparing = 0
   nedbetalMed(s, s.kontanter)
   const solgt: string[] = []
   const poster = (Object.keys(s.beholdning) as PapirId[]).sort(

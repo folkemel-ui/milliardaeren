@@ -5,17 +5,27 @@ import {
   maksNyttLaan,
   papirverdi,
   rentePerSek,
+  rentesats,
+  sparerentePerSek,
 } from '../../engine/formler'
-import { borsenStengt, kjopPapir, laan, nedbetal, selgPapir } from '../../engine/handlinger'
+import { borsenStengt, kjopPapir, laan, nedbetal, selgPapir, settInn, taUt } from '../../engine/handlinger'
 import { erHelg } from '../../engine/kalender'
-import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../../engine/innhold'
+import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME, SPARERENTE_PER_TIME } from '../../engine/innhold'
 import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
+import { portefolje, sum, type Aktivaklasse } from '../../engine/portefolje'
 import type { PapirId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { antall as fmtAntall, endring, kortKroner, kroner, kurs as fmtKurs, perSek, tall, varighet } from '../format'
+import { antall as fmtAntall, endring, fortegnKroner, kortKroner, kroner, kurs as fmtKurs, perSek, tall, varighet } from '../format'
 import { Linjegraf, Minigraf } from '../komponenter/Linjegraf'
 
-type Underfane = 'aksjer' | 'krypto' | 'bank'
+type Underfane = 'oversikt' | 'aksjer' | 'krypto' | 'bank'
+
+const UNDERFANER: { id: Underfane; navn: string }[] = [
+  { id: 'oversikt', navn: 'Oversikt' },
+  { id: 'aksjer', navn: 'Aksjer' },
+  { id: 'krypto', navn: 'Krypto' },
+  { id: 'bank', navn: 'Bank' },
+]
 
 const RISIKO_TEKST = { lav: 'Lav risiko', middels: 'Middels risiko', høy: 'Høy risiko' } as const
 
@@ -25,8 +35,8 @@ function endringTo(s: Spilltilstand, id: PapirId): number {
   return h.length ? s.marked.kurser[id].kurs / h[0] - 1 : 0
 }
 
-export function Investeringer({ s }: { s: Spilltilstand }) {
-  const [fane, settFane] = useState<Underfane>('aksjer')
+export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom: () => void }) {
+  const [fane, settFane] = useState<Underfane>('oversikt')
   const [valgt, settValgt] = useState<PapirId | null>(null)
 
   if (valgt) return <Papirdetalj s={s} id={valgt} tilbake={() => settValgt(null)} />
@@ -34,12 +44,18 @@ export function Investeringer({ s }: { s: Spilltilstand }) {
   return (
     <section className="skjerm">
       <div className="segment" role="tablist">
-        {(['aksjer', 'krypto', 'bank'] as const).map((f) => (
-          <button key={f} role="tab" aria-selected={fane === f} className={fane === f ? 'aktiv' : ''} onClick={() => settFane(f)}>
-            {f === 'aksjer' ? 'Aksjer' : f === 'krypto' ? 'Krypto' : 'Bank'}
+        {UNDERFANER.map((f) => (
+          <button key={f.id} role="tab" aria-selected={fane === f.id} className={fane === f.id ? 'aktiv' : ''} onClick={() => settFane(f.id)}>
+            {f.navn}
           </button>
         ))}
       </div>
+      {fane === 'oversikt' && (
+        <Oversikt
+          s={s}
+          velg={(k) => (k === 'eiendom' ? tilEiendom() : settFane(k === 'aksje' ? 'aksjer' : k === 'sparing' ? 'bank' : 'krypto'))}
+        />
+      )}
       {fane === 'aksjer' && <Papirliste s={s} klasse="aksje" velg={settValgt} />}
       {fane === 'krypto' && (
         <>
@@ -52,12 +68,90 @@ export function Investeringer({ s }: { s: Spilltilstand }) {
   )
 }
 
+// ─────────────────────────────────────────────── Oversikt
+
+const KLASSENAVN: Record<Aktivaklasse, string> = {
+  aksje: 'Aksjer',
+  krypto: 'Krypto',
+  eiendom: 'Eiendom',
+  sparing: 'Sparekonto',
+}
+
+function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Aktivaklasse) => void }) {
+  const poster = portefolje(s)
+  const total = sum(poster)
+  const avkastning = total.verdi - total.kostpris
+  const startIDag = total.verdi - total.iDag
+
+  return (
+    <>
+      <div className="kort oversikt">
+        <span className="etikett">Investeringene dine</span>
+        <span className="tall-kjempe">{kortKroner(total.verdi)}</span>
+        <div className="oversikt-tall">
+          <div>
+            <span className="etikett">Kursendring i dag</span>
+            <Endring kroner={total.iDag} andel={startIDag > 0 ? total.iDag / startIDag : 0} />
+          </div>
+          <div>
+            <span className="etikett">Total avkastning</span>
+            <Endring kroner={avkastning} andel={total.kostpris > 0 ? avkastning / total.kostpris : 0} />
+          </div>
+        </div>
+        {total.verdi > 0 && (
+          <div className="fordeling" role="img" aria-label="Fordeling av investeringene">
+            {poster
+              .filter((p) => p.verdi > 0)
+              .map((p) => (
+                <span key={p.klasse} className={`fordeling-del ${p.klasse}`} style={{ flexGrow: p.verdi }} />
+              ))}
+          </div>
+        )}
+      </div>
+
+      <ul className="kortliste">
+        {poster.map((p) => {
+          const avk = p.verdi - p.kostpris
+          return (
+            <li key={p.klasse}>
+              <button className="kort klasserad" onClick={() => velg(p.klasse)}>
+                <span className={`klasse-prikk ${p.klasse}`} aria-hidden="true" />
+                <span className="klasserad-navn">
+                  <strong>{KLASSENAVN[p.klasse]}</strong>
+                  <span className="dempet liten">
+                    {total.verdi > 0 ? `${tall((p.verdi / total.verdi) * 100)} % av porteføljen` : 'Ingenting ennå'}
+                  </span>
+                </span>
+                <span className="papirrad-kurs">
+                  <span>{kortKroner(p.verdi)}</span>
+                  {p.verdi > 0 && <Endring kroner={avk} andel={p.kostpris > 0 ? avk / p.kostpris : 0} liten />}
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="dempet liten">Bedriftene er ikke med her — de finner du under Bedrifter.</p>
+    </>
+  )
+}
+
+/** «+kr 1 240 · +4,6 %» i grønt, eller rødt når det går nedover. */
+function Endring({ kroner: k, andel, liten = false }: { kroner: number; andel: number; liten?: boolean }) {
+  return (
+    <span className={`${k >= 0 ? 'pluss' : 'minus'}${liten ? ' liten' : ''}`}>
+      {fortegnKroner(k)} · {endring(andel)}
+    </span>
+  )
+}
+
 // ─────────────────────────────────────────────── Lister
 
 function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | 'krypto'; velg: (id: PapirId) => void }) {
   const ider = klasse === 'aksje' ? AKSJER : KRYPTO
   const verdi = papirverdi(s, klasse)
   const kost = ider.reduce((sum, id) => sum + (s.beholdning[id]?.kostpris ?? 0), 0)
+  const eide = ider.filter((id) => s.beholdning[id])
 
   return (
     <>
@@ -67,26 +161,48 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
           <span className="etikett">{klasse === 'aksje' ? 'Dine aksjer' : 'Din krypto'}</span>
           <span className="tall-stort">{kortKroner(verdi)}</span>
         </div>
-        {kost > 0 && (
-          <span className={verdi >= kost ? 'pluss' : 'minus'}>
-            {endring(verdi / kost - 1)}
-          </span>
-        )}
+        {kost > 0 && <Endring kroner={verdi - kost} andel={verdi / kost - 1} />}
       </div>
+
+      {eide.length > 0 && (
+        <ul className="kortliste papirliste">
+          {eide.map((id) => {
+            const b = s.beholdning[id]!
+            const v = b.antall * s.marked.kurser[id].kurs
+            return (
+              <li key={id}>
+                <button className="kort papirrad eid" onClick={() => velg(id)}>
+                  <span className="ticker">{id}</span>
+                  <span className="papirrad-navn">
+                    <strong>{PAPIRER[id].navn}</strong>
+                    <span className="dempet liten">
+                      {fmtAntall(b.antall)} {klasse === 'aksje' ? 'aksjer' : 'stk'}
+                    </span>
+                  </span>
+                  <Minigraf verdier={s.marked.kurser[id].historikk} />
+                  <span className="papirrad-kurs">
+                    <span>{kroner(v)}</span>
+                    <Endring kroner={v - b.kostpris} andel={v / b.kostpris - 1} liten />
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      <h2 className="seksjon-tittel">{klasse === 'aksje' ? 'Børsen' : 'Kryptomarkedet'}</h2>
       <ul className="kortliste papirliste">
         {ider.map((id) => {
           const p = PAPIRER[id]
           const e = endringTo(s, id)
-          const eier = s.beholdning[id]
           return (
             <li key={id}>
               <button className="kort papirrad" onClick={() => velg(id)}>
                 <span className="ticker">{id}</span>
                 <span className="papirrad-navn">
                   <strong>{p.navn}</strong>
-                  <span className="dempet liten">
-                    {eier ? `Du eier ${fmtAntall(eier.antall)}` : klasse === 'aksje' ? RISIKO_TEKST[p.risiko] : 'Krypto'}
-                  </span>
+                  <span className="dempet liten">{klasse === 'aksje' ? RISIKO_TEKST[p.risiko] : 'Krypto'}</span>
                 </span>
                 <Minigraf verdier={s.marked.kurser[id].historikk} />
                 <span className="papirrad-kurs">
@@ -267,6 +383,53 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
 
 // ─────────────────────────────────────────────── Banken
 
+function Sparekonto({ s }: { s: Spilltilstand }) {
+  const andeler = [0.25, 0.5, 1]
+  return (
+    <div className="kort sparekonto">
+      <div className="bank-rad">
+        <div>
+          <span className="etikett">Sparekonto</span>
+          <span className="tall-stort">{kroner(s.sparing)}</span>
+        </div>
+        <div className="bank-rente">
+          <span className="etikett">Rente {tall(SPARERENTE_PER_TIME * 100)} % per time</span>
+          <span className={s.sparing > 0 ? 'pluss' : 'dempet'}>{perSek(sparerentePerSek(s))}</span>
+        </div>
+      </div>
+      <p className="dempet liten">
+        Risikofritt: renten legges til hvert sekund, også mens du er borte. Opptjent så langt: {kroner(s.totaltSparerente)}.
+      </p>
+      <div className="spare-rad">
+        <span className="etikett">Sett inn</span>
+        <div className="andelsknapper">
+          {andeler.map((a) => {
+            const belop = a === 1 ? s.kontanter : Math.floor(s.kontanter * a)
+            return (
+              <button key={a} className="knapp knapp-liten" disabled={belop < 1} onClick={() => utfor(settInn(s, belop))}>
+                {a === 1 ? 'Alt' : kortKroner(belop)}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      <div className="spare-rad">
+        <span className="etikett">Ta ut</span>
+        <div className="andelsknapper">
+          {andeler.map((a) => {
+            const belop = a === 1 ? s.sparing : Math.floor(s.sparing * a)
+            return (
+              <button key={a} className="knapp knapp-liten" disabled={belop < 1} onClick={() => utfor(taUt(s, belop))}>
+                {a === 1 ? 'Alt' : kortKroner(belop)}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Bank({ s }: { s: Spilltilstand }) {
   const grad = belaaningsgrad(s)
   const tilgjengelig = maksNyttLaan(s)
@@ -275,6 +438,7 @@ function Bank({ s }: { s: Spilltilstand }) {
 
   return (
     <>
+      <Sparekonto s={s} />
       <div className="kort bank">
         <div className="bank-rad">
           <div>
@@ -282,7 +446,7 @@ function Bank({ s }: { s: Spilltilstand }) {
             <span className="tall-stort">{kroner(s.gjeld)}</span>
           </div>
           <div className="bank-rente">
-            <span className="etikett">Rente {tall(RENTE_PER_TIME * 100)} % per time</span>
+            <span className="etikett">Rente {tall(rentesats(s) * 100, rentesats(s) === RENTE_PER_TIME ? 0 : 1)} % per time</span>
             <span className={s.gjeld > 0 ? 'minus' : 'dempet'}>{perSek(-rentePerSek(s))}</span>
           </div>
         </div>

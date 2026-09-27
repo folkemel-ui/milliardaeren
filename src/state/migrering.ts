@@ -14,10 +14,11 @@
 import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { lagEiendomsindeks, lagMarked } from '../engine/marked'
-import { START_LAGER } from '../engine/eiendom'
+import { EIENDOMSTYPER, START_LAGER } from '../engine/eiendom'
 import { lagDagsbilde } from '../engine/avis'
 import { sjekkPrestasjoner } from '../engine/prestasjoner'
-import type { BedriftstypeId, Spilltilstand } from '../engine/types'
+import { klasseverdier, nullPerKlasse } from '../engine/portefolje'
+import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
 
@@ -75,6 +76,33 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     } as unknown as Spilltilstand
     n.forrigeDag = lagDagsbilde(n)
     sjekkPrestasjoner(n)
+    return n as unknown as Raatilstand
+  },
+  /* 5 → 6: regnskap per bedrift, sparekonto og kostpris på eiendom.
+     Bedriftene har ikke ført regnskap før, så «tjent» starter på null.
+     Eiendom du alt eier, føres til dagens pris — den faktiske kjøpsprisen
+     ble ikke lagret — så avkastningen på den teller fra nå. */
+  5: (s) => {
+    const eiendommer = (s.eiendommer ?? {}) as Record<EiendomId, number>
+    const indeks = ((s.marked as Raatilstand).eiendom as { kurs: number }).kurs
+    const eiendomKostpris: Partial<Record<EiendomId, number>> = {}
+    for (const [id, antall] of Object.entries(eiendommer) as [EiendomId, number][]) {
+      eiendomKostpris[id] = antall * EIENDOMSTYPER[id].pris * indeks
+    }
+    return {
+      ...s,
+      bedrifter: (s.bedrifter as Raatilstand[]).map((b) => ({ tjent: 0, inntektHistorikk: [], ...b })),
+      eiendomKostpris,
+      sparing: 0,
+      totaltSparerente: 0,
+    }
+  },
+  /* 6 → 7: porteføljens «i dag». Verdien ved dagens start er ukjent for en
+     gammel lagring, så den settes til verdien nå: «i dag» teller fra nå og
+     frem til neste dagsskifte, og er riktig fra da av. */
+  6: (s) => {
+    const n = { ...s, dagensFlyt: nullPerKlasse() } as unknown as Spilltilstand
+    n.forrigeDag = { ...n.forrigeDag, verdier: klasseverdier(n) }
     return n as unknown as Raatilstand
   },
 }

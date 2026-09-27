@@ -39,15 +39,25 @@ export function kurs(n: number): string {
   return `kr ${tall(n, 2)}`
 }
 
+/** «+kr 1 240», «−kr 141»; kort form over en million. */
+export function fortegnKroner(n: number): string {
+  const abs = Math.abs(n)
+  return `${n >= 0 ? '+' : '−'}${abs >= 1e6 ? kortKroner(abs) : kroner(abs)}`
+}
+
 /** «+3,2 %», «−1,0 %». */
 export function endring(andel: number): string {
   const tekst = tall(Math.abs(andel * 100), 1)
   return `${andel >= 0 ? '+' : '−'}${tekst} %`
 }
 
-/** Antall aksjer eller mynter: brøkdeler bare når det trengs. */
+/** Antall aksjer eller mynter: brøkdeler bare når det trengs, og færre jo større tallet er. */
 export function antall(n: number): string {
-  return Number.isInteger(n) ? tall(n) : tall(n, 4)
+  if (Number.isInteger(n)) return tall(n)
+  const abs = Math.abs(n)
+  if (abs >= 100) return tall(Math.floor(n))
+  if (abs >= 1) return tall(n, 2)
+  return tall(n, 4)
 }
 
 /** «2 t 5 min», «45 s». */

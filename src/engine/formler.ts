@@ -12,6 +12,7 @@ import {
   MAKS_BELAANING,
   MILEPAELER,
   RENTE_PER_TIME,
+  SPARERENTE_PER_TIME,
 } from './innhold'
 import { handelskurs, KURTASJE, PAPIRER, rundAntall } from './marked'
 import {
@@ -88,9 +89,13 @@ export function rentePerSek(s: Spilltilstand): number {
   return (s.gjeld * rentesats(s)) / 3600
 }
 
-/** Det som faktisk kommer inn hvert sekund: bedriftene og leien, minus renter. */
+export function sparerentePerSek(s: Spilltilstand): number {
+  return (s.sparing * SPARERENTE_PER_TIME) / 3600
+}
+
+/** Det som faktisk kommer inn hvert sekund: bedriftene, leien og sparerenten, minus lånerenter. */
 export function nettoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) + leiePerSek(s) - rentePerSek(s)
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) - rentePerSek(s)
 }
 
 // ─────────────────────────────────────────────── Formue
@@ -108,6 +113,7 @@ export function papirverdi(s: Spilltilstand, klasse?: 'aksje' | 'krypto'): numbe
 export function eiendeler(s: Spilltilstand): number {
   return (
     s.kontanter +
+    s.sparing +
     s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) +
     papirverdi(s) +
     eiendomsverdi(s) +

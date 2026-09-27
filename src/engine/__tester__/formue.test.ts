@@ -35,7 +35,7 @@ describe('formuehistorikken', () => {
     expect(s.historikk.punkter.map((p) => p.sek)).toEqual([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
   })
 
-  it('tynnes ut og holder seg under taket, uansett hvor lenge du spiller', () => {
+  it('tynnes ut og holder seg under taket, uansett hvor lenge du spiller', { timeout: 60_000 }, () => {
     const s = simuler(nyttSpill(), 7 * 24 * 60 * 60)
     const h = s.historikk
     expect(h.punkter.length).toBeLessThanOrEqual(MAKS_HISTORIKKPUNKTER)

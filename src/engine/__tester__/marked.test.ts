@@ -7,6 +7,7 @@ import { AKSJER, KRYPTO, lagMarked, MAKS_KURSHISTORIKK, PAPIRER } from '../marke
 import { DAG_SEK } from '../kalender'
 import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../innhold'
 import type { PapirId, Spilltilstand } from '../types'
+import { bedrift } from './hjelp'
 
 function rik(kontanter = 1_000_000): Spilltilstand {
   const s = nyttSpill()
@@ -149,7 +150,7 @@ describe('banken', () => {
   it('konkurs: banken tar over bedrifter, men lar deg beholde én', () => {
     const s = rik(0)
     s.hoyesteFormue = 1e9
-    s.bedrifter.push({ id: 'b2', type: 'kiosk', nivaa: 10, startetSek: 0, ansatte: 0, leder: false, investert: 100_000 })
+    s.bedrifter.push(bedrift('kiosk', { id: 'b2', nivaa: 10, investert: 100_000 }))
     s.gjeld = 1_000_000
     const etter = simuler(s, 1)
     expect(etter.bedrifter.map((b) => b.type)).toEqual(['saftbod'])

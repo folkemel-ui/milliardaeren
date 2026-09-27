@@ -9,6 +9,7 @@ import { BEDRIFTSTYPER } from './innhold'
 import { EIENDOMSSTIGEN, LUKSUS } from './eiendom'
 import { AKSJER, KRYPTO, PAPIRER } from './marked'
 import { PRESTASJONER } from './prestasjoner'
+import { klasseverdier, nullPerKlasse } from './portefolje'
 import type { Terning } from './rng'
 import type { Avisutgave, Dagsbilde, Overskrift, PapirId, Spilltilstand } from './types'
 import { dagnummer } from './kalender'
@@ -27,6 +28,7 @@ export function lagDagsbilde(s: Spilltilstand): Dagsbilde {
     eiendommer: Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0),
     luksus: [...s.luksus],
     sek: s.sek,
+    verdier: klasseverdier(s),
   }
 }
 
@@ -133,5 +135,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const utgave: Avisutgave = { dag: dagnummer(s.sek), saker }
   s.avis.push(utgave)
   if (s.avis.length > MAKS_UTGAVER) s.avis.splice(0, s.avis.length - MAKS_UTGAVER)
+  // Ny dag: nytt utgangspunkt for avisen og for porteføljens «i dag».
   s.forrigeDag = lagDagsbilde(s)
+  s.dagensFlyt = nullPerKlasse()
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+﻿import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { ansett, ansettLeder, kjopBedrift, oppgrader } from '../handlinger'
@@ -13,6 +13,7 @@ import {
 } from '../formler'
 import { BEDRIFTSTYPER } from '../innhold'
 import type { Spilltilstand } from '../types'
+import { bedrift } from './hjelp'
 
 function med(endring: (s: Spilltilstand) => void): Spilltilstand {
   const s = nyttSpill()
@@ -99,7 +100,7 @@ describe('nivåer og oppgraderinger', () => {
   it('dobler inntekten ved nivå 25, 50 og 100', () => {
     expect([1, 24, 25, 49, 50, 99, 100, 200].map(milepaelfaktor)).toEqual([1, 1, 2, 2, 4, 4, 8, 8])
     expect([1, 25, 60, 100].map(nesteMilepael)).toEqual([25, 50, 100, null])
-    const b = { id: 'x', type: 'saftbod' as const, nivaa: 24, startetSek: 0, ansatte: 0, leder: false, investert: 0 }
+    const b = bedrift('saftbod', { nivaa: 24 })
     expect(bedriftInntektPerSek({ ...b, nivaa: 25 })).toBe(50)
     expect(bedriftInntektPerSek(b)).toBe(24)
   })

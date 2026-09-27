@@ -28,9 +28,11 @@ export function Linjegraf({
   const spenn = Math.max(1, punkter[punkter.length - 1].sek - førsteSek)
   let min = Math.min(...punkter.map((p) => p.verdi))
   let maks = Math.max(...punkter.map((p) => p.verdi))
+  // En flat linje får ±10 % luft rundt seg, så aksene viser noe meningsfylt.
   if (maks - min < Math.abs(maks) * 1e-6 + 1e-9) {
-    maks += Math.abs(maks) * 0.01 + 1
-    min -= Math.abs(min) * 0.01 + 1
+    const luft = Math.abs(maks) * 0.1 || 1
+    maks += luft
+    min -= luft
   }
   const luft = (maks - min) * 0.08
   const bunn = min - luft

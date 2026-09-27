@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { eierType, erLaastOpp } from '../../engine/formler'
+import { Bedriftdetalj } from './Bedriftdetalj'
 import { kjopBedrift } from '../../engine/handlinger'
 import { BEDRIFTSTYPER, STIGEN } from '../../engine/innhold'
 import type { Spilltilstand } from '../../engine/types'
@@ -8,15 +10,20 @@ import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
 
 export function Bedrifter({ s }: { s: Spilltilstand }) {
+  const [valgt, settValgt] = useState<string | null>(null)
   const tilSalgs = STIGEN.filter((t) => !eierType(s, t) && erLaastOpp(s, t))
   const nesteLaast = STIGEN.find((t) => !erLaastOpp(s, t))
+
+  // Bedriften kan forsvinne mens siden er åpen (banken kan ta den over).
+  const detalj = valgt ? s.bedrifter.find((b) => b.id === valgt) : undefined
+  if (detalj) return <Bedriftdetalj s={s} b={detalj} tilbake={() => settValgt(null)} />
 
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Dine bedrifter</h1>
       <ul className="kortliste">
         {s.bedrifter.map((b) => (
-          <Bedriftskort key={b.id} b={b} s={s} />
+          <Bedriftskort key={b.id} b={b} s={s} åpne={() => settValgt(b.id)} />
         ))}
       </ul>
 

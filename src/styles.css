@@ -389,6 +389,7 @@ figure {
   min-width: 0;
 }
 
+.bedriftskort-midt h1,
 .bedriftskort-midt h2 {
   display: flex;
   align-items: center;
@@ -638,14 +639,6 @@ figure {
   width: 44px;
   padding: 0;
   color: var(--tekst-dempet);
-}
-
-.knapp-ikon svg {
-  transition: transform 0.2s;
-}
-
-.knapp-ikon.åpen svg {
-  transform: rotate(180deg);
 }
 
 .knapp-sekundær {
@@ -987,6 +980,156 @@ figure {
 .hendelse.kritisk {
   border-color: var(--minus);
   color: inherit;
+}
+
+/* ─────────────────────────────────────────────── Porteføljen */
+
+:root {
+  --klasse-aksje: var(--gull);
+  --klasse-krypto: #a78bfa;
+  --klasse-eiendom: #38bdf8;
+  --klasse-sparing: var(--pluss);
+}
+
+.oversikt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.oversikt-tall {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.oversikt-tall > div {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.fordeling {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  margin-top: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fordeling-del {
+  flex-basis: 0;
+  min-width: 4px;
+}
+
+.fordeling-del.aksje,
+.klasse-prikk.aksje {
+  background: var(--klasse-aksje);
+}
+
+.fordeling-del.krypto,
+.klasse-prikk.krypto {
+  background: var(--klasse-krypto);
+}
+
+.fordeling-del.eiendom,
+.klasse-prikk.eiendom {
+  background: var(--klasse-eiendom);
+}
+
+.fordeling-del.sparing,
+.klasse-prikk.sparing {
+  background: var(--klasse-sparing);
+}
+
+.klasserad {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.klasse-prikk {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.klasserad-navn {
+  display: flex;
+  flex-direction: column;
+}
+
+.papirrad.eid {
+  border-color: var(--gull-mørk);
+}
+
+.sparekonto {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spare-rad {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ─────────────────────────────────────────────── Bedriftens detaljside */
+
+.bred {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.milepaeler {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.milepaeler li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--tekst-dempet);
+}
+
+.milepaeler li.nådd,
+.milepaeler li.neste {
+  color: var(--tekst);
+}
+
+.milepael-merke {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--flate-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.milepaeler li.nådd .milepael-merke {
+  background: var(--gull);
+  color: #1a1508;
+}
+
+.milepaeler li.neste .milepael-merke {
+  box-shadow: inset 0 0 0 2px var(--gull);
+  color: var(--gull);
 }
 
 .stengt {

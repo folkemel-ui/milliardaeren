@@ -4,7 +4,7 @@
  */
 
 import { betalRente, sjekkMargin } from './bank'
-import { inntektPerSek, nettoformue } from './formler'
+import { bedriftInntektPerSek, inntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
 import { leiePerSek } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, PAPIRER } from './marked'
 import { erDagsskifte, erHelg } from './kalender'
@@ -15,6 +15,10 @@ import type { PapirId, Spilltilstand } from './types'
 
 /** Flere punkter enn dette, og historikken tynnes ut til halvparten. */
 export const MAKS_HISTORIKKPUNKTER = 240
+
+/** Hver bedrifts inntekt måles hvert minutt, og de siste to timene huskes. */
+export const INNTEKT_HISTORIKK_SEK = 60
+export const MAKS_INNTEKT_HISTORIKK = 120
 
 /**
  * Kjører `antall` sekunder frem. Med `borte` går bare bedriftene med leder —
@@ -34,6 +38,21 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const inntekt = inntektPerSek(s, borte)
   s.kontanter += inntekt
   s.totaltTjent += inntekt
+  // Regnskapet per bedrift. Summen over står for kontantene; dette er bare bokføring.
+  const faktor = statusfaktor(s)
+  const maalHistorikk = (s.sek + 1) % INNTEKT_HISTORIKK_SEK === 0
+  for (const b of s.bedrifter) {
+    const denne = borte && !b.leder ? 0 : bedriftInntektPerSek(b) * faktor
+    b.tjent += denne
+    if (maalHistorikk) {
+      b.inntektHistorikk.push(denne)
+      if (b.inntektHistorikk.length > MAKS_INNTEKT_HISTORIKK) b.inntektHistorikk.shift()
+    }
+  }
+  // Sparerenten legges på kontoen, så den renter seg selv.
+  const sparerente = sparerentePerSek(s)
+  s.sparing += sparerente
+  s.totaltSparerente += sparerente
   // Leien kommer uansett — eiendom trenger ingen leder.
   const leie = leiePerSek(s)
   s.kontanter += leie

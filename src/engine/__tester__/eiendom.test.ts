@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+﻿import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
-import { kjopEiendom, kjopLuksus, laan, maksNyttLaanFor, selgEiendom, selgLuksus, utvidLager } from './hjelp'
+import { bedrift, kjopEiendom, kjopLuksus, laan, maksNyttLaanFor, selgEiendom, selgLuksus, utvidLager } from './hjelp'
 import { belaaningsgrad, inntektPerSek, nettoformue, rentesats } from '../formler'
 import {
   EIENDOMSTYPER,
@@ -127,7 +127,7 @@ describe('marginkrav med eiendom', () => {
   it('banken selger eiendom — én og én — før den tar bedrifter', () => {
     const s = nyttSpill()
     s.kontanter = 0
-    s.bedrifter.push({ id: 'b2', type: 'polsebod', nivaa: 1, startetSek: 0, ansatte: 0, leder: false, investert: 3_000 })
+    s.bedrifter.push(bedrift('polsebod', { id: 'b2', investert: 3_000 }))
     s.eiendommer = { hybel: 4 }
     // Uten gjeld er maks lån lik eiendelene; halvparten av det gir belåning på grensen.
     s.gjeld = Math.floor(maksNyttLaanFor(s) * MAKS_BELAANING)

@@ -41,6 +41,10 @@ export interface Bedrift {
   leder: boolean
   /** Alt du har brukt på bedriften: kjøp, nivåer, ansettelser og leder. Er bedriftens bokførte verdi. */
   investert: number
+  /** Alt bedriften har tjent (etter lønn og statusbonus). */
+  tjent: number
+  /** Inntekt per sekund, målt hvert minutt — de siste to timene. */
+  inntektHistorikk: number[]
 }
 
 // ─────────────────────────────────────────────── Markedet
@@ -160,7 +164,11 @@ export interface Dagsbilde {
   eiendommer: number
   luksus: LuksusId[]
   sek: number
+  /** Porteføljens verdi per klasse ved dagens start. */
+  verdier: Record<Aktivaklasse, number>
 }
+
+export type Aktivaklasse = 'aksje' | 'krypto' | 'eiendom' | 'sparing'
 
 export interface Rekorder {
   hoyesteInntekt: number
@@ -207,7 +215,12 @@ export interface Spilltilstand {
   hendelser: Hendelse[]
   /** Antall eiendommer du eier av hver type. */
   eiendommer: Partial<Record<EiendomId, number>>
+  /** Hva du har betalt for eiendommene du eier, per type. Gir avkastningen. */
+  eiendomKostpris: Partial<Record<EiendomId, number>>
   totaltLeie: number
+  /** Penger på sparekontoen. */
+  sparing: number
+  totaltSparerente: number
   /** Luksusgjenstandene du eier. Én av hver. */
   luksus: LuksusId[]
   /** Plasser i garasjen, havna og hangaren. */
@@ -217,6 +230,8 @@ export interface Spilltilstand {
   /** Dagen i den nyeste utgaven du har lest. */
   avisLest: number
   forrigeDag: Dagsbilde
+  /** Penger flyttet inn i (+) eller ut av (−) hver klasse i dag: kjøp, salg, innskudd og uttak. */
+  dagensFlyt: Record<Aktivaklasse, number>
   /** Prestasjonene du har klart, med spillsekundet de kom. */
   prestasjoner: Record<string, number>
   rekorder: Rekorder

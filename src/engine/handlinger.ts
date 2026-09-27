@@ -27,6 +27,7 @@ import {
 } from './eiendom'
 import { BEDRIFTSTYPER } from './innhold'
 import { erHelg } from './kalender'
+import { flyt } from './portefolje'
 import { PAPIRER, rundAntall } from './marked'
 import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, PapirId, Spilltilstand } from './types'
 
@@ -60,7 +61,17 @@ export function kjopBedrift(s: Spilltilstand, type: BedriftstypeId): Utfall {
   if (s.kontanter < t.pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   n.kontanter -= t.pris
-  n.bedrifter.push({ id: `b${n.nesteId}`, type, nivaa: 1, startetSek: n.sek, ansatte: 0, leder: false, investert: t.pris })
+  n.bedrifter.push({
+    id: `b${n.nesteId}`,
+    type,
+    nivaa: 1,
+    startetSek: n.sek,
+    ansatte: 0,
+    leder: false,
+    investert: t.pris,
+    tjent: 0,
+    inntektHistorikk: [],
+  })
   n.nesteId += 1
   return { ok: true, tilstand: n }
 }
@@ -135,6 +146,8 @@ export function kjopEiendom(s: Spilltilstand, id: EiendomId): Utfall {
   const n = structuredClone(s)
   n.kontanter -= pris
   n.eiendommer[id] = (n.eiendommer[id] ?? 0) + 1
+  n.eiendomKostpris[id] = (n.eiendomKostpris[id] ?? 0) + pris
+  flyt(n, 'eiendom', pris)
   return { ok: true, tilstand: n }
 }
 
@@ -186,6 +199,34 @@ export function lesAvis(s: Spilltilstand): Utfall {
   if (!siste || s.avisLest >= siste.dag) return feil('Ingen nye utgaver.')
   const n = structuredClone(s)
   n.avisLest = siste.dag
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Sparekontoen
+
+export function settInn(s: Spilltilstand, belop: number): Utfall {
+  const b = Math.min(belop, s.kontanter)
+  if (b <= 0) return feil('Du har ingen kontanter å sette inn.')
+  const n = structuredClone(s)
+  n.kontanter -= b
+  n.sparing += b
+  flyt(n, 'sparing', b)
+  return { ok: true, tilstand: n }
+}
+
+export function taUt(s: Spilltilstand, belop: number): Utfall {
+  const b = Math.min(belop, s.sparing)
+  if (b <= 0) return feil('Sparekontoen er tom.')
+  const n = structuredClone(s)
+  n.sparing -= b
+  n.kontanter += b
+  flyt(n, 'sparing', -b)
+  // Restbeløp under én krone føres over, så kontoen faktisk blir tom.
+  if (n.sparing < 1) {
+    flyt(n, 'sparing', -n.sparing)
+    n.kontanter += n.sparing
+    n.sparing = 0
+  }
   return { ok: true, tilstand: n }
 }
 

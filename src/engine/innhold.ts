@@ -88,5 +88,8 @@ export const MARGINKRAV = 0.75
 /** … og tar over bedrifter til 50 % av det du investerte, hvis det ikke holder. */
 export const TVANGSSALG_ANDEL = 0.5
 
+/** Sparekontoen: lav, risikofri rente per time, lagt til hvert sekund. Lavere enn lånerenten, så lån-for-å-spare taper alltid. */
+export const SPARERENTE_PER_TIME = 0.01
+
 /** Så mange hendelser huskes. */
 export const MAKS_HENDELSER = 30

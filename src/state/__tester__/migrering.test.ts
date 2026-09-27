@@ -105,6 +105,34 @@ describe('migrering', () => {
     expect(nettoformue(r.tilstand)).toBe(51_500)
   })
 
+  it('løfter en versjon 5-lagring til versjon 6 med regnskap, sparekonto og kostpris på eiendom', () => {
+    const s5 = migrer({
+      versjon: 2,
+      frø: 42,
+      sek: 900,
+      kontanter: 400_000,
+      bedrifter: [{ id: 'b1', type: 'saftbod', nivaa: 5, startetSek: 0, ansatte: 1, leder: true, investert: 1_500 }],
+      nesteId: 2,
+      historikk: { intervall: 10, punkter: [{ sek: 0, verdi: 1_250 }] },
+      totaltTjent: 49_000,
+      hoyesteFormue: 401_500,
+    }, 5)
+    expect(s5.ok).toBe(true)
+    if (!s5.ok) return
+    const v5 = JSON.parse(JSON.stringify(s5.tilstand))
+    v5.eiendommer = { hybel: 1 }
+    const r = migrer(v5)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.tilstand.versjon).toBe(SPILLVERSJON)
+    expect(r.tilstand.bedrifter[0]).toMatchObject({ tjent: 0, inntektHistorikk: [] })
+    expect(r.tilstand.sparing).toBe(0)
+    expect(r.tilstand.eiendomKostpris.hybel).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+    // 6 → 7: «i dag» starter på null for alle klasser.
+    expect(r.tilstand.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, sparing: 0 })
+    expect(r.tilstand.forrigeDag.verdier.eiendom).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+  })
+
   it('løfter en ekte versjon 1-lagring helt frem', () => {
     const v1 = {
       versjon: 1,

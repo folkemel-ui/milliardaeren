@@ -44,7 +44,7 @@ export default function App() {
       <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} />
       <main className="innhold">
         {fane === 'bedrifter' && <Bedrifter s={s} />}
-        {fane === 'investeringer' && <Investeringer s={s} />}
+        {fane === 'investeringer' && <Investeringer s={s} tilEiendom={() => velg('eiendom')} />}
         {fane === 'eiendom' && <Eiendom s={s} />}
         {fane === 'luksus' && <Luksus s={s} />}
         {fane === 'profil' && <Profil s={s} />}

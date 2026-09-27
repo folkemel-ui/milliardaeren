@@ -5,7 +5,7 @@
 
 import * as h from '../handlinger'
 import { maksNyttLaan } from '../formler'
-import type { EiendomId, LagerId, LuksusId, Spilltilstand } from '../types'
+import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, Spilltilstand } from '../types'
 
 function ok(u: h.Utfall): Spilltilstand {
   if (!u.ok) throw new Error(u.feil)
@@ -19,3 +19,19 @@ export const selgLuksus = (s: Spilltilstand, id: LuksusId) => ok(h.selgLuksus(s,
 export const utvidLager = (s: Spilltilstand, id: LagerId) => ok(h.utvidLager(s, id))
 export const laan = (s: Spilltilstand, belop: number) => ok(h.laan(s, belop))
 export const maksNyttLaanFor = maksNyttLaan
+
+/** En bedrift til tester, med fornuftige standardverdier for alt som ikke er gitt. */
+export function bedrift(type: BedriftstypeId, felt: Partial<Bedrift> = {}): Bedrift {
+  return {
+    id: `t-${type}`,
+    type,
+    nivaa: 1,
+    startetSek: 0,
+    ansatte: 0,
+    leder: false,
+    investert: 0,
+    tjent: 0,
+    inntektHistorikk: [],
+    ...felt,
+  }
+}

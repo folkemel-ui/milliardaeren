@@ -4,6 +4,16 @@ The idea list for a business-empire game inspired by *Business Empire: RichMan*.
 
 Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now` in the engine), Norwegian UI, NOK, no new dependencies.
 
+## Pack plan
+
+A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
+
+- **Pack 7 – The newspaper grows:** Company news that moves prices · Status titles in the paper · Weekly summary on Sundays · Month-end and year-end reports
+- **Pack 8 – Deeper businesses and property:** Unique upgrades per industry · Renovating properties · Map view for Property
+- **Pack 9 – Risk and competition:** Taxes and a tax audit (builds on the year-end report) · Rivals · Auto-trading
+- **Pack 10 – Look and feel:** SVG icons · Light "clean finance" theme
+- **Pack 11 – Big new systems:** Startups · Football club · Travel · Merging businesses (needs a rethink first)
+
 ## Businesses
 
 1. **Merging businesses.** Merge two businesses of the same type and level into one bigger one with a bonus. Note: since Pack 2 you can only own one of each type (extra copies broke the balance). Merging therefore needs a rethink first, for example allowing copies again but only as merge material, or merging two different types into a chain.
@@ -14,58 +24,43 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 4. **Unique upgrades per industry.** One-time purchases that fit each business: a juice press for the lemonade stand, a coffee machine for the café, a spa for the hotel, new drilling rigs for the oil company. Each gives a multiplier (e.g. ×1.5 or ×2) and becomes available at a certain level. It gives the business cards more to strive for between the milestones.
 
-5. **Business detail page.** Tap a business card to open its own page with stats and history: income over time, total earned, when it was started, staff and manager, upgrades and milestones. Today staff and manager are in a fold-out panel on the card.
-
 ## Investments
 
-6. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
+5. **Auto-trading.** Set target prices for automatic buying and selling of stocks and crypto, so the market works for you while you are away.
 
-7. **Company news that moves prices.** The paper reports quarterly results, contracts or scandals for the listed companies, and the price reacts. Sometimes the news comes in the morning paper before the price has moved fully, so reading the paper pays off. It builds on the newspaper and the market from Packs 3 and 5.
-
-8. **Your holdings under «Dine aksjer» / «Din krypto».** When you buy something, for example Fjellkraft, a copy of its row appears under the «Dine aksjer» card (or «Din krypto»). The original stays in the market list below with its price as before. The copy shows:
-   - how much money you have in the stock right now (number owned × price)
-   - how much you've gained or lost in kroner, in green (+) or red (−)
-   - the same gain or loss in %
-
-   Tapping the copy opens the same detail page as the original. When you sell everything, the copy disappears.
-
-9. **Fuller portfolio summary.** One summary across everything: total value, change today and total return, split into stocks, crypto and property. Today each tab only shows its own value and total gain.
-
-## Bank
-
-10. **Savings account.** Interest on unused cash: low, but risk-free. A place to park money while you save for something big, and an alternative to stocks for those who don't want risk. The interest can be shown in the top bar's income per second.
+6. **Company news that moves prices.** The paper reports quarterly results, contracts or scandals for the listed companies, and the price reacts. Sometimes the news comes in the morning paper before the price has moved fully, so reading the paper pays off. It builds on the newspaper and the market from Packs 3 and 5.
 
 ## Property
 
-11. **Map view for Property.** A simple, stylized map of Norway (Bergen, Oslo, Stavanger, Geilo, Trondheim, Lofoten) with your properties as markers you can tap. It shows at a glance where your empire is, and makes a natural starting point for Travel later.
+7. **Map view for Property.** A simple, stylized map of Norway (Bergen, Oslo, Stavanger, Geilo, Trondheim, Lofoten) with your properties as markers you can tap. It shows at a glance where your empire is, and makes a natural starting point for Travel later.
 
-12. **Renovating properties.** Spend money to raise the standard (normal → renovated → luxury), which gives higher rent and value. Each level costs more and takes a few in-game days. It gives property its own upgrade path, like levels for businesses.
+8. **Renovating properties.** Spend money to raise the standard (normal → renovated → luxury), which gives higher rent and value. Each level costs more and takes a few in-game days. It gives property its own upgrade path, like levels for businesses.
 
 ## Luxury and status
 
-13. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both.
+9. **Travel.** A private jet unlocks new cities (Oslo → Stockholm → London → New York → Dubai …) with new businesses, properties and markets. Since Pack 4 there are three planes in the Luxury tab and the properties already have Norwegian locations, so travel can build on both.
 
 ## Risk
 
-14. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
+10. **Taxes and a tax audit.** Progressive tax on profit, with late fees if you don't pay. A risky offshore option lowers your tax but carries a chance of an audit and seizure.
 
-15. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
+11. **Rivals.** AI tycoons on a leaderboard who grow on their own. You can buy shares in their companies and try a hostile takeover.
 
 ## Newspaper and calendar
 
-16. **Status titles in the paper.** The higher your status, the more the paper writes about you: "Tycoon seen at Aker Brygge", "The magnate buys again". It uses your status level name and what you own, so the paper feels like it's about you.
+12. **Status titles in the paper.** The higher your status, the more the paper writes about you: "Tycoon seen at Aker Brygge", "The magnate buys again". It uses your status level name and what you own, so the paper feels like it's about you.
 
-17. **Weekly summary on Sundays.** A special Sunday edition with the week's biggest winner and loser on the stock exchange, your net worth change over the week and "the week in numbers" (earned, rent, dividends, interest).
+13. **Weekly summary on Sundays.** A special Sunday edition with the week's biggest winner and loser on the stock exchange, your net worth change over the week and "the week in numbers" (earned, rent, dividends, interest).
 
-18. **Month-end and year-end reports.** At the end of each in-game month, a report of income, expenses, the best business and net worth change. At year-end, a bigger annual report comparing it with the year before. A natural place for taxes later.
+14. **Month-end and year-end reports.** At the end of each in-game month, a report of income, expenses, the best business and net worth change. At year-end, a bigger annual report comparing it with the year before. A natural place for taxes later.
 
 ## Presentation
 
-19. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
+15. **SVG icons.** An icon for each business, luxury item and property, built from simple shapes. Judge them at 5× in a gallery view.
 
 ## Layout
 
-20. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
+16. **Light "clean finance" theme.** White and light grey with green for gains and red for losses, like a banking app or Nordnet. The dark theme already uses color tokens in `styles.css`, so this is a new token block plus a way to switch.
 
 ## Parked (not chosen yet)
 
