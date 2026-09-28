@@ -14,6 +14,7 @@ import { simuler } from '../engine/simulering'
 import { BORTE_TAK_SEK } from '../engine/innhold'
 import type { Utfall } from '../engine/handlinger'
 import { migrer } from './migrering'
+import { pakk, pakkUt } from './overforing'
 import type { Spilltilstand } from '../engine/types'
 
 const LAGERNOKKEL = 'milliardaer.lagring'
@@ -166,6 +167,33 @@ export function startSpillokke(): void {
     }
   })
   window.addEventListener('pagehide', lagre)
+}
+
+// ─────────────────────────────────────────────── Flytte spillet
+
+/** Koden for spillet slik det står nå. */
+export function eksporter(): Promise<string> {
+  return pakk(tilstand)
+}
+
+/**
+ * Bytter ut spillet med det i koden. Det gamle legges i angre-posten, som ved
+ * «Start på nytt». Tiden mellom eksport og import regnes ikke som tid borte.
+ * Gir en feilmelding, eller null når det gikk.
+ */
+export async function importer(kode: string): Promise<string | null> {
+  const r = await pakkUt(kode)
+  if (!r.ok) return r.feil
+  try {
+    localStorage.setItem(ANGRENOKKEL, JSON.stringify(tilstand))
+  } catch {
+    // Privat modus — da finnes det heller ingen angre-post.
+  }
+  restMs = 0
+  sisteMaaling = null
+  sett(r.tilstand)
+  lagre()
+  return null
 }
 
 // ─────────────────────────────────────────────── Nytt spill

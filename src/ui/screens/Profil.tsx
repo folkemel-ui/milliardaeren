@@ -9,6 +9,7 @@ import { Formuegraf } from '../komponenter/Formuegraf'
 import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
 import { Skattekort } from '../komponenter/Skattekort'
+import { FlyttSpillet } from '../komponenter/FlyttSpillet'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
 
@@ -177,6 +178,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
       <Prestasjonsliste s={s} />
       <Rekordbok s={s} />
       <Utseende />
+      <FlyttSpillet />
 
       <div className="kort">
         {bekreft ? (

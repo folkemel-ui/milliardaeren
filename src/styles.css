@@ -1916,6 +1916,38 @@ figure {
   flex-direction: column;
 }
 
+.flytt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flytt p {
+  margin: 0;
+}
+
+.flytt-kode {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--kant);
+  background: var(--flate-2);
+  color: var(--tekst);
+  font: 12px/1.4 ui-monospace, monospace;
+  resize: vertical;
+  word-break: break-all;
+}
+
+.flytt-fil {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.flytt-fil input {
+  display: none;
+}
+
 .rival-melding {
   margin: 10px 0 0;
   padding: 8px 10px;
