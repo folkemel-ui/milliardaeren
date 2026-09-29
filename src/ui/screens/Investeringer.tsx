@@ -38,7 +38,7 @@ import { utfor } from '../../state/lager'
 import { antall as fmtAntall, endring, fortegnKroner, kortKroner, kroner, kurs as fmtKurs, perSek, tall, varighet } from '../format'
 import { Minigraf } from '../komponenter/Linjegraf'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
-import { Fondkort, Kursgraf, Nokkeltall, Rapportkalender } from '../komponenter/Marked'
+import { Fondkort, Kursgraf, Nokkeltall } from '../komponenter/Marked'
 import { Tikkekurs } from '../komponenter/Tikk'
 import { Seksjon } from '../komponenter/Seksjon'
 import {
@@ -97,18 +97,7 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
       {fane === 'oversikt' && (
         <Oversikt s={s} velg={(k) => (k === 'eiendom' ? tilEiendom() : settFane(TIL_UNDERFANE[k]))} />
       )}
-      {fane === 'bors' && (
-        <>
-          <Rapportkalender s={s} velg={settValgt} />
-          <Seksjon id="bors-aksjer" tittel="Aksjer" sammendrag={kortKroner(papirverdi(s, 'aksje'))} harInnhold={AKSJER.some((id) => s.beholdning[id])}>
-            <Papirliste s={s} klasse="aksje" velg={settValgt} />
-          </Seksjon>
-          <Seksjon id="bors-krypto" tittel="Krypto" sammendrag={kortKroner(papirverdi(s, 'krypto'))} harInnhold={KRYPTO.some((id) => s.beholdning[id])}>
-            <Stemning verdi={s.marked.stemning} />
-            <Papirliste s={s} klasse="krypto" velg={settValgt} />
-          </Seksjon>
-        </>
-      )}
+      {fane === 'bors' && <Bors s={s} velg={settValgt} />}
       {fane === 'selskaper' && (
         <>
           <Seksjon id="selskaper-startups" tittel="Startups" sammendrag={`${aktive(s).filter((x) => x.andel > 0).length} med andel`} harInnhold={aktive(s).some((x) => x.andel > 0)}>
@@ -204,25 +193,72 @@ function Endring({ kroner: k, andel, liten = false }: { kroner: number; andel: n
   )
 }
 
+// ─────────────────────────────────────────────── Børsen
+
+type Klasse = 'aksje' | 'krypto'
+const BORSVALG = 'milliardaer.borsvalg'
+
+function lesBorsvalg(): Klasse {
+  try {
+    return localStorage.getItem(BORSVALG) === 'krypto' ? 'krypto' : 'aksje'
+  } catch {
+    return 'aksje'
+  }
+}
+
+/**
+ * Børsfanen: et lite dashbord med aksjene og kryptoen dine — verdien, hva du
+ * har betalt og hvor mye det har steget eller falt. Flisene er også en
+ * bryter: trykk på en, og lista under viser den klassen.
+ */
+function Bors({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => void }) {
+  const [klasse, settKlasse] = useState<Klasse>(lesBorsvalg)
+  const bytt = (k: Klasse) => {
+    settKlasse(k)
+    try {
+      localStorage.setItem(BORSVALG, k)
+    } catch {
+      /* bare en bekvemmelighet */
+    }
+  }
+  return (
+    <>
+      <div className="dashbord" role="tablist" aria-label="Aksjer eller krypto">
+        {(['aksje', 'krypto'] as Klasse[]).map((k) => {
+          const ider = k === 'aksje' ? AKSJER : KRYPTO
+          const verdi = papirverdi(s, k)
+          const kost = ider.reduce((sum, id) => sum + (s.beholdning[id]?.kostpris ?? 0), 0)
+          return (
+            <button key={k} role="tab" aria-selected={klasse === k} className={klasse === k ? 'kort flis aktiv' : 'kort flis'} onClick={() => bytt(k)}>
+              <span className="etikett">{k === 'aksje' ? 'Aksjer' : 'Krypto'}</span>
+              <span className="tall-stort">{kortKroner(verdi)}</span>
+              {kost > 0 ? (
+                <>
+                  <span className="dempet liten">Investert {kortKroner(kost)}</span>
+                  <Endring kroner={verdi - kost} andel={verdi / kost - 1} liten />
+                </>
+              ) : (
+                <span className="dempet liten">Ingenting ennå</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      {klasse === 'krypto' && <Stemning verdi={s.marked.stemning} />}
+      <Papirliste s={s} klasse={klasse} velg={velg} />
+    </>
+  )
+}
+
 // ─────────────────────────────────────────────── Lister
 
 function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | 'krypto'; velg: (id: PapirId) => void }) {
   const ider = klasse === 'aksje' ? AKSJER : KRYPTO
-  const verdi = papirverdi(s, klasse)
-  const kost = ider.reduce((sum, id) => sum + (s.beholdning[id]?.kostpris ?? 0), 0)
   const eide = ider.filter((id) => s.beholdning[id])
 
   return (
     <>
       {klasse === 'aksje' && erHelg(s.sek) && <p className="kort stengt">Børsen er stengt i helgen. Kursene står stille til mandag.</p>}
-      <div className="kort portefolje">
-        <div>
-          <span className="etikett">{klasse === 'aksje' ? 'Dine aksjer' : 'Din krypto'}</span>
-          <span className="tall-stort">{kortKroner(verdi)}</span>
-        </div>
-        {kost > 0 && <Endring kroner={verdi - kost} andel={verdi / kost - 1} />}
-      </div>
-
 
       {eide.length > 0 && (
         <ul className="kortliste papirliste">

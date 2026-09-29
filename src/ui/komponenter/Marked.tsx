@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { kjopFond, selgFond } from '../../engine/handlinger'
 import { FOND, FOND_GEBYR, fondshistorikk, fondskurs, fondStengt, fondsutbytte } from '../../engine/fond'
-import { ESTIMAT_DAGER, ESTIMATTEKST, estimat, kvartalFor, nesteRapport, rapportkalender, UTFALLTEKST, utbytteFor } from '../../engine/kvartal'
+import { ESTIMAT_DAGER, ESTIMATTEKST, estimat, kvartalFor, nesteRapport, UTFALLTEKST, utbytteFor } from '../../engine/kvartal'
 import { DAG_SEK, dagnummer } from '../../engine/kalender'
 import { HISTORIKK_TIKK, MARKED_TIKK_SEK, PAPIRER } from '../../engine/marked'
 import type { FondId, PapirId, Spilltilstand } from '../../engine/types'
@@ -78,39 +78,6 @@ export function Fondkort({ s, id }: { s: Spilltilstand; id: FondId }) {
         </>
       )}
       {feil && <p className="rival-melding">{feil}</p>}
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────── Rapportkalender
-
-/** De neste kvartalsrapportene, med estimatet når det er kjent. */
-export function Rapportkalender({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => void }) {
-  const i_dag = dagnummer(s.sek)
-  const liste = rapportkalender(s, 10)
-  if (liste.length === 0) return null
-  return (
-    <div className="kort">
-      <h2 className="kort-tittel">Kvartalsrapporter</h2>
-      <ul className="rapportliste">
-        {liste.map((r) => (
-          <li key={r.id}>
-            <button onClick={() => velg(r.id)}>
-              <span className="ticker">{r.id}</span>
-              <span className="rapport-navn">
-                <strong>{PAPIRER[r.id].navn}</strong>
-                <span className="dempet liten">{r.dag === i_dag + 1 ? 'I morgen' : kortDato(r.dag)}</span>
-              </span>
-              <span className={r.estimat === null ? 'dempet liten' : `estimat e${r.estimat}`}>
-                {r.estimat === null ? `Estimat om ${r.dag - i_dag - ESTIMAT_DAGER} d` : ESTIMATTEKST[r.estimat]}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <p className="dempet liten">
-        Hvert selskap legger frem tall én gang i måneden. Estimatet kommer {ESTIMAT_DAGER} dager før — det er overraskelsen som flytter kursen.
-      </p>
     </div>
   )
 }

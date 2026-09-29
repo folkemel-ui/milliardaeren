@@ -8,9 +8,7 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-Pack 18 is the last and biggest of the polish packs.
-
-- **Pack 18 – Bigger layout work:** Welcome-back screen · Tabs that open as you progress · Wide layout on PC
+- **Pack 18 – Welcome back:** Welcome-back screen
 - **Later:** Hotels abroad and holiday apartments
 
 ## Property
@@ -19,11 +17,7 @@ Pack 18 is the last and biggest of the polish packs.
 
 ## Polish
 
-2. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Could grow into the parked "Offline income report" with a Claim button.
-
-3. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
-
-4. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
+2. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Decided for Pack 18: the money is still added automatically, with a «Fortsett» button; the parked "Offline income report" (Claim button, managers who raise the cap) stays parked.
 
 ## Parked (not chosen yet)
 
@@ -72,6 +66,8 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Statistics page.** Income per source (businesses, rent, dividends) as a graph over time.
 
 **Layout ideas**
+- **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
+- **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
 - **Colorful cartoon style.** Bright colors, rounded shapes and big icons.
 - **Notification badges** on tabs when something needs attention.
 - **Progress bar per business** that fills up and pays out when full.
