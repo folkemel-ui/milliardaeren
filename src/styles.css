@@ -3187,3 +3187,9 @@ figure {
   align-items: stretch;
   gap: 4px;
 }
+
+/* «Maks» valgt i handelsboksen: antallet følger kursen til du kjøper. */
+.andelsknapper .knapp.aktiv {
+  border-color: var(--gull);
+  color: var(--gull);
+}

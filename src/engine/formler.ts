@@ -46,8 +46,13 @@ export function nesteMilepael(nivaa: number): number | null {
 }
 
 export function oppgraderingspris(b: Bedrift): number {
+  return nivaapris(b, b.nivaa)
+}
+
+/** Prisen for å gå fra `nivaa` til neste — samme regning som oppgraderingspris, uten å kopiere bedriften. */
+function nivaapris(b: Bedrift, nivaa: number): number {
   const t = BEDRIFTSTYPER[b.type]
-  return Math.round(t.oppgraderingspris * t.vekst ** (b.nivaa - 1))
+  return Math.round(t.oppgraderingspris * t.vekst ** (nivaa - 1))
 }
 
 /** Så mange nivåer kan kjøpes i én handling — et tak så «Maks» aldri løper løpsk. */
@@ -56,21 +61,26 @@ export const MAKS_NIVAAER_PER_KJOP = 1000
 /** Hva `antall` nivåer koster samlet: summen av prisene for hvert nivå, avrundet likt som ett og ett. */
 export function prisForNivaaer(b: Bedrift, antall: number): number {
   let sum = 0
-  for (let i = 0; i < antall; i++) sum += oppgraderingspris({ ...b, nivaa: b.nivaa + i })
+  for (let i = 0; i < antall; i++) sum += nivaapris(b, b.nivaa + i)
   return sum
 }
 
 /** Hvor mange nivåer du har råd til med `kontanter`, høyst MAKS_NIVAAER_PER_KJOP. */
 export function nivaaerDuHarRaadTil(b: Bedrift, kontanter: number): number {
+  return raadTil(b, kontanter).antall
+}
+
+/** Hvor mange nivåer du har råd til, og hva de koster samlet — i én runde. */
+export function raadTil(b: Bedrift, kontanter: number): { antall: number; pris: number } {
   let sum = 0
   let n = 0
   while (n < MAKS_NIVAAER_PER_KJOP) {
-    const neste = oppgraderingspris({ ...b, nivaa: b.nivaa + n })
+    const neste = nivaapris(b, b.nivaa + n)
     if (sum + neste > kontanter) break
     sum += neste
     n++
   }
-  return n
+  return { antall: n, pris: sum }
 }
 
 // ─────────────────────────────────────────────── Inntekt

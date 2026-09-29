@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { lesAvis } from '../../engine/handlinger'
 import type { Avisutgave, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
@@ -47,7 +47,12 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
   )
 }
 
-function Utgave({ utgave, s, forside = false }: { utgave: Avisutgave; s: Spilltilstand; forside?: boolean }) {
+/**
+ * Én utgave. En trykket utgave endrer seg aldri, og oppgjørene i den ser bare
+ * på eldre oppgjør — så den tegnes bare på nytt når det er en annen utgave.
+ */
+const Utgave = memo(
+  function Utgave({ utgave, s, forside = false }: { utgave: Avisutgave; s: Spilltilstand; forside?: boolean }) {
   const [hoved, ...resten] = utgave.saker
   return (
     <section className={forside ? 'utgave forside' : 'utgave'}>
@@ -88,4 +93,6 @@ function Utgave({ utgave, s, forside = false }: { utgave: Avisutgave; s: Spillti
       )}
     </section>
   )
-}
+  },
+  (a, b) => a.utgave.dag === b.utgave.dag && a.forside === b.forside,
+)

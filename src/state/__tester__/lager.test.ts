@@ -164,6 +164,49 @@ describe('spilløkken', () => {
   })
 })
 
+describe('lagring etter handlinger', () => {
+  /** Teller hvor mange ganger selve spillet skrives til disken. */
+  function tellSkrivinger(): () => number {
+    let n = 0
+    const ekte = localStorage.setItem
+    vi.stubGlobal('localStorage', {
+      ...localStorage,
+      setItem: (k: string, v: string) => {
+        if (k === LAGRING) n++
+        ekte(k, v)
+      },
+    })
+    return () => n
+  }
+
+  it('mange handlinger på rad gir én lagring, litt etterpå', async () => {
+    const l = await åpne()
+    l.startSpillokke()
+    const skrevet = tellSkrivinger()
+    for (let i = 1; i <= 10; i++) l.utfor({ ok: true, tilstand: { ...nyttSpill(), kontanter: 1000 + i } })
+    expect(skrevet()).toBe(0)
+    vi.advanceTimersByTime(1000)
+    expect(skrevet()).toBe(1)
+    expect(lest().kontanter).toBe(1010)
+  })
+
+  it('å skjule appen lagrer med en gang, uten å vente', async () => {
+    const l = await åpne()
+    l.startSpillokke()
+    l.utfor({ ok: true, tilstand: { ...nyttSpill(), kontanter: 4242 } })
+    synlighet(true)
+    expect(lest().kontanter).toBe(4242)
+  })
+
+  it('å lukke siden lagrer med en gang', async () => {
+    const l = await åpne()
+    l.startSpillokke()
+    l.utfor({ ok: true, tilstand: { ...nyttSpill(), kontanter: 777 } })
+    for (const fn of vinduLyttere.pagehide ?? []) fn({})
+    expect(lest().kontanter).toBe(777)
+  })
+})
+
 describe('to faner', () => {
   it('en ny fane tar over, og den gamle slutter å lagre', async () => {
     lagreSpill(nyttSpill())

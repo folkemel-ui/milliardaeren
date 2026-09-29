@@ -6,7 +6,7 @@
  * Se dem store på ?galleri.
  */
 
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { IkonSaftbod } from './Ikoner'
 
 function Svg({ størrelse, children }: { størrelse: number; children: ReactNode }) {
@@ -974,7 +974,7 @@ const ILLUSTRASJONER: Record<string, (p: P) => ReactNode> = {
 export const ILLUSTRASJONSIDER = Object.keys(ILLUSTRASJONER)
 
 /** Illustrasjonen for en bedrift, eiendom eller luksusgjenstand, etter id. */
-export function Illustrasjon({ id, størrelse = 44 }: { id: string; størrelse?: number }) {
+export const Illustrasjon = memo(function Illustrasjon({ id, størrelse = 44 }: { id: string; størrelse?: number }) {
   const Tegning = ILLUSTRASJONER[id]
   return Tegning ? <>{Tegning({ størrelse })}</> : null
-}
+})

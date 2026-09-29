@@ -250,8 +250,25 @@ export function useSpill(): Spilltilstand {
   return useSyncExternalStore(abonner, () => tilstand)
 }
 
+/*
+ * En handling lagres litt etterpå, ikke med en gang: ti raske trykk på
+ * «oppgrader» gir én lagring, ikke ti. Å skjule eller lukke appen lagrer
+ * alltid med en gang, så ingenting går tapt.
+ */
+const LAGRE_ETTER_HANDLING_MS = 1000
+let ventendeLagring: ReturnType<typeof setTimeout> | null = null
+
+function lagreSnart(): void {
+  if (ventendeLagring) return
+  ventendeLagring = setTimeout(lagre, LAGRE_ETTER_HANDLING_MS)
+}
+
 /** Lagrer — men bare så lenge spillet går her og denne fanen eier lagringen. */
 export function lagre(): void {
+  if (ventendeLagring) {
+    clearTimeout(ventendeLagring)
+    ventendeLagring = null
+  }
   if (avbrudd) return
   if (!eierFortsatt()) {
     settAvbrudd({ type: 'annen-fane' })
@@ -271,7 +288,7 @@ export function utfor(u: Utfall, stille = false): string | null {
     return u.feil
   }
   sett(u.tilstand)
-  lagre()
+  lagreSnart()
   return null
 }
 

@@ -3,7 +3,7 @@
  * du har råd til. Gjelder hele bedriftsfanen, og huskes i nettleseren.
  */
 
-import { nivaaerDuHarRaadTil, oppgraderingspris, prisForNivaaer } from '../engine/formler'
+import { oppgraderingspris, prisForNivaaer, raadTil } from '../engine/formler'
 import type { Bedrift } from '../engine/types'
 
 export type Kjopsmengde = '1' | '10' | '100' | 'maks'
@@ -41,8 +41,8 @@ export function lagreKjopsmengde(m: Kjopsmengde): void {
  */
 export function kjop(b: Bedrift, mengde: Kjopsmengde, kontanter: number): { antall: number; pris: number } {
   if (mengde === 'maks') {
-    const antall = nivaaerDuHarRaadTil(b, kontanter)
-    return antall > 0 ? { antall, pris: prisForNivaaer(b, antall) } : { antall: 0, pris: oppgraderingspris(b) }
+    const r = raadTil(b, kontanter)
+    return r.antall > 0 ? r : { antall: 0, pris: oppgraderingspris(b) }
   }
   const antall = Number(mengde)
   return { antall, pris: prisForNivaaer(b, antall) }

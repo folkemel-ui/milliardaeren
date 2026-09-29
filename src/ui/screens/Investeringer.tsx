@@ -400,9 +400,11 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
   const [modus, settModus] = useState<'kjop' | 'selg'>('kjop')
   const [tekst, settTekst] = useState('')
   const [feil, settFeil] = useState<string | null>(null)
+  // «Maks» er ikke et fast tall: det følger kursen og kontantene, så kjøpet aldri avvises fordi kursen steg.
+  const [alt, settAlt] = useState(false)
   const eier = s.beholdning[id]?.antall ?? 0
   const maks = modus === 'kjop' ? maksKjop(s, id) : eier
-  const ønsket = rundAntall(id, Number(tekst.replace(',', '.')) || 0)
+  const ønsket = alt ? maks : rundAntall(id, Number(tekst.replace(',', '.')) || 0)
   const a = modus === 'selg' ? Math.min(ønsket, eier) : ønsket
   const fortegn = modus === 'kjop' ? 1 : -1
   const pris = a > 0 ? handelskurs(s, id, fortegn * a) : 0
@@ -410,8 +412,15 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
   const trykk = a > 0 ? Math.abs(Math.exp(kurstrykk(id, fortegn * a * s.marked.kurser[id].kurs)) - 1) : 0
 
   const velgAndel = (andel: number) => {
-    const n = andel === 1 ? maks : rundAntall(id, maks * andel)
-    settTekst(n > 0 ? String(n) : '')
+    settAlt(andel === 1)
+    const n = rundAntall(id, maks * andel)
+    settTekst(andel < 1 && n > 0 ? String(n) : '')
+    settFeil(null)
+  }
+
+  const nullstill = () => {
+    settTekst('')
+    settAlt(false)
     settFeil(null)
   }
 
@@ -419,16 +428,19 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
     const u = modus === 'kjop' ? kjopPapir(s, id, a) : selgPapir(s, id, a)
     const f = utfor(u, true)
     settFeil(f)
-    if (!f) settTekst('')
+    if (!f) {
+      settTekst('')
+      settAlt(false)
+    }
   }
 
   return (
     <div className="kort handel">
       <div className="segment">
-        <button className={modus === 'kjop' ? 'aktiv' : ''} onClick={() => { settModus('kjop'); settTekst(''); settFeil(null) }}>
+        <button className={modus === 'kjop' ? 'aktiv' : ''} onClick={() => { settModus('kjop'); nullstill() }}>
           Kjøp
         </button>
-        <button className={modus === 'selg' ? 'aktiv' : ''} disabled={eier === 0} onClick={() => { settModus('selg'); settTekst(''); settFeil(null) }}>
+        <button className={modus === 'selg' ? 'aktiv' : ''} disabled={eier === 0} onClick={() => { settModus('selg'); nullstill() }}>
           Selg
         </button>
       </div>
@@ -437,10 +449,11 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
         <span className="etikett">Antall {PAPIRER[id].klasse === 'krypto' && '(brøkdeler går fint)'}</span>
         <input
           inputMode="decimal"
-          value={tekst}
+          value={alt ? (maks > 0 ? String(maks) : '') : tekst}
           placeholder="0"
           onChange={(e) => {
             settTekst(e.target.value)
+            settAlt(false)
             settFeil(null)
           }}
         />
@@ -448,7 +461,7 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
 
       <div className="andelsknapper">
         {[0.25, 0.5, 1].map((andel) => (
-          <button key={andel} className="knapp knapp-liten" disabled={maks <= 0} onClick={() => velgAndel(andel)}>
+          <button key={andel} className={alt && andel === 1 ? 'knapp knapp-liten aktiv' : 'knapp knapp-liten'} aria-pressed={andel === 1 ? alt : undefined} disabled={maks <= 0} onClick={() => velgAndel(andel)}>
             {andel === 1 ? 'Maks' : `${andel * 100} %`}
           </button>
         ))}

@@ -1,11 +1,20 @@
 /** Tallformatering. Norske tall, hele kroner. */
 
+/*
+ * Én formaterer per antall desimaler. toLocaleString lager en ny hver gang,
+ * og det er rundt 25 ganger tregere — merkbart når hundrevis av tall tegnes
+ * hvert sekund. Resultatet er det samme.
+ */
+const formaterere = new Map<number, Intl.NumberFormat>()
+
 export function tall(n: number, desimaler = 0): string {
   const verdi = Number.isFinite(n) ? n : 0
-  return verdi.toLocaleString('nb-NO', {
-    minimumFractionDigits: desimaler,
-    maximumFractionDigits: desimaler,
-  })
+  let f = formaterere.get(desimaler)
+  if (!f) {
+    f = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: desimaler, maximumFractionDigits: desimaler })
+    formaterere.set(desimaler, f)
+  }
+  return f.format(verdi)
 }
 
 /** «kr 12 345». Brøkdeler rundes ned, så tallet aldri viser penger du ikke har. */
