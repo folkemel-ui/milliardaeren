@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Avis } from './ui/komponenter/Avis'
-import { aktivVelkomst, lukkVelkomst, startSpillokke, useSpill, useVelkomst } from './state/lager'
+import { aktivVelkomst, lukkVelkomst, startSpillokke, useAvbrudd, useSpill, useVelkomst } from './state/lager'
+import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
 import { Velkomstskjerm } from './ui/komponenter/Velkomst'
 import { FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
 import { Feiring, Varselstabel } from './ui/komponenter/Varsler'
@@ -54,6 +55,7 @@ export default function App() {
   const [retning, settRetning] = useState<'hoyre' | 'venstre' | 'ingen'>('ingen')
   const forrige = useRef(s)
   const velkomst = useVelkomst()
+  const avbrudd = useAvbrudd()
 
   useEffect(startSpillokke, [])
 
@@ -113,6 +115,9 @@ export default function App() {
       /* bare en bekvemmelighet */
     }
   }
+
+  // En annen fane har tatt over, eller noe gikk galt: da vises ikke spillet.
+  if (avbrudd) return <Avbruddskjerm a={avbrudd} />
 
   return (
     <div className="app">

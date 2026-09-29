@@ -10,6 +10,7 @@ import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
 import { Skattekort } from '../komponenter/Skattekort'
 import { FlyttSpillet } from '../komponenter/FlyttSpillet'
+import { Reservekopi } from '../komponenter/Reservekopi'
 import { lesAvisvalg, settAvisvalg, type Avisvalg } from '../avisvalg'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
@@ -203,6 +204,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
       <Rekordbok s={s} />
       <Utseende />
       <FlyttSpillet />
+      <Reservekopi />
 
       <div className="kort">
         {bekreft ? (

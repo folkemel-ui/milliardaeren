@@ -6,11 +6,13 @@
  * ukomprimert kode, og begge kan leses overalt der komprimering finnes.
  *
  * Utpakking går gjennom migreringen, så en kode fra en eldre versjon av
- * spillet fungerer i en nyere.
+ * spillet fungerer i en nyere. Etterpå sjekkes det at spillet faktisk kan
+ * spilles, så en ødelagt kode aldri erstatter spillet.
  */
 
 import type { Spilltilstand } from '../engine/types'
 import { migrer } from './migrering'
+import { sjekkTilstand } from './sjekk'
 
 const GZIP = 'MLD1:'
 const RÅ = 'MLD0:'
@@ -66,5 +68,7 @@ export async function pakkUt(kode: string): Promise<Utpakking> {
     return { ok: false, feil: 'Koden er ødelagt eller ufullstendig. Kopierte du hele?' }
   }
   const r = migrer(rå)
-  return r.ok ? { ok: true, tilstand: r.tilstand } : { ok: false, feil: r.feil }
+  if (!r.ok) return { ok: false, feil: r.feil }
+  const feil = sjekkTilstand(r.tilstand)
+  return feil ? { ok: false, feil } : { ok: true, tilstand: r.tilstand }
 }

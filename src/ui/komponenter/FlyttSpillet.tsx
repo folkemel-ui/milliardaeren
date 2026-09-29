@@ -60,7 +60,7 @@ export function FlyttSpillet() {
     if (feil) settMelding(feil)
     else {
       settKode('')
-      settMelding('Spillet er hentet inn. Det forrige spillet på denne enheten ligger i reservekopien.')
+      settMelding('Spillet er hentet inn. Det forrige spillet på denne enheten ligger i reservekopien under.')
     }
   }
 

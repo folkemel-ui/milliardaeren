@@ -3130,3 +3130,30 @@ figure {
     display: none;
   }
 }
+
+/* ─────────────────────────────────────────────── Avbrudd: annen fane eller feil */
+
+.avbrudd-side {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  padding: 16px 0;
+  background: var(--bakgrunn);
+  overflow-y: auto;
+}
+
+.avbrudd-side .velkomst-tittel:focus {
+  outline: none;
+}
+
+.avbrudd-detaljer summary {
+  cursor: pointer;
+  color: var(--tekst-dempet);
+  font-size: 13px;
+}
+
+.avbrudd-detaljer p {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
