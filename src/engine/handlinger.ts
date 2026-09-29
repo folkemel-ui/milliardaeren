@@ -14,6 +14,8 @@ import {
   forbedringspris,
   nesteForbedring,
   oppgraderingspris,
+  MAKS_NIVAAER_PER_KJOP,
+  prisForNivaaer,
 } from './formler'
 import { utforEiendomssalg, utforFondssalg, utforKjop, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
 import { FOND, FOND_GEBYR, fondskurs, fondStengt } from './fond'
@@ -125,6 +127,18 @@ export function oppgrader(s: Spilltilstand, id: string): Utfall {
   if (!b) return feil('Fant ikke bedriften.')
   return investerI(s, id, oppgraderingspris(b), (n) => {
     n.nivaa += 1
+  })
+}
+
+/** Kjøper flere nivåer på en gang. Alt eller ingenting: har du ikke råd til alle, kjøpes ingen. */
+export function oppgraderFlere(s: Spilltilstand, id: string, antall: number): Utfall {
+  const b = finn(s, id)
+  if (!b) return feil('Fant ikke bedriften.')
+  const n = Math.floor(antall)
+  if (n < 1) return feil('Du har ikke råd til et eneste nivå.')
+  if (n > MAKS_NIVAAER_PER_KJOP) return feil(`Høyst ${MAKS_NIVAAER_PER_KJOP} nivåer om gangen.`)
+  return investerI(s, id, prisForNivaaer(b, n), (ny) => {
+    ny.nivaa += n
   })
 }
 

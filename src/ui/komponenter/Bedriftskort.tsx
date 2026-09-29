@@ -6,10 +6,10 @@ import {
   forbedringspris,
   nesteForbedring,
   nesteMilepael,
-  oppgraderingspris,
   statusfaktor,
 } from '../../engine/formler'
-import { ansett, ansettLeder, kjopForbedring, oppgrader } from '../../engine/handlinger'
+import { ansett, ansettLeder, kjopForbedring, oppgraderFlere } from '../../engine/handlinger'
+import { kjop, type Kjopsmengde } from '../kjopsmengde'
 import {
   ANSATT_BONUS,
   ANSATT_LONN,
@@ -32,9 +32,8 @@ function milepaelFremdrift(nivaa: number, neste: number | null): number {
   return (nivaa - forrige) / (neste - forrige)
 }
 
-export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; åpne: () => void }) {
+export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltilstand; mengde: Kjopsmengde; åpne: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
-  const pris = oppgraderingspris(b)
   const neste = nesteMilepael(b.nivaa)
   // En forbedring som er låst opp men ikke kjøpt, får egen knapp rett på kortet.
   const f = nesteForbedring(b)
@@ -81,9 +80,7 @@ export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; å
       )}
 
       <div className="bedriftskort-knapper">
-        <button className="knapp knapp-gull" disabled={s.kontanter < pris} onClick={() => utfor(oppgrader(s, b.id))}>
-          Oppgrader · {kortKroner(pris)}
-        </button>
+        <Oppgraderingsknapp s={s} b={b} mengde={mengde} />
         <button className="knapp knapp-ikon" aria-label={`Detaljer for ${type.navn}`} onClick={åpne}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <polyline points="9,6 15,12 9,18" />
@@ -145,5 +142,19 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
         )}
       </div>
     </div>
+  )
+}
+
+/** Oppgraderingsknappen, for 1, 10, 100 eller så mange nivåer du har råd til. */
+export function Oppgraderingsknapp({ s, b, mengde, bred = false }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; bred?: boolean }) {
+  const { antall, pris } = kjop(b, mengde, s.kontanter)
+  return (
+    <button
+      className={bred ? 'knapp knapp-gull bred' : 'knapp knapp-gull'}
+      disabled={antall === 0 || s.kontanter < pris}
+      onClick={() => utfor(oppgraderFlere(s, b.id, antall))}
+    >
+      {antall === 0 ? `Maks · trenger ${kortKroner(pris)}` : `→ nivå ${b.nivaa + antall} · ${kortKroner(pris)}`}
+    </button>
   )
 }

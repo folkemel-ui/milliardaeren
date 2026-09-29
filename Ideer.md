@@ -8,9 +8,8 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-Packs 17–18 go from small to big: the first ones are quick and change nothing in the save, the last ones reshape screens.
+Pack 18 is the last and biggest of the polish packs.
 
-- **Pack 17 – Tidier screens:** Collapsible sections · A calmer Investments tab · Buy ×1 / ×10 / ×100 / Max · Garage, harbor and hangar grid
 - **Pack 18 – Bigger layout work:** Welcome-back screen · Tabs that open as you progress · Wide layout on PC
 - **Later:** Hotels abroad and holiday apartments
 
@@ -20,19 +19,11 @@ Packs 17–18 go from small to big: the first ones are quick and change nothing 
 
 ## Polish
 
-2. **Collapsible sections.** The Luxury and Property tabs have grown long. Each section (cars, watches, boats, planes, art, land, landmarks …) can fold away, and the game remembers which are open.
+2. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Could grow into the parked "Offline income report" with a Claim button.
 
-3. **A calmer Investments tab.** Six sub-tabs are tight on a phone. Fewer sub-tabs, for example Oversikt, Børs, Startups and Bank, with crypto and rivals as sections inside.
+3. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
 
-4. **Buy ×1 / ×10 / ×100 / Max.** A toggle for business upgrades, showing the total price for the chosen number of levels.
-
-5. **Garage, harbor and hangar grid.** Each storage shown as a grid of slots, so you see which spaces are used and which are free.
-
-6. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Could grow into the parked "Offline income report" with a Claim button.
-
-7. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
-
-8. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
+4. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
 
 ## Parked (not chosen yet)
 

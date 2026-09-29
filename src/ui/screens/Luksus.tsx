@@ -15,13 +15,15 @@ import {
 } from '../../engine/eiendom'
 import { rentesats } from '../../engine/formler'
 import { kjopLuksus, selgLuksus, utvidLager } from '../../engine/handlinger'
-import type { LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types'
+import type { LagerId, LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { useState } from 'react'
 import { Klubb, Klubbkort } from './Klubb'
 import { Kunst } from '../komponenter/Kunst'
+import { Seksjon } from '../komponenter/Seksjon'
+import { Illustrasjon } from '../komponenter/Illustrasjoner'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
@@ -34,34 +36,25 @@ export function Luksus({ s }: { s: Spilltilstand }) {
       <Status s={s} />
       <Klubbkort s={s} aapne={() => settKlubb(true)} />
 
-      <div className="lagerrad">
-        {LAGERLISTE.map((l) => {
-          const pris = utvidelsespris(s, l)
-          return (
-            <div key={l} className="kort lagerkort">
-              <span className="lager-emoji" aria-hidden="true">{LAGER[l].emoji}</span>
-              <strong>{LAGER[l].navn}</strong>
-              <span className="dempet liten">
-                {brukteplasser(s, l)} / {s.lager[l]} {LAGER[l].enhet}
-              </span>
-              <button className="knapp knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(utvidLager(s, l))}>
-                +1 · {kortKroner(pris)}
-              </button>
-            </div>
-          )
-        })}
+      <div className="lagerliste">
+        {LAGERLISTE.map((l) => (
+          <Lagerkort key={l} s={s} lager={l} />
+        ))}
       </div>
 
-      {KATEGORIER.map((k) => (
-        <div key={k} className="skjerm">
-          <h2 className="seksjon-tittel">{KATEGORINAVN[k]}</h2>
-          <ul className="kortliste">
-            {LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === k).map((id) => (
-              <Luksuskort key={id} s={s} id={id} />
-            ))}
-          </ul>
-        </div>
-      ))}
+      {KATEGORIER.map((k) => {
+        const ider = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === k)
+        const eid = ider.filter((id) => s.luksus.includes(id)).length
+        return (
+          <Seksjon key={k} id={`luksus-${k}`} tittel={KATEGORINAVN[k]} sammendrag={`${eid} av ${ider.length} eid`} harInnhold={eid > 0}>
+            <ul className="kortliste">
+              {ider.map((id) => (
+                <Luksuskort key={id} s={s} id={id} />
+              ))}
+            </ul>
+          </Seksjon>
+        )
+      })}
 
       <Kunst s={s} />
     </section>
@@ -123,5 +116,47 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
         </button>
       )}
     </li>
+  )
+}
+
+/** Garasjen, havna eller hangaren som et rutenett: brukte plasser viser hva som står der, ledige er stiplet. */
+function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
+  const l = LAGER[lager]
+  const pris = utvidelsespris(s, lager)
+  const her = s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager)
+  const ledige = Math.max(0, s.lager[lager] - her.length)
+  return (
+    <div className="kort lagerkort">
+      <div className="lagerkort-topp">
+        <span className="lager-emoji" aria-hidden="true">
+          {l.emoji}
+        </span>
+        <strong>{l.navn}</strong>
+        <span className="dempet liten">
+          {brukteplasser(s, lager)} / {s.lager[lager]} {l.enhet}
+        </span>
+      </div>
+      <ul className="lagerplasser">
+        {her.map((id) => (
+          <li key={id} className="lagerplass brukt" title={LUKSUS[id].navn}>
+            <Illustrasjon id={id} størrelse={30} />
+          </li>
+        ))}
+        {Array.from({ length: ledige }, (_, i) => (
+          <li key={`ledig-${i}`} className="lagerplass ledig" aria-label="Ledig plass" />
+        ))}
+        <li>
+          <button
+            className="lagerplass ny"
+            disabled={s.kontanter < pris}
+            onClick={() => utfor(utvidLager(s, lager))}
+            aria-label={`Bygg én plass til for ${kortKroner(pris)}`}
+          >
+            <span>+</span>
+            <span className="liten">{kortKroner(pris)}</span>
+          </button>
+        </li>
+      </ul>
+    </div>
   )
 }

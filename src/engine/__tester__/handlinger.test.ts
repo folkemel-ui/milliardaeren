@@ -1,7 +1,7 @@
 ﻿import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
-import { ansett, ansettLeder, kjopBedrift, oppgrader } from '../handlinger'
+import { ansett, ansettLeder, kjopBedrift, oppgrader, oppgraderFlere } from '../handlinger'
 import {
   bedriftInntektPerSek,
   inntektPerSek,
@@ -10,6 +10,8 @@ import {
   nesteMilepael,
   nettoformue,
   oppgraderingspris,
+  nivaaerDuHarRaadTil,
+  prisForNivaaer,
 } from '../formler'
 import { BEDRIFTSTYPER } from '../innhold'
 import type { Spilltilstand } from '../types'
@@ -149,5 +151,38 @@ describe('ansatte og ledere', () => {
   it('en bedrift kan bare ha én leder', () => {
     const u = ansettLeder(nyttSpill(), 'b1')
     expect(u.ok && ansettLeder(u.tilstand, 'b1').ok).toBe(false)
+  })
+})
+
+describe('flere nivåer på en gang', () => {
+  it('koster det samme som å kjøpe ett og ett', () => {
+    const s = nyttSpill()
+    s.kontanter = 1e7
+    const id = s.bedrifter[0].id
+    const samlet = prisForNivaaer(s.bedrifter[0], 10)
+    const u = oppgraderFlere(s, id, 10)
+    if (!u.ok) throw new Error(u.feil)
+    let enkelt = s
+    for (let i = 0; i < 10; i++) {
+      const v = oppgrader(enkelt, id)
+      if (!v.ok) throw new Error(v.feil)
+      enkelt = v.tilstand
+    }
+    expect(u.tilstand.bedrifter[0].nivaa).toBe(11)
+    expect(u.tilstand.kontanter).toBeCloseTo(enkelt.kontanter)
+    expect(s.kontanter - u.tilstand.kontanter).toBe(samlet)
+    expect(u.tilstand.bedrifter[0].investert).toBe(enkelt.bedrifter[0].investert)
+  })
+
+  it('«Maks» er så mange du har råd til, og alt eller ingenting', () => {
+    const s = nyttSpill()
+    s.kontanter = 5000
+    const b = s.bedrifter[0]
+    const n = nivaaerDuHarRaadTil(b, s.kontanter)
+    expect(prisForNivaaer(b, n)).toBeLessThanOrEqual(5000)
+    expect(prisForNivaaer(b, n + 1)).toBeGreaterThan(5000)
+    expect(oppgraderFlere(s, b.id, n + 1).ok).toBe(false)
+    expect(oppgraderFlere(s, b.id, n).ok).toBe(true)
+    expect(oppgraderFlere(s, b.id, 0).ok).toBe(false)
   })
 })

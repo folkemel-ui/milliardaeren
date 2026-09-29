@@ -8,26 +8,43 @@ import { utfor } from '../../state/lager'
 import { kortKroner, perSek } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
+import { Seksjon } from '../komponenter/Seksjon'
+import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
 
 export function Bedrifter({ s }: { s: Spilltilstand }) {
   const [valgt, settValgt] = useState<string | null>(null)
+  const [mengde, settMengde] = useState<Kjopsmengde>(lesKjopsmengde)
+  const velgMengde = (m: Kjopsmengde) => {
+    lagreKjopsmengde(m)
+    settMengde(m)
+  }
   const tilSalgs = STIGEN.filter((t) => !eierType(s, t) && erLaastOpp(s, t))
   const laaste = STIGEN.filter((t) => !erLaastOpp(s, t))
 
   // Bedriften kan forsvinne mens siden er åpen (banken kan ta den over).
   const detalj = valgt ? s.bedrifter.find((b) => b.id === valgt) : undefined
-  if (detalj) return <Bedriftdetalj s={s} b={detalj} tilbake={() => settValgt(null)} />
+  if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengde} tilbake={() => settValgt(null)} />
 
   return (
     <section className="skjerm">
-      <h1 className="skjerm-tittel">Dine bedrifter</h1>
+      <div className="bedrifter-topp">
+        <h1 className="skjerm-tittel">Dine bedrifter</h1>
+        <div className="segment mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
+          {MENGDER.map((m) => (
+            <button key={m.id} role="radio" aria-checked={mengde === m.id} className={mengde === m.id ? 'aktiv' : ''} onClick={() => velgMengde(m.id)}>
+              {m.navn}
+            </button>
+          ))}
+        </div>
+      </div>
       <ul className="kortliste">
         {s.bedrifter.map((b) => (
-          <Bedriftskort key={b.id} b={b} s={s} åpne={() => settValgt(b.id)} />
+          <Bedriftskort key={b.id} b={b} s={s} mengde={mengde} åpne={() => settValgt(b.id)} />
         ))}
       </ul>
 
-      {(tilSalgs.length > 0 || laaste.length > 0) && <h2 className="seksjon-tittel">Start ny bedrift</h2>}
+      {(tilSalgs.length > 0 || laaste.length > 0) && (
+      <Seksjon id="bedrifter-nye" tittel="Start ny bedrift" sammendrag={tilSalgs.length ? `${tilSalgs.length} til salgs` : `${laaste.length} låst`} harInnhold={tilSalgs.length > 0}>
       <ul className="kortliste">
         {tilSalgs.map((id) => {
           const t = BEDRIFTSTYPER[id]
@@ -52,6 +69,8 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
           <Laastkort key={id} s={s} id={id} neste={i === 0} synlig={i < SYNLIGE_LAASTE} />
         ))}
       </ul>
+      </Seksjon>
+      )}
     </section>
   )
 }

@@ -13,6 +13,7 @@ import {
 import type { MaleriId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { endring, fortegnKroner, kortKroner, tall } from '../format'
+import { Seksjon } from './Seksjon'
 
 /** Et lite maleri i gullramme, tegnet av maleriets tre farger. Formen følger id-en, så hvert er ulikt. */
 export function Miniatyr({ id, størrelse = 44 }: { id: MaleriId; størrelse?: number }) {
@@ -36,9 +37,9 @@ export function Miniatyr({ id, størrelse = 44 }: { id: MaleriId; størrelse?: n
 
 export function Kunst({ s }: { s: Spilltilstand }) {
   const verdi = kunstverdi(s)
+  const eide = MALERILISTE.filter((id) => s.kunst.eide[id]).length
   return (
-    <div className="skjerm">
-      <h2 className="seksjon-tittel">Kunst</h2>
+    <Seksjon id="luksus-kunst" tittel="Kunst" sammendrag={eide ? `${eide} ${eide === 1 ? 'maleri' : 'malerier'} · ${kortKroner(verdi)}` : 'Ingen malerier'} harInnhold={eide > 0}>
       <p className="dempet liten">
         Prisene går opp og ned hver dag, og hver kunstner har sin egen trend. Auksjonshuset tar {tall(KJOPSSALAER * 100)} % når du kjøper
         og {tall(SALGSSALAER * 100)} % når du selger. På museum gir et maleri dobbel status, men da kan det ikke selges — og det tar en dag
@@ -50,7 +51,7 @@ export function Kunst({ s }: { s: Spilltilstand }) {
           <Maleri key={id} s={s} id={id} />
         ))}
       </ul>
-    </div>
+    </Seksjon>
   )
 }
 

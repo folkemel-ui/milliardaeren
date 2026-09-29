@@ -1468,15 +1468,6 @@ figure {
   font-size: 13px;
 }
 
-.segment-seks {
-  gap: 2px;
-}
-
-.segment-seks button {
-  font-size: 12px;
-  padding: 0 2px;
-}
-
 .forbes {
   margin: 10px 0 0;
   padding: 0;
@@ -2563,19 +2554,10 @@ figure {
   align-self: start;
 }
 
-.lagerrad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
 .lagerkort {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 4px;
-  padding: 12px 8px;
-  text-align: center;
 }
 
 .lager-emoji {
@@ -2585,13 +2567,6 @@ figure {
 
 .lagerkort strong {
   font-size: 14px;
-}
-
-.lagerkort .knapp {
-  width: 100%;
-  margin-top: 4px;
-  padding: 0 6px;
-  font-size: 12px;
 }
 
 .kjopskort.eid {
@@ -2623,6 +2598,140 @@ figure {
 .kjopskort.skjult h2 {
   letter-spacing: 0.15em;
   color: var(--tekst-dempet);
+}
+
+/* ─────────────────────────────────────────────── Seksjoner */
+
+.seksjon {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seksjon-hode {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.seksjon-hode .seksjon-tittel {
+  margin: 0;
+}
+
+.seksjon-pil {
+  display: inline-block;
+  color: var(--tekst-dempet);
+  font-size: 12px;
+  transition: transform 0.15s;
+}
+
+.seksjon.åpen .seksjon-pil {
+  transform: rotate(90deg);
+}
+
+.seksjon-sammendrag {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.seksjon-innhold {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: seksjon-inn 0.18s ease-out;
+}
+
+@keyframes seksjon-inn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* ─────────────────────────────────────────────── Kjøpsmengde og lager */
+
+.bedrifter-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mengdevalg {
+  flex: 0 0 auto;
+}
+
+.mengdevalg button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.lagerliste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lagerkort-topp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lagerkort-topp .dempet {
+  margin-left: auto;
+}
+
+.lagerplasser {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 6px;
+}
+
+.lagerplass {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+}
+
+.lagerplass.brukt {
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+}
+
+.lagerplass.ledig {
+  border: 1px dashed var(--kant);
+}
+
+.lagerplass.ny {
+  border: 1px dashed var(--gull-mørk);
+  color: var(--gull);
+  font-weight: 700;
+  line-height: 1.1;
+  align-content: center;
+  gap: 2px;
+}
+
+.lagerplass.ny span:first-child {
+  font-size: 20px;
+}
+
+.lagerplass.ny .liten {
+  font-size: 10px;
+}
+
+.lagerplass.ny:disabled {
+  opacity: 0.45;
 }
 
 /* ─────────────────────────────────────────────── Varsler */

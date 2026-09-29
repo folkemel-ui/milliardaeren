@@ -40,6 +40,7 @@ import { Minigraf } from '../komponenter/Linjegraf'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { Fondkort, Kursgraf, Nokkeltall, Rapportkalender } from '../komponenter/Marked'
 import { Tikkekurs } from '../komponenter/Tikk'
+import { Seksjon } from '../komponenter/Seksjon'
 import {
   aktive,
   DIN_DEL_AV_RUNDEN,
@@ -52,23 +53,21 @@ import {
   tidTilNesteRunde,
 } from '../../engine/startups'
 
-type Underfane = 'oversikt' | 'aksjer' | 'krypto' | 'startups' | 'rivaler' | 'bank'
+type Underfane = 'oversikt' | 'bors' | 'selskaper' | 'bank'
 
 const UNDERFANER: { id: Underfane; navn: string }[] = [
   { id: 'oversikt', navn: 'Oversikt' },
-  { id: 'aksjer', navn: 'Aksjer' },
-  { id: 'krypto', navn: 'Krypto' },
-  { id: 'startups', navn: 'Startups' },
-  { id: 'rivaler', navn: 'Rivaler' },
+  { id: 'bors', navn: 'Børs' },
+  { id: 'selskaper', navn: 'Selskaper' },
   { id: 'bank', navn: 'Bank' },
 ]
 
 const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Underfane> = {
-  aksje: 'aksjer',
-  krypto: 'krypto',
+  aksje: 'bors',
+  krypto: 'bors',
   fond: 'bank',
-  rival: 'rivaler',
-  startup: 'startups',
+  rival: 'selskaper',
+  startup: 'selskaper',
   sparing: 'bank',
 }
 
@@ -88,7 +87,7 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
 
   return (
     <section className="skjerm">
-      <div className="segment segment-seks" role="tablist">
+      <div className="segment" role="tablist">
         {UNDERFANER.map((f) => (
           <button key={f.id} role="tab" aria-selected={fane === f.id} className={fane === f.id ? 'aktiv' : ''} onClick={() => settFane(f.id)}>
             {f.navn}
@@ -98,13 +97,26 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
       {fane === 'oversikt' && (
         <Oversikt s={s} velg={(k) => (k === 'eiendom' ? tilEiendom() : settFane(TIL_UNDERFANE[k]))} />
       )}
-      {fane === 'startups' && <Startups s={s} />}
-      {fane === 'rivaler' && <Rivaler s={s} />}
-      {fane === 'aksjer' && <Papirliste s={s} klasse="aksje" velg={settValgt} />}
-      {fane === 'krypto' && (
+      {fane === 'bors' && (
         <>
-          <Stemning verdi={s.marked.stemning} />
-          <Papirliste s={s} klasse="krypto" velg={settValgt} />
+          <Rapportkalender s={s} velg={settValgt} />
+          <Seksjon id="bors-aksjer" tittel="Aksjer" sammendrag={kortKroner(papirverdi(s, 'aksje'))} harInnhold={AKSJER.some((id) => s.beholdning[id])}>
+            <Papirliste s={s} klasse="aksje" velg={settValgt} />
+          </Seksjon>
+          <Seksjon id="bors-krypto" tittel="Krypto" sammendrag={kortKroner(papirverdi(s, 'krypto'))} harInnhold={KRYPTO.some((id) => s.beholdning[id])}>
+            <Stemning verdi={s.marked.stemning} />
+            <Papirliste s={s} klasse="krypto" velg={settValgt} />
+          </Seksjon>
+        </>
+      )}
+      {fane === 'selskaper' && (
+        <>
+          <Seksjon id="selskaper-startups" tittel="Startups" sammendrag={`${aktive(s).filter((x) => x.andel > 0).length} med andel`} harInnhold={aktive(s).some((x) => x.andel > 0)}>
+            <Startups s={s} />
+          </Seksjon>
+          <Seksjon id="selskaper-rivaler" tittel="Rivaler" sammendrag={`Nr. ${forbesliste(s, nettoformue(s)).findIndex((x) => x.deg) + 1} på Forbes-lista`} harInnhold={s.rivaler.some((r) => r.andel > 0)}>
+            <Rivaler s={s} />
+          </Seksjon>
         </>
       )}
       {fane === 'bank' && <Bank s={s} />}
@@ -211,7 +223,6 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
         {kost > 0 && <Endring kroner={verdi - kost} andel={verdi / kost - 1} />}
       </div>
 
-      {klasse === 'aksje' && <Rapportkalender s={s} velg={velg} />}
 
       {eide.length > 0 && (
         <ul className="kortliste papirliste">
@@ -240,7 +251,7 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
         </ul>
       )}
 
-      <h2 className="seksjon-tittel">{klasse === 'aksje' ? 'Børsen' : 'Kryptomarkedet'}</h2>
+      <h2 className="seksjon-tittel">{klasse === 'aksje' ? 'Alle aksjer' : 'Alle mynter'}</h2>
       <ul className="kortliste papirliste">
         {ider.map((id) => {
           const p = PAPIRER[id]

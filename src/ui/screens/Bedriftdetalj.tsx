@@ -1,5 +1,6 @@
-import { bedriftInntektPerSek, forbedringspris, nesteMilepael, oppgraderingspris, statusfaktor } from '../../engine/formler'
-import { kjopForbedring, oppgrader } from '../../engine/handlinger'
+import { bedriftInntektPerSek, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
+import { kjopForbedring } from '../../engine/handlinger'
+import type { Kjopsmengde } from '../kjopsmengde'
 import { fusjonsfaktor } from '../../engine/fusjon'
 import { BEDRIFTSTYPER, FORBEDRINGER, MILEPAELER } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
@@ -9,14 +10,13 @@ import { utfor } from '../../state/lager'
 import { kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
-import { Personale } from '../komponenter/Bedriftskort'
+import { Oppgraderingsknapp, Personale } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
 
-export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift; tilbake: () => void }) {
+export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
   const inntekt = bedriftInntektPerSek(b) * statusfaktor(s)
-  const pris = oppgraderingspris(b)
   const neste = nesteMilepael(b.nivaa)
   const punkter = [
     ...b.inntektHistorikk.map((v, i) => ({ sek: i * INNTEKT_HISTORIKK_SEK, verdi: v })),
@@ -55,9 +55,7 @@ export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift;
         ) : (
           <p className="graf-tom">Grafen fylles ut minutt for minutt.</p>
         )}
-        <button className="knapp knapp-gull bred" disabled={s.kontanter < pris} onClick={() => utfor(oppgrader(s, b.id))}>
-          Oppgrader til nivå {b.nivaa + 1} · {kortKroner(pris)}
-        </button>
+        <Oppgraderingsknapp s={s} b={b} mengde={mengde} bred />
       </div>
 
       <dl className="kort rekorder">

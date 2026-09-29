@@ -50,6 +50,29 @@ export function oppgraderingspris(b: Bedrift): number {
   return Math.round(t.oppgraderingspris * t.vekst ** (b.nivaa - 1))
 }
 
+/** Så mange nivåer kan kjøpes i én handling — et tak så «Maks» aldri løper løpsk. */
+export const MAKS_NIVAAER_PER_KJOP = 1000
+
+/** Hva `antall` nivåer koster samlet: summen av prisene for hvert nivå, avrundet likt som ett og ett. */
+export function prisForNivaaer(b: Bedrift, antall: number): number {
+  let sum = 0
+  for (let i = 0; i < antall; i++) sum += oppgraderingspris({ ...b, nivaa: b.nivaa + i })
+  return sum
+}
+
+/** Hvor mange nivåer du har råd til med `kontanter`, høyst MAKS_NIVAAER_PER_KJOP. */
+export function nivaaerDuHarRaadTil(b: Bedrift, kontanter: number): number {
+  let sum = 0
+  let n = 0
+  while (n < MAKS_NIVAAER_PER_KJOP) {
+    const neste = oppgraderingspris({ ...b, nivaa: b.nivaa + n })
+    if (sum + neste > kontanter) break
+    sum += neste
+    n++
+  }
+  return n
+}
+
 // ─────────────────────────────────────────────── Inntekt
 
 /** Produktet av forbedringene som er kjøpt. */

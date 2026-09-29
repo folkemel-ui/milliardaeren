@@ -17,6 +17,7 @@ import type { By, JordId, LandemerkeId, Spilltilstand } from '../../engine/types
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall } from '../format'
 import { BedriftIkon } from './BedriftIkon'
+import { Seksjon } from './Seksjon'
 
 /** Gårder og skoger — filtrert på by når en by er valgt på kartet. */
 export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
@@ -24,9 +25,9 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
   const neste = JORDLISTE.find((id) => !jordSynlig(s, id))
   if (synlige.length === 0 && (by || !neste)) return null
   const v = vaer(dagnummer(s.sek))
+  const eide = JORDLISTE.filter((id) => s.jord[id]).length
   return (
-    <>
-      <h2 className="seksjon-tittel">Jord og skog</h2>
+    <Seksjon id="eiendom-jord" tittel="Jord og skog" sammendrag={`${eide} av ${JORDLISTE.length} eid`} harInnhold={eide > 0 || !!by}>
       <p className="dempet liten">
         Gårdene høstes hver mandag morgen, etter ukas vær. Denne uka: <strong>{v.navn.toLowerCase()}</strong>. Skogen gir ingenting før
         du hogger — tømmeret vokser raskest de første {TOMMER_DAGER} dagene.
@@ -45,7 +46,7 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
           </li>
         )}
       </ul>
-    </>
+    </Seksjon>
   )
 }
 
@@ -100,9 +101,9 @@ function Jordkort({ s, id, faktor }: { s: Spilltilstand; id: JordId; faktor: num
 export function Landemerkeliste({ s }: { s: Spilltilstand }) {
   // Landemerkene vises når de første er innen rekkevidde.
   if (s.hoyesteFormue < LANDEMERKER.fyret.pris * 0.25) return null
+  const mine = LANDEMERKELISTE.filter((id) => eierDu(s, id)).length
   return (
-    <>
-      <h2 className="seksjon-tittel">Landemerker</h2>
+    <Seksjon id="eiendom-landemerker" tittel="Landemerker" sammendrag={`${mine} av ${LANDEMERKELISTE.length}`} harInnhold={mine > 0}>
       <p className="dempet liten">
         Det finnes bare ett av hvert. En rival med over {RIVAL_KJOPER_VED} ganger prisen i formue kan kjøpe det når som helst — da må du by
         over for å få det.
@@ -112,7 +113,7 @@ export function Landemerkeliste({ s }: { s: Spilltilstand }) {
           <Landemerkekort key={id} s={s} id={id} />
         ))}
       </ul>
-    </>
+    </Seksjon>
   )
 }
 

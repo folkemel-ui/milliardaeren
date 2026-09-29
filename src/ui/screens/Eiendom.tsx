@@ -24,6 +24,7 @@ import { Minigraf } from '../komponenter/Linjegraf'
 import { Norgeskart } from '../komponenter/Norgeskart'
 import { Verdenskart } from '../komponenter/Verdenskart'
 import { Jordliste, Landemerkeliste } from '../komponenter/JordOgLandemerker'
+import { Seksjon } from '../komponenter/Seksjon'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
@@ -83,6 +84,12 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
         </button>
       )}
 
+      <Seksjon
+        id="eiendom-boliger"
+        tittel="Boliger og bygg"
+        sammendrag={`${Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0)} eid`}
+        harInnhold={Object.keys(s.eiendommer).length > 0 || !!by}
+      >
       <ul className="kortliste">
         {viste.map((id) => (
           <Eiendomskort key={id} s={s} id={id} />
@@ -106,6 +113,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
           </li>
         )}
       </ul>
+      </Seksjon>
 
       <Jordliste s={s} by={by} />
       {!by && <Landemerkeliste s={s} />}
