@@ -68,6 +68,11 @@ export function useAvbrudd(): Avbrudd | null {
   )
 }
 
+/** Avbruddet nå, uten å abonnere. */
+export function aktivtAvbrudd(): Avbrudd | null {
+  return avbrudd
+}
+
 /** Stopper spillet med en feil. Den første feilen er den som vises. */
 export function meldFeil(e: unknown): void {
   if (avbrudd?.type === 'feil') return

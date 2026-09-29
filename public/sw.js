@@ -8,14 +8,20 @@
  *    index.html fra hurtiglageret, kjører spilleren gammel kode mot en nyere
  *    lagring, og migreringen avviser den med «fra en nyere spillversjon».
  *    Nettet først betyr at en ny utgivelse alltid når frem når du er på nett.
- *  - Alt annet fra samme opphav hentes fra HURTIGLAGERET FØRST. Det er trygt
- *    nettopp fordi navnene er hashet: endres innholdet, endres filnavnet.
+ *  - Ressursene med hash (assets/) hentes fra HURTIGLAGERET FØRST. Det er
+ *    trygt nettopp fordi navnene er hashet: endres innholdet, endres filnavnet.
+ *  - Skallet uten hash (manifest og ikoner) vises fra hurtiglageret, men
+ *    hentes samtidig på nytt i bakgrunnen, så en endring når frem neste gang.
+ *
+ * Bare vellykkede svar lagres. En feilside fra serveren skal aldri bli det
+ * spillet faller tilbake på uten nett.
  *
  * Offline: dokumentet faller tilbake på den sist lagrede index.html, og
  * ressursene den peker på ligger allerede i hurtiglageret fra sist besøk.
  */
 
-const LAGER = 'milliardaer-v1'
+// Byttes når strategien endres, så gamle installasjoner starter med et rent lager.
+const LAGER = 'milliardaer-v2'
 
 // Hver utgivelse gir nye hashede filnavn, og de gamle blir liggende. Uten tak
 // vokser hurtiglageret med én bunt per utgivelse i det uendelige. Nøklene
@@ -55,11 +61,36 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       fetch(forespørsel)
         .then((svar) => {
-          const kopi = svar.clone()
-          caches.open(LAGER).then((lager) => lager.put('./index.html', kopi))
+          if (svar.ok) {
+            const kopi = svar.clone()
+            caches.open(LAGER).then((lager) => lager.put('./index.html', kopi))
+          }
           return svar
         })
         .catch(() => caches.match('./index.html').then((truffet) => truffet ?? Response.error())),
+    )
+    return
+  }
+
+  if (!url.pathname.includes('/assets/')) {
+    e.respondWith(
+      caches.match(forespørsel).then((truffet) => {
+        const nytt = fetch(forespørsel)
+          .then((svar) => {
+            if (svar.ok && svar.status === 200) {
+              const kopi = svar.clone()
+              caches.open(LAGER).then((lager) => lager.put(forespørsel, kopi))
+            }
+            return svar
+          })
+          .catch(() => truffet ?? Response.error())
+        if (truffet) {
+          // Svar med en gang; oppdateringen fullføres i bakgrunnen.
+          e.waitUntil(nytt.then(() => {}))
+          return truffet
+        }
+        return nytt
+      }),
     )
     return
   }

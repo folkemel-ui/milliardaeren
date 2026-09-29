@@ -40,7 +40,7 @@ describe('markedet', () => {
       expect(Number.isFinite(s.marked.kurser[id].kurs)).toBe(true)
     }
     expect(Math.abs(s.marked.stemning)).toBeLessThanOrEqual(1)
-  })
+  }, 20_000) // Et helt døgn simuleres; med alle testfilene parallelt kan det ta over 5 s.
 })
 
 describe('handel', () => {

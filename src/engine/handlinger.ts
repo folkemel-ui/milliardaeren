@@ -79,6 +79,14 @@ export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: 
 
 const feil = (tekst: string): Utfall => ({ ok: false, feil: tekst })
 
+/*
+ * NaN slipper gjennom sammenligninger som «n < 1» (de er alltid usanne), og
+ * blir null i lagringen. Alle antall og beløp sjekkes derfor først. Uendelig
+ * er lov der det betyr «alt» — Math.min og taket tar seg av det.
+ */
+const ikkeTall = (x: number) => typeof x !== 'number' || Number.isNaN(x)
+const UGYLDIG = 'Skriv inn et gyldig tall.'
+
 function finn(s: Spilltilstand, id: string): Bedrift | undefined {
   return s.bedrifter.find((b) => b.id === id)
 }
@@ -134,6 +142,7 @@ export function oppgrader(s: Spilltilstand, id: string): Utfall {
 export function oppgraderFlere(s: Spilltilstand, id: string, antall: number): Utfall {
   const b = finn(s, id)
   if (!b) return feil('Fant ikke bedriften.')
+  if (ikkeTall(antall)) return feil(UGYLDIG)
   const n = Math.floor(antall)
   if (n < 1) return feil('Du har ikke råd til et eneste nivå.')
   if (n > MAKS_NIVAAER_PER_KJOP) return feil(`Høyst ${MAKS_NIVAAER_PER_KJOP} nivåer om gangen.`)
@@ -173,6 +182,7 @@ const STENGT = 'Børsen er stengt i helgen. Den åpner mandag morgen.'
 
 export function kjopPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall {
   if (!PAPIRER[id]) return feil('Ukjent papir.')
+  if (ikkeTall(antall)) return feil(UGYLDIG)
   if (borsenStengt(s, id)) return feil(STENGT)
   const a = rundAntall(id, antall)
   if (a <= 0) return feil('Velg hvor mye du vil kjøpe.')
@@ -186,6 +196,7 @@ export function kjopPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall
 export function selgPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall {
   const b = s.beholdning[id]
   if (!b) return feil('Du eier ingen.')
+  if (ikkeTall(antall)) return feil(UGYLDIG)
   if (borsenStengt(s, id)) return feil(STENGT)
   // Et salg av (nesten) alt selger alt, så det ikke blir liggende støv igjen.
   const a = antall >= b.antall - 1e-9 ? b.antall : rundAntall(id, antall)
@@ -203,6 +214,7 @@ export function selgPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall
 /** Kjøper fondsandeler for et beløp, gebyret inkludert. */
 export function kjopFond(s: Spilltilstand, id: FondId, belop: number): Utfall {
   if (!FOND[id]) return feil('Ukjent fond.')
+  if (ikkeTall(belop)) return feil(UGYLDIG)
   if (fondStengt(s, id)) return feil(STENGT)
   const b = Math.floor(Math.min(belop, s.kontanter))
   if (b <= 0) return feil('Velg hvor mye du vil kjøpe for.')
@@ -456,6 +468,7 @@ export function investerIStartup(s: Spilltilstand, id: number, belop: number): U
   const st = (s.startups ?? []).find((x) => x.id === id)
   if (!st) return feil('Fant ikke selskapet.')
   if (st.status !== 'aktiv') return feil('Selskapet henter ikke penger lenger.')
+  if (ikkeTall(belop)) return feil(UGYLDIG)
   const b = Math.floor(Math.min(belop, ledigIRunde(st)))
   if (b <= 0) return feil('Runden er full — vent til neste.')
   if (s.kontanter < b) return feil('Du har ikke råd.')
@@ -652,7 +665,8 @@ export const MAKS_ORDRE = 20
 
 export function nyOrdre(s: Spilltilstand, papir: PapirId, type: Ordretype, grense: number, antall: number): Utfall {
   if (!PAPIRER[papir]) return feil('Ukjent papir.')
-  if (!(grense > 0)) return feil('Sett en grense over null.')
+  if (!Number.isFinite(grense) || !(grense > 0)) return feil('Sett en grense over null.')
+  if (!Number.isFinite(antall)) return feil(UGYLDIG)
   const a = rundAntall(papir, antall)
   if (a <= 0) return feil('Velg hvor mange ordren gjelder.')
   if (type !== 'kjop' && !s.beholdning[papir]) return feil('Du eier ingen å selge.')
@@ -682,6 +696,7 @@ export function lesAvis(s: Spilltilstand): Utfall {
 // ─────────────────────────────────────────────── Sparekontoen
 
 export function settInn(s: Spilltilstand, belop: number): Utfall {
+  if (ikkeTall(belop)) return feil(UGYLDIG)
   const b = Math.min(belop, s.kontanter)
   if (b <= 0) return feil('Du har ingen kontanter å sette inn.')
   const n = structuredClone(s)
@@ -692,6 +707,7 @@ export function settInn(s: Spilltilstand, belop: number): Utfall {
 }
 
 export function taUt(s: Spilltilstand, belop: number): Utfall {
+  if (ikkeTall(belop)) return feil(UGYLDIG)
   const b = Math.min(belop, s.sparing)
   if (b <= 0) return feil('Sparekontoen er tom.')
   const n = structuredClone(s)
@@ -710,6 +726,7 @@ export function taUt(s: Spilltilstand, belop: number): Utfall {
 // ─────────────────────────────────────────────── Banken
 
 export function laan(s: Spilltilstand, belop: number): Utfall {
+  if (ikkeTall(belop)) return feil(UGYLDIG)
   const b = Math.floor(belop)
   if (b <= 0) return feil('Velg hvor mye du vil låne.')
   if (b > maksNyttLaan(s)) return feil('Banken låner deg ikke så mye.')
@@ -720,6 +737,7 @@ export function laan(s: Spilltilstand, belop: number): Utfall {
 }
 
 export function nedbetal(s: Spilltilstand, belop: number): Utfall {
+  if (ikkeTall(belop)) return feil(UGYLDIG)
   const b = Math.min(belop, s.gjeld)
   if (b <= 0) return feil('Du har ingen gjeld å betale.')
   if (b > s.kontanter) return feil('Du har ikke nok kontanter.')

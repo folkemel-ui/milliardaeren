@@ -43,7 +43,8 @@ export function FlyttSpillet() {
     a.href = url
     a.download = FILNAVN
     a.click()
-    URL.revokeObjectURL(url)
+    // Safari starter nedlastingen etter klikket; frigis adressen med en gang, blir filen tom.
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
     settMelding(`Lagret som ${FILNAVN}.`)
   }
 
