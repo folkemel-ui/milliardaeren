@@ -50,9 +50,15 @@ function Kiosk({ størrelse = 48 }: P) {
       <rect x="30" y="26" width="8" height="17" fill="#7a5230" />
       <circle cx="36" cy="35" r="0.9" fill="#f5d000" />
       <rect x="16" y="5" width="16" height="7" rx="1.5" fill="#d64545" />
-      <text x="24" y="10.6" textAnchor="middle" fontSize="5.5" fontWeight="800" fill="#ffffff" fontFamily="Inter, sans-serif">
-        24
-      </text>
+      {/* «24» tegnet som streker, ikke <text>: tekst i SVG havner i sidens tekst og skjermlesere. */}
+      <path
+        d="M20.2 7.4 Q20.2 6.3 21.5 6.3 Q22.8 6.3 22.8 7.4 Q22.8 8.2 21.8 8.9 L20.2 10.5 H22.9 M26.9 10.6 V6.3 L24.8 9.3 H28"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   )
 }
@@ -110,9 +116,7 @@ function Hotell({ størrelse = 48 }: P) {
       <rect x="10" y="3.5" width="28" height="3.5" fill="#7a5230" />
       {vinduer}
       <rect x="6" y="12" width="5" height="14" rx="1" fill="#b91c1c" />
-      <text x="8.5" y="21.3" textAnchor="middle" fontSize="6" fontWeight="800" fill="#ffffff" fontFamily="Inter, sans-serif">
-        H
-      </text>
+      <path d="M7.3 17 V21.4 M9.7 17 V21.4 M7.3 19.2 H9.7" fill="none" stroke="#ffffff" strokeWidth="1.1" strokeLinecap="round" />
       <rect x="16" y="36" width="16" height="2.6" rx="0.8" fill="#b91c1c" />
       <rect x="20" y="38.4" width="8" height="4.6" fill="#3a2a1a" />
       <rect x="5" y="43" width="38" height="2" fill="#9ca3af" />

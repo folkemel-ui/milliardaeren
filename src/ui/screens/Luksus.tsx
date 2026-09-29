@@ -9,6 +9,7 @@ import {
   LUKSUSLISTE,
   restverdi,
   STATUS_INNTEKT,
+  STATUS_RENTEKUTT,
   STATUSNIVAAER,
   statusnivaa,
   statuspoeng,
@@ -82,9 +83,26 @@ function Status({ s }: { s: Spilltilstand }) {
       <div className="milepael-spor">
         <div className="milepael-fyll" style={{ width: `${andel * 100}%` }} />
       </div>
+      <p className="dempet liten">{neste ? `${neste.poeng - poeng} poeng til ${neste.navn}.` : 'Høyeste nivå nådd.'}</p>
+      {/* Hva statusen gir, nå og på neste nivå — så det er klart hvorfor luksus lønner seg. */}
+      <dl className="status-fordeler">
+        <div>
+          <dt>Inntekt fra bedriftene</dt>
+          <dd>
+            +{tall(STATUS_INNTEKT * nivaa * 100)} %
+            {neste && <span className="dempet"> → +{tall(STATUS_INNTEKT * (nivaa + 1) * 100)} %</span>}
+          </dd>
+        </div>
+        <div>
+          <dt>Rente på lån, per time</dt>
+          <dd>
+            {tall(rentesats(s) * 100, 1)} %
+            {neste && <span className="dempet"> → {tall((rentesats(s) - STATUS_RENTEKUTT) * 100, 1)} %</span>}
+          </dd>
+        </div>
+      </dl>
       <p className="dempet liten">
-        {neste ? `${neste.poeng - poeng} poeng til ${neste.navn}. ` : 'Høyeste nivå nådd. '}
-        Nå: +{tall(STATUS_INNTEKT * nivaa * 100)} % inntekt fra bedriftene, rente {tall(rentesats(s) * 100, 1)} % per time.
+        Hvert statusnivå gir +{tall(STATUS_INNTEKT * 100)} % inntekt og kutter lånerenten med {tall(STATUS_RENTEKUTT * 100, 1)} prosentpoeng.
       </p>
     </div>
   )

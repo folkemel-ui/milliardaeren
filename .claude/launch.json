@@ -20,6 +20,12 @@
       "port": 5182
     },
     {
+      "name": "milliardaer-test3",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "5184", "--strictPort"],
+      "port": 5184
+    },
+    {
       "name": "milliardaer-bygg",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["vite", "preview", "--port", "5183", "--strictPort"],

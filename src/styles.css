@@ -2543,6 +2543,29 @@ figure {
   align-self: start;
 }
 
+.status-fordeler {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-fordeler div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status-fordeler dt {
+  color: var(--tekst-dempet);
+}
+
+.status-fordeler dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 .lagerkort {
   display: flex;
   flex-direction: column;
@@ -2724,6 +2747,12 @@ figure {
 }
 
 /* ─────────────────────────────────────────────── Velkomst */
+
+/* Vinduene tar selv imot fokus når de åpnes (useFokusfelle); knappene inni har egen ring. */
+.avis:focus,
+.velkomst:focus {
+  outline: none;
+}
 
 .velkomst {
   width: min(420px, calc(100% - 32px));

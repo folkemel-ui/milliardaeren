@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFokusfelle } from './useFokusfelle'
 import type { Velkomst } from '../../state/lager'
 import { oppsummer } from '../velkomst'
 import { UTFALLTEKST } from '../../engine/kvartal'
@@ -24,11 +25,8 @@ export function Velkomstskjerm({
   const uavgjort = o.kamper.filter((k) => k.maalFor === k.maalMot).length
   const tap = o.kamper.length - seire - uavgjort
 
-  useEffect(() => {
-    const vedTast = (e: KeyboardEvent) => e.key === 'Escape' && lukk()
-    window.addEventListener('keydown', vedTast)
-    return () => window.removeEventListener('keydown', vedTast)
-  }, [lukk])
+  const boks = useRef<HTMLDivElement>(null)
+  useFokusfelle(boks, lukk)
 
   const rad = (navn: string, belop: number) =>
     Math.abs(belop) >= 1 && (
@@ -40,7 +38,7 @@ export function Velkomstskjerm({
 
   return (
     <div className="avis-bakgrunn" onClick={lukk}>
-      <div className="velkomst" role="dialog" aria-modal="true" aria-label="Velkommen tilbake" onClick={(e) => e.stopPropagation()}>
+      <div ref={boks} tabIndex={-1} className="velkomst" role="dialog" aria-modal="true" aria-label="Velkommen tilbake" onClick={(e) => e.stopPropagation()}>
         <h1 className="velkomst-tittel">Velkommen tilbake!</h1>
         <p className="dempet">
           Du var borte i {varighet(o.borteSek)}.

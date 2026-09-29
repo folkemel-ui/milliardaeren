@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 25 – Polish:** Keyboard focus in the newspaper and welcome screen, Stray text and number formatting in the locked-business list, Clearer status line in Luksus
 - **Pack 26 – Big moments:** Buy moments, Milestone celebrations in more steps, Numbers that count up, Transitions between screens
 - **Pack 27 – One look:** Consistent illustration style, A proper logo and app icon, Businesses that grow visually
 - **Pack 28 – More to buy:** More luxury items, More stocks and coins
@@ -18,29 +17,23 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
 
-## Interface
-
-2. **Keyboard focus in the newspaper and welcome screen.** Move focus into the window when it opens, keep it there, and give it back when the window closes.
-3. **Stray text and number formatting in the locked-business list.** "24" and "H" show up among the locked businesses. Amounts are formatted unevenly: "12,00 mill" next to "150 mill".
-4. **Clearer status line in Luksus.** "rente 3,0 % per time" is hard to understand there. Explain what the status level does to the interest rate.
-
 ## Animation
 
-5. **Buy moments.** Buying a new business, property or luxury item feels like an event: a short reveal where the illustration zooms in, a shine and a "NEW" badge on the card.
-6. **Milestone celebrations in more steps.** Today confetti only shows at 1 mill and 1 mrd. Add smaller celebrations at 10k, 100k, 10 mill and 100 mill, and a bigger, different one at 1 mrd.
-7. **Numbers that count up.** Use `RulleTall` everywhere big amounts change: net worth, reports, sale results.
-8. **Transitions between screens.** Detail screens (business, stock, club) slide or grow out of the card you tapped instead of popping in.
+2. **Buy moments.** Buying a new business, property or luxury item feels like an event: a short reveal where the illustration zooms in, a shine and a "NEW" badge on the card.
+3. **Milestone celebrations in more steps.** Today confetti only shows at 1 mill and 1 mrd. Add smaller celebrations at 10k, 100k, 10 mill and 100 mill, and a bigger, different one at 1 mrd.
+4. **Numbers that count up.** Use `RulleTall` everywhere big amounts change: net worth, reports, sale results.
+5. **Transitions between screens.** Detail screens (business, stock, club) slide or grow out of the card you tapped instead of popping in.
 
 ## Art
 
-9. **Consistent illustration style.** Go through all the SVG illustrations and icons so line width, colors and level of detail match.
-10. **A proper logo and app icon.** A logo with its own look, used on the app icon, the loading screen and Profil.
-11. **Businesses that grow visually.** The illustration changes at level 1, 25, 50 and 100: the lemonade stand gets bigger, more customers show up, and a neon sign comes on.
+6. **Consistent illustration style.** Go through all the SVG illustrations and icons so line width, colors and level of detail match.
+7. **A proper logo and app icon.** A logo with its own look, used on the app icon, the loading screen and Profil.
+8. **Businesses that grow visually.** The illustration changes at level 1, 25, 50 and 100: the lemonade stand gets bigger, more customers show up, and a neon sign comes on.
 
 ## Content
 
-12. **More luxury items.** More cars, watches, boats, jets and houses, spread over the whole price range so there is always something new to aim for.
-13. **More stocks and coins.** New sectors (tech, fish farming, energy, gaming) and a few more coins, including meme coins.
+9. **More luxury items.** More cars, watches, boats, jets and houses, spread over the whole price range so there is always something new to aim for.
+10. **More stocks and coins.** New sectors (tech, fish farming, energy, gaming) and a few more coins, including meme coins.
 
 ## Parked (not chosen yet)
 

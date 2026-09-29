@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { useFokusfelle } from './useFokusfelle'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, standard, STANDARDER } from '../../engine/eiendom'
 import { eiendomSynlig } from '../../engine/handlinger'
 import { JORD, JORDLISTE } from '../../engine/jord'
@@ -16,17 +17,8 @@ import { Illustrasjon } from './Illustrasjoner'
  * i utkanten.
  */
 export function Gatebilde({ s, by, lukk }: { s: Spilltilstand; by: By; lukk: () => void }) {
-  const tittel = useRef<HTMLHeadingElement>(null)
-  useEffect(() => {
-    const forrige = document.activeElement as HTMLElement | null
-    tittel.current?.focus()
-    const vedTast = (e: KeyboardEvent) => e.key === 'Escape' && lukk()
-    window.addEventListener('keydown', vedTast)
-    return () => {
-      window.removeEventListener('keydown', vedTast)
-      forrige?.focus?.()
-    }
-  }, [lukk])
+  const boks = useRef<HTMLDivElement>(null)
+  useFokusfelle(boks, lukk)
 
   const typer = EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].by === by)
   const hus = typer.flatMap((id) => Array.from({ length: s.eiendommer[id] ?? 0 }, (_, i) => ({ id, i })))
@@ -40,8 +32,8 @@ export function Gatebilde({ s, by, lukk }: { s: Spilltilstand; by: By; lukk: () 
 
   return (
     <div className="avis-bakgrunn" onClick={lukk}>
-      <div className="velkomst gatebilde" role="dialog" aria-modal="true" aria-labelledby="gate-tittel" onClick={(ev) => ev.stopPropagation()}>
-        <h1 id="gate-tittel" className="velkomst-tittel" ref={tittel} tabIndex={-1}>
+      <div ref={boks} tabIndex={-1} className="velkomst gatebilde" role="dialog" aria-modal="true" aria-labelledby="gate-tittel" onClick={(ev) => ev.stopPropagation()}>
+        <h1 id="gate-tittel" className="velkomst-tittel">
           {by}
         </h1>
         <p className="dempet liten">

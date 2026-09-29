@@ -1,4 +1,5 @@
-import { memo, useEffect } from 'react'
+import { memo, useEffect, useRef } from 'react'
+import { useFokusfelle } from './useFokusfelle'
 import { lesAvis } from '../../engine/handlinger'
 import type { Avisutgave, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
@@ -14,15 +15,12 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
     if (siste && siste.dag > s.avisLest) utfor(lesAvis(s), true)
   }, [siste, s])
 
-  useEffect(() => {
-    const vedTast = (e: KeyboardEvent) => e.key === 'Escape' && lukk()
-    window.addEventListener('keydown', vedTast)
-    return () => window.removeEventListener('keydown', vedTast)
-  }, [lukk])
+  const boks = useRef<HTMLElement>(null)
+  useFokusfelle(boks, lukk)
 
   return (
     <div className="avis-bakgrunn" onClick={lukk}>
-      <article className="avis" role="dialog" aria-modal="true" aria-label="Børstidende" onClick={(e) => e.stopPropagation()}>
+      <article ref={boks} tabIndex={-1} className="avis" role="dialog" aria-modal="true" aria-label="Børstidende" onClick={(e) => e.stopPropagation()}>
         <header className="avis-hode">
           <button className="avis-lukk" onClick={lukk} aria-label="Lukk avisen">
             ✕

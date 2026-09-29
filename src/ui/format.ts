@@ -22,11 +22,17 @@ export function kroner(n: number): string {
   return `kr ${tall(Math.floor(n))}`
 }
 
-/** Kort form for store beløp: «kr 1,25 mill», «kr 3,40 mrd». */
+/**
+ * Kort form for store beløp: «kr 1,25 mill», «kr 12,5 mill», «kr 150 mill».
+ * Tre gjeldende sifre, uten nuller på slutten — «kr 12 mill», ikke «kr 12,00 mill».
+ */
 export function kortKroner(n: number): string {
   const abs = Math.abs(n)
-  // Tre sifre før kommaet er presist nok: «kr 150 mill», ikke «kr 150,00 mill».
-  const kort = (verdi: number, enhet: string) => `kr ${tall(verdi, Math.abs(verdi) >= 100 ? 0 : 2)} ${enhet}`
+  const kort = (verdi: number, enhet: string) => {
+    const a = Math.abs(verdi)
+    const tekst = tall(verdi, a < 10 ? 2 : a < 100 ? 1 : 0).replace(/(,\d*?)0+$/, '$1').replace(/,$/, '')
+    return `kr ${tekst} ${enhet}`
+  }
   // Fra 999,5 mill går det over til milliarder, så det aldri står «kr 1 000 mill».
   if (abs >= 999.5e6) return kort(n / 1e9, 'mrd')
   if (abs >= 1e6) return kort(n / 1e6, 'mill')
