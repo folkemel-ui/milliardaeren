@@ -15,6 +15,7 @@ import { sjekkPrestasjoner } from './prestasjoner'
 import { rivaltikk, rivalutbyttePerSek } from './rivaler'
 import { sjekkOrdre } from './ordre'
 import { Terning } from './rng'
+import { kotikk } from './hender'
 import type { PapirId, Spilltilstand } from './types'
 
 /** Flere punkter enn dette, og historikken tynnes ut til halvparten. */
@@ -83,6 +84,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   if (formue > s.hoyesteFormue) s.hoyesteFormue = formue
   if (s.sek % s.historikk.intervall === 0) loggFormue(s, formue)
   sjekkPrestasjoner(s)
+  kotikk(s, borte)
   if (erDagsskifte(s.sek)) {
     registrerDagslutt(s.marked)
     gisUtAvis(s, terning)

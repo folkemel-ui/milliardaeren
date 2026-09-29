@@ -407,6 +407,10 @@ export interface Spilltilstand {
   handler: Handelslogg[]
   /** Kvartalsrapportene per aksje: siste resultat og hvordan utbyttet har endret seg. */
   kvartal: Partial<Record<PapirId, Kvartal>>
+  /** Koppene du har solgt selv i dette sekundet — et tak på hvor fort du rekker. Mangler i eldre lagringer. */
+  handsalg?: { sek: number; antall: number }
+  /** Kø ved en av bedriftene, som du kan betjene for en bonus før kundene går. */
+  ko?: { bedriftId: string; slutterSek: number; bonus: number } | null
 }
 
 // ─────────────────────────────────────────────── Fond, handler og kvartalsrapporter

@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 23 – Hands on:** Tap to sell, Hold to upgrade, Customer rush, Swipe between tabs and scrub charts
 - **Pack 24 – Living map:** Land and landmarks on the map, Regional prices and price colors, Rent per city, Zoom into a city
 - **Pack 25 – Polish:** Keyboard focus in the newspaper and welcome screen, Stray text and number formatting in the locked-business list, Clearer status line in Luksus
 - **Later:** Hotels abroad and holiday apartments (bring up the parked Map ideas at the same time)
@@ -23,19 +22,12 @@ A suggested order, grouped so each pack feels complete when played. The order is
 3. **Stray text and number formatting in the locked-business list.** "24" and "H" show up among the locked businesses. Amounts are formatted unevenly: "12,00 mill" next to "150 mill".
 4. **Clearer status line in Luksus.** "rente 3,0 % per time" is hard to understand there. Explain what the status level does to the interest rate.
 
-## Interactivity
-
-5. **Tap to sell.** Early on you can tap the lemonade stand to sell a cup yourself. It stops being worth it once you have staff, but it gives the first minutes something to do.
-6. **Hold to upgrade.** Holding the upgrade button keeps buying levels, faster the longer you hold.
-7. **Customer rush.** Now and then a queue shows up on a business card. Tap it within a few seconds for a small bonus, or let it go.
-8. **Swipe between tabs and scrub charts.** Swipe sideways to change tab, and drag a finger along a chart to see the price at any point.
-
 ## Map
 
-9. **Land and landmarks on the map.** Farms, forest and the four landmarks get their own small symbols on the map. Landmarks aren't shown at all today.
-10. **Regional prices and price colors.** Separate property indexes for Oslo, Bergen, Stavanger and the mountains, instead of one index for the whole country. Each city is tinted green or red by how its prices have moved.
-11. **Rent per city.** Cities where you have buildings rented out show a small label with rent per second, and a coin pops up when the rent comes in. Cities with nothing rented out show nothing.
-12. **Zoom into a city.** Tap-and-hold or pinch to see a small street view where each property is a building that changes look with its standard and renovation.
+5. **Land and landmarks on the map.** Farms, forest and the four landmarks get their own small symbols on the map. Landmarks aren't shown at all today.
+6. **Regional prices and price colors.** Separate property indexes for Oslo, Bergen, Stavanger and the mountains, instead of one index for the whole country. Each city is tinted green or red by how its prices have moved.
+7. **Rent per city.** Cities where you have buildings rented out show a small label with rent per second, and a coin pops up when the rent comes in. Cities with nothing rented out show nothing.
+8. **Zoom into a city.** Tap-and-hold or pinch to see a small street view where each property is a building that changes look with its standard and renovation.
 
 ## Parked (not chosen yet)
 

@@ -1,12 +1,25 @@
-import { useId } from 'react'
+import { useId, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { varighet } from '../format'
 
 const B = 320
 const H = 140
 
+/** Punktet nærmest et tidspunkt. Punktene er sortert i tid. */
+function nærmeste(punkter: { sek: number }[], sek: number): number {
+  let lav = 0
+  let høy = punkter.length - 1
+  while (høy - lav > 1) {
+    const midt = (lav + høy) >> 1
+    if (punkter[midt].sek <= sek) lav = midt
+    else høy = midt
+  }
+  return sek - punkter[lav].sek <= punkter[høy].sek - sek ? lav : høy
+}
+
 /**
  * Linjegraf over tid med y-aksen i egen kolonne. Punktene må være sortert i
- * tid; siste punkt regnes som «nå».
+ * tid; siste punkt regnes som «nå». Dra over grafen (eller hold musa over,
+ * eller bruk piltastene) for å lese av verdien på et tidspunkt.
  */
 export function Linjegraf({
   punkter,
@@ -23,6 +36,9 @@ export function Linjegraf({
   merker?: { sek: number; verdi: number; kjop: boolean }[]
 }) {
   const id = useId()
+  // Hvor langt inn i grafen du leser av (0–1), eller null. En andel, ikke et
+  // punkt, så siktet står stille mens grafen fylles på hvert sekund.
+  const [andel, settAndel] = useState<number | null>(null)
   if (punkter.length < 2) {
     return <p className="graf-tom">Grafen fylles ut etter hvert som tiden går.</p>
   }
@@ -47,13 +63,50 @@ export function Linjegraf({
   const flate = `0,${H} ${linje} ${B},${H}`
   const synlige = merker.filter((m) => m.sek >= førsteSek && m.sek <= førsteSek + spenn)
 
+  const sisteSek = punkter[punkter.length - 1].sek
+  const valgt = andel === null ? null : punkter[nærmeste(punkter, førsteSek + andel * spenn)]
+  const lesAv = (e: PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    settAndel(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)))
+  }
+  const vedTast = (e: KeyboardEvent<HTMLDivElement>) => {
+    const steg = 1 / (punkter.length - 1)
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault()
+      const fra = andel ?? 1
+      settAndel(Math.min(1, Math.max(0, fra + (e.key === 'ArrowRight' ? steg : -steg))))
+    } else if (e.key === 'Escape') settAndel(null)
+  }
+
   return (
     <figure className="graf">
       <div className="graf-akse-y">
         <span>{format(maks)}</span>
         <span>{format(min)}</span>
       </div>
-      <div className="graf-flate">
+      <div
+        className="graf-flate"
+        tabIndex={0}
+        aria-label={`${etikett}. Bruk piltastene for å lese av verdier.`}
+        onPointerDown={(e) => {
+          lesAv(e)
+          try {
+            // Fingeren kan gli utenfor grafen uten at avlesningen slipper.
+            e.currentTarget.setPointerCapture(e.pointerId)
+          } catch {
+            /* ikke en ekte peker — avlesningen virker likevel */
+          }
+        }}
+        onPointerMove={(e) => {
+          // Musa leser av bare ved å sveve; en finger må trykke først.
+          if (e.pointerType === 'mouse' || e.buttons) lesAv(e)
+        }}
+        onPointerUp={(e) => e.pointerType !== 'mouse' && settAndel(null)}
+        onPointerCancel={() => settAndel(null)}
+        onPointerLeave={(e) => e.pointerType === 'mouse' && settAndel(null)}
+        onKeyDown={vedTast}
+        onBlur={() => settAndel(null)}
+      >
       <svg viewBox={`0 0 ${B} ${H}`} preserveAspectRatio="none" role="img" aria-label={etikett}>
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
@@ -74,6 +127,20 @@ export function Linjegraf({
           title={`${m.kjop ? 'Kjøpt' : 'Solgt'} til ${format(m.verdi)}`}
         />
       ))}
+      {valgt && (
+        <>
+          <span className="graf-sikte" style={{ left: `${(x(valgt.sek) / B) * 100}%` }} aria-hidden="true" />
+          <span
+            className="graf-punkt"
+            style={{ left: `${(x(valgt.sek) / B) * 100}%`, top: `${(y(valgt.verdi) / H) * 100}%`, background: farge }}
+            aria-hidden="true"
+          />
+          <span className="graf-boble" style={{ left: `${Math.min(80, Math.max(20, (x(valgt.sek) / B) * 100))}%` }} role="status">
+            <strong>{format(valgt.verdi)}</strong>
+            <span>{valgt.sek === sisteSek ? 'nå' : `for ${varighet(sisteSek - valgt.sek)} siden`}</span>
+          </span>
+        </>
+      )}
       </div>
       <figcaption className="graf-akse-x">
         <span>for {varighet(spenn)} siden</span>

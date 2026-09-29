@@ -292,6 +292,14 @@ export function utfor(u: Utfall, stille = false): string | null {
   return null
 }
 
+/**
+ * Som utfor, men handlingen får spillet slik det er akkurat nå. Til gjentatte
+ * trykk — å holde en knapp inne — der kortet ikke rekker å tegnes mellom hvert.
+ */
+export function utforMed(handling: (s: Spilltilstand) => Utfall, stille = false): string | null {
+  return utfor(handling(tilstand), stille)
+}
+
 // ─────────────────────────────────────────────── Spilløkken
 
 let sisteMaaling: number | null = null

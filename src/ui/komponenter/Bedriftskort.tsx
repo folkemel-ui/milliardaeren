@@ -20,7 +20,8 @@ import {
   MILEPAELER,
 } from '../../engine/innhold'
 import type { Bedrift, Spilltilstand } from '../../engine/types'
-import { utfor } from '../../state/lager'
+import { utfor, utforMed } from '../../state/lager'
+import { Koknapp, Koppknapp, useFlytetall, useHold } from './Hender'
 import { kortKroner, perSek, tall, varighet } from '../format'
 import { BedriftIkon } from './BedriftIkon'
 import { usePuls } from './Tikk'
@@ -40,9 +41,11 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
   const klarForbedring = f && b.nivaa >= f.nivaa ? f : null
   // Hvert kjøp i bedriften gir en puls — gull når en milepæl nettopp er nådd.
   const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
+  const [flytetall, legg] = useFlytetall()
 
   return (
     <li className={`kort bedriftskort ${puls}`}>
+      {flytetall}
       <div className="bedriftskort-topp">
         <BedriftIkon type={b.type} />
         <div className="bedriftskort-midt">
@@ -65,6 +68,9 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
         </div>
         <span className="dempet liten">{neste ? `×2 inntekt ved nivå ${neste}` : 'Alle milepæler nådd'}</span>
       </div>
+
+      <Koknapp s={s} b={b} legg={legg} />
+      {b.type === 'saftbod' && <Koppknapp s={s} legg={legg} />}
 
       {klarForbedring && (
         <button
@@ -145,14 +151,25 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
   )
 }
 
-/** Oppgraderingsknappen, for 1, 10, 100 eller så mange nivåer du har råd til. */
+/**
+ * Oppgraderingsknappen, for 1, 10, 100 eller så mange nivåer du har råd til.
+ * Holder du den inne, fortsetter den å kjøpe — stadig raskere — til pengene tar slutt.
+ */
 export function Oppgraderingsknapp({ s, b, mengde, bred = false }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; bred?: boolean }) {
   const { antall, pris } = kjop(b, mengde, s.kontanter)
+  const hold = useHold(
+    (første) =>
+      utforMed((nå) => {
+        const bn = nå.bedrifter.find((x) => x.id === b.id)
+        if (!bn) return { ok: false, feil: 'Fant ikke bedriften.' }
+        return oppgraderFlere(nå, b.id, kjop(bn, mengde, nå.kontanter).antall)
+      }, !første) === null,
+  )
   return (
     <button
-      className={bred ? 'knapp knapp-gull bred' : 'knapp knapp-gull'}
+      className={bred ? 'knapp knapp-gull bred hold-knapp' : 'knapp knapp-gull hold-knapp'}
       disabled={antall === 0 || s.kontanter < pris}
-      onClick={() => utfor(oppgraderFlere(s, b.id, antall))}
+      {...hold}
     >
       {antall === 0 ? `Maks · trenger ${kortKroner(pris)}` : `→ nivå ${b.nivaa + antall} · ${kortKroner(pris)}`}
     </button>

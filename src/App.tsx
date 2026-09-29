@@ -31,6 +31,15 @@ const HENDELSE_FANE: Record<string, Fane> = {
 
 const ALVOR: Record<Hendelse['alvor'], Varsel['type']> = { info: 'god', advarsel: 'advarsel', kritisk: 'kritisk' }
 
+/*
+ * Sveip til siden for å bytte fane. Bare raske, tydelig vannrette sveip teller,
+ * så vanlig rulling aldri bytter fane — og ikke på grafer (der drar du for å
+ * lese av), i tekstfelt eller noe merket data-ingen-sveip.
+ */
+const SVEIP_MIN_PX = 70
+const SVEIP_MAKS_MS = 700
+const SVEIP_UNNTAK = 'input, textarea, select, .graf-flate, [data-ingen-sveip]'
+
 /** Om et tekstfelt har fokus — da skal ikke avisen dukke opp over det du skriver. */
 function skriver(): boolean {
   const el = document.activeElement
@@ -55,6 +64,7 @@ export default function App() {
   const [retning, settRetning] = useState<'hoyre' | 'venstre' | 'ingen'>('ingen')
   const forrige = useRef(s)
   const velkomst = useVelkomst()
+  const sveip = useRef<{ x: number; y: number; t: number } | null>(null)
   const avbrudd = useAvbrudd()
 
   useEffect(startSpillokke, [])
@@ -122,7 +132,27 @@ export default function App() {
   return (
     <div className="app">
       <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} />
-      <main key={fane} className={`innhold gli-${retning}`}>
+      <main
+        key={fane}
+        className={`innhold gli-${retning}`}
+        onTouchStart={(e) => {
+          const mål = e.target as HTMLElement
+          const t = e.touches[0]
+          sveip.current = e.touches.length === 1 && !mål.closest(SVEIP_UNNTAK) ? { x: t.clientX, y: t.clientY, t: Date.now() } : null
+        }}
+        onTouchEnd={(e) => {
+          const start = sveip.current
+          sveip.current = null
+          if (!start) return
+          const t = e.changedTouches[0]
+          const dx = t.clientX - start.x
+          const dy = t.clientY - start.y
+          if (Date.now() - start.t > SVEIP_MAKS_MS || Math.abs(dx) < SVEIP_MIN_PX || Math.abs(dy) > Math.abs(dx) * 0.6) return
+          const i = FANER.findIndex((x) => x.id === fane)
+          const ny = FANER[i + (dx < 0 ? 1 : -1)]
+          if (ny) velg(ny.id)
+        }}
+      >
         {fane === 'bedrifter' && <Bedrifter s={s} />}
         {fane === 'investeringer' && <Investeringer s={s} tilEiendom={() => velg('eiendom')} />}
         {fane === 'eiendom' && <Eiendom s={s} />}

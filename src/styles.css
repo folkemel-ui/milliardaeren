@@ -3193,3 +3193,164 @@ figure {
   border-color: var(--gull);
   color: var(--gull);
 }
+
+/* ─────────────────────────────────────────────── Hender: holde inne, selge selv, kø */
+
+.bedriftskort {
+  position: relative;
+}
+
+/* Knapper du holder inne: ingen tekstmarkering eller meny ved langt trykk. */
+.hold-knapp,
+.kopp-knapp,
+.ko-knapp {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.hender {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kopp-knapp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.kopp-knapp strong,
+.ko-knapp > strong {
+  white-space: nowrap;
+}
+
+.kopp-knapp strong {
+  color: var(--pluss);
+}
+
+.kopp-knapp:active {
+  transform: scale(0.97);
+}
+
+.ko-knapp {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--gull);
+  background: var(--flate-2);
+  color: var(--tekst);
+  font-weight: 600;
+  animation: ko-puls 1s ease-in-out infinite alternate;
+}
+
+.ko-knapp > strong {
+  color: var(--pluss);
+}
+
+/* Tiden som er igjen før kundene går. */
+.ko-tid {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--gull);
+  transition: width 1s linear;
+}
+
+@keyframes ko-puls {
+  from {
+    box-shadow: 0 0 0 0 rgb(212 175 55 / 0);
+  }
+  to {
+    box-shadow: 0 0 0 4px rgb(212 175 55 / 0.25);
+  }
+}
+
+.flytetall-lag {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+.flytetall {
+  position: absolute;
+  right: 18px;
+  bottom: 56px;
+  color: var(--pluss);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  animation: flytetall 0.9s ease-out forwards;
+}
+
+@keyframes flytetall {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+
+/* Lese av grafen: sikte, punkt og en boble med verdien. Vannrett dra leser av, loddrett ruller siden. */
+.graf-flate {
+  touch-action: pan-y;
+  cursor: crosshair;
+  outline-offset: 2px;
+}
+
+.graf-sikte {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--tekst-dempet);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.graf-punkt {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  border: 2px solid var(--flate);
+  pointer-events: none;
+}
+
+.graf-boble {
+  position: absolute;
+  top: -6px;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  z-index: 1;
+}
+
+.graf-boble span {
+  color: var(--tekst-dempet);
+  font-size: 11px;
+}
