@@ -23,6 +23,7 @@ import type { Bedrift, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall, varighet } from '../format'
 import { BedriftIkon } from './BedriftIkon'
+import { usePuls } from './Tikk'
 
 /** Hvor langt bedriften har kommet fra forrige milepæl mot neste (0–1). */
 function milepaelFremdrift(nivaa: number, neste: number | null): number {
@@ -38,9 +39,11 @@ export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; å
   // En forbedring som er låst opp men ikke kjøpt, får egen knapp rett på kortet.
   const f = nesteForbedring(b)
   const klarForbedring = f && b.nivaa >= f.nivaa ? f : null
+  // Hvert kjøp i bedriften gir en puls — gull når en milepæl nettopp er nådd.
+  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
 
   return (
-    <li className="kort bedriftskort">
+    <li className={`kort bedriftskort ${puls}`}>
       <div className="bedriftskort-topp">
         <BedriftIkon type={b.type} />
         <div className="bedriftskort-midt">
@@ -54,7 +57,7 @@ export function Bedriftskort({ b, s, åpne }: { b: Bedrift; s: Spilltilstand; å
             {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'}`}
           </span>
         </div>
-        <span className="pluss">{perSek(bedriftInntektPerSek(b) * statusfaktor(s))}</span>
+        <span className={`pluss inntekt ${puls}`}>{perSek(bedriftInntektPerSek(b) * statusfaktor(s))}</span>
       </div>
 
       <div className="milepael">

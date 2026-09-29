@@ -2614,8 +2614,143 @@ figure {
   font-weight: 800;
 }
 
+/* En låst bedrift langt frem: bare omrisset, så sluttspillet blir en overraskelse. */
+.silhuett .bedrift-ikon svg {
+  filter: brightness(0);
+  opacity: 0.5;
+}
+
+.kjopskort.skjult h2 {
+  letter-spacing: 0.15em;
+  color: var(--tekst-dempet);
+}
+
+/* ─────────────────────────────────────────────── Kurstikk og puls */
+
+.tikk {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.tikk-pil {
+  font-size: 0.6em;
+  line-height: 1;
+}
+
+.tikk-pil.opp {
+  color: var(--pluss);
+}
+
+.tikk-pil.ned {
+  color: var(--minus);
+}
+
+.tikk-tall {
+  border-radius: 4px;
+}
+
+.blink-opp {
+  animation: blink-opp 0.6s ease-out;
+}
+
+.blink-ned {
+  animation: blink-ned 0.6s ease-out;
+}
+
+@keyframes blink-opp {
+  from {
+    color: var(--pluss);
+    background: color-mix(in srgb, var(--pluss) 22%, transparent);
+  }
+}
+
+@keyframes blink-ned {
+  from {
+    color: var(--minus);
+    background: color-mix(in srgb, var(--minus) 22%, transparent);
+  }
+}
+
+/* Pulsen: to like animasjoner med ulike navn, så den starter på nytt hver gang klassen byttes. */
+.bedriftskort.puls-a {
+  animation: kort-puls-a 0.45s ease-out;
+}
+
+.bedriftskort.puls-b {
+  animation: kort-puls-b 0.45s ease-out;
+}
+
+.bedriftskort.puls-gull-a {
+  animation: kort-gull-a 0.9s ease-out;
+}
+
+.bedriftskort.puls-gull-b {
+  animation: kort-gull-b 0.9s ease-out;
+}
+
+@keyframes kort-puls-a {
+  40% {
+    transform: scale(1.015);
+    border-color: var(--pluss);
+  }
+}
+
+@keyframes kort-puls-b {
+  40% {
+    transform: scale(1.015);
+    border-color: var(--pluss);
+  }
+}
+
+@keyframes kort-gull-a {
+  30% {
+    transform: scale(1.03);
+    border-color: var(--gull);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--gull) 45%, transparent);
+  }
+}
+
+@keyframes kort-gull-b {
+  30% {
+    transform: scale(1.03);
+    border-color: var(--gull);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--gull) 45%, transparent);
+  }
+}
+
+.inntekt {
+  display: inline-block;
+}
+
+.inntekt.puls-a,
+.inntekt.puls-gull-a {
+  animation: inntekt-hopp-a 0.5s ease-out;
+}
+
+.inntekt.puls-b,
+.inntekt.puls-gull-b {
+  animation: inntekt-hopp-b 0.5s ease-out;
+}
+
+@keyframes inntekt-hopp-a {
+  35% {
+    transform: scale(1.25);
+    text-shadow: 0 0 12px var(--pluss);
+  }
+}
+
+@keyframes inntekt-hopp-b {
+  35% {
+    transform: scale(1.25);
+    text-shadow: 0 0 12px var(--pluss);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
+    animation: none !important;
   }
 }

@@ -16,8 +16,10 @@ export function kroner(n: number): string {
 /** Kort form for store beløp: «kr 1,25 mill», «kr 3,40 mrd». */
 export function kortKroner(n: number): string {
   const abs = Math.abs(n)
-  if (abs >= 1e9) return `kr ${tall(n / 1e9, 2)} mrd`
-  if (abs >= 1e6) return `kr ${tall(n / 1e6, 2)} mill`
+  // Tre sifre før kommaet er presist nok: «kr 150 mill», ikke «kr 150,00 mill».
+  const kort = (verdi: number, enhet: string) => `kr ${tall(verdi, Math.abs(verdi) >= 100 ? 0 : 2)} ${enhet}`
+  if (abs >= 1e9) return kort(n / 1e9, 'mrd')
+  if (abs >= 1e6) return kort(n / 1e6, 'mill')
   return kroner(n)
 }
 

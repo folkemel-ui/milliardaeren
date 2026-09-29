@@ -24,7 +24,7 @@ const MAKS_RESSURSER = 20
 
 // Skallet vi kan navngi på forhånd. Ressursene med hash legges inn etter hvert
 // som de hentes — vi kan ikke vite navnene deres her.
-const SKALL = ['./', './index.html', './manifest.webmanifest', './ikon.svg']
+const SKALL = ['./', './index.html', './manifest.webmanifest', './ikon.svg', './apple-touch-icon.png', './ikon-192.png', './ikon-512.png']
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

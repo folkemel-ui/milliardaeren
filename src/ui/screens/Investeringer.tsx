@@ -39,6 +39,7 @@ import { antall as fmtAntall, endring, fortegnKroner, kortKroner, kroner, kurs a
 import { Minigraf } from '../komponenter/Linjegraf'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { Fondkort, Kursgraf, Nokkeltall, Rapportkalender } from '../komponenter/Marked'
+import { Tikkekurs } from '../komponenter/Tikk'
 import {
   aktive,
   DIN_DEL_AV_RUNDEN,
@@ -254,7 +255,7 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
                 </span>
                 <Minigraf verdier={s.marked.kurser[id].historikk} />
                 <span className="papirrad-kurs">
-                  <span>{fmtKurs(s.marked.kurser[id].kurs)}</span>
+                  <Tikkekurs verdi={s.marked.kurser[id].kurs} format={fmtKurs} />
                   <span className={e >= 0 ? 'pluss liten' : 'minus liten'}>{endring(e)}</span>
                 </span>
               </button>
@@ -311,7 +312,7 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
           </div>
         </div>
         <div className="detalj-kurs">
-          <span className="tall-kjempe">{fmtKurs(k.kurs)}</span>
+          <Tikkekurs verdi={k.kurs} format={fmtKurs} className="tall-kjempe" />
           <span className={e >= 0 ? 'pluss' : 'minus'}>{endring(e)} siste {varighet(k.historikk.length * steg)}</span>
         </div>
         <Kursgraf s={s} id={id} />

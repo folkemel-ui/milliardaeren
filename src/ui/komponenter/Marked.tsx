@@ -9,6 +9,7 @@ import { utfor } from '../../state/lager'
 import { endring, fortegnKroner, kortKroner, kurs as fmtKurs, tall } from '../format'
 import { kortDato } from '../kalender'
 import { Linjegraf, Minigraf } from './Linjegraf'
+import { Tikkekurs } from './Tikk'
 
 // ─────────────────────────────────────────────── Fond
 
@@ -36,7 +37,7 @@ export function Fondkort({ s, id }: { s: Spilltilstand; id: FondId }) {
           </span>
         </div>
         <div className="papirrad-kurs">
-          <span>{fmtKurs(kurs)}</span>
+          <Tikkekurs verdi={kurs} format={fmtKurs} />
           <span className={e >= 0 ? 'pluss liten' : 'minus liten'}>{endring(e)}</span>
         </div>
       </div>

@@ -11,6 +11,7 @@ import { kortDato } from '../kalender'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Personale } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
+import { usePuls } from '../komponenter/Tikk'
 
 export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
@@ -22,6 +23,7 @@ export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift;
     { sek: b.inntektHistorikk.length * INNTEKT_HISTORIKK_SEK, verdi: inntekt },
   ]
   const alder = s.sek - b.startetSek
+  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
 
   return (
     <section className="skjerm">
@@ -45,7 +47,7 @@ export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift;
           </div>
         </div>
         <div className="detalj-kurs">
-          <span className="tall-kjempe pluss">{perSek(inntekt)}</span>
+          <span className={`tall-kjempe pluss inntekt ${puls}`}>{perSek(inntekt)}</span>
           <span className="dempet liten">Inntekt etter lønn{statusfaktor(s) > 1 && ' og statusbonus'}</span>
         </div>
         {b.inntektHistorikk.length > 0 ? (
