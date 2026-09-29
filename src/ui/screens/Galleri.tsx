@@ -2,7 +2,14 @@ import { BEDRIFTSTYPER } from '../../engine/innhold'
 import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
 import { JORD } from '../../engine/jord'
 import { LANDEMERKER } from '../../engine/landemerker'
-import { Illustrasjon, ILLUSTRASJONSIDER } from '../komponenter/Illustrasjoner'
+import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, type Trinn } from '../komponenter/Illustrasjoner'
+
+const TRINN: { trinn: Trinn; navn: string }[] = [
+  { trinn: 0, navn: 'Nivå 1' },
+  { trinn: 1, navn: '25' },
+  { trinn: 2, navn: '50' },
+  { trinn: 3, navn: '100' },
+]
 
 /** Navn til galleriet, fra katalogene i motoren. */
 function navn(id: string): string {
@@ -19,6 +26,7 @@ function navn(id: string): string {
 /**
  * Illustrasjonsgalleriet (åpnes med ?galleri): hver tegning i 5× størrelse og
  * i vanlig størrelse, på både mørk og lys bunn — for å vurdere dem ordentlig.
+ * Bedriftene vises også i alle fire vekstrinn.
  */
 export function Galleri() {
   return (
@@ -39,6 +47,16 @@ export function Galleri() {
                 <Illustrasjon id={id} størrelse={44} />
               </span>
             </div>
+            {BEDRIFTSTEGNINGER.includes(id) && (
+              <div className="galleri-trinn">
+                {TRINN.map((t) => (
+                  <span key={t.trinn} className="galleri-mork" title={t.navn}>
+                    <Illustrasjon id={id} størrelse={64} trinn={t.trinn} />
+                    <small>{t.navn}</small>
+                  </span>
+                ))}
+              </div>
+            )}
             <figcaption>{navn(id)}</figcaption>
           </figure>
         ))}

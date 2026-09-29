@@ -20,8 +20,9 @@
  * ressursene den peker på ligger allerede i hurtiglageret fra sist besøk.
  */
 
-// Byttes når strategien endres, så gamle installasjoner starter med et rent lager.
-const LAGER = 'milliardaer-v2'
+// Byttes når strategien eller ikonene endres, så gamle installasjoner starter med et rent lager.
+// v3: ny logo og nye app-ikoner (pakke 27).
+const LAGER = 'milliardaer-v3'
 
 // Hver utgivelse gir nye hashede filnavn, og de gamle blir liggende. Uten tak
 // vokser hurtiglageret med én bunt per utgivelse i det uendelige. Nøklene

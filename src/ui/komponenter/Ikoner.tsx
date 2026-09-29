@@ -78,27 +78,3 @@ export function IkonProfil(p: Props) {
     </Svg>
   )
 }
-
-/** Saftboden: markise, disk og en kanne. Farget — ikke currentColor. */
-export function IkonSaftbod({ størrelse = 48 }: Props) {
-  return (
-    <svg width={størrelse} height={størrelse} viewBox="0 0 48 48" aria-hidden="true">
-      {/* stolper */}
-      <rect x="9" y="16" width="2.5" height="22" fill="#8a6a3a" />
-      <rect x="36.5" y="16" width="2.5" height="22" fill="#8a6a3a" />
-      {/* markise: gule og hvite striper */}
-      <polygon points="6,10 42,10 44,18 4,18" fill="#f4d35e" />
-      <polygon points="13.2,10 20.4,10 20.8,18 12.4,18" fill="#fff7dc" />
-      <polygon points="27.6,10 34.8,10 35.6,18 27.2,18" fill="#fff7dc" />
-      <rect x="4" y="18" width="40" height="2" fill="#c9a227" />
-      {/* disk */}
-      <rect x="6" y="30" width="36" height="10" rx="1" fill="#b5835a" />
-      <rect x="6" y="30" width="36" height="2.5" fill="#d19e6e" />
-      {/* kanne og glass */}
-      <rect x="16" y="22" width="7" height="8" rx="1.5" fill="#ffe066" stroke="#e0b400" strokeWidth="0.8" />
-      <rect x="23" y="24" width="2" height="4" rx="1" fill="none" stroke="#e0b400" strokeWidth="1" />
-      <rect x="28" y="25.5" width="3.5" height="4.5" rx="0.6" fill="#ffe066" stroke="#e0b400" strokeWidth="0.8" />
-      <circle cx="19.5" cy="21.2" r="1.3" fill="#7bc043" />
-    </svg>
-  )
-}

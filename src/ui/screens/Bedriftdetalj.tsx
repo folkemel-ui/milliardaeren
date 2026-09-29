@@ -35,7 +35,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
 
       <div className="kort">
         <div className="bedriftskort-topp">
-          <BedriftIkon type={b.type} />
+          <BedriftIkon type={b.type} nivaa={b.nivaa} />
           <div className="bedriftskort-midt">
             <h1 className="skjerm-tittel">
               {type.navn}

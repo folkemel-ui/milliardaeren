@@ -15,10 +15,15 @@ import { writeFileSync } from 'node:fs'
 import { deflateSync } from 'node:zlib'
 
 const BAKGRUNN = [0x0d, 0x0c, 0x0a]
+const GULL_LYS = [0xf0, 0xd2, 0x7a]
 const GULL = [0xd4, 0xaf, 0x37]
 const RING = [0x9c, 0x7c, 0x1c]
 const MØRK = [0x1a, 0x15, 0x08]
-const KRONE = [[160, 306], [160, 196], [208, 244], [256, 168], [304, 244], [352, 196], [352, 306]]
+const GLIMT = [0xff, 0xf4, 0xc8]
+// M-en: en tykk strek med runde ender og hjørner, der høyre topp står høyest.
+const M = [[178, 336], [178, 236], [254, 300], [334, 178], [334, 336]]
+const M_BREDDE = 42
+const STJERNE = [[382, 104], [390, 132], [418, 140], [390, 148], [382, 176], [374, 148], [346, 140], [374, 132]]
 
 function iPolygon(x, y, punkter) {
   let inni = false
@@ -30,14 +35,27 @@ function iPolygon(x, y, punkter) {
   return inni
 }
 
+/** Avstanden fra et punkt til en linjebit — en strek med runde ender er alt innenfor halve bredden. */
+function avstand(x, y, [ax, ay], [bx, by]) {
+  const dx = bx - ax
+  const dy = by - ay
+  const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)))
+  return Math.hypot(x - ax - t * dx, y - ay - t * dy)
+}
+
+function iStrek(x, y, punkter, bredde) {
+  for (let i = 1; i < punkter.length; i++) if (avstand(x, y, punkter[i - 1], punkter[i]) <= bredde / 2) return true
+  return false
+}
+
 /** Fargen i et punkt i 512-rutenettet, i samme malerekkefølge som SVG-en. */
 function farge(x, y) {
-  const r = Math.hypot(x - 256, y - 256)
   let f = BAKGRUNN
-  if (r <= 176) f = GULL
-  if (Math.abs(r - 142) <= 6) f = RING
-  if (iPolygon(x, y, KRONE)) f = MØRK
-  if (x >= 160 && x <= 352 && y >= 322 && y <= 348) f = MØRK
+  if (Math.hypot(x - 256, y - 256) <= 184) f = GULL_LYS
+  if (Math.hypot(x - 264, y - 266) <= 171) f = GULL
+  if (Math.abs(Math.hypot(x - 256, y - 256) - 148) <= 5) f = RING
+  if (iStrek(x, y, M, M_BREDDE)) f = MØRK
+  if (iPolygon(x, y, STJERNE)) f = GLIMT
   return f
 }
 

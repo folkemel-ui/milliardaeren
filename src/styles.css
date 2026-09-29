@@ -1403,6 +1403,23 @@ figure {
   background: #211e1a;
 }
 
+.galleri-trinn {
+  display: flex;
+  gap: 6px;
+}
+
+.galleri-trinn span {
+  display: grid;
+  justify-items: center;
+  padding: 4px 2px 2px;
+  border-radius: 10px;
+}
+
+.galleri-trinn small {
+  color: var(--tekst-dempet);
+  font-size: 10px;
+}
+
 .galleri-lys {
   background: #eceef2;
 }
@@ -3751,4 +3768,36 @@ figure {
 .hus-symbol {
   font-size: 30px;
   line-height: 1.2;
+}
+
+/* ─────────────────────────────────────────────── Logo */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-tekst {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-navn {
+  color: var(--gull);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.logo-under {
+  color: var(--tekst-dempet);
+  font-size: 12px;
+}
+
+.profil-bunn {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+  opacity: 0.9;
 }

@@ -14,9 +14,37 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Milliardær" />
     <title>Milliardær</title>
+    <!-- Lyst tema settes før noe tegnes, så lasteskjermen ikke blinker mørk (samme nøkkel som ui/tema.ts). -->
+    <script>
+      try {
+        if (localStorage.getItem('milliardaer.tema') === 'lys') document.documentElement.dataset.theme = 'light'
+      } catch (e) {}
+    </script>
+    <!-- Lasteskjermen står i #root til spillet tegner seg selv over den. Stilen er her, fordi CSS-en kommer med skriptet. -->
+    <style>
+      html, body { margin: 0; background: #0d0c0a; }
+      html[data-theme='light'], html[data-theme='light'] body { background: #f4f5f7; }
+      .laster { position: fixed; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; font-family: system-ui, sans-serif; }
+      .laster svg { animation: laster-puls 1.6s ease-in-out infinite; }
+      .laster span { color: #d4af37; font-size: 22px; font-weight: 800; letter-spacing: 0.04em; }
+      html[data-theme='light'] .laster span { color: #9c7c1c; }
+      @keyframes laster-puls { 50% { transform: scale(1.06); } }
+      @media (prefers-reduced-motion: reduce) { .laster svg { animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="laster" role="status">
+        <svg width="96" height="96" viewBox="64 64 384 384" aria-hidden="true">
+          <circle cx="256" cy="256" r="184" fill="#f0d27a" />
+          <circle cx="264" cy="266" r="171" fill="#d4af37" />
+          <circle cx="256" cy="256" r="148" fill="none" stroke="#9c7c1c" stroke-width="10" />
+          <polyline points="178,336 178,236 254,300 334,178 334,336" fill="none" stroke="#1a1508" stroke-width="42" stroke-linecap="round" stroke-linejoin="round" />
+          <polygon points="382,104 390,132 418,140 390,148 382,176 374,148 346,140 374,132" fill="#fff4c8" />
+        </svg>
+        <span>Milliardær</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -14,6 +14,7 @@ import { Reservekopi } from '../komponenter/Reservekopi'
 import { lesAvisvalg, settAvisvalg, type Avisvalg } from '../avisvalg'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
+import { Logo } from '../komponenter/Logo'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -231,6 +232,10 @@ export function Profil({ s }: { s: Spilltilstand }) {
           </button>
         )}
       </div>
+
+      <footer className="profil-bunn">
+        <Logo størrelse={36} undertekst="Fra 1 000 kr og en saftbod til milliardær" />
+      </footer>
     </section>
   )
 }
