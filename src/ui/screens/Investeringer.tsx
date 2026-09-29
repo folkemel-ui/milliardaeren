@@ -36,8 +36,9 @@ import { portefolje, sum, type Aktivaklasse } from '../../engine/portefolje'
 import type { BedriftstypeId, Ordretype, PapirId, Rival, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { antall as fmtAntall, endring, fortegnKroner, kortKroner, kroner, kurs as fmtKurs, perSek, tall, varighet } from '../format'
-import { Linjegraf, Minigraf } from '../komponenter/Linjegraf'
+import { Minigraf } from '../komponenter/Linjegraf'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
+import { Fondkort, Kursgraf, Nokkeltall, Rapportkalender } from '../komponenter/Marked'
 import {
   aktive,
   DIN_DEL_AV_RUNDEN,
@@ -64,6 +65,7 @@ const UNDERFANER: { id: Underfane; navn: string }[] = [
 const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Underfane> = {
   aksje: 'aksjer',
   krypto: 'krypto',
+  fond: 'bank',
   rival: 'rivaler',
   startup: 'startups',
   sparing: 'bank',
@@ -114,6 +116,7 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
 const KLASSENAVN: Record<Aktivaklasse, string> = {
   aksje: 'Aksjer',
   krypto: 'Krypto',
+  fond: 'Indeksfond',
   eiendom: 'Eiendom',
   rival: 'Rivalselskaper',
   startup: 'Startups',
@@ -207,6 +210,8 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
         {kost > 0 && <Endring kroner={verdi - kost} andel={verdi / kost - 1} />}
       </div>
 
+      {klasse === 'aksje' && <Rapportkalender s={s} velg={velg} />}
+
       {eide.length > 0 && (
         <ul className="kortliste papirliste">
           {eide.map((id) => {
@@ -288,7 +293,6 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
   const e = endringTo(s, id)
   const eier = s.beholdning[id]
   const steg = HISTORIKK_TIKK * MARKED_TIKK_SEK
-  const punkter = [...k.historikk.map((v, i) => ({ sek: i * steg, verdi: v })), { sek: k.historikk.length * steg, verdi: k.kurs }]
 
   return (
     <section className="skjerm">
@@ -310,8 +314,9 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
           <span className="tall-kjempe">{fmtKurs(k.kurs)}</span>
           <span className={e >= 0 ? 'pluss' : 'minus'}>{endring(e)} siste {varighet(k.historikk.length * steg)}</span>
         </div>
-        <Linjegraf punkter={punkter} format={fmtKurs} farge={e >= 0 ? 'var(--pluss)' : 'var(--minus)'} etikett={`Kursen til ${p.navn}`} />
+        <Kursgraf s={s} id={id} />
       </div>
+      <Nokkeltall s={s} id={id} />
 
       {eier && (
         <dl className="kort statistikk">
@@ -841,6 +846,10 @@ function Bank({ s }: { s: Spilltilstand }) {
   return (
     <>
       <Sparekonto s={s} />
+      <h2 className="seksjon-tittel">Fond</h2>
+      <Fondkort s={s} id="BORSFOND" />
+      <Fondkort s={s} id="KRYPTOFOND" />
+      <h2 className="seksjon-tittel">Gjeld og lån</h2>
       <div className="kort bank">
         <div className="bank-rad">
           <div>

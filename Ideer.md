@@ -8,7 +8,7 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Next:** Hotels abroad and holiday apartments (the only item left; pick more from Parked to make a pack)
+- **Later:** Hotels abroad and holiday apartments
 
 ## Property
 
@@ -37,12 +37,9 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Business history.** A graph per business of income over time, when it was started and total earned.
 - **Selling businesses.** Sell to a buyer at a price based on income, with bids that vary.
 - **Industry trends.** Weeks where "coffee is hot" (+20 % for cafés) or "oil price falls", announced in the paper.
-- **Quarterly reports for companies.** Good, as expected or weak results that make prices jump and change dividends.
 - **Limit orders.** "Buy NLT if the price falls to 450"; a first step toward auto-trading.
 - **Watchlist.** Star the stocks and coins you follow so they show at the top.
-- **Stock detail: history and key figures.** Highest and lowest price, dividend yield and your own trades marked on the chart.
 - **Crypto events.** Listing on a big exchange, hacked exchange, and "rug pull" for the smallest coins.
-- **Index funds.** A fund that follows all 8 stocks, for safer saving.
 - **Short selling.** Bet against a stock; risky and requires a loan.
 - **Fixed or variable rate.** A variable rate follows a policy rate announced in the paper.
 - **Credit rating.** AAA to C based on how you handle debt; affects interest and credit limit.
@@ -70,7 +67,6 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Progress bar per business** that fills up and pays out when full.
 - **Buy ×1 / ×10 / ×100 / Max** toggle.
 - **Locked businesses: show all of them.** Today only the next locked one is shown.
-- **Stock chart time ranges.** Today the chart always shows the last 2 hours.
 - **Showroom for Luxury** that you swipe through.
 - **Garage, harbor and hangar grid** with slots.
 - **Football club screen** with the league table, next match, squad and trophy cabinet.

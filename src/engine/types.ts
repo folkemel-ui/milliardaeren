@@ -102,6 +102,11 @@ export interface Kurs {
   historikk: number[]
   /** En selskapsnyhet som ennå ikke er ferdig priset inn: logaritmisk bevegelse igjen, fordelt på tikk. */
   nyhet?: { igjen: number; tikk: number }
+  /** Høyeste og laveste kurs siden spillet (eller målingen) startet. */
+  topp?: number
+  bunn?: number
+  /** Sluttkursen hver spilldag, de siste DAGSLUTT_MAKS dagene. */
+  dagslutt?: number[]
 }
 
 export interface Marked {
@@ -238,7 +243,7 @@ export interface Dagsbilde {
   fusjoner?: string[]
 }
 
-export type Aktivaklasse = 'aksje' | 'krypto' | 'eiendom' | 'sparing' | 'rival' | 'startup'
+export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'eiendom' | 'sparing' | 'rival' | 'startup'
 
 export interface Rekorder {
   hoyesteInntekt: number
@@ -395,6 +400,41 @@ export interface Spilltilstand {
   /** Landemerkene som er solgt — til deg eller til en rival. Mangler de, er de til salgs. */
   landemerker: Partial<Record<LandemerkeId, Landemerkeeie>>
   kunst: Kunstmarked
+  /** Andeler i indeksfondene. */
+  fond: Partial<Record<FondId, Beholdning>>
+  /** Dine siste handler i aksjer og krypto, nyeste sist — til merkene på grafen. */
+  handler: Handelslogg[]
+  /** Kvartalsrapportene per aksje: siste resultat og hvordan utbyttet har endret seg. */
+  kvartal: Partial<Record<PapirId, Kvartal>>
+}
+
+// ─────────────────────────────────────────────── Fond, handler og kvartalsrapporter
+
+export type FondId = 'BORSFOND' | 'KRYPTOFOND'
+
+export interface Handelslogg {
+  papir: PapirId
+  sek: number
+  kurs: number
+  /** Positivt for kjøp, negativt for salg. */
+  antall: number
+}
+
+/** 0 svakt, 1 som i fjor, 2 sterkt. */
+export type Estimat = 0 | 1 | 2
+
+export interface Rapport {
+  dag: number
+  estimat: Estimat
+  utfall: 'bedre' | 'ventet' | 'svakere'
+  /** Kursbevegelsen resultatet ga, som andel. */
+  endring: number
+}
+
+export interface Kvartal {
+  /** Utbyttet ganges med dette. Gode resultater hever det, dårlige senker det. */
+  utbytteFaktor: number
+  siste: Rapport | null
 }
 
 // ─────────────────────────────────────────────── Jord, landemerker og kunst

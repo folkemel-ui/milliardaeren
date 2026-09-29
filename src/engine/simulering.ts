@@ -6,7 +6,9 @@
 import { betalRente, sjekkMargin } from './bank'
 import { bedriftInntektPerSek, inntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
 import { leiePerSek, sjekkOppussing } from './eiendom'
-import { MARKED_TIKK_SEK, markedstikk, PAPIRER } from './marked'
+import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
+import { utbytteFor } from './kvartal'
+import { fondsutbytteIDag } from './fond'
 import { erDagsskifte, erHelg } from './kalender'
 import { gisUtAvis } from './avis'
 import { sjekkPrestasjoner } from './prestasjoner'
@@ -81,14 +83,18 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   if (formue > s.hoyesteFormue) s.hoyesteFormue = formue
   if (s.sek % s.historikk.intervall === 0) loggFormue(s, formue)
   sjekkPrestasjoner(s)
-  if (erDagsskifte(s.sek)) gisUtAvis(s, terning)
+  if (erDagsskifte(s.sek)) {
+    registrerDagslutt(s.marked)
+    gisUtAvis(s, terning)
+  }
 }
 
 function betalUtbytte(s: Spilltilstand): void {
   let sum = 0
   for (const [id, b] of Object.entries(s.beholdning) as [PapirId, { antall: number }][]) {
-    sum += b.antall * s.marked.kurser[id].kurs * PAPIRER[id].utbytte
+    sum += b.antall * s.marked.kurser[id].kurs * utbytteFor(s, id)
   }
+  sum += fondsutbytteIDag(s)
   if (sum <= 0) return
   s.kontanter += sum
   s.totaltUtbytte += sum

@@ -15,7 +15,8 @@ import {
   nesteForbedring,
   oppgraderingspris,
 } from './formler'
-import { utforEiendomssalg, utforKjop, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import { utforEiendomssalg, utforFondssalg, utforKjop, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import { FOND, FOND_GEBYR, fondskurs, fondStengt } from './fond'
 import { BLOKK, blokkpris, oppkjopspris } from './rivaler'
 import {
   brukteplasser,
@@ -70,7 +71,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { PAPIRER, rundAntall } from './marked'
-import type { Bedrift, BedriftstypeId, EiendomId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Spilltilstand, Taktikk } from './types'
+import type { Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Spilltilstand, Taktikk } from './types'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
 
@@ -180,6 +181,35 @@ export function selgPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall
   const gevinst = inntekt - b.kostpris * (a / b.antall)
   n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, inntekt)
   n.rekorder.storsteGevinst = Math.max(n.rekorder.storsteGevinst, gevinst)
+  return { ok: true, tilstand: n }
+}
+
+// ─────────────────────────────────────────────── Fond
+
+/** Kjøper fondsandeler for et beløp, gebyret inkludert. */
+export function kjopFond(s: Spilltilstand, id: FondId, belop: number): Utfall {
+  if (!FOND[id]) return feil('Ukjent fond.')
+  if (fondStengt(s, id)) return feil(STENGT)
+  const b = Math.floor(Math.min(belop, s.kontanter))
+  if (b <= 0) return feil('Velg hvor mye du vil kjøpe for.')
+  const n = structuredClone(s)
+  const andeler = b / (1 + FOND_GEBYR) / fondskurs(n, id)
+  const f = n.fond[id] ?? { antall: 0, kostpris: 0 }
+  n.fond[id] = { antall: f.antall + andeler, kostpris: f.kostpris + b }
+  n.kontanter -= b
+  flyt(n, 'fond', b)
+  n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, b)
+  return { ok: true, tilstand: n }
+}
+
+/** Selger andeler for et beløp (før gebyr), eller alt. */
+export function selgFond(s: Spilltilstand, id: FondId, belop = Infinity): Utfall {
+  if (!s.fond[id]) return feil('Du eier ingen andeler.')
+  if (fondStengt(s, id)) return feil(STENGT)
+  if (!(belop > 0)) return feil('Velg hvor mye du vil selge.')
+  const n = structuredClone(s)
+  const inntekt = utforFondssalg(n, id, belop)
+  n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, inntekt)
   return { ok: true, tilstand: n }
 }
 

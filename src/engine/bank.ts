@@ -4,7 +4,8 @@
  */
 
 import { bedriftsverdi, belaaningsgrad, rentePerSek } from './formler'
-import { utforEiendomssalg, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import { utforEiendomssalg, utforFondssalg, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import { FOND, FONDLISTE } from './fond'
 import { selskapsverdi } from './rivaler'
 import { flyt } from './portefolje'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
@@ -66,6 +67,14 @@ export function sjekkMargin(s: Spilltilstand): void {
     utforSalg(s, id, s.beholdning[id]!.antall)
     nedbetalMed(s, s.kontanter)
     solgt.push(PAPIRER[id].navn)
+  }
+  // Så fondene.
+  for (const id of FONDLISTE) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (!s.fond?.[id]) continue
+    utforFondssalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(FOND[id].navn)
   }
   // Så eierandeler i rivalselskaper, den største først.
   for (const r of [...(s.rivaler ?? [])].filter((x) => x.andel > 0).sort((a, b) => b.andel * selskapsverdi(b) - a.andel * selskapsverdi(a))) {
