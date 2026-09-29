@@ -31,7 +31,7 @@ export function OppgjorBlokk({ o, s, medTittel = true }: { o: Oppgjor; s: Spillt
 
   const rader: [string, number][] = [
     ['Bedriftene', o.bedrifter],
-    ['Leie', o.leie],
+    ['Leie og avlinger', o.leie],
     ['Utbytte', o.utbytte],
     ['Sparerente', o.sparerente],
     ['Lånerenter', -o.renter],

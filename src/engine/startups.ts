@@ -132,6 +132,21 @@ function nyStartup(s: Spilltilstand, t: Terning): Startup {
   }
 }
 
+/**
+ * Banken tar over andelen din i et selskap som lever, for halvparten av det
+ * den er verdt — en andel i en startup kan ikke selges på dagen. Selskapet
+ * lever videre uten deg. Muterer. Returnerer hva du fikk.
+ */
+export function utforStartupovertakelse(s: Spilltilstand, st: Startup, andel: number): number {
+  const utbetalt = st.andel * st.verdi * andel
+  st.andel = 0
+  st.investert = 0
+  st.investertIRunde = 0
+  s.kontanter += utbetalt
+  flyt(s, 'startup', -utbetalt)
+  return utbetalt
+}
+
 /** Avslutter et selskap og betaler ut andelen din. Muterer. */
 function avslutt(s: Spilltilstand, st: Startup, status: Startupstatus, utbetalt: number): void {
   st.status = status

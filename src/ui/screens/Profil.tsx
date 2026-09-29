@@ -81,7 +81,7 @@ function Rekordbok({ s }: { s: Spilltilstand }) {
     ['Tid til første million', tilMillion !== undefined ? varighet(tilMillion) : '—'],
     ['Tid til milliarden', tilMilliard !== undefined ? varighet(tilMilliard) : '—'],
     ['Utbytte totalt', kortKroner(s.totaltUtbytte)],
-    ['Leie totalt', kortKroner(s.totaltLeie)],
+    ['Leie og avlinger totalt', kortKroner(s.totaltLeie)],
   ]
   return (
     <div className="kort">

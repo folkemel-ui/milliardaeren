@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 21 – Fair play:** Margin call sells everything before businesses, Takeovers give free merge bonuses, Timber sales are counted twice, Confirm before expensive sales
 - **Pack 22 – Smoother:** Faster screen updates, Group saves together, `npm test` passes again, "Maks" in the trade box
 - **Pack 23 – Hands on:** Tap to sell, Hold to upgrade, Customer rush, Swipe between tabs and scrub charts
 - **Pack 24 – Living map:** Land and landmarks on the map, Regional prices and price colors, Rent per city, Zoom into a city
@@ -19,39 +18,32 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
 
-## Balance
-
-2. **Margin call sells everything before businesses.** It currently skips land, landmarks, art, startups and the club, even though they count in net worth. Sell those before taking businesses at 50 %.
-3. **Takeovers give free merge bonuses.** `fusjonerVedOppkjop` adds a ×1.5 merge bonus for each matching rival business without shrinking the rival (unlike `utforFusjon`). The stake can then be sold straight back for a 3 % fee, and the bonuses stay. Shrink the rival's value, or remove the bonuses when the stake is sold.
-4. **Timber sales are counted twice.** `hoggSkog` adds timber to both total income and rent, so the rent figure is too high.
-
 ## Interface
 
-5. **Confirm before expensive sales.** Ask "are you sure?" when selling a whole rival stake (including a takeover), the last unit of a property (which loses its standard and renovation), and luxury items, land, landmarks, art and football players.
-6. **"Maks" in the trade box.** It fills in a fixed amount, so the buy fails if the price rises before the tap. Make Maks buy as much as you can afford at the moment you tap Buy.
-7. **Keyboard focus in the newspaper and welcome screen.** Move focus into the window when it opens, keep it there, and give it back when the window closes.
-8. **Stray text and number formatting in the locked-business list.** "24" and "H" show up among the locked businesses. Amounts are formatted unevenly: "12,00 mill" next to "150 mill".
-9. **Clearer status line in Luksus.** "rente 3,0 % per time" is hard to understand there. Explain what the status level does to the interest rate.
+2. **"Maks" in the trade box.** It fills in a fixed amount, so the buy fails if the price rises before the tap. Make Maks buy as much as you can afford at the moment you tap Buy.
+3. **Keyboard focus in the newspaper and welcome screen.** Move focus into the window when it opens, keep it there, and give it back when the window closes.
+4. **Stray text and number formatting in the locked-business list.** "24" and "H" show up among the locked businesses. Amounts are formatted unevenly: "12,00 mill" next to "150 mill".
+5. **Clearer status line in Luksus.** "rente 3,0 % per time" is hard to understand there. Explain what the status level does to the interest rate.
 
 ## Speed and code health
 
-10. **Faster screen updates.** The whole app redraws every second. With "Maks" selected, the upgrade buttons redo up to about 2 000 price calculations per business every second, and an open newspaper redraws all 7 editions. Memoize the heavy parts.
-11. **Group saves together.** Every tap saves the whole game immediately. Save once after a short pause instead, and always on pagehide.
-12. **`npm test` passes again.** The balance benchmark (80 s) trips a test-runner timeout, so `npm test` reports failure even though every test is green. Move the benchmarks to their own script or config.
+6. **Faster screen updates.** The whole app redraws every second. With "Maks" selected, the upgrade buttons redo up to about 2 000 price calculations per business every second, and an open newspaper redraws all 7 editions. Memoize the heavy parts.
+7. **Group saves together.** Every tap saves the whole game immediately. Save once after a short pause instead, and always on pagehide.
+8. **`npm test` passes again.** The balance benchmark (80 s) trips a test-runner timeout, so `npm test` reports failure even though every test is green. Move the benchmarks to their own script or config.
 
 ## Interactivity
 
-13. **Tap to sell.** Early on you can tap the lemonade stand to sell a cup yourself. It stops being worth it once you have staff, but it gives the first minutes something to do.
-14. **Hold to upgrade.** Holding the upgrade button keeps buying levels, faster the longer you hold.
-15. **Customer rush.** Now and then a queue shows up on a business card. Tap it within a few seconds for a small bonus, or let it go.
-16. **Swipe between tabs and scrub charts.** Swipe sideways to change tab, and drag a finger along a chart to see the price at any point.
+9. **Tap to sell.** Early on you can tap the lemonade stand to sell a cup yourself. It stops being worth it once you have staff, but it gives the first minutes something to do.
+10. **Hold to upgrade.** Holding the upgrade button keeps buying levels, faster the longer you hold.
+11. **Customer rush.** Now and then a queue shows up on a business card. Tap it within a few seconds for a small bonus, or let it go.
+12. **Swipe between tabs and scrub charts.** Swipe sideways to change tab, and drag a finger along a chart to see the price at any point.
 
 ## Map
 
-17. **Land and landmarks on the map.** Farms, forest and the four landmarks get their own small symbols on the map. Landmarks aren't shown at all today.
-18. **Regional prices and price colors.** Separate property indexes for Oslo, Bergen, Stavanger and the mountains, instead of one index for the whole country. Each city is tinted green or red by how its prices have moved.
-19. **Rent per city.** Cities where you have buildings rented out show a small label with rent per second, and a coin pops up when the rent comes in. Cities with nothing rented out show nothing.
-20. **Zoom into a city.** Tap-and-hold or pinch to see a small street view where each property is a building that changes look with its standard and renovation.
+13. **Land and landmarks on the map.** Farms, forest and the four landmarks get their own small symbols on the map. Landmarks aren't shown at all today.
+14. **Regional prices and price colors.** Separate property indexes for Oslo, Bergen, Stavanger and the mountains, instead of one index for the whole country. Each city is tinted green or red by how its prices have moved.
+15. **Rent per city.** Cities where you have buildings rented out show a small label with rent per second, and a coin pops up when the rent comes in. Cities with nothing rented out show nothing.
+16. **Zoom into a city.** Tap-and-hold or pinch to see a small street view where each property is a building that changes look with its standard and renovation.
 
 ## Parked (not chosen yet)
 

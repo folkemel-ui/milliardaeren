@@ -355,6 +355,7 @@ export interface Spilltilstand {
   eiendomStandard: Partial<Record<EiendomId, number>>
   /** Pågående oppussinger: hvilken standard det pusses opp til, og når det er ferdig. */
   oppussing: Partial<Record<EiendomId, { standard: number; ferdigSek: number }>>
+  /** Leie, avlinger og tømmer, totalt. `totaltHost` er delen som kom fra jorda. */
   totaltLeie: number
   /** Penger på sparekontoen. */
   sparing: number

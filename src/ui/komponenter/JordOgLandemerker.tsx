@@ -1,4 +1,5 @@
 import { hoggSkog, jordSynlig, kjopJord, kjopLandemerke, selgJord, selgLandemerke } from '../../engine/handlinger'
+import { Bekreftknapp } from './Bekreftknapp'
 import { HOST_ANDEL, JORD, JORD_SYNLIG_VED, JORDLISTE, landverdi, skogalder, TOMMER_DAGER, tommerverdi, vaer } from '../../engine/jord'
 import {
   eierDu,
@@ -84,9 +85,9 @@ function Jordkort({ s, id, faktor }: { s: Spilltilstand; id: JordId; faktor: num
               Hogg · {kortKroner(tommer)}
             </button>
           )}
-          <button className="knapp" onClick={() => utfor(selgJord(s, id))}>
+          <Bekreftknapp onJa={() => utfor(selgJord(s, id))}>
             Selg · {kortKroner((land + tommer) * (1 - MEGLERHONORAR))}
-          </button>
+          </Bekreftknapp>
         </div>
       ) : (
         <button className="knapp knapp-gull bred" disabled={s.kontanter < land} onClick={() => utfor(kjopJord(s, id))}>
@@ -148,9 +149,9 @@ function Landemerkekort({ s, id }: { s: Spilltilstand; id: LandemerkeId }) {
               : 'Til salgs.'}
       </p>
       {mitt ? (
-        <button className="knapp bred" onClick={() => utfor(selgLandemerke(s, id))}>
+        <Bekreftknapp className="knapp bred" onJa={() => utfor(selgLandemerke(s, id))}>
           Selg · {kortKroner(verdi * (1 - LANDEMERKE_HONORAR))}
-        </button>
+        </Bekreftknapp>
       ) : (
         <button className="knapp knapp-gull bred" disabled={s.kontanter < pris} onClick={() => utfor(kjopLandemerke(s, id))}>
           {rival ? 'Kjøp fra rivalen' : 'Kjøp'} · {kortKroner(pris)}

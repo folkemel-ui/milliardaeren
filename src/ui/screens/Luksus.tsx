@@ -1,3 +1,4 @@
+import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import {
   brukteplasser,
   KATEGORINAVN,
@@ -103,9 +104,9 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
         <span className="gull liten">+{g.status} status</span>
       </div>
       {eier ? (
-        <button className="knapp knapp-liten" onClick={() => utfor(selgLuksus(s, id))}>
+        <Bekreftknapp className="knapp knapp-liten" onJa={() => utfor(selgLuksus(s, id))}>
           Selg · {kortKroner(restverdi(id))}
-        </button>
+        </Bekreftknapp>
       ) : (
         <button
           className="knapp knapp-gull knapp-liten"

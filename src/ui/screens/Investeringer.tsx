@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react'
+import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import {
   belaaningsgrad,
   maksKjop,
@@ -737,9 +738,13 @@ function Rivaler({ s }: { s: Spilltilstand }) {
                   </button>
                 )}
                 {r.andel > 0 && (
-                  <button className="knapp knapp-liten" onClick={() => utfor(selgRivalandel(s, r.id))}>
+                  <Bekreftknapp
+                    className="knapp knapp-liten"
+                    varsel={r.overtatt ? `Hele ${r.selskap} selges.` : undefined}
+                    onJa={() => utfor(selgRivalandel(s, r.id))}
+                  >
                     Selg · {kortKroner(min * (1 - SALGSHONORAR))}
-                  </button>
+                  </Bekreftknapp>
                 )}
               </div>
               <Rivalbedrifter s={s} r={r} />

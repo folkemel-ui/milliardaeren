@@ -17,7 +17,18 @@ import {
   MAKS_NIVAAER_PER_KJOP,
   prisForNivaaer,
 } from './formler'
-import { utforEiendomssalg, utforFondssalg, utforKjop, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import {
+  utforEiendomssalg,
+  utforFondssalg,
+  utforJordsalg,
+  utforKjop,
+  utforKlubbsalg,
+  utforLandemerkesalg,
+  utforLuksussalg,
+  utforMalerisalg,
+  utforRivalsalg,
+  utforSalg,
+} from './handel'
 import { FOND, FOND_GEBYR, fondskurs, fondStengt } from './fond'
 import { BLOKK, blokkpris, oppkjopspris } from './rivaler'
 import {
@@ -25,7 +36,6 @@ import {
   EIENDOM_SYNLIG_VED,
   eiendomspris,
   EIENDOMSTYPER,
-  MEGLERHONORAR,
   flyFor,
   kanReiseTil,
   LAGER,
@@ -57,13 +67,11 @@ import {
 import { flyt } from './portefolje'
 import { ledigIRunde } from './startups'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
-import { eierDu, kjopsprisLandemerke, LANDEMERKE_HONORAR, landemerkepris, LANDEMERKER } from './landemerker'
-import { kjopsprisMaleri, MALERIER, salgsprisMaleri } from './kunst'
+import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from './landemerker'
+import { kjopsprisMaleri, MALERIER } from './kunst'
 import {
   KLUBB_LAAST_OPP,
   KLUBBNAVN,
-  KLUBBSALG_HONORAR,
-  klubbverdi,
   kjopspris,
   klubbTilSalgs,
   MAKS_TROPP,
@@ -503,8 +511,7 @@ export function kjopKlubb(s: Spilltilstand, navn: string): Utfall {
 export function selgKlubb(s: Spilltilstand): Utfall {
   if (!s.klubb) return feil('Du eier ingen klubb.')
   const n = structuredClone(s)
-  n.kontanter += klubbverdi(n) * (1 - KLUBBSALG_HONORAR)
-  n.klubb = null
+  utforKlubbsalg(n)
   return { ok: true, tilstand: n }
 }
 
@@ -570,10 +577,7 @@ export function kjopJord(s: Spilltilstand, id: JordId): Utfall {
 export function selgJord(s: Spilltilstand, id: JordId): Utfall {
   if (!s.jord[id]) return feil('Du eier den ikke.')
   const n = structuredClone(s)
-  const inntekt = (landverdi(n, id) + tommerverdi(n, id)) * (1 - MEGLERHONORAR)
-  n.kontanter += inntekt
-  delete n.jord[id]
-  flyt(n, 'eiendom', -inntekt)
+  utforJordsalg(n, id)
   return { ok: true, tilstand: n }
 }
 
@@ -616,10 +620,7 @@ export function kjopLandemerke(s: Spilltilstand, id: LandemerkeId): Utfall {
 export function selgLandemerke(s: Spilltilstand, id: LandemerkeId): Utfall {
   if (!eierDu(s, id)) return feil('Du eier det ikke.')
   const n = structuredClone(s)
-  const inntekt = landemerkepris(n, id) * (1 - LANDEMERKE_HONORAR)
-  n.kontanter += inntekt
-  delete n.landemerker[id]
-  flyt(n, 'eiendom', -inntekt)
+  utforLandemerkesalg(n, id)
   return { ok: true, tilstand: n }
 }
 
@@ -642,8 +643,7 @@ export function selgMaleri(s: Spilltilstand, id: MaleriId): Utfall {
   if (!v) return feil('Du eier det ikke.')
   if (v.utlant) return feil('Maleriet henger på museum. Hent det hjem først.')
   const n = structuredClone(s)
-  n.kontanter += salgsprisMaleri(n, id)
-  delete n.kunst.eide[id]
+  utforMalerisalg(n, id)
   return { ok: true, tilstand: n }
 }
 

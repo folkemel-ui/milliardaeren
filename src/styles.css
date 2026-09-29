@@ -3157,3 +3157,33 @@ figure {
   margin-top: 6px;
   overflow-wrap: anywhere;
 }
+
+/* ─────────────────────────────────────────────── Bekreft: «Ja» og «Avbryt» der knappen sto */
+
+.bekreft-par {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.bekreft-par.bred {
+  width: 100%;
+}
+
+.bekreft-par > button {
+  flex: 1 1 0;
+  padding-inline: 10px;
+  white-space: nowrap;
+}
+
+.bekreft-varsel {
+  flex-basis: 100%;
+}
+
+/* Små knapper i smale kort: «Ja» over «Avbryt», så paret ikke tar mer bredde enn knappen gjorde. */
+.bekreft-par.stablet {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}

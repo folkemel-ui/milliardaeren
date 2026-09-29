@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import { kjopKlubb, kjopSpiller, selgKlubb, selgSpiller, settTaktikk } from '../../engine/handlinger'
 import {
   ANTALL_LAG,
@@ -236,10 +237,15 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
                   {i >= MIN_TROPP && ' · innbytter'}
                 </span>
               </span>
-              <button className="knapp knapp-bud spiller-knapp" disabled={k.spillere.length <= MIN_TROPP} onClick={() => utfor(selgSpiller(s, p.id))}>
+              <Bekreftknapp
+                className="knapp knapp-bud spiller-knapp"
+                ja="Ja"
+                disabled={k.spillere.length <= MIN_TROPP}
+                onJa={() => utfor(selgSpiller(s, p.id))}
+              >
                 <span>Selg</span>
                 <strong>{kompakt(salgspris(p))}</strong>
-              </button>
+              </Bekreftknapp>
             </li>
           ))}
         </ul>

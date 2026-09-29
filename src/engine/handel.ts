@@ -8,8 +8,12 @@ import { eiendomspris, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
-import type { EiendomId, FondId, LuksusId, PapirId, Spilltilstand } from './types'
+import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, PapirId, Spilltilstand } from './types'
 import { FOND_GEBYR, fondskurs } from './fond'
+import { landverdi, tommerverdi } from './jord'
+import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
+import { salgsprisMaleri } from './kunst'
+import { KLUBBSALG_HONORAR, klubbverdi } from './klubb'
 
 /** Så mange handler huskes til merkene på grafen. */
 export const MAKS_HANDLER = 60
@@ -58,6 +62,38 @@ export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
   const inntekt = restverdi(id)
   n.kontanter += inntekt
   n.luksus = n.luksus.filter((l) => l !== id)
+  return inntekt
+}
+
+/** Selger en gård eller skog med tømmeret som står, minus meglerhonorar. */
+export function utforJordsalg(n: Spilltilstand, id: JordId): number {
+  const inntekt = (landverdi(n, id) + tommerverdi(n, id)) * (1 - MEGLERHONORAR)
+  n.kontanter += inntekt
+  delete n.jord[id]
+  flyt(n, 'eiendom', -inntekt)
+  return inntekt
+}
+
+export function utforLandemerkesalg(n: Spilltilstand, id: LandemerkeId): number {
+  const inntekt = landemerkepris(n, id) * (1 - LANDEMERKE_HONORAR)
+  n.kontanter += inntekt
+  delete n.landemerker[id]
+  flyt(n, 'eiendom', -inntekt)
+  return inntekt
+}
+
+/** Selger et maleri — også et som henger på museum; da tar lånet slutt. */
+export function utforMalerisalg(n: Spilltilstand, id: MaleriId): number {
+  const inntekt = salgsprisMaleri(n, id)
+  n.kontanter += inntekt
+  delete n.kunst.eide[id]
+  return inntekt
+}
+
+export function utforKlubbsalg(n: Spilltilstand): number {
+  const inntekt = klubbverdi(n) * (1 - KLUBBSALG_HONORAR)
+  n.kontanter += inntekt
+  n.klubb = null
   return inntekt
 }
 

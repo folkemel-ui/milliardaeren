@@ -4,7 +4,21 @@
  */
 
 import { bedriftsverdi, belaaningsgrad, rentePerSek } from './formler'
-import { utforEiendomssalg, utforFondssalg, utforLuksussalg, utforRivalsalg, utforSalg } from './handel'
+import {
+  utforEiendomssalg,
+  utforFondssalg,
+  utforJordsalg,
+  utforKlubbsalg,
+  utforLandemerkesalg,
+  utforLuksussalg,
+  utforMalerisalg,
+  utforRivalsalg,
+  utforSalg,
+} from './handel'
+import { JORD, JORDLISTE, landverdi, tommerverdi } from './jord'
+import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from './landemerker'
+import { maleripris, MALERIER, mineMalerier } from './kunst'
+import { aktive, ide, utforStartupovertakelse } from './startups'
 import { FOND, FONDLISTE } from './fond'
 import { selskapsverdi } from './rivaler'
 import { flyt } from './portefolje'
@@ -44,11 +58,12 @@ function nedbetalMed(s: Spilltilstand, belop: number): void {
 
 /**
  * Marginkravet: er gjelden over grensen, tar banken først kontantene og sparepengene dine,
- * så investeringene — de største postene først — og deretter eiendom og
- * luksus, til belåningen er tilbake på det du fikk låne. Holder ikke det,
- * tar banken over bedrifter (den mest
- * verdifulle først) for halvparten av det du investerte. Den siste bedriften
- * får du alltid beholde.
+ * så investeringene — de største postene først — og deretter eiendom, jord,
+ * landemerker, luksus, kunst og klubben, til belåningen er tilbake på det du
+ * fikk låne. Så tar banken over andelene i startups for halvparten av verdien.
+ * Holder ikke det heller, tar banken over bedrifter (den mest verdifulle
+ * først) for halvparten av det du investerte. Den siste bedriften får du
+ * alltid beholde.
  */
 export function sjekkMargin(s: Spilltilstand): void {
   if (s.gjeld <= 0 || belaaningsgrad(s) <= MARGINKRAV) return
@@ -98,6 +113,34 @@ export function sjekkMargin(s: Spilltilstand): void {
     nedbetalMed(s, s.kontanter)
     solgt.push(LUKSUS[id].navn.toLowerCase())
   }
+  // Så gårder og skoger, den mest verdifulle først.
+  for (const id of [...JORDLISTE].filter((x) => s.jord?.[x]).sort((a, b) => landverdi(s, b) + tommerverdi(s, b) - landverdi(s, a) - tommerverdi(s, a))) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    utforJordsalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(JORD[id].navn)
+  }
+  // Så landemerkene.
+  for (const id of LANDEMERKELISTE.filter((x) => eierDu(s, x)).sort((a, b) => landemerkepris(s, b) - landemerkepris(s, a))) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    utforLandemerkesalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(LANDEMERKER[id].navn)
+  }
+  // Så kunsten — også maleriene som henger på museum.
+  for (const id of mineMalerier(s).sort((a, b) => maleripris(s, b) - maleripris(s, a))) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    utforMalerisalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(`«${MALERIER[id].navn}»`)
+  }
+  // Så klubben.
+  if (s.klubb && belaaningsgrad(s) > MAKS_BELAANING) {
+    const navn = s.klubb.navn
+    utforKlubbsalg(s)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(navn)
+  }
   if (solgt.length > 0) {
     leggTilHendelse(s, {
       tittel: 'Marginkrav',
@@ -107,6 +150,13 @@ export function sjekkMargin(s: Spilltilstand): void {
   }
 
   const overtatt: string[] = []
+  // Andelene i startups kan ikke selges på dagen: banken tar dem for halv verdi, den største først.
+  for (const st of aktive(s).filter((x) => x.andel > 0).sort((a, b) => b.andel * b.verdi - a.andel * a.verdi)) {
+    if (belaaningsgrad(s) <= MARGINKRAV) break
+    utforStartupovertakelse(s, st, TVANGSSALG_ANDEL)
+    nedbetalMed(s, s.kontanter)
+    overtatt.push(`andelen i ${ide(st).navn}`)
+  }
   while (belaaningsgrad(s) > MARGINKRAV && s.bedrifter.length > 1) {
     const storst = [...s.bedrifter].sort((a, b) => bedriftsverdi(b) - bedriftsverdi(a))[0]
     s.bedrifter = s.bedrifter.filter((b) => b.id !== storst.id)

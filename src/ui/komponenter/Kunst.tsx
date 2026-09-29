@@ -1,4 +1,5 @@
 import { kjopMaleri, museum, selgMaleri } from '../../engine/handlinger'
+import { Bekreftknapp } from './Bekreftknapp'
 import {
   KJOPSSALAER,
   kjopsprisMaleri,
@@ -87,9 +88,9 @@ function Maleri({ s, id }: { s: Spilltilstand; id: MaleriId }) {
           <button className="knapp" disabled={eid.hentes} onClick={() => utfor(museum(s, id))}>
             {eid.utlant ? (eid.hentes ? 'På vei hjem' : 'Hent hjem') : 'Lån ut til museum'}
           </button>
-          <button className="knapp" disabled={eid.utlant} onClick={() => utfor(selgMaleri(s, id))}>
+          <Bekreftknapp disabled={eid.utlant} onJa={() => utfor(selgMaleri(s, id))}>
             Selg · {kortKroner(salgsprisMaleri(s, id))}
-          </button>
+          </Bekreftknapp>
         </div>
       ) : (
         <button className="knapp knapp-gull bred" disabled={s.kontanter < kjopsprisMaleri(s, id)} onClick={() => utfor(kjopMaleri(s, id))}>

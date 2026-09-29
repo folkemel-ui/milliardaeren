@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import {
   EIENDOM_SYNLIG_VED,
   EIENDOMSSTIGEN,
@@ -182,9 +183,13 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
                     : `Kjøp · ${kortKroner(pris)}`}
             </button>
             {eier > 0 && (
-              <button className="knapp" onClick={() => utfor(selgEiendom(s, id))}>
+              <Bekreftknapp
+                bekreft={eier === 1}
+                varsel={st > 0 || s.oppussing[id] ? 'Standarden og oppussingen forsvinner med den siste.' : undefined}
+                onJa={() => utfor(selgEiendom(s, id))}
+              >
                 Selg · {kortKroner(pris * (1 - MEGLERHONORAR))}
-              </button>
+              </Bekreftknapp>
             )}
           </div>
           {eier > 0 && nesteStandard && oppussingPris !== null && (

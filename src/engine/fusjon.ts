@@ -11,6 +11,7 @@
 import { BEDRIFTSTYPER, STIGEN } from './innhold'
 import { dagnummer } from './kalender'
 import { hashTekst, tilfeldig } from './rng'
+import { SELSKAPSANDEL } from './rivaler'
 import type { Bedrift, BedriftstypeId, Bedriftstype, Rival, Spilltilstand } from './types'
 
 /** Hver fusjon ganger bedriftens inntekt med dette. */
@@ -124,8 +125,11 @@ export function utforFusjon(n: Spilltilstand, rivalId: string, type: Bedriftstyp
 
 /**
  * Et fiendtlig oppkjøp tar med seg alle bedriftene rivalen eier: de som er i
- * bransjer du selv har, slås sammen med dine. Muterer — kalles før rivalen
- * merkes som overtatt.
+ * bransjer du selv har, slås sammen med dine. Som ved en vanlig fusjon
+ * forlater bedriften rivalen, så selskapet krymper — og verdien flyttes fra
+ * andelen din over i din egen bedrift, så nettoformuen står stille. Selger du
+ * andelen igjen, får du bare betalt for det som er igjen. Muterer — kalles
+ * når du eier hele selskapet, før rivalen merkes som overtatt.
  */
 export function fusjonerVedOppkjop(n: Spilltilstand, r: Rival): BedriftstypeId[] {
   const fusjonert: BedriftstypeId[] = []
@@ -133,6 +137,11 @@ export function fusjonerVedOppkjop(n: Spilltilstand, r: Rival): BedriftstypeId[]
     const din = n.bedrifter.find((b) => b.type === rb.type)
     if (!din) continue
     din.fusjoner = (din.fusjoner ?? 0) + 1
+    const verdiFør = r.formue * SELSKAPSANDEL
+    const andel = Math.min(0.5, rb.verdi / r.formue)
+    r.formue *= 1 - andel
+    r.tak *= 1 - andel
+    din.investert += (verdiFør - r.formue * SELSKAPSANDEL) * r.andel
     r.solgt = [...(r.solgt ?? []), rb.type]
     fusjonert.push(rb.type)
   }
