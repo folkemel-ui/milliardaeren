@@ -30,6 +30,7 @@ import { fusjonsfaktor } from './fusjon'
 import { startupverdi } from './startups'
 import { klubbverdi } from './klubb'
 import { kunstverdi } from './kunst'
+import { fondverdi } from './fond'
 import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -138,6 +139,7 @@ export function eiendeler(s: Spilltilstand): number {
     s.sparing +
     s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) +
     papirverdi(s) +
+    fondverdi(s) +
     eiendomsverdi(s) +
     luksusverdi(s) +
     rivalverdi(s) +

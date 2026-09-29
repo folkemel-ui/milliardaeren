@@ -44,6 +44,11 @@ export function dato(dag: number): Dato {
   return { aar: d.getUTCFullYear(), maaned: d.getUTCMonth(), dag: d.getUTCDate() }
 }
 
+/** Dagnummeret for en dato (0 = januar). Kan være negativt for datoer før spillet startet. */
+export function dagFra(aar: number, maaned: number, dag: number): number {
+  return Math.round((Date.UTC(aar, maaned, dag) - START_MS) / 86_400_000)
+}
+
 /** ISO-ukenummer: uka som har torsdagen i seg, teller. */
 export function ukenummer(dag: number): number {
   const d = new Date(START_MS + dag * 86_400_000)

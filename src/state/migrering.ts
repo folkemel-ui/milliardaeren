@@ -21,6 +21,7 @@ import { klasseverdier, nullPerKlasse } from '../engine/portefolje'
 import { periodestart } from '../engine/oppgjor'
 import { START_RIVALER } from '../engine/rivaler'
 import { lagKunst } from '../engine/kunst'
+import { nyeKvartal } from '../engine/kvartal'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -167,6 +168,29 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
   /* 13 → 14: jord, landemerker og kunst. Ingenting eid ennå, alle landemerker
      til salgs, og kunstmarkedet starter på startprisene. */
   13: (s) => ({ ...s, jord: {}, totaltHost: 0, landemerker: {}, kunst: lagKunst(s.frø as number) }),
+  /* 14 → 15: fond, handelslogg og kvartalsrapporter. Ingen fondsandeler og
+     ingen loggede handler; alle aksjer starter med vanlig utbytte. Høyeste og
+     laveste kurs hentes fra historikken som finnes, og sluttkursene samles
+     fra neste dagsskifte. Porteføljen får en klasse for fond. */
+  14: (s) => {
+    const marked = s.marked as Raatilstand
+    const kurser = marked.kurser as Record<string, Raatilstand>
+    const nye: Record<string, Raatilstand> = {}
+    for (const [id, k] of Object.entries(kurser)) {
+      const alle = [...((k.historikk as number[]) ?? []), k.kurs as number]
+      nye[id] = { ...k, topp: Math.max(...alle), bunn: Math.min(...alle), dagslutt: [] }
+    }
+    const forrigeDag = s.forrigeDag as Raatilstand
+    return {
+      ...s,
+      marked: { ...marked, kurser: nye },
+      fond: {},
+      handler: [],
+      kvartal: nyeKvartal(),
+      dagensFlyt: { ...(s.dagensFlyt as Raatilstand), fond: 0 },
+      forrigeDag: { ...forrigeDag, verdier: { ...(forrigeDag.verdier as Raatilstand), fond: 0 } },
+    }
+  },
 }
 
 export type MigreringsResultat =

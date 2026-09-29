@@ -9,10 +9,11 @@ import { nullPerKlasse } from './portefolje'
 import { periodestart } from './oppgjor'
 import { START_RIVALER } from './rivaler'
 import { lagKunst } from './kunst'
+import { nyeKvartal } from './kvartal'
 import type { Dagsbilde, Periodestart, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 14
+export const SPILLVERSJON = 15
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -84,6 +85,9 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     totaltHost: 0,
     landemerker: {},
     kunst: lagKunst(frø),
+    fond: {},
+    handler: [],
+    kvartal: nyeKvartal(),
   }
   s.forrigeDag = lagDagsbilde(s)
   s.ukestart = periodestart(s)

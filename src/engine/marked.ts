@@ -100,11 +100,25 @@ function papirtikk(m: Marked, t: Terning, helg = false): void {
         k.avvik += (opp ? 1 : -1) * t.mellom(HOPP_MIN, HOPP_MAKS)
       }
       k.kurs = kursFra(k.fundament, k.avvik)
+      k.topp = Math.max(k.topp ?? k.kurs, k.kurs)
+      k.bunn = Math.min(k.bunn ?? k.kurs, k.kurs)
     }
     if (m.tikk % HISTORIKK_TIKK === 0) {
       k.historikk.push(k.kurs)
       if (k.historikk.length > MAKS_KURSHISTORIKK) k.historikk.shift()
     }
+  }
+}
+
+/** Sluttkursene huskes så mange spilldager (ti timer spilletid). */
+export const DAGSLUTT_MAKS = 120
+
+/** Legger dagens sluttkurs til hvert papir. Kalles ved dagsskiftet. Muterer. */
+export function registrerDagslutt(m: Marked): void {
+  for (const id of Object.keys(PAPIRER) as PapirId[]) {
+    const k = m.kurser[id]
+    k.dagslutt = [...(k.dagslutt ?? []), k.kurs]
+    if (k.dagslutt.length > DAGSLUTT_MAKS) k.dagslutt.shift()
   }
 }
 
@@ -155,6 +169,13 @@ export function lagMarked(frø: number): { marked: Marked; frø: number } {
   const t = new Terning(etterIndeks)
   for (let i = 0; i < OPPVARMING_TIKK; i++) papirtikk(marked, t)
   marked.tikk = 0
+  // Høyeste og laveste regnes fra historikken som vises — likt med migreringen.
+  for (const k of Object.values(kurser)) {
+    const alle = [...k.historikk, k.kurs]
+    k.topp = Math.max(...alle)
+    k.bunn = Math.min(...alle)
+    k.dagslutt = []
+  }
   return { marked, frø: t.fro }
 }
 

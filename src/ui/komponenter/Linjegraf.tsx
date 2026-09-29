@@ -13,11 +13,14 @@ export function Linjegraf({
   format,
   farge = 'var(--gull)',
   etikett,
+  merker = [],
 }: {
   punkter: { sek: number; verdi: number }[]
   format: (n: number) => string
   farge?: string
   etikett: string
+  /** Handler som vises som prikker: grønne kjøp, røde salg. Utenfor tidsvinduet vises de ikke. */
+  merker?: { sek: number; verdi: number; kjop: boolean }[]
 }) {
   const id = useId()
   if (punkter.length < 2) {
@@ -42,6 +45,7 @@ export function Linjegraf({
   const y = (v: number) => H - ((v - bunn) / (topp - bunn)) * H
   const linje = punkter.map((p) => `${x(p.sek).toFixed(1)},${y(p.verdi).toFixed(1)}`).join(' ')
   const flate = `0,${H} ${linje} ${B},${H}`
+  const synlige = merker.filter((m) => m.sek >= førsteSek && m.sek <= førsteSek + spenn)
 
   return (
     <figure className="graf">
@@ -49,6 +53,7 @@ export function Linjegraf({
         <span>{format(maks)}</span>
         <span>{format(min)}</span>
       </div>
+      <div className="graf-flate">
       <svg viewBox={`0 0 ${B} ${H}`} preserveAspectRatio="none" role="img" aria-label={etikett}>
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
@@ -60,6 +65,16 @@ export function Linjegraf({
         <polygon points={flate} fill={`url(#${CSS.escape(id)})`} />
         <polyline points={linje} fill="none" className="graf-linje" style={{ stroke: farge }} />
       </svg>
+      {/* Prikkene er HTML over grafen, så de forblir runde når grafen strekkes. */}
+      {synlige.map((m, i) => (
+        <span
+          key={i}
+          className={m.kjop ? 'graf-merke kjop' : 'graf-merke salg'}
+          style={{ left: `${(x(m.sek) / B) * 100}%`, top: `${(y(m.verdi) / H) * 100}%` }}
+          title={`${m.kjop ? 'Kjøpt' : 'Solgt'} til ${format(m.verdi)}`}
+        />
+      ))}
+      </div>
       <figcaption className="graf-akse-x">
         <span>for {varighet(spenn)} siden</span>
         <span>nå</span>

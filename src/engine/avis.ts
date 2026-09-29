@@ -18,6 +18,7 @@ import { klubbVedDagsskifte } from './klubb'
 import { jordVedDagsskifte } from './jord'
 import { landemerkerVedDagsskifte } from './landemerker'
 import { kunstVedDagsskifte } from './kunst'
+import { kvartalVedDagsskifte } from './kvartal'
 import { forbesliste } from './rivaler'
 import { FORMER, fusjonsnokler } from './fusjon'
 import { nettoformue } from './formler'
@@ -214,7 +215,7 @@ const LOKALT: Overskrift[] = [
  */
 export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const før = s.forrigeDag
-  const nyheter = selskapsnyheter(s, t)
+  const nyheter = [...kvartalVedDagsskifte(s), ...selskapsnyheter(s, t)]
   const oppgjor = dagsskifteOppgjor(s)
   const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
   const startupsaker = startupsVedDagsskifte(s, t)

@@ -16,10 +16,11 @@ import { rivalverdi } from './rivaler'
 import { startupKostpris, startupverdi } from './startups'
 import { jordKostpris } from './jord'
 import { landemerkeKostpris } from './landemerker'
+import { fondKostpris, fondverdi } from './fond'
 
 export type { Aktivaklasse }
 
-export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'eiendom', 'rival', 'startup', 'sparing']
+export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'fond', 'eiendom', 'rival', 'startup', 'sparing']
 
 export interface Postering {
   klasse: Aktivaklasse
@@ -31,13 +32,14 @@ export interface Postering {
 }
 
 export function nullPerKlasse(): Record<Aktivaklasse, number> {
-  return { aksje: 0, krypto: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 }
+  return { aksje: 0, krypto: 0, fond: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 }
 }
 
 export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
   return {
     aksje: papirverdi(s, 'aksje'),
     krypto: papirverdi(s, 'krypto'),
+    fond: fondverdi(s),
     eiendom: eiendomsverdi(s),
     rival: rivalverdi(s),
     startup: startupverdi(s),
@@ -57,6 +59,7 @@ function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
     return Math.max(0, s.sparing - s.totaltSparerente)
   }
   if (klasse === 'startup') return startupKostpris(s)
+  if (klasse === 'fond') return fondKostpris(s)
   if (klasse === 'rival') return (s.rivaler ?? []).reduce((sum, r) => sum + r.kostpris, 0)
   if (klasse === 'eiendom') {
     let sum = 0

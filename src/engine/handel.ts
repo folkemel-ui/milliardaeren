@@ -8,7 +8,17 @@ import { eiendomspris, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
-import type { EiendomId, LuksusId, PapirId, Spilltilstand } from './types'
+import type { EiendomId, FondId, LuksusId, PapirId, Spilltilstand } from './types'
+import { FOND_GEBYR, fondskurs } from './fond'
+
+/** Så mange handler huskes til merkene på grafen. */
+export const MAKS_HANDLER = 60
+
+function loggHandel(n: Spilltilstand, id: PapirId, antall: number, kurs: number): void {
+  if (!n.handler) return
+  n.handler.push({ papir: id, sek: n.sek, kurs, antall })
+  if (n.handler.length > MAKS_HANDLER) n.handler.shift()
+}
 
 /** Selger én eiendom til dagens pris, minus meglerhonorar. Returnerer hva du fikk. */
 export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
@@ -53,7 +63,9 @@ export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
 
 /** Kjøper `antall` og returnerer hva det kostet, kurtasje inkludert. */
 export function utforKjop(n: Spilltilstand, id: PapirId, antall: number): number {
-  const kostnad = antall * handelskurs(n, id, antall) * (1 + KURTASJE)
+  const kurs = handelskurs(n, id, antall)
+  const kostnad = antall * kurs * (1 + KURTASJE)
+  loggHandel(n, id, antall, kurs)
   n.kontanter -= kostnad
   flyt(n, PAPIRER[id].klasse, kostnad)
   const b = n.beholdning[id] ?? { antall: 0, kostpris: 0 }
@@ -65,7 +77,9 @@ export function utforKjop(n: Spilltilstand, id: PapirId, antall: number): number
 /** Selger `antall` og returnerer hva du fikk, etter kurtasje. */
 export function utforSalg(n: Spilltilstand, id: PapirId, antall: number): number {
   const b = n.beholdning[id]!
-  const inntekt = antall * handelskurs(n, id, -antall) * (1 - KURTASJE)
+  const kurs = handelskurs(n, id, -antall)
+  const inntekt = antall * kurs * (1 - KURTASJE)
+  loggHandel(n, id, -antall, kurs)
   n.kontanter += inntekt
   flyt(n, PAPIRER[id].klasse, -inntekt)
   const igjen = b.antall - antall
@@ -76,5 +90,19 @@ export function utforSalg(n: Spilltilstand, id: PapirId, antall: number): number
     n.beholdning[id] = { antall: igjen, kostpris: b.kostpris * (igjen / b.antall) }
   }
   flyttKurs(n.marked, id, -antall)
+  return inntekt
+}
+
+/** Selger et helt fond, eller et beløp av det, etter gebyr. Returnerer hva du fikk. */
+export function utforFondssalg(n: Spilltilstand, id: FondId, belop = Infinity): number {
+  const b = n.fond[id]!
+  const kurs = fondskurs(n, id)
+  const andeler = Math.min(b.antall, belop / kurs)
+  const inntekt = andeler * kurs * (1 - FOND_GEBYR)
+  n.kontanter += inntekt
+  flyt(n, 'fond', -inntekt)
+  const igjen = b.antall - andeler
+  if (igjen * kurs < 1) delete n.fond[id]
+  else n.fond[id] = { antall: igjen, kostpris: b.kostpris * (igjen / b.antall) }
   return inntekt
 }

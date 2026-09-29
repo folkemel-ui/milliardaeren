@@ -128,6 +128,11 @@ describe('migrering', () => {
     expect(r.tilstand.bedrifter[0]).toMatchObject({ tjent: 0, inntektHistorikk: [] })
     expect(r.tilstand.sparing).toBe(0)
     expect(r.tilstand.eiendomKostpris.hybel).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
+    // 14 → 15: ingen fond eller handler, vanlig utbytte, topp og bunn fra historikken.
+    expect(r.tilstand.fond).toEqual({})
+    expect(r.tilstand.handler).toEqual([])
+    expect(r.tilstand.kvartal.NFS).toEqual({ utbytteFaktor: 1, siste: null })
+    expect(r.tilstand.marked.kurser.NFS.topp).toBeGreaterThanOrEqual(r.tilstand.marked.kurser.NFS.kurs)
     // 13 → 14: ingen jord, alle landemerker til salgs, kunst på startpris.
     expect(r.tilstand.jord).toEqual({})
     expect(r.tilstand.landemerker).toEqual({})
@@ -153,7 +158,7 @@ describe('migrering', () => {
     expect(r.tilstand.ukestart.dag).toBe(3)
     expect(r.tilstand.totaltRentebetalt).toBe(0)
     // 6 → 7: «i dag» starter på null for alle klasser.
-    expect(r.tilstand.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 })
+    expect(r.tilstand.dagensFlyt).toEqual({ aksje: 0, krypto: 0, fond: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 })
     expect(r.tilstand.forrigeDag.verdier.eiendom).toBeCloseTo(250_000 * r.tilstand.marked.eiendom.kurs)
   })
 
