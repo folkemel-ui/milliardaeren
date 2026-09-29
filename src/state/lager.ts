@@ -15,6 +15,7 @@ import { BORTE_TAK_SEK } from '../engine/innhold'
 import type { Utfall } from '../engine/handlinger'
 import { migrer } from './migrering'
 import { pakk, pakkUt } from './overforing'
+import { visVarsel } from '../ui/varsler'
 import type { Spilltilstand } from '../engine/types'
 
 const LAGERNOKKEL = 'milliardaer.lagring'
@@ -112,8 +113,16 @@ export function lagre(): void {
 }
 
 /** Kjører en handling fra motoren. Returnerer feilmeldingen hvis den ble avvist. */
-export function utfor(u: Utfall): string | null {
-  if (!u.ok) return u.feil
+/**
+ * Utfører et utfall: lykkes det, blir det den nye tilstanden. Mislykkes det,
+ * vises feilen som et grått varsel — med mindre `stille` er satt, fordi
+ * stedet viser feilen selv.
+ */
+export function utfor(u: Utfall, stille = false): string | null {
+  if (!u.ok) {
+    if (!stille) visVarsel({ type: 'feil', tittel: u.feil })
+    return u.feil
+  }
   sett(u.tilstand)
   lagre()
   return null

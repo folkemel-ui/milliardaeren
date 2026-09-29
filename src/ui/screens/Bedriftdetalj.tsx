@@ -26,7 +26,7 @@ export function Bedriftdetalj({ s, b, tilbake }: { s: Spilltilstand; b: Bedrift;
   const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
 
   return (
-    <section className="skjerm">
+    <section className="skjerm detalj">
       <button className="tilbake" onClick={tilbake}>
         ‹ Bedrifter
       </button>

@@ -296,7 +296,7 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
   const steg = HISTORIKK_TIKK * MARKED_TIKK_SEK
 
   return (
-    <section className="skjerm">
+    <section className="skjerm detalj">
       <button className="tilbake" onClick={tilbake}>
         ‹ {p.klasse === 'aksje' ? 'Aksjer' : 'Krypto'}
       </button>
@@ -369,7 +369,7 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
 
   const utførHandel = () => {
     const u = modus === 'kjop' ? kjopPapir(s, id, a) : selgPapir(s, id, a)
-    const f = utfor(u)
+    const f = utfor(u, true)
     settFeil(f)
     if (!f) settTekst('')
   }
@@ -455,7 +455,7 @@ function Ordrer({ s, id }: { s: Spilltilstand; id: PapirId }) {
   const grenseTall = grense ? lesTall(grense) : forslag
 
   const leggInn = () => {
-    const f = utfor(nyOrdre(s, id, type, grenseTall, lesTall(antall)))
+    const f = utfor(nyOrdre(s, id, type, grenseTall, lesTall(antall)), true)
     settFeil(f)
     if (!f) settAntall(type === 'kjop' ? '' : String(eier))
   }
@@ -712,13 +712,13 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
 
   function by(type: BedriftstypeId, bud: BudId) {
     const u = byPaaBedrift(s, r.id, type, bud)
-    const feil = utfor(u)
+    const feil = utfor(u, true)
     const avtale = u.ok && (u.tilstand.rivaler.find((x) => x.id === r.id)?.solgt ?? []).includes(type)
     settMelding(feil ?? (avtale ? `Avtale! ${stor(FORMER[type].den)} er slått sammen med virksomheten din.` : null))
   }
 
   function godta(type: BedriftstypeId) {
-    const feil = utfor(godtaMotbud(s, r.id, type))
+    const feil = utfor(godtaMotbud(s, r.id, type), true)
     settMelding(feil ?? `Avtale! ${stor(FORMER[type].den)} er slått sammen med virksomheten din.`)
   }
 

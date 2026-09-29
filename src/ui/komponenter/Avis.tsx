@@ -11,7 +11,7 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
   const siste = utgaver[0]
 
   useEffect(() => {
-    if (siste && siste.dag > s.avisLest) utfor(lesAvis(s))
+    if (siste && siste.dag > s.avisLest) utfor(lesAvis(s), true)
   }, [siste, s])
 
   useEffect(() => {

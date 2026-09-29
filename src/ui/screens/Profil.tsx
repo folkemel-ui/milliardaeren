@@ -10,6 +10,7 @@ import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
 import { Skattekort } from '../komponenter/Skattekort'
 import { FlyttSpillet } from '../komponenter/FlyttSpillet'
+import { lesAvisvalg, settAvisvalg, type Avisvalg } from '../avisvalg'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
 
@@ -103,6 +104,7 @@ function fremdrift(n: number): number {
 
 function Utseende() {
   const [tema, settValgt] = useState<Tema>(lesTema)
+  const [avis, settAvis] = useState<Avisvalg>(lesAvisvalg)
   const velg = (t: Tema) => {
     settTema(t)
     settValgt(t)
@@ -118,6 +120,28 @@ function Utseende() {
           ☀️ Lyst
         </button>
       </div>
+      <h2 className="kort-tittel">Avisen</h2>
+      <div className="segment">
+        {(
+          [
+            ['varsel', 'Varsel'],
+            ['apne', 'Åpne selv'],
+            ['av', 'Av'],
+          ] as [Avisvalg, string][]
+        ).map(([v, navn]) => (
+          <button
+            key={v}
+            className={avis === v ? 'aktiv' : ''}
+            onClick={() => {
+              settAvisvalg(v)
+              settAvis(v)
+            }}
+          >
+            {navn}
+          </button>
+        ))}
+      </div>
+      <p className="dempet liten">Hva som skjer når en ny utgave kommer, hver spilldag. Den røde prikken på «Avisen» er der uansett.</p>
     </div>
   )
 }

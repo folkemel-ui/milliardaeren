@@ -24,8 +24,8 @@ export function Fondkort({ s, id }: { s: Spilltilstand; id: FondId }) {
   const verdi = b ? b.antall * kurs : 0
   const stengt = fondStengt(s, id)
   const utbytte = fondsutbytte(s, id)
-  const kjop = (andel: number) => settFeil(utfor(kjopFond(s, id, s.kontanter * andel)))
-  const selg = (andel: number) => settFeil(utfor(selgFond(s, id, andel === 1 ? Infinity : verdi * andel)))
+  const kjop = (andel: number) => settFeil(utfor(kjopFond(s, id, s.kontanter * andel), true))
+  const selg = (andel: number) => settFeil(utfor(selgFond(s, id, andel === 1 ? Infinity : verdi * andel), true))
 
   return (
     <div className={b ? 'kort fondkort eid' : 'kort fondkort'}>

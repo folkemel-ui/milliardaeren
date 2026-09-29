@@ -66,7 +66,7 @@ export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void })
 
 export function Klubb({ s, tilbake }: { s: Spilltilstand; tilbake: () => void }) {
   return (
-    <section className="skjerm">
+    <section className="skjerm detalj">
       <button className="tilbake" onClick={tilbake}>
         ‹ Luksus
       </button>
@@ -97,7 +97,7 @@ function Klubbkjop({ s }: { s: Spilltilstand }) {
         Lagstyrke <strong>{tall(lagstyrke(klubb))}</strong> · troppen er verdt {kortKroner(pris - DIVISJONER[0].verdi)}
       </p>
       {feil && <p className="rival-melding">{feil}</p>}
-      <button className="knapp knapp-gull bred" disabled={s.kontanter < pris} onClick={() => settFeil(utfor(kjopKlubb(s, navn)))}>
+      <button className="knapp knapp-gull bred" disabled={s.kontanter < pris} onClick={() => settFeil(utfor(kjopKlubb(s, navn), true))}>
         Kjøp {navn} · {kortKroner(pris)}
       </button>
     </div>

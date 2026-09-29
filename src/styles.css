@@ -2625,6 +2625,198 @@ figure {
   color: var(--tekst-dempet);
 }
 
+/* ─────────────────────────────────────────────── Varsler */
+
+.varsler {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--meny-høyde) + env(safe-area-inset-bottom) + 10px);
+  transform: translateX(-50%);
+  width: min(var(--kolonne), calc(100% - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.varsel {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--kant);
+  border-left-width: 4px;
+  background: var(--flate);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+  animation: varsel-inn 0.25s ease-out;
+}
+
+.varsel.klikkbar {
+  cursor: pointer;
+}
+
+.varsel.varsel-god {
+  border-left-color: var(--gull);
+}
+
+.varsel.varsel-avis {
+  border-left-color: var(--gull);
+}
+
+.varsel.varsel-advarsel {
+  border-left-color: var(--varsel);
+}
+
+.varsel.varsel-kritisk {
+  border-left-color: var(--fare);
+}
+
+.varsel.varsel-feil {
+  border-left-color: var(--tekst-dempet);
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+}
+
+.varsel-ikon {
+  font-size: 18px;
+}
+
+.varsel-tekst {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.varsel-tekst span {
+  color: var(--tekst-dempet);
+}
+
+.varsel-lukk {
+  align-self: flex-start;
+  color: var(--tekst-dempet);
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
+@keyframes varsel-inn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ─────────────────────────────────────────────── Feiring */
+
+.feiring {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.feiring-blink {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--gull) 55%, transparent), transparent 65%);
+  animation: feiring-blink 1.4s ease-out forwards;
+}
+
+.feiring-tekst {
+  position: relative;
+  font-size: clamp(34px, 11vw, 64px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--gull-lys);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--gull) 60%, transparent);
+  animation: feiring-tekst 3s ease-out forwards;
+}
+
+.konfetti {
+  position: absolute;
+  top: -20px;
+  width: 7px;
+  height: 12px;
+  border-radius: 2px;
+  animation-name: konfetti-fall;
+  animation-timing-function: cubic-bezier(0.3, 0.6, 0.5, 1);
+  animation-fill-mode: forwards;
+}
+
+.konfetti.bred {
+  width: 11px;
+  height: 6px;
+}
+
+@keyframes feiring-blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes feiring-tekst {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  25% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes konfetti-fall {
+  to {
+    transform: translate(var(--drift), 110vh) rotate(var(--rotasjon));
+  }
+}
+
+/* ─────────────────────────────────────────────── Fanene glir */
+
+.innhold.gli-hoyre > * {
+  animation: gli-fra-hoyre 0.22s ease-out;
+}
+
+.innhold.gli-venstre > * {
+  animation: gli-fra-venstre 0.22s ease-out;
+}
+
+.skjerm.detalj {
+  animation: gli-fra-hoyre 0.22s ease-out;
+}
+
+@keyframes gli-fra-hoyre {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes gli-fra-venstre {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
 /* ─────────────────────────────────────────────── Kurstikk og puls */
 
 .tikk {
@@ -2752,5 +2944,10 @@ figure {
   * {
     transition: none !important;
     animation: none !important;
+  }
+
+  .konfetti,
+  .feiring-blink {
+    display: none;
   }
 }

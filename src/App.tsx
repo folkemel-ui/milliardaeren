@@ -1,7 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Avis } from './ui/komponenter/Avis'
 import { startSpillokke, useSpill } from './state/lager'
-import { Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
+import { FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
+import { Feiring, Varselstabel } from './ui/komponenter/Varsler'
+import { FEIRES, MAKS_ENKELTVARSLER, nytt, type Nytt } from './ui/hendelsesstrom'
+import { visFeiring, visVarsel, type Varsel } from './ui/varsler'
+import { lesAvisvalg } from './ui/avisvalg'
+import type { Hendelse } from './engine/types'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
 import { Bedrifter } from './ui/screens/Bedrifter'
 import { Eiendom } from './ui/screens/Eiendom'
@@ -11,6 +16,24 @@ import { Profil } from './ui/screens/Profil'
 
 const FANENOKKEL = 'milliardaer.fane'
 const GYLDIGE: Fane[] = ['bedrifter', 'investeringer', 'eiendom', 'luksus', 'profil']
+
+/** Hvilken fane en hendelse hører hjemme i — dit tar et trykk på varselet deg. */
+const HENDELSE_FANE: Record<string, Fane> = {
+  Trofé: 'luksus',
+  Opprykk: 'luksus',
+  Nedrykk: 'luksus',
+  Hogst: 'eiendom',
+  Bokettersyn: 'profil',
+  'Skatt innkrevd': 'profil',
+}
+
+const ALVOR: Record<Hendelse['alvor'], Varsel['type']> = { info: 'god', advarsel: 'advarsel', kritisk: 'kritisk' }
+
+/** Om et tekstfelt har fokus — da skal ikke avisen dukke opp over det du skriver. */
+function skriver(): boolean {
+  const el = document.activeElement
+  return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement
+}
 
 function husketFane(): Fane {
   try {
@@ -26,10 +49,53 @@ export default function App() {
   const [fane, settFane] = useState<Fane>(husketFane)
   const [avisÅpen, settAvisÅpen] = useState(false)
   const lukkAvis = useCallback(() => settAvisÅpen(false), [])
+  // Retningen fanene glir: mot høyre når du går til en fane lenger til høyre.
+  const [retning, settRetning] = useState<'hoyre' | 'venstre' | 'ingen'>('ingen')
+  const forrige = useRef(s)
 
   useEffect(startSpillokke, [])
 
+  // Har du valgt at avisen skal åpne seg selv, og en ulest utgave venter ved oppstart, kommer den med én gang.
+  useEffect(() => {
+    const siste = s.avis.at(-1)
+    if (lesAvisvalg() === 'apne' && siste && siste.dag > s.avisLest) settAvisÅpen(true)
+    // Bare ved oppstart — senere utgaver går gjennom hendelsesstrømmen.
+  }, [])
+
+  // Hendelsesstrømmen: det som er nytt siden forrige tilstand, blir varsler.
+  useEffect(() => {
+    const før = forrige.current
+    forrige.current = s
+    if (før === s) return
+    håndter(nytt(før, s))
+  }, [s])
+
+  function håndter(funn: Nytt[]) {
+    const avis = funn.find((f) => f.type === 'avis')
+    const andre = funn.filter((f) => f.type !== 'avis')
+    for (const f of andre) if (f.type === 'prestasjon' && FEIRES[f.id]) visFeiring(FEIRES[f.id])
+    if (andre.length > MAKS_ENKELTVARSLER) {
+      visVarsel({ type: 'god', tittel: `${andre.length} hendelser mens du var borte`, tekst: 'Se Bank → Hendelser og Profil.', mål: 'investeringer' })
+    } else {
+      for (const f of andre) {
+        if (f.type === 'hendelse') {
+          visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'investeringer' })
+        } else if (f.type === 'prestasjon') {
+          visVarsel({ type: 'god', tittel: `${f.emoji} Prestasjon: ${f.navn}`, mål: 'profil' })
+        }
+      }
+    }
+    if (avis) {
+      const valg = lesAvisvalg()
+      if (valg === 'apne' && !skriver()) settAvisÅpen(true)
+      else if (valg !== 'av') visVarsel({ type: 'avis', tittel: 'Dagens Børstidende er her', handling: { tekst: 'Les', utfør: () => settAvisÅpen(true) } })
+    }
+  }
+
   const velg = (f: Fane) => {
+    const fra = FANER.findIndex((x) => x.id === fane)
+    const til = FANER.findIndex((x) => x.id === f)
+    settRetning(til > fra ? 'hoyre' : til < fra ? 'venstre' : 'ingen')
     settFane(f)
     window.scrollTo({ top: 0 })
     try {
@@ -42,7 +108,7 @@ export default function App() {
   return (
     <div className="app">
       <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} />
-      <main className="innhold">
+      <main key={fane} className={`innhold gli-${retning}`}>
         {fane === 'bedrifter' && <Bedrifter s={s} />}
         {fane === 'investeringer' && <Investeringer s={s} tilEiendom={() => velg('eiendom')} />}
         {fane === 'eiendom' && <Eiendom s={s} />}
@@ -50,7 +116,9 @@ export default function App() {
         {fane === 'profil' && <Profil s={s} />}
       </main>
       <Fanemeny aktiv={fane} velg={velg} />
+      <Varselstabel gåTil={velg} />
       {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
+      <Feiring />
     </div>
   )
 }

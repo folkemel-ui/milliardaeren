@@ -8,9 +8,8 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-Packs 16–18 go from small to big: the first ones are quick and change nothing in the save, the last ones reshape screens.
+Packs 17–18 go from small to big: the first ones are quick and change nothing in the save, the last ones reshape screens.
 
-- **Pack 16 – Feedback when things happen:** Toast messages · Gold flash and confetti · Smooth tab changes · Newspaper pop-up
 - **Pack 17 – Tidier screens:** Collapsible sections · A calmer Investments tab · Buy ×1 / ×10 / ×100 / Max · Garage, harbor and hangar grid
 - **Pack 18 – Bigger layout work:** Welcome-back screen · Tabs that open as you progress · Wide layout on PC
 - **Later:** Hotels abroad and holiday apartments
@@ -21,27 +20,19 @@ Packs 16–18 go from small to big: the first ones are quick and change nothing 
 
 ## Polish
 
-2. **Toast messages.** Short messages that slide in for events (a merge, a quarterly report, a harvest, a margin call, a trophy), instead of them only appearing under Bank → Hendelser.
+2. **Collapsible sections.** The Luxury and Property tabs have grown long. Each section (cars, watches, boats, planes, art, land, landmarks …) can fold away, and the game remembers which are open.
 
-3. **Gold flash and confetti.** A celebration at milestones: first million, first billion, promotion, trophies and the biggest achievements.
+3. **A calmer Investments tab.** Six sub-tabs are tight on a phone. Fewer sub-tabs, for example Oversikt, Børs, Startups and Bank, with crypto and rivals as sections inside.
 
-4. **Smooth tab changes.** A short slide or fade between tabs and into and out of detail screens. Respects the phone's "reduce motion" setting.
+4. **Buy ×1 / ×10 / ×100 / Max.** A toggle for business upgrades, showing the total price for the chosen number of levels.
 
-5. **Newspaper pop-up.** The new edition opens by itself each in-game day, with a setting on Profile to turn it off.
+5. **Garage, harbor and hangar grid.** Each storage shown as a grid of slots, so you see which spaces are used and which are free.
 
-6. **Collapsible sections.** The Luxury and Property tabs have grown long. Each section (cars, watches, boats, planes, art, land, landmarks …) can fold away, and the game remembers which are open.
+6. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Could grow into the parked "Offline income report" with a Claim button.
 
-7. **A calmer Investments tab.** Six sub-tabs are tight on a phone. Fewer sub-tabs, for example Oversikt, Børs, Startups and Bank, with crypto and rivals as sections inside.
+7. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
 
-8. **Buy ×1 / ×10 / ×100 / Max.** A toggle for business upgrades, showing the total price for the chosen number of levels.
-
-9. **Garage, harbor and hangar grid.** Each storage shown as a grid of slots, so you see which spaces are used and which are free.
-
-10. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Could grow into the parked "Offline income report" with a Claim button.
-
-11. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
-
-12. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
+8. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
 
 ## Parked (not chosen yet)
 
