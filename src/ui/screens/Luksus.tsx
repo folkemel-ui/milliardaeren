@@ -26,6 +26,7 @@ import { Klubb, Klubbkort } from './Klubb'
 import { Kunst } from '../komponenter/Kunst'
 import { Seksjon } from '../komponenter/Seksjon'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
+import { NyMerke } from '../komponenter/Kjopsglimt'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
@@ -115,10 +116,13 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
   const ingenPlass = !eier && lager !== null && brukteplasser(s, lager) >= s.lager[lager]
 
   return (
-    <li className={eier ? 'kort kjopskort eid' : 'kort kjopskort'}>
+    <li className={eier ? 'kort kjopskort eid' : 'kort kjopskort'} data-ny={id}>
       <BedriftIkon type={id} />
       <div className="bedriftskort-midt">
-        <h2>{g.navn}</h2>
+        <h2>
+          {g.navn}
+          <NyMerke id={id} />
+        </h2>
         <span className="gull liten">+{g.status} status</span>
       </div>
       {eier ? (

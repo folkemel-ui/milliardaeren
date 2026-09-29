@@ -6,6 +6,7 @@
 
 import { useSyncExternalStore } from 'react'
 import type { Fane } from './komponenter/Fanemeny'
+import type { Feiringsdata, Kjopsart } from './hendelsesstrom'
 
 export type Varseltype = 'god' | 'advarsel' | 'kritisk' | 'feil' | 'avis'
 
@@ -27,7 +28,8 @@ export const VARIGHET_MS = 4000
 export const FEIL_VARIGHET_MS = 2500
 
 let varsler: Varsel[] = []
-let feiring: string | null = null
+let feiring: Feiringsdata | null = null
+let kjop: Kjopsglimt | null = null
 let nesteId = 1
 const lyttere = new Set<() => void>()
 
@@ -59,9 +61,9 @@ export function useVarsler(): Varsel[] {
   return useSyncExternalStore(abonner, () => varsler)
 }
 
-/** Gullblink, konfetti og en stor tekst — for millionen og milliarden. */
-export function visFeiring(tekst: string): void {
-  feiring = tekst
+/** Konfetti og en tekst for en formuemilepæl — mer jo større milepælen er. */
+export function visFeiring(f: Feiringsdata): void {
+  feiring = f
   varsle()
 }
 
@@ -70,6 +72,32 @@ export function avsluttFeiring(): void {
   varsle()
 }
 
-export function useFeiring(): string | null {
+export function useFeiring(): Feiringsdata | null {
   return useSyncExternalStore(abonner, () => feiring)
+}
+
+/** Kjøpsøyeblikket: tegningen av det du nettopp kjøpte, et kort øyeblikk midt på skjermen. */
+export interface Kjopsglimt {
+  /** Ny for hvert kjøp, så samme ting kjøpt to ganger (solgt imellom) vises på nytt. */
+  nr: number
+  art: Kjopsart
+  id: string
+  navn: string
+}
+
+let nesteKjop = 1
+
+export function visKjop(k: Omit<Kjopsglimt, 'nr'>): void {
+  kjop = { ...k, nr: nesteKjop++ }
+  varsle()
+}
+
+export function avsluttKjop(nr: number): void {
+  if (kjop?.nr !== nr) return
+  kjop = null
+  varsle()
+}
+
+export function useKjop(): Kjopsglimt | null {
+  return useSyncExternalStore(abonner, () => kjop)
 }

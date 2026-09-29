@@ -29,6 +29,8 @@ import { Seksjon } from '../komponenter/Seksjon'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Gatebilde } from '../komponenter/Gatebilde'
 import { REGIONER, REGIONLISTE, regionEndring } from '../../engine/regioner'
+import { NyMerke } from '../komponenter/Kjopsglimt'
+import { RulleTall } from '../komponenter/RulleTall'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
   const [by, settBy] = useState<By | null>(null)
@@ -50,7 +52,9 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
         <div className="bank-rad">
           <div>
             <span className="etikett">Eiendommene dine</span>
-            <span className="tall-stort">{kortKroner(eiendomsverdi(s))}</span>
+            <span className="tall-stort">
+              <RulleTall verdi={eiendomsverdi(s)} format={kortKroner} />
+            </span>
           </div>
           <div className="bank-rente">
             <span className="etikett">Leie</span>
@@ -159,12 +163,13 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
   const nesteStandard = STANDARDER[st + 1]
 
   return (
-    <li className="kort bedriftskort">
+    <li className="kort bedriftskort" data-ny={id}>
       <div className="bedriftskort-topp">
         <BedriftIkon type={id} />
         <div className="bedriftskort-midt">
           <h2>
             {t.navn}
+            <NyMerke id={id} />
             {st > 0 && <span className={`merke-standard s${st}`}>{STANDARDER[st].navn}</span>}
           </h2>
           <span className="dempet">{t.sted}</span>

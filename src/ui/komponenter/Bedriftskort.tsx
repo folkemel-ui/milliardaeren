@@ -25,6 +25,7 @@ import { Koknapp, Koppknapp, useFlytetall, useHold } from './Hender'
 import { kortKroner, perSek, tall, varighet } from '../format'
 import { BedriftIkon } from './BedriftIkon'
 import { usePuls } from './Tikk'
+import { NyMerke } from './Kjopsglimt'
 
 /** Hvor langt bedriften har kommet fra forrige milepæl mot neste (0–1). */
 function milepaelFremdrift(nivaa: number, neste: number | null): number {
@@ -44,13 +45,14 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
   const [flytetall, legg] = useFlytetall()
 
   return (
-    <li className={`kort bedriftskort ${puls}`}>
+    <li className={`kort bedriftskort ${puls}`} data-ny={b.type}>
       {flytetall}
       <div className="bedriftskort-topp">
         <BedriftIkon type={b.type} />
         <div className="bedriftskort-midt">
           <h2>
             {type.navn}
+            <NyMerke id={b.type} />
             {b.leder && <span className="merke-leder">Leder</span>}
           </h2>
           <span className="dempet">

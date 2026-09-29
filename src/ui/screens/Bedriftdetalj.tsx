@@ -13,6 +13,7 @@ import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Oppgraderingsknapp, Personale } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
+import { useVoksUt } from '../overgang'
 
 export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
@@ -23,10 +24,11 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
     { sek: b.inntektHistorikk.length * INNTEKT_HISTORIKK_SEK, verdi: inntekt },
   ]
   const alder = s.sek - b.startetSek
+  const voks = useVoksUt<HTMLElement>()
   const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
 
   return (
-    <section className="skjerm detalj">
+    <section className="skjerm detalj" ref={voks}>
       <button className="tilbake" onClick={tilbake}>
         ‹ Bedrifter
       </button>

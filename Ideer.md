@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 26 – Big moments:** Buy moments, Milestone celebrations in more steps, Numbers that count up, Transitions between screens
 - **Pack 27 – One look:** Consistent illustration style, A proper logo and app icon, Businesses that grow visually
 - **Pack 28 – More to buy:** More luxury items, More stocks and coins
 - **Later:** Hotels abroad and holiday apartments (bring up the parked Map ideas at the same time)
@@ -17,23 +16,16 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
 
-## Animation
-
-2. **Buy moments.** Buying a new business, property or luxury item feels like an event: a short reveal where the illustration zooms in, a shine and a "NEW" badge on the card.
-3. **Milestone celebrations in more steps.** Today confetti only shows at 1 mill and 1 mrd. Add smaller celebrations at 10k, 100k, 10 mill and 100 mill, and a bigger, different one at 1 mrd.
-4. **Numbers that count up.** Use `RulleTall` everywhere big amounts change: net worth, reports, sale results.
-5. **Transitions between screens.** Detail screens (business, stock, club) slide or grow out of the card you tapped instead of popping in.
-
 ## Art
 
-6. **Consistent illustration style.** Go through all the SVG illustrations and icons so line width, colors and level of detail match.
-7. **A proper logo and app icon.** A logo with its own look, used on the app icon, the loading screen and Profil.
-8. **Businesses that grow visually.** The illustration changes at level 1, 25, 50 and 100: the lemonade stand gets bigger, more customers show up, and a neon sign comes on.
+2. **Consistent illustration style.** Go through all the SVG illustrations and icons so line width, colors and level of detail match.
+3. **A proper logo and app icon.** A logo with its own look, used on the app icon, the loading screen and Profil.
+4. **Businesses that grow visually.** The illustration changes at level 1, 25, 50 and 100: the lemonade stand gets bigger, more customers show up, and a neon sign comes on.
 
 ## Content
 
-9. **More luxury items.** More cars, watches, boats, jets and houses, spread over the whole price range so there is always something new to aim for.
-10. **More stocks and coins.** New sectors (tech, fish farming, energy, gaming) and a few more coins, including meme coins.
+5. **More luxury items.** More cars, watches, boats, jets and houses, spread over the whole price range so there is always something new to aim for.
+6. **More stocks and coins.** New sectors (tech, fish farming, energy, gaming) and a few more coins, including meme coins.
 
 ## Parked (not chosen yet)
 

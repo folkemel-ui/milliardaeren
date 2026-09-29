@@ -436,6 +436,25 @@ figure {
   text-transform: uppercase;
 }
 
+.merke-ny {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--gull);
+  color: var(--paa-gull);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  animation: ny-inn 0.4s ease-out;
+}
+
+@keyframes ny-inn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
 .merke-ok {
   color: var(--pluss);
   font-size: 13px;
@@ -2936,14 +2955,199 @@ figure {
   animation: feiring-blink 1.4s ease-out forwards;
 }
 
-.feiring-tekst {
+.feiring-midt {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: feiring-tekst var(--feiring-ms, 3s) ease-out forwards;
+}
+
+.feiring-tekst {
   font-size: clamp(34px, 11vw, 64px);
   font-weight: 900;
   letter-spacing: 0.04em;
   color: var(--gull-lys);
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--gull) 60%, transparent);
-  animation: feiring-tekst 3s ease-out forwards;
+}
+
+/* Den lille: et drys i øvre del av skjermen som ikke stopper spillet. */
+.feiring.liten {
+  pointer-events: none;
+  place-items: start center;
+}
+
+.feiring.liten .feiring-midt {
+  margin-top: 22vh;
+}
+
+.feiring.liten .feiring-tekst {
+  padding: 4px 20px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: clamp(26px, 8vw, 40px);
+}
+
+/* Milliarden demper resten av spillet, så øyeblikket står for seg selv. */
+.feiring.milliard {
+  background: rgba(0, 0, 0, 0.6);
+  animation: feiring-mork var(--feiring-ms, 5.5s) ease-out forwards;
+}
+
+@keyframes feiring-mork {
+  0% {
+    background: rgba(0, 0, 0, 0);
+  }
+  10%,
+  85% {
+    background: rgba(0, 0, 0, 0.6);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+/* Milliarden: stråler som går rundt, gullmynter og en krone. */
+.feiring-straaler {
+  position: absolute;
+  width: 160vmax;
+  height: 160vmax;
+  background: repeating-conic-gradient(color-mix(in srgb, var(--gull) 22%, transparent) 0deg 8deg, transparent 8deg 22deg);
+  mask-image: radial-gradient(circle, #000 0%, transparent 45%);
+  animation: straaler-rundt 12s linear infinite, straaler-inn 0.8s ease-out;
+}
+
+.feiring.milliard .feiring-tekst {
+  font-size: clamp(38px, 12vw, 76px);
+}
+
+.feiring-krone {
+  font-size: clamp(48px, 16vw, 88px);
+  line-height: 1;
+  animation: krone-ned 0.9s cubic-bezier(0.3, 1.6, 0.5, 1) 0.3s both;
+}
+
+.feiring-under {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tekst);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.konfetti.mynt {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.18);
+}
+
+@keyframes straaler-rundt {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes straaler-inn {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+@keyframes krone-ned {
+  from {
+    opacity: 0;
+    transform: translateY(-60px) rotate(-20deg);
+  }
+}
+
+/* ─────────────────────────────────────────────── Kjøpsøyeblikket */
+
+.kjopsglimt {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  pointer-events: none;
+  /* En mørk flekk bak, så navnet kan leses oppå kortene. */
+  background: radial-gradient(ellipse 280px 260px at 50% 50%, rgba(0, 0, 0, 0.7), transparent);
+  animation: kjopsglimt-ut 1.8s ease-in forwards;
+}
+
+.kjopsglimt-glod {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--gull) 35%, transparent), transparent 45%);
+  animation: feiring-blink 1.4s ease-out forwards;
+}
+
+.kjopsglimt-bilde {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 176px;
+  height: 176px;
+  border-radius: 36px;
+  background: var(--flate-2);
+  border: 1px solid var(--gull-mørk);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  animation: kjopsglimt-vokse 0.55s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+/* Et lysskjær som går over bildet én gang. */
+.kjopsglimt-skjaer {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.55) 50%, transparent 60%);
+  transform: translateX(-60%);
+  animation: kjopsglimt-skjaer 0.9s ease-out 0.35s forwards;
+}
+
+.kjopsglimt-overskrift {
+  position: relative;
+  margin-top: 10px;
+  color: var(--gull);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: ny-inn 0.4s ease-out 0.2s both;
+}
+
+.kjopsglimt-navn {
+  position: relative;
+  font-size: 24px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  animation: ny-inn 0.4s ease-out 0.28s both;
+}
+
+@keyframes kjopsglimt-vokse {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+@keyframes kjopsglimt-skjaer {
+  to {
+    transform: translateX(60%);
+  }
+}
+
+@keyframes kjopsglimt-ut {
+  0%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
 }
 
 .konfetti {
@@ -3155,7 +3359,9 @@ figure {
   }
 
   .konfetti,
-  .feiring-blink {
+  .feiring-blink,
+  .feiring-straaler,
+  .kjopsglimt-skjaer {
     display: none;
   }
 }

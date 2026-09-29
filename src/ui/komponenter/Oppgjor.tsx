@@ -3,6 +3,7 @@ import { PAPIRER } from '../../engine/marked'
 import type { Oppgjor, Spilltilstand } from '../../engine/types'
 import { endring, fortegnKroner, kroner } from '../format'
 import { kortDato } from '../kalender'
+import { RulleTall } from './RulleTall'
 
 export function oppgjorTittel(o: Oppgjor): string {
   if (o.periode === 'uke') return `Uka som gikk — ${o.navn}`
@@ -50,17 +51,21 @@ export function OppgjorBlokk({ o, s, medTittel = true }: { o: Oppgjor; s: Spillt
           .map(([navn, v]) => (
             <div key={navn}>
               <dt>{navn}</dt>
-              <dd className={v >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(v)}</dd>
+              <dd className={v >= 0 ? 'pluss' : 'minus'}>
+                <RulleTall verdi={v} fra={0} format={fortegnKroner} />
+              </dd>
             </div>
           ))}
         <div className="sum">
           <dt>Netto</dt>
-          <dd className={inn - ut >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(inn - ut)}</dd>
+          <dd className={inn - ut >= 0 ? 'pluss' : 'minus'}>
+            <RulleTall verdi={inn - ut} fra={0} format={fortegnKroner} />
+          </dd>
         </div>
         <div className="sum">
           <dt>Nettoformue</dt>
           <dd>
-            {kroner(o.formueFor)} → {kroner(o.formueEtter)}{' '}
+            {kroner(o.formueFor)} → <RulleTall verdi={o.formueEtter} fra={o.formueFor} format={kroner} />{' '}
             <span className={formueEndring >= 0 ? 'pluss' : 'minus'}>
               ({endring(o.formueFor > 0 ? formueEndring / o.formueFor : 0)})
             </span>

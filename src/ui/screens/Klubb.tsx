@@ -30,6 +30,7 @@ import { tidTilNesteRunde } from '../../engine/startups'
 import type { Kamp, Klubb as KlubbT, Spilltilstand, Taktikk } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
+import { useVoksUt } from '../overgang'
 
 /** Kortet i Luksus-fanen: kjøp en klubb, eller åpne den du har. */
 export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void }) {
@@ -66,8 +67,9 @@ export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void })
 }
 
 export function Klubb({ s, tilbake }: { s: Spilltilstand; tilbake: () => void }) {
+  const voks = useVoksUt<HTMLElement>()
   return (
-    <section className="skjerm detalj">
+    <section className="skjerm detalj" ref={voks}>
       <button className="tilbake" onClick={tilbake}>
         ‹ Luksus
       </button>

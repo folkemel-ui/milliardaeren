@@ -5,6 +5,7 @@ import { oppsummer } from '../velkomst'
 import { UTFALLTEKST } from '../../engine/kvartal'
 import { fortegnKroner, kortKroner, varighet } from '../format'
 import type { Fane } from './Fanemeny'
+import { RulleTall } from './RulleTall'
 
 /** «Velkommen tilbake»: hva som kom inn og hva som skjedde mens du var borte. */
 export function Velkomstskjerm({
@@ -32,7 +33,9 @@ export function Velkomstskjerm({
     Math.abs(belop) >= 1 && (
       <div>
         <dt>{navn}</dt>
-        <dd className={belop >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(belop)}</dd>
+        <dd className={belop >= 0 ? 'pluss' : 'minus'}>
+          <RulleTall verdi={belop} fra={0} format={fortegnKroner} />
+        </dd>
       </div>
     )
 
@@ -49,8 +52,12 @@ export function Velkomstskjerm({
 
         <div className="velkomst-formue">
           <span className="etikett">Nettoformue</span>
-          <span className="tall-stort">{kortKroner(o.formueEtter)}</span>
-          <span className={endring >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(endring)} mens du var borte</span>
+          <span className="tall-stort">
+            <RulleTall verdi={o.formueEtter} fra={o.formueFor} format={kortKroner} />
+          </span>
+          <span className={endring >= 0 ? 'pluss' : 'minus'}>
+            <RulleTall verdi={endring} fra={0} format={fortegnKroner} /> mens du var borte
+          </span>
         </div>
 
         <dl className="velkomst-tall">

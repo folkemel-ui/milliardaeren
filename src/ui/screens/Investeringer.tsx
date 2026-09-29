@@ -53,6 +53,8 @@ import {
   STARTUP_LAAST_OPP,
   tidTilNesteRunde,
 } from '../../engine/startups'
+import { RulleTall } from '../komponenter/RulleTall'
+import { useVoksUt } from '../overgang'
 
 type Underfane = 'oversikt' | 'bors' | 'selskaper' | 'bank'
 
@@ -136,7 +138,9 @@ function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Aktivaklasse) => vo
     <>
       <div className="kort oversikt">
         <span className="etikett">Investeringene dine</span>
-        <span className="tall-kjempe">{kortKroner(total.verdi)}</span>
+        <span className="tall-kjempe">
+          <RulleTall verdi={total.verdi} format={kortKroner} />
+        </span>
         <div className="oversikt-tall">
           <div>
             <span className="etikett">Kursendring i dag</span>
@@ -232,7 +236,9 @@ function Bors({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => void }) {
           return (
             <button key={k} role="tab" aria-selected={klasse === k} className={klasse === k ? 'kort flis aktiv' : 'kort flis'} onClick={() => bytt(k)}>
               <span className="etikett">{k === 'aksje' ? 'Aksjer' : 'Krypto'}</span>
-              <span className="tall-stort">{kortKroner(verdi)}</span>
+              <span className="tall-stort">
+                <RulleTall verdi={verdi} format={kortKroner} />
+              </span>
               {kost > 0 ? (
                 <>
                   <span className="dempet liten">Investert {kortKroner(kost)}</span>
@@ -342,9 +348,10 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
   const e = endringTo(s, id)
   const eier = s.beholdning[id]
   const steg = HISTORIKK_TIKK * MARKED_TIKK_SEK
+  const voks = useVoksUt<HTMLElement>()
 
   return (
-    <section className="skjerm detalj">
+    <section className="skjerm detalj" ref={voks}>
       <button className="tilbake" onClick={tilbake}>
         ‹ {p.klasse === 'aksje' ? 'Aksjer' : 'Krypto'}
       </button>
@@ -863,7 +870,9 @@ function Sparekonto({ s }: { s: Spilltilstand }) {
       <div className="bank-rad">
         <div>
           <span className="etikett">Sparekonto</span>
-          <span className="tall-stort">{kroner(s.sparing)}</span>
+          <span className="tall-stort">
+            <RulleTall verdi={s.sparing} format={kroner} />
+          </span>
         </div>
         <div className="bank-rente">
           <span className="etikett">Rente {tall(SPARERENTE_PER_TIME * 100)} % per time</span>
@@ -920,7 +929,9 @@ function Bank({ s }: { s: Spilltilstand }) {
         <div className="bank-rad">
           <div>
             <span className="etikett">Gjeld</span>
-            <span className="tall-stort">{kroner(s.gjeld)}</span>
+            <span className="tall-stort">
+              <RulleTall verdi={s.gjeld} format={kroner} />
+            </span>
           </div>
           <div className="bank-rente">
             <span className="etikett">Rente {tall(rentesats(s) * 100, rentesats(s) === RENTE_PER_TIME ? 0 : 1)} % per time</span>

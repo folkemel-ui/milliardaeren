@@ -5,8 +5,10 @@ import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
 import { Velkomstskjerm } from './ui/komponenter/Velkomst'
 import { FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
 import { Feiring, Varselstabel } from './ui/komponenter/Varsler'
-import { FEIRES, MAKS_ENKELTVARSLER, nytt, type Nytt } from './ui/hendelsesstrom'
-import { visFeiring, visVarsel, type Varsel } from './ui/varsler'
+import { MAKS_ENKELTVARSLER, nytt, stoersteFeiring, type Nytt } from './ui/hendelsesstrom'
+import { visFeiring, visKjop, visVarsel, type Varsel } from './ui/varsler'
+import { Kjopsglimt } from './ui/komponenter/Kjopsglimt'
+import { lyttEtterNyTrykk, merkNy } from './ui/nymerker'
 import { lesAvisvalg } from './ui/avisvalg'
 import type { Hendelse } from './engine/types'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
@@ -15,6 +17,7 @@ import { Eiendom } from './ui/screens/Eiendom'
 import { Investeringer } from './ui/screens/Investeringer'
 import { Luksus } from './ui/screens/Luksus'
 import { Profil } from './ui/screens/Profil'
+import { lyttEtterKorttrykk } from './ui/overgang'
 
 const FANENOKKEL = 'milliardaer.fane'
 const GYLDIGE: Fane[] = ['bedrifter', 'investeringer', 'eiendom', 'luksus', 'profil']
@@ -28,6 +31,8 @@ const HENDELSE_FANE: Record<string, Fane> = {
   Bokettersyn: 'profil',
   'Skatt innkrevd': 'profil',
 }
+
+const MAKS_KJOP_SAMTIDIG = 3
 
 const ALVOR: Record<Hendelse['alvor'], Varsel['type']> = { info: 'god', advarsel: 'advarsel', kritisk: 'kritisk' }
 
@@ -68,6 +73,8 @@ export default function App() {
   const avbrudd = useAvbrudd()
 
   useEffect(startSpillokke, [])
+  useEffect(lyttEtterNyTrykk, [])
+  useEffect(lyttEtterKorttrykk, [])
 
   // Har du valgt at avisen skal åpne seg selv, og en ulest utgave venter ved oppstart, kommer den med én gang.
   useEffect(() => {
@@ -83,18 +90,23 @@ export default function App() {
     forrige.current = s
     if (før === s) return
     const funn = nytt(før, s)
-    // Etter lengre tid borte viser velkomstskjermen alt dette — da blir det bare feiring, ingen varsler.
-    if (aktivVelkomst()?.etter === s) {
-      for (const f of funn) if (f.type === 'prestasjon' && FEIRES[f.id]) visFeiring(FEIRES[f.id])
-      return
-    }
-    håndter(funn)
+    const feiring = stoersteFeiring(funn)
+    if (feiring) visFeiring(feiring)
+    // Mange «kjøp» på en gang er ikke kjøp, men et annet spill: en importert lagring eller nytt spill.
+    const alleKjop = funn.filter((f) => f.type === 'kjop')
+    const kjop = alleKjop.length > MAKS_KJOP_SAMTIDIG ? [] : alleKjop
+    for (const k of kjop) merkNy(k.id)
+    // Etter lengre tid borte viser velkomstskjermen alt dette — da blir det bare feiring og NY-merker, ingen varsler.
+    if (aktivVelkomst()?.etter === s) return
+    // Kjøper du flere ting på en gang (automatiske ordre), vises det siste.
+    const siste = kjop.at(-1)
+    if (siste) visKjop({ art: siste.art, id: siste.id, navn: siste.navn })
+    håndter(funn.filter((f) => f.type !== 'kjop'))
   }, [s])
 
   function håndter(funn: Nytt[]) {
     const avis = funn.find((f) => f.type === 'avis')
     const andre = funn.filter((f) => f.type !== 'avis')
-    for (const f of andre) if (f.type === 'prestasjon' && FEIRES[f.id]) visFeiring(FEIRES[f.id])
     if (andre.length > MAKS_ENKELTVARSLER) {
       visVarsel({ type: 'god', tittel: `${andre.length} hendelser mens du var borte`, tekst: 'Se Bank → Hendelser og Profil.', mål: 'investeringer' })
     } else {
@@ -173,6 +185,7 @@ export default function App() {
         />
       )}
       {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
+      <Kjopsglimt />
       <Feiring />
     </div>
   )
