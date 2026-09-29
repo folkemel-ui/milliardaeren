@@ -3354,3 +3354,166 @@ figure {
   color: var(--tekst-dempet);
   font-size: 11px;
 }
+
+/* ─────────────────────────────────────────────── Levende kart: trend, leie, symboler, gatebilde */
+
+/* Ringen rundt byen: grønn når prisene i regionen stiger, rød når de faller. */
+.kart-trend {
+  fill: none;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.kart-trend.opp {
+  stroke: var(--pluss);
+}
+
+.kart-trend.ned {
+  stroke: var(--minus);
+}
+
+.kart-leie {
+  fill: var(--pluss);
+  font-size: 7.5px;
+  font-weight: 700;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* En mynt som stiger fra byen hvert par sekunder, så leien synes. */
+.kart-mynt {
+  font-size: 8px;
+  opacity: 0;
+  pointer-events: none;
+  animation: kart-mynt 4.5s ease-out infinite;
+}
+
+@keyframes kart-mynt {
+  0%,
+  70% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.kart-symboler {
+  font-size: 7px;
+}
+
+.kart-symboler tspan {
+  opacity: 0.4;
+}
+
+.kart-symboler tspan.eid {
+  opacity: 1;
+}
+
+.regionpriser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.filterrad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gatebilde {
+  width: min(460px, calc(100% - 32px));
+}
+
+/* Gata: husene står på en vei langs bunnen. */
+.gate {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 4px solid var(--kant);
+}
+
+.hus {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 112px;
+  padding: 8px 6px;
+  border-radius: 10px 10px 4px 4px;
+  border: 1px solid var(--kant);
+  background: var(--flate-2);
+  text-align: center;
+}
+
+.hus-navn {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Oppusset: friskere, med grønt skjær. Luksus: gull. */
+.hus.s1 {
+  border-color: var(--pluss);
+  background: color-mix(in srgb, var(--pluss) 8%, var(--flate-2));
+}
+
+.hus.s2 {
+  border-color: var(--gull);
+  background: color-mix(in srgb, var(--gull) 12%, var(--flate-2));
+  box-shadow: 0 0 10px rgb(212 175 55 / 0.3);
+}
+
+/* Stillas mens håndverkerne holder på. */
+.hus.stillas {
+  background-image: repeating-linear-gradient(135deg, transparent 0 8px, rgb(212 175 55 / 0.18) 8px 11px);
+}
+
+.hus.stillas svg {
+  opacity: 0.55;
+}
+
+.hus-merke {
+  font-size: 10px;
+  color: var(--gull);
+}
+
+.hus.ledig {
+  border-style: dashed;
+  background: transparent;
+  color: var(--tekst-dempet);
+}
+
+.hus-pluss {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--tekst-dempet);
+}
+
+.hus.utkant {
+  background: transparent;
+  opacity: 0.6;
+}
+
+.hus.utkant.din {
+  opacity: 1;
+  border-color: var(--gull);
+}
+
+.hus-symbol {
+  font-size: 30px;
+  line-height: 1.2;
+}

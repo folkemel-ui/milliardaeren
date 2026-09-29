@@ -14,6 +14,7 @@
 import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { lagEiendomsindeks, lagMarked } from '../engine/marked'
+import { lagRegioner } from '../engine/regioner'
 import { EIENDOMSTYPER, START_LAGER } from '../engine/eiendom'
 import { lagDagsbilde } from '../engine/avis'
 import { sjekkPrestasjoner } from '../engine/prestasjoner'
@@ -191,6 +192,14 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       forrigeDag: { ...forrigeDag, verdier: { ...(forrigeDag.verdier as Raatilstand), fond: 0 } },
     }
   },
+  /* 15 → 16: regionale eiendomspriser. Regionene får historikk like lang som
+     landsindeksens, og avvikene står på null nå — så alle eiendomsverdier og
+     all leie er nøyaktig som før migreringen. */
+  15: (s) => {
+    const marked = s.marked as Raatilstand
+    const land = marked.eiendom as Raatilstand
+    return { ...s, marked: { ...marked, regioner: lagRegioner(s.frø as number, ((land.historikk as number[]) ?? []).length) } }
+  },
 }
 
 export type MigreringsResultat =
@@ -228,7 +237,12 @@ export function migrer(
         feil: `Lagringen (versjon ${versjon}) er for gammel — ingen migrering fra versjon ${v}.`,
       }
     }
-    s = { ...steg(s), versjon: v + 1 }
+    // En ødelagt lagring kan få en migrering til å krasje; det skal bli en vanlig feil, ikke en hvit skjerm.
+    try {
+      s = { ...steg(s), versjon: v + 1 }
+    } catch {
+      return { ok: false, feil: `Lagringen er ødelagt og kunne ikke oppgraderes fra versjon ${v}.` }
+    }
   }
   return { ok: true, tilstand: s as unknown as Spilltilstand, migrert: versjon < tilVersjon }
 }

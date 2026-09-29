@@ -3,6 +3,7 @@
  * utregningene som hører til.
  */
 
+import { eiendomskurs } from './regioner'
 import type {
   EiendomId,
   Eiendomstype,
@@ -101,7 +102,7 @@ export function standard(s: Spilltilstand, id: EiendomId): number {
 
 /** Pris (og verdi) for én enhet: katalogpris × eiendomsindeks × standardens verdifaktor. */
 export function eiendomspris(s: Spilltilstand, id: EiendomId): number {
-  return EIENDOMSTYPER[id].pris * s.marked.eiendom.kurs * STANDARDER[standard(s, id)].verdi
+  return EIENDOMSTYPER[id].pris * eiendomskurs(s, EIENDOMSTYPER[id].by) * STANDARDER[standard(s, id)].verdi
 }
 
 /** Hva det koster å pusse opp alle enhetene av en type ett trinn, eller null når det ikke går. */
@@ -109,7 +110,7 @@ export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
   const neste = STANDARDER[standard(s, id) + 1]
   const antall = s.eiendommer[id] ?? 0
   if (!neste || antall === 0) return null
-  return antall * EIENDOMSTYPER[id].pris * s.marked.eiendom.kurs * neste.kostnad
+  return antall * EIENDOMSTYPER[id].pris * eiendomskurs(s, EIENDOMSTYPER[id].by) * neste.kostnad
 }
 
 /** Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker. */
@@ -122,7 +123,7 @@ export function eiendomsverdi(s: Spilltilstand): number {
 /** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren. */
 export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
   const t = EIENDOMSTYPER[id]
-  return (t.pris * s.marked.eiendom.kurs * t.avkastning * STANDARDER[standard(s, id)].leie) / 3600
+  return (t.pris * eiendomskurs(s, t.by) * t.avkastning * STANDARDER[standard(s, id)].leie) / 3600
 }
 
 export function leiePerSek(s: Spilltilstand): number {

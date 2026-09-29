@@ -116,6 +116,17 @@ export interface Marked {
   kurser: Record<PapirId, Kurs>
   /** Eiendomsindeksen: starter på 1, og alle eiendomsverdier og leier ganges med den. */
   eiendom: Kurs
+  /** Regionenes avvik fra landsindeksen (se regioner.ts). Trekkes fra en hash av frøet, ikke terningen. */
+  regioner: { frø: number; indekser: Record<Region, Regionindeks> }
+}
+
+export type Region = 'oslo' | 'bergen' | 'stavanger' | 'fjellet'
+
+export interface Regionindeks {
+  /** Logaritmisk avvik fra landsindeksen nå: regionens pris = landets · e^avvik. */
+  avvik: number
+  /** Avviket hver gang landsindeksen fikk et historikkpunkt, i samme takt. */
+  historikk: number[]
 }
 
 export interface Beholdning {

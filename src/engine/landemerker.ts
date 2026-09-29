@@ -9,12 +9,15 @@
 
 import { dagnummer } from './kalender'
 import { hashTekst, tilfeldig } from './rng'
-import type { LandemerkeId, Overskrift, Spilltilstand } from './types'
+import type { LandemerkeId, NorskBy, Overskrift, Spilltilstand } from './types'
+import { eiendomskurs } from './regioner'
 
 export interface Landemerke {
   id: LandemerkeId
   navn: string
   sted: string
+  /** Byen på kartet, som også gir regionens priser. */
+  by: NorskBy
   pris: number
   /** Statuspoeng så lenge du eier det. */
   status: number
@@ -23,10 +26,10 @@ export interface Landemerke {
 }
 
 export const LANDEMERKER: Record<LandemerkeId, Landemerke> = {
-  fyret: { id: 'fyret', navn: 'Fyret på Ytterskjær', sted: 'Ytterskjær, Vestlandet', pris: 800_000_000, status: 25, avkastning: 0.08 },
-  hoppbakken: { id: 'hoppbakken', navn: 'Kollen hoppbakke', sted: 'Holmenkollen, Oslo', pris: 2_500_000_000, status: 40, avkastning: 0.1 },
-  borgen: { id: 'borgen', navn: 'Steinvik borg', sted: 'Steinvik, Trøndelag', pris: 6_000_000_000, status: 60, avkastning: 0.08 },
-  tarnet: { id: 'tarnet', navn: 'Oslotårnet', sted: 'Bjørvika, Oslo', pris: 15_000_000_000, status: 100, avkastning: 0.14 },
+  fyret: { id: 'fyret', navn: 'Fyret på Ytterskjær', sted: 'Ytterskjær, Vestlandet', by: 'Bergen', pris: 800_000_000, status: 25, avkastning: 0.08 },
+  hoppbakken: { id: 'hoppbakken', navn: 'Kollen hoppbakke', sted: 'Holmenkollen, Oslo', by: 'Oslo', pris: 2_500_000_000, status: 40, avkastning: 0.1 },
+  borgen: { id: 'borgen', navn: 'Steinvik borg', sted: 'Steinvik, Trøndelag', by: 'Trondheim', pris: 6_000_000_000, status: 60, avkastning: 0.08 },
+  tarnet: { id: 'tarnet', navn: 'Oslotårnet', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 15_000_000_000, status: 100, avkastning: 0.14 },
 }
 
 export const LANDEMERKELISTE = Object.keys(LANDEMERKER) as LandemerkeId[]
@@ -40,7 +43,7 @@ export const TILBAKEKJOP_PREMIE = 1.5
 export const LANDEMERKE_HONORAR = 0.03
 
 export function landemerkepris(s: Spilltilstand, id: LandemerkeId): number {
-  return LANDEMERKER[id].pris * s.marked.eiendom.kurs
+  return LANDEMERKER[id].pris * eiendomskurs(s, LANDEMERKER[id].by)
 }
 
 export const eierDu = (s: Spilltilstand, id: LandemerkeId) => s.landemerker?.[id]?.eier === 'deg'

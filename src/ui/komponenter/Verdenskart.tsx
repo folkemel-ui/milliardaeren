@@ -1,5 +1,6 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, FLY_REKKEFOLGE, LUKSUS, reiseNivaa } from '../../engine/eiendom'
 import type { By, Spilltilstand, Utenlandsby } from '../../engine/types'
+import { kartLeie, leieIBy, useLangtrykk } from '../kart'
 
 /*
  * Et rutekart, ikke et ekte kart: byene står omtrent der de ligger i forhold
@@ -35,8 +36,20 @@ function bue([x, y]: [number, number]): string {
   return `M${ox},${oy} Q${mx.toFixed(1)},${my.toFixed(1)} ${x},${y}`
 }
 
-export function Verdenskart({ s, valgt, velg }: { s: Spilltilstand; valgt: By | null; velg: (by: By | null) => void }) {
+export function Verdenskart({
+  s,
+  valgt,
+  velg,
+  zoom,
+}: {
+  s: Spilltilstand
+  valgt: By | null
+  velg: (by: By | null) => void
+  /** Åpner gatebildet for en by — langt trykk på byen. */
+  zoom: (by: By) => void
+}) {
   const nivaa = reiseNivaa(s)
+  const lang = useLangtrykk(zoom)
   return (
     <figure className="verdenskart-ramme">
       <svg className="verdenskart" viewBox="0 0 300 175" role="group" aria-label="Rutekart over byene du kan fly til">
@@ -63,8 +76,9 @@ export function Verdenskart({ s, valgt, velg }: { s: Spilltilstand; valgt: By | 
               role="button"
               tabIndex={0}
               aria-label={`${by}: ${åpen ? `${n} ${n === 1 ? 'eiendom' : 'eiendommer'}` : `krever ${fly.navn.toLowerCase()}`}${valgt === by ? ', valgt' : ''}`}
-              onClick={() => velg(valgt === by ? null : by)}
+              onClick={() => !lang.varLangt() && velg(valgt === by ? null : by)}
               onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && velg(valgt === by ? null : by)}
+              {...lang.hendelser(by)}
             >
               <circle cx={x} cy={y} r={16} className="kart-treff" />
               <circle cx={x} cy={y} r={r} className="kart-prikk" />
@@ -81,6 +95,16 @@ export function Verdenskart({ s, valgt, velg }: { s: Spilltilstand; valgt: By | 
               >
                 {åpen ? by : `${fly.emoji} ${by}`}
               </text>
+              {leieIBy(s, by) > 0 && (
+                <text
+                  x={e === 'høyre' ? x + r + 4 : e === 'venstre' ? x - r - 4 : x}
+                  y={e === 'under' ? y + r + 21 : y + 14}
+                  textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
+                  className="kart-leie"
+                >
+                  {kartLeie(leieIBy(s, by))}
+                </text>
+              )}
             </g>
           )
         })}

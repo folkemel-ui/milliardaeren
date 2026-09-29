@@ -7,6 +7,7 @@
  * Alle parametre er per time spilltid; ett markedstikk er MARKED_TIKK_SEK.
  */
 
+import { lagRegioner, regiontikk } from './regioner'
 import { Terning } from './rng'
 import type { Kurs, Marked, Papir, PapirId, Spilltilstand } from './types'
 
@@ -71,6 +72,7 @@ export function kursFra(fundament: number, avvik: number): number {
 export function markedstikk(m: Marked, t: Terning, helg = false): void {
   papirtikk(m, t, helg)
   eiendomstikk(m.eiendom, m.tikk, t)
+  regiontikk(m)
 }
 
 function papirtikk(m: Marked, t: Terning, helg = false): void {
@@ -165,7 +167,7 @@ export function lagMarked(frø: number): { marked: Marked; frø: number } {
     kurser[id] = { kurs: s, fundament: s, avvik: 0, historikk: [] }
   }
   const { indeks, frø: etterIndeks } = lagEiendomsindeks(frø)
-  const marked: Marked = { tikk: 0, stemning: 0, kurser, eiendom: indeks }
+  const marked: Marked = { tikk: 0, stemning: 0, kurser, eiendom: indeks, regioner: lagRegioner(frø, indeks.historikk.length) }
   const t = new Terning(etterIndeks)
   for (let i = 0; i < OPPVARMING_TIKK; i++) papirtikk(marked, t)
   marked.tikk = 0

@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 24 – Living map:** Land and landmarks on the map, Regional prices and price colors, Rent per city, Zoom into a city
 - **Pack 25 – Polish:** Keyboard focus in the newspaper and welcome screen, Stray text and number formatting in the locked-business list, Clearer status line in Luksus
 - **Later:** Hotels abroad and holiday apartments (bring up the parked Map ideas at the same time)
 
@@ -21,13 +20,6 @@ A suggested order, grouped so each pack feels complete when played. The order is
 2. **Keyboard focus in the newspaper and welcome screen.** Move focus into the window when it opens, keep it there, and give it back when the window closes.
 3. **Stray text and number formatting in the locked-business list.** "24" and "H" show up among the locked businesses. Amounts are formatted unevenly: "12,00 mill" next to "150 mill".
 4. **Clearer status line in Luksus.** "rente 3,0 % per time" is hard to understand there. Explain what the status level does to the interest rate.
-
-## Map
-
-5. **Land and landmarks on the map.** Farms, forest and the four landmarks get their own small symbols on the map. Landmarks aren't shown at all today.
-6. **Regional prices and price colors.** Separate property indexes for Oslo, Bergen, Stavanger and the mountains, instead of one index for the whole country. Each city is tinted green or red by how its prices have moved.
-7. **Rent per city.** Cities where you have buildings rented out show a small label with rent per second, and a coin pops up when the rent comes in. Cities with nothing rented out show nothing.
-8. **Zoom into a city.** Tap-and-hold or pinch to see a small street view where each property is a building that changes look with its standard and renovation.
 
 ## Parked (not chosen yet)
 

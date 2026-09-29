@@ -1,6 +1,9 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
 import { JORD, JORDLISTE } from '../../engine/jord'
+import { useRef } from 'react'
 import type { By, NorskBy, Spilltilstand } from '../../engine/types'
+import { kartLeie, leieIBy, symbolerI, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
+import { perSek } from '../format'
 
 /*
  * Et stilisert Norgeskart tegnet fra ekte koordinater (lengde, bredde),
@@ -35,7 +38,7 @@ const LOFOTEN: [number, number][] = [
 
 const BYER: Record<NorskBy, { pos: [number, number]; etikett: 'høyre' | 'venstre' | 'over' }> = {
   Bergen: { pos: [5.32, 60.39], etikett: 'venstre' },
-  Stavanger: { pos: [5.73, 58.97], etikett: 'høyre' },
+  Stavanger: { pos: [5.73, 58.97], etikett: 'venstre' },
   Oslo: { pos: [10.75, 59.91], etikett: 'høyre' },
   Geilo: { pos: [8.21, 60.53], etikett: 'over' },
   Trondheim: { pos: [10.4, 63.43], etikett: 'høyre' },
@@ -54,44 +57,100 @@ function perBy(s: Spilltilstand): Partial<Record<By, number>> {
   return antall
 }
 
-export function Norgeskart({ s, valgt, velg }: { s: Spilltilstand; valgt: By | null; velg: (by: By | null) => void }) {
+export function Norgeskart({
+  s,
+  valgt,
+  velg,
+  zoom,
+}: {
+  s: Spilltilstand
+  valgt: By | null
+  velg: (by: By | null) => void
+  /** Åpner gatebildet for en by: langt trykk på byen, eller to fingre som glir fra hverandre. */
+  zoom: (by: By) => void
+}) {
   const antall = perBy(s)
+  const svg = useRef<SVGSVGElement>(null)
+  const lang = useLangtrykk(zoom)
+  // Klyp: gatebildet for den valgte byen, eller byen nærmest midt mellom fingrene.
+  const klyp = useKlyp((sx, sy) => {
+    if (valgt) return zoom(valgt)
+    const m = svg.current?.getScreenCTM()
+    if (!m) return
+    const p = new DOMPoint(sx, sy).matrixTransform(m.inverse())
+    const nærmest = (Object.keys(BYER) as NorskBy[])
+      .map((by) => {
+        const [x, y] = px(BYER[by].pos).split(',').map(Number)
+        return { by, d: Math.hypot(x - p.x, y - p.y) }
+      })
+      .sort((a, b) => a.d - b.d)[0]
+    if (nærmest) zoom(nærmest.by)
+  })
+
   return (
     // Litt luft til venstre, så «Bergen» får plass utenfor kysten.
-    <svg className="norgeskart" viewBox="-44 0 304 280" role="group" aria-label="Kart over eiendommene dine">
+    <svg ref={svg} className="norgeskart" viewBox="-44 0 304 280" role="group" aria-label="Kart over eiendommene dine" {...klyp}>
       <polygon points={FASTLAND.map(px).join(' ')} className="kart-land" />
       <polygon points={LOFOTEN.map(px).join(' ')} className="kart-land" />
-      {(Object.keys(BYER) as NorskBy[]).map((by) => {
+      {(Object.keys(BYER) as NorskBy[]).map((by, i) => {
         const [x, y] = px(BYER[by].pos).split(',').map(Number)
         const n = antall[by] ?? 0
         const r = n > 0 ? Math.min(11, 5 + n * 1.2) : 4
         const e = BYER[by].etikett
+        const trend = trendRing(trendFor(s, by))
+        const leie = leieIBy(s, by)
+        const symboler = symbolerI(s, by)
+        // Navnet står på én side av prikken; symbolene på den andre.
+        const navnX = e === 'høyre' ? x + r + 4 : e === 'venstre' ? x - r - 4 : x
+        const navnY = e === 'over' ? y - r - 5 : y + 4
+        const anker = e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'
+        const symbolX = e === 'høyre' ? x - r - 3 : e === 'venstre' ? x + r + 3 : x
+        const symbolY = e === 'over' ? y + r + 9 : y + 3
+        const symbolAnker = e === 'høyre' ? 'end' : e === 'venstre' ? 'start' : 'middle'
         return (
           <g
             key={by}
             className={`kart-by${n > 0 ? ' eid' : ''}${valgt === by ? ' valgt' : ''}`}
             role="button"
             tabIndex={0}
-            aria-label={`${by}: ${n} ${n === 1 ? 'eiendom' : 'eiendommer'}${valgt === by ? ', valgt' : ''}`}
-            onClick={() => velg(valgt === by ? null : by)}
+            aria-label={`${by}: ${n} ${n === 1 ? 'eiendom' : 'eiendommer'}${leie > 0 ? `, leie ${perSek(leie)}` : ''}${valgt === by ? ', valgt' : ''}. Hold inne for gatebildet.`}
+            onClick={() => !lang.varLangt() && velg(valgt === by ? null : by)}
             onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && velg(valgt === by ? null : by)}
+            {...lang.hendelser(by)}
           >
             {/* Større, usynlig treffflate så byene er lette å treffe med fingeren. */}
             <circle cx={x} cy={y} r={16} className="kart-treff" />
+            {trend && <circle cx={x} cy={y} r={r + 3} className={`kart-trend ${trend.klasse}`} style={{ strokeOpacity: trend.styrke }} />}
             <circle cx={x} cy={y} r={r} className="kart-prikk" />
             {n > 0 && (
               <text x={x} y={y + 3.5} className="kart-antall" textAnchor="middle">
                 {n}
               </text>
             )}
-            <text
-              x={e === 'høyre' ? x + r + 4 : e === 'venstre' ? x - r - 4 : x}
-              y={e === 'over' ? y - r - 5 : y + 4}
-              textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
-              className="kart-navn"
-            >
+            <text x={navnX} y={navnY} textAnchor={anker} className="kart-navn">
               {by}
             </text>
+            {leie > 0 && (
+              <>
+                <text x={navnX} y={e === 'over' ? navnY - 10 : navnY + 9} textAnchor={anker} className="kart-leie">
+                  {kartLeie(leie)}
+                </text>
+                {/* En mynt som stiger når leien kommer — forskjøvet per by, så de ikke går i takt. */}
+                <text x={x} y={y - r - 2} textAnchor="middle" className="kart-mynt" style={{ animationDelay: `${(i % 5) * 0.9}s` }}>
+                  🪙
+                </text>
+              </>
+            )}
+            {symboler.length > 0 && (
+              <text x={symbolX} y={symbolY} textAnchor={symbolAnker} className="kart-symboler">
+                {symboler.map((sym, j) => (
+                  <tspan key={j} className={sym.eid ? 'eid' : ''}>
+                    <title>{`${sym.navn}${sym.eid ? ' (din)' : ''}`}</title>
+                    {sym.tegn}
+                  </tspan>
+                ))}
+              </text>
+            )}
           </g>
         )
       })}

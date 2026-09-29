@@ -1,6 +1,7 @@
 /** Pakke 8: unike forbedringer og oppussing av eiendom. */
 
 import { describe, expect, it } from 'vitest'
+import { eiendomskurs } from '../regioner'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { kjopEiendom as kjopEiendomU, kjopForbedring, pussOpp, selgEiendom as selgEiendomU } from '../handlinger'
@@ -62,7 +63,7 @@ describe('oppussing', () => {
     s = kjopEiendom(s, 'hybel')
     const leieFør = leiePerSek(s)
     const pris = oppussingspris(s, 'hybel')!
-    expect(pris).toBeCloseTo(2 * EIENDOMSTYPER.hybel.pris * s.marked.eiendom.kurs * STANDARDER[1].kostnad)
+    expect(pris).toBeCloseTo(2 * EIENDOMSTYPER.hybel.pris * eiendomskurs(s, EIENDOMSTYPER.hybel.by) * STANDARDER[1].kostnad)
     const kostFør = s.eiendomKostpris.hybel!
     s = ok(pussOpp(s, 'hybel'))
     expect(s.eiendomKostpris.hybel).toBeCloseTo(kostFør + pris)
@@ -76,14 +77,14 @@ describe('oppussing', () => {
 
   it('gir mer leie og høyere verdi når den er ferdig', () => {
     let s = kjopEiendom(rik(), 'leilighet')
-    const verdiFør = eiendomspris(s, 'leilighet') / s.marked.eiendom.kurs
+    const verdiFør = eiendomspris(s, 'leilighet') / eiendomskurs(s, EIENDOMSTYPER.leilighet.by)
     s = ok(pussOpp(s, 'leilighet'))
     const ferdig = simuler(s, STANDARDER[1].dager * DAG_SEK)
     expect(ferdig.eiendomStandard.leilighet).toBe(1)
     expect(ferdig.oppussing.leilighet).toBeUndefined()
-    expect(eiendomspris(ferdig, 'leilighet') / ferdig.marked.eiendom.kurs).toBeCloseTo(verdiFør * STANDARDER[1].verdi)
+    expect(eiendomspris(ferdig, 'leilighet') / eiendomskurs(ferdig, EIENDOMSTYPER.leilighet.by)).toBeCloseTo(verdiFør * STANDARDER[1].verdi)
     const leieHver = leiePerSek(ferdig)
-    const forventet = (EIENDOMSTYPER.leilighet.pris * ferdig.marked.eiendom.kurs * EIENDOMSTYPER.leilighet.avkastning * 1.3) / 3600
+    const forventet = (EIENDOMSTYPER.leilighet.pris * eiendomskurs(ferdig, EIENDOMSTYPER.leilighet.by) * EIENDOMSTYPER.leilighet.avkastning * 1.3) / 3600
     expect(leieHver).toBeCloseTo(forventet)
   })
 
@@ -91,7 +92,7 @@ describe('oppussing', () => {
     let s = kjopEiendom(rik(), 'hytte')
     s = simuler(ok(pussOpp(s, 'hytte')), STANDARDER[1].dager * DAG_SEK)
     const pris = eiendomspris(s, 'hytte')
-    expect(pris).toBeCloseTo(EIENDOMSTYPER.hytte.pris * s.marked.eiendom.kurs * STANDARDER[1].verdi)
+    expect(pris).toBeCloseTo(EIENDOMSTYPER.hytte.pris * eiendomskurs(s, EIENDOMSTYPER.hytte.by) * STANDARDER[1].verdi)
     const kontanterFør = s.kontanter
     s = kjopEiendom(s, 'hytte')
     expect(kontanterFør - s.kontanter).toBeCloseTo(pris)
