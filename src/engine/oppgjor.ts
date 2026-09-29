@@ -54,7 +54,8 @@ function lagOppgjor(s: Spilltilstand, start: Periodestart, periode: Oppgjor['per
   }
   if (periode === 'uke') {
     const endring = (id: PapirId) => s.marked.kurser[id].kurs / start.kurser[id] - 1
-    const sortert = [...AKSJER].sort((a, b) => endring(b) - endring(a))
+    // Et papir som ble børsnotert midt i uka, har ingen startkurs og er ikke med.
+    const sortert = AKSJER.filter((id) => start.kurser[id] !== undefined).sort((a, b) => endring(b) - endring(a))
     o.vinner = { id: sortert[0], endring: endring(sortert[0]) }
     o.taper = { id: sortert[sortert.length - 1], endring: endring(sortert[sortert.length - 1]) }
   }

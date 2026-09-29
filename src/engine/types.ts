@@ -69,6 +69,9 @@ export interface Forbedring {
 export type PapirId =
   | 'NFS' | 'FJK' | 'VTK' | 'BSH' | 'POL' | 'NLT' | 'AUB' | 'TRS'
   | 'BMT' | 'FJD' | 'NSL' | 'TRM' | 'VKT' | 'LKS'
+  // Børsnotert i versjon 17 (se NYE_PAPIRER i marked.ts).
+  | 'NRB' | 'KRV' | 'FJF' | 'ROM'
+  | 'STK' | 'ELG' | 'BRN'
 
 export type Risiko = 'lav' | 'middels' | 'høy'
 
@@ -91,6 +94,8 @@ export interface Papir {
   dybde: number
   /** Sjanse per markedstikk for et plutselig hopp. */
   hopp: number
+  /** Hvor mye kryptostemningen drar i kursen (1 om ikke satt). 0 for en stabil mynt. */
+  stemning?: number
 }
 
 export interface Kurs {
@@ -118,6 +123,8 @@ export interface Marked {
   eiendom: Kurs
   /** Regionenes avvik fra landsindeksen (se regioner.ts). Trekkes fra en hash av frøet, ikke terningen. */
   regioner: { frø: number; indekser: Record<Region, Regionindeks> }
+  /** Frøet til papirene som kom i versjon 17. De trekker fra en hash av det, ikke fra terningen. */
+  nyeFrø?: number
 }
 
 export type Region = 'oslo' | 'bergen' | 'stavanger' | 'fjellet'
@@ -171,6 +178,10 @@ export type LuksusId =
   | 'gullklokke' | 'mesterverk' | 'diamantklokke'
   | 'snekke' | 'motorbaat' | 'superyacht'
   | 'propellfly' | 'forretningsjet' | 'langdistansejet'
+  | 'veteranbil' | 'limousin' | 'formelbil'
+  | 'dykkerklokke' | 'lommeur'
+  | 'seilbaat' | 'seilyacht'
+  | 'helikopter'
 
 export interface Luksusgjenstand {
   id: LuksusId

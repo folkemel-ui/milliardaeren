@@ -8,17 +8,11 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 28 – More to buy:** More luxury items, More stocks and coins
 - **Later:** Hotels abroad and holiday apartments (bring up the parked Map ideas at the same time)
 
 ## Property
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
-
-## Content
-
-2. **More luxury items.** More cars, watches, boats, jets and houses, spread over the whole price range so there is always something new to aim for.
-3. **More stocks and coins.** New sectors (tech, fish farming, energy, gaming) and a few more coins, including meme coins.
 
 ## Parked (not chosen yet)
 

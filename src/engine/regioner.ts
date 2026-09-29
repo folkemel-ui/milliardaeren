@@ -8,7 +8,7 @@
  * Byer utenfor regionene (Trondheim, nord og utlandet) følger landsindeksen.
  */
 
-import { hashTekst, tilfeldig } from './rng'
+import { hashNormal, hashTekst } from './rng'
 import type { By, Marked, Region, Regionindeks, Spilltilstand } from './types'
 
 export const REGIONER: Record<Region, { navn: string; byer: By[] }> = {
@@ -34,13 +34,6 @@ const DT = 5 / 3600
 const HISTORIKK_TIKK = 6
 const MAKS_HISTORIKK = 240
 const REGION = { volatilitet: 0.05, reversjon: 0.35 }
-
-/** En standard normalfordelt verdi fra en hash — samme tall hver gang for samme frø. */
-function hashNormal(frø: number): number {
-  const u1 = Math.max(1e-12, tilfeldig(frø))
-  const u2 = tilfeldig(frø + 1)
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
-}
 
 function steg(i: Regionindeks, frø: number, region: Region, tikk: number): void {
   const z = hashNormal(frø + hashTekst(region) + tikk * 2)

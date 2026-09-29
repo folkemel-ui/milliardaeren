@@ -1088,10 +1088,65 @@ function Hyperbil({ størrelse = 48 }: P) {
   )
 }
 
+function Veteranbil({ størrelse = 48 }: P) {
+  return (
+    <Bil størrelse={størrelse}>
+      <circle cx="5.4" cy="28.5" r="3" fill={F.mork} />
+      <rect x="6" y="27" width="36" height="7" rx="2" fill={F.gronnMork} />
+      <rect x="29" y="23.5" width="13" height="6" rx="1.5" fill={F.gronnMork} />
+      <rect x="41" y="23.5" width="2.2" height="8" rx="0.6" fill={F.metallLys} />
+      <rect x="12" y="16" width="17" height="12" rx="2" fill={F.gronnMork} />
+      <rect x="11" y="15" width="19" height="2.4" rx="1" fill={F.mork} />
+      <rect x="14" y="18.5" width="6" height="6" rx="0.6" fill={F.glass} />
+      <rect x="21.5" y="18.5" width="6" height="6" rx="0.6" fill={F.glass} />
+      <rect x="6" y="30" width="36" height="1" fill={F.gull} />
+      <path d="M6.5 35 Q13 28 19.5 35 Z M29.5 35 Q36 28 42.5 35 Z" fill={F.mork} />
+      <rect x="18" y="34" width="13" height="1.4" rx="0.6" fill={F.mork} />
+      <circle cx="42.4" cy="26.4" r="1.4" fill={F.lys} />
+      <Hjul x={13} felg={F.krem} />
+      <Hjul x={36} felg={F.krem} />
+    </Bil>
+  )
+}
+
+function Limousin({ størrelse = 48 }: P) {
+  return (
+    <Bil størrelse={størrelse}>
+      <polygon points="9,24.5 12,17 38,17 41,24.5" fill={F.mork} />
+      <rect x="12" y="17" width="26" height="1" fill={F.skifer} />
+      <rect x="2" y="24" width="44" height="9.5" rx="2.5" fill={F.mork} />
+      <polygon points="12.6,23.8 14.2,19 20,19 20,23.8" fill={F.glassMork} />
+      <rect x="21.5" y="19" width="7" height="4.8" fill={F.skifer} />
+      <polygon points="30,19 36.2,19 38.2,23.8 30,23.8" fill={F.skifer} />
+      <rect x="2" y="28" width="44" height="0.9" fill={F.metallLys} />
+      <rect x="44" y="25.2" width="2" height="1.8" rx="0.5" fill={F.lys} />
+      <Hjul x={9} felg={F.metallLys} />
+      <Hjul x={39} felg={F.metallLys} />
+    </Bil>
+  )
+}
+
+function Formelbil({ størrelse = 48 }: P) {
+  return (
+    <Bil størrelse={størrelse}>
+      <rect x="4.6" y="24" width="1.4" height="7" fill={F.mork} />
+      <rect x="2.5" y="21.5" width="7" height="2.6" rx="0.6" fill={F.mork} />
+      <polygon points="5,33 9,28.5 21,27.5 27,25.5 33,27.5 46,31.5 46,33.5" fill={F.rod} />
+      <polygon points="12,31 44,31 46,33.5 5,33.5" fill={F.hvit} />
+      <circle cx="25" cy="25.2" r="2.6" fill={F.gul} />
+      <rect x="25.6" y="24" width="2" height="1.4" rx="0.5" fill={F.mork} />
+      <circle cx="16" cy="30" r="1.8" fill={F.hvit} />
+      <rect x="39.5" y="32.6" width="7" height="1.4" rx="0.5" fill={F.mork} />
+      <Hjul x={11} r={5.2} felg={F.metall} />
+      <Hjul x={36} r={5.2} felg={F.metall} />
+    </Bil>
+  )
+}
+
 // ─────────────────────────────────────────────── Luksus: klokker
 
 /** Klokkene står på en fløyelspute, med remmen rundt puta. */
-function Klokke({ størrelse, rem, kasse, skive, visere, ekstra }: { størrelse: number; rem: string; kasse: string; skive: string; visere: string; ekstra?: ReactNode }) {
+function Klokke({ størrelse, rem, kasse, skive, visere, ekstra, lomme = false }: { størrelse: number; rem: string; kasse: string; skive: string; visere: string; ekstra?: ReactNode; lomme?: boolean }) {
   const markører: ReactNode[] = []
   for (let i = 0; i < 12; i++) {
     const v = (i / 12) * Math.PI * 2
@@ -1101,9 +1156,19 @@ function Klokke({ størrelse, rem, kasse, skive, visere, ekstra }: { størrelse:
     <Svg størrelse={størrelse}>
       <Grunn type="skygge" />
       <g transform="translate(24 20.5) scale(0.74) translate(-24 -24)">
-        <rect x="18.5" y="1.5" width="11" height="12" rx="2" fill={rem} />
-        <rect x="18.5" y="34.5" width="11" height="12" rx="2" fill={rem} />
-        <rect x="35" y="22.3" width="3.4" height="3.4" rx="0.8" fill={kasse} />
+        {lomme ? (
+          <>
+            <path d="M22 7 Q4 6 5 40" fill="none" stroke={rem} strokeWidth="1.6" strokeDasharray="2 1.2" />
+            <circle cx="24" cy="7" r="3" fill="none" stroke={kasse} strokeWidth="1.6" />
+            <rect x="22" y="9" width="4" height="3.4" rx="0.8" fill={kasse} />
+          </>
+        ) : (
+          <>
+            <rect x="18.5" y="1.5" width="11" height="12" rx="2" fill={rem} />
+            <rect x="18.5" y="34.5" width="11" height="12" rx="2" fill={rem} />
+            <rect x="35" y="22.3" width="3.4" height="3.4" rx="0.8" fill={kasse} />
+          </>
+        )}
         <circle cx="24" cy="24" r="12.5" fill={kasse} />
         <circle cx="24" cy="24" r="10" fill={skive} />
         {markører}
@@ -1131,6 +1196,33 @@ function Mesterverk({ størrelse = 48 }: P) {
       skive={F.marine}
       visere={F.hvit}
       ekstra={<circle cx="24" cy="29" r="2.6" fill="none" stroke={F.glass} strokeWidth="0.8" />}
+    />
+  )
+}
+
+function Dykkerklokke({ størrelse = 48 }: P) {
+  return (
+    <Klokke
+      størrelse={størrelse}
+      rem={F.mork}
+      kasse={F.metallLys}
+      skive="#0b1f33"
+      visere={F.hvit}
+      ekstra={<circle cx="24" cy="24" r="11.2" fill="none" stroke={F.blaa} strokeWidth="2.2" />}
+    />
+  )
+}
+
+function Lommeur({ størrelse = 48 }: P) {
+  return (
+    <Klokke
+      størrelse={størrelse}
+      rem={F.gullMork}
+      kasse={F.gull}
+      skive={F.krem}
+      visere={F.treDyp}
+      lomme
+      ekstra={<circle cx="24" cy="29.5" r="2.4" fill="none" stroke={F.treMork} strokeWidth="0.6" />}
     />
   )
 }
@@ -1183,6 +1275,36 @@ function Motorbaat({ størrelse = 48 }: P) {
       <polygon points="5,30 45,28 39,40 9,40" fill={F.hvit} />
       <polygon points="7,33 43,31.5 41.5,34 8,35" fill="#1d4ed8" />
       <rect x="10" y="28" width="10" height="2.3" rx="1" fill={F.metallLys} />
+    </Svg>
+  )
+}
+
+function Seilbaat({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <Grunn type="sjo" />
+      <rect x="23.4" y="7" width="1.2" height="27" fill={F.metallMork} />
+      <polygon points="22.8,9 22.8,32 9,32" fill={F.hvit} />
+      <polygon points="25.2,11 25.2,32 37,32" fill={F.krem} />
+      <polygon points="7,33.5 41,33.5 37,40 11,40" fill={F.hvit} />
+      <polygon points="8.8,36.6 39.2,36.6 37,40 11,40" fill={F.blaaMork} />
+    </Svg>
+  )
+}
+
+function Seilyacht({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <Grunn type="sjo" />
+      <rect x="15.4" y="4" width="1.2" height="28" fill={F.metallMork} />
+      <rect x="30.4" y="8" width="1.2" height="24" fill={F.metallMork} />
+      <polygon points="14.8,6 14.8,29 4.5,29" fill={F.hvit} />
+      <polygon points="17.2,8 17.2,29 29,29" fill={F.krem} />
+      <polygon points="29.8,10 29.8,29 21,29" fill={F.hvit} opacity="0.9" />
+      <polygon points="32.2,10 44,29 32.2,29" fill={F.hvit} />
+      <rect x="18" y="28" width="11" height="3" rx="0.8" fill={F.hvit} />
+      <polygon points="3,31 45,30 40.5,40 8,40" fill={F.marine} />
+      <rect x="4.5" y="32.6" width="39" height="1" fill={F.gull} />
     </Svg>
   )
 }
@@ -1258,6 +1380,25 @@ function Forretningsjet({ størrelse = 48 }: P) {
   )
 }
 
+function Helikopter({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <Grunn type="gate" />
+      <rect x="11" y="34" width="1" height="6" fill={F.metallMork} />
+      <rect x="23" y="34" width="1" height="6" fill={F.metallMork} />
+      <rect x="7" y="39.6" width="21" height="1.5" rx="0.75" fill={F.metallMork} />
+      <polygon points="25,26.5 42,28.4 42,30.4 25,32" fill={F.rod} />
+      <polygon points="40,23 43,23 43.6,30.4 41,30.4" fill={F.rodMork} />
+      <circle cx="42.3" cy="25.4" r="2.6" fill="none" stroke={F.metall} strokeWidth="0.8" />
+      <ellipse cx="17.5" cy="29" rx="10" ry="6.2" fill={F.rod} />
+      <ellipse cx="11" cy="27.6" rx="4.6" ry="3.8" fill={F.glassMork} />
+      <rect x="9" y="31.6" width="17" height="1" fill={F.rodMork} />
+      <rect x="16.8" y="20.4" width="1.4" height="3.2" fill={F.metallMork} />
+      <rect x="3" y="19.2" width="30" height="1.3" rx="0.65" fill={F.skifer} />
+    </Svg>
+  )
+}
+
 function Langdistansejet({ størrelse = 48 }: P) {
   return (
     <Svg størrelse={størrelse}>
@@ -1329,6 +1470,14 @@ const ILLUSTRASJONER: Record<string, Tegning> = {
   elbil: Elbil,
   superbil: Superbil,
   hyperbil: Hyperbil,
+  veteranbil: Veteranbil,
+  limousin: Limousin,
+  formelbil: Formelbil,
+  dykkerklokke: Dykkerklokke,
+  lommeur: Lommeur,
+  seilbaat: Seilbaat,
+  seilyacht: Seilyacht,
+  helikopter: Helikopter,
   gullklokke: Gullklokke,
   mesterverk: Mesterverk,
   diamantklokke: Diamantklokke,

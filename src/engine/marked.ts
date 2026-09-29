@@ -8,7 +8,7 @@
  */
 
 import { lagRegioner, regiontikk } from './regioner'
-import { Terning } from './rng'
+import { Hashkilde, hashTekst, Terning } from './rng'
 import type { Kurs, Marked, Papir, PapirId, Spilltilstand } from './types'
 
 export const MARKED_TIKK_SEK = 5
@@ -38,7 +38,26 @@ export const PAPIRER: Record<PapirId, Papir> = {
   TRM: { id: 'TRM', navn: 'Trollmynt', klasse: 'krypto', risiko: 'høy', startkurs: 12.5, drift: 0, volatilitet: 0.45, reversjon: 0.2, utbytte: 0, dybde: 1e8, hopp: 0.002 },
   VKT: { id: 'VKT', navn: 'Vikingtoken', klasse: 'krypto', risiko: 'høy', startkurs: 3.2, drift: 0, volatilitet: 0.5, reversjon: 0.2, utbytte: 0, dybde: 8e7, hopp: 0.0025 },
   LKS: { id: 'LKS', navn: 'Laksecoin', klasse: 'krypto', risiko: 'høy', startkurs: 0.85, drift: 0, volatilitet: 0.6, reversjon: 0.2, utbytte: 0, dybde: 5e7, hopp: 0.003 },
+  // ── Børsnotert i versjon 17: bransjer børsen manglet.
+  NRB: { id: 'NRB', navn: 'Nordre Bank', klasse: 'aksje', risiko: 'lav', startkurs: 120, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0008, dybde: 2e9, hopp: 0 },
+  KRV: { id: 'KRV', navn: 'Kurv Dagligvare', klasse: 'aksje', risiko: 'lav', startkurs: 64, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.00075, dybde: 1.5e9, hopp: 0 },
+  FJF: { id: 'FJF', navn: 'Fjellfly', klasse: 'aksje', risiko: 'middels', startkurs: 35, drift: 0.025, volatilitet: 0.08, reversjon: 0.4, utbytte: 0.0002, dybde: 6e8, hopp: 0.0005 },
+  ROM: { id: 'ROM', navn: 'Romfart Nord', klasse: 'aksje', risiko: 'høy', startkurs: 900, drift: 0.06, volatilitet: 0.16, reversjon: 0.3, utbytte: 0, dybde: 2e8, hopp: 0.001 },
+  // Stabilkronen følger ikke stemningen og holder seg rundt 10 kr — et sted å parkere kryptopenger.
+  STK: { id: 'STK', navn: 'Stabilkrone', klasse: 'krypto', risiko: 'lav', startkurs: 10, drift: 0, volatilitet: 0.01, reversjon: 4, utbytte: 0, dybde: 5e9, hopp: 0, stemning: 0 },
+  // Memecoins: bittesmå kurser, voldsomme svingninger og hyppige hopp.
+  ELG: { id: 'ELG', navn: 'Elgcoin', klasse: 'krypto', risiko: 'høy', startkurs: 0.004, drift: 0, volatilitet: 0.8, reversjon: 0.2, utbytte: 0, dybde: 3e7, hopp: 0.004 },
+  BRN: { id: 'BRN', navn: 'Brunostcoin', klasse: 'krypto', risiko: 'høy', startkurs: 0.02, drift: 0, volatilitet: 0.7, reversjon: 0.2, utbytte: 0, dybde: 4e7, hopp: 0.0035 },
 }
+
+/**
+ * Papirene som kom i versjon 17. I markedstikkene trekker de tilfeldighet fra
+ * en hash av markedets nyeFrø, ikke fra terningen, så de gamle papirenes
+ * tikk trekker nøyaktig det samme som før. (Avisa skriver om de nye også, og
+ * hvor mange fyllsaker den trekker avhenger av det — så en gammel lagring går
+ * ikke tikk for tikk som den ville gjort uten dem, men like forutsigbart.)
+ */
+export const NYE_PAPIRER: PapirId[] = ['NRB', 'KRV', 'FJF', 'ROM', 'STK', 'ELG', 'BRN']
 
 export const AKSJER = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'aksje')
 export const KRYPTO = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'krypto')
@@ -53,7 +72,7 @@ const HOPP_MAKS = 0.4
 /** Oppvarming før et nytt spill, så grafene har to timer å vise frem. */
 const OPPVARMING_TIKK = MAKS_KURSHISTORIKK * HISTORIKK_TIKK
 
-function normal(t: Terning): number {
+function normal(t: Pick<Terning, 'neste'>): number {
   // Box–Muller. 1 − u holder oss unna log(0).
   const u = 1 - t.neste()
   const v = t.neste()
@@ -75,6 +94,41 @@ export function markedstikk(m: Marked, t: Terning, helg = false): void {
   regiontikk(m)
 }
 
+/** Terningen eller en hashkilde — papirsteget spør bare om neste tall. */
+type Kilde = Pick<Terning, 'neste' | 'sjanse' | 'mellom'>
+
+/** Grunnlaget for hashen til et nytt papir i et gitt tikk. */
+function hashgrunnlag(nyeFrø: number, id: PapirId, tikk: number): number {
+  return (nyeFrø + Math.imul(hashTekst(id), 31) + Math.imul(tikk, 1009)) | 0
+}
+
+/**
+ * Ett steg for ett papir: fundamentet driver, en selskapsnyhet prises inn,
+ * avviket svinger og trekkes tilbake, og en sjelden gang et hopp. Trekkene
+ * fra kilden kommer i samme rekkefølge som alltid, så terningen går likt.
+ */
+function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde): void {
+  const drag = p.klasse === 'krypto' ? stemning * (p.stemning ?? 1) : 0
+  k.fundament *= Math.exp((p.drift + STEMNINGSKRAFT * drag) * DT)
+  // En selskapsnyhet prises inn litt for hvert tikk, til den er ferdig.
+  if (k.nyhet) {
+    const steg = k.nyhet.igjen / k.nyhet.tikk
+    k.fundament *= Math.exp(steg)
+    k.nyhet.igjen -= steg
+    k.nyhet.tikk -= 1
+    if (k.nyhet.tikk <= 0) delete k.nyhet
+  }
+  k.avvik += -p.reversjon * k.avvik * DT + p.volatilitet * Math.sqrt(DT) * normal(kilde)
+  if (p.hopp > 0 && kilde.sjanse(p.hopp)) {
+    // Hopp i stemningens retning er litt mer sannsynlige.
+    const opp = kilde.sjanse(0.5 + 0.2 * drag)
+    k.avvik += (opp ? 1 : -1) * kilde.mellom(HOPP_MIN, HOPP_MAKS)
+  }
+  k.kurs = kursFra(k.fundament, k.avvik)
+  k.topp = Math.max(k.topp ?? k.kurs, k.kurs)
+  k.bunn = Math.min(k.bunn ?? k.kurs, k.kurs)
+}
+
 function papirtikk(m: Marked, t: Terning, helg = false): void {
   m.tikk += 1
   const st = m.stemning
@@ -83,32 +137,50 @@ function papirtikk(m: Marked, t: Terning, helg = false): void {
   for (const id of Object.keys(PAPIRER) as PapirId[]) {
     const p = PAPIRER[id]
     const k = m.kurser[id]
+    // Et nytt papir som ikke er børsnotert ennå (mens et nytt marked bygges).
+    if (!k) continue
     // Stengt børs: kursen står, men historikken får fortsatt punkter, så grafen viser helgen som flat.
     if (!(helg && p.klasse === 'aksje')) {
-      const drift = p.drift + (p.klasse === 'krypto' ? STEMNINGSKRAFT * m.stemning : 0)
-      k.fundament *= Math.exp(drift * DT)
-      // En selskapsnyhet prises inn litt for hvert tikk, til den er ferdig.
-      if (k.nyhet) {
-        const steg = k.nyhet.igjen / k.nyhet.tikk
-        k.fundament *= Math.exp(steg)
-        k.nyhet.igjen -= steg
-        k.nyhet.tikk -= 1
-        if (k.nyhet.tikk <= 0) delete k.nyhet
-      }
-      k.avvik += -p.reversjon * k.avvik * DT + p.volatilitet * Math.sqrt(DT) * normal(t)
-      if (p.hopp > 0 && t.sjanse(p.hopp)) {
-        // Hopp i stemningens retning er litt mer sannsynlige.
-        const opp = t.sjanse(0.5 + 0.2 * (p.klasse === 'krypto' ? m.stemning : 0))
-        k.avvik += (opp ? 1 : -1) * t.mellom(HOPP_MIN, HOPP_MAKS)
-      }
-      k.kurs = kursFra(k.fundament, k.avvik)
-      k.topp = Math.max(k.topp ?? k.kurs, k.kurs)
-      k.bunn = Math.min(k.bunn ?? k.kurs, k.kurs)
+      const kilde = NYE_PAPIRER.includes(id) ? new Hashkilde(hashgrunnlag(m.nyeFrø ?? 0, id, m.tikk)) : t
+      papirsteg(p, k, m.stemning, kilde)
     }
     if (m.tikk % HISTORIKK_TIKK === 0) {
       k.historikk.push(k.kurs)
       if (k.historikk.length > MAKS_KURSHISTORIKK) k.historikk.shift()
     }
+  }
+}
+
+/**
+ * Børsnoterer papirene fra versjon 17 som mangler i et marked, med to timers
+ * historikk, så grafene har noe å vise fra første stund. Oppvarmingen bruker
+ * negative tikknumre, så den aldri gjentar seg senere. Rører ikke terningen
+ * eller de andre papirene. Muterer.
+ */
+export function leggTilNyePapirer(m: Marked, frø: number): void {
+  const nyeFrø = (m.nyeFrø ??= hashTekst(`nye-papirer:${frø}`))
+  const nye = NYE_PAPIRER.filter((id) => !m.kurser[id])
+  for (const id of nye) {
+    const s = PAPIRER[id].startkurs
+    m.kurser[id] = { kurs: s, fundament: s, avvik: 0, historikk: [] }
+  }
+  for (let i = OPPVARMING_TIKK; i >= 1; i--) {
+    for (const id of nye) {
+      const k = m.kurser[id]
+      papirsteg(PAPIRER[id], k, 0, new Hashkilde(hashgrunnlag(nyeFrø, id, -i)))
+      if (i % HISTORIKK_TIKK === 0) k.historikk.push(k.kurs)
+    }
+  }
+  for (const id of nye) {
+    const k = m.kurser[id]
+    // Start på katalogkursen, som eiendomsindeksen: oppvarmingen gir bare formen på grafen.
+    const skala = PAPIRER[id].startkurs / k.kurs
+    k.fundament *= skala
+    k.kurs = PAPIRER[id].startkurs
+    k.historikk = k.historikk.map((v) => v * skala)
+    k.topp = Math.max(k.kurs, ...k.historikk)
+    k.bunn = Math.min(k.kurs, ...k.historikk)
+    k.dagslutt = []
   }
 }
 
@@ -162,7 +234,8 @@ export function lagEiendomsindeks(frø: number): { indeks: Kurs; frø: number } 
 /** Et ferskt marked, varmet opp så grafene har historikk fra start. Returnerer frøet etterpå. */
 export function lagMarked(frø: number): { marked: Marked; frø: number } {
   const kurser = {} as Marked['kurser']
-  for (const id of Object.keys(PAPIRER) as PapirId[]) {
+  // De nye papirene legges til etterpå, så de gamle varmes opp nøyaktig som før.
+  for (const id of (Object.keys(PAPIRER) as PapirId[]).filter((p) => !NYE_PAPIRER.includes(p))) {
     const s = PAPIRER[id].startkurs
     kurser[id] = { kurs: s, fundament: s, avvik: 0, historikk: [] }
   }
@@ -178,6 +251,7 @@ export function lagMarked(frø: number): { marked: Marked; frø: number } {
     k.bunn = Math.min(...alle)
     k.dagslutt = []
   }
+  leggTilNyePapirer(marked, frø)
   return { marked, frø: t.fro }
 }
 

@@ -6,7 +6,7 @@ import { simuler } from '../simulering'
 import { kjopFond, kjopPapir, laan, selgFond, selgPapir, type Utfall } from '../handlinger'
 import { nettoformue } from '../formler'
 import { DAG_SEK, dato, erHelg } from '../kalender'
-import { AKSJER, KRYPTO, PAPIRER, registrerDagslutt } from '../marked'
+import { AKSJER, PAPIRER, registrerDagslutt } from '../marked'
 import { FOND, FOND_GEBYR, fondshistorikk, fondskurs, fondsutbytteIDag, fondverdi } from '../fond'
 import { ESTIMAT_DAGER, estimat, kvartalVedDagsskifte, nesteRapport, RAPPORTDAG, rapportdagI, rapportkalender, resultat } from '../kvartal'
 import { sjekkMargin } from '../bank'
@@ -30,8 +30,16 @@ describe('indeksfond', () => {
     for (const id of AKSJER) s.marked.kurser[id].kurs = PAPIRER[id].startkurs
     expect(fondskurs(s, 'BORSFOND')).toBeCloseTo(100)
     s.marked.kurser.NFS.kurs = PAPIRER.NFS.startkurs * 2
-    expect(fondskurs(s, 'BORSFOND')).toBeCloseTo(100 + 100 / AKSJER.length)
-    expect(FOND.KRYPTOFOND.medlemmer).toEqual(KRYPTO)
+    expect(fondskurs(s, 'BORSFOND')).toBeCloseTo(100 + 100 / FOND.BORSFOND.medlemmer.length)
+  })
+
+  it('fondene har papirene som fantes da de kom — nye papirer flytter ikke fondskursen', () => {
+    expect(FOND.BORSFOND.medlemmer).toEqual(['NFS', 'FJK', 'VTK', 'BSH', 'POL', 'NLT', 'AUB', 'TRS'])
+    expect(FOND.KRYPTOFOND.medlemmer).toEqual(['BMT', 'FJD', 'NSL', 'TRM', 'VKT', 'LKS'])
+    const s = rik()
+    const før = fondskurs(s, 'BORSFOND')
+    s.marked.kurser.ROM.kurs *= 3
+    expect(fondskurs(s, 'BORSFOND')).toBe(før)
   })
 
   it('kjøp koster bare gebyret og flytter ingen kurser', () => {

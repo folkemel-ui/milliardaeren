@@ -17,9 +17,14 @@ import { AKSJER, MARKED_TIKK_SEK, PAPIRER } from './marked'
 import { hashTekst, tilfeldig } from './rng'
 import type { Estimat, Kvartal, Overskrift, PapirId, Rapport, Spilltilstand } from './types'
 
-/** Dagen i måneden hvert selskap legger frem tall — spredt, så det skjer noe hver tredje dag. */
+/**
+ * Dagen i måneden hvert selskap legger frem tall — spredt, så det skjer noe
+ * hver tredje dag. De som ble børsnotert i versjon 17, fyller hullene; alle
+ * dagene finnes også i februar. Hver aksje må ha en dag her.
+ */
 export const RAPPORTDAG: Partial<Record<PapirId, number>> = {
   NFS: 4, FJK: 7, VTK: 10, BSH: 13, POL: 16, NLT: 19, AUB: 22, TRS: 25,
+  NRB: 2, KRV: 11, FJF: 17, ROM: 26,
 }
 /** Estimatet kommer så mange dager før. */
 export const ESTIMAT_DAGER = 3

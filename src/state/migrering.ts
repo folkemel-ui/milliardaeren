@@ -13,7 +13,7 @@
 
 import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
-import { lagEiendomsindeks, lagMarked } from '../engine/marked'
+import { lagEiendomsindeks, lagMarked, leggTilNyePapirer } from '../engine/marked'
 import { lagRegioner } from '../engine/regioner'
 import { EIENDOMSTYPER, START_LAGER } from '../engine/eiendom'
 import { lagDagsbilde } from '../engine/avis'
@@ -199,6 +199,14 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     const marked = s.marked as Raatilstand
     const land = marked.eiendom as Raatilstand
     return { ...s, marked: { ...marked, regioner: lagRegioner(s.frø as number, ((land.historikk as number[]) ?? []).length) } }
+  },
+  /* 16 → 17: sju nye papirer på børsen. De får to timers historikk og starter
+     på katalogkursen; frøet deres er en hash, så terningen og alle de gamle
+     kursene er nøyaktig som før. De nye luksustingene trenger ingen migrering. */
+  16: (s) => {
+    const marked = structuredClone(s.marked) as Spilltilstand['marked']
+    leggTilNyePapirer(marked, s.frø as number)
+    return { ...s, marked }
   },
 }
 

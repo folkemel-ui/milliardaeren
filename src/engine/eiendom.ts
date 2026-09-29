@@ -163,6 +163,15 @@ export const LUKSUS: Record<LuksusId, Luksusgjenstand> = {
   propellfly: { id: 'propellfly', navn: 'Propellfly', kategori: 'fly', emoji: '🛩️', pris: 20_000_000, status: 20 },
   forretningsjet: { id: 'forretningsjet', navn: 'Forretningsjet', kategori: 'fly', emoji: '✈️', pris: 250_000_000, status: 60 },
   langdistansejet: { id: 'langdistansejet', navn: 'Langdistansejet', kategori: 'fly', emoji: '🛫', pris: 1_200_000_000, status: 150 },
+  // ── Kom i versjon 17: fyller hullene i prisstigen, så det alltid er noe nytt å sikte mot.
+  dykkerklokke: { id: 'dykkerklokke', navn: 'Dykkerklokke', kategori: 'klokke', emoji: '🤿', pris: 40_000, status: 1 },
+  veteranbil: { id: 'veteranbil', navn: 'Veteranbil', kategori: 'bil', emoji: '🚘', pris: 600_000, status: 2 },
+  seilbaat: { id: 'seilbaat', navn: 'Seilbåt', kategori: 'baat', emoji: '⛵', pris: 1_500_000, status: 5 },
+  lommeur: { id: 'lommeur', navn: 'Antikt lommeur', kategori: 'klokke', emoji: '⏱️', pris: 5_000_000, status: 10 },
+  helikopter: { id: 'helikopter', navn: 'Helikopter', kategori: 'fly', emoji: '🚁', pris: 8_000_000, status: 14 },
+  limousin: { id: 'limousin', navn: 'Limousin', kategori: 'bil', emoji: '🚙', pris: 9_000_000, status: 16 },
+  seilyacht: { id: 'seilyacht', navn: 'Havseiler', kategori: 'baat', emoji: '⛵', pris: 60_000_000, status: 38 },
+  formelbil: { id: 'formelbil', navn: 'Formel 1-bil', kategori: 'bil', emoji: '🏎️', pris: 80_000_000, status: 45 },
 }
 
 export const LUKSUSLISTE = Object.keys(LUKSUS) as LuksusId[]

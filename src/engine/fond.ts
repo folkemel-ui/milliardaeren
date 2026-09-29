@@ -8,7 +8,7 @@
  * kursene. Børsfondet handles bare når børsen er åpen.
  */
 
-import { AKSJER, KRYPTO, PAPIRER } from './marked'
+import { AKSJER, KRYPTO, NYE_PAPIRER, PAPIRER } from './marked'
 import { erHelg } from './kalender'
 import type { FondId, PapirId, Spilltilstand } from './types'
 
@@ -20,9 +20,17 @@ export interface Fond {
   medlemmer: PapirId[]
 }
 
+/*
+ * Fondene har de papirene som fantes da de kom. Fondskursen er snittet av hvor
+ * mye medlemmene har steget siden start, så et nytt medlem ville flyttet kursen
+ * — og verdien av fond folk alt eier — i ett hopp.
+ */
+const FONDSAKSJER = AKSJER.filter((id) => !NYE_PAPIRER.includes(id))
+const FONDSMYNTER = KRYPTO.filter((id) => !NYE_PAPIRER.includes(id))
+
 export const FOND: Record<FondId, Fond> = {
-  BORSFOND: { id: 'BORSFOND', navn: 'Børsfondet', beskrivelse: 'Alle de åtte aksjene med lik vekt. Tryggere enn én aksje, og gir snittet av utbyttet.', klasse: 'aksje', medlemmer: AKSJER },
-  KRYPTOFOND: { id: 'KRYPTOFOND', navn: 'Kryptofondet', beskrivelse: 'Alle de seks myntene med lik vekt. Fortsatt vilt, men ingen enkeltmynt kan ta deg helt ned.', klasse: 'krypto', medlemmer: KRYPTO },
+  BORSFOND: { id: 'BORSFOND', navn: 'Børsfondet', beskrivelse: 'De åtte eldste aksjene med lik vekt. Tryggere enn én aksje, og gir snittet av utbyttet.', klasse: 'aksje', medlemmer: FONDSAKSJER },
+  KRYPTOFOND: { id: 'KRYPTOFOND', navn: 'Kryptofondet', beskrivelse: 'De seks eldste myntene med lik vekt. Fortsatt vilt, men ingen enkeltmynt kan ta deg helt ned.', klasse: 'krypto', medlemmer: FONDSMYNTER },
 }
 
 export const FONDLISTE = Object.keys(FOND) as FondId[]

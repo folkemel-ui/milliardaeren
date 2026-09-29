@@ -20,6 +20,33 @@ export function hashTekst(tekst: string): number {
   return h | 0
 }
 
+/** En standard normalfordelt verdi fra en hash — samme tall hver gang for samme frø. */
+export function hashNormal(frø: number): number {
+  const u1 = Math.max(1e-12, tilfeldig(frø))
+  const u2 = tilfeldig(frø + 1)
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
+}
+
+/**
+ * Tilfeldighet fra en hash i stedet for terningen: samme grunnlag gir samme
+ * tallrekke, og ingenting annet i spillet merker at den brukes. Til nye ting
+ * som ikke skal forskyve terningen — og dermed alt som kommer etter.
+ */
+export class Hashkilde {
+  private n = 0
+  constructor(private grunnlag: number) {}
+  neste(): number {
+    this.n += 1
+    return tilfeldig((this.grunnlag + Math.imul(this.n, 7919)) | 0)
+  }
+  mellom(min: number, maks: number): number {
+    return min + this.neste() * (maks - min)
+  }
+  sjanse(p: number): boolean {
+    return this.neste() < p
+  }
+}
+
 /** Liten hjelpeklasse så simuleringen slipper å tråkle frøet gjennom alt. */
 export class Terning {
   constructor(public fro: number) {}

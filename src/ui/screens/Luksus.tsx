@@ -46,7 +46,7 @@ export function Luksus({ s }: { s: Spilltilstand }) {
       </div>
 
       {KATEGORIER.map((k) => {
-        const ider = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === k)
+        const ider = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === k).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)
         const eid = ider.filter((id) => s.luksus.includes(id)).length
         return (
           <Seksjon key={k} id={`luksus-${k}`} tittel={KATEGORINAVN[k]} sammendrag={`${eid} av ${ider.length} eid`} harInnhold={eid > 0}>
