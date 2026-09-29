@@ -15,6 +15,7 @@ import { BORTE_TAK_SEK } from '../engine/innhold'
 import type { Utfall } from '../engine/handlinger'
 import { migrer } from './migrering'
 import { pakk, pakkUt } from './overforing'
+import { VELKOMST_ETTER_SEK } from '../ui/velkomst'
 import { visVarsel } from '../ui/varsler'
 import type { Spilltilstand } from '../engine/types'
 
@@ -81,9 +82,50 @@ function sekunderBorte(): number {
   }
 }
 
+/**
+ * Velkomsten etter lengre tid borte: tilstanden før og etter at tiden ble
+ * regnet ut. Holdes bare i minnet — appen viser den og glemmer den.
+ */
+export interface Velkomst {
+  borteSek: number
+  før: Spilltilstand
+  etter: Spilltilstand
+}
+
+let velkomst: Velkomst | null = null
+const velkomstLyttere = new Set<() => void>()
+
+export function useVelkomst(): Velkomst | null {
+  return useSyncExternalStore(
+    (fn) => {
+      velkomstLyttere.add(fn)
+      return () => {
+        velkomstLyttere.delete(fn)
+      }
+    },
+    () => velkomst,
+  )
+}
+
+/** Velkomsten som vises nå, uten å abonnere — til sammenligninger i effekter. */
+export function aktivVelkomst(): Velkomst | null {
+  return velkomst
+}
+
+export function lukkVelkomst(): void {
+  velkomst = null
+  for (const l of velkomstLyttere) l()
+}
+
 /** Kjører tiden du var borte: bare bedrifter med leder, og aldri mer enn taket. */
 function taIgjenBorteTid(s: Spilltilstand): Spilltilstand {
-  return simuler(s, Math.min(sekunderBorte(), BORTE_TAK_SEK), true)
+  const borte = sekunderBorte()
+  const etter = simuler(s, Math.min(borte, BORTE_TAK_SEK), true)
+  if (borte >= VELKOMST_ETTER_SEK) {
+    velkomst = { borteSek: borte, før: s, etter }
+    for (const l of velkomstLyttere) l()
+  }
+  return etter
 }
 
 let tilstand: Spilltilstand = (() => {

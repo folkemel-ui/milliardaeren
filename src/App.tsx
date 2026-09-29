@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Avis } from './ui/komponenter/Avis'
-import { startSpillokke, useSpill } from './state/lager'
+import { aktivVelkomst, lukkVelkomst, startSpillokke, useSpill, useVelkomst } from './state/lager'
+import { Velkomstskjerm } from './ui/komponenter/Velkomst'
 import { FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
 import { Feiring, Varselstabel } from './ui/komponenter/Varsler'
 import { FEIRES, MAKS_ENKELTVARSLER, nytt, type Nytt } from './ui/hendelsesstrom'
@@ -52,13 +53,15 @@ export default function App() {
   // Retningen fanene glir: mot høyre når du går til en fane lenger til høyre.
   const [retning, settRetning] = useState<'hoyre' | 'venstre' | 'ingen'>('ingen')
   const forrige = useRef(s)
+  const velkomst = useVelkomst()
 
   useEffect(startSpillokke, [])
 
   // Har du valgt at avisen skal åpne seg selv, og en ulest utgave venter ved oppstart, kommer den med én gang.
   useEffect(() => {
     const siste = s.avis.at(-1)
-    if (lesAvisvalg() === 'apne' && siste && siste.dag > s.avisLest) settAvisÅpen(true)
+    // Velkomstskjermen har sin egen «Les»-knapp, så avisen venter til den er lukket.
+    if (lesAvisvalg() === 'apne' && !aktivVelkomst() && siste && siste.dag > s.avisLest) settAvisÅpen(true)
     // Bare ved oppstart — senere utgaver går gjennom hendelsesstrømmen.
   }, [])
 
@@ -67,7 +70,13 @@ export default function App() {
     const før = forrige.current
     forrige.current = s
     if (før === s) return
-    håndter(nytt(før, s))
+    const funn = nytt(før, s)
+    // Etter lengre tid borte viser velkomstskjermen alt dette — da blir det bare feiring, ingen varsler.
+    if (aktivVelkomst()?.etter === s) {
+      for (const f of funn) if (f.type === 'prestasjon' && FEIRES[f.id]) visFeiring(FEIRES[f.id])
+      return
+    }
+    håndter(funn)
   }, [s])
 
   function håndter(funn: Nytt[]) {
@@ -117,6 +126,17 @@ export default function App() {
       </main>
       <Fanemeny aktiv={fane} velg={velg} />
       <Varselstabel gåTil={velg} />
+      {velkomst && !avisÅpen && (
+        <Velkomstskjerm
+          v={velkomst}
+          lukk={lukkVelkomst}
+          lesAvis={() => {
+            lukkVelkomst()
+            settAvisÅpen(true)
+          }}
+          gåTil={velg}
+        />
+      )}
       {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
       <Feiring />
     </div>

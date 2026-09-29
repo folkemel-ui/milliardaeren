@@ -18,7 +18,8 @@ export function kortKroner(n: number): string {
   const abs = Math.abs(n)
   // Tre sifre før kommaet er presist nok: «kr 150 mill», ikke «kr 150,00 mill».
   const kort = (verdi: number, enhet: string) => `kr ${tall(verdi, Math.abs(verdi) >= 100 ? 0 : 2)} ${enhet}`
-  if (abs >= 1e9) return kort(n / 1e9, 'mrd')
+  // Fra 999,5 mill går det over til milliarder, så det aldri står «kr 1 000 mill».
+  if (abs >= 999.5e6) return kort(n / 1e9, 'mrd')
   if (abs >= 1e6) return kort(n / 1e6, 'mill')
   return kroner(n)
 }
@@ -38,7 +39,7 @@ export function kompakt(n: number): string {
     const a = Math.abs(verdi)
     return `kr ${tall(verdi, a < 10 ? 2 : a < 100 ? 1 : 0)} ${enhet}`
   }
-  if (abs >= 1e9) return kort(n / 1e9, 'mrd')
+  if (abs >= 999.5e6) return kort(n / 1e9, 'mrd')
   if (abs >= 1e6) return kort(n / 1e6, 'mill')
   return kroner(n)
 }

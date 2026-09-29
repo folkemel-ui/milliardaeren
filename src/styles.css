@@ -2723,6 +2723,87 @@ figure {
   opacity: 0.45;
 }
 
+/* ─────────────────────────────────────────────── Velkomst */
+
+.velkomst {
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--gull-mørk);
+  background: var(--flate);
+  color: var(--tekst);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: avis-inn 0.25s ease-out;
+}
+
+.velkomst p {
+  margin: 0;
+}
+
+.velkomst-tittel {
+  margin: 0;
+  font-size: 24px;
+  color: var(--gull);
+}
+
+.velkomst-formue {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--flate-2);
+}
+
+.velkomst-tall {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.velkomst-tall div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.velkomst-tall dt {
+  color: var(--tekst-dempet);
+}
+
+.velkomst-tall dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.velkomst-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.velkomst-liste li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.velkomst-liste li.velkomst-rapporter {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 /* ─────────────────────────────────────────────── Varsler */
 
 .varsler {

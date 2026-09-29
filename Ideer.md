@@ -8,16 +8,11 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 18 – Welcome back:** Welcome-back screen
 - **Later:** Hotels abroad and holiday apartments
 
 ## Property
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement.
-
-## Polish
-
-2. **Welcome-back screen.** When the app opens after a while: what you earned while away, new newspaper editions, reports and matches since last time. Decided for Pack 18: the money is still added automatically, with a «Fortsett» button; the parked "Offline income report" (Claim button, managers who raise the cap) stays parked.
 
 ## Parked (not chosen yet)
 
