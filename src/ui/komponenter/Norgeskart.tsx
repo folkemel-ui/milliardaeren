@@ -2,21 +2,28 @@ import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
 import { JORD, JORDLISTE } from '../../engine/jord'
 import { useRef } from 'react'
 import type { By, NorskBy, Spilltilstand } from '../../engine/types'
-import { kartLeie, leieIBy, symbolerI, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
+import { kartLeie, leieIBy, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
 import { perSek } from '../format'
+import { BYLISTE, byPunkt, etiketter, HOVEDOMRAADE, hovedpunkt, INNFELT, innfeltpunkt, KUN_JORD, navnestorrelse, radius, VISNING } from '../norgeskartet'
 import { Ikon } from './Ikoner'
 
 /*
- * Et stilisert Norgeskart tegnet fra ekte koordinater (lengde, bredde),
- * projisert enkelt: x = (lengde − 4) · 0,46 · S, y = (71,4 − bredde) · S.
- * Faktoren 0,46 ≈ cos(63°) retter opp at lengdegradene er smale så langt nord.
+ * Et stilisert Norgeskart tegnet fra ekte koordinater. Hovedkartet viser
+ * Sør-Norge, der nesten alt skjer; hele landet står som et innfelt nederst
+ * til høyre, med Lofoten. Geometrien (projeksjon, sider for navnene) står i
+ * norgeskartet.ts, der en test sjekker at ingenting overlapper.
+ *
+ * Kartet viser bare prikk, antall og navn. Leien står ved byen du har valgt;
+ * gårder, skoger og landemerker står i lista under kartet.
  */
-const S = 20
-const px = ([lon, lat]: [number, number]) => [((lon - 4) * 0.46 * S).toFixed(1), ((71.4 - lat) * S).toFixed(1)].join(',')
 
 const FASTLAND: [number, number][] = [
-  // Sørlandet og Oslofjorden
-  [7.05, 57.98], [7.9, 58.1], [8.7, 58.4], [9.6, 58.9], [10.2, 59.05], [10.5, 59.3], [10.7, 59.7], [10.9, 59.3], [11.4, 59.1],
+  // Sørlandet: Lindesnes, Kristiansand, Arendal, Kragerø, Larvik
+  [7.05, 57.98], [7.45, 58.02], [8.0, 58.12], [8.38, 58.25], [8.77, 58.46], [9.23, 58.72], [9.42, 58.87], [9.75, 59.0],
+  [10.03, 59.05], [10.23, 59.13],
+  // Oslofjorden: vestsiden inn til Drammen og Oslo, østsiden ut til Hvaler og Halden
+  [10.42, 59.27], [10.48, 59.42], [10.3, 59.49], [10.25, 59.72], [10.55, 59.82], [10.75, 59.9], [10.72, 59.62],
+  [10.66, 59.43], [10.93, 59.21], [11.05, 59.08], [11.39, 59.12],
   // Svenskegrensa
   [11.8, 59.8], [12.5, 60.3], [12.3, 61.0], [12.1, 61.8], [12.3, 62.8], [12.0, 63.3], [13.2, 64.0], [14.0, 64.6], [14.1, 65.3],
   [15.0, 66.1], [15.8, 66.6], [16.5, 67.5], [17.9, 68.2], [18.3, 68.5], [19.9, 68.4], [20.6, 69.1],
@@ -29,26 +36,23 @@ const FASTLAND: [number, number][] = [
   // Vestfjorden og Helgeland
   [16.1, 68.4], [15.5, 68.1], [14.9, 67.8], [14.4, 67.4], [13.7, 67.0], [13.0, 66.6], [12.6, 66.1], [12.2, 65.5],
   // Trøndelag og Vestlandet
-  [11.5, 64.9], [10.7, 64.5], [10.0, 64.0], [9.3, 63.7], [8.4, 63.4], [7.3, 63.0], [6.3, 62.5], [5.2, 62.2], [5.0, 61.6],
-  [4.9, 61.0], [5.0, 60.4], [5.2, 59.9], [5.3, 59.4], [5.6, 58.9], [5.7, 58.6], [6.2, 58.3],
+  [11.5, 64.9], [10.7, 64.5], [10.0, 64.0], [9.7, 63.85],
+  // Trondheimsfjorden: nordsiden inn til Levanger, rundt via Trondheim og ut langs sørsiden
+  [10.3, 63.72], [11.0, 63.8], [11.3, 63.72], [10.95, 63.47], [10.4, 63.43], [9.9, 63.5], [9.5, 63.56],
+  [8.4, 63.4], [7.3, 63.0], [6.3, 62.5], [5.6, 62.35], [5.2, 62.2], [5.0, 61.6],
+  // Sognefjorden
+  [4.95, 61.12], [5.6, 61.14], [6.6, 61.18], [7.2, 61.22], [6.6, 61.08], [5.6, 61.04], [4.9, 61.0],
+  [5.0, 60.4],
+  // Hardangerfjorden
+  [5.3, 60.05], [6.0, 60.2], [6.6, 60.42], [6.1, 60.1], [5.55, 59.9], [5.2, 59.85],
+  [5.3, 59.4], [5.55, 59.1], [5.6, 58.9], [5.7, 58.6], [6.2, 58.3], [6.7, 58.08],
 ]
 
 const LOFOTEN: [number, number][] = [
   [12.9, 67.9], [13.8, 68.1], [14.6, 68.2], [15.3, 68.3], [15.1, 68.5], [14.2, 68.45], [13.3, 68.2], [12.9, 68.0],
 ]
 
-const BYER: Record<NorskBy, { pos: [number, number]; etikett: 'høyre' | 'venstre' | 'over' }> = {
-  Bergen: { pos: [5.32, 60.39], etikett: 'venstre' },
-  Stavanger: { pos: [5.73, 58.97], etikett: 'venstre' },
-  Oslo: { pos: [10.75, 59.91], etikett: 'høyre' },
-  Geilo: { pos: [8.21, 60.53], etikett: 'over' },
-  Trondheim: { pos: [10.4, 63.43], etikett: 'høyre' },
-  Lofoten: { pos: [14.56, 68.23], etikett: 'venstre' },
-  Hedmarken: { pos: [11.07, 60.79], etikett: 'høyre' },
-  Trysil: { pos: [12.27, 61.31], etikett: 'høyre' },
-  Lista: { pos: [6.7, 58.1], etikett: 'høyre' },
-  Namdalen: { pos: [11.5, 64.47], etikett: 'høyre' },
-}
+const punkter = (liste: [number, number][], p: (x: [number, number]) => [number, number]) => liste.map((k) => p(k).map((v) => v.toFixed(1)).join(',')).join(' ')
 
 /** Hvor mange eiendommer du eier i hver by. */
 function perBy(s: Spilltilstand): Partial<Record<By, number>> {
@@ -79,82 +83,103 @@ export function Norgeskart({
     const m = svg.current?.getScreenCTM()
     if (!m) return
     const p = new DOMPoint(sx, sy).matrixTransform(m.inverse())
-    const nærmest = (Object.keys(BYER) as NorskBy[])
-      .map((by) => {
-        const [x, y] = px(BYER[by].pos).split(',').map(Number)
-        return { by, d: Math.hypot(x - p.x, y - p.y) }
-      })
-      .sort((a, b) => a.d - b.d)[0]
+    const nærmest = BYLISTE.map((by) => {
+      const [x, y] = byPunkt(by)
+      return { by, d: Math.hypot(x - p.x, y - p.y) }
+    }).sort((a, b) => a.d - b.d)[0]
     if (nærmest) zoom(nærmest.by)
   })
 
+  const [[vLon, nLat], [oLon, sLat]] = HOVEDOMRAADE
+  const [rx1, ry1] = innfeltpunkt([vLon, nLat])
+  const [rx2, ry2] = innfeltpunkt([oLon, sLat])
+
   return (
-    // Litt luft til venstre, så «Bergen» får plass utenfor kysten.
-    <svg ref={svg} className="norgeskart" viewBox="-44 0 304 280" role="group" aria-label="Kart over eiendommene dine" {...klyp}>
-      <polygon points={FASTLAND.map(px).join(' ')} className="kart-land" />
-      <polygon points={LOFOTEN.map(px).join(' ')} className="kart-land" />
-      {(Object.keys(BYER) as NorskBy[]).map((by, i) => {
-        const [x, y] = px(BYER[by].pos).split(',').map(Number)
-        const n = antall[by] ?? 0
-        const r = n > 0 ? Math.min(11, 5 + n * 1.2) : 4
-        const e = BYER[by].etikett
-        const trend = trendRing(trendFor(s, by))
-        const leie = leieIBy(s, by)
-        const symboler = symbolerI(s, by)
-        // Navnet står på én side av prikken; symbolene på den andre.
-        const navnX = e === 'høyre' ? x + r + 4 : e === 'venstre' ? x - r - 4 : x
-        const navnY = e === 'over' ? y - r - 5 : y + 4
-        const anker = e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'
-        const symbolX = e === 'høyre' ? x - r - 3 : e === 'venstre' ? x + r + 3 : x
-        const symbolY = e === 'over' ? y + r + 9 : y + 3
-        const symbolAnker = e === 'høyre' ? 'end' : e === 'venstre' ? 'start' : 'middle'
-        return (
-          <g
-            key={by}
-            className={`kart-by${n > 0 ? ' eid' : ''}${valgt === by ? ' valgt' : ''}`}
-            role="button"
-            tabIndex={0}
-            aria-label={`${by}: ${n} ${n === 1 ? 'eiendom' : 'eiendommer'}${leie > 0 ? `, leie ${perSek(leie)}` : ''}${valgt === by ? ', valgt' : ''}. Hold inne for gatebildet.`}
-            onClick={() => !lang.varLangt() && velg(valgt === by ? null : by)}
-            onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && velg(valgt === by ? null : by)}
-            {...lang.hendelser(by)}
-          >
-            {/* Større, usynlig treffflate så byene er lette å treffe med fingeren. */}
-            <circle cx={x} cy={y} r={16} className="kart-treff" />
-            {trend && <circle cx={x} cy={y} r={r + 3} className={`kart-trend ${trend.klasse}`} style={{ strokeOpacity: trend.styrke }} />}
-            <circle cx={x} cy={y} r={r} className="kart-prikk" />
-            {n > 0 && (
-              <text x={x} y={y + 3.5} className="kart-antall" textAnchor="middle">
-                {n}
-              </text>
-            )}
-            <text x={navnX} y={navnY} textAnchor={anker} className="kart-navn">
-              {by}
-            </text>
-            {leie > 0 && (
-              <>
-                <text x={navnX} y={e === 'over' ? navnY - 10 : navnY + 9} textAnchor={anker} className="kart-leie">
-                  {kartLeie(leie)}
-                </text>
-                {/* En mynt som stiger når leien kommer — forskjøvet per by, så de ikke går i takt. */}
-                <g className="kart-mynt" style={{ animationDelay: `${(i % 5) * 0.9}s` }}>
-                  <Ikon navn="mynt" størrelse={8} x={x - 4} y={y - r - 10} />
-                </g>
-              </>
-            )}
-            {symboler.length > 0 && (
-              <text x={symbolX} y={symbolY} textAnchor={symbolAnker} className="kart-symboler">
-                {symboler.map((sym, j) => (
-                  <tspan key={j} className={sym.eid ? 'eid' : ''}>
-                    <title>{`${sym.navn}${sym.eid ? ' (din)' : ''}`}</title>
-                    {sym.tegn}
-                  </tspan>
-                ))}
-              </text>
-            )}
-          </g>
-        )
-      })}
+    <svg
+      ref={svg}
+      className="norgeskart"
+      viewBox={`${VISNING.x} ${VISNING.y} ${VISNING.bredde} ${VISNING.hoyde}`}
+      role="group"
+      aria-label="Kart over eiendommene dine"
+      {...klyp}
+    >
+      <polygon points={punkter(FASTLAND, hovedpunkt)} className="kart-land" />
+
+      {/* Innfeltet: hele landet, med rammen rundt det hovedkartet viser. */}
+      <g className="kart-innfelt" aria-hidden="true">
+        <rect x={INNFELT.x} y={INNFELT.y} width={INNFELT.bredde} height={INNFELT.hoyde} rx="6" className="kart-innfelt-ramme" />
+        <polygon points={punkter(FASTLAND, innfeltpunkt)} className="kart-land" />
+        <polygon points={punkter(LOFOTEN, innfeltpunkt)} className="kart-land" />
+        <rect x={rx1} y={ry1} width={rx2 - rx1} height={ry2 - ry1} className="kart-innfelt-utsnitt" />
+      </g>
+
+      {BYLISTE.map((by, i) => (
+        <Byen key={by} s={s} by={by} i={i} n={antall[by] ?? 0} valgt={valgt === by} velg={velg} lang={lang} />
+      ))}
     </svg>
+  )
+}
+
+function Byen({
+  s,
+  by,
+  i,
+  n,
+  valgt,
+  velg,
+  lang,
+}: {
+  s: Spilltilstand
+  by: NorskBy
+  i: number
+  n: number
+  valgt: boolean
+  velg: (by: By | null) => void
+  lang: ReturnType<typeof useLangtrykk>
+}) {
+  const [x, y] = byPunkt(by)
+  const eid = n > 0
+  const r = radius(by, eid)
+  const trend = trendRing(trendFor(s, by))
+  const leie = leieIBy(s, by)
+  // Stedene med bare jord har ikke navn på kartet før du eier noe der eller velger dem.
+  const visNavn = !KUN_JORD.has(by) || eid || valgt
+  const { navn, leie: leiepos } = etiketter(by, r, valgt && leie > 0 ? kartLeie(leie) : null)
+  return (
+    <g
+      className={`kart-by${eid ? ' eid' : ''}${valgt ? ' valgt' : ''}${KUN_JORD.has(by) ? ' jord' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-label={`${by}: ${n} ${n === 1 ? 'eiendom' : 'eiendommer'}${leie > 0 ? `, leie ${perSek(leie)}` : ''}${valgt ? ', valgt' : ''}. Hold inne for gatebildet.`}
+      onClick={() => !lang.varLangt() && velg(valgt ? null : by)}
+      onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && velg(valgt ? null : by)}
+      {...lang.hendelser(by)}
+    >
+      {/* Større, usynlig treffflate så byene er lette å treffe med fingeren. */}
+      <circle cx={x} cy={y} r={14} className="kart-treff" />
+      {trend && <circle cx={x} cy={y} r={r + 3} className={`kart-trend ${trend.klasse}`} style={{ strokeOpacity: trend.styrke }} />}
+      <circle cx={x} cy={y} r={r} className="kart-prikk" />
+      {eid && (
+        <text x={x} y={y + r * 0.43} className="kart-antall" textAnchor="middle" style={{ fontSize: r * 1.3 }}>
+          {n}
+        </text>
+      )}
+      {visNavn && (
+        <text x={navn.x} y={navn.y} textAnchor={navn.anker} className="kart-navn" style={{ fontSize: navnestorrelse(by) }}>
+          {by}
+        </text>
+      )}
+      {leiepos && (
+        <text x={leiepos.x} y={leiepos.y} textAnchor={leiepos.anker} className="kart-leie">
+          {kartLeie(leie)}
+        </text>
+      )}
+      {leie > 0 && (
+        // En mynt som stiger når leien kommer — forskjøvet per by, så de ikke går i takt.
+        <g className="kart-mynt" style={{ animationDelay: `${(i % 5) * 0.9}s` }}>
+          <Ikon navn="mynt" størrelse={8} x={x - 4} y={y - r - 10} />
+        </g>
+      )}
+    </g>
   )
 }

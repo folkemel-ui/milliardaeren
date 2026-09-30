@@ -1,13 +1,11 @@
 /**
- * Det kartene viser om hver by: leie, prisutvikling og symboler for jord og
- * landemerker. Delt mellom Norgeskartet og verdenskartet.
+ * Det kartene viser om hver by: leie og prisutvikling, og symbolene for
+ * landemerkene i gatebildet. Delt mellom Norgeskartet og verdenskartet.
  */
 
 import { useRef, type TouchEvent } from 'react'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, leieHverPerSek } from '../engine/eiendom'
-import { jordSynlig } from '../engine/handlinger'
-import { JORD, JORDLISTE } from '../engine/jord'
-import { LANDEMERKELISTE, LANDEMERKER } from '../engine/landemerker'
+import { LANDEMERKER } from '../engine/landemerker'
 import { regionEndring, regionFor } from '../engine/regioner'
 import type { By, Spilltilstand } from '../engine/types'
 import { tall } from './format'
@@ -45,22 +43,6 @@ export const LANDEMERKESYMBOL: Record<keyof typeof LANDEMERKER, string> = {
   hoppbakken: '⛷️',
   borgen: '🏰',
   tarnet: '🗼',
-}
-
-/** Symbolene ved en by: gårder og skoger du ser eller eier, og landemerkene når de er innen rekkevidde. */
-export function symbolerI(s: Spilltilstand, by: By): { tegn: string; navn: string; eid: boolean }[] {
-  const ut: { tegn: string; navn: string; eid: boolean }[] = []
-  for (const id of JORDLISTE) {
-    if (JORD[id].by !== by || !(s.jord?.[id] || jordSynlig(s, id))) continue
-    ut.push({ tegn: JORD[id].type === 'gard' ? '🌾' : '🌲', navn: JORD[id].navn, eid: !!s.jord?.[id] })
-  }
-  if (s.hoyesteFormue >= LANDEMERKER.fyret.pris * 0.25) {
-    for (const id of LANDEMERKELISTE) {
-      if (LANDEMERKER[id].by !== by) continue
-      ut.push({ tegn: LANDEMERKESYMBOL[id], navn: LANDEMERKER[id].navn, eid: s.landemerker?.[id]?.eier === 'deg' })
-    }
-  }
-  return ut
 }
 
 /**

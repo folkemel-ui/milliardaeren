@@ -2359,10 +2359,11 @@ figure {
   margin: 0 auto;
 }
 
+/* Landet skiller seg tydelig fra bakgrunnen i begge temaene, med en tynn kystlinje. */
 .kart-land {
-  fill: var(--flate-2);
-  stroke: var(--kant);
-  stroke-width: 1;
+  fill: var(--kant);
+  stroke: color-mix(in srgb, var(--tekst-dempet) 55%, transparent);
+  stroke-width: 0.8;
   stroke-linejoin: round;
 }
 
@@ -2391,6 +2392,32 @@ figure {
 .kart-by:focus-visible .kart-prikk {
   stroke: var(--tekst);
   stroke-width: 2.5;
+}
+
+/* Stedene med bare jord: en liten, hul prikk til du eier noe der. */
+.kart-by.jord:not(.eid) .kart-prikk {
+  fill: none;
+  stroke-width: 1.2;
+}
+
+/* Innfeltet med hele landet: dempet, med en gull ramme rundt det hovedkartet viser. */
+.kart-innfelt-ramme {
+  fill: var(--flate);
+  stroke: var(--kant);
+  stroke-width: 1;
+}
+
+.kart-innfelt .kart-land {
+  fill: var(--kant);
+  stroke: var(--tekst-dempet);
+  stroke-width: 0.5;
+}
+
+.kart-innfelt-utsnitt {
+  fill: none;
+  stroke: var(--gull-mørk);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
 }
 
 .kart-antall {
@@ -3676,17 +3703,6 @@ figure {
   }
 }
 
-.kart-symboler {
-  font-size: 7px;
-}
-
-.kart-symboler tspan {
-  opacity: 0.4;
-}
-
-.kart-symboler tspan.eid {
-  opacity: 1;
-}
 
 .regionpriser {
   display: flex;
