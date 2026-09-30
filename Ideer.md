@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 38 – Living drawings:** Improvements you can see, Small animations in the drawings, Merges you can see, Calmer celebrations
 - **Pack 39 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Logos for stocks and coins, Rival portraits
 - **Pack 40 – Things you own:** A garage, harbour and hangar you can see, A stadium that grows, A light theme check
 - **Pack 41 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
@@ -28,20 +27,16 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 ## Professional look
 
-7. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
-8. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
-9. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
+7. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+8. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
 
 ## Drawings
 
-10. **Improvements you can see.** Each business's three improvements show up in its drawing — the juice press on the Saftbod, the drive-in hatch on the Gatekjøkken, the rooftop bar on the Hotel. Today only levels 25, 50 and 100 change the picture.
-11. **Small animations in the drawings.** Steam from the café's coffee, a flag on the hotel, the oil pump nodding, waves by the fish farm. Slow and subtle, and off for players who have reduced motion turned on.
-12. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
-13. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
-14. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
-15. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
-16. **Merges you can see.** When you merge with a rival's business, their drawing slides into yours and the sign changes, instead of just a notice.
-17. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
+9. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
+10. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
+11. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
+12. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
+13. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
 
 ## Parked (not chosen yet)
 

@@ -5,6 +5,7 @@ import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
 import { Velkomstskjerm } from './ui/komponenter/Velkomst'
 import { FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
 import { Feiring, Varselstabel } from './ui/komponenter/Varsler'
+import { tall } from './ui/format'
 import { MAKS_ENKELTVARSLER, nytt, stoersteFeiring, type Nytt } from './ui/hendelsesstrom'
 import { visFeiring, visKjop, visVarsel, type Varsel } from './ui/varsler'
 import { Kjopsglimt } from './ui/komponenter/Kjopsglimt'
@@ -99,9 +100,12 @@ export default function App() {
     // Etter lengre tid borte viser velkomstskjermen alt dette — da blir det bare feiring og NY-merker, ingen varsler.
     if (aktivVelkomst()?.etter === s) return
     // Kjøper du flere ting på en gang (automatiske ordre), vises det siste.
+    // En fusjon går foran et kjøp: den skjer sjeldnere og betyr mer.
+    const fusjon = funn.filter((f) => f.type === 'fusjon').at(-1)
     const siste = kjop.at(-1)
-    if (siste) visKjop({ art: siste.art, id: siste.id, navn: siste.navn })
-    håndter(funn.filter((f) => f.type !== 'kjop'))
+    if (fusjon?.type === 'fusjon') visKjop({ art: 'fusjon', id: fusjon.id, navn: fusjon.navn, under: `Inntekten ×${tall(fusjon.faktor, 2)}` })
+    else if (siste) visKjop({ art: siste.art, id: siste.id, navn: siste.navn })
+    håndter(funn.filter((f) => f.type !== 'kjop' && f.type !== 'fusjon'))
   }, [s])
 
   function håndter(funn: Nytt[]) {

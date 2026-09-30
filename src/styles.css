@@ -533,6 +533,151 @@ figure {
   align-self: flex-start;
 }
 
+/* Bevegelse i tegningene (anim-klassene i Illustrasjoner.tsx): bare på scenen
+   i detaljvisningene, sakte og lite — og ingenting når spilleren har bedt om
+   mindre bevegelse. Lengdene er i tegningens egne enheter (48 × 48). */
+@media (prefers-reduced-motion: no-preference) {
+  .scene [class*='anim-'] {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .scene .anim-damp {
+    animation: tegning-damp 3.2s ease-in-out infinite;
+  }
+
+  .scene .anim-roeyk {
+    animation: tegning-roeyk 4s ease-in-out infinite;
+  }
+
+  .scene .anim-flagg {
+    transform-origin: left center;
+    animation: tegning-flagg 1.8s ease-in-out infinite;
+  }
+
+  .scene .anim-flamme {
+    transform-origin: center bottom;
+    animation: tegning-flamme 0.8s ease-in-out infinite alternate;
+  }
+
+  .scene .anim-boelge {
+    animation: tegning-boelge 3s ease-in-out infinite;
+  }
+
+  .scene .anim-duve {
+    animation: tegning-duve 4.5s ease-in-out infinite;
+  }
+
+  .scene .anim-hopp {
+    animation: tegning-hopp 3.6s ease-in-out infinite;
+  }
+
+  .scene .anim-glid {
+    animation: tegning-glid 8s ease-in-out infinite;
+  }
+
+  .scene .anim-gondol {
+    animation: tegning-gondol 6s ease-in-out infinite;
+  }
+
+  .scene .sen {
+    animation-delay: -1.6s;
+  }
+}
+
+@keyframes tegning-damp {
+  0% {
+    opacity: 0;
+    transform: translateY(1px);
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-1.6px);
+  }
+}
+
+@keyframes tegning-roeyk {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(0.6px, -1.2px) scale(1.15);
+  }
+}
+
+@keyframes tegning-flagg {
+  0%,
+  100% {
+    transform: skewY(0deg) scaleX(1);
+  }
+  50% {
+    transform: skewY(10deg) scaleX(0.88);
+  }
+}
+
+@keyframes tegning-flamme {
+  from {
+    transform: scaleY(0.9);
+  }
+  to {
+    transform: scaleY(1.08);
+  }
+}
+
+@keyframes tegning-boelge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(1.4px);
+  }
+}
+
+@keyframes tegning-duve {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(0.6px) rotate(0.6deg);
+  }
+}
+
+@keyframes tegning-hopp {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.4px);
+  }
+}
+
+@keyframes tegning-glid {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes tegning-gondol {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(1.5px, -1.6px);
+  }
+}
+
 /* Den store tegningen øverst i en detaljvisning, på en lysere scene. */
 .scene {
   display: grid;
@@ -3247,21 +3392,73 @@ button.merke {
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--gull) 60%, transparent);
 }
 
-/* Den lille: et drys i øvre del av skjermen som ikke stopper spillet. */
-.feiring.liten {
-  pointer-events: none;
+/* Den lille og millionen: teksten på en mørk flate, mellom to tynne gullstreker,
+   med en glans som går over én gang. Ingen blink. */
+.feiring.liten,
+.feiring.stor {
   place-items: start center;
 }
 
-.feiring.liten .feiring-midt {
+.feiring.liten {
+  pointer-events: none;
+}
+
+.feiring.liten .feiring-midt,
+.feiring.stor .feiring-midt {
   margin-top: 22vh;
+  padding: 10px 26px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .feiring.liten .feiring-tekst {
-  padding: 4px 20px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  font-size: clamp(26px, 8vw, 40px);
+  font-size: clamp(22px, 6vw, 30px);
+}
+
+.feiring.stor .feiring-tekst {
+  font-size: clamp(30px, 9vw, 46px);
+}
+
+.feiring.liten .feiring-tekst,
+.feiring.stor .feiring-tekst {
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.08em;
+  text-shadow: none;
+  background: linear-gradient(100deg, var(--gull-lys) 35%, #fffbe8 50%, var(--gull-lys) 65%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: feiring-glans 1.4s ease-out 0.25s forwards;
+}
+
+.feiring-linje {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 6px 0;
+  background: linear-gradient(90deg, transparent, var(--gull), transparent);
+  transform: scaleX(0);
+  animation: feiring-linje 0.7s ease-out 0.1s forwards;
+}
+
+@keyframes feiring-glans {
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes feiring-linje {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.konfetti.tynn {
+  width: 3px;
+  height: 10px;
+  border-radius: 1px;
 }
 
 /* Milliarden demper resten av spillet, så øyeblikket står for seg selv. */
@@ -3341,6 +3538,57 @@ button.merke {
 
 /* ─────────────────────────────────────────────── Kjøpsøyeblikket */
 
+/* Fusjonen: rivalens bedrift glir inn fra venstre og blir borte i din, som så gir et lite løft. */
+.kjopsglimt.fusjon {
+  animation-duration: 2.6s;
+}
+
+.fusjon-inn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  filter: grayscale(0.6);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: fusjon-inn 0.9s ease-in 0.1s;
+}
+
+.kjopsglimt.fusjon .kjopsglimt-bilde > svg {
+  animation: fusjon-loft 0.5s ease-out 0.95s;
+}
+
+.kjopsglimt-under {
+  color: var(--gull);
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-fet);
+  opacity: 0;
+  animation: fusjon-under 0.4s ease-out 1s forwards;
+}
+
+@keyframes fusjon-inn {
+  from {
+    opacity: 0.95;
+    transform: translate(-190%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+}
+
+@keyframes fusjon-loft {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fusjon-under {
+  to {
+    opacity: 1;
+  }
+}
+
 .kjopsglimt {
   position: fixed;
   inset: 0;
@@ -3358,7 +3606,7 @@ button.merke {
 .kjopsglimt-glod {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--gull) 35%, transparent), transparent 45%);
+  background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--gull) 20%, transparent), transparent 45%);
   animation: feiring-blink 1.4s ease-out forwards;
 }
 

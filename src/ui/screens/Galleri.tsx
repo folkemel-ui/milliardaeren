@@ -26,7 +26,8 @@ function navn(id: string): string {
 /**
  * Illustrasjonsgalleriet (åpnes med ?galleri): hver tegning i 5× størrelse og
  * i vanlig størrelse, på både mørk og lys bunn — for å vurdere dem ordentlig.
- * Bedriftene vises også i alle fire vekstrinn.
+ * Bedriftene vises også i alle fire vekstrinn — trinn n med n forbedringer, så
+ * alle detaljene kan vurderes.
  */
 export function Galleri() {
   return (
@@ -51,7 +52,7 @@ export function Galleri() {
               <div className="galleri-trinn">
                 {TRINN.map((t) => (
                   <span key={t.trinn} className="galleri-mork" title={t.navn}>
-                    <Illustrasjon id={id} størrelse={64} trinn={t.trinn} />
+                    <Illustrasjon id={id} størrelse={64} trinn={t.trinn} forbedringer={t.trinn} />
                     <small>{t.navn}</small>
                   </span>
                 ))}

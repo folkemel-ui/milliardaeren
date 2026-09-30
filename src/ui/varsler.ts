@@ -83,6 +83,8 @@ export interface Kjopsglimt {
   art: Kjopsart
   id: string
   navn: string
+  /** En linje under navnet, som «Inntekten ×1,5» for en fusjon. */
+  under?: string
 }
 
 let nesteKjop = 1

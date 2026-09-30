@@ -9,16 +9,21 @@
 import { EIENDOMSTYPER, LUKSUS } from '../engine/eiendom'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { PRESTASJONER } from '../engine/prestasjoner'
-import type { EiendomId, Hendelse, Spilltilstand } from '../engine/types'
+import { FUSJONSFAKTOR } from '../engine/fusjon'
+import type { BedriftstypeId, EiendomId, Hendelse, Spilltilstand } from '../engine/types'
 
-/** Et kjøp som fortjener et øyeblikk: første bedrift av en type, første eiendom av en type, eller en luksusting. */
-export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus'
+/**
+ * Et kjøp som fortjener et øyeblikk: første bedrift av en type, første
+ * eiendom av en type, en luksusting — eller en fusjon med en rivals bedrift.
+ */
+export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus' | 'fusjon'
 
 export type Nytt =
   | { type: 'hendelse'; hendelse: Hendelse }
   | { type: 'prestasjon'; id: string; navn: string }
   | { type: 'avis'; dag: number }
   | { type: 'kjop'; art: Kjopsart; id: string; navn: string }
+  | { type: 'fusjon'; id: BedriftstypeId; navn: string; faktor: number }
 
 /** Hvor stor feiringen er: et lite drys, gullblink og konfetti, eller milliarden. */
 export type Feiringsniva = 'liten' | 'stor' | 'milliard'
@@ -35,7 +40,7 @@ export interface Feiringsdata {
 export const FEIRES: Record<string, Feiringsdata> = {
   'fem-sifre': { tekst: 'kr 10 000', niva: 'liten' },
   sekssifret: { tekst: 'kr 100 000', niva: 'liten' },
-  millionaer: { tekst: 'MILLIONÆR!', niva: 'stor' },
+  millionaer: { tekst: 'Millionær', niva: 'stor' },
   'ti-mill': { tekst: 'kr 10 mill', niva: 'liten' },
   'hundre-mill': { tekst: 'kr 100 mill', niva: 'liten' },
   milliardaer: { tekst: 'MILLIARDÆR!', niva: 'milliard' },
@@ -77,6 +82,12 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
     if ((etter.eiendommer[id] ?? 0) > 0 && (før.eiendommer[id] ?? 0) === 0) {
       funn.push({ type: 'kjop', art: 'eiendom', id, navn: EIENDOMSTYPER[id].navn })
     }
+  }
+  // En bedrift som har fått flere fusjoner — ved bud, motbud eller oppkjøp av rivalen.
+  for (const b of etter.bedrifter) {
+    const f = før.bedrifter.find((x) => x.id === b.id)
+    const nye = (b.fusjoner ?? 0) - (f?.fusjoner ?? 0)
+    if (f && nye > 0) funn.push({ type: 'fusjon', id: b.type, navn: BEDRIFTSTYPER[b.type].navn, faktor: FUSJONSFAKTOR ** nye })
   }
   for (const id of etter.luksus) {
     if (!før.luksus.includes(id)) funn.push({ type: 'kjop', art: 'luksus', id, navn: LUKSUS[id].navn })

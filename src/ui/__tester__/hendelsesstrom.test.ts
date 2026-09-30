@@ -63,7 +63,7 @@ describe('hendelsesstrømmen', () => {
     expect(FEIRES.millionaer.niva).toBe('stor')
     expect(FEIRES.milliardaer.niva).toBe('milliard')
     const p = (id: string): Nytt => ({ type: 'prestasjon', id, navn: id })
-    expect(stoersteFeiring([p('fem-sifre'), p('millionaer'), p('ti-mill')])?.tekst).toBe('MILLIONÆR!')
+    expect(stoersteFeiring([p('fem-sifre'), p('millionaer'), p('ti-mill')])?.tekst).toBe('Millionær')
     expect(stoersteFeiring([p('forste-steg')])).toBeNull()
   })
 

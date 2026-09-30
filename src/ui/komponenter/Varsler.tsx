@@ -59,23 +59,23 @@ export function Varselstabel({ gåTil }: { gåTil: (f: Fane) => void }) {
   )
 }
 
-const FARGER = ['#d4af37', '#ecd07a', '#f4efe4', '#5cd68a', '#f27474', '#38bdf8']
 const GULL = ['#d4af37', '#ecd07a', '#f7e3a1', '#b8912a']
 
 /**
- * Hvor mye som skjer for hver størrelse. Den lille slipper trykk gjennom, så
- * du kan spille videre mens den drysser; de store kan lukkes med et trykk.
+ * Hvor mye som skjer for hver størrelse — rolig og i gull, med det store
+ * showet spart til milliarden. Den lille slipper trykk gjennom, så du kan
+ * spille videre; de store kan lukkes med et trykk.
  */
 const VARIANT: Record<Feiringsniva, { biter: number; ms: number; blink: boolean }> = {
-  liten: { biter: 26, ms: 2000, blink: false },
-  stor: { biter: 60, ms: 3000, blink: true },
+  liten: { biter: 0, ms: 2000, blink: false },
+  stor: { biter: 22, ms: 2800, blink: false },
   milliard: { biter: 150, ms: 5500, blink: true },
 }
 
 /**
- * Konfetti og en stor tekst for en formuemilepæl. Konfettien er vanlige
- * elementer med tilfeldig start, fart og farge — tilfeldigheten her er bare
- * pynt, ikke spill. Milliarden får gullmynter, stråler og en krone.
+ * En formuemilepæl: teksten med en gullglans mellom to tynne gullstreker,
+ * og litt gullkonfetti for millionen. Tilfeldigheten i konfettien er bare
+ * pynt, ikke spill. Milliarden får hele showet: mynter, stråler og en krone.
  */
 export function Feiring() {
   const f = useFeiring()
@@ -89,8 +89,8 @@ export function Feiring() {
         varighet: (f?.niva === 'liten' ? 1.2 : 1.6) + Math.random() * 1.2,
         drift: (Math.random() - 0.5) * 160,
         rotasjon: Math.random() * 720,
-        farge: milliard ? GULL[i % GULL.length] : FARGER[i % FARGER.length],
-        form: milliard && i % 3 === 0 ? 'mynt' : Math.random() < 0.5 ? 'bred' : '',
+        farge: GULL[i % GULL.length],
+        form: milliard && i % 3 === 0 ? 'mynt' : milliard && Math.random() < 0.5 ? 'bred' : 'tynn',
       })),
     // Ny konfetti for hver feiring.
     [f],
@@ -129,7 +129,9 @@ export function Feiring() {
             <Ikon navn="krone" størrelse={72} />
           </span>
         )}
+        {!milliard && <span className="feiring-linje" aria-hidden="true" />}
         <div className="feiring-tekst">{f.tekst}</div>
+        {!milliard && <span className="feiring-linje" aria-hidden="true" />}
         {milliard && <div className="feiring-under">Du nådde målet.</div>}
       </div>
     </div>

@@ -49,7 +49,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
     <li className={`kort bedriftskort ${puls}`} data-ny={b.type}>
       {flytetall}
       <div className="bedriftskort-topp">
-        <BedriftIkon type={b.type} nivaa={b.nivaa} />
+        <BedriftIkon type={b.type} nivaa={b.nivaa} forbedringer={b.forbedringer} />
         <div className="bedriftskort-midt">
           <h2>
             {type.navn}

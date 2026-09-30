@@ -14,7 +14,13 @@
  * - Bedriftene er steder, ikke varer: varen står på skiltet.
  *
  * Bedriftene vokser med nivået (trinn 0–3 ved nivå 1, 25, 50 og 100):
- * større og en egen detalj ved 25, kunder ved 50, og et neonskilt ved 100.
+ * større og en egen detalj ved 25, kunder ved 50, og en gullplakett ved 100.
+ * Hver av de tre forbedringene legger til sin egen lille detalj (`f` = hvor
+ * mange som er kjøpt), så du ser hva du har investert i.
+ *
+ * Noen deler har en `anim-`-klasse (damp, røyk, flagg, flamme, bølger …).
+ * De beveger seg bare på den store scenen i detaljvisningene, og aldri når
+ * spilleren har bedt om mindre bevegelse — se styles.css.
  */
 
 import { memo, type ReactNode } from 'react'
@@ -73,7 +79,6 @@ export const F = {
   metallLys: '#d1d5db',
   metallMork: '#6b7280',
   hud: '#e8b894',
-  neon: '#ff5fa2',
 } as const
 
 function Svg({ størrelse, children }: { størrelse: number; children: ReactNode }) {
@@ -131,8 +136,8 @@ function Grunn({ type }: { type: Grunntype }) {
       return (
         <>
           <rect x="3" y={y} width="42" height={45.2 - y} rx="3.6" fill={F.sjo} />
-          <polyline points={`7,${y + 3.4} 10,${y + 2.5} 13,${y + 3.4}`} fill="none" stroke={F.sjoLys} strokeWidth="1" strokeLinecap="round" />
-          <polyline points="33,43 36,42.1 39,43" fill="none" stroke={F.sjoLys} strokeWidth="1" strokeLinecap="round" />
+          <polyline className="anim-boelge" points={`7,${y + 3.4} 10,${y + 2.5} 13,${y + 3.4}`} fill="none" stroke={F.sjoLys} strokeWidth="1" strokeLinecap="round" />
+          <polyline className="anim-boelge sen" points="33,43 36,42.1 39,43" fill="none" stroke={F.sjoLys} strokeWidth="1" strokeLinecap="round" />
         </>
       )
     }
@@ -187,14 +192,8 @@ function Kunder({ trinn, sjo }: { trinn: Trinn; sjo?: boolean }) {
   )
 }
 
-/** En firtakket gnist. */
-function Gnist({ x, y, r }: { x: number; y: number; r: number }) {
-  const s = r * 0.3
-  return <polygon points={`${x},${y - r} ${x + s},${y - s} ${x + r},${y} ${x + s},${y + s} ${x},${y + r} ${x - s},${y + s} ${x - r},${y} ${x - s},${y - s}`} fill={F.gullLys} />
-}
-
-/** Neonskiltet ved nivå 100: en lysende stjerne i rosa ramme, og gnister rundt. */
-function Neon({ x, y }: { x: number; y: number }) {
+/** Gullplaketten ved nivå 100: en mørk plate med gullkant og en stjerne — et diskret kvalitetsstempel. */
+function Utmerkelse({ x, y }: { x: number; y: number }) {
   const cx = x + 4.5
   const cy = y + 3.2
   const stjerne = Array.from({ length: 10 }, (_, i) => {
@@ -204,39 +203,37 @@ function Neon({ x, y }: { x: number; y: number }) {
   }).join(' ')
   return (
     <g>
-      <rect x={x} y={y} width="9" height="6.4" rx="1.6" fill="none" stroke={F.neon} strokeWidth="2.8" opacity="0.35" />
-      <rect x={x} y={y} width="9" height="6.4" rx="1.6" fill={F.mork} stroke={F.neon} strokeWidth="0.9" />
+      <rect x={x} y={y} width="9" height="6.4" rx="1.2" fill={F.mork} stroke={F.gull} strokeWidth="0.8" />
       <polygon points={stjerne} fill={F.gullLys} />
-      <Gnist x={x + 12} y={y + 1.5} r={1.4} />
-      <Gnist x={x - 0.5} y={y + 10} r={1.1} />
     </g>
   )
 }
 
-/** Hvor neonskiltet henger på hver bedrift — der tegningen har ledig plass. */
-const NEON: Record<string, [number, number]> = {
+/** Hvor plaketten henger på hver bedrift — der tegningen har ledig plass. */
+const PLAKETT: Record<string, [number, number]> = {
   restaurant: [35, 3],
   hotell: [37, 9],
 }
 
-/** Setter sammen en bedrift: grunn, selve stedet (som vokser), kunder og neon. */
+/** Setter sammen en bedrift: grunn, selve stedet (som vokser), kunder og plaketten. */
 function Bedrift({ trinn, grunn, sjo, id, children }: { trinn: Trinn; grunn: Grunntype; sjo?: boolean; id: string; children: ReactNode }) {
-  const [nx, ny] = NEON[id] ?? [3, 3]
+  const [nx, ny] = PLAKETT[id] ?? [3, 3]
   return (
     <>
       <Grunn type={grunn} />
       <Vekst trinn={trinn}>{children}</Vekst>
       <Kunder trinn={trinn} sjo={sjo} />
-      {trinn >= 3 && <Neon x={nx} y={ny} />}
+      {trinn >= 3 && <Utmerkelse x={nx} y={ny} />}
     </>
   )
 }
 
-type B = (trinn: Trinn) => ReactNode
+/** En bedriftstegning: vekstrinnet og hvor mange forbedringer som er kjøpt (0–3). */
+type B = (trinn: Trinn, f: number) => ReactNode
 
 // ─────────────────────────────────────────────── Bedrifter
 
-const saftbod: B = (t) => (
+const saftbod: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="saftbod">
     <rect x="9" y="18" width="2.5" height="25" fill={F.treMork} />
     <rect x="36.5" y="18" width="2.5" height="25" fill={F.treMork} />
@@ -259,10 +256,31 @@ const saftbod: B = (t) => (
         <rect x="14.6" y="38.4" width="4.6" height="1" rx="0.5" fill={F.stein} />
       </>
     )}
+    {/* Saftpresse, isbiter og en grønn vimpel for den sukkerfrie linja. */}
+    {f >= 1 && (
+      <>
+        <rect x="9.5" y="27" width="4" height="6" rx="0.8" fill={F.metallLys} />
+        <line x1="11.5" y1="27" x2="14.5" y2="24" stroke={F.metallMork} strokeWidth="1" strokeLinecap="round" />
+        <circle cx="11.5" cy="26" r="1.1" fill={F.gul} />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        <rect x="17" y="27.2" width="1.6" height="1.6" rx="0.3" fill={F.hvit} opacity="0.85" />
+        <rect x="18.8" y="29.4" width="1.6" height="1.6" rx="0.3" fill={F.hvit} opacity="0.85" />
+        <rect x="29" y="29.3" width="1.4" height="1.4" rx="0.3" fill={F.hvit} opacity="0.85" />
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <line x1="42" y1="12" x2="42" y2="5.5" stroke={F.treMork} strokeWidth="0.8" />
+        <polygon points="42,5.5 45,7.2 42,8.9" fill={F.gronn} />
+      </>
+    )}
   </Bedrift>
 )
 
-const polsebod: B = (t) => (
+const polsebod: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="polsebod">
     <rect x="23.3" y="12" width="1.4" height="14" fill={F.metallMork} />
     <path d="M8 16 Q24 1 40 16 Z" fill={F.rod} />
@@ -289,10 +307,29 @@ const polsebod: B = (t) => (
         <rect x="14.2" y="18.6" width="1.4" height="1.4" fill={F.hvit} />
       </>
     )}
+    {/* Grillplate i stål, sennepsflaske og lykta foran på foodtrucken. */}
+    {f >= 1 && (
+      <>
+        <rect x="19" y="22.4" width="10" height="2.2" rx="0.5" fill={F.metallMork} />
+        <line x1="21" y1="22.9" x2="27" y2="22.9" stroke={F.metallLys} strokeWidth="0.4" />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        <rect x="33" y="19.6" width="2.4" height="5" rx="0.8" fill={F.gul} />
+        <rect x="33.5" y="18.4" width="1.4" height="1.4" rx="0.3" fill={F.rod} />
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <rect x="8" y="33.2" width="32" height="1" fill={F.gul} />
+        <circle cx="7.2" cy="31" r="1.2" fill={F.lys} />
+      </>
+    )}
   </Bedrift>
 )
 
-const gatekjokken: B = (t) => (
+const gatekjokken: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="gatekjokken">
     <rect x="8" y="18" width="32" height="25" fill={F.lysgraa} />
     <rect x="36" y="18" width="4" height="25" fill={F.graa} />
@@ -319,14 +356,35 @@ const gatekjokken: B = (t) => (
       <>
         {/* Pipa ryker: grillen står aldri stille. */}
         <rect x="36" y="10" width="3" height="6" fill={F.stein} />
-        <circle cx="37.6" cy="8" r="1.4" fill={F.lysgraa} opacity="0.85" />
-        <circle cx="39.4" cy="5.4" r="1.8" fill={F.lysgraa} opacity="0.6" />
+        <circle className="anim-roeyk" cx="37.6" cy="8" r="1.4" fill={F.lysgraa} opacity="0.85" />
+        <circle className="anim-roeyk sen" cx="39.4" cy="5.4" r="1.8" fill={F.lysgraa} opacity="0.6" />
+      </>
+    )}
+    {/* Pommes frites fra den nye gryta, dressingflaska og drive-in-luka på siden. */}
+    {f >= 1 && (
+      <>
+        {[15.1, 15.9, 16.7].map((x) => (
+          <rect key={x} x={x} y="31.3" width="0.5" height="1.8" rx="0.2" fill={F.gul} />
+        ))}
+        <polygon points="14.6,32.8 17.6,32.8 17.2,35 15,35" fill={F.rod} />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        <rect x="22.8" y="31.6" width="1.7" height="3.4" rx="0.6" fill={F.oransje} />
+        <rect x="23.2" y="30.8" width="0.9" height="0.9" fill={F.hvit} />
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <rect x="36.6" y="28.6" width="2.8" height="4" rx="0.4" fill={F.glass} />
+        <polygon points="36.4,27.6 39.6,27.6 38,26" fill={F.gul} />
       </>
     )}
   </Bedrift>
 )
 
-const kiosk: B = (t) => (
+const kiosk: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="kiosk">
     <rect x="7" y="16" width="34" height="27" fill={F.krem} />
     <rect x="37" y="16" width="4" height="27" fill={F.kremMork} />
@@ -358,10 +416,24 @@ const kiosk: B = (t) => (
         <circle cx="6.5" cy="38" r="1.1" fill={F.rosa} />
       </>
     )}
+    {/* Kaffe i vinduet, pakker til henting og en måne for døgnåpent. */}
+    {f >= 1 && (
+      <>
+        <rect x="11" y="27.4" width="2.4" height="2.2" rx="0.4" fill={F.hvit} />
+        <path d="M11.6 26.8 Q12.2 25.8 11.8 25" fill="none" stroke={F.hvit} strokeWidth="0.5" strokeLinecap="round" />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        <rect x="20.4" y="27" width="4.4" height="2.6" fill={F.tre} />
+        <line x1="22.6" y1="27" x2="22.6" y2="29.6" stroke={F.treLys} strokeWidth="0.6" />
+      </>
+    )}
+    {f >= 3 && <path d="M37 4.8 A2.7 2.7 0 1 0 39.8 9 A2.1 2.1 0 1 1 37 4.8 Z" fill={F.lys} />}
   </Bedrift>
 )
 
-const kafe: B = (t) => (
+const kafe: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="kafe">
     <rect x="7" y="16" width="34" height="27" fill={F.krem} />
     <rect x="37" y="16" width="4" height="27" fill={F.kremMork} />
@@ -385,10 +457,35 @@ const kafe: B = (t) => (
         ))}
       </>
     )}
+    {/* Espressomaskin og boller i vinduet, og en parasoll på takterrassen. */}
+    {f >= 1 && (
+      <>
+        <rect x="11" y="31.4" width="4.4" height="4.6" rx="0.4" fill={F.metall} />
+        <rect x="11" y="30.8" width="4.4" height="0.8" fill={F.metallMork} />
+        <rect x="12.4" y="36.2" width="1.6" height="1.2" rx="0.3" fill={F.hvit} />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        {[20.2, 22.6, 24.8].map((x) => (
+          <circle key={x} cx={x} cy="37.6" r="1.1" fill={F.brod} />
+        ))}
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <line x1="35.5" y1="11.5" x2="42" y2="11.5" stroke={F.metallMork} strokeWidth="0.6" />
+        <line x1="39" y1="7.6" x2="39" y2="14" stroke={F.metallMork} strokeWidth="0.6" />
+        <polygon points="35.6,8 42.4,8 39,5.6" fill={F.rod} />
+      </>
+    )}
+    {/* Dampen fra koppen på skiltet. */}
+    <path className="anim-damp" d="M23 3.6 Q22 2.4 23 1.2" fill="none" stroke={F.hvit} strokeWidth="0.6" strokeLinecap="round" opacity="0.7" />
+    <path className="anim-damp sen" d="M25 3.6 Q24 2.4 25 1.2" fill="none" stroke={F.hvit} strokeWidth="0.6" strokeLinecap="round" opacity="0.7" />
   </Bedrift>
 )
 
-const restaurant: B = (t) => (
+const restaurant: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="restaurant">
     <rect x="6" y="12" width="36" height="31" fill={F.vin} />
     <rect x="38" y="12" width="4" height="31" fill={F.vinMork} />
@@ -414,15 +511,41 @@ const restaurant: B = (t) => (
         ))}
       </>
     )}
+    {/* Kokken i vinduet, vinflasker og en plakett med stjerne ved døra. */}
+    {f >= 1 && (
+      <>
+        <circle cx="16" cy="29" r="1.4" fill={F.hud} />
+        <rect x="14.8" y="26.3" width="2.4" height="1.6" fill={F.hvit} />
+        <circle cx="16" cy="26" r="1.3" fill={F.hvit} />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        {[31.2, 35.2, 36.6].map((x) => (
+          <g key={x}>
+            <rect x={x} y="31" width="1" height="3.6" rx="0.3" fill={F.vinMork} />
+            <rect x={x + 0.3} y="30" width="0.4" height="1.2" fill={F.vinMork} />
+          </g>
+        ))}
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <rect x="31.5" y="37.5" width="5" height="4" rx="0.8" fill={F.mork} stroke={F.gull} strokeWidth="0.5" />
+        <polygon points="34,38.3 34.5,39.4 35.6,39.5 34.8,40.2 35,41.2 34,40.7 33,41.2 33.2,40.2 32.4,39.5 33.5,39.4" fill={F.gull} />
+      </>
+    )}
   </Bedrift>
 )
 
-const hotell: B = (t) => {
+const hotell: B = (t, f) => {
   const vinduer: ReactNode[] = []
   for (let rad = 0; rad < 6; rad++) {
     for (let kol = 0; kol < 3; kol++) {
       const tent = (rad * 3 + kol) % 4 !== 1
-      vinduer.push(<rect key={`${rad}-${kol}`} x={15.5 + kol * 6} y={9 + rad * 4.4} width="4" height="2.8" fill={tent ? F.lys : F.glassMork} />)
+      // Spaet ligger i nederste etasje: turkis vinduer.
+      const farge = f >= 1 && rad === 5 ? F.tyrkis : tent ? F.lys : F.glassMork
+      vinduer.push(<rect key={`${rad}-${kol}`} x={15.5 + kol * 6} y={9 + rad * 4.4} width="4" height="2.8" fill={farge} />)
     }
   }
   return (
@@ -446,11 +569,30 @@ const hotell: B = (t) => {
           ))}
         </>
       )}
+      {/* Konferansefløy og takbar. Spaet er vinduene nederst. */}
+      {f >= 2 && (
+        <>
+          <rect x="35" y="30" width="7" height="13" fill={F.krem} />
+          <rect x="35" y="33.5" width="7" height="3" fill={F.glassMork} />
+          <rect x="34.6" y="29" width="7.8" height="1.2" fill={F.treMork} />
+        </>
+      )}
+      {f >= 3 && (
+        <>
+          <rect x="16" y="1.4" width="20" height="2.1" fill={F.glass} opacity="0.7" />
+          {[18, 23, 28, 33].map((x) => (
+            <circle key={x} cx={x} cy="1.2" r="0.5" fill={F.lys} />
+          ))}
+        </>
+      )}
+      {/* Flagget på taket. */}
+      <line x1="12" y1="3.5" x2="12" y2="0.4" stroke={F.metallMork} strokeWidth="0.5" />
+      <polygon className="anim-flagg" points="12,0.4 15.2,1.2 12,2.1" fill={F.rod} />
     </Bedrift>
   )
 }
 
-const bank: B = (t) => (
+const bank: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="bank">
     <polygon points="4,16.5 24,5 44,16.5" fill={F.lysgraa} />
     <polygon points="11,15.1 24,8.3 37,15.1" fill={F.krem} />
@@ -471,10 +613,30 @@ const bank: B = (t) => (
         <rect x="21.6" y="37.9" width="4.8" height="2.6" rx="0.4" fill={F.gullLys} />
       </>
     )}
+    {/* Nettbank-skjerm, myntstabel og en stigende kurs i gavlen. */}
+    {f >= 1 && (
+      <>
+        <rect x="21.8" y="23" width="4.4" height="6.4" rx="0.5" fill={F.marine} />
+        <rect x="22.4" y="23.6" width="3.2" height="2.4" fill={F.glass} />
+      </>
+    )}
+    {f >= 2 && (
+      <>
+        {[35.6, 34.4, 33.2].map((cy) => (
+          <ellipse key={cy} cx="15" cy={cy} rx="1.8" ry="0.7" fill={F.gull} stroke={F.gullMork} strokeWidth="0.3" />
+        ))}
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <polyline points="28,14 30,12.4 31.6,13.2 34,10.8" fill="none" stroke={F.gronn} strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
+        <polygon points="34.6,10.2 34.4,12 32.8,10.4" fill={F.gronn} />
+      </>
+    )}
   </Bedrift>
 )
 
-const oljeselskap: B = (t) => (
+const oljeselskap: B = (t, f) => (
   <Bedrift trinn={t} grunn="sjo" sjo id="oljeselskap">
     <rect x="11" y="27" width="3" height="14" fill={F.metallMork} />
     <rect x="34" y="27" width="3" height="14" fill={F.metallMork} />
@@ -486,18 +648,35 @@ const oljeselskap: B = (t) => (
     <line x1="17.2" y1="17" x2="26.8" y2="17" stroke={F.metall} strokeWidth="1" />
     <line x1="19" y1="11" x2="25" y2="11" stroke={F.metall} strokeWidth="1" />
     <rect x="36" y="11" width="2" height="12.5" fill={F.metallMork} />
-    <polygon points="37,2.5 40.5,8.5 37,11 33.5,8.5" fill="#f97316" />
-    <polygon points="37,5.5 38.8,8.6 37,10 35.2,8.6" fill={F.lys} />
+    <g className="anim-flamme">
+      <polygon points="37,2.5 40.5,8.5 37,11 33.5,8.5" fill="#f97316" />
+      <polygon points="37,5.5 38.8,8.6 37,10 35.2,8.6" fill={F.lys} />
+    </g>
     {t >= 1 && (
       <>
         <rect x="8" y="18" width="6" height="5.5" fill={F.hvit} />
         <rect x="9" y="19.4" width="4" height="1.4" fill={F.glassMork} />
       </>
     )}
+    {/* Et nytt boretårn, en undervannsrobot og en ny plattform ute på feltet. */}
+    {f >= 1 && <polygon points="30,23.5 31.5,15 32.5,15 34,23.5" fill="none" stroke={F.metall} strokeWidth="1" strokeLinejoin="round" />}
+    {f >= 2 && (
+      <>
+        <rect x="18" y="41" width="4" height="2" rx="0.6" fill={F.gul} />
+        <circle cx="22.5" cy="42" r="0.5" fill={F.lys} />
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <rect x="1.5" y="29" width="5" height="1.6" fill={F.metall} />
+        <line x1="2.5" y1="30.6" x2="2.5" y2="38.5" stroke={F.metallMork} strokeWidth="0.7" />
+        <line x1="5.5" y1="30.6" x2="5.5" y2="38.5" stroke={F.metallMork} strokeWidth="0.7" />
+      </>
+    )}
   </Bedrift>
 )
 
-const rederi: B = (t) => {
+const rederi: B = (t, f) => {
   const kontainere: [number, number, string][] = [
     [12, 26, F.rod], [18, 26, F.tyrkis], [24, 26, F.oransje], [30, 26, F.blaa],
     [15, 21, F.aker], [21, 21, F.rodMork], [27, 21, F.tyrkis],
@@ -505,6 +684,7 @@ const rederi: B = (t) => {
   if (t >= 1) kontainere.push([18, 16, F.blaa], [24, 16, F.oransje])
   return (
     <Bedrift trinn={t} grunn="sjo" sjo id="rederi">
+      <g className="anim-duve">
       <polygon points="4,31 44,31 40,40 8,40" fill={F.mork} />
       <rect x="4" y="31" width="40" height="2" fill={F.rodMork} />
       {kontainere.map(([x, y, farge]) => (
@@ -517,11 +697,22 @@ const rederi: B = (t) => {
       <rect x="40.4" y="19" width="1.6" height="12" fill={F.lysgraa} />
       <rect x="37" y="21" width="4" height="1.6" fill={F.marine} />
       <rect x="38.5" y="15" width="1.6" height="4" fill={F.skifer} />
+      {/* LNG-stripe, egen kran i havna og et vindseil. */}
+      {f >= 1 && <rect x="8" y="35.4" width="32" height="1" fill={F.tyrkis} />}
+      {f >= 3 && <polygon points="31.6,26 32.3,9 34.5,9 34.1,26" fill={F.hvit} stroke={F.lysgraa} strokeWidth="0.4" />}
+      </g>
+      {f >= 2 && (
+        <>
+          <rect x="3.6" y="12" width="1.6" height="26" fill={F.gul} />
+          <line x1="4.4" y1="13" x2="15" y2="13" stroke={F.gul} strokeWidth="1.2" />
+          <line x1="13" y1="13" x2="13" y2="18" stroke={F.metallMork} strokeWidth="0.5" />
+        </>
+      )}
     </Bedrift>
   )
 }
 
-const fiskeoppdrett: B = (t) => (
+const fiskeoppdrett: B = (t, f) => (
   <Bedrift trinn={t} grunn="fjord" sjo id="fiskeoppdrett">
     {[[13, 33], [33, 35], [22, 40.5]].map(([x, y]) => (
       <g key={`${x}-${y}`}>
@@ -534,18 +725,35 @@ const fiskeoppdrett: B = (t) => (
     <rect x="38.6" y="18" width="2.4" height="6.5" fill={F.lysgraa} />
     <polygon points="30,18.4 36,14.5 42,18.4" fill={F.rod} />
     <rect x="32.4" y="20" width="3" height="2.2" fill={F.glassMork} />
-    <path d="M9 24 Q13 18 17 22" fill="none" stroke={F.oransje} strokeWidth="2.4" strokeLinecap="round" />
-    <polygon points="17,22 19.4,20.6 19,24" fill={F.oransje} />
+    <g className="anim-hopp">
+      <path d="M9 24 Q13 18 17 22" fill="none" stroke={F.oransje} strokeWidth="2.4" strokeLinecap="round" />
+      <polygon points="17,22 19.4,20.6 19,24" fill={F.oransje} />
+    </g>
     {t >= 1 && (
       <>
         <polygon points="18,31 27,31 26,33.4 19,33.4" fill={F.hvit} />
         <rect x="20" y="28.8" width="3" height="2.2" fill={F.blaaMork} />
       </>
     )}
+    {/* Lukket merd, havmerd på dypt vann og et eksportfly. */}
+    {f >= 1 && <path d="M5.5 33 A7.5 4.2 0 0 1 20.5 33 Z" fill={F.metallLys} opacity="0.9" />}
+    {f >= 2 && (
+      <>
+        <ellipse cx="5.5" cy="28.6" rx="3.2" ry="1.2" fill="none" stroke={F.metall} strokeWidth="1.1" />
+        <rect x="5" y="25" width="1" height="3.6" fill={F.metallMork} />
+      </>
+    )}
+    {f >= 3 && (
+      <g transform="translate(19 4)">
+        <rect x="0" y="1.2" width="7" height="1.6" rx="0.8" fill={F.metallLys} />
+        <polygon points="5.4,1.2 7,-0.6 7.8,-0.6 7.3,1.2" fill={F.blaa} />
+        <polygon points="2.4,2 4.8,2 3.2,3.8 2,3.8" fill={F.metall} />
+      </g>
+    )}
   </Bedrift>
 )
 
-const flyselskap: B = (t) => (
+const flyselskap: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="flyselskap">
     {[8, 18, 28].map((x) => (
       <rect key={x} x={x} y="43.6" width="5" height="1" fill={F.hvit} />
@@ -563,18 +771,29 @@ const flyselskap: B = (t) => (
         <circle key={x} cx={x} cy="21.4" r="0.9" fill={F.marine} />
       ))}
       <path d="M6 22.5 Q6 19 9.5 19 L9.5 22.5 Z" fill={F.marine} />
+      {f >= 1 && <rect x="21" y="26.4" width="4.4" height="2" rx="1" fill={F.metallMork} />}
     </g>
     {t >= 1 && (
+      <g className="anim-glid">
       <g transform="translate(30 4)">
         <rect x="0" y="1.2" width="9" height="2" rx="1" fill={F.metallLys} />
         <polygon points="7,1.2 9,-1 10,-1 9.4,1.2" fill={F.rod} />
         <polygon points="3,2 6,2 4,4.4 2.6,4.4" fill={F.metall} />
       </g>
+      </g>
     )}
+    {/* Terminal med lounge og en rute mot øst. Motoren sitter på flyet. */}
+    {f >= 2 && (
+      <>
+        <rect x="3" y="37" width="12" height="6" fill={F.glassMork} />
+        <rect x="2.5" y="36" width="13" height="1.2" fill={F.metallMork} />
+      </>
+    )}
+    {f >= 3 && <path d="M12 13 Q18 2 28 6" fill="none" stroke={F.gul} strokeWidth="0.8" strokeDasharray="1.6 1.2" />}
   </Bedrift>
 )
 
-const skisenter: B = (t) => (
+const skisenter: B = (t, f) => (
   <Bedrift trinn={t} grunn="sno" id="skisenter">
     <polygon points="3,43 18,10 28,24 34,16 45,43" fill={F.sno} />
     <polygon points="18,10 26,43 45,43 34,16 28,24" fill={F.snoSkygge} />
@@ -583,7 +802,7 @@ const skisenter: B = (t) => (
     <path d="M34 18 Q39 27 34 34 Q31 39 35 42" fill="none" stroke={F.rod} strokeWidth="1.3" strokeDasharray="2 1.5" />
     <line x1="6" y1="41" x2="30" y2="15" stroke={F.skifer} strokeWidth="0.8" />
     {[[11, 34], [17.5, 27], [24, 20]].map(([x, y]) => (
-      <g key={x}>
+      <g key={x} className="anim-gondol">
         <line x1={x} y1={y} x2={x} y2={y + 2.6} stroke={F.skifer} strokeWidth="0.6" />
         <rect x={x - 2} y={y + 2.6} width="4" height="2.6" rx="0.8" fill={F.rod} />
       </g>
@@ -594,6 +813,24 @@ const skisenter: B = (t) => (
         <rect x="31" y="36.5" width="10" height="6.5" fill={F.treMork} />
         <polygon points="29.5,37 36,32 42.5,37" fill={F.skifer} />
         <rect x="33" y="38.5" width="2.6" height="2.2" fill={F.lys} />
+      </>
+    )}
+    {/* Ny gondolstasjon, snøkanon og en målportal for OL-arenaen. */}
+    {f >= 1 && <rect x="28.4" y="12.6" width="4.4" height="3.2" rx="0.4" fill={F.skifer} />}
+    {f >= 2 && (
+      <>
+        <line x1="38.5" y1="31.5" x2="40" y2="28" stroke={F.metallMork} strokeWidth="1" />
+        <rect x="38.8" y="26.6" width="3.4" height="1.8" rx="0.6" fill={F.metall} transform="rotate(-28 40.5 27.5)" />
+        <circle cx="43" cy="25.2" r="0.6" fill={F.hvit} />
+        <circle cx="44.2" cy="24" r="0.5" fill={F.hvit} />
+      </>
+    )}
+    {f >= 3 && (
+      <>
+        <rect x="18.5" y="36" width="1" height="7" fill={F.metallMork} />
+        <rect x="27.5" y="36" width="1" height="7" fill={F.metallMork} />
+        <rect x="18" y="34.6" width="11" height="2.4" rx="0.4" fill={F.rod} />
+        <rect x="18" y="35.5" width="11" height="0.5" fill={F.gull} />
       </>
     )}
   </Bedrift>
@@ -1459,11 +1696,11 @@ function Langdistansejet({ størrelse = 48 }: P) {
 
 // ─────────────────────────────────────────────── Oppslag
 
-type Tegning = (p: P & { trinn: Trinn }) => ReactNode
+type Tegning = (p: P & { trinn: Trinn; forbedringer: number }) => ReactNode
 
 const bedrift =
   (b: B): Tegning =>
-  ({ størrelse = 48, trinn }) => <Svg størrelse={størrelse}>{b(trinn)}</Svg>
+  ({ størrelse = 48, trinn, forbedringer }) => <Svg størrelse={størrelse}>{b(trinn, forbedringer)}</Svg>
 
 const ILLUSTRASJONER: Record<string, Tegning> = {
   saftbod: bedrift(saftbod),
@@ -1529,8 +1766,21 @@ export const ILLUSTRASJONSIDER = Object.keys(ILLUSTRASJONER)
 /** Bedriftene, som har fire vekstrinn. */
 export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
 
-/** Illustrasjonen for en bedrift, eiendom eller luksusgjenstand, etter id. Bedrifter vokser med `trinn`. */
-export const Illustrasjon = memo(function Illustrasjon({ id, størrelse = 44, trinn = 0 }: { id: string; størrelse?: number; trinn?: Trinn }) {
+/**
+ * Illustrasjonen for en bedrift, eiendom eller luksusgjenstand, etter id.
+ * Bedrifter vokser med `trinn` og viser `forbedringer` (0–3) som detaljer.
+ */
+export const Illustrasjon = memo(function Illustrasjon({
+  id,
+  størrelse = 44,
+  trinn = 0,
+  forbedringer = 0,
+}: {
+  id: string
+  størrelse?: number
+  trinn?: Trinn
+  forbedringer?: number
+}) {
   const Tegning = ILLUSTRASJONER[id]
-  return Tegning ? <>{Tegning({ størrelse, trinn })}</> : null
+  return Tegning ? <>{Tegning({ størrelse, trinn, forbedringer })}</> : null
 })

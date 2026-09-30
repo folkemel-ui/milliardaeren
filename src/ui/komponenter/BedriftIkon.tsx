@@ -12,25 +12,27 @@ export const BedriftIkon = memo(function BedriftIkon({
   type,
   dempet = false,
   nivaa,
+  forbedringer = 0,
   stor = false,
 }: {
   type: string
   dempet?: boolean
   nivaa?: number
+  forbedringer?: number
   stor?: boolean
 }) {
   return (
     <div className={`bedrift-ikon${stor ? ' stor' : ''}${dempet ? ' dempet-ikon' : ''}`} aria-hidden="true">
-      <Illustrasjon id={type} størrelse={stor ? 60 : 44} trinn={trinnFor(nivaa)} />
+      <Illustrasjon id={type} størrelse={stor ? 60 : 44} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
     </div>
   )
 })
 
-/** Tegningen stor, på en egen scene øverst i en detaljvisning. */
-export const Scene = memo(function Scene({ type, nivaa }: { type: string; nivaa?: number }) {
+/** Tegningen stor, på en egen scene øverst i en detaljvisning. Bare her beveger tegningene seg. */
+export const Scene = memo(function Scene({ type, nivaa, forbedringer = 0 }: { type: string; nivaa?: number; forbedringer?: number }) {
   return (
     <div className="scene" aria-hidden="true">
-      <Illustrasjon id={type} størrelse={150} trinn={trinnFor(nivaa)} />
+      <Illustrasjon id={type} størrelse={150} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
     </div>
   )
 })
