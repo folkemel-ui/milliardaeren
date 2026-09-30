@@ -45,9 +45,22 @@ A suggested order, grouped so each pack feels complete when played. The order is
 15. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
 16. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
 
+## Balance
+
+17. **Loans that cost something.** Loan interest is 3 % per hour, while a Hybel pays 30 %, office buildings 25 % and farms about 24 %, and a Saftbod upgrade pays back in minutes. Borrowing the maximum from the first second is always right. Raise the rate, tie it to what you borrow for, or let the limit depend on income instead of assets.
+18. **Net worth that means value, not spending.** A business is valued at what was invested in it, so upgrades, managers, employees and merges all count 100 % toward net worth — yet a business can never be sold, and the only way out is the bank taking it at 50 %. Value businesses from their income, or let them be sold.
+19. **Wages that matter.** Each employee adds 10 % and costs 3 % of the same base, so an employee is always +7 % and the wage can never be a real cost. Make wages a fixed amount per employee, so hiring too early can lose money.
+20. **Rivals get paid in merges.** When a rival sells you a business, their fortune shrinks but your payment disappears. When you buy back a landmark, the rival does get the money. Merges should pay the rival too.
+21. **Property returns that fit the ladder.** The engine says property pays less than businesses, but after mid-game it pays more: a new Hotel returns about 10 % per hour, a Bank 12 % and Oil 7 %, while property pays 20–25 % with no manager. Lower the property yields at the top, or raise the late businesses.
+22. **Tax on gains too.** Rent, dividends, harvests and timber are taxed, but gains on stocks, art, rival stakes, startup exits and club sales are tax-free. Tax realized gains as well, so every income source is treated the same.
+23. **Fair startup dilution.** You buy shares at the current value, and then the same round's 20 % dilution hits the shares you just bought. Money invested in a round should not be diluted by that same round.
+24. **An honest Forbes list.** A rival's whole fortune is listed even when you own up to 50 % of their company, and your stake is also counted in your own number, so it is counted twice. Subtract your stake from the rival's figure.
+25. **An even business ladder.** The code says each step costs about 10 times the last, but the real steps are 4.8×, 33× (Pølsebod → Kiosk, the biggest gap), 15×, 15×, 15×, 4.4× and 8.3×. Oljeselskap becomes available at kr 2.5 mrd but costs kr 5 mrd, while every other business becomes available above its price. The first upgrade costs 25 % of the purchase price for most businesses, but 75 % for Bank and 100 % for Oil. Smooth out the steps and the ratios.
+26. **Status that keeps counting.** «Legende» is reached at 350 points, and the luxury items alone give about 400. After that, landmarks, museum loans, club trophies and the superyacht add nothing. Add more levels, or let status points count past the top level.
+
 ## Code health
 
-17. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
+27. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
 
 ## Parked (not chosen yet)
 
