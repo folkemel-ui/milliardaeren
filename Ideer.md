@@ -8,11 +8,14 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 33 – One visual language:** One set of badges and labels, A typography scale, A club crest
-- **Pack 34 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
-- **Pack 35 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Calmer celebrations
-- **Pack 36 – Cities that matter:** Architecture note, Buildings in more than one city, More price regions, City owner bonus
-- **Pack 37 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
+- **Pack 33 – Honest bookkeeping:** Rivals get paid in merges, An honest Forbes list, Fair startup dilution, Tax on gains too
+- **Pack 34 – Money has a price:** Architecture note, Loans that cost something, Wages that matter, Net worth that means value, not spending
+- **Pack 35 – A fair ladder:** An even business ladder, Property returns that fit the ladder, Status that keeps counting
+- **Pack 36 – One visual language:** One set of badges and labels, A typography scale, A club crest
+- **Pack 37 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
+- **Pack 38 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Calmer celebrations
+- **Pack 39 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
+- **Pack 40 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
 
 ## Property
 
