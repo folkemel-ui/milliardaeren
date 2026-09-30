@@ -218,6 +218,7 @@ export interface Periodestart {
   sparerente: number
   rentebetalt: number
   forbruk: number
+  gevinst: number
   /** Hva hver bedrift hadde tjent totalt ved periodens start, etter id. */
   bedrifter: Record<string, number>
   kurser: Record<PapirId, number>
@@ -235,6 +236,8 @@ export interface Oppgjor {
   sparerente: number
   renter: number
   forbruk: number
+  /** Gevinst minus tap på det som ble solgt. Mangler i oppgjør fra før versjon 18. */
+  gevinster?: number
   formueFor: number
   formueEtter: number
   besteBedrift: { type: BedriftstypeId; tjent: number } | null
@@ -378,6 +381,11 @@ export interface Spilltilstand {
   /** Penger på sparekontoen. */
   sparing: number
   totaltSparerente: number
+  /**
+   * Gevinst minus tap på alt som er solgt: papirer, fond, eiendom, jord,
+   * landemerker, kunst, rivalandeler, startups og klubben. Skattes med inntekten.
+   */
+  totaltGevinst: number
   /** Luksusgjenstandene du eier. Én av hver. */
   luksus: LuksusId[]
   /** Plasser i garasjen, havna og hangaren. */
@@ -557,6 +565,8 @@ export interface Klubb {
   billetter: number
   sponsor: number
   lonn: number
+  /** Det du har satt inn i klubben: kjøpet og spillerkjøpene, minus spillersalgene. Gir gevinsten ved salg. */
+  kostpris: number
   /** Tellere til prestasjonene. */
   seire: number
   opprykk: number

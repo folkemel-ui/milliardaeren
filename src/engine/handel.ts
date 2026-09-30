@@ -15,6 +15,14 @@ import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi } from './klubb'
 
+/**
+ * Bokfører gevinst (eller tap, negativt) på et salg: det du fikk, minus det du
+ * betalte. Månedens sum skattes sammen med inntekten — se skatt.ts.
+ */
+export function bokforGevinst(n: Spilltilstand, belop: number): void {
+  n.totaltGevinst = (n.totaltGevinst ?? 0) + belop
+}
+
 /** Så mange handler huskes til merkene på grafen. */
 export const MAKS_HANDLER = 60
 
@@ -30,6 +38,7 @@ export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
   n.kontanter += inntekt
   flyt(n, 'eiendom', -inntekt)
   const antall = n.eiendommer[id] ?? 0
+  bokforGevinst(n, inntekt - (n.eiendomKostpris[id] ?? 0) / Math.max(1, antall))
   const igjen = antall - 1
   if (igjen > 0) {
     n.eiendommer[id] = igjen
@@ -51,6 +60,7 @@ export function utforRivalsalg(n: Spilltilstand, id: string): number {
   const inntekt = r.andel * selskapsverdi(r) * (1 - SALGSHONORAR)
   n.kontanter += inntekt
   flyt(n, 'rival', -inntekt)
+  bokforGevinst(n, inntekt - r.kostpris)
   r.andel = 0
   r.kostpris = 0
   r.overtatt = false
@@ -69,6 +79,7 @@ export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
 export function utforJordsalg(n: Spilltilstand, id: JordId): number {
   const inntekt = (landverdi(n, id) + tommerverdi(n, id)) * (1 - MEGLERHONORAR)
   n.kontanter += inntekt
+  bokforGevinst(n, inntekt - (n.jord[id]?.kostpris ?? 0))
   delete n.jord[id]
   flyt(n, 'eiendom', -inntekt)
   return inntekt
@@ -77,6 +88,7 @@ export function utforJordsalg(n: Spilltilstand, id: JordId): number {
 export function utforLandemerkesalg(n: Spilltilstand, id: LandemerkeId): number {
   const inntekt = landemerkepris(n, id) * (1 - LANDEMERKE_HONORAR)
   n.kontanter += inntekt
+  bokforGevinst(n, inntekt - (n.landemerker[id]?.kostpris ?? 0))
   delete n.landemerker[id]
   flyt(n, 'eiendom', -inntekt)
   return inntekt
@@ -86,6 +98,7 @@ export function utforLandemerkesalg(n: Spilltilstand, id: LandemerkeId): number 
 export function utforMalerisalg(n: Spilltilstand, id: MaleriId): number {
   const inntekt = salgsprisMaleri(n, id)
   n.kontanter += inntekt
+  bokforGevinst(n, inntekt - (n.kunst.eide[id]?.kostpris ?? 0))
   delete n.kunst.eide[id]
   return inntekt
 }
@@ -93,6 +106,7 @@ export function utforMalerisalg(n: Spilltilstand, id: MaleriId): number {
 export function utforKlubbsalg(n: Spilltilstand): number {
   const inntekt = klubbverdi(n) * (1 - KLUBBSALG_HONORAR)
   n.kontanter += inntekt
+  bokforGevinst(n, inntekt - (n.klubb?.kostpris ?? 0))
   n.klubb = null
   return inntekt
 }
@@ -118,6 +132,7 @@ export function utforSalg(n: Spilltilstand, id: PapirId, antall: number): number
   loggHandel(n, id, -antall, kurs)
   n.kontanter += inntekt
   flyt(n, PAPIRER[id].klasse, -inntekt)
+  bokforGevinst(n, inntekt - b.kostpris * (antall / b.antall))
   const igjen = b.antall - antall
   if (igjen <= 1e-9) {
     delete n.beholdning[id]
@@ -137,6 +152,7 @@ export function utforFondssalg(n: Spilltilstand, id: FondId, belop = Infinity): 
   const inntekt = andeler * kurs * (1 - FOND_GEBYR)
   n.kontanter += inntekt
   flyt(n, 'fond', -inntekt)
+  bokforGevinst(n, inntekt - b.kostpris * (andeler / b.antall))
   const igjen = b.antall - andeler
   if (igjen * kurs < 1) delete n.fond[id]
   else n.fond[id] = { antall: igjen, kostpris: b.kostpris * (igjen / b.antall) }

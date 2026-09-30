@@ -13,6 +13,7 @@
 import { leggTilHendelse } from './bank'
 import { DAG_SEK, dagnummer } from './kalender'
 import { flyt } from './portefolje'
+import { bokforGevinst } from './handel'
 import type { Terning } from './rng'
 import type { Overskrift, Spilltilstand, Startup, Startupstatus } from './types'
 import { kortKroner } from './tall'
@@ -139,6 +140,7 @@ function nyStartup(s: Spilltilstand, t: Terning): Startup {
  */
 export function utforStartupovertakelse(s: Spilltilstand, st: Startup, andel: number): number {
   const utbetalt = st.andel * st.verdi * andel
+  bokforGevinst(s, utbetalt - st.investert)
   st.andel = 0
   st.investert = 0
   st.investertIRunde = 0
@@ -152,6 +154,7 @@ function avslutt(s: Spilltilstand, st: Startup, status: Startupstatus, utbetalt:
   st.status = status
   st.sluttSek = s.sek
   st.utbetalt = utbetalt
+  if (st.investert > 0) bokforGevinst(s, utbetalt - st.investert)
   if (utbetalt > 0) {
     s.kontanter += utbetalt
     flyt(s, 'startup', -utbetalt)
@@ -187,9 +190,12 @@ export function startupsVedDagsskifte(s: Spilltilstand, t: Terning): Overskrift[
       saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} til børs`, tekst: med ? 'Kursen steg på første handelsdag, og de tidlige investorene kan telle gevinsten.' : 'Kursen steg på første handelsdag. De tidlige investorene jubler.' })
       if (med) leggTilHendelse(s, { tittel: 'Børsnotering', tekst: `${navn} gikk på børs. Du fikk ${kortKroner(utbetalt)}.`, alvor: 'info' })
     } else {
+      // Pengene du satte inn i denne runden, ER de nye pengene — bare andelen
+      // du hadde fra før, vannes ut av runden.
+      const nyAndel = Math.min(st.andel, st.investertIRunde / st.verdi)
       st.runde += 1
       st.verdi = pent(st.verdi * t.mellom(VEKST_MIN, VEKST_MAKS))
-      st.andel *= 1 - RUNDEANDEL
+      st.andel = (st.andel - nyAndel) * (1 - RUNDEANDEL) + nyAndel
       st.investertIRunde = 0
     }
   }

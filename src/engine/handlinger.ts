@@ -527,6 +527,7 @@ export function kjopSpiller(s: Spilltilstand, id: number): Utfall {
   const n = structuredClone(s)
   const nk = n.klubb!
   n.kontanter -= pris
+  nk.kostpris = (nk.kostpris ?? 0) + pris
   nk.marked = nk.marked.filter((x) => x.id !== id)
   nk.spillere = [...nk.spillere, { ...p }].sort((a, b) => b.styrke - a.styrke)
   return { ok: true, tilstand: n }
@@ -540,6 +541,7 @@ export function selgSpiller(s: Spilltilstand, id: number): Utfall {
   if (k.spillere.length <= MIN_TROPP) return feil(`Du må ha minst ${MIN_TROPP} spillere.`)
   const n = structuredClone(s)
   n.kontanter += salgspris(p)
+  n.klubb!.kostpris = (n.klubb!.kostpris ?? 0) - salgspris(p)
   n.klubb!.spillere = n.klubb!.spillere.filter((x) => x.id !== id)
   return { ok: true, tilstand: n }
 }

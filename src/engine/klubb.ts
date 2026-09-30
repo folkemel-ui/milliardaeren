@@ -194,6 +194,7 @@ export function nyKlubb(navn: string, frø: number): Klubb {
     billetter: 0,
     sponsor: 0,
     lonn: 0,
+    kostpris: 0,
     seire: 0,
     opprykk: 0,
   }
@@ -332,7 +333,9 @@ function betalSponsor(s: Spilltilstand, k: Klubb): void {
  */
 export function klubbTilSalgs(s: Spilltilstand, navn: string): { klubb: Klubb; pris: number } {
   const klubb = nyKlubb(navn, hashTekst(`${navn}:${dagnummer(s.sek)}`))
-  return { klubb, pris: DIVISJONER[0].verdi + troppsverdi(klubb) }
+  const pris = DIVISJONER[0].verdi + troppsverdi(klubb)
+  klubb.kostpris = pris
+  return { klubb, pris }
 }
 
 /** Første sesongs sponsoravtale betales når klubben kjøpes. Muterer. */

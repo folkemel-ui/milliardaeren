@@ -112,8 +112,11 @@ describe('bud og fusjon', () => {
     expect(bedriftInntektPerSek(kiosk)).toBeCloseTo(inntektFør * FUSJONSFAKTOR)
     // Pengene flyttes fra kontanter til bedriftens verdi.
     expect(nettoformue(n)).toBeCloseTo(før, 0)
-    expect(n.rivaler[0].formue).toBeLessThan(formueFør)
-    expect(n.rivaler[0].tak).toBeLessThan(takFør)
+    // Rivalen bytter bedriften mot pengene: mister verdien, får betalingen, og taket står.
+    const rb = rivalbedrifter(s.rivaler[0]).find((b) => b.type === 'kiosk')!
+    const betalt = s.kontanter - n.kontanter
+    expect(n.rivaler[0].formue).toBeCloseTo(formueFør * (1 - Math.min(0.5, rb.verdi / formueFør)) + betalt)
+    expect(n.rivaler[0].tak).toBe(takFør)
     expect(n.rivaler[0].solgt).toEqual(['kiosk'])
     expect(rivalbedrifter(n.rivaler[0]).map((b) => b.type)).not.toContain('kiosk')
     expect(n.hendelser.at(-1)?.tittel).toBe('Fusjon')
@@ -204,15 +207,23 @@ describe('startups', () => {
     expect(investerIStartup(s, 1, 1).ok).toBe(false)
   })
 
-  it('en runde som går bra, øker verdien og vanner ut andelen', () => {
+  it('en runde som går bra, øker verdien — men penger fra samme runde vannes ikke ut', () => {
     const s = ok(investerIStartup(medStartup(), 1, 1e6))
     startupsVedDagsskifte(s, fast(0.99))
     const st = s.startups[0]
     expect(st.status).toBe('aktiv')
     expect(st.runde).toBe(1)
     expect(st.verdi).toBeGreaterThan(20e6)
-    expect(st.andel).toBeCloseTo((1e6 / 20e6) * (1 - RUNDEANDEL))
+    expect(st.andel).toBeCloseTo(1e6 / 20e6)
     expect(ledigIRunde(st)).toBeGreaterThan(0)
+  })
+
+  it('andelen fra en tidligere runde vannes ut av neste', () => {
+    const s = ok(investerIStartup(medStartup(), 1, 1e6))
+    startupsVedDagsskifte(s, fast(0.99))
+    const etterFørste = s.startups[0].andel
+    startupsVedDagsskifte(s, fast(0.99))
+    expect(s.startups[0].andel).toBeCloseTo(etterFørste * (1 - RUNDEANDEL))
   })
 
   it('konkurs gjør andelen verdiløs, og avisa og hendelsene melder det', () => {

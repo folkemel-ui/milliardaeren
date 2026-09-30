@@ -23,6 +23,7 @@ import { periodestart } from '../engine/oppgjor'
 import { START_RIVALER } from '../engine/rivaler'
 import { lagKunst } from '../engine/kunst'
 import { nyeKvartal } from '../engine/kvartal'
+import { klubbverdi } from '../engine/klubb'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -207,6 +208,22 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     const marked = structuredClone(s.marked) as Spilltilstand['marked']
     leggTilNyePapirer(marked, s.frø as number)
     return { ...s, marked }
+  },
+  /* 17 → 18: gevinst og tap ved salg skattes. Telleren starter på null, og
+     periodene som pågår, starter på null — så bare salg fra nå skattes.
+     Klubben du alt eier, føres til det den er verdt nå, siden det du betalte
+     ikke ble lagret; gevinsten teller fra i dag. */
+  17: (s) => {
+    const nullstill = (p: unknown) => (p ? { ...(p as Raatilstand), gevinst: 0 } : p)
+    const n: Raatilstand = {
+      ...s,
+      totaltGevinst: 0,
+      ukestart: nullstill(s.ukestart),
+      maanedstart: nullstill(s.maanedstart),
+      aarstart: nullstill(s.aarstart),
+    }
+    if (s.klubb) n.klubb = { ...(s.klubb as Raatilstand), kostpris: klubbverdi(s as unknown as Spilltilstand) }
+    return n
   },
 }
 

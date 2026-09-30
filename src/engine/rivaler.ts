@@ -69,11 +69,19 @@ export interface Plassering {
   rivalId?: string
 }
 
+/**
+ * Det rivalen selv eier: formuen minus den delen av holdingselskapet som er
+ * din. Den delen står allerede i din nettoformue, så ellers telles den to ganger.
+ */
+export function rivalensEgenFormue(r: Rival): number {
+  return r.formue - r.andel * selskapsverdi(r)
+}
+
 /** Forbes-lista: deg og rivalene som ennå ikke er kjøpt opp, rikest først. */
 export function forbesliste(s: Spilltilstand, dinFormue: number): Plassering[] {
   const liste: Plassering[] = [
     { navn: 'Deg', formue: dinFormue, deg: true },
-    ...(s.rivaler ?? []).filter((r) => !r.overtatt).map((r) => ({ navn: r.navn, formue: r.formue, deg: false, rivalId: r.id })),
+    ...(s.rivaler ?? []).filter((r) => !r.overtatt).map((r) => ({ navn: r.navn, formue: rivalensEgenFormue(r), deg: false, rivalId: r.id })),
   ]
   return liste.sort((a, b) => b.formue - a.formue)
 }

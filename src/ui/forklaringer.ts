@@ -83,7 +83,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   skatt: {
     tittel: 'Skatt og offshore',
     tekst:
-      `Hver måned kommer en regning på månedens overskudd, med trinnskatt: ${trinn.map((t) => `${pst(t.sats)} over ${kortKroner(t.fra)}`).join(', ').replace(/, (?=[^,]*$)/, ' og ')}. ` +
+      `Hver måned kommer en regning på månedens overskudd — inntektene og gevinsten på det du har solgt, minus tap og lånerenter — med trinnskatt: ${trinn.map((t) => `${pst(t.sats)} over ${kortKroner(t.fra)}`).join(', ').replace(/, (?=[^,]*$)/, ' og ')}. ` +
       `Du har en uke på å betale — etter det kommer gebyr, og skatten kreves inn. ` +
       `Offshore halverer skatten, men hver måned er det ${pst(REVISJONSSJANSE)} sjanse for bokettersyn. Da betales alt som er unndratt tilbake, pluss like mye i tillegg.`,
   },
@@ -99,7 +99,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tittel: 'Startups',
     tekst:
       `Oppstartsselskaper henter penger i runder, fra pre-seed til serie C. Hver runde varer én spilldag, og du kan ta opptil ${pst(DIN_DEL_AV_RUNDEN)} av den. ` +
-      `Ved dagsskiftet går selskapet videre, går konkurs eller blir kjøpt opp, og nye penger i hver runde gjør andelen din ${pst(RUNDEANDEL)} mindre. ` +
+      `Ved dagsskiftet går selskapet videre, går konkurs eller blir kjøpt opp, og nye penger i hver runde gjør andelen du hadde fra før, ${pst(RUNDEANDEL)} mindre — det du satte inn i selve runden, vannes ikke ut. ` +
       'Etter serie C børsnoteres det, og du får betalt. Inntrykket av teamet hjelper, men det lyver av og til.',
   },
   eiendom: {

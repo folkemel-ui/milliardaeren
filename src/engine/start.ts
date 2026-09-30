@@ -13,7 +13,7 @@ import { nyeKvartal } from './kvartal'
 import type { Dagsbilde, Periodestart, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 17
+export const SPILLVERSJON = 18
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10
@@ -57,6 +57,7 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     totaltLeie: 0,
     sparing: 0,
     totaltSparerente: 0,
+    totaltGevinst: 0,
     luksus: [],
     lager: { ...START_LAGER },
     avis: [],

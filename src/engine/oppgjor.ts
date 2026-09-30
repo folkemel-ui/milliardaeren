@@ -25,6 +25,7 @@ export function periodestart(s: Spilltilstand): Periodestart {
     sparerente: s.totaltSparerente,
     rentebetalt: s.totaltRentebetalt,
     forbruk: s.totaltForbruk,
+    gevinst: s.totaltGevinst ?? 0,
     bedrifter: Object.fromEntries(s.bedrifter.map((b) => [b.id, b.tjent])),
     kurser,
   }
@@ -48,6 +49,7 @@ function lagOppgjor(s: Spilltilstand, start: Periodestart, periode: Oppgjor['per
     sparerente: s.totaltSparerente - start.sparerente,
     renter: s.totaltRentebetalt - start.rentebetalt,
     forbruk: s.totaltForbruk - start.forbruk,
+    gevinster: (s.totaltGevinst ?? 0) - (start.gevinst ?? 0),
     formueFor: start.formue,
     formueEtter: nettoformue(s),
     besteBedrift: beste,

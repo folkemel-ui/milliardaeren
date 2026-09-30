@@ -106,7 +106,9 @@ export function dagensForhandling(s: Spilltilstand, r: Rival, type: Bedriftstype
 
 /**
  * Gjennomfører en fusjon: betaler, slår sammen og tar bedriften fra rivalen.
- * Rivalen mister bedriften, så både formuen og taket den vokser mot krymper.
+ * Rivalen bytter bedriften mot pengene, som ved et landemerke: formuen mister
+ * bedriftens verdi og får betalingen. Taket står fast — rivalen er like
+ * sulten, bare med kontanter i stedet for en bedrift.
  * Muterer — brukes på kopier. Ingen sjekker her.
  */
 export function utforFusjon(n: Spilltilstand, rivalId: string, type: BedriftstypeId, pris: number): void {
@@ -117,8 +119,7 @@ export function utforFusjon(n: Spilltilstand, rivalId: string, type: Bedriftstyp
   din.investert += pris
   din.fusjoner = (din.fusjoner ?? 0) + 1
   const andel = Math.min(0.5, rb.verdi / r.formue)
-  r.formue *= 1 - andel
-  r.tak *= 1 - andel
+  r.formue = r.formue * (1 - andel) + pris
   r.solgt = [...(r.solgt ?? []), type]
   if (r.bud) delete r.bud[type]
 }
@@ -141,7 +142,9 @@ export function fusjonerVedOppkjop(n: Spilltilstand, r: Rival): BedriftstypeId[]
     const andel = Math.min(0.5, rb.verdi / r.formue)
     r.formue *= 1 - andel
     r.tak *= 1 - andel
-    din.investert += (verdiFør - r.formue * SELSKAPSANDEL) * r.andel
+    const flyttet = (verdiFør - r.formue * SELSKAPSANDEL) * r.andel
+    din.investert += flyttet
+    r.kostpris = Math.max(0, r.kostpris - flyttet)
     r.solgt = [...(r.solgt ?? []), rb.type]
     fusjonert.push(rb.type)
   }

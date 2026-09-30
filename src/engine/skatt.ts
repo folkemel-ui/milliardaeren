@@ -27,9 +27,12 @@ export const REVISJONSSJANSE = 0.15
 /** Tatt for unndragelse: det unndratte betales tilbake, pluss like mye i tilleggsskatt. */
 export const TILLEGGSSKATT = 1
 
-/** Skattegrunnlaget i et oppgjør: inntektene minus lånerentene, aldri under null. */
+/**
+ * Skattegrunnlaget i et oppgjør: inntektene og gevinstene ved salg, minus tap
+ * og lånerenter, aldri under null. Tap trekkes bare fra i samme måned.
+ */
 export function skattegrunnlag(o: Oppgjor): number {
-  return Math.max(0, o.bedrifter + o.leie + o.utbytte + o.sparerente - o.renter)
+  return Math.max(0, o.bedrifter + o.leie + o.utbytte + o.sparerente + (o.gevinster ?? 0) - o.renter)
 }
 
 export function beregnSkatt(grunnlag: number): number {
