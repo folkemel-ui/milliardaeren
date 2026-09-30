@@ -8,11 +8,54 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Later:** Hotels abroad and holiday apartments (bring up the parked Map ideas at the same time)
+- **Pack 29 – A tidy map:** Focus on Southern Norway, Less on the map at once, Labels that never overlap, Dots that don't collide
+- **Pack 30 – A better start:** Faster first minutes, Explanations for every system, Norwegian text pass
+- **Pack 31 – The street comes alive:** A real street, Drawings instead of emoji in the street view, Act from the street view, City-first property view
+- **Pack 32 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see
+- **Pack 33 – Cities that matter:** Architecture note, Buildings in more than one city, More price regions, City owner bonus
+- **Pack 34 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
 
 ## Property
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
+
+## Map
+
+2. **Focus on Southern Norway.** Eight of the ten places sit in a small area in the south (Oslo, Geilo, Hedmarken, Trysil, Bergen, Stavanger, Lista), while Finnmark is a big empty area. Show Southern Norway large and the north as a small inset, so the crowded part gets several times more room.
+3. **Less on the map at once.** Each city can show a dot, a number, its name, rent, a rising coin, a trend ring and farm and landmark symbols — up to 60 things for ten cities. Show only the dot and the name by default, and the rest when a city is tapped or when there is room. Farms, forests and landmarks move into the city instead of tiny emoji beside the dot.
+4. **Labels that never overlap.** With every city full, "Stavanger" is cut off at the left edge, Geilo's rent floats up into Bergen, and Oslo's dot covers the Hedmarken and Trysil labels. Labels are pushed apart (or placed by a fixed plan that is checked with every city full) and never go outside the map. The land-only places (Hedmarken, Trysil, Lista, Namdalen) get small icons without a label until you own something there.
+5. **Dots that don't collide.** Dots grow with the number of buildings (up to radius 11), so the richest cities cover their neighbours. Keep the dots the same size and show size with a ring or the number instead.
+6. **A real street.** The street view is a grid of identical cards: Oslo shows six "Leilighet" cards in a row. Draw the buildings side by side as a street with the new drawings, and group repeats ("Leilighet ×6"), so it looks like a city and takes less room.
+7. **Drawings instead of emoji in the street view.** Landmarks, farms and forests show as emoji (⛷️, 🗼, 🌾, 🌲) even though they have their own drawings now.
+8. **Act from the street view.** Buying, renovating and selling happen in the list below the map, not where you see the buildings. The street view gets the same buttons as the cards.
+9. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
+10. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
+11. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
+12. **City-first property view.** At many properties, the map, the long "Boliger og bygg" list, farms and landmarks all compete. Tap a city and see only what is there, instead of one long list for everything.
+13. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
+14. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
+
+## Game
+
+15. **Faster first minutes.** The start is slow and thin: one lemonade stand at kr 1/s and a button to sell cups, with the next business at 4 000 kr (the perfect bot needs 8 minutes to reach 10 000). A quicker first unlock, or more small goals early, so a new player is hooked before they get bored.
+
+## Interface
+
+16. **Explanations for every system.** Stocks, coins, funds, automatic orders, loans, margin calls, tax, offshore, rivals, takeovers, mergers, startups, land, landmarks, art, the club and renovation are never explained in the game. A short "?" tip on each card saying what it is and why you'd want it.
+17. **Split up Profil.** Profil holds net worth, the goal, statistics, tax, accounting, trophies, achievements, records, appearance, save transfer, backup, restart and the logo in one long scroll. Split it into parts, for example "Meg", "Regnskap" and "Innstillinger".
+
+## Look
+
+18. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
+19. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
+
+## Text
+
+20. **Norwegian text pass.** Go through all the text for tone, typos and consistent words (for example "papir", "aksje" and "verdipapir"), so it reads as one finished game.
+
+## Code health
+
+21. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
 
 ## Parked (not chosen yet)
 
@@ -63,11 +106,9 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Businesses on the map.** Your kiosks, cafés and so on appear as small icons in the cities, so the map shows your whole empire.
 - **Rivals on the map.** Each rival has a color; cities where they own landmarks or businesses are marked.
 - **City card.** Tapping a city opens a card on the map with what's for sale, the price trend and rent, with Buy buttons right there.
-- **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there.
 - **Deals on the map.** Markers pop up now and then, like "Plot for sale in Trysil, 20 % off today", and disappear after a while.
 - **Local events.** "Festival in Bergen this week, +30 % rent", shown as a flag on the city and mentioned in the paper.
 - **Movement.** Planes fly the routes on the world map, boats move along the coast, and a pulse runs out from cities you buy in.
-- **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock.
 - **Fog over what's locked.** Cities you can't buy in yet are hidden in fog that clears as your net worth grows.
 - **A growing world map.** Bigger jets open new continents, and the world map widens and gets proper coastlines.
 
