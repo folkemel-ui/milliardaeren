@@ -49,6 +49,22 @@ export function betalRente(s: Spilltilstand): void {
   s.gjeld += rente - fraKontanter - fraSparing
 }
 
+/**
+ * Går kontantene under null — lønn i en bedrift som taper penger — tas resten
+ * fra sparekontoen, og så blir det gjeld. Muterer.
+ */
+export function dekkUnderskudd(s: Spilltilstand): void {
+  if (s.kontanter >= 0) return
+  const fraSparing = Math.min(-s.kontanter, s.sparing)
+  s.sparing -= fraSparing
+  flyt(s, 'sparing', -fraSparing)
+  s.kontanter += fraSparing
+  if (s.kontanter < 0) {
+    s.gjeld -= s.kontanter
+    s.kontanter = 0
+  }
+}
+
 /** Bruker kontanter til å nedbetale, men aldri mer enn gjelden. */
 function nedbetalMed(s: Spilltilstand, belop: number): void {
   const b = Math.min(belop, s.gjeld, Math.max(0, s.kontanter))

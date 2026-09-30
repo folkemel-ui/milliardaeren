@@ -2,14 +2,15 @@
 
 import {
   ANSATT_BONUS,
-  ANSATT_LONN,
   ANSATTE_PER_NIVAA,
   ANSETTELSE_FAKTOR,
   ANSETTELSE_VEKST,
   BEDRIFTSTYPER,
   FORBEDRING_PRISFAKTOR,
   FORBEDRINGER,
+  LAANETAK_TIMER,
   LEDER_MINSTEPRIS,
+  LONN_PER_ANSATT,
   MAKS_ANSATTE,
   MAKS_BELAANING,
   MILEPAELER,
@@ -105,18 +106,20 @@ export function basisinntekt(b: Bedrift): number {
   return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b) * fusjonsfaktor(b)
 }
 
+/** Lønnen til de ansatte per sekund: fast per ansatt, uansett nivå. */
 export function bedriftLonn(b: Bedrift): number {
-  return basisinntekt(b) * ANSATT_LONN * b.ansatte
+  return BEDRIFTSTYPER[b.type].grunninntekt * LONN_PER_ANSATT * b.ansatte
 }
 
-/** Nettoinntekt per sekund: basis, pluss det de ansatte gir, minus lønnen deres. */
+/** Nettoinntekt per sekund: basis, pluss det de ansatte gir, minus lønnen deres. Kan bli negativ. */
 export function bedriftInntektPerSek(b: Bedrift): number {
-  return basisinntekt(b) * (1 + (ANSATT_BONUS - ANSATT_LONN) * b.ansatte)
+  return basisinntekt(b) * (1 + ANSATT_BONUS * b.ansatte) - bedriftLonn(b)
 }
 
 /**
- * En bedrift er verdt det du har investert i den. Da flytter et kjøp bare
- * penger fra kontanter til bedrift — nettoformuen vokser bare av inntekt.
+ * En bedrift er verdt det du har investert i den: kjøpet, oppgraderingene,
+ * forbedringene og fusjonene. Ansatte og ledere er driftskostnader og
+ * bokføres ikke — de koster nettoformue.
  */
 export function bedriftsverdi(b: Bedrift): number {
   return b.investert
@@ -195,11 +198,27 @@ export function belaaningsgrad(s: Spilltilstand): number {
   return e > 0 ? s.gjeld / e : s.gjeld > 0 ? Infinity : 0
 }
 
+/** Alt som kommer inn per sekund før lånerentene: bedriftene, leien, sparerenten og rivalutbyttet. */
+export function bruttoPerSek(s: Spilltilstand): number {
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s)
+}
+
+/** Så stor kan gjelden bli etter inntekten: LAANETAK_TIMER timer av det som kommer inn. */
+export function laanetak(s: Spilltilstand): number {
+  return Math.max(0, bruttoPerSek(s) * LAANETAK_TIMER * 3600)
+}
+
 /**
- * Hvor mye du kan låne nå. Et lån øker både eiendeler og gjeld, så grensen
- * (gjeld ≤ andel · eiendeler) gir: nytt lån ≤ (andel · E − G) / (1 − andel).
+ * Hvor mye du kan låne nå: det minste av to grenser. Et lån øker både
+ * eiendeler og gjeld, så sikkerheten (gjeld ≤ andel · eiendeler) gir
+ * nytt lån ≤ (andel · E − G) / (1 − andel). Inntekten gir nytt lån ≤ tak − G.
  */
 export function maksNyttLaan(s: Spilltilstand): number {
+  return Math.max(0, Math.floor(Math.min(maksLaanMotSikkerhet(s), laanetak(s) - s.gjeld)))
+}
+
+/** Grensen fra sikkerheten alene — det du kunne lånt hvis inntekten ikke satte tak. */
+export function maksLaanMotSikkerhet(s: Spilltilstand): number {
   return Math.max(0, Math.floor((MAKS_BELAANING * eiendeler(s) - s.gjeld) / (1 - MAKS_BELAANING)))
 }
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { migrer, type Raatilstand } from '../migrering'
 import { SPILLVERSJON, nyttSpill } from '../../engine/start'
-import { nettoformue } from '../../engine/formler'
+import { lederpris, nettoformue } from '../../engine/formler'
 
 describe('migrering', () => {
   it('slipper en lagring fra gjeldende versjon gjennom urørt', () => {
@@ -52,7 +52,8 @@ describe('migrering', () => {
     expect(r.tilstand.gjeld).toBe(0)
     expect(r.tilstand.beholdning).toEqual({})
     expect(r.tilstand.marked.kurser.BMT.historikk.length).toBeGreaterThan(100)
-    expect(nettoformue(r.tilstand)).toBe(6_500)
+    // Versjon 19 tar lederen ut av bedriftens verdi; ellers er formuen den samme.
+    expect(nettoformue(r.tilstand)).toBe(6_500 - lederpris('saftbod'))
   })
 
   it('løfter en versjon 3-lagring til versjon 4 med eiendomsindeks og uendret formue', () => {
@@ -78,7 +79,8 @@ describe('migrering', () => {
     expect(r.tilstand.marked.kurser).toEqual(v3.tilstand.marked.kurser)
     expect(r.tilstand.lager).toEqual({ garasje: 1, havn: 0, hangar: 0 })
     expect(r.tilstand.luksus).toEqual([])
-    expect(nettoformue(r.tilstand)).toBe(6_500)
+    // Versjon 19 tar lederen ut av bedriftens verdi; ellers er formuen den samme.
+    expect(nettoformue(r.tilstand)).toBe(6_500 - lederpris('saftbod'))
   })
 
   it('løfter en versjon 4-lagring til versjon 5 og stempler prestasjoner du alt har', () => {
@@ -102,7 +104,8 @@ describe('migrering', () => {
     expect(r.tilstand.avis).toEqual([])
     expect(r.tilstand.forrigeDag.sek).toBe(900)
     expect(Object.keys(r.tilstand.prestasjoner).sort()).toEqual(['fem-sifre', 'forste-ansatt', 'forste-leder', 'forste-steg'])
-    expect(nettoformue(r.tilstand)).toBe(51_500)
+    // Versjon 19 tar lederen ut av bedriftens verdi; ellers er formuen den samme.
+    expect(nettoformue(r.tilstand)).toBe(51_500 - lederpris('saftbod'))
   })
 
   it('løfter en versjon 5-lagring til versjon 6 med regnskap, sparekonto og kostpris på eiendom', () => {

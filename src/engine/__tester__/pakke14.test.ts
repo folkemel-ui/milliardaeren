@@ -3,7 +3,8 @@
 import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
-import { kjopFond, kjopPapir, laan, selgFond, selgPapir, type Utfall } from '../handlinger'
+import { kjopFond, kjopPapir, selgFond, selgPapir, type Utfall } from '../handlinger'
+import { laanUtenTak } from './hjelp'
 import { nettoformue } from '../formler'
 import { DAG_SEK, dato, erHelg } from '../kalender'
 import { AKSJER, PAPIRER, registrerDagslutt } from '../marked'
@@ -83,7 +84,7 @@ describe('indeksfond', () => {
 
   it('marginkrav selger fondene når lånet blir for stort', () => {
     let s = rik()
-    s = ok(laan(s, 5e7))
+    s = laanUtenTak(s, 5e7)
     s = ok(kjopFond(s, 'BORSFOND', s.kontanter))
     // Fondet halveres i verdi.
     for (const id of AKSJER) {

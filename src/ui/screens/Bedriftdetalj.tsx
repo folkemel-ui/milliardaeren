@@ -1,8 +1,8 @@
 import { bedriftInntektPerSek, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
-import { kjopForbedring } from '../../engine/handlinger'
+import { bedriftssalgspris, kjopForbedring, selgBedrift } from '../../engine/handlinger'
 import type { Kjopsmengde } from '../kjopsmengde'
 import { fusjonsfaktor } from '../../engine/fusjon'
-import { BEDRIFTSTYPER, FORBEDRINGER, MILEPAELER } from '../../engine/innhold'
+import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER, FORBEDRINGER, MILEPAELER } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
 import { INNTEKT_HISTORIKK_SEK } from '../../engine/simulering'
 import type { Bedrift, Spilltilstand } from '../../engine/types'
@@ -15,6 +15,7 @@ import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
 import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
+import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 
 export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
@@ -50,7 +51,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
           </div>
         </div>
         <div className="detalj-kurs">
-          <span className={`tall-kjempe pluss inntekt ${puls}`}>{perSek(inntekt)}</span>
+          <span className={`tall-kjempe ${inntekt >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(inntekt)}</span>
           <span className="dempet liten">Inntekt etter lønn{statusfaktor(s) > 1 && ' og statusbonus'}</span>
         </div>
         {b.inntektHistorikk.length > 0 ? (
@@ -137,6 +138,27 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
 
       <div className="kort">
         <Personale b={b} s={s} />
+      </div>
+
+      <div className="kort">
+        <div className="personale-rad">
+          <div>
+            <h3>Selg bedriften</h3>
+            <p className="dempet liten">
+              {s.bedrifter.length <= 1
+                ? 'Den siste bedriften din kan du ikke selge.'
+                : `Du får det du har investert, ${kortKroner(b.investert)}, minus ${tall(BEDRIFTSSALG_RABATT * 100)} %. Fusjonene forsvinner med den, og kjøper du bransjen igjen, starter du på nivå 1.`}
+            </p>
+          </div>
+          <Bekreftknapp
+            className="knapp knapp-fare knapp-liten"
+            disabled={s.bedrifter.length <= 1}
+            varsel={`Du taper ${kortKroner(b.investert - bedriftssalgspris(b))}.`}
+            onJa={() => utfor(selgBedrift(s, b.id))}
+          >
+            Selg · {kortKroner(bedriftssalgspris(b))}
+          </Bekreftknapp>
+        </div>
       </div>
     </section>
   )

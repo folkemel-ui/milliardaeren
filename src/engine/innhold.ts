@@ -153,14 +153,18 @@ export const FORBEDRINGER: Record<BedriftstypeId, Forbedring[]> = {
 
 /** Hver ansatt øker inntekten med så stor andel av bedriftens basisinntekt … */
 export const ANSATT_BONUS = 0.1
-/** … og koster så stor andel i lønn, hvert sekund. */
-export const ANSATT_LONN = 0.03
+/**
+ * … og koster en fast lønn per sekund: så mange ganger bransjens grunninntekt.
+ * Lønnen vokser ikke med nivået, så en ansatt taper penger i en liten bedrift
+ * og lønner seg først rundt nivå 20.
+ */
+export const LONN_PER_ANSATT = 3
 /** Plass til én ansatt, pluss én for hvert femte nivå — opp til taket. */
 export const ANSATTE_PER_NIVAA = 5
 export const MAKS_ANSATTE = 10
 /**
  * En ansettelse koster så mange av bedriftens neste oppgradering, og blir
- * dyrere per ansatt. Da lønner ansatte seg først når bedriften er stor.
+ * dyrere per ansatt. Den egentlige kostnaden er lønnen.
  */
 export const ANSETTELSE_FAKTOR = 2
 export const ANSETTELSE_VEKST = 1.5
@@ -173,14 +177,22 @@ export const BORTE_TAK_SEK = 2 * 60 * 60
 
 // ─────────────────────────────────────────────── Banken
 
-/** Rente på lån, per time spilltid. Trekkes hvert sekund. */
-export const RENTE_PER_TIME = 0.03
-/** Du kan låne til gjelden er så stor andel av alt du eier. */
+/**
+ * Rente på lån, per time spilltid. Trekkes hvert sekund. Høy nok til at et lån
+ * bare lønner seg for de beste kjøpene — ikke for alt.
+ */
+export const RENTE_PER_TIME = 0.08
+/** Du kan låne til gjelden er så stor andel av alt du eier … */
 export const MAKS_BELAANING = 0.5
+/** … og aldri mer enn så mange timer av inntekten din. */
+export const LAANETAK_TIMER = 2
 /** Over denne andelen selger banken investeringene dine … */
 export const MARGINKRAV = 0.75
 /** … og tar over bedrifter til 50 % av det du investerte, hvis det ikke holder. */
 export const TVANGSSALG_ANDEL = 0.5
+
+/** Selger du en bedrift selv, får du det som er investert i den, minus så stor andel. */
+export const BEDRIFTSSALG_RABATT = 0.3
 
 /** Sparekontoen: lav, risikofri rente per time, lagt til hvert sekund. Lavere enn lånerenten, så lån-for-å-spare taper alltid. */
 export const SPARERENTE_PER_TIME = 0.01

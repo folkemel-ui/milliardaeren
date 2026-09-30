@@ -1,6 +1,7 @@
 import {
   ansettelsespris,
   bedriftInntektPerSek,
+  bedriftLonn,
   lederpris,
   maksAnsatte,
   forbedringspris,
@@ -8,11 +9,10 @@ import {
   nesteMilepael,
   statusfaktor,
 } from '../../engine/formler'
-import { ansett, ansettLeder, kjopForbedring, oppgraderFlere } from '../../engine/handlinger'
+import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp } from '../../engine/handlinger'
 import { kjop, type Kjopsmengde } from '../kjopsmengde'
 import {
   ANSATT_BONUS,
-  ANSATT_LONN,
   ANSATTE_PER_NIVAA,
   BEDRIFTSTYPER,
   BORTE_TAK_SEK,
@@ -62,7 +62,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
             {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'}`}
           </span>
         </div>
-        <span className={`pluss inntekt ${puls}`}>{perSek(bedriftInntektPerSek(b) * statusfaktor(s))}</span>
+        <span className={`${bedriftInntektPerSek(b) >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(bedriftInntektPerSek(b) * statusfaktor(s))}</span>
       </div>
 
       <div className="milepael">
@@ -107,6 +107,9 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
   const ansPris = ansettelsespris(b)
   const ledPris = lederpris(b.type)
   const nesteplass = (Math.floor(b.nivaa / ANSATTE_PER_NIVAA) + 1) * ANSATTE_PER_NIVAA
+  const lonnHver = bedriftLonn({ ...b, ansatte: 1 })
+  // Hva én ansatt til gir netto: ekstra inntekt minus lønnen. Kan være negativt.
+  const nesteGir = (bedriftInntektPerSek({ ...b, ansatte: b.ansatte + 1 }) - bedriftInntektPerSek(b)) * statusfaktor(s)
 
   return (
     <div className="personale">
@@ -116,17 +119,30 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
             Ansatte <span className="dempet">{b.ansatte} / {maks}</span>
           </h3>
           <p className="dempet liten">
-            Hver ansatt gir +{tall(ANSATT_BONUS * 100)} % inntekt og koster {tall(ANSATT_LONN * 100)} % i lønn.
+            Hver ansatt gir +{tall(ANSATT_BONUS * 100)} % inntekt og koster fast {perSek(lonnHver).slice(1)} i lønn.
             {fullt && maks < MAKS_ANSATTE && ` Ny plass på nivå ${nesteplass}.`}
           </p>
+          {!fullt && (
+            <p className={nesteGir >= 0 ? 'pluss liten' : 'minus liten'}>
+              Én til gir {perSek(nesteGir)}
+              {nesteGir < 0 && ' — lønnen er større enn det den ansatte tjener inn'}
+            </p>
+          )}
         </div>
-        <button
-          className="knapp knapp-gull knapp-liten"
-          disabled={fullt || s.kontanter < ansPris}
-          onClick={() => utfor(ansett(s, b.id))}
-        >
-          {fullt ? 'Fullt' : `Ansett · ${kortKroner(ansPris)}`}
-        </button>
+        <div className="personale-knapper">
+          <button
+            className="knapp knapp-gull knapp-liten"
+            disabled={fullt || s.kontanter < ansPris}
+            onClick={() => utfor(ansett(s, b.id))}
+          >
+            {fullt ? 'Fullt' : `Ansett · ${kortKroner(ansPris)}`}
+          </button>
+          {b.ansatte > 0 && (
+            <button className="knapp knapp-liten" onClick={() => utfor(siOpp(s, b.id))}>
+              Si opp én
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="personale-rad">

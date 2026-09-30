@@ -526,6 +526,13 @@ figure {
   margin: 0;
 }
 
+.personale-knapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
 /* ─────────────────────────────────────────────── Profil */
 
 .profil-formue {

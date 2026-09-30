@@ -4,7 +4,7 @@
  */
 
 import * as h from '../handlinger'
-import { maksNyttLaan } from '../formler'
+import { maksLaanMotSikkerhet, maksNyttLaan } from '../formler'
 import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, Spilltilstand } from '../types'
 
 function ok(u: h.Utfall): Spilltilstand {
@@ -19,6 +19,17 @@ export const selgLuksus = (s: Spilltilstand, id: LuksusId) => ok(h.selgLuksus(s,
 export const utvidLager = (s: Spilltilstand, id: LagerId) => ok(h.utvidLager(s, id))
 export const laan = (s: Spilltilstand, belop: number) => ok(h.laan(s, belop))
 export const maksNyttLaanFor = maksNyttLaan
+
+/**
+ * Et lån uten inntektstaket, for tester av marginkrav og renter der
+ * spilleren ikke har inntekt nok til å låne så mye på vanlig vis.
+ */
+export function laanUtenTak(s: Spilltilstand, belop = maksLaanMotSikkerhet(s)): Spilltilstand {
+  const n = structuredClone(s)
+  n.kontanter += belop
+  n.gjeld += belop
+  return n
+}
 
 /** En bedrift til tester, med fornuftige standardverdier for alt som ikke er gitt. */
 export function bedrift(type: BedriftstypeId, felt: Partial<Bedrift> = {}): Bedrift {

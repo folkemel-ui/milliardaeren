@@ -3,7 +3,7 @@
  * tilstanden og antall sekunder — aldri av bildefrekvens eller klokke.
  */
 
-import { betalRente, sjekkMargin } from './bank'
+import { betalRente, dekkUnderskudd, sjekkMargin } from './bank'
 import { bedriftInntektPerSek, inntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
 import { leiePerSek, sjekkOppussing } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
@@ -66,6 +66,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const leie = leiePerSek(s)
   s.kontanter += leie
   s.totaltLeie += leie
+  dekkUnderskudd(s)
   betalRente(s)
   s.sek += 1
   // Oppussing som er ferdig nå, gir ny standard fra neste sekund.

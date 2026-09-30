@@ -24,6 +24,7 @@ import { START_RIVALER } from '../engine/rivaler'
 import { lagKunst } from '../engine/kunst'
 import { nyeKvartal } from '../engine/kvartal'
 import { klubbverdi } from '../engine/klubb'
+import { lederpris } from '../engine/formler'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -225,6 +226,18 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     if (s.klubb) n.klubb = { ...(s.klubb as Raatilstand), kostpris: klubbverdi(s as unknown as Spilltilstand) }
     return n
   },
+  /* 18 → 19: ledere og ansatte er driftskostnader, ikke verdi i bedriften.
+     Lederprisen er kjent og trekkes fra det som er investert. Hva de ansatte
+     kostet, ble ikke lagret — det står igjen i en gammel lagring. */
+  18: (s) => ({
+    ...s,
+    bedrifter: (s.bedrifter as Raatilstand[]).map((b) => {
+      if (!b.leder) return b
+      const type = b.type as BedriftstypeId
+      const investert = Math.max(BEDRIFTSTYPER[type].pris, (b.investert as number) - lederpris(type))
+      return { ...b, investert }
+    }),
+  }),
 }
 
 export type MigreringsResultat =

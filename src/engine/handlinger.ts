@@ -28,6 +28,7 @@ import {
   utforMalerisalg,
   utforRivalsalg,
   utforSalg,
+  bokforGevinst,
 } from './handel'
 import { FOND, FOND_GEBYR, fondskurs, fondStengt } from './fond'
 import { BLOKK, blokkpris, oppkjopspris } from './rivaler'
@@ -47,7 +48,7 @@ import {
   statusnivaa,
   utvidelsespris,
 } from './eiendom'
-import { BEDRIFTSTYPER } from './innhold'
+import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER } from './innhold'
 import { DAG_SEK, dagnummer, erHelg } from './kalender'
 import { leggTilHendelse } from './bank'
 import {
@@ -101,15 +102,17 @@ function finn(s: Spilltilstand, id: string): Bedrift | undefined {
 }
 
 /**
- * Betaler for noe i en bedrift: trekker prisen, kjører endringen på en kopi,
- * og legger beløpet til bedriftens investerte verdi.
+ * Betaler for noe i en bedrift: trekker prisen og kjører endringen på en kopi.
+ * Er det en investering (oppgradering, forbedring), legges beløpet til
+ * bedriftens verdi; er det drift (ansatte, leder), er pengene brukt.
  */
-function investerI(s: Spilltilstand, id: string, pris: number, endring: (b: Bedrift) => void): Utfall {
+function investerI(s: Spilltilstand, id: string, pris: number, endring: (b: Bedrift) => void, bokfor = true): Utfall {
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   const b = finn(n, id)!
   n.kontanter -= pris
-  b.investert += pris
+  if (bokfor) b.investert += pris
+  else n.totaltForbruk += pris
   endring(b)
   return { ok: true, tilstand: n }
 }
@@ -177,7 +180,40 @@ export function ansett(s: Spilltilstand, id: string): Utfall {
   if (b.ansatte >= maksAnsatte(b)) return feil('Det er ikke plass til flere ansatte. Oppgrader bedriften først.')
   return investerI(s, id, ansettelsespris(b), (n) => {
     n.ansatte += 1
-  })
+  }, false)
+}
+
+/** Sier opp en ansatt. Ingen kostnad og ingenting tilbake — bare lønnen forsvinner. */
+export function siOpp(s: Spilltilstand, id: string): Utfall {
+  const b = finn(s, id)
+  if (!b) return feil('Fant ikke bedriften.')
+  if (b.ansatte <= 0) return feil('Bedriften har ingen ansatte.')
+  const n = structuredClone(s)
+  finn(n, id)!.ansatte -= 1
+  return { ok: true, tilstand: n }
+}
+
+/** Det du får for en bedrift du selger selv: det som er investert, minus rabatten. */
+export function bedriftssalgspris(b: Bedrift): number {
+  return Math.round(b.investert * (1 - BEDRIFTSSALG_RABATT))
+}
+
+/**
+ * Selger en bedrift til det som er investert i den, minus rabatten. Den siste
+ * bedriften får du ikke selge. Fusjonene forsvinner med bedriften; kjøper du
+ * bransjen igjen, starter du på nivå 1.
+ */
+export function selgBedrift(s: Spilltilstand, id: string): Utfall {
+  const b = finn(s, id)
+  if (!b) return feil('Fant ikke bedriften.')
+  if (s.bedrifter.length <= 1) return feil('Du må ha minst én bedrift.')
+  const n = structuredClone(s)
+  const inntekt = bedriftssalgspris(b)
+  n.kontanter += inntekt
+  bokforGevinst(n, inntekt - b.investert)
+  n.bedrifter = n.bedrifter.filter((x) => x.id !== id)
+  if (n.ko?.bedriftId === id) n.ko = null
+  return { ok: true, tilstand: n }
 }
 
 // ─────────────────────────────────────────────── Aksjer og krypto
@@ -758,5 +794,5 @@ export function ansettLeder(s: Spilltilstand, id: string): Utfall {
   if (b.leder) return feil('Bedriften har allerede en leder.')
   return investerI(s, id, lederpris(b.type), (n) => {
     n.leder = true
-  })
+  }, false)
 }

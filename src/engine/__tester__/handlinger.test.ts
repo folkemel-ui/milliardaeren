@@ -109,13 +109,14 @@ describe('nivåer og oppgraderinger', () => {
 })
 
 describe('ansatte og ledere', () => {
-  it('en ansatt gir mer enn lønnen koster', () => {
+  it('i en liten bedrift koster en ansatt mer enn den gir — lønnen er fast', () => {
     const s = med((t) => {
       t.kontanter = 10_000
     })
     const u = ansett(s, 'b1')
     expect(u.ok).toBe(true)
-    if (u.ok) expect(inntektPerSek(u.tilstand)).toBeCloseTo(1.07)
+    // Saftboden på nivå 1: 1 kr/s + 10 % − 3 kr/s i lønn.
+    if (u.ok) expect(inntektPerSek(u.tilstand)).toBeCloseTo(1.1 - 3)
   })
 
   it('plassen til ansatte vokser med nivået', () => {

@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { kjopPapir, settInn, taUt } from '../handlinger'
-import { belaaningsgrad, maksKjop, maksNyttLaan, nettoformue, nettoPerSek } from '../formler'
+import { belaaningsgrad, maksKjop, nettoformue, nettoPerSek } from '../formler'
 import { SPARERENTE_PER_TIME, MARGINKRAV } from '../innhold'
 import { portefolje, sum } from '../portefolje'
 import { EIENDOMSTYPER, MEGLERHONORAR } from '../eiendom'
-import { kjopEiendom, laan, selgEiendom } from './hjelp'
+import { kjopEiendom, laanUtenTak, selgEiendom } from './hjelp'
 import { DAG_SEK } from '../kalender'
 import type { Spilltilstand } from '../types'
 
@@ -49,8 +49,7 @@ describe('sparekontoen', () => {
   })
 
   it('banken tar sparepengene først ved marginkrav', () => {
-    let s = rik(10_000)
-    s = laan(s, maksNyttLaan(s))
+    let s = laanUtenTak(rik(10_000))
     // Halvparten i krypto, resten på sparekontoen.
     const u = kjopPapir(s, 'LKS', Math.floor(maksKjop(s, 'LKS') / 2))
     if (!u.ok) throw new Error(u.feil)

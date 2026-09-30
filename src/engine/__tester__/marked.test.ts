@@ -7,7 +7,7 @@ import { AKSJER, KRYPTO, lagMarked, MAKS_KURSHISTORIKK, PAPIRER } from '../marke
 import { DAG_SEK } from '../kalender'
 import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../innhold'
 import type { PapirId, Spilltilstand } from '../types'
-import { bedrift } from './hjelp'
+import { bedrift, laanUtenTak } from './hjelp'
 
 function rik(kontanter = 1_000_000): Spilltilstand {
   const s = nyttSpill()
@@ -102,25 +102,20 @@ describe('banken', () => {
   })
 
   it('krever renter hvert sekund', () => {
-    const u = laan(rik(100_000), 50_000)
-    if (!u.ok) throw new Error(u.feil)
+    const u = { tilstand: laanUtenTak(rik(100_000), 50_000) }
     const etter = simuler(u.tilstand, 3600)
     const rente = u.tilstand.kontanter + etter.totaltTjent - u.tilstand.totaltTjent - etter.kontanter
     expect(rente).toBeCloseTo(50_000 * RENTE_PER_TIME, 0)
   })
 
   it('nedbetaling fjerner gjelden', () => {
-    const u = laan(rik(100_000), 50_000)
-    if (!u.ok) throw new Error(u.feil)
-    const n = nedbetal(u.tilstand, 1e12)
+    const n = nedbetal(laanUtenTak(rik(100_000), 50_000), 1e12)
     expect(n.ok && n.tilstand.gjeld).toBe(0)
   })
 
   it('marginkrav: banken selger investeringene når gjelden blir for stor', () => {
-    let s = rik(10_000)
-    const u = laan(s, maksNyttLaan(s))
-    if (!u.ok) throw new Error(u.feil)
-    s = kjøpt(u.tilstand, 'LKS', maksKjop(u.tilstand, 'LKS'))
+    let s = laanUtenTak(rik(10_000))
+    s = kjøpt(s, 'LKS', maksKjop(s, 'LKS'))
     // Kryptokrakk: kursen faller 40 %, og belåningen går over marginkravet.
     const k = s.marked.kurser.LKS
     k.avvik += Math.log(0.6)
@@ -133,10 +128,8 @@ describe('banken', () => {
   })
 
   it('er du blakk etter salget, står gjelden igjen og du beholder bedriften', () => {
-    let s = rik(10_000)
-    const u = laan(s, maksNyttLaan(s))
-    if (!u.ok) throw new Error(u.feil)
-    s = kjøpt(u.tilstand, 'LKS', maksKjop(u.tilstand, 'LKS'))
+    let s = laanUtenTak(rik(10_000))
+    s = kjøpt(s, 'LKS', maksKjop(s, 'LKS'))
     const k = s.marked.kurser.LKS
     k.avvik += Math.log(0.1)
     k.kurs *= 0.1

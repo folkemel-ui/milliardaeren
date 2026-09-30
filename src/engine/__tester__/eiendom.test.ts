@@ -2,6 +2,7 @@
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { bedrift, kjopEiendom, kjopLuksus, laan, maksNyttLaanFor, selgEiendom, selgLuksus, utvidLager } from './hjelp'
+import { maksLaanMotSikkerhet } from '../formler'
 import { belaaningsgrad, inntektPerSek, nettoformue, rentesats } from '../formler'
 import {
   EIENDOMSTYPER,
@@ -130,7 +131,7 @@ describe('marginkrav med eiendom', () => {
     s.bedrifter.push(bedrift('polsebod', { id: 'b2', investert: 3_000 }))
     s.eiendommer = { hybel: 4 }
     // Uten gjeld er maks lån lik eiendelene; halvparten av det gir belåning på grensen.
-    s.gjeld = Math.floor(maksNyttLaanFor(s) * MAKS_BELAANING)
+    s.gjeld = Math.floor(maksLaanMotSikkerhet(s) * MAKS_BELAANING)
     expect(belaaningsgrad(s)).toBeCloseTo(MAKS_BELAANING, 1)
     // Boligkrakk: prisene faller 40 %, og belåningen går over marginkravet.
     s.marked.eiendom.avvik += Math.log(0.6)

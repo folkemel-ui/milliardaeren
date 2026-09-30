@@ -5,6 +5,7 @@ import {
   maksKjop,
   nettoformue,
   maksNyttLaan,
+  laanetak,
   papirverdi,
   rentePerSek,
   rentesats,
@@ -31,7 +32,7 @@ import { ORDRETYPER } from '../../engine/ordre'
 import { BLOKK, blokkpris, forbesliste, oppkjopspris, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../engine/rivaler'
 import { erHelg } from '../../engine/kalender'
 import { BUD, type BudId, dagensForhandling, FORMER, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../../engine/fusjon'
-import { BEDRIFTSTYPER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME, SPARERENTE_PER_TIME } from '../../engine/innhold'
+import { BEDRIFTSTYPER, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME, SPARERENTE_PER_TIME } from '../../engine/innhold'
 import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
 import { portefolje, sum, type Aktivaklasse } from '../../engine/portefolje'
 import type { BedriftstypeId, Ordretype, PapirId, Rival, Spilltilstand } from '../../engine/types'
@@ -951,7 +952,8 @@ function Bank({ s }: { s: Spilltilstand }) {
             <span className="belaaning-strek fare" style={{ left: `${MARGINKRAV * 100}%` }} />
           </div>
           <p className="dempet liten">
-            Du kan låne til gjelden er {tall(MAKS_BELAANING * 100)} % av alt du eier. Over {tall(MARGINKRAV * 100)} %
+            Du kan låne til gjelden er {tall(MAKS_BELAANING * 100)} % av alt du eier, og høyst {tall(LAANETAK_TIMER)} timer av
+            inntekten din — nå {kortKroner(laanetak(s))}. Over {tall(MARGINKRAV * 100)} %
             selger banken investeringene dine — og holder ikke det, tar den over bedrifter.
           </p>
         </div>

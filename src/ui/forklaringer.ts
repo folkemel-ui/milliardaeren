@@ -7,7 +7,7 @@
 import { MEGLERHONORAR } from '../engine/eiendom'
 import { FOND_GEBYR } from '../engine/fond'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
-import { ANSATT_BONUS, ANSATT_LONN, BORTE_TAK_SEK, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
+import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
@@ -43,7 +43,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tittel: 'Bedriftene',
     tekst:
       `Hver oppgradering gir litt mer inntekt, og på nivå ${MILEPAELER.join(', ').replace(/, (?=[^,]*$)/, ' og ')} dobles den. ` +
-      `Ansatte gir ${pst(ANSATT_BONUS)} mer hver og koster ${pst(ANSATT_LONN)} i lønn — de betaler seg. ` +
+      `Ansatte gir ${pst(ANSATT_BONUS)} mer hver, men lønnen er fast: i en liten bedrift koster de mer enn de gir, og de lønner seg først rundt nivå 20. ` +
+      'Ansatte og ledere er driftskostnader — de øker ikke det bedriften er verdt. ' +
+      `Selger du en bedrift, får du det du har investert i den minus ${pst(BEDRIFTSSALG_RABATT)}. ` +
       `Uten leder står bedriften stille når spillet har vært lukket i mer enn ett minutt. Med leder går den videre mens du er borte, i opptil ${tall(BORTE_TAK_SEK / 3600)} timer.`,
   },
   aksjer: {
@@ -76,7 +78,8 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   laan: {
     tittel: 'Lån og marginkrav',
     tekst:
-      `Du kan låne til gjelden er ${pst(MAKS_BELAANING)} av alt du eier. Renten trekkes hvert sekund, og jo høyere status, jo lavere rente. ` +
+      `Du kan låne til gjelden er ${pst(MAKS_BELAANING)} av alt du eier — og aldri mer enn ${tall(LAANETAK_TIMER)} timer av inntekten din. ` +
+      'Renten trekkes hvert sekund og er høy nok til at et lån bare lønner seg for de beste kjøpene. Jo høyere status, jo lavere rente. ' +
       `Stiger gjelden til ${pst(MARGINKRAV)} — for eksempel fordi kursene faller — kommer et marginkrav: banken selger av det du eier ` +
       `til du er nede på ${pst(MAKS_BELAANING)} igjen, og holder ikke det, tar den bedrifter.`,
   },
