@@ -32,6 +32,7 @@ import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
+import { Klubbvaapen } from '../komponenter/Klubbvaapen'
 import { Forklaring } from '../komponenter/Forklaring'
 
 /** Kortet i Luksus-fanen: kjøp en klubb, eller åpne den du har. */
@@ -57,9 +58,7 @@ export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void })
   const neste = nesteKamp(k)
   return (
     <button className="kort klubbkort eid" onClick={aapne}>
-      <span className="klubb-emoji" aria-hidden="true">
-        <Ikon navn="ball" størrelse={26} />
-      </span>
+      <Klubbvaapen navn={k.navn} størrelse={44} />
       <span className="klubbkort-midt">
         <strong>{k.navn}</strong>
         <span className="dempet liten">
@@ -104,6 +103,10 @@ function Klubbkjop({ s }: { s: Spilltilstand }) {
           </button>
         ))}
       </div>
+      <div className="klubbvalgt">
+        <Klubbvaapen navn={navn} størrelse={56} />
+        <strong>{navn}</strong>
+      </div>
       <p className="liten">
         Lagstyrke <strong>{tall(lagstyrke(klubb))}</strong> · troppen er verdt {kortKroner(pris - DIVISJONER[0].verdi)}
       </p>
@@ -128,13 +131,16 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
     <>
       <div className="kort klubbtopp">
         <div className="rival-topp">
-          <div>
-            <h1 className="skjerm-tittel">
-            {k.navn} <Forklaring tema="klubb" />
-          </h1>
-            <span className="dempet">
-              {DIVISJONER[k.divisjon].navn} · sesong {k.sesong}
-            </span>
+          <div className="klubbtopp-navn">
+            <Klubbvaapen navn={k.navn} størrelse={52} />
+            <div>
+              <h1 className="skjerm-tittel">
+                {k.navn} <Forklaring tema="klubb" />
+              </h1>
+              <span className="dempet">
+                {DIVISJONER[k.divisjon].navn} · sesong {k.sesong}
+              </span>
+            </div>
           </div>
           <div className="papirrad-kurs">
             <span>{kortKroner(verdi)}</span>
@@ -182,7 +188,7 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
           <ul className="kampliste">
             {[...k.kamper].reverse().slice(0, 5).map((m) => (
               <li key={`${m.sesong}-${m.runde}`}>
-                <span className={`resultat r${RESULTAT(m)}`}>{RESULTAT(m)}</span>
+                <span className={`brikke resultat r${RESULTAT(m)}`}>{RESULTAT(m)}</span>
                 <span>
                   {m.hjemme ? 'Hjemme mot' : 'Borte mot'} {m.motstander}
                 </span>
@@ -214,7 +220,12 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
               return (
                 <tr key={l.navn} className={`${i === 0 ? 'deg' : ''} ${sone}`}>
                   <td>{plass + 1}</td>
-                  <td>{l.navn}</td>
+                  <td>
+                    <span className="tabell-lag">
+                      <Klubbvaapen navn={l.navn} størrelse={18} />
+                      {l.navn}
+                    </span>
+                  </td>
                   <td>{l.spilt}</td>
                   <td>{fortegn(l.maalFor - l.maalMot)}</td>
                   <td>
@@ -339,11 +350,13 @@ function Kampoppsett({ k, styrke, motstander, motStyrke, hjemme }: { k: KlubbT; 
   return (
     <div className="kampoppsett">
       <div>
+        <Klubbvaapen navn={hjemme ? k.navn : motstander} størrelse={40} />
         <strong>{hjemme ? k.navn : motstander}</strong>
         <span className="dempet liten">styrke {tall(hjemme ? styrke : motStyrke)}</span>
       </div>
       <span className="kamp-mot">mot</span>
       <div>
+        <Klubbvaapen navn={hjemme ? motstander : k.navn} størrelse={40} />
         <strong>{hjemme ? motstander : k.navn}</strong>
         <span className="dempet liten">styrke {tall(hjemme ? motStyrke : styrke)}</span>
       </div>

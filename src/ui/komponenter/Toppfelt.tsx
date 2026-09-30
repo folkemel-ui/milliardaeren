@@ -34,7 +34,7 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
         </div>
         <button className="toppfelt-profil" onClick={tilProfil} aria-label={`Profil, statusnivå ${statusnivaa(s)}`}>
           <IkonProfil størrelse={22} />
-          {statusnivaa(s) > 0 && <span className="profil-nivaa">{statusnivaa(s)}</span>}
+          {statusnivaa(s) > 0 && <span className="profil-nivaa brikke gull">{statusnivaa(s)}</span>}
         </button>
       </div>
 
@@ -43,11 +43,11 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
           {kortDato(dag)} <span className="dempet">· uke {ukenummer(dag)} · {klokke(s.sek)}</span>
         </span>
         {s.skatt.regninger.length > 0 ? (
-          <button className="skattebrikke" onClick={tilProfil} aria-label="Ubetalt skatt — gå til Profil">
+          <button className="merke fare" onClick={tilProfil} aria-label="Ubetalt skatt — gå til Profil">
             <Ikon navn="kvittering" størrelse={14} /> Skatt
           </button>
         ) : (
-          erHelg(s.sek) && <span className="helg">Børsen stengt</span>
+          erHelg(s.sek) && <span className="merke varsel">Børsen stengt</span>
         )}
         <button className="avisknapp" onClick={åpneAvis} aria-label={ulest ? 'Avisa, ny utgave' : 'Avisa'}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">

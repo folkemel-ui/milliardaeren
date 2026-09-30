@@ -54,7 +54,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
           <h2>
             {type.navn}
             <NyMerke id={b.type} />
-            {b.leder && <span className="merke-leder">Leder</span>}
+            {b.leder && <span className="merke kant">Leder</span>}
           </h2>
           <span className="dempet">
             Nivå {b.nivaa}
@@ -155,7 +155,7 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
           </p>
         </div>
         {b.leder ? (
-          <span className="merke-ok">✓ Ansatt</span>
+          <span className="merke ok">✓ Ansatt</span>
         ) : (
           <button
             className="knapp knapp-gull knapp-liten"

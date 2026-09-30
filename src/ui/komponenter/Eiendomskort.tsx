@@ -42,7 +42,7 @@ export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
           <h2>
             {t.navn}
             <NyMerke id={id} />
-            {st > 0 && <span className={`merke-standard s${st}`}>{STANDARDER[st].navn}</span>}
+            {st > 0 && <span className={st === 1 ? 'merke info' : 'merke gull'}>{STANDARDER[st].navn}</span>}
           </h2>
           <span className="dempet">{t.sted}</span>
         </div>

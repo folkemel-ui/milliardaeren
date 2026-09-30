@@ -157,7 +157,7 @@ function Tomt({
       <button className={`hus ${klasse}${valgt ? ' valgt' : ''}`} aria-pressed={valgt} onClick={trykk}>
         <span className="hus-bilde">
           {children}
-          {antall !== undefined && antall > 1 && <span className="hus-antall">×{antall}</span>}
+          {antall !== undefined && antall > 1 && <span className="hus-antall brikke gull">×{antall}</span>}
         </span>
         <span className="hus-navn">{navn}</span>
         <span className="hus-under">{under}</span>

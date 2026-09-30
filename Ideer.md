@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 36 – One visual language:** One set of badges and labels, A typography scale, A club crest
 - **Pack 37 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
 - **Pack 38 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Calmer celebrations
 - **Pack 39 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
@@ -38,12 +37,9 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 ## Professional look
 
-11. **A club crest.** The football club uses ⚽. Draw a crest instead, made from the club's name and colors.
-12. **One set of badges and labels.** The game mixes pill badges (Leder, NY, standards), colored text and symbols. Define a small set — for example status badge, category label and number chip — and use them the same way everywhere.
-13. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
-14. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
-15. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
-16. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
+11. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
+12. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+13. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
 
 ## Parked (not chosen yet)
 

@@ -43,5 +43,5 @@ export function Kjopsglimt() {
 
 /** «NY» ved navnet på et kort, til kortet trykkes på (se nymerker.ts). */
 export function NyMerke({ id }: { id: string }) {
-  return useNy(id) ? <span className="merke-ny">Ny</span> : null
+  return useNy(id) ? <span className="merke gull ny">Ny</span> : null
 }

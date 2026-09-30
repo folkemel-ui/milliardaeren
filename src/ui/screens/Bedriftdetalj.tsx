@@ -41,7 +41,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
           <div className="bedriftskort-midt">
             <h1 className="skjerm-tittel">
               {type.navn}
-              {b.leder && <span className="merke-leder">Leder</span>}
+              {b.leder && <span className="merke kant">Leder</span>}
             </h1>
             <span className="dempet">
               Nivå {b.nivaa}
@@ -100,7 +100,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
                   <p className="dempet liten">{f.beskrivelse}</p>
                 </div>
                 {kjøpt ? (
-                  <span className="merke-ok">✓ Kjøpt</span>
+                  <span className="merke ok">✓ Kjøpt</span>
                 ) : neste && låstOpp ? (
                   <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(kjopForbedring(s, b.id))}>
                     {kortKroner(pris)}

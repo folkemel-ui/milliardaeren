@@ -7,6 +7,25 @@
   font-display: swap;
 }
 
+/* ─────────────────────────────────────────────── Skriftskala
+   Seks størrelser og fire vekter, brukt overalt. Ny tekst velger fra disse —
+   aldri en egen størrelse. Unntak er grafikk: kartnavn, logoer og feiringen.
+   1 etiketter, merker og akser · 2 sekundærtekst og små knapper · 3 brødtekst
+   4 overskrifter på kort · 5 skjermtitler og store tall · 6 de største tallene */
+
+:root {
+  --skrift-1: 11px;
+  --skrift-2: 13px;
+  --skrift-3: 15px;
+  --skrift-4: 18px;
+  --skrift-5: 22px;
+  --skrift-6: 34px;
+  --vekt-normal: 400;
+  --vekt-halvfet: 600;
+  --vekt-fet: 700;
+  --vekt-tung: 800;
+}
+
 /* ─────────────────────────────────────────────── Fargetokens
    Mørkt «luksus»-tema er standard. Alle farger går gjennom tokens, så et lyst
    tema senere bare er en ny blokk med de samme navnene under [data-theme]. */
@@ -77,7 +96,7 @@ body {
   background: var(--bakgrunn);
   color: var(--tekst);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 15px;
+  font-size: var(--skrift-3);
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -158,7 +177,7 @@ figure {
   gap: 8px;
   padding-top: 6px;
   border-top: 1px solid var(--kant);
-  font-size: 12px;
+  font-size: var(--skrift-2);
 }
 
 .dato {
@@ -170,16 +189,6 @@ figure {
   font-variant-numeric: tabular-nums;
 }
 
-.helg {
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--varsel) 18%, transparent);
-  color: var(--varsel);
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .avisknapp {
   position: relative;
   display: flex;
@@ -189,8 +198,8 @@ figure {
   padding: 0 8px;
   border-radius: 8px;
   color: var(--gull);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
 }
 
 .ulest-prikk {
@@ -231,8 +240,8 @@ figure {
 }
 
 .etikett {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--tekst-dempet);
@@ -247,25 +256,25 @@ figure {
 }
 
 .tall-mellom {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
 }
 
 .tall-stort {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-fet);
   letter-spacing: -0.01em;
 }
 
 .tall-kjempe {
-  font-size: 34px;
-  font-weight: 800;
+  font-size: var(--skrift-6);
+  font-weight: var(--vekt-tung);
   letter-spacing: -0.02em;
 }
 
 .tempo {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
   color: var(--pluss);
 }
 
@@ -275,7 +284,7 @@ figure {
 
 .pluss {
   color: var(--pluss);
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
   font-variant-numeric: tabular-nums;
 }
 
@@ -284,7 +293,7 @@ figure {
 }
 
 .liten {
-  font-size: 12px;
+  font-size: var(--skrift-2);
 }
 
 /* ─────────────────────────────────────────────── Fanemenyen */
@@ -314,8 +323,8 @@ figure {
   gap: 3px;
   height: var(--meny-høyde);
   color: var(--tekst-dempet);
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
   transition: color 0.15s;
 }
 
@@ -339,8 +348,8 @@ figure {
 }
 
 .skjerm-tittel {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-fet);
 }
 
 .kort {
@@ -355,7 +364,7 @@ figure {
   background: transparent;
   color: var(--tekst-dempet);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .kortliste {
@@ -369,8 +378,8 @@ figure {
 
 .seksjon-tittel {
   margin: 12px 0 0;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--tekst-dempet);
@@ -417,35 +426,98 @@ figure {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-fet);
 }
 
 .bedriftskort-midt .dempet {
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
-.merke-leder {
-  padding: 1px 7px;
+/* ─────────────────────────────────────────────── Merker, etiketter og brikker
+   Tre slags små markeringer, brukt likt overalt:
+   - .merke  — statusmerke: én pille med ett ord om hvordan noe står
+               (Leder, Ny, Oppusset, Børsen stengt, Skatt). Fargen sier hva slags:
+               gull = nytt eller best, kant = en rolle, ok = ferdig, varsel,
+               fare, info = en nøytral egenskap. Uten farge: grått.
+   - .etikett — kategori: små grå versaler over et tall eller en gruppe.
+   - .brikke — et tall eller en kort kode i en liten firkant (×3, nivå 7, S/U/T). */
+
+.merke {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  border: 1px solid var(--gull-mørk);
-  color: var(--gull);
-  font-size: 10.5px;
-  font-weight: 700;
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-fet);
   letter-spacing: 0.04em;
+  line-height: 1.5;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.merke-ny {
-  padding: 1px 7px;
-  border-radius: 999px;
+.merke.gull {
   background: var(--gull);
   color: var(--paa-gull);
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+}
+
+.merke.kant {
+  border-color: var(--gull-mørk);
+  background: transparent;
+  color: var(--gull);
+}
+
+.merke.ok {
+  background: color-mix(in srgb, var(--pluss) 18%, transparent);
+  color: var(--pluss);
+}
+
+.merke.varsel {
+  background: color-mix(in srgb, var(--varsel) 18%, transparent);
+  color: var(--varsel);
+}
+
+.merke.fare {
+  background: color-mix(in srgb, var(--minus) 20%, transparent);
+  color: var(--minus);
+}
+
+.merke.info {
+  background: color-mix(in srgb, var(--klasse-eiendom) 18%, transparent);
+  color: var(--klasse-eiendom);
+}
+
+/* Et merke som er en knapp, som skattemerket i toppen. */
+button.merke {
+  cursor: pointer;
+}
+
+.merke.ny {
   animation: ny-inn 0.4s ease-out;
+}
+
+.brikke {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--flate-2);
+  color: var(--tekst);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-tung);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.brikke.gull {
+  background: var(--gull);
+  color: var(--paa-gull);
 }
 
 @keyframes ny-inn {
@@ -453,13 +525,6 @@ figure {
     opacity: 0;
     transform: scale(0.4);
   }
-}
-
-.merke-ok {
-  color: var(--pluss);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .milepael {
@@ -518,8 +583,8 @@ figure {
 
 .personale-rad h3 {
   margin: 0 0 2px;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-fet);
 }
 
 .personale-rad p {
@@ -607,7 +672,7 @@ figure {
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-end;
-  font-size: 11px;
+  font-size: var(--skrift-1);
   color: var(--tekst-dempet);
   font-variant-numeric: tabular-nums;
 }
@@ -617,13 +682,13 @@ figure {
   display: flex;
   justify-content: space-between;
   margin-top: 6px;
-  font-size: 11px;
+  font-size: var(--skrift-1);
   color: var(--tekst-dempet);
 }
 
 .graf-tom {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   color: var(--tekst-dempet);
 }
 
@@ -659,15 +724,15 @@ figure {
 }
 
 .statistikk dt {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--tekst-dempet);
 }
 
 .statistikk dd {
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
   font-variant-numeric: tabular-nums;
 }
 
@@ -679,7 +744,7 @@ figure {
   border-radius: 10px;
   background: var(--flate-2);
   border: 1px solid var(--kant);
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
 }
 
 .knapp-gull {
@@ -706,7 +771,7 @@ figure {
 .knapp-liten {
   min-height: 38px;
   padding: 0 12px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .knapp-ikon {
@@ -732,7 +797,7 @@ figure {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .knapperad {
@@ -745,7 +810,7 @@ figure {
 
 .minus {
   color: var(--minus);
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
   font-variant-numeric: tabular-nums;
 }
 
@@ -762,8 +827,8 @@ figure {
 }
 
 .kort-tittel {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-fet);
 }
 
 .segment {
@@ -780,8 +845,8 @@ figure {
 .segment button {
   min-height: 36px;
   border-radius: 9px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
   color: var(--tekst-dempet);
 }
 
@@ -819,8 +884,8 @@ figure {
   border-radius: 8px;
   background: var(--flate-2);
   color: var(--gull);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-tung);
   letter-spacing: 0.04em;
 }
 
@@ -831,7 +896,7 @@ figure {
 }
 
 .papirrad-navn strong {
-  font-size: 14px;
+  font-size: var(--skrift-3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -846,8 +911,8 @@ figure {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -881,7 +946,7 @@ figure {
   align-self: flex-start;
   min-height: 36px;
   color: var(--gull);
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
 }
 
 .detalj-topp {
@@ -916,8 +981,8 @@ figure {
   background: var(--bakgrunn);
   color: var(--tekst);
   font: inherit;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-halvfet);
   font-variant-numeric: tabular-nums;
 }
 
@@ -936,7 +1001,7 @@ figure {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .handel-sum div {
@@ -949,13 +1014,13 @@ figure {
 }
 
 .handel-sum dd {
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
   font-variant-numeric: tabular-nums;
 }
 
 .feilmelding {
   color: var(--minus);
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .bank {
@@ -1090,7 +1155,7 @@ figure {
 .oversikt-tall > div {
   display: flex;
   flex-direction: column;
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .fordeling {
@@ -1184,7 +1249,7 @@ figure {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
   color: var(--tekst-dempet);
 }
 
@@ -1201,8 +1266,8 @@ figure {
   height: 30px;
   border-radius: 50%;
   background: var(--flate-2);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
 }
 
 .milepaeler li.nådd .milepael-merke {
@@ -1218,7 +1283,7 @@ figure {
 .stengt {
   border-color: color-mix(in srgb, var(--varsel) 50%, var(--kant));
   color: var(--varsel);
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 /* ─────────────────────────────────────────────── Avisen
@@ -1269,18 +1334,18 @@ figure {
   height: 36px;
   color: #1c1a16;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: var(--skrift-4);
 }
 
 .avis-navn {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: var(--skrift-6);
+  font-weight: var(--vekt-fet);
   letter-spacing: -0.01em;
 }
 
 .avis-under {
   margin-top: 2px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   font-style: italic;
   color: #5a5448;
 }
@@ -1301,19 +1366,19 @@ figure {
 }
 
 .hovedsak h2 {
-  font-size: 26px;
+  font-size: var(--skrift-5);
   line-height: 1.15;
 }
 
 .sak p {
   margin-top: 4px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
   line-height: 1.45;
   color: #3b372f;
 }
 
 .hovedsak p {
-  font-size: 15px;
+  font-size: var(--skrift-3);
 }
 
 .saker {
@@ -1326,7 +1391,7 @@ figure {
 
 .sak h3 {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--skrift-4);
   line-height: 1.25;
 }
 
@@ -1339,8 +1404,8 @@ figure {
 .avis-tidligere {
   margin: 18px 0 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #5a5448;
@@ -1348,16 +1413,16 @@ figure {
 
 .utgave-dato {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   font-style: italic;
-  font-weight: 400;
+  font-weight: var(--vekt-normal);
   color: #5a5448;
 }
 
 .overskrifter {
   margin: 0;
   padding-left: 18px;
-  font-size: 15px;
+  font-size: var(--skrift-3);
   line-height: 1.5;
 }
 
@@ -1424,7 +1489,7 @@ figure {
 
 .galleri-trinn small {
   color: var(--tekst-dempet);
-  font-size: 10px;
+  font-size: var(--skrift-1);
 }
 
 .galleri-lys {
@@ -1432,20 +1497,10 @@ figure {
 }
 
 .galleri-kort figcaption {
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
 }
 
 /* ─────────────────────────────────────────────── Skatt, rivaler og ordre */
-
-.skattebrikke {
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--minus) 20%, transparent);
-  color: var(--minus);
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-}
 
 .skattekort {
   display: flex;
@@ -1497,7 +1552,7 @@ figure {
 }
 
 .segment-fem button {
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .forbes {
@@ -1514,7 +1569,7 @@ figure {
   align-items: center;
   padding: 7px 0;
   border-bottom: 1px solid var(--kant);
-  font-size: 14px;
+  font-size: var(--skrift-3);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1524,12 +1579,12 @@ figure {
 
 .forbes li.deg {
   color: var(--gull);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
 }
 
 .forbes-plass {
   color: var(--tekst-dempet);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
 }
 
 .rivalkort {
@@ -1549,14 +1604,14 @@ figure {
 }
 
 .rival-topp h2 {
-  font-size: 16px;
+  font-size: var(--skrift-4);
 }
 
 .rival-andel {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .andelsbar {
@@ -1603,8 +1658,8 @@ figure {
 
 .rivalbedrifter summary {
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
 }
 
 .rivalbedrifter ul {
@@ -1651,13 +1706,13 @@ figure {
   gap: 2px;
   min-height: 48px;
   padding: 6px 4px;
-  font-size: 12px;
+  font-size: var(--skrift-2);
   line-height: 1.2;
 }
 
 .knapp-bud strong {
   white-space: nowrap;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .startupkort {
@@ -1676,7 +1731,7 @@ figure {
   border-radius: 10px;
   color: #ffffff;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: var(--vekt-tung);
   letter-spacing: 0.04em;
 }
 
@@ -1708,7 +1763,7 @@ figure {
   border-radius: 6px;
   background: var(--flate-2);
   color: var(--tekst-dempet);
-  font-size: 11px;
+  font-size: var(--skrift-1);
   text-align: center;
   white-space: nowrap;
 }
@@ -1720,7 +1775,7 @@ figure {
 .runder li.naa {
   background: var(--gull);
   color: var(--paa-gull);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
 }
 
 .startup-slutt {
@@ -1736,7 +1791,7 @@ figure {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .klubbkort {
@@ -1766,6 +1821,51 @@ figure {
   font-size: 24px;
 }
 
+/* Klubbvåpenet (Klubbvaapen.tsx). Initialene skaleres med våpenet, så
+   størrelsen settes i komponenten — et av få unntak fra skriftskalaen. */
+.klubbvaapen {
+  position: relative;
+  display: inline-block;
+  flex: none;
+}
+
+.klubbvaapen svg {
+  display: block;
+}
+
+.klubbvaapen-tekst {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.klubbtopp-navn,
+.klubbvalgt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.klubbvalgt {
+  margin: 12px 0 4px;
+  font-size: var(--skrift-4);
+}
+
+.tabell-lag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kampoppsett .klubbvaapen {
+  align-self: center;
+  margin-bottom: 4px;
+}
+
 .klubbkort-midt {
   flex: 1;
   display: flex;
@@ -1793,7 +1893,7 @@ figure {
   border-radius: 10px;
   border: 1px solid var(--kant);
   background: var(--flate-2);
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
 }
 
 .navnevalg button.aktiv {
@@ -1837,7 +1937,7 @@ figure {
 
 .kamp-mot {
   color: var(--tekst-dempet);
-  font-size: 12px;
+  font-size: var(--skrift-2);
 }
 
 .kamp-forventet {
@@ -1861,17 +1961,12 @@ figure {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .resultat {
-  display: grid;
-  place-items: center;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 800;
   color: #ffffff;
 }
 
@@ -1891,14 +1986,19 @@ figure {
   width: 100%;
   margin-top: 8px;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   font-variant-numeric: tabular-nums;
 }
 
+/* Kolonnenavnene er etiketter, som .etikett. */
 .tabell th {
   color: var(--tekst-dempet);
-  font-weight: 600;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-align: right;
+  white-space: nowrap;
   padding: 4px 6px;
 }
 
@@ -1930,7 +2030,7 @@ figure {
 
 .tabell tr.deg td {
   color: var(--gull);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
 }
 
 .spillerliste li {
@@ -1957,8 +2057,8 @@ figure {
   height: 34px;
   border-radius: 50%;
   background: conic-gradient(var(--gull) var(--andel), var(--flate-2) 0);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-tung);
   position: relative;
   isolation: isolate;
 }
@@ -2030,7 +2130,7 @@ figure {
 }
 
 .fondkort h2 {
-  font-size: 16px;
+  font-size: var(--skrift-4);
 }
 
 .fondkort .minigraf {
@@ -2040,29 +2140,6 @@ figure {
 
 .fond-besk {
   margin: 0;
-}
-
-.estimat {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.estimat.e0 {
-  background: color-mix(in srgb, var(--minus) 20%, transparent);
-  color: var(--minus);
-}
-
-.estimat.e1 {
-  background: var(--flate-2);
-  color: var(--tekst-dempet);
-}
-
-.estimat.e2 {
-  background: color-mix(in srgb, var(--pluss) 20%, transparent);
-  color: var(--pluss);
 }
 
 .rapportkort p {
@@ -2085,7 +2162,7 @@ figure {
 }
 
 .flis .tall-stort {
-  font-size: 22px;
+  font-size: var(--skrift-5);
 }
 
 .flis.aktiv {
@@ -2099,7 +2176,7 @@ figure {
   border-radius: 10px;
   background: var(--flate-2);
   color: var(--gull);
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .ordrer {
@@ -2109,7 +2186,7 @@ figure {
 }
 
 .ordrer .segment button {
-  font-size: 12px;
+  font-size: var(--skrift-2);
 }
 
 .ordre-felt {
@@ -2141,12 +2218,12 @@ figure {
 
 .oppgjor-tittel {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--skrift-4);
 }
 
 .oppgjor-periode {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--skrift-2);
   font-style: italic;
   opacity: 0.7;
 }
@@ -2156,7 +2233,7 @@ figure {
   flex-direction: column;
   margin-top: 8px;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .oppgjor-tall div {
@@ -2170,7 +2247,7 @@ figure {
   margin-top: 4px;
   padding-top: 6px;
   border-top: 1px solid var(--oppgjor-kant, var(--kant));
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
 }
 
 .oppgjor-tall dd {
@@ -2188,13 +2265,13 @@ figure {
 
 .oppgjor-merknad {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   line-height: 1.4;
 }
 
 .utgave-oppgjor {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   font-style: italic;
 }
 
@@ -2230,7 +2307,7 @@ figure {
 }
 
 .regnskap-navn {
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
 }
 
 .regnskap .oppgjor {
@@ -2273,8 +2350,8 @@ figure {
 }
 
 .prestasjon-navn {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
 }
 
 .prestasjon.klart .prestasjon-navn {
@@ -2282,7 +2359,7 @@ figure {
 }
 
 .prestasjon-besk {
-  font-size: 11px;
+  font-size: var(--skrift-1);
   color: var(--tekst-dempet);
   line-height: 1.3;
 }
@@ -2299,7 +2376,7 @@ figure {
   gap: 12px;
   padding: 7px 0;
   border-bottom: 1px solid var(--kant);
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .rekorder div:last-child {
@@ -2311,7 +2388,7 @@ figure {
 }
 
 .rekorder dd {
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -2430,14 +2507,14 @@ figure {
 .kart-antall {
   fill: var(--paa-gull);
   font-size: 9px;
-  font-weight: 800;
+  font-weight: var(--vekt-tung);
   pointer-events: none;
 }
 
 .kart-navn {
   fill: var(--tekst-dempet);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
   pointer-events: none;
 }
 
@@ -2490,26 +2567,7 @@ figure {
   border-radius: 999px;
   border: 1px solid var(--gull-mørk);
   color: var(--gull);
-  font-size: 13px;
-}
-
-.merke-standard {
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.merke-standard.s1 {
-  border: 1px solid var(--klasse-eiendom);
-  color: var(--klasse-eiendom);
-}
-
-.merke-standard.s2 {
-  background: var(--gull);
-  color: var(--paa-gull);
+  font-size: var(--skrift-2);
 }
 
 .knapp-oppussing {
@@ -2518,8 +2576,12 @@ figure {
   align-items: center;
   gap: 8px;
   width: 100%;
-  font-size: 13px;
+  font-size: var(--skrift-2);
   text-align: left;
+}
+
+.knapp-oppussing strong {
+  white-space: nowrap;
 }
 
 .oppussing-pågår {
@@ -2529,7 +2591,7 @@ figure {
   padding: 10px 12px;
   border-radius: 10px;
   background: color-mix(in srgb, var(--klasse-eiendom) 12%, transparent);
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 /* ─────────────────────────────────────────────── Forbedringer */
@@ -2544,13 +2606,13 @@ figure {
   border: 1px dashed var(--gull);
   background: color-mix(in srgb, var(--gull) 10%, transparent);
   color: var(--tekst);
-  font-size: 13px;
+  font-size: var(--skrift-2);
   text-align: left;
 }
 
 .forbedring-knapp > span:last-child {
   color: var(--gull);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
   white-space: nowrap;
 }
 
@@ -2615,12 +2677,12 @@ figure {
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, var(--gull-lys), var(--gull) 55%, var(--gull-mørk));
   color: var(--paa-gull);
-  font-size: 20px;
-  font-weight: 800;
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-tung);
 }
 
 .status-navn {
-  font-size: 18px;
+  font-size: var(--skrift-4);
 }
 
 .status-poeng {
@@ -2662,7 +2724,7 @@ figure {
 }
 
 .lagerkort strong {
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .kjopskort.eid {
@@ -2673,16 +2735,10 @@ figure {
   position: absolute;
   right: -4px;
   bottom: -4px;
-  display: grid;
-  place-items: center;
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--gull);
-  color: var(--paa-gull);
-  font-size: 11px;
-  font-weight: 800;
 }
 
 /* En låst bedrift langt frem: bare omrisset, så sluttspillet blir en overraskelse. */
@@ -2720,7 +2776,7 @@ figure {
 .seksjon-pil {
   display: inline-block;
   color: var(--tekst-dempet);
-  font-size: 12px;
+  font-size: var(--skrift-2);
   transition: transform 0.15s;
 }
 
@@ -2764,7 +2820,7 @@ figure {
 .mengdevalg button {
   min-height: 32px;
   padding: 0 10px;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .lagerliste {
@@ -2812,18 +2868,18 @@ figure {
 .lagerplass.ny {
   border: 1px dashed var(--gull-mørk);
   color: var(--gull);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
   line-height: 1.1;
   align-content: center;
   gap: 2px;
 }
 
 .lagerplass.ny span:first-child {
-  font-size: 20px;
+  font-size: var(--skrift-5);
 }
 
 .lagerplass.ny .liten {
-  font-size: 10px;
+  font-size: var(--skrift-1);
 }
 
 .lagerplass.ny:disabled {
@@ -2860,7 +2916,7 @@ figure {
 
 .velkomst-tittel {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--skrift-5);
   color: var(--gull);
 }
 
@@ -2908,7 +2964,7 @@ figure {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  font-size: 14px;
+  font-size: var(--skrift-3);
 }
 
 .velkomst-liste li.velkomst-rapporter {
@@ -2943,7 +2999,7 @@ figure {
   border-left-width: 4px;
   background: var(--flate);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  font-size: 13px;
+  font-size: var(--skrift-2);
   animation: varsel-inn 0.25s ease-out;
 }
 
@@ -2997,7 +3053,7 @@ figure {
 .varsel-lukk {
   align-self: flex-start;
   color: var(--tekst-dempet);
-  font-size: 12px;
+  font-size: var(--skrift-2);
   padding: 2px 4px;
 }
 
@@ -3036,7 +3092,7 @@ figure {
 
 .feiring-tekst {
   font-size: clamp(34px, 11vw, 64px);
-  font-weight: 900;
+  font-weight: var(--vekt-tung);
   letter-spacing: 0.04em;
   color: var(--gull-lys);
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--gull) 60%, transparent);
@@ -3101,8 +3157,8 @@ figure {
 
 .feiring-under {
   margin-top: 6px;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-halvfet);
   color: var(--tekst);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
@@ -3184,8 +3240,8 @@ figure {
   position: relative;
   margin-top: 10px;
   color: var(--gull);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-tung);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   animation: ny-inn 0.4s ease-out 0.2s both;
@@ -3193,7 +3249,7 @@ figure {
 
 .kjopsglimt-navn {
   position: relative;
-  font-size: 24px;
+  font-size: var(--skrift-5);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   animation: ny-inn 0.4s ease-out 0.28s both;
 }
@@ -3457,7 +3513,7 @@ figure {
 .avbrudd-detaljer summary {
   cursor: pointer;
   color: var(--tekst-dempet);
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .avbrudd-detaljer p {
@@ -3556,7 +3612,7 @@ figure {
   border: 1px solid var(--gull);
   background: var(--flate-2);
   color: var(--tekst);
-  font-weight: 600;
+  font-weight: var(--vekt-halvfet);
   animation: ko-puls 1s ease-in-out infinite alternate;
 }
 
@@ -3596,7 +3652,7 @@ figure {
   right: 18px;
   bottom: 56px;
   color: var(--pluss);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
   font-variant-numeric: tabular-nums;
   animation: flytetall 0.9s ease-out forwards;
 }
@@ -3650,7 +3706,7 @@ figure {
   border-radius: 8px;
   background: var(--flate-2);
   border: 1px solid var(--kant);
-  font-size: 12px;
+  font-size: var(--skrift-2);
   white-space: nowrap;
   pointer-events: none;
   font-variant-numeric: tabular-nums;
@@ -3659,7 +3715,7 @@ figure {
 
 .graf-boble span {
   color: var(--tekst-dempet);
-  font-size: 11px;
+  font-size: var(--skrift-1);
 }
 
 /* ─────────────────────────────────────────────── Levende kart: trend, leie, symboler, gatebilde */
@@ -3682,7 +3738,7 @@ figure {
 .kart-leie {
   fill: var(--pluss);
   font-size: 7.5px;
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
   pointer-events: none;
   font-variant-numeric: tabular-nums;
 }
@@ -3718,7 +3774,7 @@ figure {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 13px;
+  font-size: var(--skrift-2);
 }
 
 .filterrad {
@@ -3787,24 +3843,18 @@ figure {
   position: absolute;
   top: 0;
   right: -6px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--gull);
-  color: var(--paa-gull);
-  font-size: 11px;
-  font-weight: 800;
 }
 
 .hus-navn {
   max-width: 92px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
   line-height: 1.2;
 }
 
 .hus-under {
   color: var(--tekst-dempet);
-  font-size: 10px;
+  font-size: var(--skrift-1);
 }
 
 /* Oppusset: grønn linje under. Luksus: gull, med et gullskjær rundt bygget. */
@@ -3880,14 +3930,14 @@ figure {
 
 .logo-navn {
   color: var(--gull);
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-tung);
   letter-spacing: 0.04em;
 }
 
 .logo-under {
   color: var(--tekst-dempet);
-  font-size: 12px;
+  font-size: var(--skrift-2);
 }
 
 .profil-bunn {
@@ -3966,8 +4016,8 @@ figure {
   border: 1px solid var(--kant);
   background: var(--flate-2);
   color: var(--tekst-dempet);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-fet);
   line-height: 1;
   letter-spacing: 0;
   cursor: pointer;
@@ -3994,8 +4044,8 @@ figure {
   background: var(--flate);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: var(--tekst);
-  font-size: 13px;
-  font-weight: 400;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-normal);
   line-height: 1.45;
   letter-spacing: normal;
   text-align: left;
@@ -4005,7 +4055,7 @@ figure {
 
 .forklaring-boble strong {
   color: var(--gull);
-  font-weight: 700;
+  font-weight: var(--vekt-fet);
 }
 
 /* I en sammenleggbar seksjon står «?» ytterst til høyre, så boblen åpner seg mot venstre. */

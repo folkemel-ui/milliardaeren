@@ -176,7 +176,7 @@ export function Nokkeltall({ s, id }: { s: Spilltilstand; id: PapirId }) {
             {neste - i_dag <= ESTIMAT_DAGER ? (
               <>
                 {' '}
-                · analytikerne venter <span className={`estimat e${estimat(id, neste)}`}>{ESTIMATTEKST[estimat(id, neste)].toLowerCase()}</span>
+                · analytikerne venter <span className={['merke fare', 'merke', 'merke ok'][estimat(id, neste)]}>{ESTIMATTEKST[estimat(id, neste)].toLowerCase()}</span>
               </>
             ) : (
               <span className="dempet"> · estimatet kommer {ESTIMAT_DAGER} dager før</span>
