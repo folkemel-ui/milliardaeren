@@ -17,6 +17,7 @@ import { forbesliste } from '../../engine/rivaler'
 import { Logo } from '../komponenter/Logo'
 import { Ikon } from '../komponenter/Ikoner'
 import { Merke } from '../komponenter/Merke'
+import { PROFILDELER, settProfildel, useProfildel } from '../profilfane'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -152,13 +153,40 @@ function Utseende() {
   )
 }
 
+/**
+ * Profil i tre deler: Meg (formuen, målet og det du har oppnådd), Regnskap
+ * (skatt og oppgjør) og Innstillinger. Delen du sist hadde åpen, huskes.
+ */
 export function Profil({ s }: { s: Spilltilstand }) {
-  const [bekreft, settBekreft] = useState(false)
-  const verdi = nettoformue(s)
-  const andel = fremdrift(verdi)
-
+  const del = useProfildel()
+  const ubetalt = s.skatt.regninger.length > 0
   return (
     <section className="skjerm">
+      <div className="segment" role="tablist" aria-label="Profil">
+        {PROFILDELER.map((d) => (
+          <button key={d.id} role="tab" aria-selected={del === d.id} className={del === d.id ? 'aktiv' : ''} onClick={() => settProfildel(d.id)}>
+            {d.navn}
+            {d.id === 'regnskap' && ubetalt && <span className="fane-prikk" aria-label="ubetalt skatt" />}
+          </button>
+        ))}
+      </div>
+      {del === 'meg' && <Meg s={s} />}
+      {del === 'regnskap' && (
+        <>
+          <Skattekort s={s} />
+          <Regnskap s={s} />
+        </>
+      )}
+      {del === 'innstillinger' && <Innstillinger />}
+    </section>
+  )
+}
+
+function Meg({ s }: { s: Spilltilstand }) {
+  const verdi = nettoformue(s)
+  const andel = fremdrift(verdi)
+  return (
+    <>
       <div className="kort profil-formue">
         <span className="etikett">Nettoformue</span>
         <span className="tall-kjempe gull">
@@ -202,11 +230,17 @@ export function Profil({ s }: { s: Spilltilstand }) {
         </div>
       </dl>
 
-      <Skattekort s={s} />
-      <Regnskap s={s} />
       <Trofeskap s={s} />
       <Prestasjonsliste s={s} />
       <Rekordbok s={s} />
+    </>
+  )
+}
+
+function Innstillinger() {
+  const [bekreft, settBekreft] = useState(false)
+  return (
+    <>
       <Utseende />
       <FlyttSpillet />
       <Reservekopi />
@@ -240,6 +274,6 @@ export function Profil({ s }: { s: Spilltilstand }) {
       <footer className="profil-bunn">
         <Logo størrelse={36} undertekst="Fra 1 000 kr og en saftbod til milliardær" />
       </footer>
-    </section>
+    </>
   )
 }

@@ -117,8 +117,8 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
   const ingenPlass = !eier && lager !== null && brukteplasser(s, lager) >= s.lager[lager]
 
   return (
-    <li className={eier ? 'kort kjopskort eid' : 'kort kjopskort'} data-ny={id}>
-      <BedriftIkon type={id} />
+    <li className={eier ? 'kort kjopskort luksuskort eid' : 'kort kjopskort luksuskort'} data-ny={id}>
+      <BedriftIkon type={id} stor />
       <div className="bedriftskort-midt">
         <h2>
           {g.navn}

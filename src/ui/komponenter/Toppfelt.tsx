@@ -1,23 +1,37 @@
 ﻿import { nettoformue, nettoPerSek } from '../../engine/formler'
-import { statusnivaa } from '../../engine/eiendom'
+import { STATUSNIVAAER, statusnivaa } from '../../engine/eiendom'
 import { dagnummer, erHelg } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
 import { kompakt, perSek } from '../format'
 import { klokke, kortDato, ukenummer } from '../kalender'
 import { Ikon, IkonProfil } from './Ikoner'
 import { RulleTall } from './RulleTall'
+import { settProfildel } from '../profilfane'
+
+/**
+ * Hvor langt du har kommet, i fire trinn: under en million, millionær,
+ * milliardær og over tusen milliarder. Nettoformuen i toppfeltet skifter
+ * utseende for hvert trinn, så fremgangen synes uten å lese tallet.
+ */
+export function formuetrinn(formue: number): 0 | 1 | 2 | 3 {
+  return formue >= 1e12 ? 3 : formue >= 1e9 ? 2 : formue >= 1e6 ? 1 : 0
+}
 
 /**
  * Fast toppfelt: kontanter og tempo til venstre, nettoformuen i midten,
- * profil til høyre — og under, datolinja med klokka og avisen.
+ * profil til høyre — og under, datolinja med klokka og avisen. Kanten under
+ * blir gylnere for hvert statusnivå, og tittelen din står under formuen.
  */
 export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilProfil: () => void; åpneAvis: () => void }) {
   const dag = dagnummer(s.sek)
   const siste = s.avis[s.avis.length - 1]
   const ulest = siste !== undefined && siste.dag > s.avisLest
+  const formue = nettoformue(s)
+  const nivaa = statusnivaa(s)
+  const styrke = nivaa / (STATUSNIVAAER.length - 1)
 
   return (
-    <header className="toppfelt">
+    <header className="toppfelt" style={{ ['--status-styrke' as string]: styrke }}>
       <div className="toppfelt-rad">
         <div className="toppfelt-kontanter">
           <span className="etikett">Kontanter</span>
@@ -28,9 +42,10 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
         </div>
         <div className="toppfelt-formue">
           <span className="etikett">Nettoformue</span>
-          <span className="tall-stort gull">
-            <RulleTall verdi={nettoformue(s)} format={kompakt} />
+          <span className={`tall-stort formue-trinn-${formuetrinn(formue)}`}>
+            <RulleTall verdi={formue} format={kompakt} />
           </span>
+          {nivaa > 0 && <span className="toppfelt-tittel">{STATUSNIVAAER[nivaa].navn}</span>}
         </div>
         <button className="toppfelt-profil" onClick={tilProfil} aria-label={`Profil, statusnivå ${statusnivaa(s)}`}>
           <IkonProfil størrelse={22} />
@@ -43,7 +58,14 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
           {kortDato(dag)} <span className="dempet">· uke {ukenummer(dag)} · {klokke(s.sek)}</span>
         </span>
         {s.skatt.regninger.length > 0 ? (
-          <button className="merke fare" onClick={tilProfil} aria-label="Ubetalt skatt — gå til Profil">
+          <button
+            className="merke fare"
+            onClick={() => {
+              settProfildel('regnskap')
+              tilProfil()
+            }}
+            aria-label="Ubetalt skatt — gå til regnskapet"
+          >
             <Ikon navn="kvittering" størrelse={14} /> Skatt
           </button>
         ) : (

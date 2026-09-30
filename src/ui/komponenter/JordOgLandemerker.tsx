@@ -58,7 +58,7 @@ export function Jordkort({ s, id, faktor = vaer(dagnummer(s.sek)).faktor }: { s:
   return (
     <li className={eid ? 'kort bedriftskort eid' : 'kort bedriftskort'}>
       <div className="bedriftskort-topp">
-        <BedriftIkon type={id} />
+        <BedriftIkon type={id} stor />
         <div className="bedriftskort-midt">
           <h2>{t.navn}</h2>
           <span className="dempet">{t.sted}</span>
@@ -124,7 +124,7 @@ export function Landemerkekort({ s, id }: { s: Spilltilstand; id: LandemerkeId }
   return (
     <li className={mitt ? 'kort bedriftskort eid' : 'kort bedriftskort'}>
       <div className="bedriftskort-topp">
-        <BedriftIkon type={id} />
+        <BedriftIkon type={id} stor />
         <div className="bedriftskort-midt">
           <h2>{l.navn}</h2>
           <span className="dempet">{l.sted}</span>

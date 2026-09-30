@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 37 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
 - **Pack 38 – Living drawings:** Improvements you can see, Small animations in the drawings, Merges you can see, Calmer celebrations
 - **Pack 39 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Logos for stocks and coins, Rival portraits
 - **Pack 40 – Things you own:** A garage, harbour and hangar you can see, A stadium that grows, A light theme check
@@ -24,35 +23,25 @@ A suggested order, grouped so each pack feels complete when played. The order is
 2. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
 3. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
 4. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
-5. **City-first property view.** At many properties, the map, the long "Boliger og bygg" list, farms and landmarks all compete. Tap a city and see only what is there, instead of one long list for everything.
-6. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
-7. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
-
-## Interface
-
-8. **Split up Profil.** Profil holds net worth, the goal, statistics, tax, accounting, trophies, achievements, records, appearance, save transfer, backup, restart and the logo in one long scroll. Split it into parts, for example "Meg", "Regnskap" and "Innstillinger".
-
-## Look
-
-9. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
-10. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
+5. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
+6. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
 ## Professional look
 
-11. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
-12. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
-13. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
+7. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
+8. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+9. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
 
 ## Drawings
 
-14. **Improvements you can see.** Each business's three improvements show up in its drawing — the juice press on the Saftbod, the drive-in hatch on the Gatekjøkken, the rooftop bar on the Hotel. Today only levels 25, 50 and 100 change the picture.
-15. **Small animations in the drawings.** Steam from the café's coffee, a flag on the hotel, the oil pump nodding, waves by the fish farm. Slow and subtle, and off for players who have reduced motion turned on.
-16. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
-17. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
-18. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
-19. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
-20. **Merges you can see.** When you merge with a rival's business, their drawing slides into yours and the sign changes, instead of just a notice.
-21. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
+10. **Improvements you can see.** Each business's three improvements show up in its drawing — the juice press on the Saftbod, the drive-in hatch on the Gatekjøkken, the rooftop bar on the Hotel. Today only levels 25, 50 and 100 change the picture.
+11. **Small animations in the drawings.** Steam from the café's coffee, a flag on the hotel, the oil pump nodding, waves by the fish farm. Slow and subtle, and off for players who have reduced motion turned on.
+12. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
+13. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
+14. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
+15. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
+16. **Merges you can see.** When you merge with a rival's business, their drawing slides into yours and the sign changes, instead of just a notice.
+17. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
 
 ## Parked (not chosen yet)
 

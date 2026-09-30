@@ -161,7 +161,49 @@ figure {
   background: color-mix(in srgb, var(--bakgrunn) 88%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--kant);
+  /* Gylnere kant for hvert statusnivå: grå ved Ukjent, helt gull ved Udødelig. */
+  border-bottom: 1px solid color-mix(in srgb, var(--gull) calc(var(--status-styrke, 0) * 100%), var(--kant));
+}
+
+/* Nettoformuen i toppfeltet, etter formuetrinn (Toppfelt.tsx). */
+.formue-trinn-0 {
+  color: var(--tekst);
+}
+
+.formue-trinn-1 {
+  color: var(--gull);
+}
+
+.formue-trinn-2,
+.formue-trinn-3 {
+  background: linear-gradient(180deg, var(--gull-lys), var(--gull) 55%, var(--gull-mørk));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.formue-trinn-3 {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gull) 45%, transparent));
+}
+
+.toppfelt-tittel {
+  color: var(--gull);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* En rød prikk på en fane som har noe å vise, som ubetalt skatt under Regnskap. */
+.fane-prikk {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--minus);
+  vertical-align: 0.15em;
 }
 
 .toppfelt-rad {
@@ -395,6 +437,112 @@ figure {
   background: var(--flate-2);
 }
 
+/* Luksus: bildet til venstre over to rader, knappen under navnet — så lange navn får plass. */
+.kjopskort.luksuskort {
+  grid-template-columns: auto 1fr;
+  row-gap: 8px;
+}
+
+.luksuskort > .bedrift-ikon {
+  grid-row: span 2;
+}
+
+.luksuskort > :last-child {
+  justify-self: start;
+}
+
+.bedrift-ikon.stor {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+}
+
+/* Et tall på bildet, som «3/8» for eiendom du eier. */
+.bilde-med-brikke {
+  position: relative;
+  flex: none;
+}
+
+.bilde-med-brikke .brikke {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+}
+
+/* Byvalget under kartet: «Alle» og hver by som har noe å vise. */
+.byvalg {
+  display: flex;
+  gap: 6px;
+  margin: 10px -4px 0;
+  padding: 0 4px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.byvalg::-webkit-scrollbar {
+  display: none;
+}
+
+.byvalg button {
+  flex: none;
+  padding: 5px 12px;
+  border: 1px solid var(--kant);
+  border-radius: 999px;
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+  white-space: nowrap;
+}
+
+.byvalg button.aktiv {
+  border-color: var(--gull);
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.byvisning {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.byvisning .skjerm-tittel {
+  margin: 0;
+}
+
+.byvisning-tall {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.byvisning-tall div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.byvisning-tall dd {
+  margin: 0;
+  font-weight: var(--vekt-fet);
+  font-variant-numeric: tabular-nums;
+}
+
+.byvisning > .knapp {
+  align-self: flex-start;
+}
+
+/* Den store tegningen øverst i en detaljvisning, på en lysere scene. */
+.scene {
+  display: grid;
+  place-items: center;
+  height: 172px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--gull) 9%, var(--flate-2)), var(--flate-2) 70%);
+}
+
 .dempet-ikon {
   filter: grayscale(1);
   opacity: 0.45;
@@ -424,8 +572,9 @@ figure {
 .bedriftskort-midt h1,
 .bedriftskort-midt h2 {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px 8px;
   font-size: var(--skrift-4);
   font-weight: var(--vekt-fet);
 }

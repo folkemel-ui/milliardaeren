@@ -9,7 +9,7 @@ import type { Bedrift, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
-import { BedriftIkon } from '../komponenter/BedriftIkon'
+import { Scene } from '../komponenter/BedriftIkon'
 import { Oppgraderingsknapp, Personale } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
@@ -36,8 +36,8 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
       </button>
 
       <div className="kort">
+        <Scene type={b.type} nivaa={b.nivaa} />
         <div className="bedriftskort-topp">
-          <BedriftIkon type={b.type} nivaa={b.nivaa} />
           <div className="bedriftskort-midt">
             <h1 className="skjerm-tittel">
               {type.navn}

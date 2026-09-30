@@ -5,7 +5,11 @@ import {
   EIENDOMSTYPER,
   eiendomsverdi,
   leiePerSek,
+  UTENLANDSBYER,
 } from '../../engine/eiendom'
+import { JORD, JORDLISTE } from '../../engine/jord'
+import { LANDEMERKELISTE, LANDEMERKER } from '../../engine/landemerker'
+import { Byvisning, byerMedInnhold } from '../komponenter/Byvisning'
 import { eiendomSynlig } from '../../engine/handlinger'
 import type { By, Spilltilstand } from '../../engine/types'
 import { endring, kortKroner, perSek } from '../format'
@@ -19,7 +23,15 @@ import { Gatebilde } from '../komponenter/Gatebilde'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { REGIONER, REGIONLISTE, regionEndring } from '../../engine/regioner'
 import { RulleTall } from '../komponenter/RulleTall'
-import { Ikon } from '../komponenter/Ikoner'
+
+/** Byene i Norge, i stigens rekkefølge: først byggene, så jorda og landemerkene. */
+const NORSKE_BYER: By[] = [
+  ...new Set<By>([
+    ...EIENDOMSSTIGEN.filter((id) => !EIENDOMSTYPER[id].reise).map((id) => EIENDOMSTYPER[id].by),
+    ...JORDLISTE.map((id) => JORD[id].by),
+    ...LANDEMERKELISTE.map((id) => LANDEMERKER[id].by),
+  ]),
+]
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
   const [by, settBy] = useState<By | null>(null)
@@ -27,7 +39,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
   // Byen som vises i gatebildet, eller null.
   const [gate, settGate] = useState<By | null>(null)
   const synlige = EIENDOMSSTIGEN.filter((id) => eiendomSynlig(s, id))
-  const viste = by ? synlige.filter((id) => EIENDOMSTYPER[id].by === by) : synlige
+  const byer = byerMedInnhold(s, kart === 'norge' ? NORSKE_BYER : UTENLANDSBYER)
   const nesteSkjult = EIENDOMSSTIGEN.find((id) => !eiendomSynlig(s, id))
   const indeks = s.marked.eiendom
   const lukkGate = useCallback(() => settGate(null), [])
@@ -67,6 +79,18 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
           ))}
         </div>
         {kart === 'norge' ? <Norgeskart s={s} valgt={by} velg={settBy} zoom={settGate} /> : <Verdenskart s={s} valgt={by} velg={settBy} zoom={settGate} />}
+        {byer.length > 1 && (
+          <div className="byvalg" role="tablist" aria-label="Velg by">
+            <button role="tab" aria-selected={by === null} className={by === null ? 'aktiv' : ''} onClick={() => settBy(null)}>
+              Alle
+            </button>
+            {byer.map((b) => (
+              <button key={b} role="tab" aria-selected={by === b} className={by === b ? 'aktiv' : ''} onClick={() => settBy(b)}>
+                {b}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="indeks">
           <div>
             <span className="etikett">Eiendomsprisene</span>
@@ -86,34 +110,28 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
             })}
           </ul>
         )}
-        <p className="dempet liten">Leien kommer også mens du er borte — eiendom trenger ingen leder. Trykk på en by for å vise bare den, og hold inne for gatebildet.</p>
+        <p className="dempet liten">Leien kommer også mens du er borte — eiendom trenger ingen leder. Velg en by for å se bare den, og hold inne på kartet for gatebildet.</p>
       </div>
 
-      {by && (
-        <div className="filterrad">
-          <button className="filterbrikke" onClick={() => settBy(null)}>
-            Viser {by} · <strong>Vis alle</strong> ✕
-          </button>
-          <button className="filterbrikke" onClick={() => settGate(by)}>
-            <Ikon navn="sok" størrelse={14} /> Gatebildet
-          </button>
-        </div>
-      )}
       {gate && <Gatebilde s={s} by={gate} lukk={lukkGate} />}
+
+      {by ? (
+        <Byvisning s={s} by={by} lukk={() => settBy(null)} gatebilde={() => settGate(by)} />
+      ) : (
+        <>
 
       <Seksjon
         id="eiendom-boliger"
         tittel="Boliger og bygg"
         forklaring="eiendom"
         sammendrag={`${Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0)} eid`}
-        harInnhold={Object.keys(s.eiendommer).length > 0 || !!by}
+        harInnhold={Object.keys(s.eiendommer).length > 0}
       >
       <ul className="kortliste">
-        {viste.map((id) => (
+        {synlige.map((id) => (
           <Eiendomskort key={id} s={s} id={id} />
         ))}
-        {by && viste.length === 0 && <p className="kort kort-tomt">Ingen eiendommer til salgs i {by} ennå.</p>}
-        {!by && nesteSkjult && (
+        {nesteSkjult && (
           <li className="kort kjopskort laast">
             <BedriftIkon type={nesteSkjult} dempet />
             <div className="bedriftskort-midt">
@@ -133,8 +151,10 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
       </ul>
       </Seksjon>
 
-      <Jordliste s={s} by={by} />
-      {!by && <Landemerkeliste s={s} />}
+      <Jordliste s={s} by={null} />
+      <Landemerkeliste s={s} />
+        </>
+      )}
     </section>
   )
 }

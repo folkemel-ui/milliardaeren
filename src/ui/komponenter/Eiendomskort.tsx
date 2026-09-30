@@ -37,7 +37,14 @@ export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
   return (
     <li className="kort bedriftskort" data-ny={id}>
       <div className="bedriftskort-topp">
-        <BedriftIkon type={id} />
+        <div className="bilde-med-brikke">
+          <BedriftIkon type={id} stor />
+          {eier > 0 && (
+            <span className="brikke gull" aria-label={`${eier} av ${t.maksAntall} eid`}>
+              {eier}/{t.maksAntall}
+            </span>
+          )}
+        </div>
         <div className="bedriftskort-midt">
           <h2>
             {t.navn}
@@ -48,16 +55,17 @@ export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
         </div>
         <div className="eiendom-tall">
           {oppussing ? <span className="dempet">Ingen leie</span> : <span className="pluss">{perSek(leieHverPerSek(s, id))}</span>}
-          <span className="dempet liten">
-            {eier} / {t.maksAntall} eid
-          </span>
+          <span className="dempet liten">per enhet</span>
         </div>
       </div>
-      <p className="dempet liten">
-        Avkastning {tall(t.avkastning * STANDARDER[st].leie * 100)} % per time
-        {t.statuskrav > 0 && ` · krever statusnivå ${t.statuskrav}`}
-        {fly && ` · krever ${LUKSUS[fly].navn.toLowerCase()}`}
-      </p>
+      {/* Avkastningen og kravene trengs bare så lenge det er noe igjen å kjøpe. */}
+      {!fullt && (
+        <p className="dempet liten">
+          Avkastning {tall(t.avkastning * STANDARDER[st].leie * 100)} % per time
+          {t.statuskrav > 0 && ` · krever statusnivå ${t.statuskrav}`}
+          {fly && ` · krever ${LUKSUS[fly].navn.toLowerCase()}`}
+        </p>
+      )}
 
       {oppussing ? (
         <div className="oppussing-pågår">
