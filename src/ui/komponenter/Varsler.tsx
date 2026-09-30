@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react'
 import type { Feiringsniva } from '../hendelsesstrom'
-import { avsluttFeiring, fjernVarsel, useFeiring, useVarsler } from '../varsler'
+import { avsluttFeiring, fjernVarsel, useFeiring, useVarsler, type Varsel } from '../varsler'
 import type { Fane } from './Fanemeny'
+import { Ikon, type Ikonnavn } from './Ikoner'
 
-const IKON = { god: '✨', advarsel: '⚠️', kritisk: '🚨', feil: '', avis: '📰' } as const
+const IKON: Record<Varsel['type'], Ikonnavn | null> = { god: 'gnist', advarsel: 'advarsel', kritisk: 'alarm', feil: null, avis: 'avis' }
 
 /** Varslene, stablet over fanemenyen. Trykk går dit varselet gjelder; krysset lukker. */
 export function Varselstabel({ gåTil }: { gåTil: (f: Fane) => void }) {
@@ -23,7 +24,7 @@ export function Varselstabel({ gåTil }: { gåTil: (f: Fane) => void }) {
         >
           {IKON[v.type] && (
             <span className="varsel-ikon" aria-hidden="true">
-              {IKON[v.type]}
+              <Ikon navn={IKON[v.type]!} størrelse={18} />
             </span>
           )}
           <span className="varsel-tekst">
@@ -125,7 +126,7 @@ export function Feiring() {
       <div className="feiring-midt">
         {milliard && (
           <span className="feiring-krone" aria-hidden="true">
-            👑
+            <Ikon navn="krone" størrelse={72} />
           </span>
         )}
         <div className="feiring-tekst">{f.tekst}</div>

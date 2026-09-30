@@ -26,6 +26,7 @@ import { kortKroner, perSek, tall, varighet } from '../format'
 import { BedriftIkon } from './BedriftIkon'
 import { usePuls } from './Tikk'
 import { NyMerke } from './Kjopsglimt'
+import { Ikon } from './Ikoner'
 
 /** Hvor langt bedriften har kommet fra forrige milepæl mot neste (0–1). */
 function milepaelFremdrift(nivaa: number, neste: number | null): number {
@@ -81,7 +82,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
           onClick={() => utfor(kjopForbedring(s, b.id))}
         >
           <span>
-            ✨ <strong>{klarForbedring.navn}</strong> · ×{tall(klarForbedring.faktor, 1)} inntekt
+            <Ikon navn="gnist" størrelse={14} /> <strong>{klarForbedring.navn}</strong> · ×{tall(klarForbedring.faktor, 1)} inntekt
           </span>
           <span>{kortKroner(forbedringspris(b, klarForbedring))}</span>
         </button>

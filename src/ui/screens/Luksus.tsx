@@ -27,6 +27,7 @@ import { Kunst } from '../komponenter/Kunst'
 import { Seksjon } from '../komponenter/Seksjon'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { NyMerke } from '../komponenter/Kjopsglimt'
+import { Ikon, type Ikonnavn } from '../komponenter/Ikoner'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
@@ -142,6 +143,8 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
   )
 }
 
+const LAGERIKON: Record<LagerId, Ikonnavn> = { garasje: 'garasje', havn: 'anker', hangar: 'hangar' }
+
 /** Garasjen, havna eller hangaren som et rutenett: brukte plasser viser hva som står der, ledige er stiplet. */
 function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
   const l = LAGER[lager]
@@ -152,7 +155,7 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
     <div className="kort lagerkort">
       <div className="lagerkort-topp">
         <span className="lager-emoji" aria-hidden="true">
-          {l.emoji}
+          <Ikon navn={LAGERIKON[lager]} størrelse={22} />
         </span>
         <strong>{l.navn}</strong>
         <span className="dempet liten">

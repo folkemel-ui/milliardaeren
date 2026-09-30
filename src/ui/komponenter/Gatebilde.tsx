@@ -9,6 +9,7 @@ import type { By, Spilltilstand } from '../../engine/types'
 import { endring, perSek } from '../format'
 import { LANDEMERKESYMBOL, leieIBy, trendFor } from '../kart'
 import { Illustrasjon } from './Illustrasjoner'
+import { Ikon } from './Ikoner'
 
 /**
  * Gatebildet: byen på nært hold. Hver enhet du eier er et hus som ser ut
@@ -64,7 +65,9 @@ export function Gatebilde({ s, by, lukk }: { s: Spilltilstand; by: By; lukk: () 
                   <Illustrasjon id={id} størrelse={52} />
                   <span className="hus-navn">{EIENDOMSTYPER[id].navn}</span>
                   {pusses ? (
-                    <span className="hus-merke">🏗️ Pusses opp</span>
+                    <span className="hus-merke">
+                      <Ikon navn="kran" størrelse={13} /> Pusses opp
+                    </span>
                   ) : (
                     st > 0 && <span className={`merke-standard s${st}`}>{STANDARDER[st].navn}</span>
                   )}

@@ -30,12 +30,12 @@ describe('hendelsesstrømmen', () => {
     expect(funn[0]).toMatchObject({ type: 'hendelse', hendelse: { tittel: 'Hogst' } })
   })
 
-  it('finner nye prestasjoner, med navn og emoji', () => {
+  it('finner nye prestasjoner, med navn', () => {
     const før = nyttSpill()
     const etter = structuredClone(før)
     etter.prestasjoner.millionaer = etter.sek
     const funn = nytt(før, etter)
-    expect(funn).toEqual([{ type: 'prestasjon', id: 'millionaer', navn: 'Millionær', emoji: '🥂' }])
+    expect(funn).toEqual([{ type: 'prestasjon', id: 'millionaer', navn: 'Millionær' }])
     expect(FEIRES.millionaer).toBeDefined()
     expect(FEIRES.milliardaer).toBeDefined()
   })
@@ -62,7 +62,7 @@ describe('hendelsesstrømmen', () => {
     expect(FEIRES['fem-sifre'].niva).toBe('liten')
     expect(FEIRES.millionaer.niva).toBe('stor')
     expect(FEIRES.milliardaer.niva).toBe('milliard')
-    const p = (id: string): Nytt => ({ type: 'prestasjon', id, navn: id, emoji: '' })
+    const p = (id: string): Nytt => ({ type: 'prestasjon', id, navn: id })
     expect(stoersteFeiring([p('fem-sifre'), p('millionaer'), p('ti-mill')])?.tekst).toBe('MILLIONÆR!')
     expect(stoersteFeiring([p('forste-steg')])).toBeNull()
   })

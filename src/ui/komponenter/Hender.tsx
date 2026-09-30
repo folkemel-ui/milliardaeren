@@ -3,6 +3,7 @@ import { aktivKo, betjenKo, kanSelgeSelv, KO_VARER_SEK, KOPPEPRIS, selgKopp } fr
 import type { Bedrift, Spilltilstand } from '../../engine/types'
 import { utforMed } from '../../state/lager'
 import { kortKroner } from '../format'
+import { Ikon } from './Ikoner'
 
 // ─────────────────────────────────────────────── Holde inne
 
@@ -88,7 +89,9 @@ export function Koppknapp({ s, legg }: { s: Spilltilstand; legg: (tekst: string)
           if (utforMed(selgKopp, true) === null) legg(`+${kortKroner(KOPPEPRIS)}`)
         }}
       >
-        <span>🥤 Selg en kopp selv</span>
+        <span>
+          <Ikon navn="kopp" størrelse={18} /> Selg en kopp selv
+        </span>
         <strong>+{kortKroner(KOPPEPRIS)}</strong>
       </button>
       <span className="dempet liten">Du selger selv til saftboden får sin første ansatte.</span>
@@ -109,7 +112,7 @@ export function Koknapp({ s, b, legg }: { s: Spilltilstand; b: Bedrift; legg: (t
       }}
     >
       <span>
-        🧍🧍🧍 <strong>Kø!</strong> Betjen dem
+        <Ikon navn="folk" størrelse={18} /> <strong>Kø!</strong> Betjen dem
       </span>
       <strong>+{kortKroner(ko.bonus)}</strong>
       <span className="ko-tid" style={{ width: `${(igjen / KO_VARER_SEK) * 100}%` }} aria-hidden="true" />

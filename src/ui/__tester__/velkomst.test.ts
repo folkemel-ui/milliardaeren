@@ -58,6 +58,6 @@ describe('velkomsten', () => {
     const før = nyttSpill()
     const etter = structuredClone(før)
     etter.prestasjoner.millionaer = 1
-    expect(oppsummer(før, etter, 600).prestasjoner).toEqual([{ navn: 'Millionær', emoji: '🥂' }])
+    expect(oppsummer(før, etter, 600).prestasjoner).toEqual([{ navn: 'Millionær' }])
   })
 })

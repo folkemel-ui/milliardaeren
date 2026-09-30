@@ -16,7 +16,7 @@ export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus'
 
 export type Nytt =
   | { type: 'hendelse'; hendelse: Hendelse }
-  | { type: 'prestasjon'; id: string; navn: string; emoji: string }
+  | { type: 'prestasjon'; id: string; navn: string }
   | { type: 'avis'; dag: number }
   | { type: 'kjop'; art: Kjopsart; id: string; navn: string }
 
@@ -63,7 +63,7 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   }
   for (const p of PRESTASJONER) {
     if (etter.prestasjoner[p.id] !== undefined && før.prestasjoner[p.id] === undefined) {
-      funn.push({ type: 'prestasjon', id: p.id, navn: p.navn, emoji: p.emoji })
+      funn.push({ type: 'prestasjon', id: p.id, navn: p.navn })
     }
   }
   const hadde = new Set(før.bedrifter.map((b) => b.type))

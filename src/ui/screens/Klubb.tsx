@@ -31,6 +31,7 @@ import type { Kamp, Klubb as KlubbT, Spilltilstand, Taktikk } from '../../engine
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { useVoksUt } from '../overgang'
+import { Ikon } from '../komponenter/Ikoner'
 
 /** Kortet i Luksus-fanen: kjøp en klubb, eller åpne den du har. */
 export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void }) {
@@ -39,7 +40,9 @@ export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void })
     const laast = s.hoyesteFormue < KLUBB_LAAST_OPP
     return (
       <button className="kort klubbkort" onClick={aapne} disabled={laast}>
-        <span className="klubb-emoji" aria-hidden="true">⚽</span>
+        <span className="klubb-emoji" aria-hidden="true">
+          <Ikon navn="ball" størrelse={26} />
+        </span>
         <span className="klubbkort-midt">
           <strong>Fotballklubb</strong>
           <span className="dempet liten">
@@ -53,7 +56,9 @@ export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void })
   const neste = nesteKamp(k)
   return (
     <button className="kort klubbkort eid" onClick={aapne}>
-      <span className="klubb-emoji" aria-hidden="true">⚽</span>
+      <span className="klubb-emoji" aria-hidden="true">
+        <Ikon navn="ball" størrelse={26} />
+      </span>
       <span className="klubbkort-midt">
         <strong>{k.navn}</strong>
         <span className="dempet liten">

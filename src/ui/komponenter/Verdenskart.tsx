@@ -93,7 +93,7 @@ export function Verdenskart({
                 textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
                 className="kart-navn"
               >
-                {åpen ? by : `${fly.emoji} ${by}`}
+                {by}
               </text>
               {leieIBy(s, by) > 0 && (
                 <text

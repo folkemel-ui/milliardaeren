@@ -25,20 +25,20 @@ import { kunststatus } from './kunst'
  * Avkastningen er lavere enn i bedriftene, men den krever ingenting av deg.
  */
 export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
-  hybel: { id: 'hybel', navn: 'Hybel', sted: 'Møhlenpris, Bergen', by: 'Bergen', emoji: '🛏️', pris: 250_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
-  leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', emoji: '🏠', pris: 2_500_000, avkastning: 0.28, maksAntall: 6, statuskrav: 0 },
-  rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', emoji: '🏘️', pris: 6_000_000, avkastning: 0.26, maksAntall: 5, statuskrav: 0 },
-  hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', emoji: '🏔️', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
-  stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', emoji: '🇸🇪', pris: 30_000_000, avkastning: 0.24, maksAntall: 3, statuskrav: 0, reise: 1 },
-  kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', emoji: '🏢', pris: 80_000_000, avkastning: 0.25, maksAntall: 4, statuskrav: 0 },
-  kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', emoji: '🇩🇰', pris: 150_000_000, avkastning: 0.23, maksAntall: 3, statuskrav: 0, reise: 1 },
-  kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', emoji: '🛍️', pris: 400_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
-  berlin: { id: 'berlin', navn: 'Bygård i Mitte', sted: 'Mitte, Berlin', by: 'Berlin', emoji: '🇩🇪', pris: 500_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0, reise: 2 },
-  london: { id: 'london', navn: 'Byhus i Mayfair', sted: 'Mayfair, London', by: 'London', emoji: '🇬🇧', pris: 1_200_000_000, avkastning: 0.21, maksAntall: 2, statuskrav: 0, reise: 2 },
-  naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', emoji: '🏙️', pris: 1_500_000_000, avkastning: 0.2, maksAntall: 2, statuskrav: 3 },
-  dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', emoji: '🇦🇪', pris: 4_000_000_000, avkastning: 0.19, maksAntall: 2, statuskrav: 0, reise: 3 },
-  oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', emoji: '🏝️', pris: 6_000_000_000, avkastning: 0.1, maksAntall: 1, statuskrav: 5 },
-  newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', emoji: '🇺🇸', pris: 12_000_000_000, avkastning: 0.16, maksAntall: 1, statuskrav: 0, reise: 3 },
+  hybel: { id: 'hybel', navn: 'Hybel', sted: 'Møhlenpris, Bergen', by: 'Bergen', pris: 250_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
+  leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', pris: 2_500_000, avkastning: 0.28, maksAntall: 6, statuskrav: 0 },
+  rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', pris: 6_000_000, avkastning: 0.26, maksAntall: 5, statuskrav: 0 },
+  hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
+  stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', pris: 30_000_000, avkastning: 0.24, maksAntall: 3, statuskrav: 0, reise: 1 },
+  kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 80_000_000, avkastning: 0.25, maksAntall: 4, statuskrav: 0 },
+  kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', pris: 150_000_000, avkastning: 0.23, maksAntall: 3, statuskrav: 0, reise: 1 },
+  kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', pris: 400_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
+  berlin: { id: 'berlin', navn: 'Bygård i Mitte', sted: 'Mitte, Berlin', by: 'Berlin', pris: 500_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0, reise: 2 },
+  london: { id: 'london', navn: 'Byhus i Mayfair', sted: 'Mayfair, London', by: 'London', pris: 1_200_000_000, avkastning: 0.21, maksAntall: 2, statuskrav: 0, reise: 2 },
+  naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', pris: 1_500_000_000, avkastning: 0.2, maksAntall: 2, statuskrav: 3 },
+  dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', pris: 4_000_000_000, avkastning: 0.19, maksAntall: 2, statuskrav: 0, reise: 3 },
+  oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', pris: 6_000_000_000, avkastning: 0.1, maksAntall: 1, statuskrav: 5 },
+  newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', pris: 12_000_000_000, avkastning: 0.16, maksAntall: 1, statuskrav: 0, reise: 3 },
 }
 
 export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
@@ -150,28 +150,28 @@ export function sjekkOppussing(s: Spilltilstand): void {
 // ─────────────────────────────────────────────── Luksus
 
 export const LUKSUS: Record<LuksusId, Luksusgjenstand> = {
-  stasjonsvogn: { id: 'stasjonsvogn', navn: 'Brukt stasjonsvogn', kategori: 'bil', emoji: '🚙', pris: 150_000, status: 1 },
-  elbil: { id: 'elbil', navn: 'Elektrisk sportsbil', kategori: 'bil', emoji: '🚗', pris: 1_200_000, status: 4 },
-  superbil: { id: 'superbil', navn: 'Italiensk superbil', kategori: 'bil', emoji: '🏎️', pris: 4_500_000, status: 10 },
-  hyperbil: { id: 'hyperbil', navn: 'Hyperbil', kategori: 'bil', emoji: '🏁', pris: 25_000_000, status: 30 },
-  gullklokke: { id: 'gullklokke', navn: 'Gullklokke', kategori: 'klokke', emoji: '⌚', pris: 200_000, status: 2 },
-  mesterverk: { id: 'mesterverk', navn: 'Sveitsisk mesterverk', kategori: 'klokke', emoji: '🕰️', pris: 2_000_000, status: 6 },
-  diamantklokke: { id: 'diamantklokke', navn: 'Diamantklokke', kategori: 'klokke', emoji: '💎', pris: 15_000_000, status: 20 },
-  snekke: { id: 'snekke', navn: 'Snekke', kategori: 'baat', emoji: '🛶', pris: 300_000, status: 2 },
-  motorbaat: { id: 'motorbaat', navn: 'Motorbåt', kategori: 'baat', emoji: '🚤', pris: 6_000_000, status: 12 },
-  superyacht: { id: 'superyacht', navn: 'Superyacht', kategori: 'baat', emoji: '🛥️', pris: 400_000_000, status: 80 },
-  propellfly: { id: 'propellfly', navn: 'Propellfly', kategori: 'fly', emoji: '🛩️', pris: 20_000_000, status: 20 },
-  forretningsjet: { id: 'forretningsjet', navn: 'Forretningsjet', kategori: 'fly', emoji: '✈️', pris: 250_000_000, status: 60 },
-  langdistansejet: { id: 'langdistansejet', navn: 'Langdistansejet', kategori: 'fly', emoji: '🛫', pris: 1_200_000_000, status: 150 },
+  stasjonsvogn: { id: 'stasjonsvogn', navn: 'Brukt stasjonsvogn', kategori: 'bil', pris: 150_000, status: 1 },
+  elbil: { id: 'elbil', navn: 'Elektrisk sportsbil', kategori: 'bil', pris: 1_200_000, status: 4 },
+  superbil: { id: 'superbil', navn: 'Italiensk superbil', kategori: 'bil', pris: 4_500_000, status: 10 },
+  hyperbil: { id: 'hyperbil', navn: 'Hyperbil', kategori: 'bil', pris: 25_000_000, status: 30 },
+  gullklokke: { id: 'gullklokke', navn: 'Gullklokke', kategori: 'klokke', pris: 200_000, status: 2 },
+  mesterverk: { id: 'mesterverk', navn: 'Sveitsisk mesterverk', kategori: 'klokke', pris: 2_000_000, status: 6 },
+  diamantklokke: { id: 'diamantklokke', navn: 'Diamantklokke', kategori: 'klokke', pris: 15_000_000, status: 20 },
+  snekke: { id: 'snekke', navn: 'Snekke', kategori: 'baat', pris: 300_000, status: 2 },
+  motorbaat: { id: 'motorbaat', navn: 'Motorbåt', kategori: 'baat', pris: 6_000_000, status: 12 },
+  superyacht: { id: 'superyacht', navn: 'Superyacht', kategori: 'baat', pris: 400_000_000, status: 80 },
+  propellfly: { id: 'propellfly', navn: 'Propellfly', kategori: 'fly', pris: 20_000_000, status: 20 },
+  forretningsjet: { id: 'forretningsjet', navn: 'Forretningsjet', kategori: 'fly', pris: 250_000_000, status: 60 },
+  langdistansejet: { id: 'langdistansejet', navn: 'Langdistansejet', kategori: 'fly', pris: 1_200_000_000, status: 150 },
   // ── Kom i versjon 17: fyller hullene i prisstigen, så det alltid er noe nytt å sikte mot.
-  dykkerklokke: { id: 'dykkerklokke', navn: 'Dykkerklokke', kategori: 'klokke', emoji: '🤿', pris: 40_000, status: 1 },
-  veteranbil: { id: 'veteranbil', navn: 'Veteranbil', kategori: 'bil', emoji: '🚘', pris: 600_000, status: 2 },
-  seilbaat: { id: 'seilbaat', navn: 'Seilbåt', kategori: 'baat', emoji: '⛵', pris: 1_500_000, status: 5 },
-  lommeur: { id: 'lommeur', navn: 'Antikt lommeur', kategori: 'klokke', emoji: '⏱️', pris: 5_000_000, status: 10 },
-  helikopter: { id: 'helikopter', navn: 'Helikopter', kategori: 'fly', emoji: '🚁', pris: 8_000_000, status: 14 },
-  limousin: { id: 'limousin', navn: 'Limousin', kategori: 'bil', emoji: '🚙', pris: 9_000_000, status: 16 },
-  seilyacht: { id: 'seilyacht', navn: 'Havseiler', kategori: 'baat', emoji: '⛵', pris: 60_000_000, status: 38 },
-  formelbil: { id: 'formelbil', navn: 'Formel 1-bil', kategori: 'bil', emoji: '🏎️', pris: 80_000_000, status: 45 },
+  dykkerklokke: { id: 'dykkerklokke', navn: 'Dykkerklokke', kategori: 'klokke', pris: 40_000, status: 1 },
+  veteranbil: { id: 'veteranbil', navn: 'Veteranbil', kategori: 'bil', pris: 600_000, status: 2 },
+  seilbaat: { id: 'seilbaat', navn: 'Seilbåt', kategori: 'baat', pris: 1_500_000, status: 5 },
+  lommeur: { id: 'lommeur', navn: 'Antikt lommeur', kategori: 'klokke', pris: 5_000_000, status: 10 },
+  helikopter: { id: 'helikopter', navn: 'Helikopter', kategori: 'fly', pris: 8_000_000, status: 14 },
+  limousin: { id: 'limousin', navn: 'Limousin', kategori: 'bil', pris: 9_000_000, status: 16 },
+  seilyacht: { id: 'seilyacht', navn: 'Havseiler', kategori: 'baat', pris: 60_000_000, status: 38 },
+  formelbil: { id: 'formelbil', navn: 'Formel 1-bil', kategori: 'bil', pris: 80_000_000, status: 45 },
 }
 
 export const LUKSUSLISTE = Object.keys(LUKSUS) as LuksusId[]
@@ -211,10 +211,10 @@ export const LAGER_FOR: Record<LuksusKategori, LagerId | null> = {
   fly: 'hangar',
 }
 
-export const LAGER: Record<LagerId, { navn: string; bestemt: string; emoji: string; enhet: string; startpris: number; vekst: number }> = {
-  garasje: { navn: 'Garasje', bestemt: 'garasjen', emoji: '🅿️', enhet: 'biler', startpris: 100_000, vekst: 3 },
-  havn: { navn: 'Havn', bestemt: 'havna', emoji: '⚓', enhet: 'båter', startpris: 250_000, vekst: 4 },
-  hangar: { navn: 'Hangar', bestemt: 'hangaren', emoji: '🛬', enhet: 'fly', startpris: 5_000_000, vekst: 5 },
+export const LAGER: Record<LagerId, { navn: string; bestemt: string; enhet: string; startpris: number; vekst: number }> = {
+  garasje: { navn: 'Garasje', bestemt: 'garasjen', enhet: 'biler', startpris: 100_000, vekst: 3 },
+  havn: { navn: 'Havn', bestemt: 'havna', enhet: 'båter', startpris: 250_000, vekst: 4 },
+  hangar: { navn: 'Hangar', bestemt: 'hangaren', enhet: 'fly', startpris: 5_000_000, vekst: 5 },
 }
 
 export const LAGERLISTE = Object.keys(LAGER) as LagerId[]

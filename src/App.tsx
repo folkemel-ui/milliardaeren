@@ -114,7 +114,7 @@ export default function App() {
         if (f.type === 'hendelse') {
           visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'investeringer' })
         } else if (f.type === 'prestasjon') {
-          visVarsel({ type: 'god', tittel: `${f.emoji} Prestasjon: ${f.navn}`, mål: 'profil' })
+          visVarsel({ type: 'god', tittel: `Prestasjon: ${f.navn}`, mål: 'profil' })
         }
       }
     }

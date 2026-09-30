@@ -26,7 +26,7 @@ export interface Oppsummering {
   nyeAviser: number
   kamper: Kamp[]
   rapporter: { navn: string; utfall: Rapport['utfall'] }[]
-  prestasjoner: { navn: string; emoji: string }[]
+  prestasjoner: { navn: string }[]
   hendelser: number
 }
 
@@ -49,10 +49,7 @@ export function oppsummer(før: Spilltilstand, etter: Spilltilstand, borteSek: n
       const r = etter.kvartal?.[id]?.siste
       return r && r.dag !== før.kvartal?.[id]?.siste?.dag ? [{ navn: PAPIRER[id].navn, utfall: r.utfall }] : []
     }),
-    prestasjoner: PRESTASJONER.filter((p) => etter.prestasjoner[p.id] !== undefined && før.prestasjoner[p.id] === undefined).map((p) => ({
-      navn: p.navn,
-      emoji: p.emoji,
-    })),
+    prestasjoner: PRESTASJONER.filter((p) => etter.prestasjoner[p.id] !== undefined && før.prestasjoner[p.id] === undefined).map((p) => ({ navn: p.navn })),
     hendelser: etter.hendelser.filter((h) => !kjenteHendelser.has(`${h.sek}|${h.tittel}|${h.tekst}`)).length,
   }
 }

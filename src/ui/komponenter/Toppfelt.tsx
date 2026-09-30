@@ -4,7 +4,7 @@ import { dagnummer, erHelg } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
 import { kompakt, perSek } from '../format'
 import { klokke, kortDato, ukenummer } from '../kalender'
-import { IkonProfil } from './Ikoner'
+import { Ikon, IkonProfil } from './Ikoner'
 import { RulleTall } from './RulleTall'
 
 /**
@@ -44,7 +44,7 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
         </span>
         {s.skatt.regninger.length > 0 ? (
           <button className="skattebrikke" onClick={tilProfil} aria-label="Ubetalt skatt — gå til Profil">
-            🧾 Skatt
+            <Ikon navn="kvittering" størrelse={14} /> Skatt
           </button>
         ) : (
           erHelg(s.sek) && <span className="helg">Børsen stengt</span>

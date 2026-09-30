@@ -14,6 +14,7 @@ import { Oppgraderingsknapp, Personale } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
 import { useVoksUt } from '../overgang'
+import { Ikon } from '../komponenter/Ikoner'
 
 export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
@@ -104,7 +105,9 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
                     {kortKroner(pris)}
                   </button>
                 ) : (
-                  <span className="dempet liten laast-merke">🔒 Nivå {f.nivaa}</span>
+                  <span className="dempet liten laast-merke">
+                    <Ikon navn="las" størrelse={12} /> Nivå {f.nivaa}
+                  </span>
                 )}
               </li>
             )

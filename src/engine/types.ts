@@ -20,8 +20,6 @@ export type BedriftstypeId =
 export interface Bedriftstype {
   id: BedriftstypeId
   navn: string
-  /** Midlertidig ikon til SVG-ikonene kommer. */
-  emoji: string
   /** Hva det koster å starte bedriften. Du kan eie én av hver type. */
   pris: number
   /** Inntekt per sekund på nivå 1, uten ansatte. */
@@ -158,7 +156,6 @@ export interface Eiendomstype {
   navn: string
   sted: string
   by: By
-  emoji: string
   /** Pris når eiendomsindeksen står på 1. */
   pris: number
   /** Leie per time, som andel av prisen. Følger indeksen. */
@@ -187,7 +184,6 @@ export interface Luksusgjenstand {
   id: LuksusId
   navn: string
   kategori: LuksusKategori
-  emoji: string
   pris: number
   /** Statuspoeng gjenstanden gir så lenge du eier den. */
   status: number
@@ -572,7 +568,7 @@ export type Startupstatus = 'aktiv' | 'konkurs' | 'solgt' | 'bors'
 
 export interface Startup {
   id: number
-  /** Indeks i STARTUP_IDEER — navn, beskrivelse og emoji. */
+  /** Indeks i STARTUP_IDEER — navn og beskrivelse. */
   ide: number
   /** Indeks i RUNDER: 0 pre-seed … 4 serie C. */
   runde: number

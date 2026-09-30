@@ -15,6 +15,8 @@ import { lesAvisvalg, settAvisvalg, type Avisvalg } from '../avisvalg'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
 import { Logo } from '../komponenter/Logo'
+import { Ikon } from '../komponenter/Ikoner'
+import { Merke } from '../komponenter/Merke'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -28,7 +30,9 @@ function Trofeskap({ s }: { s: Spilltilstand }) {
       <ul className="trofeer">
         {[...trofeer].reverse().map((t, i) => (
           <li key={i}>
-            <span aria-hidden="true">🏆</span>
+            <span className="trofe-ikon" aria-hidden="true">
+              <Ikon navn="trofe" størrelse={22} />
+            </span>
             <span>
               <strong>{t.navn}</strong>
               <span className="dempet liten">
@@ -57,8 +61,8 @@ function Prestasjonsliste({ s }: { s: Spilltilstand }) {
           const når = s.prestasjoner[p.id]
           return (
             <li key={p.id} className={når === undefined ? 'prestasjon' : 'prestasjon klart'} title={p.beskrivelse}>
-              <span className="prestasjon-emoji" aria-hidden="true">
-                {når === undefined ? '🔒' : p.emoji}
+              <span className="prestasjon-emoji">
+                <Merke id={p.id} klart={når !== undefined} størrelse={38} />
               </span>
               <span className="prestasjon-navn">{p.navn}</span>
               <span className="prestasjon-besk">{p.beskrivelse}</span>
@@ -116,10 +120,10 @@ function Utseende() {
       <h2 className="kort-tittel">Utseende</h2>
       <div className="segment">
         <button className={tema === 'mork' ? 'aktiv' : ''} onClick={() => velg('mork')}>
-          🌙 Mørkt
+          <Ikon navn="mane" størrelse={15} /> Mørkt
         </button>
         <button className={tema === 'lys' ? 'aktiv' : ''} onClick={() => velg('lys')}>
-          ☀️ Lyst
+          <Ikon navn="sol" størrelse={15} /> Lyst
         </button>
       </div>
       <h2 className="kort-tittel">Avisen</h2>

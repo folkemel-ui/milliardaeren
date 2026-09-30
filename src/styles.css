@@ -1659,14 +1659,28 @@ figure {
   gap: 10px;
 }
 
-.startup-emoji {
+/* Startupens logo: initialene på en farget flis (fargen settes i StartupLogo). */
+.startup-logo {
   display: grid;
+  flex: none;
   place-items: center;
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--flate-2);
-  font-size: 22px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.startup-logo.liten {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  vertical-align: middle;
 }
 
 .startup-besk {
@@ -2248,7 +2262,7 @@ figure {
 .prestasjon-emoji {
   grid-row: 1 / 3;
   align-self: center;
-  font-size: 22px;
+  display: grid;
 }
 
 .prestasjon-navn {
@@ -2609,8 +2623,8 @@ figure {
 }
 
 .lager-emoji {
-  font-size: 24px;
-  line-height: 1.2;
+  display: grid;
+  color: var(--gull);
 }
 
 .lagerkort strong {
@@ -2926,7 +2940,13 @@ figure {
 }
 
 .varsel-ikon {
-  font-size: 18px;
+  display: grid;
+  flex: none;
+}
+
+.varsel-god .varsel-ikon,
+.varsel-avis .varsel-ikon {
+  color: var(--gull);
 }
 
 .varsel-tekst {
@@ -3039,8 +3059,9 @@ figure {
 }
 
 .feiring-krone {
-  font-size: clamp(48px, 16vw, 88px);
-  line-height: 1;
+  display: grid;
+  color: var(--gull-lys);
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.6));
   animation: krone-ned 0.9s cubic-bezier(0.3, 1.6, 0.5, 1) 0.3s both;
 }
 
@@ -3634,7 +3655,7 @@ figure {
 
 /* En mynt som stiger fra byen hvert par sekunder, så leien synes. */
 .kart-mynt {
-  font-size: 8px;
+  color: var(--gull);
   opacity: 0;
   pointer-events: none;
   animation: kart-mynt 4.5s ease-out infinite;
@@ -3800,4 +3821,54 @@ figure {
   justify-content: center;
   padding: 8px 0 4px;
   opacity: 0.9;
+}
+
+/* ─────────────────────────────────────────────── Ikoner og medaljer */
+
+/* Ikoner står på grunnlinjen når de står i tekst, og krymper aldri i en flex-rad. */
+.ikon {
+  flex: none;
+  vertical-align: -0.2em;
+}
+
+.klubb-emoji,
+.trofe-ikon {
+  color: var(--gull);
+}
+
+.trofe-ikon {
+  display: grid;
+}
+
+/* En prestasjon som medalje: ring i graden, mørk skive, ikonet i ringens lyse farge. */
+.merke-medalje {
+  --ring: #b87333;
+  --ring-lys: #e7b07a;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  border: 3px solid var(--ring);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--ring) 30%, var(--flate-2)), var(--flate-2) 70%);
+  box-shadow:
+    inset 0 0 0 1.5px var(--ring-lys),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  color: var(--ring-lys);
+}
+
+.merke-medalje.solv {
+  --ring: #8d949e;
+  --ring-lys: #e5e7eb;
+}
+
+.merke-medalje.gull {
+  --ring: #b8912a;
+  --ring-lys: #f7e3a1;
+}
+
+.merke-medalje.laast {
+  border: 2px dashed var(--kant);
+  background: transparent;
+  box-shadow: none;
+  color: var(--tekst-dempet);
 }

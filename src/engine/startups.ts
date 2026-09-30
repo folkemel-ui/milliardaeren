@@ -54,26 +54,25 @@ export const INNTRYKK = ['Uprøvd team', 'Lovende team', 'Erfarent team'] as con
 export interface StartupIde {
   navn: string
   beskrivelse: string
-  emoji: string
 }
 
 export const STARTUP_IDEER: StartupIde[] = [
-  { navn: 'Matbudet', beskrivelse: 'App som leverer middag på døra på under 20 minutter.', emoji: '🛵' },
-  { navn: 'Batterikraft', beskrivelse: 'Batterifabrikk for elbiler, bygget på vannkraft.', emoji: '🔋' },
-  { navn: 'Laksegen', beskrivelse: 'Bioteknologi som holder oppdrettslaksen frisk.', emoji: '🧬' },
-  { navn: 'Hyttebooking', beskrivelse: 'Lei ut hytta når du ikke bruker den selv.', emoji: '🏡' },
-  { navn: 'Nordrobot', beskrivelse: 'Roboter som plukker varer på lageret.', emoji: '🤖' },
-  { navn: 'Skygge AI', beskrivelse: 'Kunstig intelligens som leser kontrakter for advokater.', emoji: '🧠' },
-  { navn: 'Tareskog', beskrivelse: 'Mat og emballasje laget av tare fra kysten.', emoji: '🌿' },
-  { navn: 'Havvind Flyt', beskrivelse: 'Flytende vindmøller til dypt vann.', emoji: '🌬️' },
-  { navn: 'Snøfonn Spill', beskrivelse: 'Spillstudio med et vikingspill i støpeskjeen.', emoji: '🎮' },
-  { navn: 'Karbonfangst', beskrivelse: 'Fanger CO₂ fra fabrikkpiper og lagrer den under havbunnen.', emoji: '🏭' },
-  { navn: 'Lommebanken', beskrivelse: 'Mobilbank for ungdom, uten gebyrer.', emoji: '💳' },
-  { navn: 'Helsesjekk', beskrivelse: 'Legetime på video, døgnet rundt.', emoji: '🩺' },
-  { navn: 'Norsk Romfart', beskrivelse: 'Små satellitter som overvåker isen i Arktis.', emoji: '🛰️' },
-  { navn: 'Elferja', beskrivelse: 'Elektriske ferjer til fjordene.', emoji: '⛴️' },
-  { navn: 'Fjellgrip', beskrivelse: 'Klatreutstyr som selger seg selv på sosiale medier.', emoji: '🧗' },
-  { navn: 'Kvitre', beskrivelse: 'Et nytt sosialt nettverk — denne gangen blir det annerledes.', emoji: '🐦' },
+  { navn: 'Matbudet', beskrivelse: 'App som leverer middag på døra på under 20 minutter.' },
+  { navn: 'Batterikraft', beskrivelse: 'Batterifabrikk for elbiler, bygget på vannkraft.' },
+  { navn: 'Laksegen', beskrivelse: 'Bioteknologi som holder oppdrettslaksen frisk.' },
+  { navn: 'Hyttebooking', beskrivelse: 'Lei ut hytta når du ikke bruker den selv.' },
+  { navn: 'Nordrobot', beskrivelse: 'Roboter som plukker varer på lageret.' },
+  { navn: 'Skygge AI', beskrivelse: 'Kunstig intelligens som leser kontrakter for advokater.' },
+  { navn: 'Tareskog', beskrivelse: 'Mat og emballasje laget av tare fra kysten.' },
+  { navn: 'Havvind Flyt', beskrivelse: 'Flytende vindmøller til dypt vann.' },
+  { navn: 'Snøfonn Spill', beskrivelse: 'Spillstudio med et vikingspill i støpeskjeen.' },
+  { navn: 'Karbonfangst', beskrivelse: 'Fanger CO₂ fra fabrikkpiper og lagrer den under havbunnen.' },
+  { navn: 'Lommebanken', beskrivelse: 'Mobilbank for ungdom, uten gebyrer.' },
+  { navn: 'Helsesjekk', beskrivelse: 'Legetime på video, døgnet rundt.' },
+  { navn: 'Norsk Romfart', beskrivelse: 'Små satellitter som overvåker isen i Arktis.' },
+  { navn: 'Elferja', beskrivelse: 'Elektriske ferjer til fjordene.' },
+  { navn: 'Fjellgrip', beskrivelse: 'Klatreutstyr som selger seg selv på sosiale medier.' },
+  { navn: 'Kvitre', beskrivelse: 'Et nytt sosialt nettverk — denne gangen blir det annerledes.' },
 ]
 
 export function ide(st: Startup): StartupIde {

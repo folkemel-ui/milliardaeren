@@ -14,52 +14,52 @@ export const MAAL = 1_000_000_000
  */
 export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   saftbod: {
-    id: 'saftbod', navn: 'Saftbod', emoji: '🍋',
+    id: 'saftbod', navn: 'Saftbod',
     pris: 250, grunninntekt: 1, oppgraderingspris: 100, vekst: 1.1, laasesOppVed: 0,
   },
   polsebod: {
-    id: 'polsebod', navn: 'Pølsebod', emoji: '🌭',
+    id: 'polsebod', navn: 'Pølsebod',
     pris: 3_000, grunninntekt: 2.5, oppgraderingspris: 600, vekst: 1.1, laasesOppVed: 4_000,
   },
   kiosk: {
-    id: 'kiosk', navn: 'Kiosk', emoji: '🏪',
+    id: 'kiosk', navn: 'Kiosk',
     pris: 40_000, grunninntekt: 16, oppgraderingspris: 10_000, vekst: 1.1, laasesOppVed: 50_000,
   },
   kafe: {
-    id: 'kafe', navn: 'Kafé', emoji: '☕',
+    id: 'kafe', navn: 'Kafé',
     pris: 600_000, grunninntekt: 100, oppgraderingspris: 150_000, vekst: 1.1, laasesOppVed: 750_000,
   },
   restaurant: {
-    id: 'restaurant', navn: 'Restaurant', emoji: '🍽️',
+    id: 'restaurant', navn: 'Restaurant',
     pris: 9_000_000, grunninntekt: 600, oppgraderingspris: 2_250_000, vekst: 1.1, laasesOppVed: 12_000_000,
   },
   hotell: {
-    id: 'hotell', navn: 'Hotell', emoji: '🏨',
+    id: 'hotell', navn: 'Hotell',
     pris: 135_000_000, grunninntekt: 3_600, oppgraderingspris: 32_400_000, vekst: 1.1, laasesOppVed: 150_000_000,
   },
   bank: {
-    id: 'bank', navn: 'Bank', emoji: '🏦',
+    id: 'bank', navn: 'Bank',
     pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 450_000_000, vekst: 1.1, laasesOppVed: 700_000_000,
   },
   oljeselskap: {
-    id: 'oljeselskap', navn: 'Oljeselskap', emoji: '🛢️',
+    id: 'oljeselskap', navn: 'Oljeselskap',
     pris: 5_000_000_000, grunninntekt: 100_000, oppgraderingspris: 5_000_000_000, vekst: 1.1, laasesOppVed: 2_500_000_000,
   },
   // Sluttspillet etter milliarden: hvert trinn er rundt fire–fem ganger det forrige.
   rederi: {
-    id: 'rederi', navn: 'Rederi', emoji: '🚢',
+    id: 'rederi', navn: 'Rederi',
     pris: 25_000_000_000, grunninntekt: 400_000, oppgraderingspris: 20_000_000_000, vekst: 1.1, laasesOppVed: 15_000_000_000,
   },
   fiskeoppdrett: {
-    id: 'fiskeoppdrett', navn: 'Fiskeoppdrett', emoji: '🐟',
+    id: 'fiskeoppdrett', navn: 'Fiskeoppdrett',
     pris: 100_000_000_000, grunninntekt: 1_400_000, oppgraderingspris: 80_000_000_000, vekst: 1.1, laasesOppVed: 60_000_000_000,
   },
   flyselskap: {
-    id: 'flyselskap', navn: 'Flyselskap', emoji: '🛬',
+    id: 'flyselskap', navn: 'Flyselskap',
     pris: 400_000_000_000, grunninntekt: 5_000_000, oppgraderingspris: 300_000_000_000, vekst: 1.1, laasesOppVed: 250_000_000_000,
   },
   skisenter: {
-    id: 'skisenter', navn: 'Skisenter', emoji: '⛷️',
+    id: 'skisenter', navn: 'Skisenter',
     pris: 1_500_000_000_000, grunninntekt: 17_000_000, oppgraderingspris: 1_200_000_000_000, vekst: 1.1, laasesOppVed: 1_000_000_000_000,
   },
 }

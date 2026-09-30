@@ -55,6 +55,7 @@ import {
 } from '../../engine/startups'
 import { RulleTall } from '../komponenter/RulleTall'
 import { useVoksUt } from '../overgang'
+import { StartupLogo } from '../komponenter/StartupLogo'
 
 type Underfane = 'oversikt' | 'bors' | 'selskaper' | 'bank'
 
@@ -602,14 +603,14 @@ function Startups({ s }: { s: Spilltilstand }) {
       {liste.length === 0 && <p className="dempet">Ingen søker penger akkurat nå. Nye gründere dukker opp ved dagsskiftene.</p>}
       <ul className="kortliste">
         {liste.map((st) => {
-          const { navn, beskrivelse, emoji } = ide(st)
+          const { navn, beskrivelse } = ide(st)
           const ledig = ledigIRunde(st)
           const valg = [...new Set([ledig / 4, ledig / 2, ledig].map((b) => Math.floor(b)))].filter((b) => b > 0)
           return (
             <li key={st.id} className="kort startupkort">
               <div className="rival-topp">
                 <div className="rivalbedrift-topp">
-                  <span className="startup-emoji" aria-hidden="true">{emoji}</span>
+                  <StartupLogo navn={navn} />
                   <div>
                     <h2>{navn}</h2>
                     <span className="dempet liten">{INNTRYKK[st.inntrykk]}</span>
@@ -668,7 +669,7 @@ function Startups({ s }: { s: Spilltilstand }) {
             {avsluttet.map((st) => (
               <li key={st.id}>
                 <span>
-                  {ide(st).emoji} {ide(st).navn} <span className="dempet liten">· {SLUTT[st.status]}</span>
+                  <StartupLogo navn={ide(st).navn} liten /> {ide(st).navn} <span className="dempet liten">· {SLUTT[st.status]}</span>
                 </span>
                 {st.investert > 0 ? (
                   <span className={(st.utbetalt ?? 0) >= st.investert ? 'pluss' : 'minus'}>{fortegnKroner((st.utbetalt ?? 0) - st.investert)}</span>

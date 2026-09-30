@@ -31,6 +31,7 @@ import { Gatebilde } from '../komponenter/Gatebilde'
 import { REGIONER, REGIONLISTE, regionEndring } from '../../engine/regioner'
 import { NyMerke } from '../komponenter/Kjopsglimt'
 import { RulleTall } from '../komponenter/RulleTall'
+import { Ikon } from '../komponenter/Ikoner'
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
   const [by, settBy] = useState<By | null>(null)
@@ -106,7 +107,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
             Viser {by} · <strong>Vis alle</strong> ✕
           </button>
           <button className="filterbrikke" onClick={() => settGate(by)}>
-            🔍 Gatebildet
+            <Ikon navn="sok" størrelse={14} /> Gatebildet
           </button>
         </div>
       )}
@@ -190,7 +191,7 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
       {oppussing ? (
         <div className="oppussing-pågår">
           <span>
-            🛠️ Pusses opp til <strong>{STANDARDER[oppussing.standard].navn.toLowerCase()}</strong>
+            <Ikon navn="kran" størrelse={16} /> Pusses opp til <strong>{STANDARDER[oppussing.standard].navn.toLowerCase()}</strong>
           </span>
           <span className="dempet liten">Ferdig om {varighet(Math.max(0, oppussing.ferdigSek - s.sek))} · ingen leie så lenge</span>
         </div>
@@ -207,7 +208,7 @@ function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
                 : manglerStatus
                   ? `Krever status ${t.statuskrav}`
                   : manglerFly && fly
-                    ? `${LUKSUS[fly].emoji} Krever ${LUKSUS[fly].navn.toLowerCase()}`
+                    ? `Krever ${LUKSUS[fly].navn.toLowerCase()}`
                     : `Kjøp · ${kortKroner(pris)}`}
             </button>
             {eier > 0 && (

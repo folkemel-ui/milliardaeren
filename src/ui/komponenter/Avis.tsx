@@ -5,6 +5,7 @@ import type { Avisutgave, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { datotekst } from '../kalender'
 import { OppgjorBlokk, oppgjorTittel } from './Oppgjor'
+import { Ikon } from './Ikoner'
 
 /** Børstidende: dagens utgave øverst, de forrige under. Å åpne avisen merker den som lest. */
 export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
@@ -84,7 +85,7 @@ const Utgave = memo(
           </ul>
           {utgave.oppgjor?.map((o) => (
             <p key={o.periode} className="utgave-oppgjor">
-              📊 {oppgjorTittel(o)} — se Regnskap på Profil
+              <Ikon navn="stolper" størrelse={14} /> {oppgjorTittel(o)} — se Regnskap på Profil
             </p>
           ))}
         </>

@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import type { By, NorskBy, Spilltilstand } from '../../engine/types'
 import { kartLeie, leieIBy, symbolerI, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
 import { perSek } from '../format'
+import { Ikon } from './Ikoner'
 
 /*
  * Et stilisert Norgeskart tegnet fra ekte koordinater (lengde, bredde),
@@ -136,9 +137,9 @@ export function Norgeskart({
                   {kartLeie(leie)}
                 </text>
                 {/* En mynt som stiger når leien kommer — forskjøvet per by, så de ikke går i takt. */}
-                <text x={x} y={y - r - 2} textAnchor="middle" className="kart-mynt" style={{ animationDelay: `${(i % 5) * 0.9}s` }}>
-                  🪙
-                </text>
+                <g className="kart-mynt" style={{ animationDelay: `${(i % 5) * 0.9}s` }}>
+                  <Ikon navn="mynt" størrelse={8} x={x - 4} y={y - r - 10} />
+                </g>
               </>
             )}
             {symboler.length > 0 && (

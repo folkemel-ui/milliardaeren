@@ -6,6 +6,7 @@ import { UTFALLTEKST } from '../../engine/kvartal'
 import { fortegnKroner, kortKroner, varighet } from '../format'
 import type { Fane } from './Fanemeny'
 import { RulleTall } from './RulleTall'
+import { Ikon } from './Ikoner'
 
 /** «Velkommen tilbake»: hva som kom inn og hva som skjedde mens du var borte. */
 export function Velkomstskjerm({
@@ -72,7 +73,7 @@ export function Velkomstskjerm({
           {o.nyeAviser > 0 && (
             <li>
               <span>
-                📰 {o.nyeAviser} {o.nyeAviser === 1 ? 'ny utgave' : 'nye utgaver'} av Børstidende
+                <Ikon navn="avis" størrelse={16} /> {o.nyeAviser} {o.nyeAviser === 1 ? 'ny utgave' : 'nye utgaver'} av Børstidende
               </span>
               <button className="knapp knapp-liten" onClick={lesAvis}>
                 Les
@@ -82,7 +83,7 @@ export function Velkomstskjerm({
           {o.kamper.length > 0 && (
             <li>
               <span>
-                ⚽ {o.kamper.length} {o.kamper.length === 1 ? 'kamp' : 'kamper'}: {seire} {seire === 1 ? 'seier' : 'seire'}, {uavgjort} uavgjort, {tap} tap
+                <Ikon navn="ball" størrelse={16} /> {o.kamper.length} {o.kamper.length === 1 ? 'kamp' : 'kamper'}: {seire} {seire === 1 ? 'seier' : 'seire'}, {uavgjort} uavgjort, {tap} tap
               </span>
               <button className="knapp knapp-liten" onClick={() => (gåTil('luksus'), lukk())}>
                 Klubben
@@ -91,19 +92,23 @@ export function Velkomstskjerm({
           )}
           {o.rapporter.length > 0 && (
             <li className="velkomst-rapporter">
-              <span>📊 Kvartalstall</span>
+              <span>
+                <Ikon navn="stolper" størrelse={16} /> Kvartalstall
+              </span>
               <span className="dempet liten">{o.rapporter.map((r) => `${r.navn}: ${UTFALLTEKST[r.utfall].toLowerCase()}`).join(' · ')}</span>
             </li>
           )}
           {o.prestasjoner.length > 0 && (
             <li>
-              <span>🏅 {o.prestasjoner.map((p) => `${p.emoji} ${p.navn}`).join(', ')}</span>
+              <span>
+                <Ikon navn="medalje" størrelse={16} /> {o.prestasjoner.map((p) => p.navn).join(', ')}
+              </span>
             </li>
           )}
           {o.hendelser > 0 && (
             <li>
               <span>
-                🔔 {o.hendelser} {o.hendelser === 1 ? 'hendelse' : 'hendelser'}
+                <Ikon navn="bjelle" størrelse={16} /> {o.hendelser} {o.hendelser === 1 ? 'hendelse' : 'hendelser'}
               </span>
               <button className="knapp knapp-liten" onClick={() => (gåTil('investeringer'), lukk())}>
                 Se
