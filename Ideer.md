@@ -8,12 +8,15 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 29 – A tidy map:** Focus on Southern Norway, Less on the map at once, Labels that never overlap, Dots that don't collide
-- **Pack 30 – A better start:** Faster first minutes, Explanations for every system, Norwegian text pass
-- **Pack 31 – The street comes alive:** A real street, Drawings instead of emoji in the street view, Act from the street view, City-first property view
-- **Pack 32 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see
-- **Pack 33 – Cities that matter:** Architecture note, Buildings in more than one city, More price regions, City owner bonus
-- **Pack 34 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
+- **Pack 29 – No more emoji:** A proper icon set, Icons instead of emoji in the interface, Remove emoji from the game data, Drawn achievement badges
+- **Pack 30 – A tidy map:** Focus on Southern Norway, Less on the map at once, Labels that never overlap, Dots that don't collide
+- **Pack 31 – The street comes alive:** A real street, Drawings instead of emoji in the street view, Icons on the maps, Act from the street view
+- **Pack 32 – A better start:** Faster first minutes, Explanations for every system, Norwegian text pass
+- **Pack 33 – One visual language:** One set of badges and labels, A typography scale, A club crest
+- **Pack 34 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
+- **Pack 35 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Calmer celebrations
+- **Pack 36 – Cities that matter:** Architecture note, Buildings in more than one city, More price regions, City owner bonus
+- **Pack 37 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
 
 ## Property
 
@@ -49,13 +52,27 @@ A suggested order, grouped so each pack feels complete when played. The order is
 18. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
 19. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
 
+## Professional look
+
+20. **A proper icon set.** The game has a few line icons in `Ikoner.tsx` that follow the text color and the theme. Extend them to a full set of about 20–25, drawn in the same style, and use them everywhere an emoji is used today.
+21. **Icons instead of emoji in the interface.** The toasts (✨ ⚠️ 🚨 📰), 🥤 «Selg en kopp selv», 🔍 «Gatebildet», 🏗️ «Pusses opp», 🔒 on locked achievements, the rising 🪙 on the map, 📰 and 🏅 on the welcome screen and so on get icons from the icon set, or plain text.
+22. **Drawn achievement badges.** All the achievements use an emoji as their picture. Replace them with drawn medals — round badges in bronze, silver or gold with a small icon inside — so the trophy case looks like a collection.
+23. **Icons on the maps.** Farm, forest and landmark symbols (🌾 🌲 🔦 ⛷️ 🏰 🗼) and the plane symbols on the world map become small icons or the new drawings.
+24. **Remove emoji from the game data.** Luxury items, property types, startups and businesses carry an `emoji` field. The places that still show it (startups, the storage list in Luksus, the plane requirement) use drawings or icons, and the field is removed.
+25. **A club crest.** The football club uses ⚽. Draw a crest instead, made from the club's name and colors.
+26. **One set of badges and labels.** The game mixes pill badges (Leder, NY, standards), colored text and symbols. Define a small set — for example status badge, category label and number chip — and use them the same way everywhere.
+27. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
+28. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+29. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
+30. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
+
 ## Text
 
-20. **Norwegian text pass.** Go through all the text for tone, typos and consistent words (for example "papir", "aksje" and "verdipapir"), so it reads as one finished game.
+31. **Norwegian text pass.** Go through all the text for typos and consistent words (for example "papir", "aksje" and "verdipapir"), and choose one voice: some texts are playful ("Lærepenger", "Kryptonysgjerrig"), others dry. Dry and slightly witty, like a business paper, fits the game. So it reads as one finished game.
 
 ## Code health
 
-21. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
+32. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
 
 ## Parked (not chosen yet)
 
