@@ -12,6 +12,7 @@ import { DAG_SEK } from './kalender'
 import { flyt } from './portefolje'
 import type { Terning } from './rng'
 import type { Oppgjor, Overskrift, Spilltilstand } from './types'
+import { kortKroner } from './tall'
 
 /** Trinnskatt på månedens overskudd: satsen gjelder beløpet over grensen. */
 export const SKATTETRINN = [
@@ -70,7 +71,7 @@ export function skattVedDagsskifte(s: Spilltilstand, oppgjor: Oppgjor[], t: Tern
       const krav = s.skatt.unndratt * (1 + TILLEGGSSKATT)
       nyRegning(s, 'Etterskatt og tilleggsskatt', krav, 'etterskatt')
       s.skatt.unndratt = 0
-      leggTilHendelse(s, { tittel: 'Bokettersyn', tekst: `Skattemyndighetene fant pengene i skatteparadiset. Kravet er ${Math.round(krav).toLocaleString('nb-NO')} kr.`, alvor: 'kritisk' })
+      leggTilHendelse(s, { tittel: 'Bokettersyn', tekst: `Skattemyndighetene fant pengene i skatteparadiset. Kravet er ${kortKroner(krav)}.`, alvor: 'kritisk' })
       saker.push({ type: 'deg', tittel: `Skattejakt: ${hvem} tatt for unndragelse`, tekst: 'Et selskap i et skatteparadis ble avslørt ved bokettersyn. Tilleggsskatten er på 100 %.' })
     }
     const full = beregnSkatt(skattegrunnlag(maaned))
@@ -78,7 +79,7 @@ export function skattVedDagsskifte(s: Spilltilstand, oppgjor: Oppgjor[], t: Tern
       const skatt = s.skatt.offshore ? full / 2 : full
       if (s.skatt.offshore) s.skatt.unndratt += full - skatt
       nyRegning(s, `Skatt for ${maaned.navn}`, skatt, 'skatt')
-      saker.push({ type: 'deg', tittel: 'Skatteoppgjøret er klart', tekst: `Skatten for ${maaned.navn} er ${Math.round(skatt).toLocaleString('nb-NO')} kr, med forfall om ${FORFALL_DAGER} dager.` })
+      saker.push({ type: 'deg', tittel: 'Skatteoppgjøret er klart', tekst: `Skatten for ${maaned.navn} er ${kortKroner(skatt)}, med forfall om ${FORFALL_DAGER} dager.` })
     }
   }
   // Forfalte regninger krever skattemyndighetene inn selv — med gebyr.

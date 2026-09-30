@@ -63,7 +63,7 @@ function Feilinnhold({ melding, tittel }: { melding: string; tittel: RefObject<H
       )}
       {bekreftNytt ? (
         <div className="bekreft">
-          <p>Starte et nytt spill med 1 000 kr? Den ødelagte lagringen tas vare på.</p>
+          <p>Starte et nytt spill med kr 1 000? Den ødelagte lagringen tas vare på.</p>
           <div className="knapperad">
             <button className="knapp" onClick={() => settBekreftNytt(false)}>
               Avbryt

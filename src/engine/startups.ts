@@ -15,6 +15,7 @@ import { DAG_SEK, dagnummer } from './kalender'
 import { flyt } from './portefolje'
 import type { Terning } from './rng'
 import type { Overskrift, Spilltilstand, Startup, Startupstatus } from './types'
+import { kortKroner } from './tall'
 
 export const RUNDER = [
   { navn: 'Pre-seed', konkurs: 0.3, oppkjop: 0.03 },
@@ -179,12 +180,12 @@ export function startupsVedDagsskifte(s: Spilltilstand, t: Terning): Overskrift[
       const utbetalt = verdiFor * t.mellom(OPPKJOP_MIN, OPPKJOP_MAKS)
       avslutt(s, st, 'solgt', utbetalt)
       saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} kjøpt opp`, tekst: med ? 'En utenlandsk gigant kjøper selskapet, og investorene får betalt.' : 'En utenlandsk gigant sikret seg det lovende selskapet.' })
-      if (med) leggTilHendelse(s, { tittel: 'Oppkjøp', tekst: `${navn} ble kjøpt opp. Du fikk ${Math.round(utbetalt).toLocaleString('nb-NO')} kr.`, alvor: 'info' })
+      if (med) leggTilHendelse(s, { tittel: 'Oppkjøp', tekst: `${navn} ble kjøpt opp. Du fikk ${kortKroner(utbetalt)}.`, alvor: 'info' })
     } else if (st.runde === RUNDER.length - 1) {
       const utbetalt = verdiFor * t.mellom(BORS_MIN, BORS_MAKS)
       avslutt(s, st, 'bors', utbetalt)
       saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} til børs`, tekst: med ? 'Kursen steg på første handelsdag, og de tidlige investorene kan telle gevinsten.' : 'Kursen steg på første handelsdag. De tidlige investorene jubler.' })
-      if (med) leggTilHendelse(s, { tittel: 'Børsnotering', tekst: `${navn} gikk på børs. Du fikk ${Math.round(utbetalt).toLocaleString('nb-NO')} kr.`, alvor: 'info' })
+      if (med) leggTilHendelse(s, { tittel: 'Børsnotering', tekst: `${navn} gikk på børs. Du fikk ${kortKroner(utbetalt)}.`, alvor: 'info' })
     } else {
       st.runde += 1
       st.verdi = pent(st.verdi * t.mellom(VEKST_MIN, VEKST_MAKS))

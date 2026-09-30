@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 32 – A better start:** Faster first minutes, Explanations for every system, Norwegian text pass
 - **Pack 33 – One visual language:** One set of badges and labels, A typography scale, A club crest
 - **Pack 34 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
 - **Pack 35 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Calmer celebrations
@@ -28,36 +27,27 @@ A suggested order, grouped so each pack feels complete when played. The order is
 6. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
 7. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
-## Game
-
-8. **Faster first minutes.** The start is slow and thin: one lemonade stand at kr 1/s and a button to sell cups, with the next business at 4 000 kr (the perfect bot needs 8 minutes to reach 10 000). A quicker first unlock, or more small goals early, so a new player is hooked before they get bored.
-
 ## Interface
 
-9. **Explanations for every system.** Stocks, coins, funds, automatic orders, loans, margin calls, tax, offshore, rivals, takeovers, mergers, startups, land, landmarks, art, the club and renovation are never explained in the game. A short "?" tip on each card saying what it is and why you'd want it.
-10. **Split up Profil.** Profil holds net worth, the goal, statistics, tax, accounting, trophies, achievements, records, appearance, save transfer, backup, restart and the logo in one long scroll. Split it into parts, for example "Meg", "Regnskap" and "Innstillinger".
+8. **Split up Profil.** Profil holds net worth, the goal, statistics, tax, accounting, trophies, achievements, records, appearance, save transfer, backup, restart and the logo in one long scroll. Split it into parts, for example "Meg", "Regnskap" and "Innstillinger".
 
 ## Look
 
-11. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
-12. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
+9. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
+10. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
 
 ## Professional look
 
-13. **A club crest.** The football club uses ⚽. Draw a crest instead, made from the club's name and colors.
-14. **One set of badges and labels.** The game mixes pill badges (Leder, NY, standards), colored text and symbols. Define a small set — for example status badge, category label and number chip — and use them the same way everywhere.
-15. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
-16. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
-17. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
-18. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
-
-## Text
-
-19. **Norwegian text pass.** Go through all the text for typos and consistent words (for example "papir", "aksje" and "verdipapir"), and choose one voice: some texts are playful ("Lærepenger", "Kryptonysgjerrig"), others dry. Dry and slightly witty, like a business paper, fits the game. So it reads as one finished game.
+11. **A club crest.** The football club uses ⚽. Draw a crest instead, made from the club's name and colors.
+12. **One set of badges and labels.** The game mixes pill badges (Leder, NY, standards), colored text and symbols. Define a small set — for example status badge, category label and number chip — and use them the same way everywhere.
+13. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
+14. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+15. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
+16. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
 
 ## Code health
 
-20. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
+17. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
 
 ## Parked (not chosen yet)
 

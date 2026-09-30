@@ -23,7 +23,7 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
     <div className="avis-bakgrunn" onClick={lukk}>
       <article ref={boks} tabIndex={-1} className="avis" role="dialog" aria-modal="true" aria-label="Børstidende" onClick={(e) => e.stopPropagation()}>
         <header className="avis-hode">
-          <button className="avis-lukk" onClick={lukk} aria-label="Lukk avisen">
+          <button className="avis-lukk" onClick={lukk} aria-label="Lukk avisa">
             ✕
           </button>
           <h1 className="avis-navn">Børstidende</h1>

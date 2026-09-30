@@ -1,6 +1,6 @@
 import { hoggSkog, jordSynlig, kjopJord, kjopLandemerke, selgJord, selgLandemerke } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
-import { HOST_ANDEL, JORD, JORD_SYNLIG_VED, JORDLISTE, landverdi, skogalder, TOMMER_DAGER, tommerverdi, vaer } from '../../engine/jord'
+import { HOST_ANDEL, JORD, JORD_SYNLIG_VED, JORDLISTE, landverdi, skogalder, tommerverdi, vaer } from '../../engine/jord'
 import {
   eierDu,
   kjopsprisLandemerke,
@@ -8,7 +8,6 @@ import {
   LANDEMERKELISTE,
   LANDEMERKER,
   landemerkepris,
-  RIVAL_KJOPER_VED,
   rivalerSomKan,
   TILBAKEKJOP_PREMIE,
 } from '../../engine/landemerker'
@@ -28,10 +27,9 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
   const v = vaer(dagnummer(s.sek))
   const eide = JORDLISTE.filter((id) => s.jord[id]).length
   return (
-    <Seksjon id="eiendom-jord" tittel="Jord og skog" sammendrag={`${eide} av ${JORDLISTE.length} eid`} harInnhold={eide > 0 || !!by}>
+    <Seksjon id="eiendom-jord" tittel="Jord og skog" forklaring="jord" sammendrag={`${eide} av ${JORDLISTE.length} eid`} harInnhold={eide > 0 || !!by}>
       <p className="dempet liten">
-        Gårdene høstes hver mandag morgen, etter ukas vær. Denne uka: <strong>{v.navn.toLowerCase()}</strong>. Skogen gir ingenting før
-        du hogger — tømmeret vokser raskest de første {TOMMER_DAGER} dagene.
+        Ukas vær: <strong>{v.navn.toLowerCase()}</strong>. Gårdene høstes mandag morgen.
       </p>
       <ul className="kortliste">
         {synlige.map((id) => (
@@ -105,11 +103,7 @@ export function Landemerkeliste({ s }: { s: Spilltilstand }) {
   if (s.hoyesteFormue < LANDEMERKER.fyret.pris * 0.25) return null
   const mine = LANDEMERKELISTE.filter((id) => eierDu(s, id)).length
   return (
-    <Seksjon id="eiendom-landemerker" tittel="Landemerker" sammendrag={`${mine} av ${LANDEMERKELISTE.length}`} harInnhold={mine > 0}>
-      <p className="dempet liten">
-        Det finnes bare ett av hvert. En rival med over {RIVAL_KJOPER_VED} ganger prisen i formue kan kjøpe det når som helst — da må du by
-        over for å få det.
-      </p>
+    <Seksjon id="eiendom-landemerker" tittel="Landemerker" forklaring="landemerker" sammendrag={`${mine} av ${LANDEMERKELISTE.length}`} harInnhold={mine > 0}>
       <ul className="kortliste">
         {LANDEMERKELISTE.map((id) => (
           <Landemerkekort key={id} s={s} id={id} />

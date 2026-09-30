@@ -19,7 +19,7 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   },
   polsebod: {
     id: 'polsebod', navn: 'Pølsebod',
-    pris: 3_000, grunninntekt: 2.5, oppgraderingspris: 600, vekst: 1.1, laasesOppVed: 4_000,
+    pris: 1_200, grunninntekt: 2.5, oppgraderingspris: 600, vekst: 1.1, laasesOppVed: 2_000,
   },
   kiosk: {
     id: 'kiosk', navn: 'Kiosk',
@@ -109,7 +109,7 @@ export const FORBEDRINGER: Record<BedriftstypeId, Forbedring[]> = {
   ]),
   restaurant: forbedringer([
     ['Kjendiskokk', 'Kokken har vært på TV. Bordene er fullbooket.'],
-    ['Vinkjeller', 'Vinlisten er lengre enn menyen.'],
+    ['Vinkjeller', 'Vinlista er lengre enn menyen.'],
     ['Michelinstjerne', 'Guiden har vært på besøk. Prisene har steget.'],
   ]),
   hotell: forbedringer([

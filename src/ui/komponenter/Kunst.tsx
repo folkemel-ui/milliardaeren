@@ -1,7 +1,6 @@
 import { kjopMaleri, museum, selgMaleri } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
 import {
-  KJOPSSALAER,
   kjopsprisMaleri,
   KUNSTNERE,
   kunstverdi,
@@ -9,11 +8,10 @@ import {
   MALERILISTE,
   maleripris,
   salgsprisMaleri,
-  SALGSSALAER,
 } from '../../engine/kunst'
 import type { MaleriId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { endring, fortegnKroner, kortKroner, tall } from '../format'
+import { endring, fortegnKroner, kortKroner } from '../format'
 import { Seksjon } from './Seksjon'
 
 /** Et lite maleri i gullramme, tegnet av maleriets tre farger. Formen følger id-en, så hvert er ulikt. */
@@ -40,13 +38,8 @@ export function Kunst({ s }: { s: Spilltilstand }) {
   const verdi = kunstverdi(s)
   const eide = MALERILISTE.filter((id) => s.kunst.eide[id]).length
   return (
-    <Seksjon id="luksus-kunst" tittel="Kunst" sammendrag={eide ? `${eide} ${eide === 1 ? 'maleri' : 'malerier'} · ${kortKroner(verdi)}` : 'Ingen malerier'} harInnhold={eide > 0}>
-      <p className="dempet liten">
-        Prisene går opp og ned hver dag, og hver kunstner har sin egen trend. Auksjonshuset tar {tall(KJOPSSALAER * 100)} % når du kjøper
-        og {tall(SALGSSALAER * 100)} % når du selger. På museum gir et maleri dobbel status, men da kan det ikke selges — og det tar en dag
-        å hente det hjem.
-        {verdi > 0 && ` Samlingen din er verdt ${kortKroner(verdi)}.`}
-      </p>
+    <Seksjon id="luksus-kunst" tittel="Kunst" forklaring="kunst" sammendrag={eide ? `${eide} ${eide === 1 ? 'maleri' : 'malerier'} · ${kortKroner(verdi)}` : 'Ingen malerier'} harInnhold={eide > 0}>
+      {verdi > 0 && <p className="dempet liten">Samlingen din er verdt {kortKroner(verdi)}.</p>}
       <ul className="kortliste">
         {MALERILISTE.map((id) => (
           <Maleri key={id} s={s} id={id} />

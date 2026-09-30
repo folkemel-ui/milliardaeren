@@ -126,7 +126,7 @@ function Utseende() {
           <Ikon navn="sol" størrelse={15} /> Lyst
         </button>
       </div>
-      <h2 className="kort-tittel">Avisen</h2>
+      <h2 className="kort-tittel">Avisa</h2>
       <div className="segment">
         {(
           [
@@ -147,7 +147,7 @@ function Utseende() {
           </button>
         ))}
       </div>
-      <p className="dempet liten">Hva som skjer når en ny utgave kommer, hver spilldag. Den røde prikken på «Avisen» er der uansett.</p>
+      <p className="dempet liten">Hva som skjer når en ny utgave kommer, hver spilldag. Den røde prikken på «Avisa» er der uansett.</p>
     </div>
   )
 }
@@ -214,7 +214,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
       <div className="kort">
         {bekreft ? (
           <div className="bekreft">
-            <p>Starte på nytt med 1 000 kr? Det forrige spillet tas vare på i en reservekopi.</p>
+            <p>Starte på nytt med kr 1 000? Det forrige spillet tas vare på i en reservekopi.</p>
             <div className="knapperad">
               <button className="knapp" onClick={() => settBekreft(false)}>
                 Avbryt

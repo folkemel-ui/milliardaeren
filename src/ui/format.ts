@@ -1,43 +1,8 @@
 /** Tallformatering. Norske tall, hele kroner. */
 
-/*
- * Én formaterer per antall desimaler. toLocaleString lager en ny hver gang,
- * og det er rundt 25 ganger tregere — merkbart når hundrevis av tall tegnes
- * hvert sekund. Resultatet er det samme.
- */
-const formaterere = new Map<number, Intl.NumberFormat>()
+import { kortKroner, kroner, tall } from '../engine/tall'
 
-export function tall(n: number, desimaler = 0): string {
-  const verdi = Number.isFinite(n) ? n : 0
-  let f = formaterere.get(desimaler)
-  if (!f) {
-    f = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: desimaler, maximumFractionDigits: desimaler })
-    formaterere.set(desimaler, f)
-  }
-  return f.format(verdi)
-}
-
-/** «kr 12 345». Brøkdeler rundes ned, så tallet aldri viser penger du ikke har. */
-export function kroner(n: number): string {
-  return `kr ${tall(Math.floor(n))}`
-}
-
-/**
- * Kort form for store beløp: «kr 1,25 mill», «kr 12,5 mill», «kr 150 mill».
- * Tre gjeldende sifre, uten nuller på slutten — «kr 12 mill», ikke «kr 12,00 mill».
- */
-export function kortKroner(n: number): string {
-  const abs = Math.abs(n)
-  const kort = (verdi: number, enhet: string) => {
-    const a = Math.abs(verdi)
-    const tekst = tall(verdi, a < 10 ? 2 : a < 100 ? 1 : 0).replace(/(,\d*?)0+$/, '$1').replace(/,$/, '')
-    return `kr ${tekst} ${enhet}`
-  }
-  // Fra 999,5 mill går det over til milliarder, så det aldri står «kr 1 000 mill».
-  if (abs >= 999.5e6) return kort(n / 1e9, 'mrd')
-  if (abs >= 1e6) return kort(n / 1e6, 'mill')
-  return kroner(n)
-}
+export { kortKroner, kroner, tall }
 
 /** Kroner der det er plass til hele tallet opp til en million, kort form over. */
 export function formue(n: number): string {

@@ -10,6 +10,7 @@ import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
 import { Seksjon } from '../komponenter/Seksjon'
 import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
+import { Forklaring } from '../komponenter/Forklaring'
 
 export function Bedrifter({ s }: { s: Spilltilstand }) {
   const [valgt, settValgt] = useState<string | null>(null)
@@ -28,7 +29,9 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
   return (
     <section className="skjerm">
       <div className="bedrifter-topp">
-        <h1 className="skjerm-tittel">Dine bedrifter</h1>
+        <h1 className="skjerm-tittel">
+          Dine bedrifter <Forklaring tema="bedrifter" />
+        </h1>
         <div className="segment mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
           {MENGDER.map((m) => (
             <button key={m.id} role="radio" aria-checked={mengde === m.id} className={mengde === m.id ? 'aktiv' : ''} onClick={() => velgMengde(m.id)}>

@@ -10,6 +10,7 @@ import { utforKjop, utforSalg } from './handel'
 import { erHelg } from './kalender'
 import { PAPIRER } from './marked'
 import type { Ordre, Spilltilstand } from './types'
+import { kortKroner } from './tall'
 
 export const ORDRETYPER: Record<Ordre['type'], { navn: string; forklaring: string }> = {
   kjop: { navn: 'Kjøp på vei ned', forklaring: 'Kjøper når kursen har falt til grensen' },
@@ -40,7 +41,7 @@ export function sjekkOrdre(s: Spilltilstand): void {
         continue
       }
       const kostnad = utforKjop(s, o.papir, o.antall)
-      leggTilHendelse(s, { tittel: 'Ordre utført', tekst: `Kjøpte ${o.antall} ${p.navn} for ${Math.round(kostnad).toLocaleString('nb-NO')} kr.`, alvor: 'info' })
+      leggTilHendelse(s, { tittel: 'Ordre utført', tekst: `Kjøpte ${o.antall} ${p.navn} for ${kortKroner(kostnad)}.`, alvor: 'info' })
     } else {
       const eier = s.beholdning[o.papir]?.antall ?? 0
       // Eier du ingenting lenger, er ordren meningsløs og fjernes.
@@ -49,7 +50,7 @@ export function sjekkOrdre(s: Spilltilstand): void {
       const inntekt = utforSalg(s, o.papir, antall)
       leggTilHendelse(s, {
         tittel: o.type === 'selg-over' ? 'Gevinst sikret' : 'Stopp tap utløst',
-        tekst: `Solgte ${antall} ${p.navn} for ${Math.round(inntekt).toLocaleString('nb-NO')} kr.`,
+        tekst: `Solgte ${antall} ${p.navn} for ${kortKroner(inntekt)}.`,
         alvor: o.type === 'selg-over' ? 'info' : 'advarsel',
       })
     }

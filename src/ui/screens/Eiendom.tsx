@@ -104,6 +104,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
       <Seksjon
         id="eiendom-boliger"
         tittel="Boliger og bygg"
+        forklaring="eiendom"
         sammendrag={`${Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0)} eid`}
         harInnhold={Object.keys(s.eiendommer).length > 0 || !!by}
       >

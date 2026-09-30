@@ -11,6 +11,7 @@
 import { DAG_SEK, dagnummer, ukedag } from './kalender'
 import { hashTekst, tilfeldig } from './rng'
 import type { JordId, NorskBy, Overskrift, Spilltilstand } from './types'
+import { kortKroner } from './tall'
 
 export interface Jordtype {
   id: JordId
@@ -107,5 +108,5 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   s.totaltHost += host
   s.totaltLeie += host
   const v = vaer(forrige)
-  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${Math.round(host).toLocaleString('nb-NO')} kr.` }]
+  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}.` }]
 }

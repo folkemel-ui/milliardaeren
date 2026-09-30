@@ -49,7 +49,7 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
         ) : (
           erHelg(s.sek) && <span className="helg">Børsen stengt</span>
         )}
-        <button className="avisknapp" onClick={åpneAvis} aria-label={ulest ? 'Avisen, ny utgave' : 'Avisen'}>
+        <button className="avisknapp" onClick={åpneAvis} aria-label={ulest ? 'Avisa, ny utgave' : 'Avisa'}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <rect x="3" y="4" width="15" height="16" rx="1.5" />
             <path d="M18 8 H21 V18 A2 2 0 0 1 17 18" />
@@ -58,7 +58,7 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
             <line x1="12" y1="12" x2="15" y2="12" />
             <line x1="12" y1="15" x2="15" y2="15" />
           </svg>
-          Avisen
+          Avisa
           {ulest && <span className="ulest-prikk" />}
         </button>
       </div>

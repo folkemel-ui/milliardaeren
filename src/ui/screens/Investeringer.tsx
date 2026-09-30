@@ -44,11 +44,9 @@ import { Tikkekurs } from '../komponenter/Tikk'
 import { Seksjon } from '../komponenter/Seksjon'
 import {
   aktive,
-  DIN_DEL_AV_RUNDEN,
   ide,
   INNTRYKK,
   ledigIRunde,
-  RUNDEANDEL,
   RUNDER,
   STARTUP_LAAST_OPP,
   tidTilNesteRunde,
@@ -56,6 +54,7 @@ import {
 import { RulleTall } from '../komponenter/RulleTall'
 import { useVoksUt } from '../overgang'
 import { StartupLogo } from '../komponenter/StartupLogo'
+import { Forklaring } from '../komponenter/Forklaring'
 
 type Underfane = 'oversikt' | 'bors' | 'selskaper' | 'bank'
 
@@ -104,10 +103,10 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
       {fane === 'bors' && <Bors s={s} velg={settValgt} />}
       {fane === 'selskaper' && (
         <>
-          <Seksjon id="selskaper-startups" tittel="Startups" sammendrag={`${aktive(s).filter((x) => x.andel > 0).length} med andel`} harInnhold={aktive(s).some((x) => x.andel > 0)}>
+          <Seksjon id="selskaper-startups" tittel="Startups" forklaring="startups" sammendrag={`${aktive(s).filter((x) => x.andel > 0).length} med andel`} harInnhold={aktive(s).some((x) => x.andel > 0)}>
             <Startups s={s} />
           </Seksjon>
-          <Seksjon id="selskaper-rivaler" tittel="Rivaler" sammendrag={`Nr. ${forbesliste(s, nettoformue(s)).findIndex((x) => x.deg) + 1} på Forbes-lista`} harInnhold={s.rivaler.some((r) => r.andel > 0)}>
+          <Seksjon id="selskaper-rivaler" tittel="Rivaler" forklaring="rivaler" sammendrag={`Nr. ${forbesliste(s, nettoformue(s)).findIndex((x) => x.deg) + 1} på Forbes-lista`} harInnhold={s.rivaler.some((r) => r.andel > 0)}>
             <Rivaler s={s} />
           </Seksjon>
         </>
@@ -295,7 +294,9 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
         </ul>
       )}
 
-      <h2 className="seksjon-tittel">{klasse === 'aksje' ? 'Alle aksjer' : 'Alle mynter'}</h2>
+      <h2 className="seksjon-tittel">
+        {klasse === 'aksje' ? 'Alle aksjer' : 'Alle mynter'} <Forklaring tema={klasse === 'aksje' ? 'aksjer' : 'krypto'} />
+      </h2>
       <ul className="kortliste papirliste">
         {ider.map((id) => {
           const p = PAPIRER[id]
@@ -531,8 +532,9 @@ function Ordrer({ s, id }: { s: Spilltilstand; id: PapirId }) {
 
   return (
     <div className="kort ordrer">
-      <h2 className="kort-tittel">Automatiske ordre</h2>
-      <p className="dempet liten">Utføres av seg selv når kursen når grensen — også mens du er borte.</p>
+      <h2 className="kort-tittel">
+        Automatiske ordrer <Forklaring tema="ordre" />
+      </h2>
       <div className="segment">
         {(Object.keys(ORDRETYPER) as Ordretype[]).map((t) => (
           <button key={t} className={t === type ? 'aktiv' : ''} disabled={t !== 'kjop' && eier === 0} onClick={() => velgType(t)}>
@@ -595,11 +597,6 @@ function Startups({ s }: { s: Spilltilstand }) {
   }
   return (
     <>
-      <p className="dempet liten">
-        Oppstartsselskaper henter penger i runder. Hver runde varer én spilldag, og du kan ta opptil {tall(DIN_DEL_AV_RUNDEN * 100)} % av
-        den. Ved dagsskiftet går selskapet videre, går konkurs eller blir kjøpt opp. Nye penger i hver runde gjør andelen din{' '}
-        {tall(RUNDEANDEL * 100)} % mindre. Etter serie C går selskapet på børs, og du får betalt.
-      </p>
       {liste.length === 0 && <p className="dempet">Ingen søker penger akkurat nå. Nye gründere dukker opp ved dagsskiftene.</p>}
       <ul className="kortliste">
         {liste.map((st) => {
@@ -832,7 +829,7 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
                     </button>
                   </div>
                 ) : f ? (
-                  <p className="dempet liten">Sa nei. Prøv igjen i morgen.</p>
+                  <p className="dempet liten">{r.navn.split(' ')[0]} sa nei. Prøv igjen i morgen.</p>
                 ) : (
                   <div className="bud-knapper">
                     {BUD.map((b) => {
@@ -922,10 +919,14 @@ function Bank({ s }: { s: Spilltilstand }) {
   return (
     <>
       <Sparekonto s={s} />
-      <h2 className="seksjon-tittel">Fond</h2>
+      <h2 className="seksjon-tittel">
+        Fond <Forklaring tema="fond" />
+      </h2>
       <Fondkort s={s} id="BORSFOND" />
       <Fondkort s={s} id="KRYPTOFOND" />
-      <h2 className="seksjon-tittel">Gjeld og lån</h2>
+      <h2 className="seksjon-tittel">
+        Gjeld og lån <Forklaring tema="laan" />
+      </h2>
       <div className="kort bank">
         <div className="bank-rad">
           <div>

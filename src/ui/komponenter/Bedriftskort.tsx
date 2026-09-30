@@ -135,7 +135,7 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
           <p className="dempet liten">
             {b.leder
               ? `Driver bedriften mens du er borte, i opptil ${varighet(BORTE_TAK_SEK)}.`
-              : `Uten leder står bedriften stille når appen har vært lukket i mer enn ett minutt. En leder holder den i gang i opptil ${varighet(BORTE_TAK_SEK)}.`}
+              : `Uten leder står bedriften stille når spillet har vært lukket i mer enn ett minutt. En leder holder den i gang i opptil ${varighet(BORTE_TAK_SEK)}.`}
           </p>
         </div>
         {b.leder ? (

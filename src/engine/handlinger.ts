@@ -82,6 +82,7 @@ import {
 } from './klubb'
 import { PAPIRER, rundAntall } from './marked'
 import type { Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Spilltilstand, Taktikk } from './types'
+import { kortKroner } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
 
@@ -189,7 +190,7 @@ export function borsenStengt(s: Spilltilstand, id: PapirId): boolean {
 const STENGT = 'Børsen er stengt i helgen. Den åpner mandag morgen.'
 
 export function kjopPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall {
-  if (!PAPIRER[id]) return feil('Ukjent papir.')
+  if (!PAPIRER[id]) return feil('Ukjent aksje eller mynt.')
   if (ikkeTall(antall)) return feil(UGYLDIG)
   if (borsenStengt(s, id)) return feil(STENGT)
   const a = rundAntall(id, antall)
@@ -593,7 +594,7 @@ export function hoggSkog(s: Spilltilstand, id: JordId): Utfall {
   n.totaltLeie += tommer
   n.jord[id]!.plantetSek = n.sek
   flyt(n, 'eiendom', -tommer)
-  leggTilHendelse(n, { tittel: 'Hogst', tekst: `${JORD[id].navn} er hogd. Tømmeret ga ${Math.round(tommer).toLocaleString('nb-NO')} kr, og ny skog er plantet.`, alvor: 'info' })
+  leggTilHendelse(n, { tittel: 'Hogst', tekst: `${JORD[id].navn} er hogd. Tømmeret ga ${kortKroner(tommer)}, og ny skog er plantet.`, alvor: 'info' })
   return { ok: true, tilstand: n }
 }
 
@@ -664,13 +665,13 @@ export function museum(s: Spilltilstand, id: MaleriId): Utfall {
 export const MAKS_ORDRE = 20
 
 export function nyOrdre(s: Spilltilstand, papir: PapirId, type: Ordretype, grense: number, antall: number): Utfall {
-  if (!PAPIRER[papir]) return feil('Ukjent papir.')
+  if (!PAPIRER[papir]) return feil('Ukjent aksje eller mynt.')
   if (!Number.isFinite(grense) || !(grense > 0)) return feil('Sett en grense over null.')
   if (!Number.isFinite(antall)) return feil(UGYLDIG)
   const a = rundAntall(papir, antall)
   if (a <= 0) return feil('Velg hvor mange ordren gjelder.')
   if (type !== 'kjop' && !s.beholdning[papir]) return feil('Du eier ingen å selge.')
-  if (s.ordre.length >= MAKS_ORDRE) return feil(`Du kan ha høyst ${MAKS_ORDRE} aktive ordre.`)
+  if (s.ordre.length >= MAKS_ORDRE) return feil(`Du kan ha høyst ${MAKS_ORDRE} aktive ordrer.`)
   const n = structuredClone(s)
   n.ordre.push({ id: n.nesteOrdreId++, papir, type, grense, antall: a })
   return { ok: true, tilstand: n }

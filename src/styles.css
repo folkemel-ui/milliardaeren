@@ -3939,3 +3939,81 @@ figure {
   box-shadow: none;
   color: var(--tekst-dempet);
 }
+
+/* ─────────────────────────────────────────────── Forklaringer («?») */
+
+.forklaring {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.forklaring-knapp {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--kant);
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.forklaring-knapp[aria-expanded='true'],
+.forklaring-knapp:hover {
+  border-color: var(--gull-mørk);
+  color: var(--gull);
+}
+
+.forklaring-boble {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -8px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(290px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gull-mørk);
+  background: var(--flate);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: var(--tekst);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+
+.forklaring-boble strong {
+  color: var(--gull);
+  font-weight: 700;
+}
+
+/* I en sammenleggbar seksjon står «?» ytterst til høyre, så boblen åpner seg mot venstre. */
+.seksjon-hoderad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seksjon-hoderad .seksjon-hode {
+  flex: 1;
+  min-width: 0;
+}
+
+.seksjon-hoderad .forklaring-boble {
+  left: auto;
+  right: -4px;
+}

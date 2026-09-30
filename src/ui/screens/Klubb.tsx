@@ -32,6 +32,7 @@ import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
+import { Forklaring } from '../komponenter/Forklaring'
 
 /** Kortet i Luksus-fanen: kjøp en klubb, eller åpne den du har. */
 export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void }) {
@@ -89,7 +90,9 @@ function Klubbkjop({ s }: { s: Spilltilstand }) {
   const { klubb, pris } = klubbTilSalgs(s, navn)
   return (
     <div className="kort klubbkjop">
-      <h1 className="skjerm-tittel">Kjøp en fotballklubb</h1>
+      <h1 className="skjerm-tittel">
+        Kjøp en fotballklubb <Forklaring tema="klubb" />
+      </h1>
       <p className="dempet">
         Klubbene i 4. divisjon er til salgs. Du får en tropp på {klubb.spillere.length} spillere og sponsorpengene for første sesong.
         Klubben spiller én kamp hver spilldag.
@@ -126,7 +129,9 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
       <div className="kort klubbtopp">
         <div className="rival-topp">
           <div>
-            <h1 className="skjerm-tittel">{k.navn}</h1>
+            <h1 className="skjerm-tittel">
+            {k.navn} <Forklaring tema="klubb" />
+          </h1>
             <span className="dempet">
               {DIVISJONER[k.divisjon].navn} · sesong {k.sesong}
             </span>

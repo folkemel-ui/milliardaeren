@@ -4,6 +4,7 @@ import { FORSINKELSESGEBYR, REVISJONSSJANSE, SKATTETRINN } from '../../engine/sk
 import type { Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, kroner, tall, varighet } from '../format'
+import { Forklaring } from './Forklaring'
 
 /** Skattekortet: åpne regninger, offshore-valget og hva du har betalt. */
 export function Skattekort({ s }: { s: Spilltilstand }) {
@@ -13,7 +14,9 @@ export function Skattekort({ s }: { s: Spilltilstand }) {
   return (
     <div className="kort skattekort" id="skatt">
       <div className="maal-topp">
-        <h2 className="kort-tittel">Skatt</h2>
+        <h2 className="kort-tittel">
+          Skatt <Forklaring tema="skatt" />
+        </h2>
         <span className="dempet liten">Betalt totalt {kortKroner(k.totaltBetalt)}</span>
       </div>
 

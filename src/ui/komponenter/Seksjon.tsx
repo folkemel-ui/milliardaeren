@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from 'react'
+import { Forklaring } from './Forklaring'
+import type { Tema } from '../forklaringer'
 
 const NOKKEL = 'milliardaer.seksjoner'
 
@@ -29,10 +31,13 @@ export function Seksjon({
   tittel,
   sammendrag,
   harInnhold,
+  forklaring,
   children,
 }: {
   id: string
   tittel: string
+  /** Et «?» ved overskriften som forklarer systemet. */
+  forklaring?: Tema
   sammendrag?: string
   harInnhold: boolean
   children: ReactNode
@@ -45,13 +50,16 @@ export function Seksjon({
   }
   return (
     <div className={åpen ? 'seksjon åpen' : 'seksjon'}>
-      <button className="seksjon-hode" aria-expanded={åpen} onClick={bytt}>
-        <span className="seksjon-pil" aria-hidden="true">
-          ▸
-        </span>
-        <h2 className="seksjon-tittel">{tittel}</h2>
-        {sammendrag && <span className="dempet liten seksjon-sammendrag">{sammendrag}</span>}
-      </button>
+      <div className="seksjon-hoderad">
+        <button className="seksjon-hode" aria-expanded={åpen} onClick={bytt}>
+          <span className="seksjon-pil" aria-hidden="true">
+            ▸
+          </span>
+          <h2 className="seksjon-tittel">{tittel}</h2>
+          {sammendrag && <span className="dempet liten seksjon-sammendrag">{sammendrag}</span>}
+        </button>
+        {forklaring && <Forklaring tema={forklaring} />}
+      </div>
       {åpen && <div className="seksjon-innhold">{children}</div>}
     </div>
   )
