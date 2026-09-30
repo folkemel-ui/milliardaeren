@@ -16,22 +16,14 @@ function kildefiler(mappe = SRC): string[] {
   })
 }
 
-/*
- * Symbolene på kartet og i gatebildet (gårder, skoger, landemerker) byttes
- * ut i pakke 31 — «Icons on the maps» og «Drawings instead of emoji in the
- * street view». Til da er de de eneste som får stå.
- */
-const UNNTAK = [/ui[\\/]kart\.ts$/, /Gatebilde\.tsx$/]
-
 describe('ikoner i stedet for emoji', () => {
   it('hver prestasjon har en medalje', () => {
     expect(PRESTASJONER.filter((p) => !MERKER[p.id]).map((p) => p.id)).toEqual([])
   })
 
-  it('ingen emoji i koden, utenom kartsymbolene som byttes i pakke 31', () => {
+  it('ingen emoji i koden', () => {
     const funn: string[] = []
     for (const fil of kildefiler()) {
-      if (UNNTAK.some((u) => u.test(fil))) continue
       readFileSync(fil, 'utf8')
         .split('\n')
         .forEach((linje, i) => {

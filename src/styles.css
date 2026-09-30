@@ -3725,86 +3725,137 @@ figure {
 }
 
 /* Gata: husene står på en vei langs bunnen. */
+/* Gata: byggene står på rad på en vei med stiplet midtlinje, og gata ruller sidelengs når den blir lang. */
 .gate {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
-  gap: 8px;
-  padding-bottom: 10px;
-  border-bottom: 4px solid var(--kant);
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 6px 4px 20px;
+  background:
+    repeating-linear-gradient(90deg, var(--gull-mørk) 0 10px, transparent 10px 20px) left 0 bottom 7px / 100% 2px no-repeat,
+    linear-gradient(var(--kant), var(--kant)) left 0 bottom 0 / 100% 16px no-repeat;
+  border-radius: 10px 10px 4px 4px;
+  scrollbar-width: thin;
+}
+
+.tomt {
+  flex: none;
 }
 
 .hus {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  min-height: 112px;
-  padding: 8px 6px;
-  border-radius: 10px 10px 4px 4px;
-  border: 1px solid var(--kant);
-  background: var(--flate-2);
+  gap: 2px;
+  width: 96px;
+  padding: 6px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   text-align: center;
+  cursor: pointer;
+}
+
+.hus:hover {
+  background: color-mix(in srgb, var(--tekst) 4%, transparent);
+}
+
+.hus.valgt {
+  border-color: var(--gull);
+  background: color-mix(in srgb, var(--gull) 8%, transparent);
+}
+
+.hus-bilde {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  height: 76px;
+}
+
+/* Hvor mange av typen du eier. */
+.hus-antall {
+  position: absolute;
+  top: 0;
+  right: -6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--gull);
+  color: var(--paa-gull);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .hus-navn {
+  max-width: 92px;
   font-size: 11px;
   font-weight: 600;
   line-height: 1.2;
 }
 
-/* Oppusset: friskere, med grønt skjær. Luksus: gull. */
-.hus.s1 {
-  border-color: var(--pluss);
-  background: color-mix(in srgb, var(--pluss) 8%, var(--flate-2));
-}
-
-.hus.s2 {
-  border-color: var(--gull);
-  background: color-mix(in srgb, var(--gull) 12%, var(--flate-2));
-  box-shadow: 0 0 10px rgb(212 175 55 / 0.3);
-}
-
-/* Stillas mens håndverkerne holder på. */
-.hus.stillas {
-  background-image: repeating-linear-gradient(135deg, transparent 0 8px, rgb(212 175 55 / 0.18) 8px 11px);
-}
-
-.hus.stillas svg {
-  opacity: 0.55;
-}
-
-.hus-merke {
+.hus-under {
+  color: var(--tekst-dempet);
   font-size: 10px;
+}
+
+/* Oppusset: grønn linje under. Luksus: gull, med et gullskjær rundt bygget. */
+.hus.s1 .hus-under {
+  color: var(--pluss);
+}
+
+.hus.s2 .hus-under {
   color: var(--gull);
 }
 
-.hus.ledig {
-  border-style: dashed;
-  background: transparent;
-  color: var(--tekst-dempet);
+.hus.s2 .hus-bilde > svg {
+  filter: drop-shadow(0 0 6px rgb(212 175 55 / 0.55));
+}
+
+/* Stillas mens håndverkerne holder på: bygget er blekt, med en kran i hjørnet. */
+.hus.stillas .hus-bilde > svg {
+  opacity: 0.5;
+}
+
+.hus-stillas {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  color: var(--gull);
+}
+
+.hus.stillas .hus-under {
+  color: var(--gull);
+}
+
+/* En ledig tomt: stiplet ramme med pluss. */
+.hus.ledig .hus-bilde {
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-top: 12px;
+  border: 1.5px dashed var(--kant);
+  border-radius: 8px;
 }
 
 .hus-pluss {
+  color: var(--tekst-dempet);
   font-size: 26px;
   line-height: 1;
-  color: var(--tekst-dempet);
 }
 
-.hus.utkant {
-  background: transparent;
+/* Jord og landemerker i utkanten: dempet til du eier dem. */
+.hus.utkant .hus-bilde > svg {
   opacity: 0.6;
 }
 
-.hus.utkant.din {
+.hus.utkant.din .hus-bilde > svg {
   opacity: 1;
-  border-color: var(--gull);
 }
 
-.hus-symbol {
-  font-size: 30px;
-  line-height: 1.2;
+.gate-kort {
+  margin-top: 4px;
 }
 
 /* ─────────────────────────────────────────────── Logo */

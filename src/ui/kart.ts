@@ -1,11 +1,10 @@
 /**
- * Det kartene viser om hver by: leie og prisutvikling, og symbolene for
- * landemerkene i gatebildet. Delt mellom Norgeskartet og verdenskartet.
+ * Det kartene viser om hver by: leie og prisutvikling. Delt mellom
+ * Norgeskartet og verdenskartet.
  */
 
 import { useRef, type TouchEvent } from 'react'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, leieHverPerSek } from '../engine/eiendom'
-import { LANDEMERKER } from '../engine/landemerker'
 import { regionEndring, regionFor } from '../engine/regioner'
 import type { By, Spilltilstand } from '../engine/types'
 import { tall } from './format'
@@ -36,13 +35,6 @@ export function trendFor(s: Spilltilstand, by: By): number {
 export function trendRing(endring: number): { klasse: string; styrke: number } | null {
   if (Math.abs(endring) < 0.005) return null
   return { klasse: endring > 0 ? 'opp' : 'ned', styrke: Math.min(1, 0.35 + Math.abs(endring) / 0.04) }
-}
-
-export const LANDEMERKESYMBOL: Record<keyof typeof LANDEMERKER, string> = {
-  fyret: '🔦',
-  hoppbakken: '⛷️',
-  borgen: '🏰',
-  tarnet: '🗼',
 }
 
 /**

@@ -51,7 +51,8 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
   )
 }
 
-function Jordkort({ s, id, faktor }: { s: Spilltilstand; id: JordId; faktor: number }) {
+/** Kortet for en gård eller skog. Uten `faktor` brukes denne ukas vær. */
+export function Jordkort({ s, id, faktor = vaer(dagnummer(s.sek)).faktor }: { s: Spilltilstand; id: JordId; faktor?: number }) {
   const t = JORD[id]
   const eid = s.jord[id]
   const land = landverdi(s, id)
@@ -118,7 +119,7 @@ export function Landemerkeliste({ s }: { s: Spilltilstand }) {
   )
 }
 
-function Landemerkekort({ s, id }: { s: Spilltilstand; id: LandemerkeId }) {
+export function Landemerkekort({ s, id }: { s: Spilltilstand; id: LandemerkeId }) {
   const l = LANDEMERKER[id]
   const mitt = eierDu(s, id)
   const e = s.landemerker[id]

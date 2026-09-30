@@ -1,6 +1,7 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, FLY_REKKEFOLGE, LUKSUS, reiseNivaa } from '../../engine/eiendom'
 import type { By, Spilltilstand, Utenlandsby } from '../../engine/types'
 import { kartLeie, leieIBy, useLangtrykk } from '../kart'
+import { Ikon } from './Ikoner'
 
 /*
  * Et rutekart, ikke et ekte kart: byene står omtrent der de ligger i forhold
@@ -81,7 +82,8 @@ export function Verdenskart({
               {...lang.hendelser(by)}
             >
               <circle cx={x} cy={y} r={16} className="kart-treff" />
-              <circle cx={x} cy={y} r={r} className="kart-prikk" />
+              <circle cx={x} cy={y} r={åpen ? r : 6} className="kart-prikk" />
+              {!åpen && <Ikon navn="fly" størrelse={9} x={x - 4.5} y={y - 4.5} />}
               {n > 0 && (
                 <text x={x} y={y + 3.5} className="kart-antall" textAnchor="middle">
                   {n}

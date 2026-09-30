@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 31 – The street comes alive:** A real street, Drawings instead of emoji in the street view, Icons on the maps, Act from the street view
 - **Pack 32 – A better start:** Faster first minutes, Explanations for every system, Norwegian text pass
 - **Pack 33 – One visual language:** One set of badges and labels, A typography scale, A club crest
 - **Pack 34 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
@@ -22,47 +21,43 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 ## Map
 
-2. **A real street.** The street view is a grid of identical cards: Oslo shows six "Leilighet" cards in a row. Draw the buildings side by side as a street with the new drawings, and group repeats ("Leilighet ×6"), so it looks like a city and takes less room.
-3. **Drawings instead of emoji in the street view.** Landmarks, farms and forests show as emoji (⛷️, 🗼, 🌾, 🌲) even though they have their own drawings now.
-4. **Act from the street view.** Buying, renovating and selling happen in the list below the map, not where you see the buildings. The street view gets the same buttons as the cards.
-5. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
-6. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
-7. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
-8. **City-first property view.** At many properties, the map, the long "Boliger og bygg" list, farms and landmarks all compete. Tap a city and see only what is there, instead of one long list for everything.
-9. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
-10. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
+2. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
+3. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
+4. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
+5. **City-first property view.** At many properties, the map, the long "Boliger og bygg" list, farms and landmarks all compete. Tap a city and see only what is there, instead of one long list for everything.
+6. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
+7. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
 ## Game
 
-11. **Faster first minutes.** The start is slow and thin: one lemonade stand at kr 1/s and a button to sell cups, with the next business at 4 000 kr (the perfect bot needs 8 minutes to reach 10 000). A quicker first unlock, or more small goals early, so a new player is hooked before they get bored.
+8. **Faster first minutes.** The start is slow and thin: one lemonade stand at kr 1/s and a button to sell cups, with the next business at 4 000 kr (the perfect bot needs 8 minutes to reach 10 000). A quicker first unlock, or more small goals early, so a new player is hooked before they get bored.
 
 ## Interface
 
-12. **Explanations for every system.** Stocks, coins, funds, automatic orders, loans, margin calls, tax, offshore, rivals, takeovers, mergers, startups, land, landmarks, art, the club and renovation are never explained in the game. A short "?" tip on each card saying what it is and why you'd want it.
-13. **Split up Profil.** Profil holds net worth, the goal, statistics, tax, accounting, trophies, achievements, records, appearance, save transfer, backup, restart and the logo in one long scroll. Split it into parts, for example "Meg", "Regnskap" and "Innstillinger".
+9. **Explanations for every system.** Stocks, coins, funds, automatic orders, loans, margin calls, tax, offshore, rivals, takeovers, mergers, startups, land, landmarks, art, the club and renovation are never explained in the game. A short "?" tip on each card saying what it is and why you'd want it.
+10. **Split up Profil.** Profil holds net worth, the goal, statistics, tax, accounting, trophies, achievements, records, appearance, save transfer, backup, restart and the logo in one long scroll. Split it into parts, for example "Meg", "Regnskap" and "Innstillinger".
 
 ## Look
 
-14. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
-15. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
+11. **Bigger pictures, fewer numbers.** Most cards are text and numbers. Now that the drawings are consistent, use them bigger in the detail views, on the property cards and in the luxury list, so the game feels less like a spreadsheet.
+12. **Progress you can see.** The screens look the same at kr 1 000 and kr 1 000 mrd. Let the look change as you get richer: the top bar, the background or your title, so progress shows without reading numbers.
 
 ## Professional look
 
-16. **Icons on the maps.** Farm, forest and landmark symbols (🌾 🌲 🔦 ⛷️ 🏰 🗼) and the plane symbols on the world map become small icons or the new drawings.
-17. **A club crest.** The football club uses ⚽. Draw a crest instead, made from the club's name and colors.
-18. **One set of badges and labels.** The game mixes pill badges (Leder, NY, standards), colored text and symbols. Define a small set — for example status badge, category label and number chip — and use them the same way everywhere.
-19. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
-20. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
-21. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
-22. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
+13. **A club crest.** The football club uses ⚽. Draw a crest instead, made from the club's name and colors.
+14. **One set of badges and labels.** The game mixes pill badges (Leder, NY, standards), colored text and symbols. Define a small set — for example status badge, category label and number chip — and use them the same way everywhere.
+15. **Calmer celebrations.** Confetti, gold flashes, buy moments, neon signs and floating coins can feel more like a casual mobile game than a business game. A quieter, more elegant style: thin gold lines, a short shine and less confetti, saving the big show for 1 mrd.
+16. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+17. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
+18. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
 
 ## Text
 
-23. **Norwegian text pass.** Go through all the text for typos and consistent words (for example "papir", "aksje" and "verdipapir"), and choose one voice: some texts are playful ("Lærepenger", "Kryptonysgjerrig"), others dry. Dry and slightly witty, like a business paper, fits the game. So it reads as one finished game.
+19. **Norwegian text pass.** Go through all the text for typos and consistent words (for example "papir", "aksje" and "verdipapir"), and choose one voice: some texts are playful ("Lærepenger", "Kryptonysgjerrig"), others dry. Dry and slightly witty, like a business paper, fits the game. So it reads as one finished game.
 
 ## Code health
 
-24. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
+20. **Architecture note.** A short document in the repo explaining which systems use the die, which use hashes and which have their own dice, the newspaper's side effect on the die, and how to add new content without changing old games — so future packs stay safe.
 
 ## Parked (not chosen yet)
 
