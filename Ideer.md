@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 35 – A fair ladder:** An even business ladder, Property returns that fit the ladder, Status that keeps counting
 - **Pack 36 – One visual language:** One set of badges and labels, A typography scale, A club crest
 - **Pack 37 – Tidier and more visual:** Split up Profil, Bigger pictures, fewer numbers, Progress you can see, City-first property view
 - **Pack 38 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Calmer celebrations
@@ -45,12 +44,6 @@ A suggested order, grouped so each pack feels complete when played. The order is
 14. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
 15. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
 16. **A typography scale.** A fixed set of text sizes and weights (for example five sizes), used everywhere. Today many screens have their own sizes, so they feel slightly different from each other.
-
-## Balance
-
-17. **Property returns that fit the ladder.** The engine says property pays less than businesses, but after mid-game it pays more: a new Hotel returns about 10 % per hour, a Bank 12 % and Oil 7 %, while property pays 20–25 % with no manager. Lower the property yields at the top, or raise the late businesses.
-18. **An even business ladder.** The code says each step costs about 10 times the last, but the real steps are 4.8×, 33× (Pølsebod → Kiosk, the biggest gap), 15×, 15×, 15×, 4.4× and 8.3×. Oljeselskap becomes available at kr 2.5 mrd but costs kr 5 mrd, while every other business becomes available above its price. The first upgrade costs 25 % of the purchase price for most businesses, but 75 % for Bank and 100 % for Oil. Smooth out the steps and the ratios.
-19. **Status that keeps counting.** «Legende» is reached at 350 points, and the luxury items alone give about 400. After that, landmarks, museum loans, club trophies and the superyacht add nothing. Add more levels, or let status points count past the top level.
 
 ## Parked (not chosen yet)
 

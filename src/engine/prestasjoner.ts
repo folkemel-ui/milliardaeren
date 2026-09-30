@@ -5,7 +5,7 @@
  */
 
 import { inntektPerSek } from './formler'
-import { byerUtenlands, statusnivaa, UTENLANDSBYER } from './eiendom'
+import { byerUtenlands, STATUSNIVAAER, statusnivaa, UTENLANDSBYER } from './eiendom'
 import { mineLandemerker, LANDEMERKELISTE } from './landemerker'
 import { mineMalerier } from './kunst'
 import { PAPIRER } from './marked'
@@ -46,7 +46,8 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'utleier', navn: 'Utleier', beskrivelse: 'Eie fem eiendommer', klart: (s) => antallEiendommer(s) >= 5 },
   { id: 'litt-luksus', navn: 'Litt luksus', beskrivelse: 'Kjøp noe du ikke trenger', klart: (s) => s.luksus.length >= 1 },
   { id: 'rikmann', navn: 'Rikmann', beskrivelse: 'Nå statusnivå 4', klart: (s) => statusnivaa(s) >= 4 },
-  { id: 'legende', navn: 'Legende', beskrivelse: 'Nå høyeste statusnivå', klart: (s) => statusnivaa(s) >= 7 },
+  { id: 'legende', navn: 'Legende', beskrivelse: 'Nå statusnivået Legende', klart: (s) => statusnivaa(s) >= 7 },
+  { id: 'udodelig', navn: 'Udødelig', beskrivelse: 'Nå høyeste statusnivå', klart: (s) => statusnivaa(s) >= STATUSNIVAAER.length - 1 },
   { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', klart: (s) => byerUtenlands(s).size >= 1 },
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (s) => byerUtenlands(s).size >= UTENLANDSBYER.length },
   { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },

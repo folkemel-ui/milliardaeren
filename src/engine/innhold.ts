@@ -8,9 +8,15 @@ export const STARTKAPITAL = 1_000
 export const MAAL = 1_000_000_000
 
 /**
- * Bransjestigen. Hvert trinn koster ti ganger det forrige og tar lenger tid å
- * tjene inn igjen, så tempoet roer seg jo rikere du blir. Oljeselskapet ligger
- * bak milliarden — det er for dem som vil videre.
+ * Bransjestigen. Starten går fort — trinn på fem–seks ganger prisen — så
+ * rundt femten ganger gjennom midten, og tettere mot milliarden. Hvert trinn
+ * tar lenger tid å tjene inn igjen, så tempoet roer seg jo rikere du blir.
+ * Oljeselskapet ligger bak milliarden — det er for dem som vil videre.
+ *
+ * Reglene, så nye bransjer passer inn:
+ * - Låses opp når formuen har vært LAAS_OPP_VED × prisen (avrundet pent).
+ * - Første oppgradering koster 25 % av prisen fra kiosken til hotellet, og
+ *   så en jevnt stigende andel: 40 % for banken og opp til 80 % på toppen.
  */
 export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   saftbod: {
@@ -19,7 +25,11 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   },
   polsebod: {
     id: 'polsebod', navn: 'Pølsebod',
-    pris: 1_200, grunninntekt: 2.5, oppgraderingspris: 600, vekst: 1.1, laasesOppVed: 2_000,
+    pris: 1_200, grunninntekt: 2.5, oppgraderingspris: 600, vekst: 1.1, laasesOppVed: 1_500,
+  },
+  gatekjokken: {
+    id: 'gatekjokken', navn: 'Gatekjøkken',
+    pris: 7_000, grunninntekt: 4.5, oppgraderingspris: 1_750, vekst: 1.1, laasesOppVed: 9_000,
   },
   kiosk: {
     id: 'kiosk', navn: 'Kiosk',
@@ -31,42 +41,42 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   },
   restaurant: {
     id: 'restaurant', navn: 'Restaurant',
-    pris: 9_000_000, grunninntekt: 600, oppgraderingspris: 2_250_000, vekst: 1.1, laasesOppVed: 12_000_000,
+    pris: 9_000_000, grunninntekt: 600, oppgraderingspris: 2_250_000, vekst: 1.1, laasesOppVed: 11_000_000,
   },
   hotell: {
     id: 'hotell', navn: 'Hotell',
-    pris: 135_000_000, grunninntekt: 3_600, oppgraderingspris: 32_400_000, vekst: 1.1, laasesOppVed: 150_000_000,
+    pris: 135_000_000, grunninntekt: 3_600, oppgraderingspris: 33_750_000, vekst: 1.1, laasesOppVed: 170_000_000,
   },
   bank: {
     id: 'bank', navn: 'Bank',
-    pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 450_000_000, vekst: 1.1, laasesOppVed: 700_000_000,
+    pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 240_000_000, vekst: 1.1, laasesOppVed: 750_000_000,
   },
   oljeselskap: {
     id: 'oljeselskap', navn: 'Oljeselskap',
-    pris: 5_000_000_000, grunninntekt: 100_000, oppgraderingspris: 5_000_000_000, vekst: 1.1, laasesOppVed: 2_500_000_000,
+    pris: 5_000_000_000, grunninntekt: 100_000, oppgraderingspris: 2_750_000_000, vekst: 1.1, laasesOppVed: 6_300_000_000,
   },
   // Sluttspillet etter milliarden: hvert trinn er rundt fire–fem ganger det forrige.
   rederi: {
     id: 'rederi', navn: 'Rederi',
-    pris: 25_000_000_000, grunninntekt: 400_000, oppgraderingspris: 20_000_000_000, vekst: 1.1, laasesOppVed: 15_000_000_000,
+    pris: 25_000_000_000, grunninntekt: 400_000, oppgraderingspris: 16_250_000_000, vekst: 1.1, laasesOppVed: 31_000_000_000,
   },
   fiskeoppdrett: {
     id: 'fiskeoppdrett', navn: 'Fiskeoppdrett',
-    pris: 100_000_000_000, grunninntekt: 1_400_000, oppgraderingspris: 80_000_000_000, vekst: 1.1, laasesOppVed: 60_000_000_000,
+    pris: 100_000_000_000, grunninntekt: 1_400_000, oppgraderingspris: 70_000_000_000, vekst: 1.1, laasesOppVed: 125_000_000_000,
   },
   flyselskap: {
     id: 'flyselskap', navn: 'Flyselskap',
-    pris: 400_000_000_000, grunninntekt: 5_000_000, oppgraderingspris: 300_000_000_000, vekst: 1.1, laasesOppVed: 250_000_000_000,
+    pris: 400_000_000_000, grunninntekt: 5_000_000, oppgraderingspris: 300_000_000_000, vekst: 1.1, laasesOppVed: 500_000_000_000,
   },
   skisenter: {
     id: 'skisenter', navn: 'Skisenter',
-    pris: 1_500_000_000_000, grunninntekt: 17_000_000, oppgraderingspris: 1_200_000_000_000, vekst: 1.1, laasesOppVed: 1_000_000_000_000,
+    pris: 1_500_000_000_000, grunninntekt: 17_000_000, oppgraderingspris: 1_200_000_000_000, vekst: 1.1, laasesOppVed: 1_900_000_000_000,
   },
 }
 
 /** Stigen i rekkefølge. */
 export const STIGEN: BedriftstypeId[] = [
-  'saftbod', 'polsebod', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap',
+  'saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap',
   'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
 ]
 
@@ -96,6 +106,11 @@ export const FORBEDRINGER: Record<BedriftstypeId, Forbedring[]> = {
     ['Grillplate i stål', 'Dobbelt så mange pølser i timen.'],
     ['Hjemmelaget sennep', 'Oppskriften er hemmelig. Køen er det ikke.'],
     ['Food truck', 'Boden ruller dit folket er.'],
+  ]),
+  gatekjokken: forbedringer([
+    ['Ny frityrgryte', 'Sprøere pommes frites, dobbelt så fort.'],
+    ['Hjemmelaget burgerdressing', 'Oppskriften står bare i kokkens hode.'],
+    ['Drive-in-luke', 'Bilistene handler uten å gå ut av bilen.'],
   ]),
   kiosk: forbedringer([
     ['Kaffeautomat', 'Morgenkunder på vei til jobb.'],

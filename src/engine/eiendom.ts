@@ -22,23 +22,25 @@ import { kunststatus } from './kunst'
 
 /**
  * Eiendommene gir leie hvert sekund — også mens du er borte, uten leder.
- * Avkastningen er lavere enn i bedriftene, men den krever ingenting av deg.
+ * Avkastningen faller jevnt med prisen: 30 % i timen for en hybel, rundt
+ * 18 % for et kontorbygg og 8 % på Manhattan. Den er trygg og krever
+ * ingenting av deg, men slår ikke bedriftene når de vokser.
  */
 export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
   hybel: { id: 'hybel', navn: 'Hybel', sted: 'Møhlenpris, Bergen', by: 'Bergen', pris: 250_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
-  leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', pris: 2_500_000, avkastning: 0.28, maksAntall: 6, statuskrav: 0 },
-  rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', pris: 6_000_000, avkastning: 0.26, maksAntall: 5, statuskrav: 0 },
+  leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', pris: 2_500_000, avkastning: 0.25, maksAntall: 6, statuskrav: 0 },
+  rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', pris: 6_000_000, avkastning: 0.24, maksAntall: 5, statuskrav: 0 },
   hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
-  stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', pris: 30_000_000, avkastning: 0.24, maksAntall: 3, statuskrav: 0, reise: 1 },
-  kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 80_000_000, avkastning: 0.25, maksAntall: 4, statuskrav: 0 },
-  kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', pris: 150_000_000, avkastning: 0.23, maksAntall: 3, statuskrav: 0, reise: 1 },
-  kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', pris: 400_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
-  berlin: { id: 'berlin', navn: 'Bygård i Mitte', sted: 'Mitte, Berlin', by: 'Berlin', pris: 500_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0, reise: 2 },
-  london: { id: 'london', navn: 'Byhus i Mayfair', sted: 'Mayfair, London', by: 'London', pris: 1_200_000_000, avkastning: 0.21, maksAntall: 2, statuskrav: 0, reise: 2 },
-  naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', pris: 1_500_000_000, avkastning: 0.2, maksAntall: 2, statuskrav: 3 },
-  dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', pris: 4_000_000_000, avkastning: 0.19, maksAntall: 2, statuskrav: 0, reise: 3 },
-  oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', pris: 6_000_000_000, avkastning: 0.1, maksAntall: 1, statuskrav: 5 },
-  newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', pris: 12_000_000_000, avkastning: 0.16, maksAntall: 1, statuskrav: 0, reise: 3 },
+  stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', pris: 30_000_000, avkastning: 0.2, maksAntall: 3, statuskrav: 0, reise: 1 },
+  kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 80_000_000, avkastning: 0.18, maksAntall: 4, statuskrav: 0 },
+  kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', pris: 150_000_000, avkastning: 0.17, maksAntall: 3, statuskrav: 0, reise: 1 },
+  kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', pris: 400_000_000, avkastning: 0.15, maksAntall: 3, statuskrav: 0 },
+  berlin: { id: 'berlin', navn: 'Bygård i Mitte', sted: 'Mitte, Berlin', by: 'Berlin', pris: 500_000_000, avkastning: 0.14, maksAntall: 3, statuskrav: 0, reise: 2 },
+  london: { id: 'london', navn: 'Byhus i Mayfair', sted: 'Mayfair, London', by: 'London', pris: 1_200_000_000, avkastning: 0.13, maksAntall: 2, statuskrav: 0, reise: 2 },
+  naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', pris: 1_500_000_000, avkastning: 0.12, maksAntall: 2, statuskrav: 3 },
+  dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', pris: 4_000_000_000, avkastning: 0.1, maksAntall: 2, statuskrav: 0, reise: 3 },
+  oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', pris: 6_000_000_000, avkastning: 0.05, maksAntall: 1, statuskrav: 5 },
+  newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', pris: 12_000_000_000, avkastning: 0.08, maksAntall: 1, statuskrav: 0, reise: 3 },
 }
 
 export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
@@ -244,6 +246,9 @@ export const STATUSNIVAAER: { poeng: number; navn: string }[] = [
   { poeng: 120, navn: 'Magnat' },
   { poeng: 220, navn: 'Tycoon' },
   { poeng: 350, navn: 'Legende' },
+  { poeng: 500, navn: 'Ikon' },
+  { poeng: 700, navn: 'Monark' },
+  { poeng: 1000, navn: 'Udødelig' },
 ]
 
 /** Hvert statusnivå gir så mye mer inntekt fra bedriftene … */

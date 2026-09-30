@@ -37,7 +37,7 @@ export const JORD_SYNLIG_VED = 0.8
 /** Jordprisene stiger så mye per spilldag. */
 const JORDVEKST_PER_DAG = 0.003
 /** En gård gir så stor andel av jordverdien i avling per uke, i et normalt år. */
-export const HOST_ANDEL = 0.12
+export const HOST_ANDEL = 0.08
 /** Tømmeret nærmer seg så mange ganger jordverdien … */
 export const TOMMER_MAKS = 3
 /** … og har vokst til en firedel av det etter så mange dager. Snittveksten er størst da. */

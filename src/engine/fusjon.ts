@@ -43,6 +43,7 @@ export const MOTBUD_VED = 0.85
 export const FORMER: Record<BedriftstypeId, { en: string; den: string }> = {
   saftbod: { en: 'en saftbod', den: 'saftboden' },
   polsebod: { en: 'en pølsebod', den: 'pølseboden' },
+  gatekjokken: { en: 'et gatekjøkken', den: 'gatekjøkkenet' },
   kiosk: { en: 'en kiosk', den: 'kiosken' },
   kafe: { en: 'en kafé', den: 'kafeen' },
   restaurant: { en: 'en restaurant', den: 'restauranten' },

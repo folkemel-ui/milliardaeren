@@ -292,6 +292,40 @@ const polsebod: B = (t) => (
   </Bedrift>
 )
 
+const gatekjokken: B = (t) => (
+  <Bedrift trinn={t} grunn="gate" id="gatekjokken">
+    <rect x="8" y="18" width="32" height="25" fill={F.lysgraa} />
+    <rect x="36" y="18" width="4" height="25" fill={F.graa} />
+    <rect x="6" y="15.5" width="36" height="3" fill={F.skifer} />
+    {/* Skiltet: en burger. */}
+    <rect x="14" y="5" width="20" height="10" rx="2" fill={F.mork} />
+    <path d="M18.5 10 Q24 5.6 29.5 10 Z" fill={F.brod} />
+    <rect x="18" y="10" width="12" height="1.1" rx="0.5" fill={F.gronn} />
+    <rect x="18.3" y="11.1" width="11.4" height="1.7" rx="0.8" fill={F.treMork} />
+    <rect x="18.5" y="12.8" width="11" height="1.4" rx="0.7" fill={F.brod} />
+    {/* Luka med markise, og kokken inne. */}
+    <polygon points="8,18.5 32,18.5 34,24 6,24" fill={F.oransje} />
+    <rect x="6" y="24" width="28" height="1.4" fill={F.rodMork} />
+    <rect x="10" y="26.5" width="20" height="8.5" fill={F.glass} />
+    <rect x="17.8" y="30.6" width="4.4" height="4.4" rx="1.4" fill={F.hvit} />
+    <circle cx="20" cy="29.4" r="1.6" fill={F.hud} />
+    <rect x="18.4" y="26.8" width="3.2" height="1.6" rx="0.6" fill={F.hvit} />
+    <rect x="8.5" y="35" width="23" height="2.2" fill={F.metallLys} />
+    <rect x="25" y="33.2" width="3" height="1.8" rx="0.5" fill={F.rod} />
+    <rect x="12" y="33.4" width="2.4" height="1.6" rx="0.4" fill={F.gul} />
+    <rect x="32" y="27" width="4" height="16" fill={F.skifer} />
+    <circle cx="33" cy="35.5" r="0.7" fill={F.gul} />
+    {t >= 1 && (
+      <>
+        {/* Pipa ryker: grillen står aldri stille. */}
+        <rect x="36" y="10" width="3" height="6" fill={F.stein} />
+        <circle cx="37.6" cy="8" r="1.4" fill={F.lysgraa} opacity="0.85" />
+        <circle cx="39.4" cy="5.4" r="1.8" fill={F.lysgraa} opacity="0.6" />
+      </>
+    )}
+  </Bedrift>
+)
+
 const kiosk: B = (t) => (
   <Bedrift trinn={t} grunn="gate" id="kiosk">
     <rect x="7" y="16" width="34" height="27" fill={F.krem} />
@@ -1434,6 +1468,7 @@ const bedrift =
 const ILLUSTRASJONER: Record<string, Tegning> = {
   saftbod: bedrift(saftbod),
   polsebod: bedrift(polsebod),
+  gatekjokken: bedrift(gatekjokken),
   kiosk: bedrift(kiosk),
   kafe: bedrift(kafe),
   restaurant: bedrift(restaurant),
@@ -1492,7 +1527,7 @@ const ILLUSTRASJONER: Record<string, Tegning> = {
 export const ILLUSTRASJONSIDER = Object.keys(ILLUSTRASJONER)
 
 /** Bedriftene, som har fire vekstrinn. */
-export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
+export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
 
 /** Illustrasjonen for en bedrift, eiendom eller luksusgjenstand, etter id. Bedrifter vokser med `trinn`. */
 export const Illustrasjon = memo(function Illustrasjon({ id, størrelse = 44, trinn = 0 }: { id: string; størrelse?: number; trinn?: Trinn }) {

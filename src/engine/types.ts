@@ -6,6 +6,7 @@
 export type BedriftstypeId =
   | 'saftbod'
   | 'polsebod'
+  | 'gatekjokken'
   | 'kiosk'
   | 'kafe'
   | 'restaurant'

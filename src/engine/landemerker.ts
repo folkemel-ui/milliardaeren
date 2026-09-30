@@ -26,10 +26,10 @@ export interface Landemerke {
 }
 
 export const LANDEMERKER: Record<LandemerkeId, Landemerke> = {
-  fyret: { id: 'fyret', navn: 'Fyret på Ytterskjær', sted: 'Ytterskjær, Vestlandet', by: 'Bergen', pris: 800_000_000, status: 25, avkastning: 0.08 },
-  hoppbakken: { id: 'hoppbakken', navn: 'Kollen hoppbakke', sted: 'Holmenkollen, Oslo', by: 'Oslo', pris: 2_500_000_000, status: 40, avkastning: 0.1 },
-  borgen: { id: 'borgen', navn: 'Steinvik borg', sted: 'Steinvik, Trøndelag', by: 'Trondheim', pris: 6_000_000_000, status: 60, avkastning: 0.08 },
-  tarnet: { id: 'tarnet', navn: 'Oslotårnet', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 15_000_000_000, status: 100, avkastning: 0.14 },
+  fyret: { id: 'fyret', navn: 'Fyret på Ytterskjær', sted: 'Ytterskjær, Vestlandet', by: 'Bergen', pris: 800_000_000, status: 25, avkastning: 0.07 },
+  hoppbakken: { id: 'hoppbakken', navn: 'Kollen hoppbakke', sted: 'Holmenkollen, Oslo', by: 'Oslo', pris: 2_500_000_000, status: 40, avkastning: 0.06 },
+  borgen: { id: 'borgen', navn: 'Steinvik borg', sted: 'Steinvik, Trøndelag', by: 'Trondheim', pris: 6_000_000_000, status: 60, avkastning: 0.05 },
+  tarnet: { id: 'tarnet', navn: 'Oslotårnet', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 15_000_000_000, status: 100, avkastning: 0.04 },
 }
 
 export const LANDEMERKELISTE = Object.keys(LANDEMERKER) as LandemerkeId[]
