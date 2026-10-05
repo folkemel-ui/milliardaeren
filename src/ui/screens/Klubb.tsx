@@ -33,6 +33,7 @@ import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
 import { Klubbvaapen } from '../komponenter/Klubbvaapen'
+import { Stadion } from '../komponenter/Stadion'
 import { Forklaring } from '../komponenter/Forklaring'
 
 /** Kortet i Luksus-fanen: kjøp en klubb, eller åpne den du har. */
@@ -107,6 +108,7 @@ function Klubbkjop({ s }: { s: Spilltilstand }) {
         <Klubbvaapen navn={navn} størrelse={56} />
         <strong>{navn}</strong>
       </div>
+      <Stadion divisjon={0} navn={navn} />
       <p className="liten">
         Lagstyrke <strong>{tall(lagstyrke(klubb))}</strong> · troppen er verdt {kortKroner(pris - DIVISJONER[0].verdi)}
       </p>
@@ -130,6 +132,7 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
   return (
     <>
       <div className="kort klubbtopp">
+        <Stadion divisjon={k.divisjon} navn={k.navn} />
         <div className="rival-topp">
           <div className="klubbtopp-navn">
             <Klubbvaapen navn={k.navn} størrelse={52} />

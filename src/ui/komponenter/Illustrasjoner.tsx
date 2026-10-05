@@ -83,7 +83,7 @@ export const F = {
 
 function Svg({ størrelse, children }: { størrelse: number; children: ReactNode }) {
   return (
-    <svg width={størrelse} height={størrelse} viewBox="0 0 48 48" aria-hidden="true">
+    <svg className="illustrasjon" width={størrelse} height={størrelse} viewBox="0 0 48 48" aria-hidden="true">
       {children}
     </svg>
   )

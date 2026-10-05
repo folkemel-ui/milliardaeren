@@ -21,7 +21,7 @@ import type { LagerId, LuksusId, LuksusKategori, Spilltilstand } from '../../eng
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Klubb, Klubbkort } from './Klubb'
 import { Kunst } from '../komponenter/Kunst'
 import { Seksjon } from '../komponenter/Seksjon'
@@ -145,14 +145,29 @@ function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
 
 const LAGERIKON: Record<LagerId, Ikonnavn> = { garasje: 'garasje', havn: 'anker', hangar: 'hangar' }
 
-/** Garasjen, havna eller hangaren som et rutenett: brukte plasser viser hva som står der, ledige er stiplet. */
+/** Hvilken luksuskategori som står i hvert lager. */
+const KATEGORI_I: Record<LagerId, LuksusKategori> = { garasje: 'bil', havn: 'baat', hangar: 'fly' }
+
+type Lagervalg = { slag: 'eid'; id: LuksusId } | { slag: 'ledig' } | null
+
+/**
+ * Garasjen, havna eller hangaren som en scene, som gatebildet for eiendom:
+ * bilene står parkert i hver sin bås, båtene ligger ved brygga og flyene
+ * står i hangaren. En ledig plass viser en skygge av det neste du kan kjøpe
+ * dit, og bakerst kan du bygge en plass til. Trykk på en plass for kortet.
+ */
 function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
+  const [valgt, velg] = useState<Lagervalg>(null)
   const l = LAGER[lager]
   const pris = utvidelsespris(s, lager)
-  const her = s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager)
+  const her = s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)
   const ledige = Math.max(0, s.lager[lager] - her.length)
+  // Det billigste i kategorien du ikke eier ennå — det er det en ledig plass venter på.
+  const neste = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === KATEGORI_I[lager] && !s.luksus.includes(id)).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)[0]
+  const trykk = (v: Lagervalg) => velg(JSON.stringify(v) === JSON.stringify(valgt) ? null : v)
+
   return (
-    <div className="kort lagerkort">
+    <div className={`kort lagerkort lager-${lager}`}>
       <div className="lagerkort-topp">
         <span className="lager-emoji" aria-hidden="true">
           <Ikon navn={LAGERIKON[lager]} størrelse={22} />
@@ -162,27 +177,85 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
           {brukteplasser(s, lager)} / {s.lager[lager]} {l.enhet}
         </span>
       </div>
-      <ul className="lagerplasser">
+      <div className="lagerscene" role="list" aria-label={l.navn} data-ingen-sveip>
         {her.map((id) => (
-          <li key={id} className="lagerplass brukt" title={LUKSUS[id].navn}>
-            <Illustrasjon id={id} størrelse={30} />
-          </li>
+          <Plass key={id} lager={lager} navn={LUKSUS[id].navn} under={`+${LUKSUS[id].status} status`} valgt={valgt?.slag === 'eid' && valgt.id === id} trykk={() => trykk({ slag: 'eid', id })}>
+            <Illustrasjon id={id} størrelse={64} />
+          </Plass>
         ))}
         {Array.from({ length: ledige }, (_, i) => (
-          <li key={`ledig-${i}`} className="lagerplass ledig" aria-label="Ledig plass" />
+          <Plass
+            key={`ledig-${i}`}
+            lager={lager}
+            klasse="ledig"
+            navn="Ledig plass"
+            under={neste ? LUKSUS[neste].navn : 'Alt er kjøpt'}
+            valgt={i === 0 && valgt?.slag === 'ledig'}
+            trykk={() => neste && trykk({ slag: 'ledig' })}
+          >
+            {neste && (
+              <span className="plass-skygge">
+                <Illustrasjon id={neste} størrelse={64} />
+              </span>
+            )}
+          </Plass>
         ))}
-        <li>
+        <div role="listitem" className="plass-hylle">
           <button
-            className="lagerplass ny"
+            className={`plass ${lager} ny`}
             disabled={s.kontanter < pris}
             onClick={() => utfor(utvidLager(s, lager))}
             aria-label={`Bygg én plass til for ${kortKroner(pris)}`}
           >
-            <span>+</span>
-            <span className="liten">{kortKroner(pris)}</span>
+            <span className="plass-bilde">
+              <span className="plass-pluss" aria-hidden="true">
+                +
+              </span>
+            </span>
+            <span className="plass-navn">Bygg plass</span>
+            <span className="plass-under">{kortKroner(pris)}</span>
           </button>
-        </li>
-      </ul>
+        </div>
+      </div>
+      {valgt?.slag === 'eid' && s.luksus.includes(valgt.id) && (
+        <ul className="kortliste lager-valgt">
+          <Luksuskort s={s} id={valgt.id} />
+        </ul>
+      )}
+      {valgt?.slag === 'ledig' && neste && (
+        <ul className="kortliste lager-valgt">
+          <Luksuskort s={s} id={neste} />
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/** Én plass i lageret: tegningen på bakgrunnen (vegg og gulv, sjø og brygge, hangar), navnet og en linje under. */
+function Plass({
+  lager,
+  klasse = '',
+  navn,
+  under,
+  valgt,
+  trykk,
+  children,
+}: {
+  lager: LagerId
+  klasse?: string
+  navn: string
+  under: string
+  valgt: boolean
+  trykk: () => void
+  children: ReactNode
+}) {
+  return (
+    <div role="listitem" className="plass-hylle">
+      <button className={`plass ${lager} ${klasse}${valgt ? ' valgt' : ''}`} aria-pressed={valgt} onClick={trykk}>
+        <span className="plass-bilde">{children}</span>
+        <span className="plass-navn">{navn}</span>
+        <span className="plass-under">{under}</span>
+      </button>
     </div>
   )
 }

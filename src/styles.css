@@ -1895,8 +1895,9 @@ button.merke {
   font-size: var(--skrift-1);
 }
 
+/* Hvit, som kortene i det lyse temaet — der falmer lyse tegninger først. */
 .galleri-lys {
-  background: #eceef2;
+  background: #ffffff;
 }
 
 .galleri-kort figcaption {
@@ -3242,51 +3243,176 @@ button.merke {
   margin-left: auto;
 }
 
-.lagerplasser {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-  gap: 6px;
+/* Lagrene som scener (Pakke 42): vegg og gulv i garasjen, sjø og brygge i havna,
+   hangarvegg og oppstillingsplass i hangaren. Bakgrunnen er en del av tegningen,
+   så fargene er faste og like i begge temaene. */
+.lagerscene {
+  display: flex;
+  margin-top: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
 }
 
-.lagerplass {
-  display: grid;
-  place-items: center;
+.plass-hylle {
+  flex: none;
+  scroll-snap-align: start;
+}
+
+/* Bygg-plassen fyller resten av raden, så scenen går kant i kant i kortet. */
+.plass-hylle:last-child {
+  flex: 1 0 auto;
+}
+
+.plass-hylle:last-child .plass {
   width: 100%;
-  aspect-ratio: 1;
+  min-width: 96px;
+}
+
+.plass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 96px;
+  padding: 0 0 4px;
+  background: none;
+  border: 0;
+  color: var(--tekst);
+  font: inherit;
+  text-align: center;
+}
+
+.plass-bilde {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  height: 84px;
+  padding-bottom: 2px;
+}
+
+.plass-hylle:first-child .plass-bilde {
+  border-radius: 10px 0 0 10px;
+}
+
+.plass-hylle:last-child .plass-bilde {
+  border-radius: 0 10px 10px 0;
+}
+
+.plass-hylle:only-child .plass-bilde {
   border-radius: 10px;
 }
 
-.lagerplass.brukt {
-  background: var(--flate-2);
-  border: 1px solid var(--kant);
-}
-
-.lagerplass.ledig {
-  border: 1px dashed var(--kant);
-}
-
-.lagerplass.ny {
-  border: 1px dashed var(--gull-mørk);
-  color: var(--gull);
-  font-weight: var(--vekt-fet);
-  line-height: 1.1;
-  align-content: center;
-  gap: 2px;
-}
-
-.lagerplass.ny span:first-child {
-  font-size: var(--skrift-5);
-}
-
-.lagerplass.ny .liten {
+.plass-navn {
+  margin-top: 6px;
+  max-width: 92px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
 }
 
-.lagerplass.ny:disabled {
-  opacity: 0.45;
+.plass-under {
+  max-width: 92px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+}
+
+/* Garasjen: mørk vegg, betonggulv og hvite streker mellom båsene. */
+.plass.garasje .plass-bilde {
+  background: linear-gradient(to bottom, #3a3632 0 64%, #6f6a64 64% 100%);
+}
+
+.plass.garasje .plass-bilde::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  height: 36%;
+  background: #f8f6f1;
+  opacity: 0.6;
+}
+
+/* Havna: himmel, sjø og en pæl mellom hver båtplass. */
+.plass.havn .plass-bilde {
+  background: linear-gradient(to bottom, #8cc4ea 0 56%, #2f7fbf 56% 100%);
+}
+
+.plass.havn .plass-bilde::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  bottom: 0;
+  width: 4px;
+  height: 58%;
+  border-radius: 2px 2px 0 0;
+  background: #7a5230;
+}
+
+/* Hangaren: bølgeblikk på veggen og en gul linje på gulvet. */
+.plass.hangar .plass-bilde {
+  background:
+    repeating-linear-gradient(to right, transparent 0 10px, rgb(0 0 0 / 0.14) 10px 11px) top / 100% 62% no-repeat,
+    linear-gradient(to bottom, #6b7280 0 62%, #9ca3af 62% 100%);
+}
+
+.plass.hangar .plass-bilde::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  height: 2px;
+  background: repeating-linear-gradient(to right, #f4d35e 0 8px, transparent 8px 14px);
+}
+
+/* En ledig plass: stiplet ramme og en skygge av det neste du kan kjøpe. */
+.plass.ledig .plass-bilde::before {
+  content: '';
+  position: absolute;
+  inset: 8px 8px 4px;
+  border: 1px dashed rgb(255 255 255 / 0.6);
+  border-radius: 6px;
+}
+
+.plass-skygge {
+  display: grid;
+  filter: brightness(0);
+  opacity: 0.3;
+}
+
+.plass.ny .plass-bilde {
+  place-items: center;
+}
+
+.plass-pluss {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px dashed #ecd07a;
+  color: #ecd07a;
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-fet);
+}
+
+.plass.ny:disabled {
+  opacity: 0.5;
+}
+
+.plass.valgt .plass-bilde {
+  outline: 2px solid var(--gull);
+  outline-offset: -2px;
+}
+
+.lager-valgt {
+  margin-top: 10px;
 }
 
 /* ─────────────────────────────────────────────── Velkomst */
@@ -4474,6 +4600,7 @@ button.merke {
 .merke-medalje {
   --ring: #b87333;
   --ring-lys: #e7b07a;
+  --ring-mork: #7f4a1c;
   display: grid;
   place-items: center;
   flex: none;
@@ -4489,11 +4616,18 @@ button.merke {
 .merke-medalje.solv {
   --ring: #8d949e;
   --ring-lys: #e5e7eb;
+  --ring-mork: #4b5563;
 }
 
 .merke-medalje.gull {
   --ring: #b8912a;
   --ring-lys: #f7e3a1;
+  --ring-mork: #7d5d00;
+}
+
+/* Lyst tema: ikonet i en mørk tone av metallet — den lyse forsvant mot lys bunn (Pakke 42). */
+:root[data-theme='light'] .merke-medalje {
+  color: var(--ring-mork);
 }
 
 .merke-medalje.laast {
@@ -5048,4 +5182,34 @@ button.maalstripe {
   content: '';
   display: block;
   clear: both;
+}
+
+/* Hjemmebanen øverst i klubbkortet (Pakke 42). */
+.stadion {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.galleri-stadion {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.galleri-stadion .galleri-mork,
+.galleri-stadion .galleri-lys {
+  display: block;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+/* Lyst tema (Pakke 42): tegningene ble laget på mørk bunn, og hvite og kremfargede
+   flater (seil, snø, hvite hus) forsvinner på hvitt. En hårfin kant rundt hele
+   tegningen holder dem synlige uten å endre fargene. Mørkt tema er urørt. */
+:root[data-theme='light'] .illustrasjon,
+:root[data-theme='light'] .stadion {
+  filter: drop-shadow(0 0 0.6px rgb(0 0 0 / 0.5));
 }

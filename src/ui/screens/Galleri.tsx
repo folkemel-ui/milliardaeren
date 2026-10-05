@@ -6,6 +6,8 @@ import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, type Trinn } from '
 import { PAPIRER } from '../../engine/marked'
 import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
 import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
+import { Stadion, STADIONTRINN } from '../komponenter/Stadion'
+import { DIVISJONER, KLUBBNAVN } from '../../engine/klubb'
 import { START_RIVALER } from '../../engine/rivaler'
 
 const TRINN: { trinn: Trinn; navn: string }[] = [
@@ -83,6 +85,23 @@ export function Galleri() {
               </span>
             </div>
             <figcaption>{START_RIVALER.find((r) => r.id === id)?.navn ?? id}</figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <h2 className="skjerm-tittel galleri-del">Stadion</h2>
+      <div className="galleri-stadion">
+        {Array.from({ length: STADIONTRINN }, (_, d) => (
+          <figure key={d} className="galleri-kort">
+            <span className="galleri-mork">
+              <Stadion divisjon={d} navn={KLUBBNAVN[d % KLUBBNAVN.length]} />
+            </span>
+            <span className="galleri-lys">
+              <Stadion divisjon={d} navn={KLUBBNAVN[d % KLUBBNAVN.length]} />
+            </span>
+            <figcaption>
+              {DIVISJONER[d].navn} · {KLUBBNAVN[d % KLUBBNAVN.length]}
+            </figcaption>
           </figure>
         ))}
       </div>

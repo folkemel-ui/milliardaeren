@@ -223,6 +223,12 @@ session; delete what stops being true.
   shows a gold plaque (`Utmerkelse`), not neon. Moving parts get an `anim-*` class and
   only move inside `.scene` (detail views), never with reduced motion. Review art on
   `?galleri` (stage n is shown with n improvements) via a cloned overlay contact sheet.
+- **Light theme** (Pack 42): every drawing SVG has class `illustrasjon`, and the light theme gives
+  it (and `.stadion`) a 0.6 px drop-shadow hairline so white and cream shapes stay visible on
+  white. A new drawing component outside `Illustrasjoner.tsx` needs the same class or selector.
+  Medal symbols use `--ring-mork` in the light theme. `?galleri`'s light swatch is pure white,
+  like light cards. Check contrast with a script (text colour against the first opaque
+  background up the tree) on every tab and sub-page in both themes, rather than by eye.
 - **Pictures**: `BedriftIkon` (`stor` for cards where the picture matters) and `Scene`
   (large drawing at the top of a detail view). Club crests: `Klubbvaapen.tsx`, colours and
   pattern from a hash of the name; text goes as HTML over the SVG, never `<text>`.

@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 42 – Things you own:** A garage, harbour and hangar you can see, A stadium that grows, A light theme check
 - **Pack 43 – Ready for v1.0:** Settings in one place, Wide layout on PC, A version number and What's new
 
 After v1.0:
@@ -35,12 +34,6 @@ The game as of Pack 38 counts as v0.5. These items, together with Packs 39–43,
 7. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
 8. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
 9. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
-
-## Drawings
-
-10. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
-11. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
-12. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
 
 ## Parked (not chosen yet)
 
