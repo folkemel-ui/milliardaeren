@@ -1,13 +1,22 @@
 import { memo, useEffect, useRef } from 'react'
 import { useFokusfelle } from './useFokusfelle'
 import { lesAvis } from '../../engine/handlinger'
-import type { Avisutgave, Spilltilstand } from '../../engine/types'
+import type { Avisutgave, Overskrift, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { datotekst } from '../kalender'
+import { tall } from '../format'
 import { OppgjorBlokk, oppgjorTittel } from './Oppgjor'
 import { Ikon } from './Ikoner'
+import { Illustrasjon } from './Illustrasjoner'
+import { Papirlogo } from './Papirlogo'
+import { Rivalportrett } from './Rivalportrett'
+import { avisbilde, borslinje, seksjon } from '../avisbilde'
 
-/** Børstidende: dagens utgave øverst, de forrige under. Å åpne avisen merker den som lest. */
+/**
+ * Børstidende: et avishode med nummer og dato, børslinja, dagens utgave med
+ * hovedsak, seksjoner, spalter og små tegninger — og de forrige utgavene
+ * under. Å åpne avisen merker den som lest.
+ */
 export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
   const utgaver = [...s.avis].reverse()
   const siste = utgaver[0]
@@ -26,10 +35,16 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
           <button className="avis-lukk" onClick={lukk} aria-label="Lukk avisa">
             ✕
           </button>
+          <div className="avis-topplinje">
+            <span>{siste ? `Nr. ${siste.dag + 1}` : 'Nr. 0'}</span>
+            <span>{siste ? datotekst(siste.dag, true) : 'Første utgave kommer i morgen tidlig'}</span>
+            <span>Kr 45</span>
+          </div>
           <h1 className="avis-navn">Børstidende</h1>
-          <p className="avis-under">{siste ? datotekst(siste.dag, true) : 'Første utgave kommer i morgen tidlig'}</p>
+          <p className="avis-under">Næringsliv · Børs · Eiendom · Folk</p>
         </header>
 
+        {siste && <Borslinje s={s} />}
         {!siste && <p className="avis-tom">Trykkeriet går i natt. Kom tilbake i morgen for dagens nyheter.</p>}
         {siste && <Utgave utgave={siste} s={s} forside />}
 
@@ -46,52 +61,90 @@ export function Avis({ s, lukk }: { s: Spilltilstand; lukk: () => void }) {
   )
 }
 
+/** Aksjene som beveget seg mest ved siste sluttkurs, som kurslista i en finansavis. */
+function Borslinje({ s }: { s: Spilltilstand }) {
+  const linje = borslinje(s)
+  if (linje.length === 0) return null
+  return (
+    <ul className="borslinje" aria-label="Børsen i går">
+      <li className="borslinje-tittel">Børsen</li>
+      {linje.map((b) => (
+        <li key={b.id}>
+          <strong>{b.id}</strong> <span className={b.endring >= 0 ? 'opp' : 'ned'}>{b.endring >= 0 ? '▲' : '▼'} {tall(Math.abs(b.endring) * 100, 1)} %</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** Den lille tegningen til en sak, i en trykt ramme. */
+function Bilde({ sak, stor = false }: { sak: Overskrift; stor?: boolean }) {
+  const b = avisbilde(sak)
+  if (!b) return null
+  const px = stor ? 88 : 44
+  return (
+    <figure className={`avisbilde ${b.art}${stor ? ' stor' : ''}`} aria-hidden="true">
+      {b.art === 'rival' && <Rivalportrett id={b.id} størrelse={px} />}
+      {b.art === 'papir' && <Papirlogo id={b.id} størrelse={Math.round(px * 0.7)} />}
+      {b.art === 'tegning' && <Illustrasjon id={b.id} størrelse={px} trinn={1} />}
+      {b.art === 'ikon' && <Ikon navn={b.navn} størrelse={Math.round(px * 0.55)} />}
+    </figure>
+  )
+}
+
+function Sak({ sak, hoved = false }: { sak: Overskrift; hoved?: boolean }) {
+  const Tittel = hoved ? 'h2' : 'h3'
+  return (
+    // Forbokstaven passer bare når hovedsaken har noen linjer tekst.
+    <div className={`sak ${hoved ? 'hovedsak ' : ''}${hoved && sak.tekst.length > 90 ? 'forbokstav ' : ''}${sak.type}`}>
+      <Bilde sak={sak} stor={hoved} />
+      <span className="sak-seksjon">{seksjon(sak)}</span>
+      <Tittel>{sak.tittel}</Tittel>
+      {sak.tekst && <p>{sak.tekst}</p>}
+    </div>
+  )
+}
+
 /**
  * Én utgave. En trykket utgave endrer seg aldri, og oppgjørene i den ser bare
  * på eldre oppgjør — så den tegnes bare på nytt når det er en annen utgave.
  */
 const Utgave = memo(
   function Utgave({ utgave, s, forside = false }: { utgave: Avisutgave; s: Spilltilstand; forside?: boolean }) {
-  const [hoved, ...resten] = utgave.saker
-  return (
-    <section className={forside ? 'utgave forside' : 'utgave'}>
-      {!forside && <h3 className="utgave-dato">{datotekst(utgave.dag)}</h3>}
-      {forside ? (
-        <>
-          <div className={`sak hovedsak ${hoved.type}`}>
-            <h2>{hoved.tittel}</h2>
-            {hoved.tekst && <p>{hoved.tekst}</p>}
-          </div>
-          <div className="saker">
-            {resten.map((sak, i) => (
-              <div key={i} className={`sak ${sak.type}`}>
-                <h3>{sak.tittel}</h3>
-                {sak.tekst && <p>{sak.tekst}</p>}
-              </div>
+    const [hoved, ...resten] = utgave.saker
+    return (
+      <section className={forside ? 'utgave forside' : 'utgave'}>
+        {!forside && <h3 className="utgave-dato">{datotekst(utgave.dag)}</h3>}
+        {forside ? (
+          <>
+            <Sak sak={hoved} hoved />
+            <div className="saker">
+              {resten.map((sak, i) => (
+                <Sak key={i} sak={sak} />
+              ))}
+            </div>
+            {utgave.oppgjor?.map((o) => (
+              <OppgjorBlokk key={o.periode} o={o} s={s} />
             ))}
-          </div>
-          {utgave.oppgjor?.map((o) => (
-            <OppgjorBlokk key={o.periode} o={o} s={s} />
-          ))}
-        </>
-      ) : (
-        <>
-          <ul className="overskrifter">
-            {utgave.saker.map((sak, i) => (
-              <li key={i} className={sak.type}>
-                {sak.tittel}
-              </li>
+          </>
+        ) : (
+          <>
+            <ul className="overskrifter">
+              {utgave.saker.map((sak, i) => (
+                <li key={i} className={sak.type}>
+                  <span className="sak-seksjon">{seksjon(sak)}</span> {sak.tittel}
+                </li>
+              ))}
+            </ul>
+            {utgave.oppgjor?.map((o) => (
+              <p key={o.periode} className="utgave-oppgjor">
+                <Ikon navn="stolper" størrelse={14} /> {oppgjorTittel(o)} — se Regnskap på Profil
+              </p>
             ))}
-          </ul>
-          {utgave.oppgjor?.map((o) => (
-            <p key={o.periode} className="utgave-oppgjor">
-              <Ikon navn="stolper" størrelse={14} /> {oppgjorTittel(o)} — se Regnskap på Profil
-            </p>
-          ))}
-        </>
-      )}
-    </section>
-  )
+          </>
+        )}
+      </section>
+    )
   },
   (a, b) => a.utgave.dag === b.utgave.dag && a.forside === b.forside,
 )

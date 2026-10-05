@@ -3,6 +3,10 @@ import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
 import { JORD } from '../../engine/jord'
 import { LANDEMERKER } from '../../engine/landemerker'
 import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, type Trinn } from '../komponenter/Illustrasjoner'
+import { PAPIRER } from '../../engine/marked'
+import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
+import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
+import { START_RIVALER } from '../../engine/rivaler'
 
 const TRINN: { trinn: Trinn; navn: string }[] = [
   { trinn: 0, navn: 'Nivå 1' },
@@ -59,6 +63,48 @@ export function Galleri() {
               </div>
             )}
             <figcaption>{navn(id)}</figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <h2 className="skjerm-tittel galleri-del">Rivalene</h2>
+      <div className="galleri-rutenett">
+        {RIVALPORTRETTER.map((id) => (
+          <figure key={id} className="galleri-kort">
+            <div className="galleri-stor">
+              <Rivalportrett id={id} størrelse={240} />
+            </div>
+            <div className="galleri-små">
+              <span className="galleri-mork">
+                <Rivalportrett id={id} størrelse={40} />
+              </span>
+              <span className="galleri-lys">
+                <Rivalportrett id={id} størrelse={40} />
+              </span>
+            </div>
+            <figcaption>{START_RIVALER.find((r) => r.id === id)?.navn ?? id}</figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <h2 className="skjerm-tittel galleri-del">Logoer</h2>
+      <div className="galleri-logoer">
+        {PAPIRLOGOER.map((id) => (
+          <figure key={id} className="galleri-logo">
+            <span className="galleri-mork">
+              <Papirlogo id={id} størrelse={96} />
+            </span>
+            <span className="galleri-små">
+              <span className="galleri-mork">
+                <Papirlogo id={id} størrelse={32} />
+              </span>
+              <span className="galleri-lys">
+                <Papirlogo id={id} størrelse={32} />
+              </span>
+            </span>
+            <figcaption>
+              {id} · {PAPIRER[id].navn}
+            </figcaption>
           </figure>
         ))}
       </div>

@@ -1260,20 +1260,6 @@ button.merke {
   text-align: left;
 }
 
-.ticker {
-  display: grid;
-  place-items: center;
-  min-width: 46px;
-  height: 32px;
-  padding: 0 6px;
-  border-radius: 8px;
-  background: var(--flate-2);
-  color: var(--gull);
-  font-size: var(--skrift-2);
-  font-weight: var(--vekt-tung);
-  letter-spacing: 0.04em;
-}
-
 .papirrad-navn {
   display: flex;
   flex-direction: column;
@@ -1707,8 +1693,24 @@ button.merke {
 .avis-hode {
   position: relative;
   text-align: center;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
   border-bottom: 3px double #1c1a16;
+}
+
+/* Nummer, dato og pris over avisnavnet, som på en ekte forside. */
+.avis-topplinje {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 40px 6px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #1c1a16;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5a5448;
 }
 
 .avis-lukk {
@@ -1724,12 +1726,15 @@ button.merke {
 
 .avis-navn {
   font-size: var(--skrift-6);
-  font-weight: var(--vekt-fet);
-  letter-spacing: -0.01em;
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.01em;
+  line-height: 1.1;
 }
 
 .avis-under {
-  margin-top: 2px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #1c1a16;
   font-size: var(--skrift-2);
   font-style: italic;
   color: #5a5448;
@@ -1766,12 +1771,25 @@ button.merke {
   font-size: var(--skrift-3);
 }
 
+/* De andre sakene i to spalter med en strek imellom, som i en avis. */
 .saker {
-  display: grid;
-  gap: 12px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid #cfc6b3;
+  columns: 2;
+  column-gap: 18px;
+  column-rule: 1px solid #cfc6b3;
+}
+
+.saker .sak {
+  break-inside: avoid;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 340px) {
+  .saker {
+    columns: 1;
+  }
 }
 
 .sak h3 {
@@ -4878,4 +4896,156 @@ button.maalstripe {
 
 .kommende-tittel {
   margin: 14px 0 0;
+}
+
+/* Galleriet: rivalene og logoene (Pakke 41). */
+.galleri-del {
+  margin-top: 32px;
+}
+
+.galleri-logoer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.galleri-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--flate);
+  font-size: var(--skrift-2);
+  text-align: center;
+}
+
+/* Logoer og portretter (Pakke 41). */
+.papirlogo,
+.rivalportrett {
+  display: block;
+  flex: none;
+}
+
+.forbes-navn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Deg på Forbes-lista: en gull medaljong i stedet for et portrett. */
+.forbes-deg {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.rival-topp {
+  align-items: center;
+}
+
+.rival-navn {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─────────────────────────────────────────────── Avisa: børslinje, seksjoner og bilder (Pakke 41) */
+
+.borslinje {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px solid #1c1a16;
+  list-style: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-1);
+  font-variant-numeric: tabular-nums;
+  color: #1c1a16;
+}
+
+.borslinje-tittel {
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.borslinje .opp {
+  color: #2f6b3a;
+}
+
+.borslinje .ned {
+  color: #8a1f11;
+}
+
+.sak-seksjon {
+  display: block;
+  margin-bottom: 2px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a1f11;
+}
+
+.overskrifter .sak-seksjon {
+  display: inline;
+  margin-right: 4px;
+  color: #5a5448;
+}
+
+/* En trykt ramme med rasterprikker bak tegningen. */
+.avisbilde {
+  float: right;
+  display: grid;
+  place-items: center;
+  margin: 2px 0 6px 10px;
+  padding: 4px;
+  border: 1px solid #1c1a16;
+  background:
+    radial-gradient(circle, rgb(28 26 22 / 0.16) 0.8px, transparent 1px) 0 0 / 5px 5px,
+    #ebe4d4;
+  color: #1c1a16;
+}
+
+.avisbilde.ikon {
+  width: 44px;
+  height: 44px;
+}
+
+.avisbilde.ikon.stor {
+  width: 96px;
+  height: 96px;
+}
+
+.avisbilde.rival {
+  border-radius: 50%;
+  padding: 2px;
+}
+
+/* Hovedsaken: stor forbokstav. */
+.forbokstav p::first-letter {
+  float: left;
+  margin: 3px 6px 0 0;
+  font-size: var(--skrift-6);
+  font-weight: var(--vekt-fet);
+  line-height: 0.85;
+}
+
+.hovedsak::after,
+.saker .sak::after {
+  content: '';
+  display: block;
+  clear: both;
 }

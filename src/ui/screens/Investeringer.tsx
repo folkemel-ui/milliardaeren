@@ -55,6 +55,9 @@ import {
 import { RulleTall } from '../komponenter/RulleTall'
 import { useVoksUt } from '../overgang'
 import { StartupLogo } from '../komponenter/StartupLogo'
+import { Papirlogo } from '../komponenter/Papirlogo'
+import { Ikon } from '../komponenter/Ikoner'
+import { Rivalportrett } from '../komponenter/Rivalportrett'
 import { Forklaring } from '../komponenter/Forklaring'
 
 type Underfane = 'oversikt' | 'bors' | 'selskaper' | 'bank'
@@ -276,11 +279,11 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
             return (
               <li key={id}>
                 <button className="kort papirrad eid" onClick={() => velg(id)}>
-                  <span className="ticker">{id}</span>
+                  <Papirlogo id={id} størrelse={36} />
                   <span className="papirrad-navn">
                     <strong>{PAPIRER[id].navn}</strong>
                     <span className="dempet liten">
-                      {fmtAntall(b.antall)} {klasse === 'aksje' ? 'aksjer' : 'stk'}
+                      {id} · {fmtAntall(b.antall)} {klasse === 'aksje' ? 'aksjer' : 'stk'}
                     </span>
                   </span>
                   <Minigraf verdier={s.marked.kurser[id].historikk} />
@@ -305,10 +308,12 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
           return (
             <li key={id}>
               <button className="kort papirrad" onClick={() => velg(id)}>
-                <span className="ticker">{id}</span>
+                <Papirlogo id={id} størrelse={36} />
                 <span className="papirrad-navn">
                   <strong>{p.navn}</strong>
-                  <span className="dempet liten">{klasse === 'aksje' ? RISIKO_TEKST[p.risiko] : 'Krypto'}</span>
+                  <span className="dempet liten">
+                    {id} · {klasse === 'aksje' ? RISIKO_TEKST[p.risiko] : 'Krypto'}
+                  </span>
                 </span>
                 <Minigraf verdier={s.marked.kurser[id].historikk} />
                 <span className="papirrad-kurs">
@@ -360,11 +365,11 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
       </button>
       <div className="kort">
         <div className="detalj-topp">
-          <span className="ticker">{id}</span>
+          <Papirlogo id={id} størrelse={48} />
           <div>
             <h1 className="skjerm-tittel">{p.navn}</h1>
             <span className="dempet liten">
-              {RISIKO_TEKST[p.risiko]}
+              {id} · {RISIKO_TEKST[p.risiko]}
               {p.utbytte > 0 && ` · Utbytte ${tall(p.utbytte * 100, 3)} % hver børsdag`}
             </span>
           </div>
@@ -695,7 +700,16 @@ function Rivaler({ s }: { s: Spilltilstand }) {
           {liste.map((p, i) => (
             <li key={p.navn} className={p.deg ? 'deg' : ''}>
               <span className="forbes-plass">{i + 1}</span>
-              <span className="forbes-navn">{p.navn}</span>
+              <span className="forbes-navn">
+                {p.rivalId ? (
+                  <Rivalportrett id={p.rivalId} størrelse={28} />
+                ) : (
+                  <span className="forbes-deg" aria-hidden="true">
+                    <Ikon navn="person" størrelse={16} />
+                  </span>
+                )}
+                {p.navn}
+              </span>
               <span className="forbes-formue">{kortKroner(p.formue)}</span>
             </li>
           ))}
@@ -720,7 +734,8 @@ function Rivaler({ s }: { s: Spilltilstand }) {
           return (
             <li key={r.id} className={r.overtatt ? 'kort rivalkort eid' : 'kort rivalkort'}>
               <div className="rival-topp">
-                <div>
+                <Rivalportrett id={r.id} størrelse={44} />
+                <div className="rival-navn">
                   <h2>{r.selskap}</h2>
                   <span className="dempet liten">
                     {r.overtatt ? 'Eid av deg — tidligere' : 'Eies av'} {r.navn}
