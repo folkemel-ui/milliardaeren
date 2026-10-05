@@ -86,7 +86,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   skatt: {
     tittel: 'Skatt og offshore',
     tekst:
-      `Hver måned kommer en regning på månedens overskudd — inntektene og gevinsten på det du har solgt, minus tap og lånerenter — med trinnskatt: ${trinn.map((t) => `${pst(t.sats)} over ${kortKroner(t.fra)}`).join(', ').replace(/, (?=[^,]*$)/, ' og ')}. ` +
+      `Hver måned kommer en regning på månedens overskudd — inntektene, klubbens resultat og gevinsten på det du har solgt, minus tap og lånerenter — med trinnskatt: ${trinn.map((t) => `${pst(t.sats)} over ${kortKroner(t.fra)}`).join(', ').replace(/, (?=[^,]*$)/, ' og ')}. ` +
       `Du har en uke på å betale — etter det kommer gebyr, og skatten kreves inn. ` +
       `Offshore halverer skatten, men hver måned er det ${pst(REVISJONSSJANSE)} sjanse for bokettersyn. Da betales alt som er unndratt tilbake, pluss like mye i tillegg.`,
   },

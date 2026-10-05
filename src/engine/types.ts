@@ -220,13 +220,17 @@ export interface Periodestart {
   rentebetalt: number
   forbruk: number
   gevinst: number
+  /** Klubbens resultat og jordas avling. Mangler i tellerstander fra før Pakke 39. */
+  klubb?: number
+  host?: number
   /** Hva hver bedrift hadde tjent totalt ved periodens start, etter id. */
   bedrifter: Record<string, number>
   kurser: Record<PapirId, number>
 }
 
 export interface Oppgjor {
-  periode: 'uke' | 'maaned' | 'aar'
+  /** 'dag' brukes bare i statistikken (`dagsoppgjor`), aldri i avisa. */
+  periode: 'dag' | 'uke' | 'maaned' | 'aar'
   /** «uke 7», «januar 2027», «2027». */
   navn: string
   fraDag: number
@@ -239,6 +243,10 @@ export interface Oppgjor {
   forbruk: number
   /** Gevinst minus tap på det som ble solgt. Mangler i oppgjør fra før versjon 18. */
   gevinster?: number
+  /** Klubbens resultat: billetter og sponsor minus lønn. Mangler i oppgjør fra før Pakke 39. */
+  klubb?: number
+  /** Delen av `leie` som kom fra jorda: avlinger og tømmer. Mangler i oppgjør fra før Pakke 39. */
+  host?: number
   formueFor: number
   formueEtter: number
   besteBedrift: { type: BedriftstypeId; tjent: number } | null
@@ -387,6 +395,16 @@ export interface Spilltilstand {
    * landemerker, kunst, rivalandeler, startups og klubben. Skattes med inntekten.
    */
   totaltGevinst: number
+  /**
+   * Klubbens resultat, totalt: billetter og sponsor minus lønn. Skattes med
+   * inntekten. Kjøp og salg av spillere er kostpris, ikke resultat.
+   * Mangler i lagringer fra før Pakke 39.
+   */
+  totaltKlubb?: number
+  /** Tellerstanden ved starten av dagen, til statistikken. Mangler før Pakke 39. */
+  dagstart?: Periodestart
+  /** Oppgjør for hver av de siste dagene, nyeste sist — bare til statistikken. */
+  dagsoppgjor?: Oppgjor[]
   /** Luksusgjenstandene du eier. Én av hver. */
   luksus: LuksusId[]
   /** Plasser i garasjen, havna og hangaren. */

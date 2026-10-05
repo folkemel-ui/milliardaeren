@@ -14,6 +14,7 @@ import {
   utforMalerisalg,
   utforRivalsalg,
   utforSalg,
+  bokforGevinst,
 } from './handel'
 import { JORD, JORDLISTE, landverdi, tommerverdi } from './jord'
 import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from './landemerker'
@@ -177,6 +178,7 @@ export function sjekkMargin(s: Spilltilstand): void {
     const storst = [...s.bedrifter].sort((a, b) => bedriftsverdi(b) - bedriftsverdi(a))[0]
     s.bedrifter = s.bedrifter.filter((b) => b.id !== storst.id)
     s.kontanter += bedriftsverdi(storst) * TVANGSSALG_ANDEL
+    bokforGevinst(s, -bedriftsverdi(storst) * (1 - TVANGSSALG_ANDEL))
     nedbetalMed(s, s.kontanter)
     overtatt.push(BEDRIFTSTYPER[storst.type].navn)
   }

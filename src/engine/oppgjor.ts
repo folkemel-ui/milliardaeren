@@ -11,7 +11,7 @@ import { dagnummer, dato, MÅNEDER, ukedag, ukenummer } from './kalender'
 import { AKSJER } from './marked'
 import type { Oppgjor, PapirId, Periodestart, Spilltilstand } from './types'
 
-const BEHOLD: Record<Oppgjor['periode'], number> = { uke: 8, maaned: 12, aar: 10 }
+const BEHOLD: Record<Oppgjor['periode'], number> = { dag: 30, uke: 8, maaned: 12, aar: 10 }
 
 export function periodestart(s: Spilltilstand): Periodestart {
   const kurser = {} as Record<PapirId, number>
@@ -26,6 +26,8 @@ export function periodestart(s: Spilltilstand): Periodestart {
     rentebetalt: s.totaltRentebetalt,
     forbruk: s.totaltForbruk,
     gevinst: s.totaltGevinst ?? 0,
+    klubb: s.totaltKlubb ?? 0,
+    host: s.totaltHost ?? 0,
     bedrifter: Object.fromEntries(s.bedrifter.map((b) => [b.id, b.tjent])),
     kurser,
   }
@@ -50,6 +52,9 @@ function lagOppgjor(s: Spilltilstand, start: Periodestart, periode: Oppgjor['per
     renter: s.totaltRentebetalt - start.rentebetalt,
     forbruk: s.totaltForbruk - start.forbruk,
     gevinster: (s.totaltGevinst ?? 0) - (start.gevinst ?? 0),
+    // En tellerstand fra før Pakke 39 har ikke klubb og avling: da teller perioden fra nå.
+    klubb: start.klubb === undefined ? 0 : (s.totaltKlubb ?? 0) - start.klubb,
+    host: start.host === undefined ? 0 : (s.totaltHost ?? 0) - start.host,
     formueFor: start.formue,
     formueEtter: nettoformue(s),
     besteBedrift: beste,
@@ -82,6 +87,13 @@ export function dagsskifteOppgjor(s: Spilltilstand): Oppgjor[] {
   const nye: Oppgjor[] = []
   const d = dato(idag)
   const igår = dato(idag - 1)
+
+  // Dagens tall til statistikken. Et spill fra før Pakke 39 starter tellingen nå.
+  if (s.dagstart) {
+    const dag = lagOppgjor(s, s.dagstart, 'dag', String(idag - 1))
+    s.dagsoppgjor = [...(s.dagsoppgjor ?? []), dag].slice(-BEHOLD.dag)
+  }
+  s.dagstart = periodestart(s)
 
   if (ukedag(s.sek) === 6) {
     nye.push(lagOppgjor(s, s.ukestart, 'uke', `uke ${ukenummer(idag - 1)}`))

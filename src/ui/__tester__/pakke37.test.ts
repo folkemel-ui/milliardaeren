@@ -36,8 +36,8 @@ describe('byvisningen', () => {
 })
 
 describe('profildelene', () => {
-  it('er Meg, Regnskap og Innstillinger, og kan settes utenfra uten lagring', () => {
-    expect(PROFILDELER.map((d) => d.id)).toEqual(['meg', 'regnskap', 'innstillinger'])
+  it('er Meg, Regnskap, Statistikk (Pakke 39) og Innstillinger, og kan settes utenfra uten lagring', () => {
+    expect(PROFILDELER.map((d) => d.id)).toEqual(['meg', 'regnskap', 'statistikk', 'innstillinger'])
     expect(() => settProfildel('regnskap')).not.toThrow()
   })
 })

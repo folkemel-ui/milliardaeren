@@ -28,11 +28,12 @@ export const REVISJONSSJANSE = 0.15
 export const TILLEGGSSKATT = 1
 
 /**
- * Skattegrunnlaget i et oppgjør: inntektene og gevinstene ved salg, minus tap
- * og lånerenter, aldri under null. Tap trekkes bare fra i samme måned.
+ * Skattegrunnlaget i et oppgjør: inntektene, klubbens resultat og gevinstene
+ * ved salg, minus tap og lånerenter, aldri under null. Tap — også klubbens
+ * underskudd — trekkes bare fra i samme måned.
  */
 export function skattegrunnlag(o: Oppgjor): number {
-  return Math.max(0, o.bedrifter + o.leie + o.utbytte + o.sparerente + (o.gevinster ?? 0) - o.renter)
+  return Math.max(0, o.bedrifter + o.leie + o.utbytte + o.sparerente + (o.gevinster ?? 0) + (o.klubb ?? 0) - o.renter)
 }
 
 export function beregnSkatt(grunnlag: number): number {

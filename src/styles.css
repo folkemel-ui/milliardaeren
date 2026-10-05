@@ -47,6 +47,14 @@
   --varsel: #f0b44c;
   /* Tekst og ikoner som står på gull. */
   --paa-gull: #1a1508;
+  /* Kildene i statistikken, i fast rekkefølge. Validert mot flaten for fargeblinde (dataviz-sjekken). */
+  --kilde-1: #3987e5;
+  --kilde-2: #d95926;
+  --kilde-3: #199e70;
+  --kilde-4: #c98500;
+  --kilde-5: #d55181;
+  --kilde-6: #008300;
+  --kilde-7: #9085e9;
 
   --radius: 14px;
   --meny-høyde: 64px;
@@ -72,6 +80,13 @@
   --fare: #cf2f2f;
   --varsel: #b45309;
   --paa-gull: #ffffff;
+  --kilde-1: #2a78d6;
+  --kilde-2: #eb6834;
+  --kilde-3: #1baf7a;
+  --kilde-4: #eda100;
+  --kilde-5: #e87ba4;
+  --kilde-6: #008300;
+  --kilde-7: #4a3aa7;
   --klasse-krypto: #7c3aed;
   --klasse-eiendom: #0284c7;
   --klasse-rival: #db2777;
@@ -956,28 +971,104 @@ button.merke {
 .graf-rutenett {
   stroke: var(--kant);
   stroke-width: 1;
-  stroke-dasharray: 3 4;
+  stroke-dasharray: 2 4;
   vector-effect: non-scaling-stroke;
 }
 
+/* Etikettene på rutenettet ligger i samme rute oppå hverandre, så kolonnen
+   blir så bred som den bredeste — og hver flyttes ned til sin strek. */
 .graf-akse-y {
   grid-area: y;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
+  display: grid;
+  height: 140px;
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.graf-akse-y span {
+  grid-area: 1 / 1;
+  position: relative;
+  align-self: start;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+/* Dato eller klokkeslett under hver strek langs bunnen. */
+.graf-akse-x {
+  grid-area: x;
+  position: relative;
+  height: 16px;
+  margin-top: 4px;
   font-size: var(--skrift-1);
   color: var(--tekst-dempet);
   font-variant-numeric: tabular-nums;
 }
 
-.graf-akse-x {
-  grid-area: x;
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
+.graf-akse-x span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.graf-akse-x span.venstre {
+  transform: none;
+}
+
+.graf-akse-x span.hoyre {
+  transform: translateX(-100%);
+}
+
+.graf-strek {
+  stroke: var(--tekst-dempet);
+  stroke-width: 1;
+  opacity: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Verdien ved start og nå, i hver ende av linja. Teksten er tekstfarget; linjefargen står i kanten. */
+.graf-ende {
+  position: absolute;
+  padding: 1px 6px;
+  border-radius: 6px;
   font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.graf-ende.start {
+  left: 0;
   color: var(--tekst-dempet);
+}
+
+.graf-ende.naa {
+  right: 0;
+  color: var(--tekst);
+  background: var(--flate-2);
+  border: 1px solid;
+}
+
+.graf-ende.over {
+  transform: translateY(calc(-100% - 6px));
+}
+
+.graf-ende.under {
+  transform: translateY(6px);
+}
+
+.graf-endepunkt {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  border: 2px solid var(--flate);
+  box-sizing: content-box;
+  pointer-events: none;
 }
 
 .graf-tom {
@@ -4470,4 +4561,186 @@ button.merke {
 .seksjon-hoderad .forklaring-boble {
   left: auto;
   right: -4px;
+}
+
+/* ─────────────────────────────────────────────── Statistikk: inntekt per kilde */
+
+.stabel-flate {
+  height: 140px;
+}
+
+.stabel-linje,
+.stabel-null {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--kant);
+  pointer-events: none;
+}
+
+.stabel-null {
+  border-top: 1px solid var(--tekst-dempet);
+  opacity: 0.6;
+}
+
+.stabel-kolonne {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* Søylen er smalere enn plassen sin, så det blir luft mellom periodene. */
+.stabel-del {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  min-height: 1px;
+  /* 2 px flate mellom delene i en stabel. */
+  box-shadow: 0 0 0 1px var(--flate);
+}
+
+.stabel-del.topp {
+  border-radius: 4px 4px 0 0;
+}
+
+.stabel-del.bunn {
+  border-radius: 0 0 4px 4px;
+}
+
+/* Perioden som pågår, er ikke ferdig: lysere, med striper. */
+.stabel-kolonne.paagaar .stabel-del {
+  opacity: 0.55;
+  background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgba(255, 255, 255, 0.25) 3px 5px);
+}
+
+.stabel-kolonne.valgt::before {
+  content: '';
+  position: absolute;
+  inset: 0 4%;
+  border-radius: 6px;
+  background: var(--tekst);
+  opacity: 0.07;
+}
+
+.stabel-boble {
+  /* Inne i grafen, ikke over den: toppfeltet ville skjult den. */
+  top: 4px;
+  transform: translateX(-50%);
+  align-items: stretch;
+  gap: 2px;
+  min-width: 190px;
+}
+
+.stabel-boble strong {
+  text-align: center;
+}
+
+.stabel-boble .stabel-boble-rad {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+}
+
+.stabel-boble-rad i,
+.kilde-farge {
+  display: inline-block;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.stabel-boble-rad b {
+  margin-left: auto;
+  padding-left: 10px;
+  color: var(--tekst);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.stabel-boble .stabel-boble-rad.sum {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: 1px solid var(--kant);
+}
+
+.kildetabell {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.kildetabell th,
+.kildetabell td {
+  padding: 5px 0;
+  text-align: right;
+  font-weight: var(--vekt-normal);
+}
+
+.kildetabell th:first-child {
+  text-align: left;
+}
+
+.kildetabell thead th {
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kildetabell td:last-child {
+  width: 4.5em;
+}
+
+.kildetabell tbody tr + tr {
+  border-top: 1px solid var(--kant);
+}
+
+.kildetabell tfoot {
+  border-top: 1px solid var(--tekst-dempet);
+}
+
+.kildetabell tfoot th,
+.kildetabell tfoot td {
+  font-weight: var(--vekt-halvfet);
+}
+
+.kildetabell .kilde-farge {
+  margin-right: 8px;
+}
+
+.kildesoyler {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.kildesoyler li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 4px;
+}
+
+.kildesoyle {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.kildesoyle i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
 }

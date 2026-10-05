@@ -12,7 +12,7 @@ export function oppgjorTittel(o: Oppgjor): string {
 }
 
 export function nettoInn(o: Oppgjor): number {
-  return o.bedrifter + o.leie + o.utbytte + o.sparerente + (o.gevinster ?? 0)
+  return o.bedrifter + o.leie + o.utbytte + o.sparerente + (o.gevinster ?? 0) + (o.klubb ?? 0)
 }
 
 export function nettoUt(o: Oppgjor): number {
@@ -35,9 +35,10 @@ export function OppgjorBlokk({ o, s, medTittel = true }: { o: Oppgjor; s: Spillt
     ['Leie og avlinger', o.leie],
     ['Utbytte', o.utbytte],
     ['Sparerente', o.sparerente],
+    ['Klubben', o.klubb ?? 0],
     ['Gevinst og tap ved salg', o.gevinster ?? 0],
     ['Lånerenter', -o.renter],
-    ['Luksus og lager', -o.forbruk],
+    ['Luksus, lager og ansettelser', -o.forbruk],
   ]
 
   return (

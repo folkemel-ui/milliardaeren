@@ -1,16 +1,17 @@
 /**
- * Hvilken del av Profil som er åpen: Meg, Regnskap eller Innstillinger.
+ * Hvilken del av Profil som er åpen: Meg, Regnskap, Statistikk eller Innstillinger.
  * Huskes i nettleseren, og kan settes utenfra — skattemerket i toppfeltet
  * åpner Regnskap — så den er en liten delt tilstand, ikke bare en useState.
  */
 
 import { useSyncExternalStore } from 'react'
 
-export type Profildel = 'meg' | 'regnskap' | 'innstillinger'
+export type Profildel = 'meg' | 'regnskap' | 'statistikk' | 'innstillinger'
 
 export const PROFILDELER: { id: Profildel; navn: string }[] = [
   { id: 'meg', navn: 'Meg' },
   { id: 'regnskap', navn: 'Regnskap' },
+  { id: 'statistikk', navn: 'Statistikk' },
   { id: 'innstillinger', navn: 'Innstillinger' },
 ]
 
@@ -20,7 +21,7 @@ const lyttere = new Set<() => void>()
 function les(): Profildel {
   try {
     const v = localStorage.getItem(NOKKEL)
-    return v === 'regnskap' || v === 'innstillinger' ? v : 'meg'
+    return v === 'regnskap' || v === 'statistikk' || v === 'innstillinger' ? v : 'meg'
   } catch {
     return 'meg'
   }

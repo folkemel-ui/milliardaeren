@@ -272,6 +272,7 @@ function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
     const meg = k.lag[0]
     const inntekt = Math.round(DIVISJONER[k.divisjon].billett * (0.8 + (0.6 * meg.vunnet) / Math.max(1, meg.spilt)))
     s.kontanter += inntekt
+    s.totaltKlubb = (s.totaltKlubb ?? 0) + inntekt
     k.billetter += inntekt
   }
   k.kamper.push(kamp)
@@ -324,6 +325,7 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
 function betalSponsor(s: Spilltilstand, k: Klubb): void {
   const sponsor = DIVISJONER[k.divisjon].sponsor
   s.kontanter += sponsor
+  s.totaltKlubb = (s.totaltKlubb ?? 0) + sponsor
   k.sponsor += sponsor
 }
 
@@ -364,6 +366,7 @@ export function klubbVedDagsskifte(s: Spilltilstand): Overskrift[] {
   })
   const lonn = lonnPerDag(k)
   betal(s, lonn)
+  s.totaltKlubb = (s.totaltKlubb ?? 0) - lonn
   k.lonn += lonn
   if (k.runde >= RUNDER_PER_SESONG) saker.push(...sesongslutt(s, k, t))
   k.marked = nyttMarked(k, t)

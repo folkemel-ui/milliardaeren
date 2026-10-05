@@ -18,6 +18,7 @@ import { Logo } from '../komponenter/Logo'
 import { Ikon } from '../komponenter/Ikoner'
 import { Merke } from '../komponenter/Merke'
 import { PROFILDELER, settProfildel, useProfildel } from '../profilfane'
+import { Statistikk } from '../komponenter/Statistikk'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -154,15 +155,15 @@ function Utseende() {
 }
 
 /**
- * Profil i tre deler: Meg (formuen, målet og det du har oppnådd), Regnskap
- * (skatt og oppgjør) og Innstillinger. Delen du sist hadde åpen, huskes.
+ * Profil i fire deler: Meg (formuen, målet og det du har oppnådd), Regnskap
+ * (skatt og oppgjør), Statistikk (hvor inntekten kommer fra) og Innstillinger. Delen du sist hadde åpen, huskes.
  */
 export function Profil({ s }: { s: Spilltilstand }) {
   const del = useProfildel()
   const ubetalt = s.skatt.regninger.length > 0
   return (
     <section className="skjerm">
-      <div className="segment" role="tablist" aria-label="Profil">
+      <div className="segment segment-fem" role="tablist" aria-label="Profil">
         {PROFILDELER.map((d) => (
           <button key={d.id} role="tab" aria-selected={del === d.id} className={del === d.id ? 'aktiv' : ''} onClick={() => settProfildel(d.id)}>
             {d.navn}
@@ -177,6 +178,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
           <Regnskap s={s} />
         </>
       )}
+      {del === 'statistikk' && <Statistikk s={s} />}
       {del === 'innstillinger' && <Innstillinger />}
     </section>
   )
