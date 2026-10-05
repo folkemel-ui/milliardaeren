@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Ikon, IkonBedrifter, IkonEiendom, IkonInvesteringer, IkonLuksus, IkonProfil } from './Ikoner'
 import { useNy } from '../nymerker'
+import { Logo } from './Logo'
 
 export type Fane = 'bedrifter' | 'investeringer' | 'eiendom' | 'luksus' | 'profil'
 
@@ -29,6 +30,10 @@ export const FANE_INNHOLD: Record<Fane, string> = {
 export function Fanemeny({ aktiv, velg, aapen }: { aktiv: Fane; velg: (f: Fane) => void; aapen: (f: Fane) => boolean }) {
   return (
     <nav className="fanemeny" aria-label="Hovedmeny">
+      {/* Logoen står bare øverst i sidemenyen på en bred skjerm. */}
+      <div className="fanemeny-logo" aria-hidden="true">
+        <Logo størrelse={32} />
+      </div>
       {FANER.map((f) => (
         <Faneknapp key={f.id} f={f} aktiv={f.id === aktiv} laast={!aapen(f.id)} velg={velg} />
       ))}

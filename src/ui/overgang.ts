@@ -9,6 +9,7 @@
  */
 
 import { useLayoutEffect, useRef } from 'react'
+import { redusertBevegelse } from './innstillinger'
 
 /** Et trykk eldre enn dette åpnet ikke detaljsiden (den kom av noe annet). */
 const MAKS_ALDER_MS = 600
@@ -17,9 +18,6 @@ const TILBAKE_MS = 220
 
 let sisteTrykk: { rect: DOMRect; tid: number; scrollY: number } | null = null
 
-function redusertBevegelse(): boolean {
-  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-}
 
 /** Husker kortet ved hvert trykk. Kalles én gang fra appen; gir tilbake en opprydding. */
 export function lyttEtterKorttrykk(): () => void {

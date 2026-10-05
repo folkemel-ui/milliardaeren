@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import type { Feiringsniva } from '../hendelsesstrom'
 import { avsluttFeiring, fjernVarsel, useFeiring, useVarsler, type Varsel } from '../varsler'
+import { redusertBevegelse } from '../innstillinger'
 import type { Fane } from './Fanemeny'
 import { Ikon, type Ikonnavn } from './Ikoner'
 
@@ -83,7 +84,8 @@ export function Feiring() {
   const milliard = f?.niva === 'milliard'
   const biter = useMemo(
     () =>
-      Array.from({ length: v?.biter ?? 0 }, (_, i) => ({
+      // Ingen konfetti når bevegelsen skal dempes — blinket og teksten holder.
+      Array.from({ length: redusertBevegelse() ? 0 : (v?.biter ?? 0) }, (_, i) => ({
         venstre: Math.random() * 100,
         forsinkelse: Math.random() * (milliard ? 2.2 : 0.6),
         varighet: (f?.niva === 'liten' ? 1.2 : 1.6) + Math.random() * 1.2,

@@ -5213,3 +5213,192 @@ button.maalstripe {
 :root[data-theme='light'] .stadion {
   filter: drop-shadow(0 0 0.6px rgb(0 0 0 / 0.5));
 }
+
+/* Redusert bevegelse valgt i spillet (Pakke 43): alle animasjoner og overganger
+   stopper, også når systemet ikke ber om det. JS-delen (rullende tall, konfetti,
+   kort som vokser) spør redusertBevegelse() i ui/innstillinger.ts. */
+:root[data-bevegelse='redusert'] *,
+:root[data-bevegelse='redusert'] *::before,
+:root[data-bevegelse='redusert'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* «Nytt i 1.0» og endringsloggen (Pakke 43). */
+.nyheter-versjon {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nyheter-versjon + .nyheter-versjon {
+  padding-top: 14px;
+  border-top: 1px solid var(--kant);
+}
+
+.nyheter-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--skrift-2);
+  line-height: 1.4;
+}
+
+.nyheter-liste li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.nyheter-liste li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gull);
+}
+
+/* Innstillingskortet (Pakke 43): ett valg per rad med en strek imellom. */
+.innstillinger {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.innstilling {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.innstilling + .innstilling {
+  padding-top: 14px;
+  border-top: 1px solid var(--kant);
+}
+
+.innstilling p {
+  margin: 0;
+}
+
+.versjonslinje {
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+/* En knapp som ser ut som en lenke. */
+.lenkeknapp {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--gull);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────── Bred skjerm (Pakke 43)
+   Fra 1024 px: menyen blir en sidemeny til venstre, toppfeltet og innholdet
+   står til høyre, og kortlistene går i to spalter. Telefonen er urørt. */
+
+.fanemeny-logo {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --sidemeny: 224px;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidemeny) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'meny topp'
+      'meny innhold';
+    max-width: 1240px;
+  }
+
+  .toppfelt {
+    grid-area: topp;
+  }
+
+  .innhold {
+    grid-area: innhold;
+    padding: 20px 24px 40px;
+  }
+
+  .fanemeny {
+    grid-area: meny;
+    position: sticky;
+    top: 0;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    align-self: start;
+    width: auto;
+    max-width: none;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 12px;
+    border-top: 0;
+    border-right: 1px solid var(--kant);
+  }
+
+  .fanemeny-logo {
+    display: block;
+    padding: 0 8px 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--kant);
+  }
+
+  .fane {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: var(--skrift-3);
+  }
+
+  .fane:hover:not(.laast) {
+    background: color-mix(in srgb, var(--flate-2) 60%, transparent);
+  }
+
+  .fane.aktiv {
+    background: var(--flate-2);
+  }
+
+  /* Kortlistene i to spalter — ikke i vinduene som åpner seg over (gatebildet, valgt plass). */
+  .innhold .kortliste:not(.gate-kort, .lager-valgt) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  /* Varslene står over innholdet, ikke over sidemenyen. */
+  .varsler {
+    left: calc(50% + var(--sidemeny) / 2);
+    bottom: 24px;
+  }
+
+  /* Vinduene (avisa, velkomst) midt på skjermen i stedet for nederst. */
+  .avis-bakgrunn {
+    align-items: center;
+  }
+
+  .avis {
+    border-radius: 18px;
+  }
+}

@@ -16,10 +16,10 @@ session; delete what stops being true.
   numbers to keep ("Add 1, 3, 5 …"), and asks to fit them into packs. Never add an idea to
   `Ideer.md` that wasn't picked. Unpicked ideas stay in chat; picked ones go into a section,
   numbered, and into the pack plan when asked.
-- **Folke thinks in versions.** The game as of Pack 38 is "v0.5"; `Ideer.md` has a
-  "Road to v1.0" section, and the pack plan marks which packs make v1.0 (39–43) and
-  which come after. When a picked item already sits under Parked, move it up — don't
-  leave a copy behind. Folke picks by number and leaves things out on purpose: the
+- **Folke thinks in versions.** Pack 38 was "v0.5"; Packs 39–43 were the road to v1.0,
+  and the game shipped as 1.0.0 with Pack 43. A version goal gets its own section in
+  `Ideer.md` while it's being built, and the section goes when it's done. When a picked
+  item already sits under Parked, move it up — don't leave a copy behind. Folke picks by number and leaves things out on purpose: the
   unpicked v1.0 ideas (tutorial, sound, missions, events, playtesting …) stay out.
 - **"Make the new packs" means do it**, not propose: write the plan into `Ideer.md`,
   commit it on its own (`Idéliste: …`), then report the grouping and why. A pack of two
@@ -223,6 +223,20 @@ session; delete what stops being true.
   shows a gold plaque (`Utmerkelse`), not neon. Moving parts get an `anim-*` class and
   only move inside `.scene` (detail views), never with reduced motion. Review art on
   `?galleri` (stage n is shown with n improvements) via a cloned overlay contact sheet.
+- **Versions** (Pack 43): the game is 1.0.0. `VERSJON` in `ui/versjon.ts` must equal
+  `version` in `package.json` (a test checks). A new release bumps both
+  (`npm version X --no-git-tag-version`) and adds an entry at the top of `ENDRINGER`. Players
+  who've played ≥ 10 minutes then see "Nytt i X" once; brand-new players never do. The full
+  log opens from "Hva er nytt" at the bottom of Innstillinger. Ask Folke before bumping.
+- **Settings** live in one card (`Innstillingskort` in Profil.tsx), each a `Valg` row. Browser
+  settings (theme, newspaper, notifications, motion) go in localStorage, never the save.
+  `ui/innstillinger.ts`: `vises(funn)` decides which toasts show (Alle / Viktige / Av); motion
+  uses `data-bevegelse="redusert"` (a CSS rule stops every animation) and `redusertBevegelse()`
+  in JS. New animations get both for free; new JS motion must call `redusertBevegelse()`.
+- **Wide layout** (Pack 43, ≥ 1024 px): `.app` becomes a grid with the tab bar as a sticky
+  sidebar (`--sidemeny` 224 px), and `.innhold .kortliste` turns into two columns. Lists inside
+  pop-ups must be excluded in that selector (`.gate-kort`, `.lager-valgt`). The screenshot
+  pane scales wide viewports down; check layouts with DOM numbers (grid columns, scrollWidth).
 - **Light theme** (Pack 42): every drawing SVG has class `illustrasjon`, and the light theme gives
   it (and `.stadion`) a 0.6 px drop-shadow hairline so white and cream shapes stay visible on
   white. A new drawing component outside `Illustrasjoner.tsx` needs the same class or selector.

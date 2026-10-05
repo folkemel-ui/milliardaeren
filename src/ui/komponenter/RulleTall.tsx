@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-
-function redusertBevegelse(): boolean {
-  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-}
+import { redusertBevegelse } from '../innstillinger'
 
 /**
  * Tallet ruller mot ny verdi i stedet for å hoppe. Kommer en ny verdi midt i

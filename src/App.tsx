@@ -12,6 +12,9 @@ import { visFeiring, visKjop, visVarsel, type Varsel } from './ui/varsler'
 import { Kjopsglimt } from './ui/komponenter/Kjopsglimt'
 import { fjernNy, lyttEtterNyTrykk, merkNy } from './ui/nymerker'
 import { lesAvisvalg } from './ui/avisvalg'
+import { vises } from './ui/innstillinger'
+import { merkVersjonSett, visNyheter } from './ui/versjon'
+import { Nyheter } from './ui/komponenter/Nyheter'
 import type { Hendelse } from './engine/types'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
 import { Bedrifter } from './ui/screens/Bedrifter'
@@ -70,6 +73,8 @@ export default function App() {
     return faneAapen(s, f) ? f : 'bedrifter'
   })
   const [avisÅpen, settAvisÅpen] = useState(false)
+  // «Nytt i 1.0» for en spiller som kommer tilbake etter en oppdatering. En ny spiller merkes som oppdatert med en gang.
+  const [nyheter, settNyheter] = useState(() => visNyheter(s.sek))
   const lukkAvis = useCallback(() => settAvisÅpen(false), [])
   // Retningen fanene glir: mot høyre når du går til en fane lenger til høyre.
   const [retning, settRetning] = useState<'hoyre' | 'venstre' | 'ingen'>('ingen')
@@ -79,6 +84,10 @@ export default function App() {
   const avbrudd = useAvbrudd()
 
   useEffect(startSpillokke, [])
+  useEffect(() => {
+    if (!nyheter) merkVersjonSett()
+    // Bare ved oppstart.
+  }, [])
   useEffect(lyttEtterNyTrykk, [])
   useEffect(lyttEtterKorttrykk, [])
 
@@ -117,7 +126,8 @@ export default function App() {
 
   function håndter(funn: Nytt[]) {
     const avis = funn.find((f) => f.type === 'avis')
-    const andre = funn.filter((f) => f.type !== 'avis')
+    // Varselvalget i Innstillinger bestemmer hvilke som vises. Avisa har sitt eget valg.
+    const andre = funn.filter((f) => f.type !== 'avis' && vises(f))
     if (andre.length > MAKS_ENKELTVARSLER) {
       visVarsel({ type: 'god', tittel: `${andre.length} hendelser mens du var borte`, tekst: 'Se Bank → Hendelser og Profil.', mål: 'investeringer' })
     } else {
@@ -205,6 +215,14 @@ export default function App() {
         />
       )}
       {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
+      {nyheter && !velkomst && !avisÅpen && (
+        <Nyheter
+          lukk={() => {
+            merkVersjonSett()
+            settNyheter(false)
+          }}
+        />
+      )}
       <Kjopsglimt />
       <Feiring />
     </div>

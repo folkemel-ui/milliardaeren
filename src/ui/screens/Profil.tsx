@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { nettoformue } from '../../engine/formler'
 import { MAAL } from '../../engine/innhold'
 import { PRESTASJONER } from '../../engine/prestasjoner'
@@ -20,6 +20,9 @@ import { Merke } from '../komponenter/Merke'
 import { PROFILDELER, settProfildel, useProfildel } from '../profilfane'
 import { Statistikk } from '../komponenter/Statistikk'
 import { kommendeMaal } from '../progresjon'
+import { settBevegelse, settVarsler, useBevegelse, useVarselnivaa } from '../innstillinger'
+import { VERSJON } from '../versjon'
+import { Endringslogg } from '../komponenter/Nyheter'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -130,46 +133,83 @@ function KommendeMaal({ s }: { s: Spilltilstand }) {
   )
 }
 
-function Utseende() {
-  const [tema, settValgt] = useState<Tema>(lesTema)
-  const [avis, settAvis] = useState<Avisvalg>(lesAvisvalg)
-  const velg = (t: Tema) => {
-    settTema(t)
-    settValgt(t)
-  }
+/** Ett valg i innstillingene: navn, knappene og en linje om hva det gjør. */
+function Valg<T extends string>({ navn, verdi, valg, velg, forklaring }: { navn: string; verdi: T; valg: [T, ReactNode][]; velg: (v: T) => void; forklaring: string }) {
   return (
-    <div className="kort utseende">
-      <h2 className="kort-tittel">Utseende</h2>
-      <div className="segment">
-        <button className={tema === 'mork' ? 'aktiv' : ''} onClick={() => velg('mork')}>
-          <Ikon navn="mane" størrelse={15} /> Mørkt
-        </button>
-        <button className={tema === 'lys' ? 'aktiv' : ''} onClick={() => velg('lys')}>
-          <Ikon navn="sol" størrelse={15} /> Lyst
-        </button>
-      </div>
-      <h2 className="kort-tittel">Avisa</h2>
-      <div className="segment">
-        {(
-          [
-            ['varsel', 'Varsel'],
-            ['apne', 'Åpne selv'],
-            ['av', 'Av'],
-          ] as [Avisvalg, string][]
-        ).map(([v, navn]) => (
-          <button
-            key={v}
-            className={avis === v ? 'aktiv' : ''}
-            onClick={() => {
-              settAvisvalg(v)
-              settAvis(v)
-            }}
-          >
-            {navn}
+    <div className="innstilling">
+      <h3 className="etikett">{navn}</h3>
+      <div className="segment" role="radiogroup" aria-label={navn}>
+        {valg.map(([v, tekst]) => (
+          <button key={v} role="radio" aria-checked={verdi === v} className={verdi === v ? 'aktiv' : ''} onClick={() => velg(v)}>
+            {tekst}
           </button>
         ))}
       </div>
-      <p className="dempet liten">Hva som skjer når en ny utgave kommer, hver spilldag. Den røde prikken på «Avisa» er der uansett.</p>
+      <p className="dempet liten">{forklaring}</p>
+    </div>
+  )
+}
+
+/**
+ * Alle innstillingene samlet i ett kort: utseende, avisa, varsler og
+ * bevegelse. De hører til nettleseren, ikke spillet.
+ */
+function Innstillingskort() {
+  const [tema, settValgtTema] = useState<Tema>(lesTema)
+  const [avis, settAvis] = useState<Avisvalg>(lesAvisvalg)
+  const varsler = useVarselnivaa()
+  const bevegelse = useBevegelse()
+  return (
+    <div className="kort innstillinger">
+      <h2 className="kort-tittel">Innstillinger</h2>
+      <Valg
+        navn="Utseende"
+        verdi={tema}
+        valg={[
+          ['mork', <><Ikon navn="mane" størrelse={15} /> Mørkt</>],
+          ['lys', <><Ikon navn="sol" størrelse={15} /> Lyst</>],
+        ]}
+        velg={(v) => {
+          settTema(v)
+          settValgtTema(v)
+        }}
+        forklaring="Mørkt «luksus» eller lyst «ren finans». Avisa er alltid på papir."
+      />
+      <Valg
+        navn="Avisa"
+        verdi={avis}
+        valg={[
+          ['varsel', 'Varsel'],
+          ['apne', 'Åpne selv'],
+          ['av', 'Av'],
+        ]}
+        velg={(v) => {
+          settAvisvalg(v)
+          settAvis(v)
+        }}
+        forklaring="Hva som skjer når en ny utgave kommer, hver spilldag. Den røde prikken på «Avisa» er der uansett."
+      />
+      <Valg
+        navn="Varsler"
+        verdi={varsler}
+        valg={[
+          ['alle', 'Alle'],
+          ['viktige', 'Viktige'],
+          ['av', 'Av'],
+        ]}
+        velg={settVarsler}
+        forklaring="Hendelser, prestasjoner og nye faner nederst på skjermen. «Viktige» viser bare det som har gått galt — og nye faner. Feil når du trykker, vises alltid."
+      />
+      <Valg
+        navn="Bevegelse"
+        verdi={bevegelse}
+        valg={[
+          ['system', 'Som systemet'],
+          ['redusert', 'Redusert'],
+        ]}
+        velg={settBevegelse}
+        forklaring="Redusert skrur av glidende faner, konfetti, rullende tall og tegninger som beveger seg — også om systemet ikke ber om det."
+      />
     </div>
   )
 }
@@ -262,9 +302,12 @@ function Meg({ s }: { s: Spilltilstand }) {
 
 function Innstillinger() {
   const [bekreft, settBekreft] = useState(false)
+  const [logg, settLogg] = useState(false)
   return (
     <>
-      <Utseende />
+      <Innstillingskort />
+
+      <h2 className="seksjon-tittel">Lagringen</h2>
       <FlyttSpillet />
       <Reservekopi />
 
@@ -296,7 +339,14 @@ function Innstillinger() {
 
       <footer className="profil-bunn">
         <Logo størrelse={36} undertekst="Fra 1 000 kr og en saftbod til milliardær" />
+        <p className="dempet liten versjonslinje">
+          Versjon {VERSJON} ·{' '}
+          <button className="lenkeknapp" onClick={() => settLogg(true)}>
+            Hva er nytt
+          </button>
+        </p>
       </footer>
+      {logg && <Endringslogg lukk={() => settLogg(false)} />}
     </>
   )
 }

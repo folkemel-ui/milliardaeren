@@ -8,32 +8,22 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 43 – Ready for v1.0:** Settings in one place, Wide layout on PC, A version number and What's new
-
-After v1.0:
+Version 1.0 was reached with Pack 43. Next:
 
 - **Pack 44 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
 - **Pack 45 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
 
-## Road to v1.0
-
-The game as of Pack 38 counts as v0.5. These items, together with Packs 39–43, make it v1.0.
-
-1. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
-2. **Settings in one place.** Sound (later), newspaper, theme, notifications, reduced motion, export/import and reset gathered in one Settings card on Profile.
-3. **A version number and What's new.** package.json still says 0.1.0. Show the version on Profile and a short "What's new" screen the first time the game opens after an update.
-
 ## Property
 
-4. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
+1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
 
 ## Map
 
-5. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
-6. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
-7. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
-8. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
-9. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
+2. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
+3. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
+4. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
+5. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
+6. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
 ## Parked (not chosen yet)
 
