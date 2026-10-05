@@ -8,35 +8,53 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 39 – A grown-up finance feel:** A real newspaper, Finance charts with axes, Logos for stocks and coins, Rival portraits
-- **Pack 40 – Things you own:** A garage, harbour and hangar you can see, A stadium that grows, A light theme check
-- **Pack 41 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
-- **Pack 42 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
+- **Pack 39 – Honest numbers:** Close the gaps in the rules, A statistics page, Finance charts with axes
+- **Pack 40 – A clear start:** Tabs that open as you progress, A clear goal
+- **Pack 41 – A grown-up finance feel:** A real newspaper, Logos for stocks and coins, Rival portraits
+- **Pack 42 – Things you own:** A garage, harbour and hangar you can see, A stadium that grows, A light theme check
+- **Pack 43 – Ready for v1.0:** Settings in one place, Wide layout on PC, A version number and What's new
+
+After v1.0:
+
+- **Pack 44 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
+- **Pack 45 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
+
+## Road to v1.0
+
+The game as of Pack 38 counts as v0.5. These items, together with Packs 39–43, make it v1.0.
+
+1. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
+2. **A clear goal.** Always show the next milestone ("Next: kr 10 mill — Kiosk king"), so the player knows what they are working towards.
+3. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
+4. **Close the gaps in the rules.** Club ticket and sponsor income is not taxed (no totalt counter). Audit every income and cost for anything else that skips tax or the books.
+5. **A statistics page.** Income per source (businesses, rent, dividends, club, harvests) as a graph over time.
+6. **Settings in one place.** Sound (later), newspaper, theme, notifications, reduced motion, export/import and reset gathered in one Settings card on Profile.
+7. **A version number and What's new.** package.json still says 0.1.0. Show the version on Profile and a short "What's new" screen the first time the game opens after an update.
 
 ## Property
 
-1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
+8. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
 
 ## Map
 
-2. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
-3. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
-4. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
-5. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
-6. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
+9. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
+10. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
+11. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
+12. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
+13. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
 ## Professional look
 
-7. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
-8. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
+14. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+15. **Finance charts with axes.** The stock and net worth charts are good but minimal. Add light gridlines, value labels at the ends and dates along the axis, so they look like finance charts.
 
 ## Drawings
 
-9. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
-10. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
-11. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
-12. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
-13. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
+16. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
+17. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
+18. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
+19. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
+20. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
 
 ## Parked (not chosen yet)
 
@@ -81,7 +99,6 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Rewards for achievements.** Small permanent bonuses or cash rewards.
 - **Hidden achievements.** "Bought at the bottom", "Night owl" and so on.
 - **Titles for your largest business.** "Lemonade king", "Sausage baron" and so on, shown on Profile.
-- **Statistics page.** Income per source (businesses, rent, dividends) as a graph over time.
 
 **Map ideas** (bring these up again with Hotels abroad and holiday apartments)
 - **Businesses on the map.** Your kiosks, cafés and so on appear as small icons in the cities, so the map shows your whole empire.
@@ -94,8 +111,6 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **A growing world map.** Bigger jets open new continents, and the world map widens and gets proper coastlines.
 
 **Layout ideas**
-- **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
-- **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
 - **Colorful cartoon style.** Bright colors, rounded shapes and big icons.
 - **Notification badges** on tabs when something needs attention.
 - **Progress bar per business** that fills up and pays out when full.
