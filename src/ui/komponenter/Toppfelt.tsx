@@ -7,6 +7,9 @@ import { klokke, kortDato, ukenummer } from '../kalender'
 import { Ikon, IkonProfil } from './Ikoner'
 import { RulleTall } from './RulleTall'
 import { settProfildel } from '../profilfane'
+import { faneAapen, nesteMaal } from '../progresjon'
+import { kortKroner } from '../format'
+import type { Fane } from './Fanemeny'
 
 /**
  * Hvor langt du har kommet, i fire trinn: under en million, millionær,
@@ -21,8 +24,9 @@ export function formuetrinn(formue: number): 0 | 1 | 2 | 3 {
  * Fast toppfelt: kontanter og tempo til venstre, nettoformuen i midten,
  * profil til høyre — og under, datolinja med klokka og avisen. Kanten under
  * blir gylnere for hvert statusnivå, og tittelen din står under formuen.
+ * Nederst står det neste målet (Pakke 40).
  */
-export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilProfil: () => void; åpneAvis: () => void }) {
+export function Toppfelt({ s, tilProfil, åpneAvis, gåTil }: { s: Spilltilstand; tilProfil: () => void; åpneAvis: () => void; gåTil: (f: Fane) => void }) {
   const dag = dagnummer(s.sek)
   const siste = s.avis[s.avis.length - 1]
   const ulest = siste !== undefined && siste.dag > s.avisLest
@@ -84,6 +88,41 @@ export function Toppfelt({ s, tilProfil, åpneAvis }: { s: Spilltilstand; tilPro
           {ulest && <span className="ulest-prikk" />}
         </button>
       </div>
+      <Maalstripe s={s} gåTil={gåTil} />
     </header>
+  )
+}
+
+/**
+ * Det neste målet over den høyeste formuen din: hva som skjer, ved hvilket
+ * beløp, og hvor langt du har kommet siden forrige mål. Et trykk tar deg dit
+ * målet hører hjemme — en fane som åpner, kan du ikke gå til ennå.
+ */
+function Maalstripe({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
+  const neste = nesteMaal(s)
+  if (!neste) return null
+  const [forst, ...resten] = neste.maal
+  const mål = forst.fane && faneAapen(s, forst.fane) ? forst.fane : undefined
+  const innhold = (
+    <>
+      <span className="maalstripe-tekst">
+        <span className="etikett">Neste</span> <strong>{forst.tekst}</strong>
+        {resten.length > 0 && <span className="dempet"> · {resten.map((m) => m.tekst).join(' · ')}</span>}
+      </span>
+      <span className="maalstripe-belop">{kortKroner(neste.belop)}</span>
+      <span className="maalstripe-spor" aria-hidden="true">
+        <span style={{ width: `${neste.andel * 100}%` }} />
+      </span>
+    </>
+  )
+  const etikett = `Neste mål: ${neste.maal.map((m) => m.tekst).join(', ')} ved ${kortKroner(neste.belop)}. ${Math.round(neste.andel * 100)} % av veien fra forrige mål.`
+  return mål ? (
+    <button className="maalstripe" onClick={() => gåTil(mål)} aria-label={etikett}>
+      {innhold}
+    </button>
+  ) : (
+    <div className="maalstripe" role="status" aria-label={etikett}>
+      {innhold}
+    </div>
   )
 }

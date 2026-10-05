@@ -3,13 +3,14 @@ import { Avis } from './ui/komponenter/Avis'
 import { aktivVelkomst, lukkVelkomst, startSpillokke, useAvbrudd, useSpill, useVelkomst } from './state/lager'
 import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
 import { Velkomstskjerm } from './ui/komponenter/Velkomst'
-import { FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
+import { FANE_INNHOLD, FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
 import { Feiring, Varselstabel } from './ui/komponenter/Varsler'
-import { tall } from './ui/format'
+import { kortKroner, tall } from './ui/format'
+import { FANE_AAPNER, faneAapen } from './ui/progresjon'
 import { MAKS_ENKELTVARSLER, nytt, stoersteFeiring, type Nytt } from './ui/hendelsesstrom'
 import { visFeiring, visKjop, visVarsel, type Varsel } from './ui/varsler'
 import { Kjopsglimt } from './ui/komponenter/Kjopsglimt'
-import { lyttEtterNyTrykk, merkNy } from './ui/nymerker'
+import { fjernNy, lyttEtterNyTrykk, merkNy } from './ui/nymerker'
 import { lesAvisvalg } from './ui/avisvalg'
 import type { Hendelse } from './engine/types'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
@@ -63,7 +64,11 @@ function husketFane(): Fane {
 
 export default function App() {
   const s = useSpill()
-  const [fane, settFane] = useState<Fane>(husketFane)
+  // En husket fane som er låst (etter «Start på nytt»), gir Bedrifter.
+  const [fane, settFane] = useState<Fane>(() => {
+    const f = husketFane()
+    return faneAapen(s, f) ? f : 'bedrifter'
+  })
   const [avisÅpen, settAvisÅpen] = useState(false)
   const lukkAvis = useCallback(() => settAvisÅpen(false), [])
   // Retningen fanene glir: mot høyre når du går til en fane lenger til høyre.
@@ -97,6 +102,8 @@ export default function App() {
     const alleKjop = funn.filter((f) => f.type === 'kjop')
     const kjop = alleKjop.length > MAKS_KJOP_SAMTIDIG ? [] : alleKjop
     for (const k of kjop) merkNy(k.id)
+    // En fane som har åpnet seg, får en prikk til du har vært innom.
+    for (const f of funn) if (f.type === 'fane') merkNy(`fane:${f.fane}`)
     // Etter lengre tid borte viser velkomstskjermen alt dette — da blir det bare feiring og NY-merker, ingen varsler.
     if (aktivVelkomst()?.etter === s) return
     // Kjøper du flere ting på en gang (automatiske ordre), vises det siste.
@@ -119,6 +126,8 @@ export default function App() {
           visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'investeringer' })
         } else if (f.type === 'prestasjon') {
           visVarsel({ type: 'god', tittel: `Prestasjon: ${f.navn}`, mål: 'profil' })
+        } else if (f.type === 'fane') {
+          visVarsel({ type: 'god', tittel: `Ny fane: ${FANER.find((x) => x.id === f.fane)!.navn}`, tekst: FANE_INNHOLD[f.fane], mål: f.fane })
         }
       }
     }
@@ -130,6 +139,12 @@ export default function App() {
   }
 
   const velg = (f: Fane) => {
+    if (!faneAapen(s, f)) {
+      const navn = FANER.find((x) => x.id === f)!.navn
+      visVarsel({ type: 'feil', tittel: `${navn} åpner ved ${kortKroner(FANE_AAPNER[f])}`, tekst: 'Første gang nettoformuen din når dit.' })
+      return
+    }
+    fjernNy(`fane:${f}`)
     const fra = FANER.findIndex((x) => x.id === fane)
     const til = FANER.findIndex((x) => x.id === f)
     settRetning(til > fra ? 'hoyre' : til < fra ? 'venstre' : 'ingen')
@@ -147,7 +162,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} />
+      <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} gåTil={velg} />
       <main
         key={fane}
         className={`innhold gli-${retning}`}
@@ -166,7 +181,8 @@ export default function App() {
           if (Date.now() - start.t > SVEIP_MAKS_MS || Math.abs(dx) < SVEIP_MIN_PX || Math.abs(dy) > Math.abs(dx) * 0.6) return
           const i = FANER.findIndex((x) => x.id === fane)
           const ny = FANER[i + (dx < 0 ? 1 : -1)]
-          if (ny) velg(ny.id)
+          // Sveip hopper ikke inn i en låst fane — da skjer ingenting.
+          if (ny && faneAapen(s, ny.id)) velg(ny.id)
         }}
       >
         {fane === 'bedrifter' && <Bedrifter s={s} />}
@@ -175,7 +191,7 @@ export default function App() {
         {fane === 'luksus' && <Luksus s={s} />}
         {fane === 'profil' && <Profil s={s} />}
       </main>
-      <Fanemeny aktiv={fane} velg={velg} />
+      <Fanemeny aktiv={fane} velg={velg} aapen={(f) => faneAapen(s, f)} />
       <Varselstabel gåTil={velg} />
       {velkomst && !avisÅpen && (
         <Velkomstskjerm

@@ -19,6 +19,7 @@ import { Ikon } from '../komponenter/Ikoner'
 import { Merke } from '../komponenter/Merke'
 import { PROFILDELER, settProfildel, useProfildel } from '../profilfane'
 import { Statistikk } from '../komponenter/Statistikk'
+import { kommendeMaal } from '../progresjon'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -108,6 +109,25 @@ function Rekordbok({ s }: { s: Spilltilstand }) {
 /** Fremdrift mot milliarden på logaritmisk skala: hvert nuller er like langt. */
 function fremdrift(n: number): number {
   return Math.min(1, Math.max(0, Math.log10(Math.max(1, n)) / Math.log10(MAAL)))
+}
+
+/** De neste målene over den høyeste formuen din: hva som åpner, og milepælene. */
+function KommendeMaal({ s }: { s: Spilltilstand }) {
+  const liste = kommendeMaal(s)
+  if (liste.length === 0) return <p className="dempet liten">Alt er låst opp, og alle milepælene er nådd.</p>
+  return (
+    <>
+      <h3 className="etikett kommende-tittel">De neste målene</h3>
+      <ul className="kommende-maal">
+        {liste.map((g) => (
+          <li key={g.belop}>
+            <span>{g.maal.map((m) => m.tekst).join(' · ')}</span>
+            <span>{kortKroner(g.belop)}</span>
+          </li>
+        ))}
+      </ul>
+    </>
+  )
 }
 
 function Utseende() {
@@ -215,6 +235,7 @@ function Meg({ s }: { s: Spilltilstand }) {
           <div className="maal-fyll" style={{ width: `${andel * 100}%` }} />
         </div>
         <p className="dempet liten">Hvert nuller teller like mye: 1 000 → 10 000 er like langt som 100 mill → 1 mrd.</p>
+        <KommendeMaal s={s} />
       </div>
 
       <dl className="kort statistikk">

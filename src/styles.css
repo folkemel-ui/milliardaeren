@@ -389,7 +389,7 @@ figure {
   color: var(--gull);
 }
 
-.fane span {
+.fane > span:last-child {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4743,4 +4743,139 @@ button.merke {
   display: block;
   height: 100%;
   border-radius: 3px;
+}
+
+/* ─────────────────────────────────────────────── Progresjon: låste faner og neste mål (Pakke 40) */
+
+.fane-ikon {
+  position: relative;
+  display: inline-flex;
+}
+
+/* En låst fane er grå, med en liten hengelås i hjørnet av ikonet. */
+.fane.laast {
+  opacity: 0.45;
+}
+
+.fane-laas {
+  position: absolute;
+  right: -7px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+  color: var(--tekst);
+}
+
+/* En fane som nettopp har åpnet: gull prikk til du har vært innom. */
+.fane-ny {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gull);
+  box-shadow: 0 0 0 2px var(--flate);
+}
+
+/* Neste mål nederst i toppfeltet: tekst til venstre, beløpet til høyre, et tynt spor under. */
+.maalstripe {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 10px;
+  row-gap: 4px;
+  width: 100%;
+  margin-top: -2px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-2);
+  text-align: left;
+}
+
+button.maalstripe {
+  cursor: pointer;
+}
+
+.maalstripe .etikett {
+  margin-right: 4px;
+}
+
+.maalstripe-tekst {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.maalstripe-tekst strong {
+  font-weight: var(--vekt-halvfet);
+}
+
+.maalstripe-belop {
+  color: var(--gull);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.maalstripe-spor {
+  grid-column: 1 / -1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.maalstripe-spor span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--gull);
+  transition: width 0.6s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maalstripe-spor span {
+    transition: none;
+  }
+}
+
+/* Lista over de neste målene på Profil. */
+.kommende-maal {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--skrift-2);
+}
+
+.kommende-maal li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.kommende-maal li + li {
+  border-top: 1px solid var(--kant);
+}
+
+.kommende-maal li > span:last-child {
+  color: var(--gull);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kommende-tittel {
+  margin: 14px 0 0;
 }

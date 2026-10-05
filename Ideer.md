@@ -8,7 +8,6 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-- **Pack 40 – A clear start:** Tabs that open as you progress, A clear goal
 - **Pack 41 – A grown-up finance feel:** A real newspaper, Logos for stocks and coins, Rival portraits
 - **Pack 42 – Things you own:** A garage, harbour and hangar you can see, A stadium that grows, A light theme check
 - **Pack 43 – Ready for v1.0:** Settings in one place, Wide layout on PC, A version number and What's new
@@ -22,35 +21,33 @@ After v1.0:
 
 The game as of Pack 38 counts as v0.5. These items, together with Packs 39–43, make it v1.0.
 
-1. **Tabs that open as you progress.** Locked tabs stay greyed out with a padlock until you reach the right net worth, so a new player is not met with everything at once.
-2. **A clear goal.** Always show the next milestone ("Next: kr 10 mill — Kiosk king"), so the player knows what they are working towards.
-3. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
-4. **Settings in one place.** Sound (later), newspaper, theme, notifications, reduced motion, export/import and reset gathered in one Settings card on Profile.
-5. **A version number and What's new.** package.json still says 0.1.0. Show the version on Profile and a short "What's new" screen the first time the game opens after an update.
+1. **Wide layout on PC.** A sidebar and two columns on a wide screen, instead of a phone-width column in the middle.
+2. **Settings in one place.** Sound (later), newspaper, theme, notifications, reduced motion, export/import and reset gathered in one Settings card on Profile.
+3. **A version number and What's new.** package.json still says 0.1.0. Show the version on Profile and a short "What's new" screen the first time the game opens after an update.
 
 ## Property
 
-6. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
+4. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement. When this comes up, bring up the parked **Map ideas** too.
 
 ## Map
 
-7. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
-8. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
-9. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
-10. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
-11. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
+5. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
+6. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
+7. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
+8. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
+9. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
 ## Professional look
 
-12. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
+10. **A real newspaper.** Give Børstidende a proper masthead, serif headings, columns and small drawn pictures instead of emoji, so it looks like a financial paper.
 
 ## Drawings
 
-13. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
-14. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
-15. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
-16. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
-17. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
+11. **Rival portraits.** A simple drawn bust in the same style for each of the four rivals, each with a fixed colour, shown on the Forbes list, in merges and in the newspaper. Today rivals are only names.
+12. **Logos for stocks and coins.** A small mark per company instead of the plain ticker box — a fish for Nordfjord Sjømat, a wave for Fjellkraft, a coin mark for each crypto — like the startups already have monograms.
+13. **A garage, harbour and hangar you can see.** Like the street view for property: your cars park in the garage, boats lie in the harbour and planes stand in the hangar, with empty spaces showing what you can still buy.
+14. **A stadium that grows.** A drawing of the club's ground that grows with each division, from a gravel pitch in 4. divisjon to a full arena in Eliteserien. The players' shirts can use the crest's colours.
+15. **A light theme check.** Go through every drawing and badge in the light theme. The drawings were made on a dark background, and some light colours (white, cream) may fade on white. Best done after the other drawing items, so it covers them too.
 
 ## Parked (not chosen yet)
 

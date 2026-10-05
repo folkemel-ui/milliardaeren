@@ -11,6 +11,8 @@ import { BEDRIFTSTYPER } from '../engine/innhold'
 import { PRESTASJONER } from '../engine/prestasjoner'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
 import type { BedriftstypeId, EiendomId, Hendelse, Spilltilstand } from '../engine/types'
+import { FANE_AAPNER, faneAapen } from './progresjon'
+import type { Fane } from './komponenter/Fanemeny'
 
 /**
  * Et kjøp som fortjener et øyeblikk: første bedrift av en type, første
@@ -24,6 +26,7 @@ export type Nytt =
   | { type: 'avis'; dag: number }
   | { type: 'kjop'; art: Kjopsart; id: string; navn: string }
   | { type: 'fusjon'; id: BedriftstypeId; navn: string; faktor: number }
+  | { type: 'fane'; fane: Fane }
 
 /** Hvor stor feiringen er: et lite drys, gullblink og konfetti, eller milliarden. */
 export type Feiringsniva = 'liten' | 'stor' | 'milliard'
@@ -91,6 +94,10 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   }
   for (const id of etter.luksus) {
     if (!før.luksus.includes(id)) funn.push({ type: 'kjop', art: 'luksus', id, navn: LUKSUS[id].navn })
+  }
+  // En fane som har åpnet seg (Pakke 40).
+  for (const f of Object.keys(FANE_AAPNER) as Fane[]) {
+    if (FANE_AAPNER[f] > 0 && faneAapen(etter, f) && !faneAapen(før, f)) funn.push({ type: 'fane', fane: f })
   }
   const forrigeUtgave = før.avis.at(-1)?.dag ?? -1
   const nyUtgave = etter.avis.at(-1)?.dag ?? -1
