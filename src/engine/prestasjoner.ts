@@ -11,11 +11,32 @@ import { mineMalerier } from './kunst'
 import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
 
+/**
+ * Verdier flere prestasjoner trenger, regnet ut høyst én gang per sjekk.
+ * Sjekken går hvert sekund, så dette sparer mye når du har vært borte.
+ */
+export interface Felles {
+  inntekt: () => number
+  status: () => number
+  byerUtenlands: () => Set<string>
+}
+
+function felles(s: Spilltilstand): Felles {
+  let inntekt: number | undefined
+  let status: number | undefined
+  let byer: Set<string> | undefined
+  return {
+    inntekt: () => (inntekt ??= inntektPerSek(s)),
+    status: () => (status ??= statusnivaa(s)),
+    byerUtenlands: () => (byer ??= byerUtenlands(s)),
+  }
+}
+
 export interface Prestasjon {
   id: string
   navn: string
   beskrivelse: string
-  klart: (s: Spilltilstand) => boolean
+  klart: (s: Spilltilstand, f: Felles) => boolean
 }
 
 const antallEiendommer = (s: Spilltilstand) => Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0)
@@ -36,7 +57,7 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'niva-100', navn: 'Hundre!', beskrivelse: 'Få en bedrift til nivå 100', klart: (s) => s.bedrifter.some((b) => b.nivaa >= 100) },
   { id: 'forste-ansatt', navn: 'Arbeidsgiver', beskrivelse: 'Ansett din første medarbeider', klart: (s) => s.bedrifter.some((b) => b.ansatte > 0) },
   { id: 'forste-leder', navn: 'Delegering', beskrivelse: 'Ansett en leder', klart: (s) => s.bedrifter.some((b) => b.leder) },
-  { id: 'inntekt-1000', navn: 'Pengemaskin', beskrivelse: 'Tjen kr 1 000 i sekundet', klart: (s) => inntektPerSek(s) >= 1000 },
+  { id: 'inntekt-1000', navn: 'Pengemaskin', beskrivelse: 'Tjen kr 1 000 i sekundet', klart: (_, f) => f.inntekt() >= 1000 },
   { id: 'forste-aksje', navn: 'Børsnybegynner', beskrivelse: 'Kjøp en aksje', klart: (s) => eierKlasse(s, 'aksje') },
   { id: 'forste-krypto', navn: 'Kryptonysgjerrig', beskrivelse: 'Kjøp krypto', klart: (s) => eierKlasse(s, 'krypto') },
   { id: 'utbytte', navn: 'Rentier', beskrivelse: 'Få kr 10 000 i utbytte', klart: (s) => s.totaltUtbytte >= 1e4 },
@@ -45,11 +66,11 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'huseier', navn: 'Huseier', beskrivelse: 'Kjøp en eiendom', klart: (s) => antallEiendommer(s) >= 1 },
   { id: 'utleier', navn: 'Utleier', beskrivelse: 'Eie fem eiendommer', klart: (s) => antallEiendommer(s) >= 5 },
   { id: 'litt-luksus', navn: 'Litt luksus', beskrivelse: 'Kjøp noe du ikke trenger', klart: (s) => s.luksus.length >= 1 },
-  { id: 'rikmann', navn: 'Rikmann', beskrivelse: 'Nå statusnivå 4', klart: (s) => statusnivaa(s) >= 4 },
-  { id: 'legende', navn: 'Legende', beskrivelse: 'Nå statusnivået Legende', klart: (s) => statusnivaa(s) >= 7 },
-  { id: 'udodelig', navn: 'Udødelig', beskrivelse: 'Nå høyeste statusnivå', klart: (s) => statusnivaa(s) >= STATUSNIVAAER.length - 1 },
-  { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', klart: (s) => byerUtenlands(s).size >= 1 },
-  { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (s) => byerUtenlands(s).size >= UTENLANDSBYER.length },
+  { id: 'rikmann', navn: 'Rikmann', beskrivelse: 'Nå statusnivå 4', klart: (_, f) => f.status() >= 4 },
+  { id: 'legende', navn: 'Legende', beskrivelse: 'Nå statusnivået Legende', klart: (_, f) => f.status() >= 7 },
+  { id: 'udodelig', navn: 'Udødelig', beskrivelse: 'Nå høyeste statusnivå', klart: (_, f) => f.status() >= STATUSNIVAAER.length - 1 },
+  { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', klart: (_, f) => f.byerUtenlands().size >= 1 },
+  { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (_, f) => f.byerUtenlands().size >= UTENLANDSBYER.length },
   { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },
   { id: 'tommerhogger', navn: 'Tømmerhogger', beskrivelse: 'Hogg en skog', klart: (s) => s.hendelser.some((h) => h.tittel === 'Hogst') },
   { id: 'landemerke', navn: 'Landemerke', beskrivelse: 'Eie et landemerke', klart: (s) => mineLandemerker(s).length > 0 },
@@ -69,13 +90,15 @@ export const PRESTASJONER: Prestasjon[] = [
 /** Stempler nye prestasjoner og oppdaterer rekordene. Muterer — brukes på kopier. */
 export function sjekkPrestasjoner(s: Spilltilstand): string[] {
   const nye: string[] = []
+  const f = felles(s)
   for (const p of PRESTASJONER) {
-    if (s.prestasjoner[p.id] === undefined && p.klart(s)) {
+    if (s.prestasjoner[p.id] === undefined && p.klart(s, f)) {
       s.prestasjoner[p.id] = s.sek
       nye.push(p.id)
+      // En ny prestasjon har ikke endret tilstanden noe annet enn stempelet, så de felles verdiene står.
     }
   }
-  const inntekt = inntektPerSek(s)
+  const inntekt = f.inntekt()
   if (inntekt > s.rekorder.hoyesteInntekt) s.rekorder.hoyesteInntekt = inntekt
   return nye
 }

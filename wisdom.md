@@ -195,7 +195,14 @@ session; delete what stops being true.
   `BEDRIFTSTEGNINGER`. `pakke35.test.ts` checks the ladder rules: steps ≤ 16×, unlock at
   1.2–1.3 × price, first-upgrade share rising from 25 % (kiosk) to ≤ 80 %.
 - **Index funds keep their original members**; **every stock needs a `RAPPORTDAG` ≤ 26**.
-- `ytelse.test.ts` can fail when the whole suite runs in parallel; run it alone first.
+- **`ytelse.test.ts` runs last, alone**: `vite.config.ts` has two test projects, `enhet` and
+  `ytelse`, with `sequence.groupOrder`, so a plain `npx vitest run` finishes everything else
+  before timing. It measures the process's CPU time (`process.cpuUsage`), not wall-clock
+  time. Two hours away costs ~300–390 ms CPU against a 500 ms limit. If it creeps up,
+  profile from `/ikon.svg` in the browser by timing engine functions 7 200 times each;
+  the per-second checks (achievements, net worth, rent) are where the time goes.
+  `sjekkPrestasjoner` computes income, status level and foreign cities once per check via
+  `Felles`; give a new achievement that needs an expensive value a field there.
 - **Slow tests are slow on their own**: `formue.test.ts` takes ~19 s alone and ~33 s in
   the full suite. Before blaming your change for a slowdown, time it alone on both sides
   of `git stash` (Pack 39's daily settlement cost ~7 %, which is fine).

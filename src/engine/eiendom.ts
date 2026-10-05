@@ -118,7 +118,11 @@ export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
 /** Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker. */
 export function eiendomsverdi(s: Spilltilstand): number {
   let sum = 0
-  for (const id of EIENDOMSSTIGEN) sum += (s.eiendommer[id] ?? 0) * eiendomspris(s, id)
+  for (const id of EIENDOMSSTIGEN) {
+    // Prisen (regionskursen) er dyr å regne ut — hopp over det du ikke eier.
+    const antall = s.eiendommer[id] ?? 0
+    if (antall > 0) sum += antall * eiendomspris(s, id)
+  }
   return sum + jordverdi(s) + landemerkeverdi(s)
 }
 
@@ -133,7 +137,8 @@ export function leiePerSek(s: Spilltilstand): number {
   for (const id of EIENDOMSSTIGEN) {
     // Under oppussing står enhetene tomme.
     if (s.oppussing?.[id]) continue
-    sum += (s.eiendommer[id] ?? 0) * leieHverPerSek(s, id)
+    const antall = s.eiendommer[id] ?? 0
+    if (antall > 0) sum += antall * leieHverPerSek(s, id)
   }
   return sum + landemerkeleiePerSek(s)
 }
