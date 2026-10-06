@@ -148,15 +148,19 @@ export type EiendomId =
   // Pakke 44: de samme byggene i flere byer.
   | 'hybel-trondheim' | 'hybel-oslo' | 'leilighet-bergen' | 'leilighet-trondheim'
   | 'rekkehus-bergen' | 'hytte-trysil' | 'hytte-lofoten' | 'kontorbygg-stavanger'
+  // Pakke 45: ferieboliger og hoteller med sesong.
+  | 'marbella-leilighet' | 'marbella-hotell' | 'zermatt-leilighet' | 'zermatt-hotell'
   | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
   | 'stockholm' | 'kobenhavn' | 'berlin' | 'london' | 'dubai' | 'newyork'
 
 export type NorskBy = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten' | 'Hedmarken' | 'Lista' | 'Trysil' | 'Namdalen'
-export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Dubai' | 'New York'
+export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Marbella' | 'Zermatt' | 'Dubai' | 'New York'
 export type By = NorskBy | Utenlandsby
 
 export interface Eiendomstype {
   id: EiendomId
+  /** Ferieboliger og hoteller har sesong: leien følger måneden (eiendom.ts, SESONGER). */
+  sesong?: 'sommer' | 'vinter'
   navn: string
   sted: string
   by: By

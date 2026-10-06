@@ -1,23 +1,9 @@
+import { useMemo } from 'react'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, FLY_REKKEFOLGE, LUKSUS, reiseNivaa } from '../../engine/eiendom'
 import type { By, Spilltilstand, Utenlandsby } from '../../engine/types'
 import { kartLeie, leieIBy, useLangtrykk, eierHeleByen, kronesti } from '../kart'
+import { BREDDE, BYPLASS, byPunkt, HOYDE, INNFELT, LAND, OSLO_POS, projeksjon, sti, utsnittFor } from '../verdenskartet'
 import { Ikon } from './Ikoner'
-
-/*
- * Et rutekart, ikke et ekte kart: byene står omtrent der de ligger i forhold
- * til Oslo, men avstandene er klemt sammen så Europa får plass ved siden av
- * New York og Dubai. Buene er flyrutene fra Oslo.
- */
-const OSLO: [number, number] = [150, 38]
-
-const BYER: Record<Utenlandsby, { pos: [number, number]; etikett: 'høyre' | 'venstre' | 'under' }> = {
-  Stockholm: { pos: [196, 46], etikett: 'høyre' },
-  København: { pos: [160, 76], etikett: 'høyre' },
-  Berlin: { pos: [184, 104], etikett: 'høyre' },
-  London: { pos: [108, 92], etikett: 'venstre' },
-  'New York': { pos: [30, 132], etikett: 'under' },
-  Dubai: { pos: [266, 146], etikett: 'under' },
-}
 
 /** Flyet som trengs for å nå en by (1–3). */
 function reiseTil(by: Utenlandsby): number {
@@ -30,13 +16,21 @@ function antallI(s: Spilltilstand, by: By): number {
 }
 
 /** En bue fra Oslo til byen, bøyd litt oppover som en flyrute. */
-function bue([x, y]: [number, number]): string {
-  const [ox, oy] = OSLO
+function bue([ox, oy]: [number, number], [x, y]: [number, number]): string {
   const mx = (ox + x) / 2
   const my = (oy + y) / 2 - Math.hypot(x - ox, y - oy) * 0.18
-  return `M${ox},${oy} Q${mx.toFixed(1)},${my.toFixed(1)} ${x},${y}`
+  return `M${ox.toFixed(1)},${oy.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${x.toFixed(1)},${y.toFixed(1)}`
 }
 
+/** Hva det neste flyet åpner, til teksten under kartet. */
+const NESTE_STEG = ['Propellflyet åpner Norden.', 'Forretningsjeten åpner Europa: London, Berlin, Marbella og Zermatt.', 'Langdistansejeten åpner New York og Dubai.']
+
+/**
+ * Verdenskartet (Pakke 45): et ekte kart med kystlinjer som vokser med flyene
+ * dine — Norden med propellflyet, Europa med forretningsjeten, og med
+ * langdistansejeten to innfelte ruter for New York og Dubai. Buene er
+ * flyrutene fra Oslo. Geometrien står i ui/verdenskartet.ts.
+ */
 export function Verdenskart({
   s,
   valgt,
@@ -51,24 +45,53 @@ export function Verdenskart({
 }) {
   const nivaa = reiseNivaa(s)
   const lang = useLangtrykk(zoom)
+  const p = useMemo(() => projeksjon(utsnittFor(nivaa)), [nivaa])
+  const land = useMemo(() => LAND.map((l) => sti(l, p)), [p])
+  const oslo = p(OSLO_POS)
+  const synlige = (Object.keys(BYPLASS) as Utenlandsby[]).flatMap((by) => {
+    const pos = byPunkt(by, nivaa)
+    return pos ? [{ by, pos }] : []
+  })
+
   return (
     <figure className="verdenskart-ramme">
-      <svg className="verdenskart" viewBox="0 0 300 175" role="group" aria-label="Rutekart over byene du kan fly til">
-        {(Object.keys(BYER) as Utenlandsby[]).map((by) => (
-          <path key={by} d={bue(BYER[by].pos)} className={nivaa >= reiseTil(by) ? 'kart-rute' : 'kart-rute stengt'} />
+      <svg className="verdenskart" viewBox={`0 0 ${BREDDE} ${HOYDE}`} role="group" aria-label="Kart over byene du kan fly til">
+        <rect x="0" y="0" width={BREDDE} height={HOYDE} rx="8" className="kart-hav" />
+        {land.map((d, i) => (
+          <path key={i} d={d} className="kart-land" />
+        ))}
+        {nivaa >= 3 &&
+          (Object.keys(INNFELT) as (keyof typeof INNFELT)[]).map((by) => {
+            const i = INNFELT[by]
+            const ip = projeksjon(i.utsnitt, i)
+            return (
+              <g key={by} className="kart-innfelt" aria-hidden="true">
+                <rect x={i.x} y={i.y} width={i.bredde} height={i.hoyde} rx="5" className="kart-innfelt-ramme" />
+                <clipPath id={`innfelt-${by.replace(' ', '')}`}>
+                  <rect x={i.x} y={i.y} width={i.bredde} height={i.hoyde} rx="5" />
+                </clipPath>
+                <g clipPath={`url(#innfelt-${by.replace(' ', '')})`}>
+                  {i.land.map((l, k) => (
+                    <path key={k} d={sti(l, ip)} className="kart-land" />
+                  ))}
+                </g>
+              </g>
+            )
+          })}
+        {synlige.map(({ by, pos }) => (
+          <path key={by} d={bue(oslo, pos)} className={nivaa >= reiseTil(by) ? 'kart-rute' : 'kart-rute stengt'} />
         ))}
         <g className="kart-by eid hjem">
-          <circle cx={OSLO[0]} cy={OSLO[1]} r={5} className="kart-prikk" />
-          <text x={OSLO[0]} y={OSLO[1] - 9} textAnchor="middle" className="kart-navn">
+          <circle cx={oslo[0]} cy={oslo[1]} r={4.5} className="kart-prikk" />
+          <text x={oslo[0] - 7} y={oslo[1] + 3.5} textAnchor="end" className="kart-navn">
             Oslo
           </text>
         </g>
-        {(Object.keys(BYER) as Utenlandsby[]).map((by) => {
-          const [x, y] = BYER[by].pos
+        {synlige.map(({ by, pos: [x, y] }) => {
           const n = antallI(s, by)
           const åpen = nivaa >= reiseTil(by)
           const r = n > 0 ? Math.min(11, 5 + n * 1.2) : 4
-          const e = BYER[by].etikett
+          const e = BYPLASS[by].etikett
           const fly = LUKSUS[FLY_REKKEFOLGE[reiseTil(by) - 1]]
           return (
             <g
@@ -114,9 +137,9 @@ export function Verdenskart({
       </svg>
       <figcaption className="dempet liten">
         {nivaa === 0
-          ? 'Kjøp et fly under Luksus for å reise ut. Propellflyet når Norden, jetflyene resten av verden.'
+          ? `Kjøp et fly under Luksus for å reise ut. ${NESTE_STEG[0]}`
           : nivaa < FLY_REKKEFOLGE.length
-            ? `${LUKSUS[FLY_REKKEFOLGE[nivaa - 1]].navn} tar deg til de åpne byene. ${LUKSUS[FLY_REKKEFOLGE[nivaa]].navn} når lenger.`
+            ? `${LUKSUS[FLY_REKKEFOLGE[nivaa - 1]].navn} tar deg til byene på kartet. ${NESTE_STEG[nivaa]}`
             : 'Langdistansejeten tar deg hvor som helst.'}
       </figcaption>
     </figure>

@@ -1240,6 +1240,104 @@ function Dubai({ størrelse = 48 }: P) {
   )
 }
 
+/** Marbella: hvit ferieleilighet med terrakottatak, balkonger og palme. */
+function Ferieleilighet({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <Grunn type="sand" />
+      <rect x="13" y="20" width="26" height="20" fill={F.hvit} />
+      <rect x="35.5" y="20" width="3.5" height="20" fill={F.krem} />
+      <polygon points="11,20.5 26,13 41,20.5" fill={F.mur} />
+      <polygon points="35,17.5 41,20.5 35,20.5" fill={F.murMork} />
+      {[23, 30.5].map((y) => (
+        <g key={y}>
+          <rect x="16" y={y} width="6" height="4" fill={F.glassMork} />
+          <rect x="25" y={y} width="6" height="4" fill={F.glassMork} />
+          <rect x="15" y={y + 4} width="17" height="1" fill={F.mur} />
+        </g>
+      ))}
+      <rect x="32.5" y="33" width="3" height="7" fill={F.tre} />
+      <path d="M8 40 Q7 32 9 25" fill="none" stroke={F.treMork} strokeWidth="1.6" />
+      <path d="M9 25 Q4.5 23 4.4 28 M9 25 Q13.5 21 15.5 25 M9 25 Q6 19 4.4 19.4 M9 25 Q11 18 14.5 18.5" fill="none" stroke={F.gronn} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  )
+}
+
+/** Marbella: høyt hvitt strandhotell med parasoll på stranda. */
+function Strandhotell({ størrelse = 48 }: P) {
+  const vinduer: ReactNode[] = []
+  for (let y = 11; y < 34; y += 4) {
+    vinduer.push(<rect key={`v${y}`} x="16.5" y={y} width="4.5" height="2.2" fill={F.glassMork} />)
+    vinduer.push(<rect key={`h${y}`} x="23.5" y={y} width="4.5" height="2.2" fill={F.glassMork} />)
+  }
+  return (
+    <Svg størrelse={størrelse}>
+      <Grunn type="sand" />
+      <rect x="14" y="8" width="20" height="32" fill={F.hvit} />
+      <rect x="30.5" y="8" width="3.5" height="32" fill={F.krem} />
+      <rect x="13" y="6.4" width="22" height="2" fill={F.mur} />
+      <rect x="21" y="3.6" width="6" height="2.6" rx="0.6" fill={F.gull} />
+      {vinduer}
+      <rect x="20" y="35" width="6" height="5" fill={F.glass} />
+      <path d="M8 40 Q7 33 9 27" fill="none" stroke={F.treMork} strokeWidth="1.5" />
+      <path d="M9 27 Q5 25.5 4.8 29.5 M9 27 Q13 24 14.6 27.4 M9 27 Q6.5 22 5 22.4" fill="none" stroke={F.gronn} strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="40" y="31" width="0.8" height="9.5" fill={F.treMork} />
+      <path d="M35 32.4 Q40.4 27 45.8 32.4 Z" fill={F.rod} />
+      <path d="M38.6 32.4 Q40.4 28.4 42.2 32.4 Z" fill={F.hvit} />
+    </Svg>
+  )
+}
+
+/** Zermatt: skileilighet i treverk med balkong, under en spiss fjelltopp. */
+function Skileilighet({ størrelse = 48 }: P) {
+  return (
+    <Svg størrelse={størrelse}>
+      <polygon points="14,34 27,5 31,13 42,34" fill={F.fjell} />
+      <polygon points="24.4,11 27,5 29.2,9.4 28,9 26,11.6" fill={F.sno} />
+      <Grunn type="sno" />
+      <rect x="12" y="24" width="24" height="19" fill={F.tre} />
+      <rect x="32.5" y="24" width="3.5" height="19" fill={F.treMork} />
+      <rect x="11" y="32" width="26" height="1.4" fill={F.treDyp} />
+      {[12, 15, 18, 21, 24, 27, 30, 33, 36].map((x) => (
+        <rect key={x} x={x} y="29.2" width="0.8" height="2.8" fill={F.treDyp} />
+      ))}
+      <rect x="11" y="29" width="26" height="0.8" fill={F.treDyp} />
+      <polygon points="8,25 24,15 40,25" fill={F.treDyp} />
+      <polygon points="8,25 24,15 40,25 38,25 24,17.4 10,25" fill={F.sno} />
+      <rect x="15" y="25.6" width="5" height="3" fill={F.lys} />
+      <rect x="26" y="25.6" width="5" height="3" fill={F.lys} />
+      <rect x="15" y="35" width="5" height="4" fill={F.lys} />
+      <rect x="14.6" y="39" width="5.8" height="1.2" fill={F.rod} />
+      <rect x="26" y="35" width="5" height="8" fill={F.treDyp} />
+    </Svg>
+  )
+}
+
+/** Zermatt: stort alpehotell med sveitserflagg, foran fjellene. */
+function Alpehotell({ størrelse = 48 }: P) {
+  const vinduer: ReactNode[] = []
+  for (const y of [21.5, 27.5, 33])
+    for (const x of [11, 16, 21, 26, 31]) if (!(y === 33 && (x === 21 || x === 26))) vinduer.push(<rect key={`${x}-${y}`} x={x} y={y} width="3" height="3.4" fill={F.lys} />)
+  return (
+    <Svg størrelse={størrelse}>
+      <polygon points="3,34 12,17 19,26 28,7 33.5,16 45,34" fill={F.fjell} />
+      <polygon points="10,20.8 12,17 14,20.4 12.6,20 11.4,21" fill={F.sno} />
+      <polygon points="25.6,11.4 28,7 30.6,11.2 29,10.6 27.2,12" fill={F.sno} />
+      <Grunn type="sno" />
+      <rect x="8" y="19" width="32" height="24" fill={F.krem} />
+      <rect x="36" y="19" width="4" height="24" fill={F.kremMork} />
+      <polygon points="6,19.6 24,11 42,19.6" fill={F.vin} />
+      <polygon points="36,16.7 42,19.6 36,19.6" fill={F.vinMork} />
+      {vinduer}
+      <rect x="21" y="36" width="8" height="7" fill={F.treDyp} />
+      <rect x="23.6" y="3.6" width="0.8" height="8" fill={F.metallMork} />
+      <rect x="24.4" y="3.6" width="5" height="3.6" fill={F.rod} />
+      <rect x="26.4" y="4.2" width="1" height="2.4" fill={F.hvit} />
+      <rect x="25.7" y="4.9" width="2.4" height="1" fill={F.hvit} />
+    </Svg>
+  )
+}
+
 /** New York: skyskraper med opplyst toppleilighet. */
 function NewYork({ størrelse = 48 }: P) {
   const vinduer: ReactNode[] = []
@@ -1729,6 +1827,10 @@ const ILLUSTRASJONER: Record<string, Tegning> = {
   'hytte-trysil': Hytte,
   'hytte-lofoten': Hytte,
   'kontorbygg-stavanger': Kontorbygg,
+  'marbella-leilighet': Ferieleilighet,
+  'marbella-hotell': Strandhotell,
+  'zermatt-leilighet': Skileilighet,
+  'zermatt-hotell': Alpehotell,
   kontorbygg: Kontorbygg,
   kjopesenter: Kjopesenter,
   naeringsbygg: Naeringsbygg,

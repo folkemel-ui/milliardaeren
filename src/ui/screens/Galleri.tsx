@@ -8,6 +8,16 @@ import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
 import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
 import { Stadion, STADIONTRINN } from '../komponenter/Stadion'
 import { DIVISJONER, KLUBBNAVN } from '../../engine/klubb'
+import { Verdenskart } from '../komponenter/Verdenskart'
+import { nyttSpill } from '../../engine/start'
+import type { LuksusId } from '../../engine/types'
+
+/** Et spill med et gitt fly, så verdenskartet kan vises i hvert trinn. */
+function medFly(fly: LuksusId | null) {
+  const s = nyttSpill()
+  if (fly) s.luksus = [fly]
+  return s
+}
 import { START_RIVALER } from '../../engine/rivaler'
 
 const TRINN: { trinn: Trinn; navn: string }[] = [
@@ -102,6 +112,16 @@ export function Galleri() {
             <figcaption>
               {DIVISJONER[d].navn} · {KLUBBNAVN[d % KLUBBNAVN.length]}
             </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <h2 className="skjerm-tittel galleri-del">Verdenskartet</h2>
+      <div className="galleri-stadion">
+        {([null, 'propellfly', 'forretningsjet', 'langdistansejet'] as (LuksusId | null)[]).map((fly) => (
+          <figure key={fly ?? 'ingen'} className="galleri-kort">
+            <Verdenskart s={medFly(fly)} valgt={null} velg={() => {}} zoom={() => {}} />
+            <figcaption>{fly ?? 'Uten fly'}</figcaption>
           </figure>
         ))}
       </div>

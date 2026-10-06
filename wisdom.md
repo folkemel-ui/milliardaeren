@@ -267,6 +267,11 @@ session; delete what stops being true.
   (`hybel-trondheim` …), listed in price order. Owning every unit in a city (`eierHeleByen`)
   gives a crown on the map and +10 % rent there, applied inside `leieHverPerSek`. Save
   version is now 20. How to add a region or a building in a new city is in `ARKITEKTUR.md`.
+- **World map** (Pack 45): geometry in pure `ui/verdenskartet.ts`, with simplified coastlines as
+  lon/lat, Mercator, one view per plane (`UTSNITT`) and two insets (`INNFELT`) for New York and
+  Dubai. A new foreign city needs a `BYPLASS` entry, and `pakke45.test.ts` checks it shows
+  inside the edge at the level its plane opens. `?galleri` shows all four map stages.
+  Seasonal properties (`sesong`) multiply rent by `SESONGER[...][month]` inside `leieHverPerSek`.
 - **Testing a migration on a real save**: park the browser tab on `/ikon.svg` while changing
   the engine (stopping the server can wipe that port's storage), then load the game. The game
   always copies the pre-migration save to `milliardaer.lagring.korrupt`. That's the safety

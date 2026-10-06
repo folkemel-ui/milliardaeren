@@ -5457,3 +5457,35 @@ button.maalstripe {
   border-radius: 2px;
   background: var(--gull);
 }
+
+/* Verdenskartet (Pakke 45): havet bak landet, som på Norgeskartet. */
+.kart-hav {
+  fill: color-mix(in srgb, var(--flate-2) 70%, transparent);
+}
+
+/* Sesongen på ferieboligene (Pakke 45): merke, tekst og året som tolv søyler. */
+.sesong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.sesong-aar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  margin-left: auto;
+}
+
+.sesong-aar span {
+  width: 4px;
+  min-height: 2px;
+  border-radius: 1px;
+  background: var(--kant);
+}
+
+.sesong-aar span.naa {
+  background: var(--gull);
+}

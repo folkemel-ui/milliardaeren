@@ -8,12 +8,14 @@ import {
   leieHverPerSek,
   MEGLERHONORAR,
   oppussingspris,
+  SESONGER,
   standard,
   STANDARDER,
   statusnivaa,
 } from '../../engine/eiendom'
 import { kjopEiendom, pussOpp, selgEiendom } from '../../engine/handlinger'
 import type { EiendomId, Spilltilstand } from '../../engine/types'
+import { dagnummer, dato, MÅNEDER } from '../../engine/kalender'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall, varighet } from '../format'
 import { BedriftIkon } from './BedriftIkon'
@@ -58,6 +60,7 @@ export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
           <span className="dempet liten">per enhet</span>
         </div>
       </div>
+      {t.sesong && <Sesong s={s} sesong={t.sesong} />}
       {/* Avkastningen og kravene trengs bare så lenge det er noe igjen å kjøpe. */}
       {!fullt && (
         <p className="dempet liten">
@@ -112,5 +115,32 @@ export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
         </>
       )}
     </li>
+  )
+}
+
+const BEST: Record<'sommer' | 'vinter', string> = { sommer: 'best juni–august', vinter: 'best desember–mars' }
+
+/**
+ * Sesongen for en feriebolig: hvor i året vi er, hva leien ganges med nå, og
+ * året som tolv små søyler med denne måneden markert.
+ */
+function Sesong({ s, sesong }: { s: Spilltilstand; sesong: 'sommer' | 'vinter' }) {
+  const maaned = dato(dagnummer(s.sek)).maaned
+  const faktorer = SESONGER[sesong]
+  const f = faktorer[maaned]
+  const navn = f >= 1.4 ? 'Høysesong' : f <= 0.7 ? 'Lavsesong' : 'Mellomsesong'
+  const høyest = Math.max(...faktorer)
+  return (
+    <div className="sesong">
+      <span className={`merke ${f >= 1.4 ? 'ok' : f <= 0.7 ? 'kant' : 'info'}`}>{navn}</span>
+      <span className="dempet liten">
+        Leie ×{tall(f, 1)} i {MÅNEDER[maaned]} · {BEST[sesong]}
+      </span>
+      <span className="sesong-aar" aria-hidden="true">
+        {faktorer.map((x, i) => (
+          <span key={i} className={i === maaned ? 'naa' : ''} style={{ height: `${(x / høyest) * 100}%` }} />
+        ))}
+      </span>
+    </div>
   )
 }

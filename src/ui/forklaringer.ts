@@ -110,6 +110,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       'Eiendom gir leie hvert sekund, også mens du er borte — den trenger ingen leder. Prisene følger landet og byens region, så samme bygg kan stige i én by og falle i en annen. ' +
       `Eier du alle enhetene i en by, får du en krone på kartet og +${pst(BYEIER_BONUS)} leie der. ` +
+      'Ferieboligene i Marbella og Zermatt har sesong: Spania gir mest om sommeren, Alpene om vinteren, og over et år blir det det samme som en vanlig eiendom. ' +
       'Oppussing gir mer leie for godt, men så lenge håndverkerne holder på, kommer det ingen leie. ' +
       `Selger du, tar megleren ${pst(MEGLERHONORAR)}. Noen eiendommer krever status eller et fly for å komme dit.`,
   },

@@ -4,6 +4,7 @@
  */
 
 import { eiendomskurs } from './regioner'
+import { dagnummer, dato } from './kalender'
 import type {
   By,
   EiendomId,
@@ -45,11 +46,15 @@ export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
   'hytte-trysil': { id: 'hytte-trysil', navn: 'Hytte', sted: 'Trysilfjellet', by: 'Trysil', pris: 12_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
   hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
   stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', pris: 30_000_000, avkastning: 0.2, maksAntall: 3, statuskrav: 0, reise: 1 },
+  'marbella-leilighet': { id: 'marbella-leilighet', navn: 'Ferieleilighet', sted: 'Marbella, Spania', by: 'Marbella', pris: 45_000_000, avkastning: 0.19, maksAntall: 3, statuskrav: 0, reise: 2, sesong: 'sommer' },
   'kontorbygg-stavanger': { id: 'kontorbygg-stavanger', navn: 'Kontorbygg', sted: 'Forus, Stavanger', by: 'Stavanger', pris: 70_000_000, avkastning: 0.18, maksAntall: 3, statuskrav: 0 },
   kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 80_000_000, avkastning: 0.18, maksAntall: 4, statuskrav: 0 },
+  'zermatt-leilighet': { id: 'zermatt-leilighet', navn: 'Skileilighet', sted: 'Zermatt, Sveits', by: 'Zermatt', pris: 90_000_000, avkastning: 0.18, maksAntall: 3, statuskrav: 0, reise: 2, sesong: 'vinter' },
   kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', pris: 150_000_000, avkastning: 0.17, maksAntall: 3, statuskrav: 0, reise: 1 },
   kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', pris: 400_000_000, avkastning: 0.15, maksAntall: 3, statuskrav: 0 },
   berlin: { id: 'berlin', navn: 'Bygård i Mitte', sted: 'Mitte, Berlin', by: 'Berlin', pris: 500_000_000, avkastning: 0.14, maksAntall: 3, statuskrav: 0, reise: 2 },
+  'marbella-hotell': { id: 'marbella-hotell', navn: 'Strandhotell', sted: 'Costa del Sol, Spania', by: 'Marbella', pris: 700_000_000, avkastning: 0.14, maksAntall: 2, statuskrav: 0, reise: 2, sesong: 'sommer' },
+  'zermatt-hotell': { id: 'zermatt-hotell', navn: 'Alpehotell', sted: 'Zermatt, Sveits', by: 'Zermatt', pris: 900_000_000, avkastning: 0.135, maksAntall: 2, statuskrav: 0, reise: 2, sesong: 'vinter' },
   london: { id: 'london', navn: 'Byhus i Mayfair', sted: 'Mayfair, London', by: 'London', pris: 1_200_000_000, avkastning: 0.13, maksAntall: 2, statuskrav: 0, reise: 2 },
   naeringsbygg: { id: 'naeringsbygg', navn: 'Næringsbygg', sted: 'Aker Brygge, Oslo', by: 'Oslo', pris: 1_500_000_000, avkastning: 0.12, maksAntall: 2, statuskrav: 3 },
   dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', pris: 4_000_000_000, avkastning: 0.1, maksAntall: 2, statuskrav: 0, reise: 3 },
@@ -140,6 +145,22 @@ export function eiendomsverdi(s: Spilltilstand): number {
   return sum + jordverdi(s) + landemerkeverdi(s)
 }
 
+/**
+ * Sesongene (Pakke 45): leien ganges med månedens faktor, januar først.
+ * Snittet over året er 1, så en feriebolig tjener det samme som en vanlig
+ * eiendom til samme pris — men det lønner seg å eie den i høysesongen.
+ */
+export const SESONGER: Record<'sommer' | 'vinter', number[]> = {
+  sommer: [0.5, 0.5, 0.6, 0.8, 1.2, 1.6, 1.8, 1.8, 1.2, 0.8, 0.6, 0.6],
+  vinter: [1.7, 1.7, 1.5, 0.9, 0.5, 0.6, 0.9, 0.9, 0.5, 0.5, 0.8, 1.5],
+}
+
+/** Leiefaktoren for en eiendom akkurat nå: 1 uten sesong, ellers månedens faktor. */
+export function sesongfaktor(s: Spilltilstand, id: EiendomId): number {
+  const sesong = EIENDOMSTYPER[id].sesong
+  return sesong ? SESONGER[sesong][dato(dagnummer(s.sek)).maaned] : 1
+}
+
 /** Eier du alt i en by, gir leien der så mye mer (Pakke 44). */
 export const BYEIER_BONUS = 0.1
 
@@ -169,11 +190,11 @@ export function enheterI(s: Spilltilstand, by: By): { eid: number; av: number } 
   return { eid, av }
 }
 
-/** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren — og byeierbonusen. */
+/** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren — byeierbonusen og sesongen. */
 export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
   const t = EIENDOMSTYPER[id]
   const bonus = eierHeleByen(s, t.by) ? 1 + BYEIER_BONUS : 1
-  return (t.pris * eiendomskurs(s, t.by) * t.avkastning * STANDARDER[standard(s, id)].leie * bonus) / 3600
+  return (t.pris * eiendomskurs(s, t.by) * t.avkastning * STANDARDER[standard(s, id)].leie * bonus * sesongfaktor(s, id)) / 3600
 }
 
 export function leiePerSek(s: Spilltilstand): number {
