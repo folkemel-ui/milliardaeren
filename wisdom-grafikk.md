@@ -16,6 +16,10 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   *Working side by side* in `Ideer.md`. `styles.css`, the screens and `Ideer.md` are
   shared: touch only what the pack needs (G1 added two `utklipp` props in `Luksus.tsx`,
   nothing else).
+- **A bug you find in the game track's code gets flagged, not fixed.** In G5 a test
+  save crashed in `avis.ts`. I proved it wasn't the drawings (stack trace from
+  `/ikon.svg`), offered it as a separate task with a self-contained description
+  (`spawn_task`), mentioned it in the report and carried on. Folke started it at once.
 - **Never change the engine's behaviour.** No dice, balance or save version. The golden
   master and the bench must be untouched. Run the full suite anyway, since drawing
   tests live next to engine tests.
@@ -389,5 +393,10 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   Marbella/Zermatt properties and the four landmarks. G7's detail scenes need them
   in the new style, so raise it before G7. `pakke42.test.ts` uses `kjopesenter` as
   its old-style example; change it when that one is redrawn.
+- **Not yet seen after G5**: the 34 new drawings in the light theme, in the street
+  view (`Gatebilde`) and in the buy moment (`Kjopsglimt`). Check them early in G6.
+- **Small subjects in the 64 px storage slots**: the snekke and the station wagon are
+  small in the harbour and garage because of the scale rule (like the kiosk in the
+  rival list). G7 could crop or zoom the cutouts.
 - Once every drawing is in `NY_STIL`, remove `F`, `Svg`, `Grunn`, the old hairline rule
   and the 48 branch of the test, and turn the "old style" note in the header into history.
