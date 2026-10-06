@@ -203,6 +203,14 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 - **Ids from `useId` must be cleaned, not escaped**: `CSS.escape` doesn't exist in
   the tests' Node environment, so `renderToStaticMarkup` crashed. Do as `Lerret`
   does: `'r' + useId().replace(/[^a-zA-Z0-9]/g, '')`, then `url(#…)` directly.
+- **An industry symbol alone looks like a UI icon**: the first startup marks read as
+  "download" (cloud with arrow), "home" (house) and "chat" (speech bubble). A brand
+  mark needs a specific silhouette instead of the generic one: an A-frame cabin, not
+  a house; a bird, not a bubble; a plane's tail with windows, not a fin that reads as a
+  sail. Look at all of them on one contact sheet and redraw the ones that look generic.
+- **Faces: check proportions at cover size first.** The first portraits had long necks
+  and low shoulders, so the heads floated; the hair sat like a helmet until it got
+  volume over the ears, an uneven hairline and a few light and dark strands.
 - **Logo knockouts use `fillRule="evenodd"`**, not masks: the hole shows the card
   in any theme and needs no id.
 - **Collision tests must cover the worst case**: `norgeskartet.test.ts` checks every
@@ -282,6 +290,10 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   (`fonter/`); `node scripts/lag-ordmerker.mjs <folder>` writes `src/ui/ordmerker.ts`.
   The script's own TrueType reader handles composite glyphs (Ø, Å) and GPOS kerning.
   Relative commands in tenths took the file from 89 KB to 48 KB (12 KB gzipped).
+- **`Ideer.md`'s Art direction uses bold subheadings** (`**People**`, `**Stadium**`),
+  not `##`. When the last item under one goes, the subheading must go too; the
+  scratchpad `ferdig.mjs` from G4 removes empty bold subheadings as well as the pack
+  line and items, and renumbers. Check the diff afterwards.
 - **Douglas–Peucker on a closed ring**: first and last point are the same, so the
   line distance divides by zero. Use point distance for a degenerate segment. The
   first run returned zero points everywhere.
