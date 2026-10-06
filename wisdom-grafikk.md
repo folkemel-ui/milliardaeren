@@ -12,7 +12,7 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 
 - **What you own**: the drawings and how they render. That means `Illustrasjoner.tsx`,
   `Tegnestil.tsx`, `BedriftIkon.tsx`, portraits, crests, stadium, logos, the maps and
-  their geometry, `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
+  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
   *Working side by side* in `Ideer.md`. `styles.css`, the screens and `Ideer.md` are
   shared: touch only what the pack needs (G1 added two `utklipp` props in `Luksus.tsx`,
   nothing else).
@@ -91,6 +91,19 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   n-th window), `Bakke` types `hav` (open sea with `HORISONT` = 56, faded at the
   sides and bottom) and `asfalt`, material `lov`. `Passasjerfly` (in Illustrasjoner)
   draws a plane side-on: propeller, jet or widebody.
+- **The maps (G3)** are an atlas that follows the theme: all colours are `--kart-*`
+  CSS vars in both theme blocks (sea, Norway in warm stone, neighbours flat grey,
+  coast, border, relief, grid, sea/land label colours). Unlike the drawings, the maps
+  follow the theme because they *are* UI. Coastlines, lakes and the mountain ranges
+  come from Natural Earth via `scripts/lag-kartdata.mjs` → `src/ui/kartdata.ts`.
+  Norway sits in the south view (`hovedpunkt`, 20 units per degree of longitude, 40
+  per latitude) with a North Norway inset (`innfeltpunkt`, Lofoten). The world map is
+  Mercator with one view per plane.
+- **Markers (`Kartmerke.tsx`)**: a small dot (3.2 owned, 2.6 not, 2 land-only); the
+  count in a pill badge on the side *opposite* the name (`merkeboks`,
+  `merkeboksVerden`); gold dot, gold badge and a tiny crown only when you own the
+  whole city. The price trend is a ▲/▼ `tspan` inside the name's text. Rent shows only
+  on the selected city. The old coins and trend rings are gone.
 
 ## 4. SVG techniques that worked, and traps
 
@@ -137,6 +150,18 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   sky a thin `fjell.lys` outline (the ski mountain).
 - **The newspaper** (`.avisbilde`) is cream paper in both themes; it sets the
   `--himmel-*` vars to the light sky, so drawings print with a pale sky there.
+- **Text widths can't be estimated well**: real label width varies 0.45–0.62 × font size per
+  character (Inter), so an arrow positioned after an estimated width floated loose.
+  Put trailing glyphs *in the same text* (`tspan`) and keep the estimate (0.6, generous)
+  only for collision boxes. Measure with `getComputedTextLength()` if you must.
+- **Relief without elevation data**: soft blobs read as dirt. A real outline (Natural
+  Earth "Range/mtn" polygons), drawn twice with `feGaussianBlur` — light offset to the
+  northwest, shadow to the southeast — and clipped to the land, reads as mountains.
+- **Maps re-render every second** (they take the game state). Wrap the static base
+  (coastlines, relief, inset) in `memo`, and build the path strings in `useMemo`.
+- **Collision tests must cover the worst case**: `norgeskartet.test.ts` checks every
+  name (with room for the arrow), the longest rent and a two-digit badge with crown for
+  all cities at once. That caught Oslo's badge and rent reaching into the inset.
 
 ## 5. Reviewing art
 
@@ -186,6 +211,28 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   only `Bedrift` and `bedrift` were flagged, but `Vekst`, `Kunder`, `Smabaat`,
   `Utmerkelse`, `PLAKETT` and the old `Person` went with them. Grep the names before
   deleting.
+- **Outside data (G3)**: Folke approved Natural Earth (public domain). The raw GeoJSON
+  is downloaded into the scratchpad (`ne/`) with curl from
+  `raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/…`.
+  Only the generated, simplified `kartdata.ts` goes in the repo. To regenerate:
+  `node scripts/lag-kartdata.mjs <folder>`.
+- **Simplify at the scale it's shown**: measure the view first. I assumed 7.3 units per
+  degree for the world map, but the Europe view is 2.9, so the data was far finer than
+  visible. Coordinates are stored as hundredths with deltas from the previous point.
+  That took the file from 39 KB to 23 KB gzipped (the bundle is about 222 KB gzipped
+  after G3).
+- **Douglas–Peucker on a closed ring**: first and last point are the same, so the
+  line distance divides by zero. Use point distance for a degenerate segment. The
+  first run returned zero points everywhere.
+- **The Write tool refuses a file changed since it was last read**, such as a patch
+  JSON reused across steps. The old patch then runs by mistake. Give each patch its own
+  file name (`g3-fjell.json`).
+- **Heredocs aren't reliable for backslashes either**: `\\d` in a regex came out as `\d`
+  through Bash. Write scripts with regexes using the Write tool.
+- **An error screen during edits** ("Noe gikk galt", e.g. "reading 'x'") is usually HMR
+  catching a half-applied multi-file change. Reload before you debug.
+- **Gallery maps run at midnight**: `?galleri` builds new games (`sek` 0), so the maps
+  show the night tint there. Judge map colours in the game by day.
 - Draw in batches of three or four, then look at all stages on a contact sheet. Every
   batch found two or three layout bugs that tests can't see.
 - Patch with `.mjs` files written by the Write tool, using a `filPatch(fil, [[fra, til]])`
@@ -205,6 +252,12 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 
 - **G2 is done** (all 13 businesses). The old `Bedrift`, `Vekst`, `Kunder`, `Smabaat`,
   `Utmerkelse` and `PLAKETT` are gone. `F`, `Svg` and `Grunn` remain for properties and luxury.
+- **G3 is done** (both maps, markers). If a new Norwegian city is added, give it a
+  `BYPLAN` side and run `norgeskartet.test.ts` (names, badges, rent, inset), and
+  `grafikkG3.test.ts` checks that it stands on land. A new foreign city needs a
+  `BYPLASS` label side; the badge goes opposite automatically.
+- The map data costs ~23 KB gzipped at startup. If loading time matters later,
+  `Norgeskart`/`Verdenskart` could be lazy-loaded in Eiendom (a screen change; ask).
 - **The 32 px rival list** in Investeringer shows business drawings very small. The
   scale rule makes the kiosk and the lemonade stand tiny there; G7 could crop or zoom.
 - **G5**: `hytte-trysil`, `hytte-lofoten` (shown as "Rorbu") and `kontorbygg-stavanger`

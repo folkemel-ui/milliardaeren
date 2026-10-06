@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BYLISTE, BYPLAN, byPunkt, etiketter, INNFELT, KUN_JORD, radius, VISNING } from '../norgeskartet'
+import { BYLISTE, BYPLAN, byPunkt, etiketter, INNFELT, KUN_JORD, merkeboks, radius, VISNING } from '../norgeskartet'
 
 type Boks = { x: number; y: number; b: number; h: number; hva: string }
 
@@ -8,13 +8,14 @@ const overlapper = (a: Boks, b: Boks) => a.x < b.x + b.b && b.x < a.x + a.b && a
 /** Det lengste leietallet kartet viser, satt på alle byene samtidig. */
 const LENGST_LEIE = '+kr 2,2 mill/s'
 
-/** Alle boksene på kartet når alle byene er fulle og viser leie. */
+/** Alle boksene på kartet når alle byene er fulle og viser leie, med tosifret antall og krone i merket (G3). */
 function alleBokser(): Boks[] {
   const bokser: Boks[] = []
   for (const by of BYLISTE) {
     const r = radius(by, true)
     const [x, y] = byPunkt(by)
     bokser.push({ x: x - r - 3, y: y - r - 3, b: 2 * r + 6, h: 2 * r + 6, hva: `${by} (prikk)` })
+    bokser.push({ ...merkeboks(by, r, 2, true), hva: `${by} (merke)` })
     const { navn, leie } = etiketter(by, r, LENGST_LEIE)
     bokser.push({ ...navn.boks, hva: `${by} (navn)` })
     if (leie) bokser.push({ ...leie.boks, hva: `${by} (leie)` })

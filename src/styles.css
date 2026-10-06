@@ -59,6 +59,19 @@
   --radius: 14px;
   --meny-høyde: 64px;
   --kolonne: 480px;
+
+  /* Kartene (Grafikkpakke G3): et rolig atlas — dempet hav, Norge i varm stein,
+     nabolandene flatt grått, myke fjellskygger. */
+  --kart-hav: #1c2832;
+  --kart-land: #4a443b;
+  --kart-naboland: #2c2b29;
+  --kart-kyst: #6e6659;
+  --kart-grense: #403e3a;
+  --kart-fjell: #221e19;
+  --kart-fjell-lys: #6c6455;
+  --kart-nett: rgb(255 255 255 / 0.05);
+  --kart-havtekst: #6a8394;
+  --kart-landtekst: #7a746a;
 }
 
 /* Lyst «ren finans»-tema: hvitt og lysegrått, mørk tekst, et mørkere gull som
@@ -97,6 +110,16 @@
   --himmel-dag-horisont: #efe3cb;
   --himmel-inne-topp: #c9c4bc;
   --himmel-inne-horisont: #e6e1d8;
+  --kart-hav: #cddbe4;
+  --kart-land: #ece4d4;
+  --kart-naboland: #dfddd7;
+  --kart-kyst: #a69c8b;
+  --kart-grense: #c3beb3;
+  --kart-fjell: #b8a98d;
+  --kart-fjell-lys: #faf6ee;
+  --kart-nett: rgb(0 0 0 / 0.06);
+  --kart-havtekst: #6f8a9c;
+  --kart-landtekst: #9a9386;
 }
 
 /* ─────────────────────────────────────────────── Grunnlag */
@@ -2887,12 +2910,66 @@ button.merke {
   margin: 0 auto;
 }
 
-/* Landet skiller seg tydelig fra bakgrunnen i begge temaene, med en tynn kystlinje. */
+/* Kartene (G3): hav, Norge, nabolandene, innsjøene og gradnettet. */
 .kart-land {
-  fill: var(--kant);
-  stroke: color-mix(in srgb, var(--tekst-dempet) 55%, transparent);
-  stroke-width: 0.8;
+  fill: var(--kart-land);
+  stroke: var(--kart-kyst);
+  stroke-width: 0.5;
   stroke-linejoin: round;
+}
+
+.kart-naboland {
+  fill: var(--kart-naboland);
+  stroke: var(--kart-grense);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+
+.kart-innsjo {
+  fill: var(--kart-hav);
+  stroke: var(--kart-kyst);
+  stroke-width: 0.3;
+}
+
+.kart-nett {
+  stroke: var(--kart-nett);
+  stroke-width: 0.5;
+}
+
+/* Fjellene som myk relieff: lyst mot nordvest, skygge mot sørøst. */
+.kart-fjell {
+  fill: var(--kart-fjell);
+  opacity: 0.5;
+}
+
+.kart-fjell-lys {
+  fill: var(--kart-fjell-lys);
+  opacity: 0.4;
+}
+
+/* Fjellene som myk relieff: lyst mot nordvest, skygge mot sørøst. */
+.kart-fjell {
+  fill: var(--kart-fjell);
+  opacity: 0.5;
+}
+
+.kart-fjell-lys {
+  fill: var(--kart-fjell-lys);
+  opacity: 0.4;
+}
+
+.kart-havnavn {
+  fill: var(--kart-havtekst);
+  font-style: italic;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.kart-landnavn {
+  fill: var(--kart-landtekst);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.3em;
+  pointer-events: none;
 }
 
 .kart-by {
@@ -2904,22 +2981,61 @@ button.merke {
   fill: transparent;
 }
 
+/* Markørene (G3): en liten prikk, lys når du eier noe der, gull bare når du eier hele byen. */
 .kart-prikk {
   fill: var(--flate);
   stroke: var(--tekst-dempet);
-  stroke-width: 1.5;
-  transition: r 0.2s;
+  stroke-width: 1.1;
 }
 
 .kart-by.eid .kart-prikk {
-  fill: var(--gull);
-  stroke: var(--gull-lys);
+  fill: var(--tekst);
+  stroke: var(--flate);
+  stroke-width: 1;
 }
 
-.kart-by.valgt .kart-prikk,
+.kart-by.hel .kart-prikk {
+  fill: var(--gull);
+}
+
+.kart-valgt {
+  fill: none;
+  stroke: var(--tekst);
+  stroke-width: 1.2;
+}
+
 .kart-by:focus-visible .kart-prikk {
   stroke: var(--tekst);
-  stroke-width: 2.5;
+  stroke-width: 2;
+}
+
+/* Antallet i et lite merke ved prikken. */
+.kart-merke rect {
+  fill: var(--flate);
+  stroke: var(--kart-kyst);
+  stroke-width: 0.5;
+}
+
+.kart-by.hel .kart-merke rect {
+  fill: var(--gull);
+  stroke: none;
+}
+
+.kart-merke-krone {
+  fill: var(--paa-gull);
+}
+
+/* Trendpila ved navnet: prisene i regionen siste to timer. */
+.kart-trendpil {
+  pointer-events: none;
+}
+
+.kart-trendpil.opp {
+  fill: var(--pluss);
+}
+
+.kart-trendpil.ned {
+  fill: var(--minus);
 }
 
 /* Stedene med bare jord: en liten, hul prikk til du eier noe der. */
@@ -2928,37 +3044,33 @@ button.merke {
   stroke-width: 1.2;
 }
 
-/* Innfeltet med hele landet: dempet, med en gull ramme rundt det hovedkartet viser. */
+/* Innfeltet med Nord-Norge: en tynn ramme rundt. */
 .kart-innfelt-ramme {
-  fill: var(--flate);
+  fill: none;
   stroke: var(--kant);
   stroke-width: 1;
 }
 
-.kart-innfelt .kart-land {
-  fill: var(--kant);
-  stroke: var(--tekst-dempet);
-  stroke-width: 0.5;
-}
-
-.kart-innfelt-utsnitt {
-  fill: none;
-  stroke: var(--gull-mørk);
-  stroke-width: 1;
-  stroke-dasharray: 2 2;
-}
-
 .kart-antall {
-  fill: var(--paa-gull);
-  font-size: 9px;
+  fill: var(--tekst);
+  font-size: 6.8px;
   font-weight: var(--vekt-tung);
   pointer-events: none;
 }
 
+.kart-by.hel .kart-antall {
+  fill: var(--paa-gull);
+}
+
+/* Navnene får en myk kant i flatefargen, så de leses over både land og hav. */
 .kart-navn {
   fill: var(--tekst-dempet);
   font-size: 10px;
   font-weight: var(--vekt-halvfet);
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--flate) 60%, transparent);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
   pointer-events: none;
 }
 
@@ -4392,21 +4504,6 @@ button.merke {
 
 /* ─────────────────────────────────────────────── Levende kart: trend, leie, symboler, gatebilde */
 
-/* Ringen rundt byen: grønn når prisene i regionen stiger, rød når de faller. */
-.kart-trend {
-  fill: none;
-  stroke-width: 2;
-  pointer-events: none;
-}
-
-.kart-trend.opp {
-  stroke: var(--pluss);
-}
-
-.kart-trend.ned {
-  stroke: var(--minus);
-}
-
 .kart-leie {
   fill: var(--pluss);
   font-size: 7.5px;
@@ -4415,28 +4512,6 @@ button.merke {
   font-variant-numeric: tabular-nums;
 }
 
-/* En mynt som stiger fra byen hvert par sekunder, så leien synes. */
-.kart-mynt {
-  color: var(--gull);
-  opacity: 0;
-  pointer-events: none;
-  animation: kart-mynt 4.5s ease-out infinite;
-}
-
-@keyframes kart-mynt {
-  0%,
-  70% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  78% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
 
 
 .regionpriser {
@@ -5452,14 +5527,6 @@ button.maalstripe {
   }
 }
 
-/* Byeier (Pakke 44): kronen på kartet og veien mot å eie hele byen. */
-.kart-krone {
-  fill: var(--gull);
-  stroke: var(--flate);
-  stroke-width: 1;
-  paint-order: stroke;
-}
-
 .byeier {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -5507,9 +5574,9 @@ button.maalstripe {
   background: var(--gull);
 }
 
-/* Verdenskartet (Pakke 45): havet bak landet, som på Norgeskartet. */
+/* Havet bak landet, på begge kartene. */
 .kart-hav {
-  fill: color-mix(in srgb, var(--flate-2) 70%, transparent);
+  fill: var(--kart-hav);
 }
 
 /* Sesongen på ferieboligene (Pakke 45): merke, tekst og året som tolv søyler. */
@@ -5552,11 +5619,16 @@ button.maalstripe {
 
 /* Dag og natt: landet og havet mørkner etter klokka i spillet (--natt 0–1). */
 .kart-natt .kart-land {
-  fill: color-mix(in srgb, var(--kant), #0a1024 calc(var(--natt, 0) * 55%));
+  fill: color-mix(in srgb, var(--kart-land), #0a1024 calc(var(--natt, 0) * 45%));
 }
 
-.kart-natt .kart-hav {
-  fill: color-mix(in srgb, color-mix(in srgb, var(--flate-2) 70%, transparent), #050814 calc(var(--natt, 0) * 50%));
+.kart-natt .kart-naboland {
+  fill: color-mix(in srgb, var(--kart-naboland), #0a1024 calc(var(--natt, 0) * 45%));
+}
+
+.kart-natt .kart-hav,
+.kart-natt .kart-innsjo {
+  fill: color-mix(in srgb, var(--kart-hav), #050814 calc(var(--natt, 0) * 45%));
 }
 
 .kart-lys,

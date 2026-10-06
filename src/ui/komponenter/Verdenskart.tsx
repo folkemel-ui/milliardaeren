@@ -1,12 +1,13 @@
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, FLY_REKKEFOLGE, LUKSUS, reiseNivaa } from '../../engine/eiendom'
 import type { By, Spilltilstand, Utenlandsby } from '../../engine/types'
-import { kartLeie, leieIBy, useLangtrykk, eierHeleByen, kronesti } from '../kart'
-import { BREDDE, BYPLASS, byPunkt, HOYDE, INNFELT, LAND, OSLO_POS, projeksjon, sti, utsnittFor } from '../verdenskartet'
+import { kartLeie, leieIBy, useLangtrykk, eierHeleByen } from '../kart'
+import { BREDDE, BYPLASS, byPunkt, HOYDE, INNFELT, LAND, merkeboksVerden, NORGE, OSLO_POS, projeksjon, sti, utsnittFor } from '../verdenskartet'
 import { morke } from '../dagognatt'
 import { Ikon } from './Ikoner'
 import { Flysymbol, Reisende, usePuls } from './Bevegelse'
 import { Bykort } from './Bykort'
+import { Kartmerke } from './Kartmerke'
 
 /** Flyet som trengs for å nå en by (1–3). */
 function reiseTil(by: Utenlandsby): number {
@@ -33,7 +34,9 @@ const NESTE_STEG = ['Propellflyet åpner Norden.', 'Forretningsjeten åpner Euro
  * flyene dine — Norden med propellflyet, Europa med forretningsjeten, og med
  * langdistansejeten to innfelte ruter for New York og Dubai. Buene er
  * flyrutene fra Oslo, og et fly går på hver rute du kan fly. Kartet mørkner
- * om kvelden, og byene du eier, lyser. Geometrien står i ui/verdenskartet.ts.
+ * om kvelden, og byene du eier, lyser. Samme atlas som Norgeskartet (G3):
+ * dempet hav, Norge i varm stein, de andre landene flatt grått, og de samme
+ * rolige markørene. Geometrien står i ui/verdenskartet.ts.
  */
 export function Verdenskart({
   s,
@@ -49,8 +52,17 @@ export function Verdenskart({
 }) {
   const nivaa = reiseNivaa(s)
   const lang = useLangtrykk(zoom)
+  const id = 'verden' + useId().replace(/[^a-zA-Z0-9]/g, '')
   const p = useMemo(() => projeksjon(utsnittFor(nivaa)), [nivaa])
-  const land = useMemo(() => LAND.map((l) => sti(l, p)), [p])
+  const land = useMemo(() => ({ andre: LAND.map((l) => sti(l, p)).join(' '), norge: NORGE.map((l) => sti(l, p)).join(' ') }), [p])
+  // Gradnettet: hver tiende grad, som på et atlas.
+  const nett = useMemo(
+    () => ({
+      bredde: [30, 40, 50, 60, 70].map((b) => p([0, b])[1]),
+      lengde: [-40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60].map((l) => p([l, 60])[0]),
+    }),
+    [p],
+  )
   const oslo = p(OSLO_POS)
   const synlige = (Object.keys(BYPLASS) as Utenlandsby[]).flatMap((by) => {
     const pos = byPunkt(by, nivaa)
@@ -64,30 +76,34 @@ export function Verdenskart({
       <div className="kart-ramme">
         <svg className="verdenskart kart-natt" style={{ ['--natt' as string]: natt.toFixed(3) }} viewBox={`0 0 ${BREDDE} ${HOYDE}`} role="group" aria-label="Kart over byene du kan fly til">
           <defs>
-            <radialGradient id="verden-lysglod">
+            <radialGradient id={`${id}-glod`}>
               <stop offset="0" stopColor="#ffd970" stopOpacity="0.95" />
               <stop offset="1" stopColor="#ffd970" stopOpacity="0" />
             </radialGradient>
           </defs>
           <rect x="0" y="0" width={BREDDE} height={HOYDE} rx="8" className="kart-hav" />
-          {land.map((d, i) => (
-            <path key={i} d={d} className="kart-land" />
+          {nett.bredde.map((y) => (
+            <line key={`b${y}`} x1="0" y1={y} x2={BREDDE} y2={y} className="kart-nett" />
           ))}
+          {nett.lengde.map((x) => (
+            <line key={`l${x}`} x1={x} y1="0" x2={x} y2={HOYDE} className="kart-nett" />
+          ))}
+          <path d={land.andre} className="kart-naboland" />
+          <path d={land.norge} className="kart-land" />
           {nivaa >= 3 &&
             (Object.keys(INNFELT) as (keyof typeof INNFELT)[]).map((by) => {
               const i = INNFELT[by]
               const ip = projeksjon(i.utsnitt, i)
               return (
                 <g key={by} className="kart-innfelt" aria-hidden="true">
-                  <rect x={i.x} y={i.y} width={i.bredde} height={i.hoyde} rx="5" className="kart-innfelt-ramme" />
-                  <clipPath id={`innfelt-${by.replace(' ', '')}`}>
+                  <rect x={i.x} y={i.y} width={i.bredde} height={i.hoyde} rx="5" className="kart-hav" />
+                  <clipPath id={`${id}-${by.replace(' ', '')}`}>
                     <rect x={i.x} y={i.y} width={i.bredde} height={i.hoyde} rx="5" />
                   </clipPath>
-                  <g clipPath={`url(#innfelt-${by.replace(' ', '')})`}>
-                    {i.land.map((l, k) => (
-                      <path key={k} d={sti(l, ip)} className="kart-land" />
-                    ))}
+                  <g clipPath={`url(#${id}-${by.replace(' ', '')})`}>
+                    <path d={i.land.map((l) => sti(l, ip)).join(' ')} className="kart-naboland" />
                   </g>
+                  <rect x={i.x} y={i.y} width={i.bredde} height={i.hoyde} rx="5" className="kart-innfelt-ramme" />
                 </g>
               )
             })}
@@ -103,13 +119,13 @@ export function Verdenskart({
               </Reisende>
             ))}
           <g className="kart-by eid hjem">
-            <circle cx={oslo[0]} cy={oslo[1]} r={4.5} className="kart-prikk" />
-            <text x={oslo[0] - 7} y={oslo[1] + 3.5} textAnchor="end" className="kart-navn">
+            <circle cx={oslo[0]} cy={oslo[1]} r={3.2} className="kart-prikk" />
+            <text x={oslo[0] - 6} y={oslo[1] + 3.5} textAnchor="end" className="kart-navn">
               Oslo
             </text>
           </g>
           {synlige.map(({ by, pos: [x, y] }) => (
-            <Verdensby key={by} s={s} by={by} x={x} y={y} nivaa={nivaa} natt={natt} valgt={valgt === by} velg={velg} lang={lang} />
+            <Verdensby key={by} s={s} by={by} x={x} y={y} nivaa={nivaa} natt={natt} valgt={valgt === by} velg={velg} lang={lang} glod={`${id}-glod`} />
           ))}
         </svg>
         {valgtPlass && <Bykort s={s} by={valgtPlass.by} x={valgtPlass.pos[0] / BREDDE} y={valgtPlass.pos[1] / HOYDE} lukk={() => velg(null)} />}
@@ -125,7 +141,7 @@ export function Verdenskart({
   )
 }
 
-/** Én by på verdenskartet: prikk, antall, navn og leie — lys om kvelden og en ring når du kjøper. */
+/** Én by på verdenskartet: prikk, antall i merket, navn, og leien når byen er valgt — lys om kvelden og en ring når du kjøper. */
 function Verdensby({
   s,
   by,
@@ -136,6 +152,7 @@ function Verdensby({
   valgt,
   velg,
   lang,
+  glod,
 }: {
   s: Spilltilstand
   by: Utenlandsby
@@ -146,17 +163,19 @@ function Verdensby({
   valgt: boolean
   velg: (by: By | null) => void
   lang: ReturnType<typeof useLangtrykk>
+  glod: string
 }) {
   const n = antallI(s, by)
   const puls = usePuls(n)
   const åpen = nivaa >= reiseTil(by)
-  const r = n > 0 ? Math.min(11, 5 + n * 1.2) : 4
+  const hel = åpen && eierHeleByen(s, by)
+  const r = n > 0 ? 3.2 : 2.6
   const e = BYPLASS[by].etikett
   const fly = LUKSUS[FLY_REKKEFOLGE[reiseTil(by) - 1]]
   const leie = leieIBy(s, by)
   return (
     <g
-      className={`kart-by${n > 0 ? ' eid' : ''}${valgt ? ' valgt' : ''}${åpen ? '' : ' stengt'}`}
+      className={`kart-by${n > 0 ? ' eid' : ''}${hel ? ' hel' : ''}${valgt ? ' valgt' : ''}${åpen ? '' : ' stengt'}`}
       role="button"
       tabIndex={0}
       aria-label={`${by}: ${åpen ? `${n} ${n === 1 ? 'eiendom' : 'eiendommer'}` : `krever ${fly.navn.toLowerCase()}`}${valgt ? ', valgt' : ''}`}
@@ -165,28 +184,24 @@ function Verdensby({
       {...lang.hendelser(by)}
     >
       <circle cx={x} cy={y} r={16} className="kart-treff" />
-      {n > 0 && natt > 0 && <circle cx={x} cy={y} r={r + 11} fill="url(#verden-lysglod)" className="kart-lys" style={{ opacity: natt }} />}
-      {puls > 0 && <circle key={puls} cx={x} cy={y} r={r + 2} className="kart-puls" />}
-      <circle cx={x} cy={y} r={åpen ? r : 6} className="kart-prikk" />
-      {åpen && eierHeleByen(s, by) && <path d={kronesti(x + r * 0.9, y - r * 0.9, 9)} className="kart-krone" />}
-      {!åpen && <Ikon navn="fly" størrelse={9} x={x - 4.5} y={y - 4.5} />}
-      {n > 0 && (
-        <text x={x} y={y + 3.5} className="kart-antall" textAnchor="middle">
-          {n}
-        </text>
+      {valgt && <circle cx={x} cy={y} r={r + 2.6} className="kart-valgt" />}
+      {åpen ? (
+        <Kartmerke x={x} y={y} r={r} n={n} hel={hel} natt={natt} puls={puls} glod={glod} merke={n > 0 ? merkeboksVerden(x, y, r, String(n).length, hel, e) : null} />
+      ) : (
+        <Ikon navn="fly" størrelse={8} x={x - 4} y={y - 4} />
       )}
       <text
-        x={e === 'høyre' ? x + r + 4 : e === 'venstre' ? x - r - 4 : x}
-        y={e === 'under' ? y + r + 11 : y + 4}
+        x={e === 'høyre' ? x + r + 3.5 : e === 'venstre' ? x - r - 3.5 : x}
+        y={e === 'under' ? y + r + 10.5 : y + 3.5}
         textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
         className="kart-navn"
       >
         {by}
       </text>
-      {leie > 0 && (
+      {valgt && leie > 0 && (
         <text
-          x={e === 'høyre' ? x + r + 4 : e === 'venstre' ? x - r - 4 : x}
-          y={e === 'under' ? y + r + 21 : y + 14}
+          x={e === 'høyre' ? x + r + 3.5 : e === 'venstre' ? x - r - 3.5 : x}
+          y={e === 'under' ? y + r + 19 : y + 12}
           textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
           className="kart-leie"
         >

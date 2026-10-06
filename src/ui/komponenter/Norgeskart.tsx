@@ -1,67 +1,128 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
 import { JORD, JORDLISTE } from '../../engine/jord'
-import { useRef } from 'react'
+import { memo, useId, useMemo, useRef } from 'react'
 import type { By, NorskBy, Spilltilstand } from '../../engine/types'
-import { eierHeleByen, kartLeie, kronesti, leieIBy, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
+import { eierHeleByen, kartLeie, leieIBy, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
 import { perSek } from '../format'
-import { BYLISTE, byPunkt, etiketter, HOVEDOMRAADE, hovedpunkt, INNFELT, innfeltpunkt, KUN_JORD, navnestorrelse, radius, VISNING } from '../norgeskartet'
-import { Ikon } from './Ikoner'
+import { BYLISTE, BYPLAN, byPunkt, etiketter, hovedpunkt, KYSTRUTA, INNFELT, innfeltpunkt, KARTNAVN, KUN_JORD, merkeboks, navnestorrelse, radius, VISNING } from '../norgeskartet'
+import { FJELL_NORD, FJELL_SOR, INNSJOER_SOR, NABOLAND_NORD, NABOLAND_SOR, NORGE_NORD, NORGE_SOR, type Ring } from '../kartdata'
 import { morke } from '../dagognatt'
 import { Reisende, Skipsymbol, usePuls } from './Bevegelse'
 import { Bykort } from './Bykort'
+import { Kartmerke } from './Kartmerke'
 
 /*
- * Et stilisert Norgeskart tegnet fra ekte koordinater. Hovedkartet viser
- * Sør-Norge, der nesten alt skjer; hele landet står som et innfelt nederst
- * til høyre, med Lofoten. Geometrien (projeksjon, sider for navnene) står i
- * norgeskartet.ts, der en test sjekker at ingenting overlapper.
+ * Norgeskartet (Grafikkpakke G3): et rolig atlas med ekte kystlinjer fra
+ * Natural Earth. Havet, Sverige og Danmark i dempede toner, Norge i varm
+ * stein med myke fjellskygger, og et innfelt med Nord-Norge og Lofoten
+ * nederst til høyre. Fargene følger temaet (--kart-* i styles.css).
+ * Geometrien (projeksjon, sider for navnene, merkene) står i norgeskartet.ts,
+ * der en test sjekker at ingenting overlapper.
  *
- * Kartet viser bare prikk, antall og navn. Leien står ved byen du har valgt;
- * gårder, skoger og landemerker står i lista under kartet.
+ * Kartet viser bare prikk, antall og navn, og en liten pil for prisene i
+ * regionen. Leien står ved byen du har valgt.
  */
 
-const FASTLAND: [number, number][] = [
-  // Sørlandet: Lindesnes, Kristiansand, Arendal, Kragerø, Larvik
-  [7.05, 57.98], [7.45, 58.02], [8.0, 58.12], [8.38, 58.25], [8.77, 58.46], [9.23, 58.72], [9.42, 58.87], [9.75, 59.0],
-  [10.03, 59.05], [10.23, 59.13],
-  // Oslofjorden: vestsiden inn til Drammen og Oslo, østsiden ut til Hvaler og Halden
-  [10.42, 59.27], [10.48, 59.42], [10.3, 59.49], [10.25, 59.72], [10.55, 59.82], [10.75, 59.9], [10.72, 59.62],
-  [10.66, 59.43], [10.93, 59.21], [11.05, 59.08], [11.39, 59.12],
-  // Svenskegrensa
-  [11.8, 59.8], [12.5, 60.3], [12.3, 61.0], [12.1, 61.8], [12.3, 62.8], [12.0, 63.3], [13.2, 64.0], [14.0, 64.6], [14.1, 65.3],
-  [15.0, 66.1], [15.8, 66.6], [16.5, 67.5], [17.9, 68.2], [18.3, 68.5], [19.9, 68.4], [20.6, 69.1],
-  // Finnmarksvidda og russegrensa
-  [21.8, 69.0], [22.5, 68.7], [23.9, 68.8], [25.0, 68.6], [25.8, 69.4], [26.5, 69.9], [27.9, 70.1], [28.9, 69.8], [29.3, 69.3],
-  [29.1, 69.0], [30.9, 69.6],
-  // Nordkysten
-  [31.0, 70.3], [30.0, 70.6], [28.5, 71.0], [27.0, 71.0], [25.8, 71.15], [24.5, 70.9], [23.2, 70.8], [22.0, 70.4],
-  [21.0, 70.1], [19.5, 70.1], [18.3, 69.8], [17.0, 69.3], [16.0, 68.8],
-  // Vestfjorden og Helgeland
-  [16.1, 68.4], [15.5, 68.1], [14.9, 67.8], [14.4, 67.4], [13.7, 67.0], [13.0, 66.6], [12.6, 66.1], [12.2, 65.5],
-  // Trøndelag og Vestlandet
-  [11.5, 64.9], [10.7, 64.5], [10.0, 64.0], [9.7, 63.85],
-  // Trondheimsfjorden: nordsiden inn til Levanger, rundt via Trondheim og ut langs sørsiden
-  [10.3, 63.72], [11.0, 63.8], [11.3, 63.72], [10.95, 63.47], [10.4, 63.43], [9.9, 63.5], [9.5, 63.56],
-  [8.4, 63.4], [7.3, 63.0], [6.3, 62.5], [5.6, 62.35], [5.2, 62.2], [5.0, 61.6],
-  // Sognefjorden
-  [4.95, 61.12], [5.6, 61.14], [6.6, 61.18], [7.2, 61.22], [6.6, 61.08], [5.6, 61.04], [4.9, 61.0],
-  [5.0, 60.4],
-  // Hardangerfjorden
-  [5.3, 60.05], [6.0, 60.2], [6.6, 60.42], [6.1, 60.1], [5.55, 59.9], [5.2, 59.85],
-  [5.3, 59.4], [5.55, 59.1], [5.6, 58.9], [5.7, 58.6], [6.2, 58.3], [6.7, 58.08],
-]
+/** Ringene som én SVG-sti, med en gitt projeksjon. */
+function sti(ringer: Ring[], p: (q: [number, number]) => [number, number]): string {
+  return ringer
+    .map((r) => {
+      let d = ''
+      for (let i = 0; i < r.length; i += 2) {
+        const [x, y] = p([r[i], r[i + 1]])
+        d += `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`
+      }
+      return d + 'Z'
+    })
+    .join('')
+}
 
-const LOFOTEN: [number, number][] = [
-  [12.9, 67.9], [13.8, 68.1], [14.6, 68.2], [15.3, 68.3], [15.1, 68.5], [14.2, 68.45], [13.3, 68.2], [12.9, 68.0],
-]
-
-const punkter = (liste: [number, number][], p: (x: [number, number]) => [number, number]) => liste.map((k) => p(k).map((v) => v.toFixed(1)).join(',')).join(' ')
-
-/** Kystruta skipet går (Pakke 46): fra Bergen langs kysten rundt Lindesnes og inn Oslofjorden — litt ute på sjøen. */
-const KYSTRUTA: [number, number][] = [
-  [4.75, 60.45], [4.75, 59.6], [5.05, 59.05], [5.35, 58.5], [6.0, 58.05], [6.9, 57.8], [8.0, 57.95], [8.9, 58.3], [9.6, 58.8], [10.4, 59.05], [10.6, 59.45],
-]
 const KYSTSTI = 'M' + KYSTRUTA.map((p) => hovedpunkt(p).map((v) => v.toFixed(1)).join(',')).join(' L')
+
+/** De faste delene av kartet: land, hav, fjell og innfelt. Tegnes én gang, ikke hvert sekund. */
+const Kartbunn = memo(function Kartbunn({ id }: { id: string }) {
+  const stier = useMemo(
+    () => ({
+      norge: sti(NORGE_SOR, hovedpunkt),
+      naboland: sti(NABOLAND_SOR, hovedpunkt),
+      sjoer: sti(INNSJOER_SOR, hovedpunkt),
+      norgeNord: sti(NORGE_NORD, innfeltpunkt),
+      nabolandNord: sti(NABOLAND_NORD, innfeltpunkt),
+      fjell: sti(FJELL_SOR, hovedpunkt),
+      fjellNord: sti(FJELL_NORD, innfeltpunkt),
+    }),
+    [],
+  )
+  // Fjellene (Kjølen og Hardangervidda) som myk relieff: et lyst drag mot nordvest og
+  // skygge mot sørøst, uskarpt, og bare innenfor Norge.
+  const fjell = (d: string, k: number) => (
+    <>
+      <path d={d} transform={`translate(${-2 * k} ${-2.4 * k})`} className="kart-fjell-lys" filter={`url(#${id}-myk${k < 1 ? '-nord' : ''})`} />
+      <path d={d} transform={`translate(${2.4 * k} ${3 * k})`} className="kart-fjell" filter={`url(#${id}-myk${k < 1 ? '-nord' : ''})`} />
+    </>
+  )
+  const [nx, ny] = [INNFELT.x, INNFELT.y]
+  return (
+    <>
+      <defs>
+        <radialGradient id={`${id}-glod`}>
+          <stop offset="0" stopColor="#ffd970" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#ffd970" stopOpacity="0" />
+        </radialGradient>
+        <filter id={`${id}-myk`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="5" />
+        </filter>
+        <filter id={`${id}-myk-nord`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.6" />
+        </filter>
+        <clipPath id={`${id}-norge`}>
+          <path d={stier.norge} />
+        </clipPath>
+        <clipPath id={`${id}-nord`}>
+          <rect x={nx} y={ny} width={INNFELT.bredde} height={INNFELT.hoyde} rx="6" />
+        </clipPath>
+        <clipPath id={`${id}-norge-nord`}>
+          <path d={stier.norgeNord} />
+        </clipPath>
+      </defs>
+      <rect x={VISNING.x} y={VISNING.y} width={VISNING.bredde} height={VISNING.hoyde} rx="10" className="kart-hav" />
+      {/* Breddegradene, svakt, som på et atlas. */}
+      {[58, 60, 62, 64].map((b) => {
+        const y = hovedpunkt([0, b])[1]
+        return <line key={b} x1={VISNING.x} y1={y} x2={VISNING.x + VISNING.bredde} y2={y} className="kart-nett" />
+      })}
+      {[0, 5, 10, 15].map((l) => {
+        const x = hovedpunkt([l, 0])[0]
+        return <line key={l} x1={x} y1={VISNING.y} x2={x} y2={VISNING.y + VISNING.hoyde} className="kart-nett" />
+      })}
+      <path d={stier.naboland} className="kart-naboland" />
+      <path d={stier.norge} className="kart-land" />
+      <g clipPath={`url(#${id}-norge)`}>{fjell(stier.fjell, 1)}</g>
+      <path d={stier.sjoer} className="kart-innsjo" />
+      {KARTNAVN.map((k) => {
+        const [x, y] = hovedpunkt(k.pos)
+        return (
+          <text key={k.navn} x={x} y={y} textAnchor="middle" className={k.hav ? 'kart-havnavn' : 'kart-landnavn'} style={{ fontSize: k.hav ? 7.5 : 7 }}>
+            {k.navn}
+          </text>
+        )
+      })}
+      {/* Innfeltet: Nord-Norge fra Trondheim til Nordkapp, med Lofoten. */}
+      <g className="kart-innfelt" aria-hidden="true">
+        <rect x={nx} y={ny} width={INNFELT.bredde} height={INNFELT.hoyde} rx="6" className="kart-hav" />
+        <g clipPath={`url(#${id}-nord)`}>
+          <path d={stier.nabolandNord} className="kart-naboland" />
+          <path d={stier.norgeNord} className="kart-land" />
+          <g clipPath={`url(#${id}-norge-nord)`}>{fjell(stier.fjellNord, 0.4)}</g>
+        </g>
+        <rect x={nx} y={ny} width={INNFELT.bredde} height={INNFELT.hoyde} rx="6" className="kart-innfelt-ramme" />
+        <text x={nx + 6} y={ny + 11} className="kart-havnavn" style={{ fontSize: 7 }}>
+          Nord-Norge
+        </text>
+      </g>
+    </>
+  )
+})
 
 /** Hvor mange eiendommer du eier i hver by. */
 function perBy(s: Spilltilstand): Partial<Record<By, number>> {
@@ -83,6 +144,7 @@ export function Norgeskart({
   /** Åpner gatebildet for en by: langt trykk på byen, eller to fingre som glir fra hverandre. */
   zoom: (by: By) => void
 }) {
+  const id = 'kart' + useId().replace(/[^a-zA-Z0-9]/g, '')
   const antall = perBy(s)
   const svg = useRef<SVGSVGElement>(null)
   const lang = useLangtrykk(zoom)
@@ -99,50 +161,30 @@ export function Norgeskart({
     if (nærmest) zoom(nærmest.by)
   })
 
-  const [[vLon, nLat], [oLon, sLat]] = HOVEDOMRAADE
-  const [rx1, ry1] = innfeltpunkt([vLon, nLat])
-  const [rx2, ry2] = innfeltpunkt([oLon, sLat])
   const natt = morke(s.sek)
   const valgtNorsk = valgt && (BYLISTE as By[]).includes(valgt) ? (valgt as NorskBy) : null
   const [vx, vy] = valgtNorsk ? byPunkt(valgtNorsk) : [0, 0]
 
   return (
     <div className="kart-ramme norgeskart-ramme">
-    <svg
-      ref={svg}
-      className="norgeskart kart-natt"
-      style={{ ['--natt' as string]: natt.toFixed(3) }}
-      viewBox={`${VISNING.x} ${VISNING.y} ${VISNING.bredde} ${VISNING.hoyde}`}
-      role="group"
-      aria-label="Kart over eiendommene dine"
-      {...klyp}
-    >
-      <defs>
-        <radialGradient id="kart-lysglod">
-          <stop offset="0" stopColor="#ffd970" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#ffd970" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <polygon points={punkter(FASTLAND, hovedpunkt)} className="kart-land" />
-      <Reisende d={KYSTSTI} periode={42_000} snu="speil">
-        <Skipsymbol />
-      </Reisende>
-
-      {/* Innfeltet: hele landet, med rammen rundt det hovedkartet viser. */}
-      <g className="kart-innfelt" aria-hidden="true">
-        <rect x={INNFELT.x} y={INNFELT.y} width={INNFELT.bredde} height={INNFELT.hoyde} rx="6" className="kart-innfelt-ramme" />
-        <polygon points={punkter(FASTLAND, innfeltpunkt)} className="kart-land" />
-        <polygon points={punkter(LOFOTEN, innfeltpunkt)} className="kart-land" />
-        <rect x={rx1} y={ry1} width={rx2 - rx1} height={ry2 - ry1} className="kart-innfelt-utsnitt" />
-      </g>
-
-      {BYLISTE.map((by, i) => (
-        <Byen key={by} s={s} by={by} i={i} n={antall[by] ?? 0} valgt={valgt === by} velg={velg} lang={lang} natt={natt} />
-      ))}
-    </svg>
-      {valgtNorsk && (
-        <Bykort s={s} by={valgtNorsk} x={(vx - VISNING.x) / VISNING.bredde} y={(vy - VISNING.y) / VISNING.hoyde} lukk={() => velg(null)} />
-      )}
+      <svg
+        ref={svg}
+        className="norgeskart kart-natt"
+        style={{ ['--natt' as string]: natt.toFixed(3) }}
+        viewBox={`${VISNING.x} ${VISNING.y} ${VISNING.bredde} ${VISNING.hoyde}`}
+        role="group"
+        aria-label="Kart over eiendommene dine"
+        {...klyp}
+      >
+        <Kartbunn id={id} />
+        <Reisende d={KYSTSTI} periode={42_000} snu="speil">
+          <Skipsymbol />
+        </Reisende>
+        {BYLISTE.map((by) => (
+          <Byen key={by} s={s} by={by} n={antall[by] ?? 0} valgt={valgt === by} velg={velg} lang={lang} natt={natt} glod={`${id}-glod`} />
+        ))}
+      </svg>
+      {valgtNorsk && <Bykort s={s} by={valgtNorsk} x={(vx - VISNING.x) / VISNING.bredde} y={(vy - VISNING.y) / VISNING.hoyde} lukk={() => velg(null)} />}
     </div>
   )
 }
@@ -150,25 +192,26 @@ export function Norgeskart({
 function Byen({
   s,
   by,
-  i,
   n,
   valgt,
   velg,
   lang,
   natt,
+  glod,
 }: {
   s: Spilltilstand
   by: NorskBy
-  i: number
   n: number
   valgt: boolean
   velg: (by: By | null) => void
   lang: ReturnType<typeof useLangtrykk>
   /** Hvor mørkt det er på kartet, 0–1. Byene du eier, lyser om kvelden. */
   natt: number
+  glod: string
 }) {
   const [x, y] = byPunkt(by)
   const eid = n > 0
+  const hel = eierHeleByen(s, by)
   const puls = usePuls(n)
   const r = radius(by, eid)
   const trend = trendRing(trendFor(s, by))
@@ -178,44 +221,33 @@ function Byen({
   const { navn, leie: leiepos } = etiketter(by, r, valgt && leie > 0 ? kartLeie(leie) : null)
   return (
     <g
-      className={`kart-by${eid ? ' eid' : ''}${valgt ? ' valgt' : ''}${KUN_JORD.has(by) ? ' jord' : ''}`}
+      className={`kart-by${eid ? ' eid' : ''}${hel ? ' hel' : ''}${valgt ? ' valgt' : ''}${KUN_JORD.has(by) ? ' jord' : ''}${BYPLAN[by].innfelt ? ' i-innfelt' : ''}`}
       role="button"
       tabIndex={0}
-      aria-label={`${by}: ${n} ${n === 1 ? 'eiendom' : 'eiendommer'}${leie > 0 ? `, leie ${perSek(leie)}` : ''}${valgt ? ', valgt' : ''}. Hold inne for gatebildet.`}
+      aria-label={`${by}: ${n} ${n === 1 ? 'eiendom' : 'eiendommer'}${hel ? ', du eier hele byen' : ''}${leie > 0 ? `, leie ${perSek(leie)}` : ''}${valgt ? ', valgt' : ''}. Hold inne for gatebildet.`}
       onClick={() => !lang.varLangt() && velg(valgt ? null : by)}
       onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && velg(valgt ? null : by)}
       {...lang.hendelser(by)}
     >
       {/* Større, usynlig treffflate så byene er lette å treffe med fingeren. */}
       <circle cx={x} cy={y} r={14} className="kart-treff" />
-      {/* Lysene i byene du eier tennes når det mørkner. */}
-      {eid && natt > 0 && <circle cx={x} cy={y} r={r + 10} fill="url(#kart-lysglod)" className="kart-lys" style={{ opacity: natt }} />}
-      {/* En ring som brer seg ut når du kjøper noe i byen. */}
-      {puls > 0 && <circle key={puls} cx={x} cy={y} r={r + 2} className="kart-puls" />}
-      {trend && <circle cx={x} cy={y} r={r + 3} className={`kart-trend ${trend.klasse}`} style={{ strokeOpacity: trend.styrke }} />}
-      <circle cx={x} cy={y} r={r} className="kart-prikk" />
-      {/* Eier du hele byen, står det en krone på skrå over prikken. */}
-      {eierHeleByen(s, by) && <path d={kronesti(x + r * 0.9, y - r * 0.9, 8)} className="kart-krone" />}
-      {eid && (
-        <text x={x} y={y + r * 0.43} className="kart-antall" textAnchor="middle" style={{ fontSize: r * 1.3 }}>
-          {n}
-        </text>
-      )}
+      {valgt && <circle cx={x} cy={y} r={r + 2.6} className="kart-valgt" />}
+      <Kartmerke x={x} y={y} r={r} n={n} hel={hel} natt={natt} puls={puls} glod={glod} merke={eid ? merkeboks(by, r, String(n).length, hel) : null} />
       {visNavn && (
         <text x={navn.x} y={navn.y} textAnchor={navn.anker} className="kart-navn" style={{ fontSize: navnestorrelse(by) }}>
           {by}
+          {/* Prisene i regionen: en liten pil rett etter navnet. */}
+          {trend && (
+            <tspan className={`kart-trendpil ${trend.klasse}`} dx="1.6" style={{ fontSize: navnestorrelse(by) * 0.6, opacity: trend.styrke }}>
+              {trend.klasse === 'opp' ? '▲' : '▼'}
+            </tspan>
+          )}
         </text>
       )}
       {leiepos && (
         <text x={leiepos.x} y={leiepos.y} textAnchor={leiepos.anker} className="kart-leie">
           {kartLeie(leie)}
         </text>
-      )}
-      {leie > 0 && (
-        // En mynt som stiger når leien kommer — forskjøvet per by, så de ikke går i takt.
-        <g className="kart-mynt" style={{ animationDelay: `${(i % 5) * 0.9}s` }}>
-          <Ikon navn="mynt" størrelse={8} x={x - 4} y={y - r - 10} />
-        </g>
       )}
     </g>
   )
