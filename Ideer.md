@@ -35,6 +35,15 @@ The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid groun
 11. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
 12. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
 
+## Graphics
+
+13. **Real paintings.** The 12 paintings are generated miniatures today: the same landscape shape in each painting's three colours, in the same gold frame. Draw each as its own small work in its artist's style — Solheim's romantic fjords, Aske's harbour realism, Lind's modern colour fields, Vik's contemporary work — and hang the collection on a gallery wall.
+14. **City properties that look like their city.** The 8 city properties from Pack 44 reuse the base drawings (`hybel-oslo` is the plain Hybel, `hytte-lofoten` the plain Hytte). Give them their own: a Bryggen house in Bergen, a rorbu in Lofoten, Bakklandet in Trondheim, a glass office block in Stavanger, and so on.
+15. **Proper startup logos.** Startups are still initials on a coloured tile. Give them marks like the 21 in `Papirlogo.tsx`, with a symbol for the industry.
+16. **Detail scenes for everything you own.** The large animated `Scene` exists only for businesses; properties, landmarks, luxury and paintings top out at 64 px. Give them the same big scene when opened — this is also the parked *Showroom for Luxury*.
+17. **Reports as statements.** The weekly, monthly and yearly reports (`Oppgjor.tsx`) have no graphics. Give them a bar per income source and a before → after for net worth, laid out like an annual report.
+18. **Loading screen and first frame.** The coin with the rising M animates on the loading screen, and the first view fades in instead of appearing all at once.
+
 ## Parked (not chosen yet)
 
 These ideas were suggested but not picked. They stay here so they can be moved up later. They are not part of any pack until they are chosen.
@@ -80,5 +89,4 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Colorful cartoon style.** Bright colors, rounded shapes and big icons.
 - **Notification badges** on tabs when something needs attention.
 - **Progress bar per business** that fills up and pays out when full.
-- **Showroom for Luxury** that you swipe through.
 - **Floating "+kr" numbers** on payouts.
