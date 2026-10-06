@@ -13,6 +13,14 @@ Version 1.0 was reached with Pack 43. Next:
 - **Pack 45 – The wide world:** A real world map, A growing world map, Hotels abroad and holiday apartments
 - **Pack 46 – A living map:** Day and night, Movement, City card
 
+Packs 47–51 are the road to v2.0:
+
+- **Pack 47 – Solid ground:** Ready for years of saves, A real late game
+- **Pack 48 – Your businesses, deeper:** Specialization at level 50, Staff with names and skills
+- **Pack 49 – The world turns:** Economic cycles, The calendar comes alive
+- **Pack 50 – Things happen:** Random events with choices, Rivals that fight back, Daily and weekly missions
+- **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus
+
 ## Property
 
 1. **Hotels abroad and holiday apartments.** Properties with seasons: Spain pays best in summer, the Alps in winter. Since Pack 11 the planes unlock six foreign cities with a property each and a world map in the Property tab, so new places (Spain, the Alps) can be added there with the same plane requirement.
@@ -25,34 +33,43 @@ Version 1.0 was reached with Pack 43. Next:
 5. **Movement.** Planes fly the routes on the world map, boats move along the coast, and a pulse runs out from a city when you buy there. Switched off with the reduced-motion setting.
 6. **City card.** Tapping a city opens a small card on the map itself, with what's for sale, the price trend, rent and the owner progress, with Buy buttons right there. The city view under the map (Pack 37) stays for the full list.
 
+## Road to v2.0
+
+The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid ground to carry it.
+
+7. **Ready for years of saves.** The balance bench runs past 1 mrd (today it stops there) and prints the time to 10 mrd, 100 mrd and 1 trillion. Every old save version (there are 20) is migrated to the latest in a test. The game is checked on a slow phone: two hours away costs ~300–390 ms CPU against the 500 ms limit. A short outside playtest before 2.0 is called done.
+8. **A real late game.** The ladder goes to a business that unlocks at kr 1.9 trillion, the goal ladder ends at Billionær (kr 1 trillion) and status tops out at Udødelig (1 000 points) — but nothing after 1 mrd has been measured or tuned. Measure it with the bench above, tune it, and give the hours after the first billion their own goals.
+9. **Specialization at level 50.** Choose a direction per business, for example *Volume* (more income) or *Premium* (higher value and status). The choice is permanent.
+10. **Staff with names and skills.** Junior, experienced or star; stars cost more but give more. (Managers with traits stay parked for now.)
+11. **Economic cycles.** A policy rate announced in Avisa, and boom and recession phases that move stocks, property and loan interest together. Includes a choice of fixed or variable rate (the variable rate follows the policy rate), and industry trends — weeks where "coffee is hot" (+20 % for cafés) or "the oil price falls", announced in the paper.
+12. **The calendar comes alive.** The calendar (from Monday 4 January 2027) starts to matter: holidays (Easter, 17 May with the sausage stand +200 %, Christmas), seasons and weather in the paper (sun for the lemonade stand, snow for the ski resort and the cabin), and weekday effects (restaurants and hotels earn more at the weekend, banks and offices on weekdays).
+13. **Random events with choices.** Crashes, booms, strikes, scandals and inspections, each with two or three ways to respond. Drawn from a hash, not the die.
+14. **Rivals that fight back.** Today the rivals grow and can be taken over, but never come after you. Let them bid against you for landmarks, try a hostile takeover of one of your businesses, or poach your staff.
+15. **Daily and weekly missions.** Short goals with small rewards, so a five-minute visit has a point too.
+16. **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
+17. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
+18. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
+
 ## Parked (not chosen yet)
 
 These ideas were suggested but not picked. They stay here so they can be moved up later. They are not part of any pack until they are chosen.
 
 **Game ideas**
-- **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus.
 - **Temporary boosts.** Marketing campaigns for ×2 income for a limited time, followed by a cooldown.
 - **Offline income report.** A "while you were away" screen with a Claim button and an hour cap that managers can raise.
-- **Daily and weekly missions.**
-- **Random events.** Crashes, booms, strikes, scandals and inspections, each with choices for how to respond.
 - **Auction house.** Rare cars and art sold at auctions with rising bids.
 - **Sound.** Synthesized coin and level-up sounds using Web Audio.
 - **Other sports clubs.** Hockey and basketball, in addition to football.
 
 **Expansions of what exists**
-- **Specialization at level 50.** Choose a direction per business, for example *Volume* (more income) or *Premium* (higher value and status). The choice is permanent.
 - **Opening hours and rush hours.** The kiosk earns most in the evening, the café in the morning and the restaurant at dinner, using the game clock.
-- **Weekday effects.** Restaurants and hotels earn more at the weekend, banks and offices on weekdays.
-- **Staff with names and skills.** Junior, experienced or star; stars cost more but give more.
 - **Managers with traits.** Careful (safe offline income), Aggressive (more income, risk of mistakes) or Night owl (longer offline cap).
 - **Business history.** A graph per business of income over time, when it was started and total earned.
 - **Selling businesses.** Sell to a buyer at a price based on income, with bids that vary.
-- **Industry trends.** Weeks where "coffee is hot" (+20 % for cafés) or "oil price falls", announced in the paper.
 - **Limit orders.** "Buy NLT if the price falls to 450"; a first step toward auto-trading.
 - **Watchlist.** Star the stocks and coins you follow so they show at the top.
 - **Crypto events.** Listing on a big exchange, hacked exchange, and "rug pull" for the smallest coins.
 - **Short selling.** Bet against a stock; risky and requires a loan.
-- **Fixed or variable rate.** A variable rate follows a policy rate announced in the paper.
 - **Credit rating.** AAA to C based on how you handle debt; affects interest and credit limit.
 - **Mortgages.** Borrow against specific properties at a better rate.
 - **Vacancy and tenants.** Properties can stand empty and bad tenants cost money; a property manager reduces the risk.
@@ -62,8 +79,6 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Using your items.** A boat trip on Sunday for status that day, a jet to "a meeting".
 - **Collection bonuses.** All the cars gives "Car collector", all the watches "Watch nerd", and so on.
 - **Events you can attend.** Charity gala, yacht race, opera premiere: cost money, give status, appear in the paper.
-- **Holidays.** Easter, 17 May (sausage stand +200 %), Christmas.
-- **Seasons and weather.** The weather in the paper affects business: sun for the lemonade stand, snow for the cabin.
 - **Paper ads.** Offers in the paper, for example "Cabin for sale at 20 % discount, today only".
 - **Rewards for achievements.** Small permanent bonuses or cash rewards.
 - **Hidden achievements.** "Bought at the bottom", "Night owl" and so on.
