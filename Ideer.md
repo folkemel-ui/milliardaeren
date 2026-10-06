@@ -24,9 +24,8 @@ Items from *Road to v2.0*. Commits: `Pakke N: …`.
 
 ### Graphics track (Packs G1–G7)
 
-Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 (the foundation), G2 (the businesses), G3 (the maps) and G4 (faces and names) are done; every later pack draws against the style G1 set.
+Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 (the foundation), G2 (the businesses), G3 (the maps), G4 (faces and names) and G5 (things you own) are done; every later pack draws against the style G1 set.
 
-- **Pack G5 – Things you own:** Cars that are visible; Watches, boats and planes up close; No duplicate drawings; City properties that look like their city
 - **Pack G6 – Stadium and gallery:** The crowd as a mass, not confetti; A real stadium at each stage; Real paintings
 - **Pack G7 – The finish:** Detail scenes for everything you own, Reports as statements, Loading screen and first frame
 
@@ -61,25 +60,18 @@ The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid groun
 ## Graphics
 
 13. **Real paintings.** The 12 paintings are generated miniatures today: the same landscape shape in each painting's three colours, in the same gold frame. Draw each as its own small work in its artist's style — Solheim's romantic fjords, Aske's harbour realism, Lind's modern colour fields, Vik's contemporary work — and hang the collection on a gallery wall.
-14. **City properties that look like their city.** The 8 city properties from Pack 44 reuse the base drawings (`hybel-oslo` is the plain Hybel, `hytte-lofoten` the plain Hytte). Give them their own: a Bryggen house in Bergen, a rorbu in Lofoten, Bakklandet in Trondheim, a glass office block in Stavanger, and so on.
-15. **Detail scenes for everything you own.** The large animated `Scene` exists only for businesses; properties, landmarks, luxury and paintings top out at 64 px. Give them the same big scene when opened — this is also the parked *Showroom for Luxury*.
-16. **Reports as statements.** The weekly, monthly and yearly reports (`Oppgjor.tsx`) have no graphics. Give them a bar per income source and a before → after for net worth, laid out like an annual report.
-17. **Loading screen and first frame.** The coin with the rising M animates on the loading screen, and the first view fades in instead of appearing all at once.
+14. **Detail scenes for everything you own.** The large animated `Scene` exists only for businesses; properties, landmarks, luxury and paintings top out at 64 px. Give them the same big scene when opened — this is also the parked *Showroom for Luxury*.
+15. **Reports as statements.** The weekly, monthly and yearly reports (`Oppgjor.tsx`) have no graphics. Give them a bar per income source and a before → after for net worth, laid out like an annual report.
+16. **Loading screen and first frame.** The coin with the rising M animates on the loading screen, and the first view fades in instead of appearing all at once.
 
 ## Art direction
 
 From a review of all 72 drawings, the rivals, the stadium, both maps and the 21 logos: the art looks amateurish mainly because the drawings are toy-coloured flat clip-art on a 48×48 grid inside a grown-up dark-and-gold interface. The foundation is in place (G1): the art direction is written in the header of `Illustrasjoner.tsx`, the helpers live in `Tegnestil.tsx`, and `?galleri` shows the style sheet. The items below redraw each category against it.
 
-**Things you own**
-
-18. **Cars that are visible.** The hypercar is dark on a dark background, so only the gold trim shows. Each car gets a real body shape, shine, rims and its own colour, and they look different from each other.
-19. **Watches, boats and planes up close.** The three watches sit on the same red cushion and look nearly alike. Give them a dial, bezel and strap, with the diamond watch clearly the most expensive. Boats and planes get the right proportions and a hint of shine on metal and water.
-20. **No duplicate drawings.** Every id gets its own drawing — today the cabins, bedsits, farms and forests repeat (three identical cabins, three bedsits, two farms, two forests). *City properties that look like their city* covers the eight city versions; this covers the rest.
-
 **Stadium**
 
-21. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
-22. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
+17. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
+18. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
 
 ## Parked (not chosen yet)
 

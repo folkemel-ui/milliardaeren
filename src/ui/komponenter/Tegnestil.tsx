@@ -200,7 +200,7 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
 /** Et punkt flyttet `d` enheter inn i bildet. */
 export const inn = (x: number, y: number, d: number): [number, number] => [+(x + d * DYBDE.x).toFixed(2), +(y + d * DYBDE.y).toFixed(2)]
 
-const pkt = (...p: [number, number][]) => p.map(([x, y]) => `${+x.toFixed(2)},${+y.toFixed(2)}`).join(' ')
+export const pkt = (...p: [number, number][]) => p.map(([x, y]) => `${+x.toFixed(2)},${+y.toFixed(2)}`).join(' ')
 
 /**
  * En kloss: fronten (b × h, nederste kant på y), siden mot høyre i skygge og

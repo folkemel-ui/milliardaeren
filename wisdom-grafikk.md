@@ -4,7 +4,7 @@ For the session in charge of graphics and animation (packs G1–G7, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G4.
+Update it at the end of each G pack, and delete what stops being true. Updated after G5.
 
 ---
 
@@ -50,6 +50,15 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   Natural Earth). For G4 all four again (painted magazine cover, round in lists and
   cover in gallery/Avisa, open fonts → paths, stocks free shapes and crypto coins).
   Naming each rival's look in the option (age, hair, clothes, background) worked.
+  For G5 Folke took three recommendations (showroom, watch case, the city's own
+  building type) but *not* the bigger scope: "only the G5 list", so 17 old-style
+  drawings stay (see §7). Make the smaller-scope option one you'd be happy with.
+- **Check the data before you put places in a question.** For G5 I offered "Bergen:
+  Bryggen, Trondheim: Bakklandet …" from memory. `sted` in `EIENDOMSTYPER` said
+  otherwise: the Bergen ids are Møhlenpris, Nordnes and Fana, `hybel-oslo` is
+  Blindern, `leilighet` is Grünerløkka, `kontorbygg-stavanger` is Forus (inland). I
+  had to move and redraw half the batch, and Bryggen was dropped. Grep the data
+  first and name the real places in the option.
 - **Put outside sources in the question.** Fetching Natural Earth was an option in
   the G3 questions, so Folke's answer was the approval. Do the same for any download,
   font or dataset: name the source, the licence and that nothing loads at runtime.
@@ -130,6 +139,20 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   main story; lists show the mark alone. `bland()` mixes colours; `papirfarge(id)`
   gives the colour. Startups: `STARTUPMERKER` keyed by the idea's *name*, so a new
   idea in `STARTUP_IDEER` needs a mark (the test fails otherwise).
+- **Things you own (G5)**: cars stand in `Utstilling` (showroom, reflection) built
+  from `Bilhjul` (felg styles stal/eiker/aero/wire/racing/krom) and `Hjulbue`; watches
+  sit in `Klokkeskrin` (case colour rises with price) with `Urkasse` (horn={false}
+  for the pocket watch); houses use `Vindu`, `Kledning`, `Gavlhus` (gable to the
+  front, draw left to right), `Langhus` (ridge along the front) and `Rekkerad`;
+  `Sykkel` gives street-distance scale. `pkt` is now exported from Tegnestil.
+- **The scale rule decides the distance for buildings**: at gate distance a storey is
+  32 units, so two storeys is the most that fits. Blocks, bygårder, Bryggen-like rows,
+  terraces and towers go fjern (8 per storey). Watches break the rule on purpose (a
+  macro shot); vehicles without people beside them may be compressed in length, never
+  height. This is now written in the header of `Illustrasjoner.tsx`.
+- **Ground details go in `Kantfade`** (the windsock, the helipad's H, the red
+  carpet): `utklipp` drops `Kantfade`, so they vanish in the hangar and harbour.
+  `grafikkG5.test.ts` checks it. Wakes and rain are part of the drawing and stay.
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
   `grafikkG4.test.ts` checks all three. The cream was the strictest: five colours that
@@ -294,6 +317,25 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   not `##`. When the last item under one goes, the subheading must go too; the
   scratchpad `ferdig.mjs` from G4 removes empty bold subheadings as well as the pack
   line and items, and renumbers. Check the diff afterwards.
+- **`splice.mjs` (G5)**: `//@@ bytt Navn` replaces `function Navn(` and the doc
+  comment right above it, `//@@ før <line start>` inserts, `//@@ nystil ids` adds to
+  `NY_STIL`. An empty `bytt` block deletes a function (old helpers like `Hjul`,
+  `Klokke`, `Understell`). The first version's regex matched from the *first* `/**`
+  in the file and silently kept old comments; find the last `\n/**` before the
+  function and check only whitespace follows its `*/`.
+- **`cat > fil` without a heredoc waits for stdin** and hung Bash for two minutes.
+  Write temporary files with the Write tool.
+- **A buy-everything test save crashed the game** at the day change: `avis.ts` has 8
+  titles but there are 12 status levels (an engine bug, flagged as its own task).
+  Keep test saves below status level 8 (`STATUSNIVAAER[7].poeng`) until it's fixed.
+- **A spawned task's worktree (`.claude/worktrees/…`) doubles the test count**:
+  vitest picks it up. Both copies pass, so it's harmless; just don't be surprised.
+- **Long decimals in markup** come from shared helpers too (Bakke, Tre, `Figur`'s
+  exact 0.21875 scale), so a "no long decimals" test can't pass without touching
+  G1–G3. Round inside your own helpers (`Urkasse` leaked `10.799999`) and move on.
+- **The gallery doesn't always re-render after a splice**: reload before the
+  contact sheet, and select figures by caption, not index (the order isn't the
+  registry order).
 - **Douglas–Peucker on a closed ring**: first and last point are the same, so the
   line distance divides by zero. Use point distance for a degenerate segment. The
   first run returned zero points everywhere.
@@ -341,8 +383,11 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   `Norgeskart`/`Verdenskart` could be lazy-loaded in Eiendom (a screen change; ask).
 - **The 32 px rival list** in Investeringer shows business drawings very small. The
   scale rule makes the kiosk and the lemonade stand tiny there; G7 could crop or zoom.
-- **G5**: `hytte-trysil`, `hytte-lofoten` (shown as "Rorbu") and `kontorbygg-stavanger`
-  share new drawings; each needs its own. Cars in the garage are shown as cutouts at
-  64 px, so the body must read without a floor.
+- **G5 is done** (19 luxury items, 15 properties, farms and forests; every owned id
+  has its own drawing). **Still old style, in no pack** (Folke chose not to include
+  them): `kjopesenter`, `naeringsbygg`, `oy`, the six foreign cities, the four
+  Marbella/Zermatt properties and the four landmarks. G7's detail scenes need them
+  in the new style, so raise it before G7. `pakke42.test.ts` uses `kjopesenter` as
+  its old-style example; change it when that one is redrawn.
 - Once every drawing is in `NY_STIL`, remove `F`, `Svg`, `Grunn`, the old hairline rule
   and the 48 branch of the test, and turn the "old style" note in the header into history.
