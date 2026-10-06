@@ -10,13 +10,40 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 Version 1.0 was reached with Pack 43.
 
-Packs 47–51 are the road to v2.0:
+The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
+
+### Game track: the road to v2.0 (Packs 47–51)
+
+Items from *Road to v2.0*. Commits: `Pakke N: …`.
 
 - **Pack 47 – Solid ground:** Ready for years of saves, A real late game
 - **Pack 48 – Your businesses, deeper:** Specialization at level 50, Staff with names and skills
 - **Pack 49 – The world turns:** Economic cycles, The calendar comes alive
 - **Pack 50 – Things happen:** Random events with choices, Rivals that fight back, Daily and weekly missions
 - **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus
+
+### Graphics track (Packs G1–G7)
+
+Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 comes first — every later pack draws against the style it sets.
+
+- **Pack G1 – The foundation:** One art direction, written down; A bigger canvas; Shading and depth; A real ground, not a grey bar; Consistent scale
+- **Pack G2 – Businesses:** Businesses as real places
+- **Pack G3 – The map:** A proper map of Norway, Calmer markers, The world map in the same style
+- **Pack G4 – Faces and names:** Real portraits of the rivals, Logos that look like companies, not app icons, Proper startup logos
+- **Pack G5 – Things you own:** Cars that are visible; Watches, boats and planes up close; No duplicate drawings; City properties that look like their city
+- **Pack G6 – Stadium and gallery:** The crowd as a mass, not confetti; A real stadium at each stage; Real paintings
+- **Pack G7 – The finish:** Detail scenes for everything you own, Reports as statements, Loading screen and first frame
+
+G1 is five items but one change: the style guide plus the shared drawing helpers (canvas, light, shadow, ground, scale), proved on a handful of drawings. G2 is one item because it is 13 businesses × 4 growth stages. G7 comes last because the big detail scenes need the redrawn art.
+
+### Working side by side
+
+- **Who owns what.** The graphics track owns the drawings and how they render: `Illustrasjoner.tsx`, `BedriftIkon.tsx`, `Rivalportrett.tsx`, `Stadion.tsx`, `Klubbvaapen.tsx`, `Papirlogo.tsx`, `StartupLogo.tsx`, the painting miniature in `Kunst.tsx`, `Norgeskart.tsx`, `Verdenskart.tsx`, `Gatebilde.tsx`, the map geometry in `ui/norgeskartet.ts` and `ui/verdenskartet.ts`, `Oppgjor.tsx`, the logo files (`Logo.tsx`, `public/ikon.svg`, `index.html`, `scripts/lag-ikoner.mjs`) and `Galleri.tsx`. The game track owns `src/engine`, `src/state` and the screens' logic. `styles.css`, the screens and `Ideer.md` are shared: change only what your pack needs.
+- **Commit only your own files.** `git add <paths>`, never `git add -A` — the other session may have work in progress in the same folder. Check `git status` before committing and leave the other track's changes alone.
+- **The graphics track never changes the engine's behaviour.** No dice, no balance, no save version — the golden master and the bench stay unchanged by every G pack.
+- **New content in the game track gets a drawing in the current style.** If G1 has landed, follow its rules; otherwise use the old ones and leave the redraw to the graphics track (note it in the commit message).
+- **`Ideer.md`:** each track removes only its own finished items and pack line, by title. Pack numbers don't depend on item numbers, so renumbering is harmless.
+- **Releases:** v2.0 is reached with Pack 51. The graphics track can ship with it or after it. Folke decides.
 
 ## Road to v2.0
 
