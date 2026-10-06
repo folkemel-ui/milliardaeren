@@ -8,9 +8,7 @@ Stack: React + Vite + TypeScript, pure seeded engine (no `Math.random`/`Date.now
 
 A suggested order, grouped so each pack feels complete when played. The order is a suggestion; packs can be swapped or reshuffled at any time. Items are referred to by title.
 
-Version 1.0 was reached with Pack 43. Next:
-
-- **Pack 46 – A living map:** Day and night, Movement, City card
+Version 1.0 was reached with Pack 43.
 
 Packs 47–51 are the road to v2.0:
 
@@ -20,28 +18,22 @@ Packs 47–51 are the road to v2.0:
 - **Pack 50 – Things happen:** Random events with choices, Rivals that fight back, Daily and weekly missions
 - **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus
 
-## Map
-
-1. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
-2. **Movement.** Planes fly the routes on the world map, boats move along the coast, and a pulse runs out from a city when you buy there. Switched off with the reduced-motion setting.
-3. **City card.** Tapping a city opens a small card on the map itself, with what's for sale, the price trend, rent and the owner progress, with Buy buttons right there. The city view under the map (Pack 37) stays for the full list.
-
 ## Road to v2.0
 
 The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid ground to carry it.
 
-4. **Ready for years of saves.** The balance bench runs past 1 mrd (today it stops there) and prints the time to 10 mrd, 100 mrd and 1 trillion. Every old save version (there are 20) is migrated to the latest in a test. The game is checked on a slow phone: two hours away costs ~300–390 ms CPU against the 500 ms limit. A short outside playtest before 2.0 is called done.
-5. **A real late game.** The ladder goes to a business that unlocks at kr 1.9 trillion, the goal ladder ends at Billionær (kr 1 trillion) and status tops out at Udødelig (1 000 points) — but nothing after 1 mrd has been measured or tuned. Measure it with the bench above, tune it, and give the hours after the first billion their own goals.
-6. **Specialization at level 50.** Choose a direction per business, for example *Volume* (more income) or *Premium* (higher value and status). The choice is permanent.
-7. **Staff with names and skills.** Junior, experienced or star; stars cost more but give more. (Managers with traits stay parked for now.)
-8. **Economic cycles.** A policy rate announced in Avisa, and boom and recession phases that move stocks, property and loan interest together. Includes a choice of fixed or variable rate (the variable rate follows the policy rate), and industry trends — weeks where "coffee is hot" (+20 % for cafés) or "the oil price falls", announced in the paper.
-9. **The calendar comes alive.** The calendar (from Monday 4 January 2027) starts to matter: holidays (Easter, 17 May with the sausage stand +200 %, Christmas), seasons and weather in the paper (sun for the lemonade stand, snow for the ski resort and the cabin), and weekday effects (restaurants and hotels earn more at the weekend, banks and offices on weekdays).
-10. **Random events with choices.** Crashes, booms, strikes, scandals and inspections, each with two or three ways to respond. Drawn from a hash, not the die.
-11. **Rivals that fight back.** Today the rivals grow and can be taken over, but never come after you. Let them bid against you for landmarks, try a hostile takeover of one of your businesses, or poach your staff.
-12. **Daily and weekly missions.** Short goals with small rewards, so a five-minute visit has a point too.
-13. **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
-14. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
-15. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
+1. **Ready for years of saves.** The balance bench runs past 1 mrd (today it stops there) and prints the time to 10 mrd, 100 mrd and 1 trillion. Every old save version (there are 20) is migrated to the latest in a test. The game is checked on a slow phone: two hours away costs ~300–390 ms CPU against the 500 ms limit. A short outside playtest before 2.0 is called done.
+2. **A real late game.** The ladder goes to a business that unlocks at kr 1.9 trillion, the goal ladder ends at Billionær (kr 1 trillion) and status tops out at Udødelig (1 000 points) — but nothing after 1 mrd has been measured or tuned. Measure it with the bench above, tune it, and give the hours after the first billion their own goals.
+3. **Specialization at level 50.** Choose a direction per business, for example *Volume* (more income) or *Premium* (higher value and status). The choice is permanent.
+4. **Staff with names and skills.** Junior, experienced or star; stars cost more but give more. (Managers with traits stay parked for now.)
+5. **Economic cycles.** A policy rate announced in Avisa, and boom and recession phases that move stocks, property and loan interest together. Includes a choice of fixed or variable rate (the variable rate follows the policy rate), and industry trends — weeks where "coffee is hot" (+20 % for cafés) or "the oil price falls", announced in the paper.
+6. **The calendar comes alive.** The calendar (from Monday 4 January 2027) starts to matter: holidays (Easter, 17 May with the sausage stand +200 %, Christmas), seasons and weather in the paper (sun for the lemonade stand, snow for the ski resort and the cabin), and weekday effects (restaurants and hotels earn more at the weekend, banks and offices on weekdays).
+7. **Random events with choices.** Crashes, booms, strikes, scandals and inspections, each with two or three ways to respond. Drawn from a hash, not the die.
+8. **Rivals that fight back.** Today the rivals grow and can be taken over, but never come after you. Let them bid against you for landmarks, try a hostile takeover of one of your businesses, or poach your staff.
+9. **Daily and weekly missions.** Short goals with small rewards, so a five-minute visit has a point too.
+10. **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
+11. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
+12. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
 
 ## Parked (not chosen yet)
 

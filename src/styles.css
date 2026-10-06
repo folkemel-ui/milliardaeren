@@ -5489,3 +5489,112 @@ button.maalstripe {
 .sesong-aar span.naa {
   background: var(--gull);
 }
+
+/* ─────────────────────────────────────────────── Et levende kart (Pakke 46) */
+
+.kart-ramme {
+  position: relative;
+}
+
+.norgeskart-ramme {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Dag og natt: landet og havet mørkner etter klokka i spillet (--natt 0–1). */
+.kart-natt .kart-land {
+  fill: color-mix(in srgb, var(--kant), #0a1024 calc(var(--natt, 0) * 55%));
+}
+
+.kart-natt .kart-hav {
+  fill: color-mix(in srgb, color-mix(in srgb, var(--flate-2) 70%, transparent), #050814 calc(var(--natt, 0) * 50%));
+}
+
+.kart-lys,
+.reisende {
+  pointer-events: none;
+}
+
+/* En ring som brer seg ut fra byen når du kjøper noe der. */
+.kart-puls {
+  fill: none;
+  stroke: var(--gull);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kart-puls 1.2s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes kart-puls {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* Bykortet: et lite kort på kartet ved byen du trykket på. */
+.bykort {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(210px, 64%);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--gull-mørk);
+  background: var(--flate);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  font-size: var(--skrift-2);
+  text-align: left;
+}
+
+.bykort-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bykort-lukk {
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  color: var(--tekst-dempet);
+  font: inherit;
+  font-size: var(--skrift-3);
+  cursor: pointer;
+}
+
+.bykort-spor {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--kant);
+  overflow: hidden;
+}
+
+.bykort-spor span {
+  display: block;
+  height: 100%;
+  background: var(--gull);
+}
+
+.bykort-kjop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: var(--skrift-1);
+}
+
+.bykort .lenkeknapp {
+  align-self: flex-start;
+}

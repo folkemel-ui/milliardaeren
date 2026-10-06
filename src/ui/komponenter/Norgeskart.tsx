@@ -6,6 +6,9 @@ import { eierHeleByen, kartLeie, kronesti, leieIBy, trendFor, trendRing, useKlyp
 import { perSek } from '../format'
 import { BYLISTE, byPunkt, etiketter, HOVEDOMRAADE, hovedpunkt, INNFELT, innfeltpunkt, KUN_JORD, navnestorrelse, radius, VISNING } from '../norgeskartet'
 import { Ikon } from './Ikoner'
+import { morke } from '../dagognatt'
+import { Reisende, Skipsymbol, usePuls } from './Bevegelse'
+import { Bykort } from './Bykort'
 
 /*
  * Et stilisert Norgeskart tegnet fra ekte koordinater. Hovedkartet viser
@@ -54,6 +57,12 @@ const LOFOTEN: [number, number][] = [
 
 const punkter = (liste: [number, number][], p: (x: [number, number]) => [number, number]) => liste.map((k) => p(k).map((v) => v.toFixed(1)).join(',')).join(' ')
 
+/** Kystruta skipet går (Pakke 46): fra Bergen langs kysten rundt Lindesnes og inn Oslofjorden — litt ute på sjøen. */
+const KYSTRUTA: [number, number][] = [
+  [4.75, 60.45], [4.75, 59.6], [5.05, 59.05], [5.35, 58.5], [6.0, 58.05], [6.9, 57.8], [8.0, 57.95], [8.9, 58.3], [9.6, 58.8], [10.4, 59.05], [10.6, 59.45],
+]
+const KYSTSTI = 'M' + KYSTRUTA.map((p) => hovedpunkt(p).map((v) => v.toFixed(1)).join(',')).join(' L')
+
 /** Hvor mange eiendommer du eier i hver by. */
 function perBy(s: Spilltilstand): Partial<Record<By, number>> {
   const antall: Partial<Record<By, number>> = {}
@@ -93,17 +102,31 @@ export function Norgeskart({
   const [[vLon, nLat], [oLon, sLat]] = HOVEDOMRAADE
   const [rx1, ry1] = innfeltpunkt([vLon, nLat])
   const [rx2, ry2] = innfeltpunkt([oLon, sLat])
+  const natt = morke(s.sek)
+  const valgtNorsk = valgt && (BYLISTE as By[]).includes(valgt) ? (valgt as NorskBy) : null
+  const [vx, vy] = valgtNorsk ? byPunkt(valgtNorsk) : [0, 0]
 
   return (
+    <div className="kart-ramme norgeskart-ramme">
     <svg
       ref={svg}
-      className="norgeskart"
+      className="norgeskart kart-natt"
+      style={{ ['--natt' as string]: natt.toFixed(3) }}
       viewBox={`${VISNING.x} ${VISNING.y} ${VISNING.bredde} ${VISNING.hoyde}`}
       role="group"
       aria-label="Kart over eiendommene dine"
       {...klyp}
     >
+      <defs>
+        <radialGradient id="kart-lysglod">
+          <stop offset="0" stopColor="#ffd970" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#ffd970" stopOpacity="0" />
+        </radialGradient>
+      </defs>
       <polygon points={punkter(FASTLAND, hovedpunkt)} className="kart-land" />
+      <Reisende d={KYSTSTI} periode={42_000} snu="speil">
+        <Skipsymbol />
+      </Reisende>
 
       {/* Innfeltet: hele landet, med rammen rundt det hovedkartet viser. */}
       <g className="kart-innfelt" aria-hidden="true">
@@ -114,9 +137,13 @@ export function Norgeskart({
       </g>
 
       {BYLISTE.map((by, i) => (
-        <Byen key={by} s={s} by={by} i={i} n={antall[by] ?? 0} valgt={valgt === by} velg={velg} lang={lang} />
+        <Byen key={by} s={s} by={by} i={i} n={antall[by] ?? 0} valgt={valgt === by} velg={velg} lang={lang} natt={natt} />
       ))}
     </svg>
+      {valgtNorsk && (
+        <Bykort s={s} by={valgtNorsk} x={(vx - VISNING.x) / VISNING.bredde} y={(vy - VISNING.y) / VISNING.hoyde} lukk={() => velg(null)} />
+      )}
+    </div>
   )
 }
 
@@ -128,6 +155,7 @@ function Byen({
   valgt,
   velg,
   lang,
+  natt,
 }: {
   s: Spilltilstand
   by: NorskBy
@@ -136,9 +164,12 @@ function Byen({
   valgt: boolean
   velg: (by: By | null) => void
   lang: ReturnType<typeof useLangtrykk>
+  /** Hvor mørkt det er på kartet, 0–1. Byene du eier, lyser om kvelden. */
+  natt: number
 }) {
   const [x, y] = byPunkt(by)
   const eid = n > 0
+  const puls = usePuls(n)
   const r = radius(by, eid)
   const trend = trendRing(trendFor(s, by))
   const leie = leieIBy(s, by)
@@ -157,6 +188,10 @@ function Byen({
     >
       {/* Større, usynlig treffflate så byene er lette å treffe med fingeren. */}
       <circle cx={x} cy={y} r={14} className="kart-treff" />
+      {/* Lysene i byene du eier tennes når det mørkner. */}
+      {eid && natt > 0 && <circle cx={x} cy={y} r={r + 10} fill="url(#kart-lysglod)" className="kart-lys" style={{ opacity: natt }} />}
+      {/* En ring som brer seg ut når du kjøper noe i byen. */}
+      {puls > 0 && <circle key={puls} cx={x} cy={y} r={r + 2} className="kart-puls" />}
       {trend && <circle cx={x} cy={y} r={r + 3} className={`kart-trend ${trend.klasse}`} style={{ strokeOpacity: trend.styrke }} />}
       <circle cx={x} cy={y} r={r} className="kart-prikk" />
       {/* Eier du hele byen, står det en krone på skrå over prikken. */}

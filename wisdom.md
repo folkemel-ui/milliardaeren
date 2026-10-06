@@ -272,6 +272,7 @@ session; delete what stops being true.
   Dubai. A new foreign city needs a `BYPLASS` entry, and `pakke45.test.ts` checks it shows
   inside the edge at the level its plane opens. `?galleri` shows all four map stages.
   Seasonal properties (`sesong`) multiply rent by `SESONGER[...][month]` inside `leieHverPerSek`.
+- **Living maps** (Pack 46): day and night uses `morke(s.sek)` from `ui/dagognatt.ts` as a CSS var `--natt` on the map. Planes and the coastal ship are `<Reisende>` (`Bevegelse.tsx`), which moves via requestAnimationFrame and renders nothing with reduced motion. The buy ring is CSS (`.kart-puls`, `usePuls`). The city card (`Bykort.tsx`) is HTML over the SVG inside `.kart-ramme`. Hooks using `useSyncExternalStore` need a third argument (server snapshot), or `renderToStaticMarkup` tests fail.
 - **Testing a migration on a real save**: park the browser tab on `/ikon.svg` while changing
   the engine (stopping the server can wipe that port's storage), then load the game. The game
   always copies the pre-migration save to `milliardaer.lagring.korrupt`. That's the safety

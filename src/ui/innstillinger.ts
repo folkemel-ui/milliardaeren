@@ -82,9 +82,9 @@ function abonner(l: () => void): () => void {
 }
 
 export function useBevegelse(): Bevegelse {
-  return useSyncExternalStore(abonner, lesBevegelse)
+  return useSyncExternalStore(abonner, lesBevegelse, lesBevegelse)
 }
 
 export function useVarselnivaa(): Varselnivaa {
-  return useSyncExternalStore(abonner, lesVarsler)
+  return useSyncExternalStore(abonner, lesVarsler, lesVarsler)
 }
