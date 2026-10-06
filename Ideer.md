@@ -39,10 +39,48 @@ The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid groun
 
 13. **Real paintings.** The 12 paintings are generated miniatures today: the same landscape shape in each painting's three colours, in the same gold frame. Draw each as its own small work in its artist's style — Solheim's romantic fjords, Aske's harbour realism, Lind's modern colour fields, Vik's contemporary work — and hang the collection on a gallery wall.
 14. **City properties that look like their city.** The 8 city properties from Pack 44 reuse the base drawings (`hybel-oslo` is the plain Hybel, `hytte-lofoten` the plain Hytte). Give them their own: a Bryggen house in Bergen, a rorbu in Lofoten, Bakklandet in Trondheim, a glass office block in Stavanger, and so on.
-15. **Proper startup logos.** Startups are still initials on a coloured tile. Give them marks like the 21 in `Papirlogo.tsx`, with a symbol for the industry.
+15. **Proper startup logos.** Startups are still initials on a coloured tile. Give them marks in the same style as the stock logos (see *Logos that look like companies, not app icons*), with a symbol for the industry.
 16. **Detail scenes for everything you own.** The large animated `Scene` exists only for businesses; properties, landmarks, luxury and paintings top out at 64 px. Give them the same big scene when opened — this is also the parked *Showroom for Luxury*.
 17. **Reports as statements.** The weekly, monthly and yearly reports (`Oppgjor.tsx`) have no graphics. Give them a bar per income source and a before → after for net worth, laid out like an annual report.
 18. **Loading screen and first frame.** The coin with the rising M animates on the loading screen, and the first view fades in instead of appearing all at once.
+
+## Art direction
+
+From a review of all 72 drawings, the rivals, the stadium, both maps and the 21 logos: the art looks amateurish mainly because the drawings are toy-coloured flat clip-art on a 48×48 grid inside a grown-up dark-and-gold interface. The first five items are the foundation; the rest redraw each category against it. The drawing rules at the top of `Illustrasjoner.tsx` must be rewritten to match.
+
+**The foundation**
+
+19. **One art direction, written down.** A muted palette tuned to the dark-and-gold interface (today's `F` palette has toy colours such as `#d64545` red and `#f4d35e` yellow), one light direction (top left) and one shadow tone per colour. Written into the header of `Illustrasjoner.tsx`; every drawing is then redrawn against it.
+20. **A bigger canvas.** From 48×48 to 96×96, so there is room for framed windows, real roof shapes and people with proportions. Small icons scale down from the same drawing.
+21. **Shading and depth.** A shadow side on every building, soft cast shadows on the ground, a slight gradient in sky and sea. Today everything is flat colour on flat colour.
+22. **A real ground, not a grey bar.** Every drawing stands on the same rounded grey strip (`Grunn`), which looks like a placeholder. Pavement for businesses, grass for houses, a quay for boats, a showroom floor for cars — each fitted to its subject.
+23. **Consistent scale.** A bedsit, an office tower and a ski resort are drawn the same size today. Small things small, large things large, with a sense of distance.
+
+**Businesses and items**
+
+24. **Businesses as real places.** The restaurant is a red wall with two arched windows, the hotel a narrow block. Each business gets a recognizable building with a storefront, sign, entrance and street life; the four growth stages are clearly visible and stage 3 looks expensive.
+25. **Cars that are visible.** The hypercar is dark on a dark background, so only the gold trim shows. Each car gets a real body shape, shine, rims and its own colour, and they look different from each other.
+26. **Watches, boats and planes up close.** The three watches sit on the same red cushion and look nearly alike. Give them a dial, bezel and strap, with the diamond watch clearly the most expensive. Boats and planes get the right proportions and a hint of shine on metal and water.
+27. **No duplicate drawings.** Every id gets its own drawing — today the cabins, bedsits, farms and forests repeat (three identical cabins, three bedsits, two farms, two forests). *City properties that look like their city* covers the eight city versions; this covers the rest.
+
+**People**
+
+28. **Real portraits of the rivals.** Today they look like a default chat-app avatar: dot eyes, the same face shape, smile and pose, the same skin tone. Give them individual faces, different ages, clothing and a background that suits each, like a business-magazine cover. A thin frame instead of the thick coloured ring.
+
+**Stadium**
+
+29. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
+30. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
+
+**Map**
+
+31. **A proper map of Norway.** Today it is a rough blob with few points, no Sweden, no difference between land and sea, and a tiny Lofoten inset. A detailed coastline with fjords and islands, neighbouring countries in grey, a sea colour, light mountain shading, and city labels that don't sit on the markers.
+32. **Calmer markers.** The glowing gold coins with numbers look like a mobile game. A small clean dot with the count as a small badge, and gold only for cities you fully own.
+33. **The world map in the same style.** The coastlines are thin outlines and land is almost the colour of the sea. Same style as the Norway map, so the two read as one map.
+
+**Stocks and crypto**
+
+34. **Logos that look like companies, not app icons.** All 21 are a glyph on a rounded square today (a fish, a wifi symbol for telecom, a die, DNA). Give each company its own shape and its own typeface for a short wordmark — Bergen Shipping as a classic crest, Nordlys Tech as a modern geometric mark.
 
 ## Parked (not chosen yet)
 
