@@ -81,9 +81,9 @@ const prosent = (andel: number) => `${Math.round(Math.abs(andel) * 100)} %`
 
 /**
  * Hva avisa kaller deg, etter statusnivå. Jo høyere status, jo mer skriver
- * avisa om deg — og jo mindre anonymt.
+ * avisa om deg — og jo mindre anonymt. Én per nivå i STATUSNIVAAER (en test passer på).
  */
-const TITLER = [
+export const TITLER = [
   'Den unge gründeren',
   'Lokalkjendisen',
   'Den lovende gründeren',
@@ -92,6 +92,9 @@ const TITLER = [
   'Magnaten',
   'Tycoonen',
   'Legenden',
+  'Næringslivsikonet',
+  'Finansmonarken',
+  'Den udødelige',
 ]
 
 export function tittel(s: Spilltilstand): string {

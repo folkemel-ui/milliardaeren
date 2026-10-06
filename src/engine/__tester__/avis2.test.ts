@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { DAG_SEK, erHelg } from '../kalender'
-import { tittel } from '../avis'
+import { TITLER, tittel } from '../avis'
+import { LUKSUSLISTE, STATUSNIVAAER, statusnivaa } from '../eiendom'
 import { NYHET_SEK } from '../selskapsnyheter'
 import { AKSJER, PAPIRER } from '../marked'
 import { kjopLuksus } from './hjelp'
@@ -64,6 +65,23 @@ describe('statustitler og sosietet', () => {
     expect(tittel(s)).toBe('Den unge gründeren')
     for (const id of ['gullklokke', 'mesterverk', 'diamantklokke'] as const) s = kjopLuksus(s, id)
     expect(tittel(s)).toBe('Forretningsprofilen')
+  })
+
+  it('har én tittel for hvert statusnivå', () => {
+    expect(TITLER).toHaveLength(STATUSNIVAAER.length)
+    STATUSNIVAAER.forEach((n, i) => expect(TITLER[i], n.navn).toMatch(/^\p{Lu}/u))
+    expect(new Set(TITLER).size).toBe(TITLER.length)
+  })
+
+  it('tåler et dagsskifte på de høyeste nivåene', () => {
+    // Fra nivå 8 og opp manglet tittelen, og dagsskiftet krasjet på ny luksus.
+    let s = simuler(rik(), 60)
+    s.luksus = [...LUKSUSLISTE]
+    expect(statusnivaa(s)).toBeGreaterThanOrEqual(8)
+    s = simuler(s, DAG_SEK)
+    const saker = s.avis.flatMap((u) => u.saker)
+    expect(saker.some((x) => x.tekst.endsWith(`${tittel(s).toLowerCase()}.`))).toBe(true)
+    for (const x of saker) expect(`${x.tittel} ${x.tekst}`).not.toContain('undefined')
   })
 
   it('skriver om livet ditt når statusen er høy nok', () => {
