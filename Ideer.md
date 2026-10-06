@@ -24,9 +24,8 @@ Items from *Road to v2.0*. Commits: `Pakke N: …`.
 
 ### Graphics track (Packs G1–G7)
 
-Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 comes first — every later pack draws against the style it sets.
+Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 (the foundation) is done; every later pack draws against the style it set.
 
-- **Pack G1 – The foundation:** One art direction, written down; A bigger canvas; Shading and depth; A real ground, not a grey bar; Consistent scale
 - **Pack G2 – Businesses:** Businesses as real places
 - **Pack G3 – The map:** A proper map of Norway, Calmer markers, The world map in the same style
 - **Pack G4 – Faces and names:** Real portraits of the rivals, Logos that look like companies, not app icons, Proper startup logos
@@ -34,14 +33,14 @@ Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 c
 - **Pack G6 – Stadium and gallery:** The crowd as a mass, not confetti; A real stadium at each stage; Real paintings
 - **Pack G7 – The finish:** Detail scenes for everything you own, Reports as statements, Loading screen and first frame
 
-G1 is five items but one change: the style guide plus the shared drawing helpers (canvas, light, shadow, ground, scale), proved on a handful of drawings. G2 is one item because it is 13 businesses × 4 growth stages. G7 comes last because the big detail scenes need the redrawn art.
+G2 is one item because it is 13 businesses × 4 growth stages. G7 comes last because the big detail scenes need the redrawn art.
 
 ### Working side by side
 
-- **Who owns what.** The graphics track owns the drawings and how they render: `Illustrasjoner.tsx`, `BedriftIkon.tsx`, `Rivalportrett.tsx`, `Stadion.tsx`, `Klubbvaapen.tsx`, `Papirlogo.tsx`, `StartupLogo.tsx`, the painting miniature in `Kunst.tsx`, `Norgeskart.tsx`, `Verdenskart.tsx`, `Gatebilde.tsx`, the map geometry in `ui/norgeskartet.ts` and `ui/verdenskartet.ts`, `Oppgjor.tsx`, the logo files (`Logo.tsx`, `public/ikon.svg`, `index.html`, `scripts/lag-ikoner.mjs`) and `Galleri.tsx`. The game track owns `src/engine`, `src/state` and the screens' logic. `styles.css`, the screens and `Ideer.md` are shared: change only what your pack needs.
+- **Who owns what.** The graphics track owns the drawings and how they render: `Illustrasjoner.tsx`, `Tegnestil.tsx`, `BedriftIkon.tsx`, `Rivalportrett.tsx`, `Stadion.tsx`, `Klubbvaapen.tsx`, `Papirlogo.tsx`, `StartupLogo.tsx`, the painting miniature in `Kunst.tsx`, `Norgeskart.tsx`, `Verdenskart.tsx`, `Gatebilde.tsx`, the map geometry in `ui/norgeskartet.ts` and `ui/verdenskartet.ts`, `Oppgjor.tsx`, the logo files (`Logo.tsx`, `public/ikon.svg`, `index.html`, `scripts/lag-ikoner.mjs`) and `Galleri.tsx`. The game track owns `src/engine`, `src/state` and the screens' logic. `styles.css`, the screens and `Ideer.md` are shared: change only what your pack needs.
 - **Commit only your own files.** `git add <paths>`, never `git add -A` — the other session may have work in progress in the same folder. Check `git status` before committing and leave the other track's changes alone.
 - **The graphics track never changes the engine's behaviour.** No dice, no balance, no save version — the golden master and the bench stay unchanged by every G pack.
-- **New content in the game track gets a drawing in the current style.** If G1 has landed, follow its rules; otherwise use the old ones and leave the redraw to the graphics track (note it in the commit message).
+- **New content in the game track gets a drawing in the current style.** G1 has landed: new drawings follow the rules in the header of `Illustrasjoner.tsx` and are built with `Tegnestil.tsx`. If that is too much for the pack, leave the drawing to the graphics track and say so in the commit message.
 - **`Ideer.md`:** each track removes only its own finished items and pack line, by title. Pack numbers don't depend on item numbers, so renumbering is harmless.
 - **Releases:** v2.0 is reached with Pack 51. The graphics track can ship with it or after it. Folke decides.
 
@@ -73,41 +72,33 @@ The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid groun
 
 ## Art direction
 
-From a review of all 72 drawings, the rivals, the stadium, both maps and the 21 logos: the art looks amateurish mainly because the drawings are toy-coloured flat clip-art on a 48×48 grid inside a grown-up dark-and-gold interface. The first five items are the foundation; the rest redraw each category against it. The drawing rules at the top of `Illustrasjoner.tsx` must be rewritten to match.
-
-**The foundation**
-
-19. **One art direction, written down.** A muted palette tuned to the dark-and-gold interface (today's `F` palette has toy colours such as `#d64545` red and `#f4d35e` yellow), one light direction (top left) and one shadow tone per colour. Written into the header of `Illustrasjoner.tsx`; every drawing is then redrawn against it.
-20. **A bigger canvas.** From 48×48 to 96×96, so there is room for framed windows, real roof shapes and people with proportions. Small icons scale down from the same drawing.
-21. **Shading and depth.** A shadow side on every building, soft cast shadows on the ground, a slight gradient in sky and sea. Today everything is flat colour on flat colour.
-22. **A real ground, not a grey bar.** Every drawing stands on the same rounded grey strip (`Grunn`), which looks like a placeholder. Pavement for businesses, grass for houses, a quay for boats, a showroom floor for cars — each fitted to its subject.
-23. **Consistent scale.** A bedsit, an office tower and a ski resort are drawn the same size today. Small things small, large things large, with a sense of distance.
+From a review of all 72 drawings, the rivals, the stadium, both maps and the 21 logos: the art looks amateurish mainly because the drawings are toy-coloured flat clip-art on a 48×48 grid inside a grown-up dark-and-gold interface. The foundation is in place (G1): the art direction is written in the header of `Illustrasjoner.tsx`, the helpers live in `Tegnestil.tsx`, and `?galleri` shows the style sheet. The items below redraw each category against it.
 
 **Businesses and items**
 
-24. **Businesses as real places.** The restaurant is a red wall with two arched windows, the hotel a narrow block. Each business gets a recognizable building with a storefront, sign, entrance and street life; the four growth stages are clearly visible and stage 3 looks expensive.
-25. **Cars that are visible.** The hypercar is dark on a dark background, so only the gold trim shows. Each car gets a real body shape, shine, rims and its own colour, and they look different from each other.
-26. **Watches, boats and planes up close.** The three watches sit on the same red cushion and look nearly alike. Give them a dial, bezel and strap, with the diamond watch clearly the most expensive. Boats and planes get the right proportions and a hint of shine on metal and water.
-27. **No duplicate drawings.** Every id gets its own drawing — today the cabins, bedsits, farms and forests repeat (three identical cabins, three bedsits, two farms, two forests). *City properties that look like their city* covers the eight city versions; this covers the rest.
+19. **Businesses as real places.** The restaurant is a red wall with two arched windows, the hotel a narrow block. Each business gets a recognizable building with a storefront, sign, entrance and street life; the four growth stages are clearly visible and stage 3 looks expensive.
+20. **Cars that are visible.** The hypercar is dark on a dark background, so only the gold trim shows. Each car gets a real body shape, shine, rims and its own colour, and they look different from each other.
+21. **Watches, boats and planes up close.** The three watches sit on the same red cushion and look nearly alike. Give them a dial, bezel and strap, with the diamond watch clearly the most expensive. Boats and planes get the right proportions and a hint of shine on metal and water.
+22. **No duplicate drawings.** Every id gets its own drawing — today the cabins, bedsits, farms and forests repeat (three identical cabins, three bedsits, two farms, two forests). *City properties that look like their city* covers the eight city versions; this covers the rest.
 
 **People**
 
-28. **Real portraits of the rivals.** Today they look like a default chat-app avatar: dot eyes, the same face shape, smile and pose, the same skin tone. Give them individual faces, different ages, clothing and a background that suits each, like a business-magazine cover. A thin frame instead of the thick coloured ring.
+23. **Real portraits of the rivals.** Today they look like a default chat-app avatar: dot eyes, the same face shape, smile and pose, the same skin tone. Give them individual faces, different ages, clothing and a background that suits each, like a business-magazine cover. A thin frame instead of the thick coloured ring.
 
 **Stadium**
 
-29. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
-30. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
+24. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
+25. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
 
 **Map**
 
-31. **A proper map of Norway.** Today it is a rough blob with few points, no Sweden, no difference between land and sea, and a tiny Lofoten inset. A detailed coastline with fjords and islands, neighbouring countries in grey, a sea colour, light mountain shading, and city labels that don't sit on the markers.
-32. **Calmer markers.** The glowing gold coins with numbers look like a mobile game. A small clean dot with the count as a small badge, and gold only for cities you fully own.
-33. **The world map in the same style.** The coastlines are thin outlines and land is almost the colour of the sea. Same style as the Norway map, so the two read as one map.
+26. **A proper map of Norway.** Today it is a rough blob with few points, no Sweden, no difference between land and sea, and a tiny Lofoten inset. A detailed coastline with fjords and islands, neighbouring countries in grey, a sea colour, light mountain shading, and city labels that don't sit on the markers.
+27. **Calmer markers.** The glowing gold coins with numbers look like a mobile game. A small clean dot with the count as a small badge, and gold only for cities you fully own.
+28. **The world map in the same style.** The coastlines are thin outlines and land is almost the colour of the sea. Same style as the Norway map, so the two read as one map.
 
 **Stocks and crypto**
 
-34. **Logos that look like companies, not app icons.** All 21 are a glyph on a rounded square today (a fish, a wifi symbol for telecom, a die, DNA). Give each company its own shape and its own typeface for a short wordmark — Bergen Shipping as a classic crest, Nordlys Tech as a modern geometric mark.
+29. **Logos that look like companies, not app icons.** All 21 are a glyph on a rounded square today (a fish, a wifi symbol for telecom, a die, DNA). Give each company its own shape and its own typeface for a short wordmark — Bergen Shipping as a classic crest, Nordlys Tech as a modern geometric mark.
 
 ## Parked (not chosen yet)
 

@@ -92,6 +92,11 @@
   --klasse-rival: #db2777;
   --klasse-startup: #ea580c;
   --klasse-fond: #0d9488;
+  /* Himmelen bak tegningene i den nye stilen (Tegnestil.tsx): lys på lys bunn. */
+  --himmel-dag-topp: #aebfcb;
+  --himmel-dag-horisont: #efe3cb;
+  --himmel-inne-topp: #c9c4bc;
+  --himmel-inne-horisont: #e6e1d8;
 }
 
 /* ─────────────────────────────────────────────── Grunnlag */
@@ -550,7 +555,12 @@ figure {
 
 /* Bevegelse i tegningene (anim-klassene i Illustrasjoner.tsx): bare på scenen
    i detaljvisningene, sakte og lite — og ingenting når spilleren har bedt om
-   mindre bevegelse. Lengdene er i tegningens egne enheter (48 × 48). */
+   mindre bevegelse. Lengdene er i tegningens egne enheter (48 × 48); på det
+   nye lerretet (96 × 96) dobles de med --utslag. */
+.lerret {
+  --utslag: 2;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .scene [class*='anim-'] {
     transform-box: fill-box;
@@ -603,14 +613,14 @@ figure {
 @keyframes tegning-damp {
   0% {
     opacity: 0;
-    transform: translateY(1px);
+    transform: translateY(calc(1px * var(--utslag, 1)));
   }
   40% {
     opacity: 0.8;
   }
   100% {
     opacity: 0;
-    transform: translateY(-1.6px);
+    transform: translateY(calc(-1.6px * var(--utslag, 1)));
   }
 }
 
@@ -620,7 +630,7 @@ figure {
     transform: translate(0, 0) scale(1);
   }
   50% {
-    transform: translate(0.6px, -1.2px) scale(1.15);
+    transform: translate(calc(0.6px * var(--utslag, 1)), calc(-1.2px * var(--utslag, 1))) scale(1.15);
   }
 }
 
@@ -649,7 +659,7 @@ figure {
     transform: translateX(0);
   }
   50% {
-    transform: translateX(1.4px);
+    transform: translateX(calc(1.4px * var(--utslag, 1)));
   }
 }
 
@@ -659,7 +669,7 @@ figure {
     transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(0.6px) rotate(0.6deg);
+    transform: translateY(calc(0.6px * var(--utslag, 1))) rotate(0.6deg);
   }
 }
 
@@ -669,7 +679,7 @@ figure {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-1.4px);
+    transform: translateY(calc(-1.4px * var(--utslag, 1)));
   }
 }
 
@@ -679,7 +689,7 @@ figure {
     transform: translateX(0);
   }
   50% {
-    transform: translateX(-3px);
+    transform: translateX(calc(-3px * var(--utslag, 1)));
   }
 }
 
@@ -689,7 +699,7 @@ figure {
     transform: translate(0, 0);
   }
   50% {
-    transform: translate(1.5px, -1.6px);
+    transform: translate(calc(1.5px * var(--utslag, 1)), calc(-1.6px * var(--utslag, 1)));
   }
 }
 
@@ -1902,6 +1912,36 @@ button.merke {
 
 .galleri-kort figcaption {
   font-weight: var(--vekt-halvfet);
+}
+
+/* Stilarket øverst i galleriet (G1): paletten med tre toner per materiale. */
+.stilark-palett {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.stilark-farge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  font-size: var(--skrift-2);
+}
+
+.stilark-toner {
+  display: flex;
+  height: 28px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.stilark-toner span {
+  flex: 1;
 }
 
 /* ─────────────────────────────────────────────── Skatt, rivaler og ordre */
@@ -5208,8 +5248,9 @@ button.maalstripe {
 
 /* Lyst tema (Pakke 42): tegningene ble laget på mørk bunn, og hvite og kremfargede
    flater (seil, snø, hvite hus) forsvinner på hvitt. En hårfin kant rundt hele
-   tegningen holder dem synlige uten å endre fargene. Mørkt tema er urørt. */
-:root[data-theme='light'] .illustrasjon,
+   tegningen holder dem synlige uten å endre fargene. Mørkt tema er urørt.
+   Tegningene i den nye stilen (.lerret, G1) har en himmel bak og trenger den ikke. */
+:root[data-theme='light'] .illustrasjon:not(.lerret),
 :root[data-theme='light'] .stadion {
   filter: drop-shadow(0 0 0.6px rgb(0 0 0 / 0.5));
 }

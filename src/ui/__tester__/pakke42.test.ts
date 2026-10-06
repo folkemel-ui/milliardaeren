@@ -43,8 +43,8 @@ describe('det lyse temaet', () => {
   const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
 
   it('tegningene har en klasse, og får en hårfin kant bare i det lyse temaet', () => {
-    expect(renderToStaticMarkup(createElement(Illustrasjon, { id: 'seilbaat' }))).toContain('class="illustrasjon"')
-    expect(css).toMatch(/:root\[data-theme='light'\] \.illustrasjon,\s*:root\[data-theme='light'\] \.stadion \{\s*filter: drop-shadow/)
+    expect(renderToStaticMarkup(createElement(Illustrasjon, { id: 'snekke' }))).toContain('class="illustrasjon"')
+    expect(css).toMatch(/:root\[data-theme='light'\] \.illustrasjon:not\(\.lerret\),\s*:root\[data-theme='light'\] \.stadion \{\s*filter: drop-shadow/)
   })
 
   it('medaljene har et mørkt ikon i det lyse temaet', () => {

@@ -2,7 +2,8 @@ import { BEDRIFTSTYPER } from '../../engine/innhold'
 import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
 import { JORD } from '../../engine/jord'
 import { LANDEMERKER } from '../../engine/landemerker'
-import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, type Trinn } from '../komponenter/Illustrasjoner'
+import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NY_STIL, type Trinn } from '../komponenter/Illustrasjoner'
+import { Bakke, GRUNNLINJE, Kloss, Lerret, maal, METER, Person, S, Slagskygge, type Avstand, type Bakketype } from '../komponenter/Tegnestil'
 import { PAPIRER } from '../../engine/marked'
 import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
 import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
@@ -39,6 +40,93 @@ function navn(id: string): string {
   )
 }
 
+const BAKKER: { type: Bakketype; navn: string; himmel?: 'inne' }[] = [
+  { type: 'fortau', navn: 'Fortau — forretninger' },
+  { type: 'gress', navn: 'Gress — hus og hytter' },
+  { type: 'kai', navn: 'Kai — båter' },
+  { type: 'gulv', navn: 'Gulv — biler', himmel: 'inne' },
+  { type: 'sno', navn: 'Snø — fjellet' },
+]
+
+const AVSTANDER: { avstand: Avstand; navn: string }[] = [
+  { avstand: 'naer', navn: 'Nær — biler, klokker, boder' },
+  { avstand: 'gate', navn: 'Gate — hus og forretninger' },
+  { avstand: 'fjern', navn: 'Fjern — tårn og anlegg' },
+]
+
+/** Et typisk bygg for hver avstand: én etasje nær, to på gateavstand, åtte fjernt. */
+const ETASJER: Record<Avstand, number> = { naer: 1, gate: 2, fjern: 8 }
+
+/** En dør og en person på samme avstand, foran et bygg: målestokken. */
+function Maalestokk({ avstand }: { avstand: Avstand }) {
+  const dor = maal(avstand, 'dor')
+  const etasje = maal(avstand, 'etasje')
+  const etasjer = ETASJER[avstand]
+  const bredde = { naer: 44, gate: 46, fjern: 26 }[avstand]
+  const x = 44 - bredde / 2
+  return (
+    <Lerret størrelse={240}>
+      <Bakke type="fortau" />
+      <Slagskygge x1={x} x2={x + bredde} lengde={14} d={10} />
+      <Kloss x={x} b={bredde} h={etasje * etasjer} d={10} m={S.puss} />
+      {Array.from({ length: etasjer - 1 }, (_, n) => (
+        <rect key={n} x={x} y={GRUNNLINJE - (n + 1) * etasje} width={bredde} height="0.8" fill={S.puss.skygge} />
+      ))}
+      <rect x={x + bredde / 2 - dor * 0.22} y={GRUNNLINJE - dor} width={dor * 0.44} height={dor} fill={S.treMork.flate} />
+      <Person x={x + bredde + 4 + maal(avstand, 'person') * 0.2} avstand={avstand} klaer={S.marine} />
+    </Lerret>
+  )
+}
+
+/** Stilarket øverst i galleriet: paletten, bakkene og de tre avstandene fra G1. */
+function Stilark() {
+  return (
+    <>
+      <h2 className="skjerm-tittel galleri-del">Stilarket</h2>
+      <p className="dempet">
+        Kunstretningen fra Grafikkpakke G1 (reglene står i Illustrasjoner.tsx). Tre toner per materiale, lyset ovenfra til venstre. Gull er den eneste klare fargen.
+      </p>
+      <div className="stilark-palett">
+        {Object.entries(S).map(([navn, m]) => (
+          <div key={navn} className="stilark-farge">
+            <div className="stilark-toner" aria-hidden="true">
+              <span style={{ background: m.lys }} />
+              <span style={{ background: m.flate }} />
+              <span style={{ background: m.skygge }} />
+            </div>
+            <span>{navn}</span>
+          </div>
+        ))}
+      </div>
+      <div className="galleri-rutenett">
+        {BAKKER.map((b) => (
+          <figure key={b.type} className="galleri-kort">
+            <div className="galleri-stor">
+              <Lerret størrelse={240} himmel={b.himmel}>
+                <Bakke type={b.type} />
+                <Slagskygge x1={34} x2={58} lengde={16} d={14} />
+                <Kloss x={34} b={24} h={24} d={14} m={S.stein} />
+              </Lerret>
+            </div>
+            <figcaption>{b.navn}</figcaption>
+          </figure>
+        ))}
+        {AVSTANDER.map((a) => (
+          <figure key={a.avstand} className="galleri-kort">
+            <div className="galleri-stor">
+              <Maalestokk avstand={a.avstand} />
+            </div>
+            <figcaption>
+              {a.navn} · {String(METER[a.avstand]).replace('.', ',')} enheter per meter
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <h2 className="skjerm-tittel galleri-del">Tegningene</h2>
+    </>
+  )
+}
+
 /**
  * Illustrasjonsgalleriet (åpnes med ?galleri): hver tegning i 5× størrelse og
  * i vanlig størrelse, på både mørk og lys bunn — for å vurdere dem ordentlig.
@@ -49,9 +137,10 @@ export function Galleri() {
   return (
     <main className="galleri">
       <h1 className="skjerm-tittel">Illustrasjoner</h1>
-      <p className="dempet">Hver tegning i 5× størrelse, og slik den vises i spillet — på mørk og lys bunn.</p>
+      <p className="dempet">Hver tegning i 5× størrelse, og slik den vises i spillet — på mørk og lys bunn. De som er tegnet i den nye stilen, kommer først.</p>
+      <Stilark />
       <div className="galleri-rutenett">
-        {ILLUSTRASJONSIDER.map((id) => (
+        {[...ILLUSTRASJONSIDER].sort((a, b) => Number(NY_STIL.includes(b)) - Number(NY_STIL.includes(a))).map((id) => (
           <figure key={id} className="galleri-kort">
             <div className="galleri-stor">
               <Illustrasjon id={id} størrelse={240} />
@@ -74,7 +163,9 @@ export function Galleri() {
                 ))}
               </div>
             )}
-            <figcaption>{navn(id)}</figcaption>
+            <figcaption>
+              {navn(id)} {NY_STIL.includes(id) && <span className="merke gull">Ny stil</span>}
+            </figcaption>
           </figure>
         ))}
       </div>

@@ -180,7 +180,7 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
       <div className="lagerscene" role="list" aria-label={l.navn} data-ingen-sveip>
         {her.map((id) => (
           <Plass key={id} lager={lager} navn={LUKSUS[id].navn} under={`+${LUKSUS[id].status} status`} valgt={valgt?.slag === 'eid' && valgt.id === id} trykk={() => trykk({ slag: 'eid', id })}>
-            <Illustrasjon id={id} størrelse={64} />
+            <Illustrasjon id={id} størrelse={64} utklipp />
           </Plass>
         ))}
         {Array.from({ length: ledige }, (_, i) => (
@@ -195,7 +195,7 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
           >
             {neste && (
               <span className="plass-skygge">
-                <Illustrasjon id={neste} størrelse={64} />
+                <Illustrasjon id={neste} størrelse={64} utklipp />
               </span>
             )}
           </Plass>

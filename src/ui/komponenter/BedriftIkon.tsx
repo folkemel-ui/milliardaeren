@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Illustrasjon, trinnFor } from './Illustrasjoner'
+import { Illustrasjon, NY_STIL, trinnFor } from './Illustrasjoner'
 
 /**
  * Illustrasjonen i en rund flis — for bedrifter, eiendom og luksus. `stor`
@@ -28,11 +28,15 @@ export const BedriftIkon = memo(function BedriftIkon({
   )
 })
 
-/** Tegningen stor, på en egen scene øverst i en detaljvisning. Bare her beveger tegningene seg. */
+/**
+ * Tegningen stor, på en egen scene øverst i en detaljvisning. Bare her beveger
+ * tegningene seg. Tegningene i den nye stilen har himmel og luft rundt seg, så
+ * de fyller hele scenens høyde.
+ */
 export const Scene = memo(function Scene({ type, nivaa, forbedringer = 0 }: { type: string; nivaa?: number; forbedringer?: number }) {
   return (
     <div className="scene" aria-hidden="true">
-      <Illustrasjon id={type} størrelse={150} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
+      <Illustrasjon id={type} størrelse={NY_STIL.includes(type) ? 172 : 150} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
     </div>
   )
 })

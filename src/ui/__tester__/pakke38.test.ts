@@ -6,6 +6,7 @@ import { FUSJONSFAKTOR } from '../../engine/fusjon'
 import { STIGEN } from '../../engine/innhold'
 import { nytt } from '../hendelsesstrom'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
+import { S } from '../komponenter/Tegnestil'
 import { bedrift } from '../../engine/__tester__/hjelp'
 
 const tegn = (id: string, forbedringer: number, trinn: 0 | 1 | 2 | 3 = 0) =>
@@ -22,7 +23,7 @@ describe('forbedringene synes', () => {
   it('plaketten ved nivå 100 er gull, ikke neon', () => {
     const svg = tegn('kiosk', 0, 3)
     expect(svg).not.toContain('#ff5fa2')
-    expect(svg).toContain('#d4af37')
+    expect(svg).toContain(S.gull.flate)
   })
 
   it('bevegelige deler er merket, så CSS kan styre dem', () => {

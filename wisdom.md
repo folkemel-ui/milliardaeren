@@ -89,7 +89,9 @@ session; delete what stops being true.
 ## 4. Dev server and browser pane
 
 - Ports 5180–5182 are often held by other chats. `.claude/launch.json` has
-  `milliardaer-test3` on **5184** with its own origin and save.
+  `milliardaer-test3` on **5184** with its own origin and save, and
+  `milliardaer-grafikk` on **5186** for the graphics track (the two tracks run at the
+  same time, so each has its own port and save).
 - **The 5184 test save is not durable.** On 1 October the pane's storage for that origin
   was wiped when the test server restarted (not by game code — nothing in `src` clears
   storage). Rebuild a rich test game when needed: open `/ikon.svg` (the game isn't
@@ -216,13 +218,31 @@ session; delete what stops being true.
 - **Badges**: `.merke` (status word; `gull` new/best, `kant` a role, `ok`, `varsel`,
   `fare`, `info`), `.etikett` (category, grey capitals), `.brikke` (a number). Don't
   invent new pill styles.
-- **Drawings** follow the rules at the top of `Illustrasjoner.tsx`: palette `F`, one
-  `Grunn` per drawing on baseline y = 43, nothing outside or touching the 48×48 frame,
-  side view, flat shapes, product on the sign. Businesses are `B = (trinn, f)`: growth
-  stage 0–3 (level 1/25/50/100) and `f` improvements, each with its own detail. Level 100
-  shows a gold plaque (`Utmerkelse`), not neon. Moving parts get an `anim-*` class and
-  only move inside `.scene` (detail views), never with reduced motion. Review art on
-  `?galleri` (stage n is shown with n improvements) via a cloned overlay contact sheet.
+- **Drawings — the art direction (G1).** The rules are in the header of
+  `Illustrasjoner.tsx`, the tools in `Tegnestil.tsx`, and `?galleri` opens with a style
+  sheet (palette, grounds, the three distances). New drawings use a 96×96 `Lerret`, only
+  palette `S` (three tones per material: `lys`/`flate`/`skygge`, light from top left),
+  `Kloss`/`Saltak` for oblique depth (`DYBDE`, the side faces right), a `Slagskygge`,
+  a `Bakke` fitted to the subject on `GRUNNLINJE` (84), and one of three distances
+  (`METER`: nær 18, gate 10, fjern 2,5 units per metre; `Figur`/`Person` and `maal`
+  keep people, doors and floors the same size). `NY_STIL` lists the ids drawn so far;
+  the rest still use the old 48×48 style (`F`, `Grunn`, y = 43) until their G pack —
+  Folke chose to leave them alone rather than recolour them. `grafikkG1.test.ts` checks
+  the palette (every tone ordered by luminance, chroma ≤ 0.48 except gold), viewBox, loose
+  colours and unique gradient ids. Businesses are still `B = (trinn, f)`: stage 0–3 at
+  level 1/25/50/100, `f` improvements with their own detail; level 100 gets `Plakett`.
+- **The canvas has details that bite.** Gradients, masks and the haze filter get ids from
+  `useId` (two identical drawings on a page must not share ids). The sky is backdrop, not
+  subject, so it follows the theme via `--himmel-*` CSS vars; the subject's colours are
+  fixed. The light-theme hairline applies only to `.illustrasjon:not(.lerret)`. A place
+  with its own scene (garage, harbour, hangar in Luksus) passes `utklipp` to
+  `Illustrasjon`, which drops sky, ground, background and reflection via context. Moving
+  parts get an `anim-*` class and move only inside `.scene`; the keyframes multiply their
+  px by `--utslag` (2 on `.lerret`), so the same classes work on both canvases. `Scene`
+  shows new-style drawings at 172 px (they carry their own margin of sky).
+- **Reviewing art**: clone the gallery's big SVGs into a fixed overlay at 270–540 px and
+  screenshot that; resize the viewport by 1 px if the frame is stale. Check each drawing at
+  44 and 60 px in both themes too — the scale rule makes small subjects (the kiosk) small.
 - **Versions** (Pack 43): the game is 1.0.0. `VERSJON` in `ui/versjon.ts` must equal
   `version` in `package.json` (a test checks). A new release bumps both
   (`npm version X --no-git-tag-version`) and adds an entry at the top of `ENDRINGER`. Players

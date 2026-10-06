@@ -1,29 +1,57 @@
 /**
- * Illustrasjonene for bedrifter, eiendom og luksus. Alle er bygget av enkle
- * former på et 48×48-rutenett, med faste farger, så de ser like ut i mørkt
- * og lyst tema. Se dem store på ?galleri.
+ * Illustrasjonene for bedrifter, eiendom og luksus. Se dem store på ?galleri,
+ * der stilarket øverst viser paletten, bakkene og de tre avstandene.
  *
- * Tegnereglene, så nye tegninger passer med de gamle:
- * - Fargene kommer fra paletten F — ingen løse fargekoder.
- * - Alt står på samme grunnlinje (y = 43) og på én «Grunn»: gate, sjø,
- *   gress, snø, sand, åker eller en skygge for ting som står løst.
- *   Ingen bakgrunn fyller hele ruta, og ingenting går helt ut i kanten.
- * - Alt sees fra siden, også flyene.
- * - Flate former uten omriss. Streker bare for tynne detaljer.
- * - Bygninger har en mørkere stripe på høyre side (lyset kommer fra venstre).
- * - Bedriftene er steder, ikke varer: varen står på skiltet.
+ * KUNSTRETNINGEN (Grafikkpakke G1). Alle nye tegninger følger den; de gamle
+ * tegnes om etter den i G2–G7 og bruker den gamle stilen (nederst) til da.
  *
- * Bedriftene vokser med nivået (trinn 0–3 ved nivå 1, 25, 50 og 100):
- * større og en egen detalj ved 25, kunder ved 50, og en gullplakett ved 100.
- * Hver av de tre forbedringene legger til sin egen lille detalj (`f` = hvor
- * mange som er kjøpt), så du ser hva du har investert i.
+ * Uttrykket: rolige, voksne tegninger som hører hjemme i et mørkt og gyllent
+ * grensesnitt — som illustrasjonene i en næringslivsavis, ikke et mobilspill.
+ *
+ * - Lerret: 96 × 96 (`Lerret` i Tegnestil.tsx). Små ikoner er den samme
+ *   tegningen skalert ned, så detaljer under ~1 enhet forsvinner i lista.
+ *   Ingen `<text>`: bokstaver og tall tegnes som streker.
+ * - Farger: bare paletten `S`, dempede nordiske toner (metning under 50 %).
+ *   Gull er den eneste klare fargen og brukes sparsomt: plaketter, beslag,
+ *   detaljer som skal se dyre ut.
+ * - Lys: alltid ovenfra til venstre. Hvert materiale har tre toner — `lys` på
+ *   flater som vender mot lyset (tak, venstre kanter), `flate` på fronten og
+ *   `skygge` på siden bort fra lyset. Glass og lakk får `Glans`, bunnen av
+ *   en vegg `Bunnskygge`.
+ * - Dybde: skrått sett. Fronten er rett på, og dybden går opp og til høyre
+ *   (`DYBDE`), så vi ser siden mot høyre i skygge (`Kloss`, `Saltak`).
+ * - Skygge: hver ting kaster en myk `Slagskygge` mot høyre og inn i bildet,
+ *   og har en mørk kontaktskygge der den møter bakken.
+ * - Bakke: alt står på `GRUNNLINJE` (y = 84) og på en `Bakke` som passer
+ *   motivet — fortau for forretninger, gress for hus, kai for båter, blankt
+ *   gulv for biler, snø i fjellet. Bakken blekner ut mot sidene.
+ * - Himmel: en svak himmel som blekner ut mot kantene, ingen hard boks.
+ *   Biler står inne (`himmel="inne"`), med lys ovenfra.
+ * - Målestokk: hvert motiv ses fra én av tre avstander (`METER`), og alt på
+ *   samme avstand har samme mål — en person, en dør, en etasje (`maal`).
+ *   Nær (18 enheter/m): biler, klokker, boder. Gate (10): hus og forretninger.
+ *   Fjern (2,5): tårn, anlegg og store bygg. Det som står langt bak, får `Dis`.
+ * - Mennesker: `Person` i riktig målestokk, i palettens klær. De gir
+ *   tegningen størrelse og liv, så bruk dem der det passer.
+ * - Former: flate former med tre toner, ingen omriss. Streker bare for tynne
+ *   ting (stag, sprosser, skjøter).
+ *
+ * Bedriftene vokser med nivået (trinn 0–3 ved nivå 1, 25, 50 og 100): en egen
+ * detalj ved 25, kunder ved 50, og ved 100 en gullplakett (`Plakett`) og noe
+ * som ser dyrt ut. Hver av de tre forbedringene legger til sin egen detalj
+ * (`f` = hvor mange som er kjøpt), så du ser hva du har investert i.
  *
  * Noen deler har en `anim-`-klasse (damp, røyk, flagg, flamme, bølger …).
  * De beveger seg bare på den store scenen i detaljvisningene, og aldri når
  * spilleren har bedt om mindre bevegelse — se styles.css.
+ *
+ * DEN GAMLE STILEN (48 × 48), for tegningene som ikke er tegnet om ennå:
+ * paletten `F`, grunnlinje y = 43 og én `Grunn`, flate former sett fra siden.
+ * Lag ingen nye tegninger i den.
  */
 
 import { memo, type ReactNode } from 'react'
+import { Bakke, Dis, GRUNNLINJE, Utklipp, Kantfade, Kloss, Lerret, Person as Figur, Plakett, S, Slagskygge, Speiling, Bunnskygge, Glans, inn, maal } from './Tegnestil'
 
 export const F = {
   hvit: '#f8f6f1',
@@ -384,54 +412,125 @@ const gatekjokken: B = (t, f) => (
   </Bedrift>
 )
 
-const kiosk: B = (t, f) => (
-  <Bedrift trinn={t} grunn="gate" id="kiosk">
-    <rect x="7" y="16" width="34" height="27" fill={F.krem} />
-    <rect x="37" y="16" width="4" height="27" fill={F.kremMork} />
-    <rect x="4" y="12" width="40" height="5" fill={F.blaaMork} />
-    <polygon points="5,17 43,17 45,23 3,23" fill={F.blaa} />
-    <polygon points="11.3,17 17.6,17 18,23 10.7,23" fill={F.hvit} />
-    <polygon points="23.9,17 30.2,17 31.2,23 23.8,23" fill={F.hvit} />
-    <polygon points="36.5,17 42.8,17 44.3,23 37.2,23" fill={F.hvit} />
-    <rect x="10" y="26" width="16" height="12" fill={F.glass} />
-    <rect x="12" y="32" width="3" height="5" fill={F.rod} />
-    <rect x="16" y="30" width="3" height="7" fill={F.oransje} />
-    <rect x="20" y="33" width="4" height="4" fill={F.tyrkis} />
-    <rect x="30" y="26" width="7" height="17" fill={F.treMork} />
-    <circle cx="35.4" cy="35" r="0.9" fill={F.gul} />
-    <rect x="16" y="5" width="16" height="7" rx="1.5" fill={F.rod} />
-    {/* «24» tegnet som streker, ikke <text>: tekst i SVG havner i sidens tekst og skjermlesere. */}
-    <path
-      d="M20.2 7.4 Q20.2 6.3 21.5 6.3 Q22.8 6.3 22.8 7.4 Q22.8 8.2 21.8 8.9 L20.2 10.5 H22.9 M26.9 10.6 V6.3 L24.8 9.3 H28"
-      fill="none"
-      stroke={F.hvit}
-      strokeWidth="1.1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {t >= 1 && (
-      <>
-        <polygon points="3.5,43 6.5,34.5 9.5,43" fill={F.hvit} />
-        <polygon points="5.8,38.6 6.5,41.4 7.2,38.6" fill={F.tre} />
-        <circle cx="6.5" cy="38" r="1.1" fill={F.rosa} />
-      </>
-    )}
-    {/* Kaffe i vinduet, pakker til henting og en måne for døgnåpent. */}
-    {f >= 1 && (
-      <>
-        <rect x="11" y="27.4" width="2.4" height="2.2" rx="0.4" fill={F.hvit} />
-        <path d="M11.6 26.8 Q12.2 25.8 11.8 25" fill="none" stroke={F.hvit} strokeWidth="0.5" strokeLinecap="round" />
-      </>
-    )}
-    {f >= 2 && (
-      <>
-        <rect x="20.4" y="27" width="4.4" height="2.6" fill={F.tre} />
-        <line x1="22.6" y1="27" x2="22.6" y2="29.6" stroke={F.treLys} strokeWidth="0.6" />
-      </>
-    )}
-    {f >= 3 && <path d="M37 4.8 A2.7 2.7 0 1 0 39.8 9 A2.1 2.1 0 1 1 37 4.8 Z" fill={F.lys} />}
-  </Bedrift>
-)
+/**
+ * Kiosken (ny stil, gateavstand): en liten paviljong i puss med skiltbånd,
+ * markise over luka og dør til høyre. Nivå 25 får en isboks med flagg, 50
+ * kunder, 100 gullkant, lamper og plakett. Forbedringene: kaffe (skilt og
+ * maskin), pakkeautomat og døgnåpent (måneskilt og varmt lys inne).
+ */
+const kiosk: B = (t, f) => {
+  const g = GRUNNLINJE
+  const lysInne = f >= 3 || t >= 3
+  const varer = [S.oker, S.petrol, S.vin, S.hvit, S.gran, S.oker, S.vin]
+  return (
+    <>
+      <Bakke type="fortau" />
+      <Slagskygge x1={28} x2={70} lengde={18} d={22} />
+      {/* Pakkeautomaten til venstre. */}
+      {f >= 2 && (
+        <g>
+          <Kloss x={12} b={15} h={23} d={9} m={S.petrol} />
+          {[0, 1].map((k) =>
+            [0, 1, 2, 3].map((r) => <rect key={`${k}-${r}`} x={13.4 + k * 6.6} y={g - 21.6 + r * 5.3} width="5.6" height="4.5" rx="0.4" fill={S.petrol.lys} opacity="0.55" />),
+          )}
+          <rect x="17" y={g - 19.8} width="5" height="3" rx="0.4" fill={S.glass.lys} />
+        </g>
+      )}
+      {/* Selve kiosken. */}
+      <Kloss x={28} b={42} h={29} d={22} m={S.puss} />
+      <Bunnskygge x={28} y={g - 16} b={42} h={16} />
+      <rect x="28" y={g - 3} width="42" height="3" fill={S.stein.skygge} />
+      {/* Skiltbåndet med «24», tegnet som streker. */}
+      <Kloss x={26} y={56} b={46} h={9} d={24} m={{ lys: S.skifer.flate, flate: S.marine.flate, skygge: S.marine.skygge }} />
+      <rect x="42" y="48.4" width="14" height="6.2" rx="1" fill={S.vin.flate} />
+      <path d="M45.2 50.4 Q45.2 49.3 46.6 49.3 Q48 49.3 48 50.4 Q48 51.3 47 52 L45.2 53.6 H48.1 M52.7 53.7 V49.3 L50.3 52.3 H53.9" fill="none" stroke={S.hvit.lys} strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+      {t >= 3 && <rect x="26" y="55.2" width="46" height="0.8" fill={S.gull.flate} />}
+      {/* Døgnåpent: et måneskilt på båndet. */}
+      {f >= 3 && (
+        <g>
+          <rect x="60" y="48.4" width="8" height="6.2" rx="1" fill={S.mork.skygge} />
+          <path d="M64.6 49.6 A2.4 2.4 0 1 0 65.4 53.6 A1.9 1.9 0 1 1 64.6 49.6 Z" fill={S.vinduLys.lys} />
+        </g>
+      )}
+      {/* Luka: hyller med varer bak glasset, disk foran. */}
+      <rect x="31" y="63" width="22" height="12.5" fill={lysInne ? S.vinduLys.skygge : S.mork.lys} />
+      {[67.4, 71.2].map((y) => (
+        <rect key={y} x="31" y={y} width="22" height="0.8" fill={S.metall.skygge} />
+      ))}
+      {varer.map((m, i) => (
+        <rect key={i} x={32.4 + i * 3} y={64.6 + (i % 2) * 0.6} width="2.2" height={2.8 - (i % 2) * 0.6} fill={m.flate} />
+      ))}
+      {varer.map((_, i) => (
+        <rect key={`n${i}`} x={33.2 + i * 2.8} y={68.6 + (i % 3) * 0.4} width="1.8" height={2.6 - (i % 3) * 0.4} fill={varer[(i + 3) % varer.length].lys} />
+      ))}
+      {/* Kaffemaskinen i luka. */}
+      {f >= 1 && (
+        <g>
+          <rect x="45" y="71.6" width="6" height="3.9" fill={S.metall.flate} />
+          <rect x="45" y="71.6" width="6" height="1" fill={S.metall.lys} />
+          <rect x="47.4" y="73.4" width="1.6" height="2.1" fill={S.hvit.lys} />
+        </g>
+      )}
+      <Glans points="31,63 41,63 34.5,75.5 31,75.5" />
+      <rect x="31" y="63" width="22" height="12.5" fill="none" stroke={S.hvit.flate} strokeWidth="0.8" />
+      <Kloss x={29.5} y={77.4} b={25} h={1.9} d={3} m={S.metall} />
+      {/* Markisen over luka. */}
+      <polygon points="30,57 54,57 55.8,62.6 28.2,62.6" fill={S.hvit.flate} />
+      {[0, 2, 4].map((i) => (
+        <polygon key={i} points={`${30 + i * 4},57 ${34 + i * 4},57 ${33.8 + i * 4.6},62.6 ${28.2 + i * 4.6},62.6`} fill={S.vin.flate} />
+      ))}
+      <rect x="28.2" y="62.6" width="27.6" height="1.2" fill={S.vin.skygge} />
+      {/* Døra. */}
+      <rect x="57" y={g - 21} width="9.6" height="21" fill={S.treMork.flate} />
+      <rect x="58.5" y={g - 19} width="6.6" height="9.5" fill={lysInne ? S.vinduLys.flate : S.glass.skygge} />
+      <rect x="56.4" y={g - 21.6} width="10.8" height="0.8" fill={S.hvit.flate} />
+      <circle cx="64.9" cy={g - 8.6} r="0.6" fill={S.gull.flate} />
+      {/* Kaffeskiltet som henger ut fra hjørnet til høyre. */}
+      {f >= 1 && (
+        <g transform="translate(52 0)">
+          <rect x="18" y="57.6" width="6.4" height="0.8" fill={S.mork.flate} />
+          <line x1="23.6" y1="58.4" x2="23.6" y2="60" stroke={S.mork.flate} strokeWidth="0.4" />
+          <circle cx="23.6" cy="63.6" r="3.8" fill={S.hvit.lys} stroke={S.treMork.flate} strokeWidth="0.6" />
+          <path d="M21.6 62.4 H25 V64.4 A1.7 1.7 0 0 1 23.3 66 A1.7 1.7 0 0 1 21.6 64.4 Z" fill={S.treMork.flate} />
+          <circle cx="25.6" cy="63.6" r="0.9" fill="none" stroke={S.treMork.flate} strokeWidth="0.5" />
+          <path className="anim-damp" d="M23 61.6 Q22.2 60.6 23 59.8" fill="none" stroke={S.hvit.flate} strokeWidth="0.5" strokeLinecap="round" />
+        </g>
+      )}
+      {/* Nivå 25: isboks og flagg på fortauet. */}
+      {t >= 1 && (
+        <g>
+          <Kloss x={73} y={g + 3} b={12} h={8} d={5} m={S.hvit} />
+          <rect x="74" y={g - 4.2} width="10" height="2.2" fill={S.glass.flate} />
+          <line x1="89" y1={g + 4} x2="89" y2="55" stroke={S.metall.skygge} strokeWidth="0.8" />
+          <path d="M88.6 56 Q82 57 82.6 66 L83.4 80 L88.6 80 Z" fill={S.oker.flate} />
+          <path d="M88.6 56 Q86.6 57 86.4 66 L86.6 80 L88.6 80 Z" fill={S.oker.skygge} />
+          <polygon points="84,68 86.6,68 85.3,73" fill={S.treverk.lys} />
+          <circle cx="85.3" cy="66.8" r="1.6" fill={S.vin.lys} />
+        </g>
+      )}
+      {/* Nivå 100: messinglamper ved døra. */}
+      {t >= 3 && (
+        <g>
+          {[55.4, 68.2].map((x) => (
+            <g key={x}>
+              <circle cx={x} cy="65.5" r="2.6" fill={S.vinduLys.lys} opacity="0.35" />
+              <rect x={x - 0.8} y="64" width="1.6" height="2.8" rx="0.5" fill={S.gull.flate} />
+            </g>
+          ))}
+        </g>
+      )}
+      {t >= 3 && <Plakett x={28} y={47.2} />}
+      {/* Kunder: to ved nivå 50, tre ved 100. */}
+      {t >= 2 && (
+        <>
+          <Figur x={42} y={g + 1.6} avstand="gate" klaer={S.petrol} vendt={-1} />
+          <Figur x={18} y={g + 4.2} avstand="gate" klaer={S.oker} hud={S.hudMork} har={S.mork.skygge} />
+        </>
+      )}
+      {t >= 3 && <Figur x={63} y={g + 5} avstand="gate" klaer={S.vin} ben={S.marine.skygge} vendt={-1} />}
+    </>
+  )
+}
 
 const kafe: B = (t, f) => (
   <Bedrift trinn={t} grunn="gate" id="kafe">
@@ -896,43 +995,185 @@ function Rekkehus({ størrelse = 48 }: P) {
   )
 }
 
+/**
+ * Hytta (ny stil, gateavstand): laftet tømmer med torvtak, hvite vinduskarmer,
+ * pipe med røyk og vimpel. Fjellene bak står i dis, så det føles langt dit.
+ */
 function Hytte({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  // Veggen: front x 20–66, topp y 62, dybde 26. Mønet ligger midt i dybden.
+  const møne = (x: number) => inn(x, 62 - 14, 13)
+  const [mvx, mvy] = møne(17)
+  const [mhx, mhy] = møne(69)
+  const tuster = Array.from({ length: 13 }, (_, i) => {
+    const x = mvx + ((mhx - mvx) * i) / 12
+    return `Q${x + 2} ${mvy - 2.4 - (i % 2) * 0.8} ${x + 4.3} ${mvy}`
+  }).join(' ')
   return (
-    <Svg størrelse={størrelse}>
-      <polygon points="3,34 14,12 22,24 30,14 45,34" fill={F.fjell} />
-      <polygon points="11,18 14,12 17,17.8 15,17 13,18.6" fill={F.sno} />
-      <polygon points="27.5,17.6 30,14 32.6,17.4 30.8,16.8 29,18" fill={F.sno} />
-      <Grunn type="sno" />
-      <rect x="11" y="28" width="26" height="15" fill={F.treMork} />
-      <rect x="33.5" y="28" width="3.5" height="15" fill={F.treDyp} />
-      {[31, 34, 37, 40].map((y) => (
-        <rect key={y} x="11" y={y} width="26" height="0.7" fill={F.treDyp} />
+    <Lerret størrelse={størrelse}>
+      {/* Fjellene langt bak, i dis. */}
+      <Kantfade>
+        <Dis>
+          <polygon points="0,70 8,56 16,60 26,42 38,58 50,50 60,56 74,36 86,50 96,46 96,72 0,72" fill={S.fjell.flate} />
+          <polygon points="26,42 38,58 30,60 24,56" fill={S.fjell.skygge} />
+          <polygon points="74,36 86,50 80,58 72,54" fill={S.fjell.skygge} />
+          <polygon points="21.6,49 26,42 31,48.8 28.6,47.6 26,50 23.8,48" fill={S.sno.lys} />
+          <polygon points="69.6,43 74,36 79,42.6 76.6,41.6 74.4,44 72,42.4" fill={S.sno.lys} />
+        </Dis>
+      </Kantfade>
+      <Bakke type="gress" />
+      <Slagskygge x1={20} x2={66} lengde={16} d={26} />
+      {/* Bjørka til venstre. */}
+      <polygon points={`9.4,${g + 2} 12.2,${g + 2} 11.5,52 10.3,52`} fill={S.hvit.lys} />
+      <line x1="11.2" y1="60" x2="15" y2="55" stroke={S.hvit.flate} strokeWidth="0.7" />
+      {[58, 63, 68.5, 74, 79].map((y, i) => (
+        <rect key={y} x={i % 2 ? 10.4 : 9.6} y={y} width="1.3" height="0.6" fill={S.mork.flate} />
       ))}
-      <polygon points="8,29 24,18 40,29" fill={F.mork} />
-      <polygon points="8,29 24,18 40,29 38,29 24,20.3 10,29" fill={F.sno} />
-      <rect x="31" y="18" width="3" height="6" fill={F.treDyp} />
-      <rect x="14" y="32" width="6" height="5" fill={F.lys} />
-      <rect x="25" y="34" width="6" height="9" fill={F.treDyp} />
-    </Svg>
+      {[
+        [5.6, 54, 4.6, S.bjork.flate],
+        [15.6, 52, 4.4, S.bjork.skygge],
+        [9, 50, 5.2, S.bjork.flate],
+        [13.6, 46, 4.4, S.bjork.flate],
+        [7.4, 45.4, 3.8, S.bjork.lys],
+        [10.8, 41.8, 3.6, S.bjork.lys],
+      ].map(([x, y, r, c]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r={r} fill={c as string} />
+      ))}
+      {/* Veggene i laftet tømmer. */}
+      <Kloss x={20} b={46} h={22} d={26} m={S.treMork} tak={false} />
+      {Array.from({ length: 7 }, (_, i) => +(64.4 + i * 3.1).toFixed(1)).map((y) => (
+        <g key={y}>
+          <line x1="20" y1={y} x2="66" y2={y} stroke={S.treMork.skygge} strokeWidth="0.6" />
+          <line x1="66" y1={y} x2={inn(66, y, 26)[0]} y2={inn(66, y, 26)[1]} stroke={S.mork.flate} strokeWidth="0.5" />
+        </g>
+      ))}
+      {Array.from({ length: 7 }, (_, i) => +(63 + i * 3.1).toFixed(1)).map((y) => (
+        <g key={`e${y}`}>
+          <circle cx="20" cy={y} r="1.15" fill={S.treverk.flate} />
+          <circle cx="66" cy={y} r="1.15" fill={S.treverk.skygge} />
+        </g>
+      ))}
+      {/* Gavlen på siden, og torvtaket. */}
+      <polygon points={`66,62 ${inn(66, 62, 26).join(',')} ${mhx - 3},${mhy}`} fill={S.treMork.skygge} />
+      <polygon points={`17,63.6 69,63.6 ${mhx},${mhy} ${mvx},${mvy}`} fill={S.gress.flate} />
+      <path d={`M${mvx} ${mvy} ${tuster}`} fill={S.gress.lys} />
+      <polyline points={`69,63.6 ${mhx},${mhy} ${inn(69, 63.6, 29).join(',')}`} fill="none" stroke={S.treMork.skygge} strokeWidth="1.2" strokeLinejoin="round" />
+      <rect x="17" y="63" width="52" height="1.6" fill={S.treMork.skygge} />
+      {/* Pipa med røyk. */}
+      <Kloss x={52} y={56} b={4.6} h={9} d={4} m={S.stein} />
+      <circle className="anim-roeyk" cx="55.6" cy="44" r="2" fill={S.hvit.flate} opacity="0.7" />
+      <circle className="anim-roeyk sen" cx="58" cy="40" r="2.6" fill={S.hvit.flate} opacity="0.45" />
+      {/* Vinduer med hvite karmer, og døra. */}
+      {[24.4, 36.4].map((x) => (
+        <g key={x}>
+          <rect x={x} y="67" width="8.4" height="8.4" fill={S.hvit.lys} />
+          <rect x={x + 1} y="68" width="6.4" height="6.4" fill={S.vinduLys.flate} />
+          <rect x={x + 3.8} y="68" width="0.8" height="6.4" fill={S.hvit.lys} />
+          <rect x={x + 1} y="70.8" width="6.4" height="0.8" fill={S.hvit.lys} />
+          <rect x={x - 0.6} y="75.4" width="9.6" height="1" fill={S.hvit.flate} />
+        </g>
+      ))}
+      <rect x="51" y={g - 19.5} width="9" height="19.5" fill={S.faluRod.flate} />
+      <rect x="51" y={g - 19.5} width="9" height="19.5" fill="none" stroke={S.hvit.flate} strokeWidth="0.8" />
+      <circle cx="58.3" cy={g - 9.5} r="0.6" fill={S.gull.flate} />
+      <rect x="19.4" y={g - 2.2} width="47" height="2.2" fill={S.stein.flate} />
+      {/* Steinheller ned til plenen. */}
+      {[[55.5, g + 2.6], [53.5, g + 6]].map(([x, y]) => (
+        <ellipse key={y} cx={x} cy={y} rx="4" ry="1.2" fill={S.stein.lys} />
+      ))}
+      {/* Flaggstanga med vimpel. */}
+      <line x1="84" y1={g + 3} x2="84" y2="38" stroke={S.hvit.lys} strokeWidth="0.9" />
+      <circle cx="84" cy="37.6" r="0.9" fill={S.gull.flate} />
+      <g className="anim-flagg">
+        <polygon points="84.4,39 92,41.4 84.4,43.2" fill={S.faluRod.lys} />
+        <rect x="84.4" y="39.8" width="2.2" height="2.6" fill={S.faluRod.lys} />
+        <rect x="84.4" y="40.6" width="2.2" height="1" fill={S.hvit.lys} />
+        <rect x="85" y="39.8" width="1" height="2.6" fill={S.hvit.lys} />
+        <rect x="84.4" y="40.9" width="2.2" height="0.4" fill={S.marine.flate} />
+        <rect x="85.3" y="39.8" width="0.4" height="2.6" fill={S.marine.flate} />
+      </g>
+    </Lerret>
   )
 }
 
+/**
+ * Kontorbygget (ny stil, fjern avstand): et glasstårn på et lavt steinbygg,
+ * sett fra andre siden av byen. Folkene ved foten er små — det er det som
+ * gjør tårnet stort. Nabobyggene står i dis bak.
+ */
 function Kontorbygg({ størrelse = 48 }: P) {
-  const linjer: ReactNode[] = []
-  for (let y = 8; y < 43; y += 4) linjer.push(<rect key={y} x="14" y={y} width="20" height="0.8" fill={F.glass} />)
+  const g = GRUNNLINJE
+  const etasje = maal('fjern', 'etasje')
+  const etasjer = Array.from({ length: 8 }, (_, i) => g - 12 - (i + 1) * etasje)
+  const tent = new Set(['1-2', '2-5', '3-1', '4-4', '5-0', '6-3', '7-5', '8-2'])
   return (
-    <Svg størrelse={størrelse}>
-      <Grunn type="gate" />
-      <rect x="5" y="20" width="10" height="23" fill={F.blaaMork} />
-      {[23, 28, 33, 38].map((y) => (
-        <rect key={y} x="7" y={y} width="6" height="0.8" fill={F.glassMork} />
+    <Lerret størrelse={størrelse}>
+      {/* Byen bak, i dis. */}
+      <Kantfade>
+        <Dis>
+          <Kloss x={8} y={g - 6} b={16} h={40} d={10} m={S.stein} />
+          {[0, 1, 2, 3, 4, 5, 6].map((r) => (
+            <rect key={r} x="10" y={g - 42 + r * 5} width="12" height="1.6" fill={S.stein.skygge} />
+          ))}
+          <Kloss x={66} y={g - 6} b={20} h={30} d={10} m={S.skifer} />
+          {[0, 1, 2, 3, 4].map((r) => (
+            <rect key={r} x="68" y={g - 32 + r * 5} width="16" height="1.6" fill={S.skifer.skygge} />
+          ))}
+          <Kloss x={78} y={g - 6} b={10} h={46} d={8} m={S.puss} />
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((r) => (
+            <rect key={r} x="80" y={g - 48 + r * 5} width="6" height="1.6" fill={S.puss.skygge} />
+          ))}
+        </Dis>
+      </Kantfade>
+      <Bakke type="fortau" />
+      <Slagskygge x1={14} x2={62} lengde={26} d={14} />
+      {/* Det lave steinbygget med lobbyen. */}
+      <Kloss x={14} b={48} h={12} d={14} m={S.stein} />
+      <rect x="14" y={g - 12} width="48" height="1.2" fill={S.stein.lys} />
+      <rect x="18" y={g - 8.6} width="40" height="8.6" fill={S.vinduLys.skygge} />
+      {[23, 28, 33, 38, 43, 48, 53].map((x) => (
+        <rect key={x} x={x} y={g - 8.6} width="0.5" height="8.6" fill={S.stein.skygge} />
       ))}
-      <polygon points="13,43 13,6 35,3 35,43" fill={F.glassMork} />
-      {linjer}
-      <rect x="23.5" y="4" width="0.8" height="39" fill={F.glass} />
-      <polygon points="17,43 30,4 34,3.5 21,43" fill={F.hvit} opacity="0.25" />
-      <rect x="31.5" y="3.4" width="3.5" height="39.6" fill={F.blaaMork} opacity="0.35" />
-    </Svg>
+      <Glans points={`18,${g - 8.6} 26,${g - 8.6} 21,${g} 18,${g}`} />
+      <rect x="31" y={g - 10.4} width="14" height="1.6" fill={S.mork.flate} />
+      {/* Tårnet: glassfasade med etasjeskiller og sprosser. */}
+      <Kloss x={34} y={g - 12} b={28} h={64} d={16} m={S.glass} />
+      {etasjer.map((y, rad) => (
+        <g key={y}>
+          <rect x="34" y={y} width="28" height="1.3" fill={S.glass.skygge} />
+          <polygon points={`62,${y} ${inn(62, y, 16).join(',')} ${inn(62, y + 1.3, 16).join(',')} 62,${y + 1.3}`} fill={S.skifer.flate} />
+          {[0, 1, 2, 3, 4, 5].map((k) =>
+            tent.has(`${rad}-${k}`) ? <rect key={k} x={34.6 + k * 4.62} y={y + 1.9} width="3.6" height={etasje - 2.6} fill={S.vinduLys.flate} opacity="0.75" /> : null,
+          )}
+        </g>
+      ))}
+      {[1, 2, 3, 4, 5].map((k) => (
+        <rect key={k} x={34 + k * 4.62} y={g - 76} width="0.4" height="64" fill={S.glass.lys} opacity="0.7" />
+      ))}
+      <Glans points={`34,${g - 70} 34,${g - 50} 62,${g - 22} 62,${g - 42}`} />
+      <Glans points={`34,${g - 44} 34,${g - 38} 62,${g - 14} 62,${g - 20}`} />
+      {/* Teknisk rom på taket. */}
+      <Kloss x={40} y={g - 76} b={13} h={4} d={9} m={S.stein} />
+      {/* Små trær og folk ved foten: målestokken. */}
+      {[70, 78].map((x) => (
+        <g key={x}>
+          <rect x={x - 0.4} y={g - 5} width="0.8" height="5" fill={S.treMork.flate} />
+          <circle cx={x} cy={g - 7} r="3" fill={S.gran.flate} />
+          <circle cx={x - 0.9} cy={g - 7.8} r="1.6" fill={S.gran.lys} />
+        </g>
+      ))}
+      <Figur x={26} y={g + 2} avstand="fjern" klaer={S.marine} />
+      <Figur x={29} y={g + 3} avstand="fjern" klaer={S.oker} />
+      <Figur x={66} y={g + 2.6} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <Figur x={84} y={g + 3.4} avstand="fjern" klaer={S.hvit} />
+      {/* Flaggstengene foran. */}
+      {[8, 11].map((x) => (
+        <g key={x}>
+          <line x1={x} y1={g + 1} x2={x} y2={g - 13} stroke={S.hvit.lys} strokeWidth="0.4" />
+          <polygon className="anim-flagg" points={`${x + 0.2},${g - 13} ${x + 3},${g - 12.2} ${x + 0.2},${g - 11.4}`} fill={x === 8 ? S.faluRod.lys : S.marine.lys} />
+        </g>
+      ))}
+    </Lerret>
   )
 }
 
@@ -1423,19 +1664,63 @@ function Speilet({ children }: { children: ReactNode }) {
   return <g transform="translate(48 0) scale(-1 1)">{children}</g>
 }
 
+/**
+ * Superbilen (ny stil, nær avstand): lav kile i dyp vinrød lakk med lys
+ * skulderlinje, mørk kuppel, felger med eiker og gule bremser. Den står i et
+ * utstillingsrom med lys ovenfra og speiler seg i det blanke gulvet.
+ */
+function SuperbilKarosseri() {
+  const g = GRUNNLINJE
+  const hjul = [24, 72]
+  return (
+    <g>
+      <path
+        d="M9 80.6 L8 72.4 Q9 68.6 13 67.4 L19 66.6 Q27 64.6 35 63.6 Q41 60.8 47 60.8 Q54 60.8 58.6 63.4 Q62 65.6 65 66.6 L80 69.6 Q86.6 71.2 88.6 74 L89.6 77.4 Q89.4 80 87 80.6 L79.6 80.6 A7.6 7.6 0 0 0 64.4 80.6 L31.6 80.6 A7.6 7.6 0 0 0 16.4 80.6 Z"
+        fill={S.vin.flate}
+      />
+      {/* Nedre del i skygge, og skulderlinja i lys. */}
+      <path d="M31.6 80.6 L64.4 80.6 L64.8 76.4 L31.2 76.6 Z" fill={S.vin.skygge} />
+      <path d="M13 67.6 Q27 64.8 35 63.8 M65 66.8 L80 69.8 Q85.4 71 87.6 73" fill="none" stroke={S.vin.lys} strokeWidth="1.3" strokeLinecap="round" />
+      {/* Kuppelen. */}
+      <path d="M36.4 64.8 Q41.6 62 47 62 Q53.4 62 57.6 64.2 L61 66.2 L37 67.6 Z" fill={S.mork.flate} />
+      <Glans d="M37.4 64.8 Q41.6 62.6 46 62.4 L42.4 67.2 L37.6 67.4 Z" />
+      <line x1="49.2" y1="62.4" x2="48.4" y2="67" stroke={S.vin.skygge} strokeWidth="0.8" />
+      {/* Luftinntaket foran bakhjulet, dørlinja og speilet. */}
+      <path d="M33.6 70.6 L44.6 69.6 Q43.6 73.6 41.4 75.4 L34.2 75.6 Z" fill={S.mork.skygge} />
+      <path d="M45.6 68 Q47.6 72 47.2 76.4" fill="none" stroke={S.vin.skygge} strokeWidth="0.5" />
+      <path d="M59.4 66.4 L62.8 66.2 L62.4 67.8 L59.8 67.8 Z" fill={S.vin.skygge} />
+      {/* Lykter. */}
+      <path d="M80.4 71 L87.4 73 L86.8 74.2 L80 72.4 Z" fill={S.hvit.lys} />
+      <rect x="8.4" y="69.4" width="4" height="1.4" rx="0.5" fill={S.faluRod.lys} />
+      <path d="M78 79 L89.2 78.6" stroke={S.mork.flate} strokeWidth="1" />
+      {/* Hjulene: dekk, felg med fem eiker, bremsekaliper. */}
+      {hjul.map((x) => (
+        <g key={x}>
+          <circle cx={x} cy={g - 6.4} r="6.4" fill={S.mork.skygge} />
+          <circle cx={x} cy={g - 6.4} r="4.6" fill={S.metall.skygge} />
+          <path d={`M${x - 3.4} ${g - 9.6} A4.4 4.4 0 0 1 ${x + 1} ${g - 10.8}`} fill="none" stroke={S.oker.flate} strokeWidth="1.4" />
+          {[0, 1, 2, 3, 4].map((i) => {
+            const v = (i / 5) * Math.PI * 2 + 0.3
+            return <line key={i} x1={x} y1={g - 6.4} x2={+(x + Math.cos(v) * 4.2).toFixed(2)} y2={+(g - 6.4 + Math.sin(v) * 4.2).toFixed(2)} stroke={S.metall.lys} strokeWidth="1.1" strokeLinecap="round" />
+          })}
+          <circle cx={x} cy={g - 6.4} r="4.6" fill="none" stroke={S.metall.lys} strokeWidth="0.6" />
+          <circle cx={x} cy={g - 6.4} r="1" fill={S.mork.flate} />
+        </g>
+      ))}
+    </g>
+  )
+}
+
 function Superbil({ størrelse = 48 }: P) {
   return (
-    <Bil størrelse={størrelse}>
-      <Speilet>
-        <polygon points="2,33 3,28.5 16,25.5 24,20 33,19.5 44,26 46,33" fill="#dc2626" />
-        <polygon points="2.4,30.5 45.6,30.5 46,33 2,33" fill={F.rodMork} />
-        <polygon points="25,24.8 27.5,21.5 32.5,21.3 38.5,25.3" fill={F.mork} />
-        <polygon points="30,27 36,27 35,29.5 31,29.5" fill={F.mork} />
-        <rect x="2.2" y="28.6" width="3" height="1.2" rx="0.5" fill={F.lys} />
-        <Hjul x={12} r={5} felg={F.lysgraa} />
-        <Hjul x={37} r={5} felg={F.lysgraa} />
-      </Speilet>
-    </Bil>
+    <Lerret størrelse={størrelse} himmel="inne">
+      <Bakke type="gulv" />
+      <Speiling>
+        <SuperbilKarosseri />
+      </Speiling>
+      <ellipse cx="49" cy={GRUNNLINJE + 0.3} rx="40" ry="2" fill="#000000" opacity="0.45" />
+      <SuperbilKarosseri />
+    </Lerret>
   )
 }
 
@@ -1648,16 +1933,53 @@ function Motorbaat({ størrelse = 48 }: P) {
   )
 }
 
+/**
+ * Seilbåten (ny stil, gateavstand): en liten seilbåt fortøyd ved kaia, med
+ * baugen mot høyre. Storseilet bak masta, fokka foran, og en marineblå stripe
+ * langs skroget. Båten duver på den store scenen.
+ */
 function Seilbaat({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
   return (
-    <Svg størrelse={størrelse}>
-      <Grunn type="sjo" />
-      <rect x="23.4" y="7" width="1.2" height="27" fill={F.metallMork} />
-      <polygon points="22.8,9 22.8,32 9,32" fill={F.hvit} />
-      <polygon points="25.2,11 25.2,32 37,32" fill={F.krem} />
-      <polygon points="7,33.5 41,33.5 37,40 11,40" fill={F.hvit} />
-      <polygon points="8.8,36.6 39.2,36.6 37,40 11,40" fill={F.blaaMork} />
-    </Svg>
+    <Lerret størrelse={størrelse}>
+      <Bakke type="kai" />
+      {/* Fortøyningen fra pullerten. */}
+      <path d={`M17.5 ${g - 8} Q25 ${g - 2} 33 ${g - 5.6}`} fill="none" stroke={S.treverk.lys} strokeWidth="0.6" />
+      <g className="anim-duve">
+        {/* Speilbildet i vannet. */}
+        {[g + 1.6, g + 3.8, g + 6.2].map((y, i) => (
+          <rect key={y} x={36 + i * 4} y={y} width={46 - i * 9} height="0.9" rx="0.45" fill={S.hvit.flate} opacity={0.3 - i * 0.08} />
+        ))}
+        {/* Masta, bommen og stagene. */}
+        <line x1="57" y1={g - 7} x2="86.6" y2={g - 6.4} stroke={S.metall.skygge} strokeWidth="0.35" />
+        <line x1="57" y1="10" x2="31" y2={g - 6.6} stroke={S.metall.skygge} strokeWidth="0.35" />
+        <rect x="56.4" y="10" width="1.2" height={g - 7 - 10} fill={S.metall.flate} />
+        {/* Storseilet, med sømmer og skygge mot masta. */}
+        <polygon points={`55.8,12 55.8,${g - 13} 34,${g - 13}`} fill={S.hvit.lys} />
+        <polygon points={`55.8,12 55.8,${g - 13} 51,${g - 13}`} fill={S.hvit.flate} />
+        {[30, 44, 58].map((y) => (
+          <line key={y} x1="55.8" y1={y} x2={55.8 - ((y - 12) / (g - 25)) * 21.8} y2={y} stroke={S.hvit.skygge} strokeWidth="0.4" />
+        ))}
+        <rect x="33" y={g - 13} width="23.6" height="1.4" rx="0.6" fill={S.treverk.flate} />
+        {/* Fokka. */}
+        <polygon points={`58.2,15 82,${g - 8} 59,${g - 10}`} fill={S.hvit.flate} />
+        <polygon points={`58.2,15 64,${g - 9.6} 59,${g - 10}`} fill={S.hvit.skygge} opacity="0.6" />
+        {/* Vimpelen på toppen. */}
+        <polygon points="57.6,10 62.4,11.2 57.6,12.4" fill={S.vin.lys} />
+        {/* Ruffen med koøyer. */}
+        <path d={`M45 ${g - 7} L47 ${g - 11} L64 ${g - 11} L67 ${g - 7} Z`} fill={S.hvit.flate} />
+        <path d={`M47 ${g - 11} L64 ${g - 11} L64.6 ${g - 10} L46.6 ${g - 10} Z`} fill={S.hvit.lys} />
+        {[51, 56, 61].map((x) => (
+          <circle key={x} cx={x} cy={g - 8.6} r="0.9" fill={S.glass.skygge} />
+        ))}
+        {/* Skroget: hvitt med marineblå stripe, mørkere under vannlinja. */}
+        <path d={`M30 ${g - 7} L88 ${g - 7} Q86.6 ${g - 2} 83.4 ${g} L35 ${g} Q31.4 ${g - 2.4} 30 ${g - 7} Z`} fill={S.hvit.flate} />
+        <path d={`M30.4 ${g - 6} L87.6 ${g - 6} L87.2 ${g - 4.6} L30.8 ${g - 4.6} Z`} fill={S.marine.flate} />
+        <path d={`M31.6 ${g - 3} L86.6 ${g - 3} Q85.4 ${g - 1} 83.4 ${g} L35 ${g} Q32.6 ${g - 1.2} 31.6 ${g - 3} Z`} fill={S.hvit.skygge} />
+        <rect x="34" y={g - 0.8} width="50" height="1.2" rx="0.6" fill={S.vin.skygge} />
+        <rect x="29.6" y={g - 7.6} width="58.8" height="0.9" rx="0.45" fill={S.treverk.lys} />
+      </g>
+    </Lerret>
   )
 }
 
@@ -1800,11 +2122,16 @@ const bedrift =
   (b: B): Tegning =>
   ({ størrelse = 48, trinn, forbedringer }) => <Svg størrelse={størrelse}>{b(trinn, forbedringer)}</Svg>
 
+/** En bedrift tegnet i den nye stilen (G1): 96 × 96 på et `Lerret`. */
+const bedriftNy =
+  (b: B): Tegning =>
+  ({ størrelse = 48, trinn, forbedringer }) => <Lerret størrelse={størrelse}>{b(trinn, forbedringer)}</Lerret>
+
 const ILLUSTRASJONER: Record<string, Tegning> = {
   saftbod: bedrift(saftbod),
   polsebod: bedrift(polsebod),
   gatekjokken: bedrift(gatekjokken),
-  kiosk: bedrift(kiosk),
+  kiosk: bedriftNy(kiosk),
   kafe: bedrift(kafe),
   restaurant: bedrift(restaurant),
   hotell: bedrift(hotell),
@@ -1874,24 +2201,34 @@ const ILLUSTRASJONER: Record<string, Tegning> = {
 
 export const ILLUSTRASJONSIDER = Object.keys(ILLUSTRASJONER)
 
+/**
+ * Tegningene som er tegnet i den nye stilen (G1). Listen vokser til den dekker alt.
+ * Byversjonene deler tegning med grunnbygget til G5 gir dem sine egne.
+ */
+export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kontorbygg', 'kontorbygg-stavanger', 'superbil', 'seilbaat']
+
 /** Bedriftene, som har fire vekstrinn. */
 export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
 
 /**
  * Illustrasjonen for en bedrift, eiendom eller luksusgjenstand, etter id.
  * Bedrifter vokser med `trinn` og viser `forbedringer` (0–3) som detaljer.
+ * Med `utklipp` kommer tegningene i den nye stilen uten himmel, bakke og
+ * bakgrunn, til steder som har sin egen scene rundt.
  */
 export const Illustrasjon = memo(function Illustrasjon({
   id,
   størrelse = 44,
   trinn = 0,
   forbedringer = 0,
+  utklipp = false,
 }: {
   id: string
   størrelse?: number
   trinn?: Trinn
   forbedringer?: number
+  utklipp?: boolean
 }) {
   const Tegning = ILLUSTRASJONER[id]
-  return Tegning ? <>{Tegning({ størrelse, trinn, forbedringer })}</> : null
+  return Tegning ? <Utklipp.Provider value={utklipp}>{Tegning({ størrelse, trinn, forbedringer })}</Utklipp.Provider> : null
 })
