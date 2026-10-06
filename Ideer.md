@@ -24,16 +24,15 @@ Items from *Road to v2.0*. Commits: `Pakke N: …`.
 
 ### Graphics track (Packs G1–G7)
 
-Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 (the foundation) is done; every later pack draws against the style it set.
+Items from *Graphics* and *Art direction*. Commits: `Grafikkpakke GN: …`. G1 (the foundation) and G2 (the businesses) are done; every later pack draws against the style G1 set.
 
-- **Pack G2 – Businesses:** Businesses as real places
 - **Pack G3 – The map:** A proper map of Norway, Calmer markers, The world map in the same style
 - **Pack G4 – Faces and names:** Real portraits of the rivals, Logos that look like companies, not app icons, Proper startup logos
 - **Pack G5 – Things you own:** Cars that are visible; Watches, boats and planes up close; No duplicate drawings; City properties that look like their city
 - **Pack G6 – Stadium and gallery:** The crowd as a mass, not confetti; A real stadium at each stage; Real paintings
 - **Pack G7 – The finish:** Detail scenes for everything you own, Reports as statements, Loading screen and first frame
 
-G2 is one item because it is 13 businesses × 4 growth stages. G7 comes last because the big detail scenes need the redrawn art.
+G7 comes last because the big detail scenes need the redrawn art.
 
 ### Working side by side
 
@@ -74,31 +73,30 @@ The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid groun
 
 From a review of all 72 drawings, the rivals, the stadium, both maps and the 21 logos: the art looks amateurish mainly because the drawings are toy-coloured flat clip-art on a 48×48 grid inside a grown-up dark-and-gold interface. The foundation is in place (G1): the art direction is written in the header of `Illustrasjoner.tsx`, the helpers live in `Tegnestil.tsx`, and `?galleri` shows the style sheet. The items below redraw each category against it.
 
-**Businesses and items**
+**Things you own**
 
-19. **Businesses as real places.** The restaurant is a red wall with two arched windows, the hotel a narrow block. Each business gets a recognizable building with a storefront, sign, entrance and street life; the four growth stages are clearly visible and stage 3 looks expensive.
-20. **Cars that are visible.** The hypercar is dark on a dark background, so only the gold trim shows. Each car gets a real body shape, shine, rims and its own colour, and they look different from each other.
-21. **Watches, boats and planes up close.** The three watches sit on the same red cushion and look nearly alike. Give them a dial, bezel and strap, with the diamond watch clearly the most expensive. Boats and planes get the right proportions and a hint of shine on metal and water.
-22. **No duplicate drawings.** Every id gets its own drawing — today the cabins, bedsits, farms and forests repeat (three identical cabins, three bedsits, two farms, two forests). *City properties that look like their city* covers the eight city versions; this covers the rest.
+19. **Cars that are visible.** The hypercar is dark on a dark background, so only the gold trim shows. Each car gets a real body shape, shine, rims and its own colour, and they look different from each other.
+20. **Watches, boats and planes up close.** The three watches sit on the same red cushion and look nearly alike. Give them a dial, bezel and strap, with the diamond watch clearly the most expensive. Boats and planes get the right proportions and a hint of shine on metal and water.
+21. **No duplicate drawings.** Every id gets its own drawing — today the cabins, bedsits, farms and forests repeat (three identical cabins, three bedsits, two farms, two forests). *City properties that look like their city* covers the eight city versions; this covers the rest.
 
 **People**
 
-23. **Real portraits of the rivals.** Today they look like a default chat-app avatar: dot eyes, the same face shape, smile and pose, the same skin tone. Give them individual faces, different ages, clothing and a background that suits each, like a business-magazine cover. A thin frame instead of the thick coloured ring.
+22. **Real portraits of the rivals.** Today they look like a default chat-app avatar: dot eyes, the same face shape, smile and pose, the same skin tone. Give them individual faces, different ages, clothing and a background that suits each, like a business-magazine cover. A thin frame instead of the thick coloured ring.
 
 **Stadium**
 
-24. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
-25. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
+23. **The crowd as a mass, not confetti.** The stands are random coloured dots. Draw the crowd in the club's colours with a few highlights, and give the stands seat rows in perspective.
+24. **A real stadium at each stage.** The drawing is long and thin, so the players are dots. A taller frame with the pitch seen at a slight angle; each stage gets a recognizable roof, floodlights and scoreboard, and the Eliteserien stadium is clearly a different building.
 
 **Map**
 
-26. **A proper map of Norway.** Today it is a rough blob with few points, no Sweden, no difference between land and sea, and a tiny Lofoten inset. A detailed coastline with fjords and islands, neighbouring countries in grey, a sea colour, light mountain shading, and city labels that don't sit on the markers.
-27. **Calmer markers.** The glowing gold coins with numbers look like a mobile game. A small clean dot with the count as a small badge, and gold only for cities you fully own.
-28. **The world map in the same style.** The coastlines are thin outlines and land is almost the colour of the sea. Same style as the Norway map, so the two read as one map.
+25. **A proper map of Norway.** Today it is a rough blob with few points, no Sweden, no difference between land and sea, and a tiny Lofoten inset. A detailed coastline with fjords and islands, neighbouring countries in grey, a sea colour, light mountain shading, and city labels that don't sit on the markers.
+26. **Calmer markers.** The glowing gold coins with numbers look like a mobile game. A small clean dot with the count as a small badge, and gold only for cities you fully own.
+27. **The world map in the same style.** The coastlines are thin outlines and land is almost the colour of the sea. Same style as the Norway map, so the two read as one map.
 
 **Stocks and crypto**
 
-29. **Logos that look like companies, not app icons.** All 21 are a glyph on a rounded square today (a fish, a wifi symbol for telecom, a die, DNA). Give each company its own shape and its own typeface for a short wordmark — Bergen Shipping as a classic crest, Nordlys Tech as a modern geometric mark.
+28. **Logos that look like companies, not app icons.** All 21 are a glyph on a rounded square today (a fish, a wifi symbol for telecom, a die, DNA). Give each company its own shape and its own typeface for a short wordmark — Bergen Shipping as a classic crest, Nordlys Tech as a modern geometric mark.
 
 ## Parked (not chosen yet)
 

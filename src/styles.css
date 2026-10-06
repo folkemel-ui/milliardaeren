@@ -5193,6 +5193,14 @@ button.maalstripe {
   color: #1c1a16;
 }
 
+/* Avispapiret er lyst i begge temaer, så tegningene får alltid den lyse himmelen der. */
+.avisbilde {
+  --himmel-dag-topp: #aebfcb;
+  --himmel-dag-horisont: #efe3cb;
+  --himmel-inne-topp: #c9c4bc;
+  --himmel-inne-horisont: #e6e1d8;
+}
+
 .avisbilde.ikon {
   width: 44px;
   height: 44px;

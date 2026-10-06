@@ -39,6 +39,7 @@ export const S = {
   oker: { lys: '#d2ab5c', flate: '#b88f40', skygge: '#8b6b2d' },
   vin: { lys: '#934750', flate: '#77343c', skygge: '#55242b' },
   bjork: { lys: '#b7b45f', flate: '#9a9a4c', skygge: '#76783a' },
+  lov: { lys: '#7c8f5c', flate: '#647748', skygge: '#4a5a35' },
   gull: { lys: '#e7cf88', flate: '#c9a54a', skygge: '#94782f' },
   hud: { lys: '#e2bd9b', flate: '#c99b77', skygge: '#a07858' },
   hudMork: { lys: '#a87a5c', flate: '#8a5f43', skygge: '#664532' },
@@ -132,6 +133,14 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
         </linearGradient>
         <mask id={`${id}km`}>
           <rect x="0" y="0" width="96" height="96" fill={`url(#${id}k)`} />
+        </mask>
+        {/* Havet blekner ut nederst, så det ikke slutter i en hard kant. */}
+        <linearGradient id={`${id}n`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0.84" stopColor="#ffffff" />
+          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+        <mask id={`${id}nm`}>
+          <rect x="0" y="0" width="96" height="96" fill={`url(#${id}n)`} />
         </mask>
         <radialGradient id={`${id}b`} gradientUnits="userSpaceOnUse" cx="48" cy={GRUNNLINJE - 3} r="58" gradientTransform={`translate(48 ${GRUNNLINJE - 3}) scale(1 0.3) translate(-48 -${GRUNNLINJE - 3})`}>
           <stop offset="0.55" stopColor="#ffffff" />
@@ -290,12 +299,16 @@ export function Kantfade({ children }: { children: ReactNode }) {
 
 // ─────────────────────────────────────────────── Bakken
 
-export type Bakketype = 'fortau' | 'gress' | 'kai' | 'gulv' | 'sno'
+export type Bakketype = 'fortau' | 'gress' | 'kai' | 'gulv' | 'sno' | 'hav' | 'asfalt'
+
+/** Horisonten over åpent hav (`hav`). */
+export const HORISONT = 56
 
 /**
  * Bakken, tilpasset motivet: fortau for forretninger, gress for hus, kai og
- * sjø for båter, blankt gulv for biler, snø i fjellet. Den blekner ut mot
- * sidene, så tegningen ikke står på en grå strek.
+ * sjø for båter, blankt gulv for biler, snø i fjellet, åpent hav helt ut til
+ * horisonten for det som ligger til havs, og asfalt for flyplassen. Den
+ * blekner ut mot sidene, så tegningen ikke står på en grå strek.
  */
 export function Bakke({ type }: { type: Bakketype }) {
   const u = useUrl()
@@ -373,8 +386,124 @@ export function Bakke({ type }: { type: Bakketype }) {
         </>
       )
       break
+    case 'hav':
+      innhold = (
+        <>
+          <rect x="0" y={HORISONT} width="96" height={96 - HORISONT} fill={S.sjo.flate} />
+          <rect x="0" y={HORISONT} width="96" height={96 - HORISONT} fill={u('d')} />
+          <rect x="0" y={HORISONT} width="96" height="3" fill={S.sjo.lys} opacity="0.55" />
+          {[
+            [12, 64, 0.5],
+            [70, 62, 0.5],
+            [30, 72, 0.7],
+            [80, 76, 0.7],
+            [8, 86, 0.9],
+            [52, 91, 0.9],
+          ].map(([x, y, w], i) => (
+            <polyline key={i} className={i % 2 ? 'anim-boelge sen' : 'anim-boelge'} points={`${x},${y} ${x + 4 * w},${y - 1.2 * w} ${x + 8 * w},${y}`} fill="none" stroke={S.sjo.lys} strokeWidth={w} strokeLinecap="round" />
+          ))}
+        </>
+      )
+      return (
+        <g mask={u('km')}>
+          <g mask={u('nm')}>{innhold}</g>
+        </g>
+      )
+    case 'asfalt':
+      innhold = (
+        <>
+          <rect x="0" y={g - 16} width="96" height="28" fill={S.mork.lys} />
+          <rect x="0" y={g - 16} width="96" height="6" fill={S.mork.flate} opacity="0.5" />
+          <path d={`M-4 ${g + 6} Q40 ${g - 2} 100 ${g - 6}`} fill="none" stroke={S.oker.flate} strokeWidth="0.7" />
+          {[6, 22, 38, 54, 70, 86].map((x) => (
+            <rect key={x} x={x} y={g + 8} width="8" height="0.8" fill={S.hvit.flate} opacity="0.7" />
+          ))}
+        </>
+      )
+      break
   }
   return <g mask={u('bm')}>{innhold}</g>
+}
+
+// ─────────────────────────────────────────────── Trær og lys
+
+/**
+ * Et tre som står på (x, y), `h` enheter høyt: løvtre (`lov`, en krone av
+ * runde klynger) eller gran (tre lag, lys venstre og skygge høyre side).
+ */
+export function Tre({ x, y = GRUNNLINJE, h, slag = 'lov' }: { x: number; y?: number; h: number; slag?: 'lov' | 'gran' }) {
+  if (slag === 'gran') {
+    const lag = [0, 1, 2].map((i) => {
+      const topp = y - h + i * h * 0.24
+      const b = h * (0.2 + i * 0.09)
+      const bunn = topp + h * 0.42
+      return (
+        <g key={i}>
+          <polygon points={pkt([x, topp], [x - b, bunn], [x + b, bunn])} fill={S.gran.flate} />
+          <polygon points={pkt([x, topp], [x + b * 0.15, bunn], [x + b, bunn])} fill={S.gran.skygge} />
+        </g>
+      )
+    })
+    return (
+      <g>
+        <ellipse cx={x + h * 0.12} cy={y} rx={h * 0.3} ry={h * 0.04} fill="#000000" opacity="0.22" />
+        <rect x={x - h * 0.03} y={y - h * 0.16} width={h * 0.06} height={h * 0.16} fill={S.treMork.flate} />
+        {lag}
+      </g>
+    )
+  }
+  const r = h * 0.2
+  const sentrum = y - h * 0.62
+  const klynger: [number, number, number, string][] = [
+    [-0.9, 0.35, 0.95, S.lov.flate],
+    [0.9, 0.3, 0.9, S.lov.skygge],
+    [0, 0.45, 1.05, S.lov.flate],
+    [-0.45, -0.45, 1, S.lov.flate],
+    [0.55, -0.3, 0.95, S.lov.skygge],
+    [-0.6, -0.15, 0.7, S.lov.lys],
+    [0, -0.95, 0.85, S.lov.lys],
+  ]
+  return (
+    <g>
+      <ellipse cx={x + h * 0.14} cy={y} rx={h * 0.32} ry={h * 0.045} fill="#000000" opacity="0.22" />
+      <polygon points={pkt([x - h * 0.045, y], [x + h * 0.045, y], [x + h * 0.025, sentrum], [x - h * 0.025, sentrum])} fill={S.treMork.flate} />
+      {klynger.map(([dx, dy, k, c], i) => (
+        <circle key={i} cx={+(x + dx * r).toFixed(2)} cy={+(sentrum + dy * r).toFixed(2)} r={+(r * k).toFixed(2)} fill={c} />
+      ))}
+    </g>
+  )
+}
+
+/** En lampe med varm glød rundt; (x, y) er midt på lampen, `r` gløden. */
+export function Lampe({ x, y, r = 2.6 }: { x: number; y: number; r?: number }) {
+  return (
+    <g>
+      <circle cx={x} cy={y} r={r} fill={S.vinduLys.lys} opacity="0.32" />
+      <rect x={+(x - r * 0.3).toFixed(2)} y={+(y - r * 0.55).toFixed(2)} width={+(r * 0.6).toFixed(2)} height={+(r * 1.1).toFixed(2)} rx={+(r * 0.2).toFixed(2)} fill={S.vinduLys.lys} />
+    </g>
+  )
+}
+
+/**
+ * En rad vinduer: `antall` vinduer, `b` × `h` store med `mellom` mellom,
+ * fra (x, y). Hvert `tent`-te vindu (fra `start`) lyser varmt.
+ */
+export function Vindusrad({ x, y, antall, b, h, mellom, tent = 0, start = 0, karm }: { x: number; y: number; antall: number; b: number; h: number; mellom: number; tent?: number; start?: number; karm?: string }) {
+  return (
+    <g>
+      {Array.from({ length: antall }, (_, i) => {
+        const vx = +(x + i * (b + mellom)).toFixed(2)
+        const lyser = tent > 0 && (i + start) % tent === 0
+        return (
+          <g key={i}>
+            {karm && <rect x={vx - 0.5} y={y - 0.5} width={b + 1} height={h + 1} fill={karm} />}
+            <rect x={vx} y={y} width={b} height={h} fill={lyser ? S.vinduLys.flate : S.glass.skygge} />
+            {!lyser && <rect x={vx} y={y} width={b * 0.45} height={h} fill={S.glass.flate} opacity="0.5" />}
+          </g>
+        )
+      })}
+    </g>
+  )
 }
 
 // ─────────────────────────────────────────────── Mennesker

@@ -4,7 +4,7 @@ For the session in charge of graphics and animation (packs G1–G7, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true.
+Update it at the end of each G pack, and delete what stops being true. Updated after G2.
 
 ---
 
@@ -60,8 +60,20 @@ Update it at the end of each G pack, and delete what stops being true.
   registry. Stage 0–3 must look different, and each `f` must change the output
   (`pakke38.test.ts`). Place improvement details so they never collide at stage 3 + f3:
   the coffee sign first hung over the parcel locker.
-- In `Illustrasjoner.tsx` the new `Person` is imported as **`Figur`**, because the old
-  48 style already has a `Person`.
+- In `Illustrasjoner.tsx` the new `Person` is imported as **`Figur`** (the old 48 style
+  had its own `Person`; the name stuck).
+- **How the businesses are built (G2)**: the place itself grows (Folke's choice). At 25
+  it gets bigger, at 50 customers or traffic arrive, and at 100 come finer materials,
+  warm light and `Plakett`. Small ones at street distance (lemonade stand close up). Big
+  ones show the operation from afar on `hav`, `asfalt` or `sno`; the bank is the
+  exception, at street distance, because its building *is* the business. Every
+  improvement must show on every stage (`grafikkG2.test.ts` checks all 13 × 4 × 4).
+  When geometry changes per stage, keep the improvement positions in variables
+  (`disk`, `luke`, `x`, `b`) so they follow the building.
+- **Helpers added in G2**: `Tre` (leafy or spruce), `Lampe`, `Vindusrad` (lit every
+  n-th window), `Bakke` types `hav` (open sea with `HORISONT` = 56, faded at the
+  sides and bottom) and `asfalt`, material `lov`. `Passasjerfly` (in Illustrasjoner)
+  draws a plane side-on: propeller, jet or widebody.
 
 ## 4. SVG techniques that worked, and traps
 
@@ -94,7 +106,20 @@ Update it at the end of each G pack, and delete what stops being true.
 - **Light cones** with hard edges that touch the frame look cheap. A soft radial glow
   behind the subject works better.
 - **Trees**: one trunk and two or three circles is a lollipop. Use a tapered trunk,
-  6+ overlapping circles in three tones, and a branch.
+  6+ overlapping circles in three tones, and a branch. (`Tre` does this now.)
+- **Draw order for attached wings**: a wing that stands in the same front plane as the
+  main building must be drawn *after* it, or the main building's shaded side face covers
+  it (hotel wing, G2). A wing set back can come first.
+- **Keep clear of the frame**: things past x ≈ 90 get cut. Remember that `Kloss`
+  adds `d × 0.5` to the right. The bank wings, the hot dog terrace and a parasol all
+  ran out in G2. Check the right edge at stage 3 with every improvement on.
+- **Level 100 is the crowded stage**: the plaque collided with a helicopter, a crane boom,
+  silos and customers. Place the plaque last, in the sky or on a quiet wall, and look at
+  stage 3 with f = 3 for every business.
+- **Snow on a light sky** disappears in the light theme: give white shapes against the
+  sky a thin `fjell.lys` outline (the ski mountain).
+- **The newspaper** (`.avisbilde`) is cream paper in both themes; it sets the
+  `--himmel-*` vars to the light sky, so drawings print with a pale sky there.
 
 ## 5. Reviewing art
 
@@ -115,6 +140,14 @@ Update it at the end of each G pack, and delete what stops being true.
 
 ## 6. Tools (what cost time in G1)
 
+- **G2 workflow that paid off**: each drawing in its own snippet file, spliced in by
+  `splice.mjs <id> <snippet>` (replaces `const <id>: B` up to the next drawing, switches
+  the registry to `bedriftNy`, adds the id to `NY_STIL`). Small fixes go through
+  `fiks.mjs <file> <p.json>`: a JSON list of `[from, to]` pairs that throws if `from` is
+  missing. Writing JSON via a quoted heredoc (`<<'EOF'`) avoids Bash eating `${…}`.
+  `flytt.mjs` moves a block (draw order). Rebuild these in the scratchpad if gone.
+- Draw in batches of three or four, then look at all stages on a contact sheet. Every
+  batch found two or three layout bugs that tests can't see.
 - Patch with `.mjs` files written by the Write tool, using a `filPatch(fil, [[fra, til]])`
   helper that throws when `fra` is missing and keeps CRLF. **`styles.css` is CRLF**; the
   `.tsx` files are LF. Long drawings go in separate `.txt` snippet files that a script
@@ -130,13 +163,10 @@ Update it at the end of each G pack, and delete what stops being true.
 
 ## 7. Notes for the coming packs
 
-- **G2 (businesses)**: 12 businesses left, kiosk done. Reuse the kiosk structure: fascia
-  and sign, storefront, door, props at 25, `Figur` customers at 50, `Plakett` and
-  something expensive at 100. Choose a distance per business: stalls and food truck
-  close, shops street, hotel, bank, oil, shipping, airline and ski resort far, perhaps
-  with a street-distance foreground. The old `Kunder`, `Vekst` and `Utmerkelse` go
-  away when the last old business does. `pakke38.test.ts` names `kafe`, `oljeselskap`,
-  `rederi`, `skisenter` and `hotell` for anim classes, so keep those classes.
+- **G2 is done** (all 13 businesses). The old `Bedrift`, `Vekst`, `Kunder`, `Smabaat`,
+  `Utmerkelse` and `PLAKETT` are gone. `F`, `Svg` and `Grunn` remain for properties and luxury.
+- **The 32 px rival list** in Investeringer shows business drawings very small. The
+  scale rule makes the kiosk and the lemonade stand tiny there; G7 could crop or zoom.
 - **G5**: `hytte-trysil`, `hytte-lofoten` (shown as "Rorbu") and `kontorbygg-stavanger`
   share new drawings; each needs its own. Cars in the garage are shown as cutouts at
   64 px, so the body must read without a floor.
