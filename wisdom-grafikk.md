@@ -37,7 +37,12 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   numbers). For G1 Folke took the recommended option on palette, scale and sky, but
   *not* on the transition: they chose to leave old drawings alone instead of
   recolouring them. So the recommended option isn't always taken. Make every option
-  one you'd be happy to build.
+  one you'd be happy to build. For G2 Folke took all three recommendations (growth,
+  big ones from afar, level 100). Options that named examples per business ("the café
+  takes over the shop next door, the oil field gets a second platform") were easy to
+  answer.
+- **After each pack, Folke asks what you learned.** Update this file before the pack
+  commit, then re-read it once for anything missing. That's cheaper than a second round.
 - Report each item as what it looks like now. Say plainly what's still mixed or still
   small (the game looks mixed until G7; the kiosk is small because of the scale rule).
 
@@ -70,6 +75,18 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   improvement must show on every stage (`grafikkG2.test.ts` checks all 13 × 4 × 4).
   When geometry changes per stage, keep the improvement positions in variables
   (`disk`, `luke`, `x`, `b`) so they follow the building.
+- **The oblique view has no perspective**: something further back is *not* smaller,
+  just raised (`inn`). Show distance by raising it, by overlap (partly hidden behind the
+  subject) and with `Dis`, as with the food truck, the second plane and the LNG tanker on
+  the horizon. Don't shrink background objects; that breaks the scale rule.
+- **Round things lying flat** (fish pens, pools, the helideck) are ellipses with
+  ry ≈ 0.3 × rx, which matches `DYBDE`. Put a lighter top rail 1–2 units above the
+  ring to give it height.
+- **"Customers at 50" from afar is traffic**: a person at far distance is 4.4 units,
+  invisible in a 44 px icon. Big businesses get boats, a taxi, a helicopter, a second
+  plane, a baggage train or skiers instead, with a couple of tiny people as a bonus.
+- **On the sea**: platform legs and anything standing in the water change to
+  `S.sjo.skygge` below the waterline, with a pale ellipse where they meet the surface.
 - **Helpers added in G2**: `Tre` (leafy or spruce), `Lampe`, `Vindusrad` (lit every
   n-th window), `Bakke` types `hav` (open sea with `HORISONT` = 56, faded at the
   sides and bottom) and `asfalt`, material `lov`. `Passasjerfly` (in Illustrasjoner)
@@ -131,14 +148,27 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   screenshot. The pane scales wide viewports down a lot; 560×600 gives the most detail
   per drawing. `zoom` with a region isn't supported.
 - Check every new drawing at 240+ px, 60 px and 44 px, in both themes, and in each
-  place it appears: list card, `.scene` detail view, Luksus storage, city view, gallery.
-  The gallery's stage row shows stage n with n improvements.
+  place it appears: list card, `.scene` detail view, Luksus storage, city view, gallery,
+  the newspaper (`.avisbilde`), the buy moment (`Kjopsglimt`, 96/132 px) and the
+  rival list (32 px).
+- The gallery's stage row shows only stage n with n improvements (`trinnark(navn, px)`
+  clones that row). An improvement at another stage (f3 at stage 0) is only checked
+  by `grafikkG2.test.ts` unless you build that state in the game.
+- **Test save for businesses**: set `b.nivaa` *before* `kjopForbedring`, because
+  improvements have level requirements (online banking needs level 10, the offshore pen
+  40). Keep `kontanter` huge and log every failed action.
+- The game reopens on the last tab used. Click the tab before querying
+  `.bedrift-ikon`, or the query returns 0. In a detail view, the way back is the button
+  with the tab's name inside `main`.
+- The newspaper only shows a drawing when a story is about one, and the issue you open
+  may have none. Mock it with a `figure.avisbilde.tegning` holding a cloned SVG on the
+  gallery page.
 - Set the light theme with `document.documentElement.dataset.theme = 'light'`. CSS-var
   skies follow it at once; cloned SVGs do too.
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
   Reload, wrap `console.error`, click all five tabs, and read the wrapped list.
 
-## 6. Tools (what cost time in G1)
+## 6. Tools (what cost time in G1 and G2)
 
 - **G2 workflow that paid off**: each drawing in its own snippet file, spliced in by
   `splice.mjs <id> <snippet>` (replaces `const <id>: B` up to the next drawing, switches
@@ -146,6 +176,16 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   `fiks.mjs <file> <p.json>`: a JSON list of `[from, to]` pairs that throws if `from` is
   missing. Writing JSON via a quoted heredoc (`<<'EOF'`) avoids Bash eating `${…}`.
   `flytt.mjs` moves a block (draw order). Rebuild these in the scratchpad if gone.
+  `splice.mjs` carries the old drawing's doc comment away with it. A helper used by
+  only one drawing (`Passasjerfly`) goes in the same snippet, above the drawing.
+- After your own scripts have written a file, the Edit tool warns "modified on disk".
+  That's expected; re-read the file before an edit that depends on nearby lines.
+- `grafikkG2.test.ts` finds the plaque by its exact markup (`fill` mork.skygge, `stroke`
+  gull.flate, `stroke-width="1"`). If `Plakett` changes, update the test with it.
+- `tsc` reports only the first level of dead code: after the last old business went,
+  only `Bedrift` and `bedrift` were flagged, but `Vekst`, `Kunder`, `Smabaat`,
+  `Utmerkelse`, `PLAKETT` and the old `Person` went with them. Grep the names before
+  deleting.
 - Draw in batches of three or four, then look at all stages on a contact sheet. Every
   batch found two or three layout bugs that tests can't see.
 - Patch with `.mjs` files written by the Write tool, using a `filPatch(fil, [[fra, til]])`
