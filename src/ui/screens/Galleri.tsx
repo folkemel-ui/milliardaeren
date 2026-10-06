@@ -7,6 +7,7 @@ import { Bakke, GRUNNLINJE, Kloss, Lerret, maal, METER, Person, S, Slagskygge, t
 import { PAPIRER } from '../../engine/marked'
 import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
 import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
+import { STARTUPNAVN, StartupLogo } from '../komponenter/StartupLogo'
 import { Stadion, STADIONTRINN } from '../komponenter/Stadion'
 import { DIVISJONER, KLUBBNAVN } from '../../engine/klubb'
 import { Verdenskart } from '../komponenter/Verdenskart'
@@ -175,14 +176,20 @@ export function Galleri() {
         {RIVALPORTRETTER.map((id) => (
           <figure key={id} className="galleri-kort">
             <div className="galleri-stor">
-              <Rivalportrett id={id} størrelse={240} />
+              <Rivalportrett id={id} størrelse={260} form="omslag" />
             </div>
             <div className="galleri-små">
               <span className="galleri-mork">
-                <Rivalportrett id={id} størrelse={40} />
+                <Rivalportrett id={id} størrelse={44} />
               </span>
               <span className="galleri-lys">
-                <Rivalportrett id={id} størrelse={40} />
+                <Rivalportrett id={id} størrelse={44} />
+              </span>
+              <span className="galleri-mork">
+                <Rivalportrett id={id} størrelse={28} />
+              </span>
+              <span className="galleri-lys">
+                <Rivalportrett id={id} størrelse={28} />
               </span>
             </div>
             <figcaption>{START_RIVALER.find((r) => r.id === id)?.navn ?? id}</figcaption>
@@ -221,8 +228,14 @@ export function Galleri() {
       <div className="galleri-logoer">
         {PAPIRLOGOER.map((id) => (
           <figure key={id} className="galleri-logo">
-            <span className="galleri-mork">
+            <span className="galleri-mork galleri-ordmerke">
               <Papirlogo id={id} størrelse={96} />
+            </span>
+            <span className="galleri-mork galleri-ordmerke">
+              <Papirlogo id={id} størrelse={36} ordmerke />
+            </span>
+            <span className="galleri-lys galleri-ordmerke">
+              <Papirlogo id={id} størrelse={36} ordmerke />
             </span>
             <span className="galleri-små">
               <span className="galleri-mork">
@@ -235,6 +248,26 @@ export function Galleri() {
             <figcaption>
               {id} · {PAPIRER[id].navn}
             </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <h2 className="skjerm-tittel galleri-del">Startups</h2>
+      <div className="galleri-logoer">
+        {STARTUPNAVN.map((navn) => (
+          <figure key={navn} className="galleri-logo">
+            <span className="galleri-mork galleri-ordmerke">
+              <StartupLogo navn={navn} />
+            </span>
+            <span className="galleri-små">
+              <span className="galleri-mork">
+                <StartupLogo navn={navn} liten />
+              </span>
+              <span className="galleri-lys">
+                <StartupLogo navn={navn} />
+              </span>
+            </span>
+            <figcaption>{navn}</figcaption>
           </figure>
         ))}
       </div>

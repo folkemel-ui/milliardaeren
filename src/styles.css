@@ -1359,6 +1359,13 @@ button.merke {
   gap: 12px;
 }
 
+/* Et papirs side (G4): logoen med ordmerke over navnet. */
+.detalj-topp.papir-topp {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .detalj-kurs {
   display: flex;
   flex-direction: column;
@@ -1933,6 +1940,16 @@ button.merke {
   background: #ffffff;
 }
 
+/* Logoene i galleriet (G4): merket stort og ordmerket på mørk og lys bunn. */
+.galleri-ordmerke {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 10px;
+  border-radius: 10px;
+  line-height: 0;
+}
+
 .galleri-kort figcaption {
   font-weight: var(--vekt-halvfet);
 }
@@ -2188,27 +2205,15 @@ button.merke {
   gap: 10px;
 }
 
-/* Startupens logo: initialene på en farget flis (fargen settes i StartupLogo). */
+/* Startupens logo: et bransjemerke i egen farge (G4), tegnet i StartupLogo. */
 .startup-logo {
-  display: grid;
+  display: block;
   flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: var(--vekt-tung);
-  letter-spacing: 0.04em;
 }
 
 .startup-logo.liten {
-  display: inline-grid;
-  width: 22px;
-  height: 22px;
+  display: inline-block;
   margin-right: 4px;
-  border-radius: 6px;
-  font-size: 9.5px;
   vertical-align: middle;
 }
 
@@ -5154,7 +5159,7 @@ button.maalstripe {
 
 .galleri-logoer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
   margin-top: 16px;
 }
@@ -5287,7 +5292,6 @@ button.maalstripe {
 }
 
 .avisbilde.rival {
-  border-radius: 50%;
   padding: 2px;
 }
 

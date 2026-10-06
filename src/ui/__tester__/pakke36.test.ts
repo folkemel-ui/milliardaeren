@@ -18,7 +18,7 @@ function deklarasjoner(egenskap: string): { sel: string; verdi: string }[] {
 }
 
 /** Grafikk som skaleres med tegningen sin, ikke tekst i grensesnittet. */
-const GRAFIKK = ['.kart-leie', '.kart-antall', '.kart-navn', '.startup-logo', '.tikk-pil', '.feiring-tekst', '.hus-pluss', '.klubb-emoji']
+const GRAFIKK = ['.kart-leie', '.kart-antall', '.kart-navn', '.tikk-pil', '.feiring-tekst', '.hus-pluss', '.klubb-emoji']
 
 describe('skriftskalaen', () => {
   it('all tekst bruker et trinn på skalaen — unntatt grafikk', () => {

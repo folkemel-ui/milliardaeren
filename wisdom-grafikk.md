@@ -4,7 +4,7 @@ For the session in charge of graphics and animation (packs G1–G7, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G2.
+Update it at the end of each G pack, and delete what stops being true. Updated after G4.
 
 ---
 
@@ -12,7 +12,7 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 
 - **What you own**: the drawings and how they render. That means `Illustrasjoner.tsx`,
   `Tegnestil.tsx`, `BedriftIkon.tsx`, portraits, crests, stadium, logos, the maps and
-  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
+  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), the wordmarks (`ordmerker.ts`, `scripts/lag-ordmerker.mjs`), `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
   *Working side by side* in `Ideer.md`. `styles.css`, the screens and `Ideer.md` are
   shared: touch only what the pack needs (G1 added two `utklipp` props in `Luksus.tsx`,
   nothing else).
@@ -30,6 +30,12 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 
 ## 2. Folke and the art
 
+- **"What is your next task?" is a question, not a go.** Answer it and stop. In the G4
+  session I sent the design questions straight away, and Folke stopped me: "I didn't
+  tell you to start on it." Start a pack only when Folke says so.
+- **Read the three files in full before you say you've read them**: `Ideer.md`
+  (at least the plan and your sections), `wisdom.md` and this file. Folke asks
+  "have you read the wisdom file?" at the start; skimming two sections didn't count.
 - Folke finds the old art amateurish. The diagnosis that landed: toy-coloured flat
   clip-art on a 48×48 grid inside a grown-up dark-and-gold interface. The target is
   illustrations in a business paper, not a mobile game.
@@ -40,7 +46,13 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   one you'd be happy to build. For G2 Folke took all three recommendations (growth,
   big ones from afar, level 100). Options that named examples per business ("the café
   takes over the shop next door, the oil field gets a second platform") were easy to
-  answer.
+  answer. For G3 Folke took all four (atlas, south + north inset, trend arrow,
+  Natural Earth). For G4 all four again (painted magazine cover, round in lists and
+  cover in gallery/Avisa, open fonts → paths, stocks free shapes and crypto coins).
+  Naming each rival's look in the option (age, hair, clothes, background) worked.
+- **Put outside sources in the question.** Fetching Natural Earth was an option in
+  the G3 questions, so Folke's answer was the approval. Do the same for any download,
+  font or dataset: name the source, the licence and that nothing loads at runtime.
 - **After each pack, Folke asks what you learned.** Update this file before the pack
   commit, then re-read it once for anything missing. That's cheaper than a second round.
 - Report each item as what it looks like now. Say plainly what's still mixed or still
@@ -104,6 +116,24 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   `merkeboksVerden`); gold dot, gold badge and a tiny crown only when you own the
   whole city. The price trend is a ▲/▼ `tspan` inside the name's text. Rent shows only
   on the selected city. The old coins and trend rings are gone.
+- **Rival portraits (G4)** are one 80 × 100 drawing per rival in `Rivalportrett.tsx`,
+  built from small helpers (`Oye`, `Nese`, `Munn`, `Ore`, `Hals`, `Toning`,
+  `Hudtoning`) and split into `bakgrunn` + `figur`. `form="rund"` crops to the face
+  (`utsnitt`: tighter at ≤ 32 px) inside a thin ring in `RIVALFARGE`; `form="omslag"`
+  is the whole 4:5 cover with a thin frame (gallery, Avisa). `RIVALFARGE` is now the
+  background colour of each portrait (palette `S`). The clothes sit in `<Kropp>`, which
+  stretches up from the bottom edge, so the necks are short without moving the edge.
+- **Company logos (G4)**: `Papirlogo.tsx`, a mark on a 24 grid in the company colour, no
+  tile. Stocks have free shapes; crypto is a coin whose symbol is "embossed" (drawn
+  once in a dark tone offset 0.8/0.9, then in a light tone). `ordmerke` adds the
+  wordmark beside the mark (`LUFT` 5): used at the top of a stock's page and on Avisa's
+  main story; lists show the mark alone. `bland()` mixes colours; `papirfarge(id)`
+  gives the colour. Startups: `STARTUPMERKER` keyed by the idea's *name*, so a new
+  idea in `STARTUP_IDEER` needs a mark (the test fails otherwise).
+- **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
+  (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
+  `grafikkG4.test.ts` checks all three. The cream was the strictest: five colours that
+  passed both cards failed there and had to go a step darker.
 
 ## 4. SVG techniques that worked, and traps
 
@@ -150,6 +180,13 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   sky a thin `fjell.lys` outline (the ski mountain).
 - **The newspaper** (`.avisbilde`) is cream paper in both themes; it sets the
   `--himmel-*` vars to the light sky, so drawings print with a pale sky there.
+- **Map units are about screen pixels**: the maps are ~320 px wide for ~300 units, so
+  1 unit ≈ 1 px on a phone. Text below ~7 units is unreadable; the first count badge
+  (5.4) had to grow to 6.8 in a 9-unit pill. Judge map sizes at phone width, not in an
+  enlarged overlay.
+- **Labels over both land and sea** get a halo: `paint-order: stroke` with a
+  half-transparent stroke in the surface colour (`.kart-navn`). That's readable
+  everywhere without a box behind the text.
 - **Text widths can't be estimated well**: real label width varies 0.45–0.62 × font size per
   character (Inter), so an arrow positioned after an estimated width floated loose.
   Put trailing glyphs *in the same text* (`tspan`) and keep the estimate (0.6, generous)
@@ -159,6 +196,15 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   northwest, shadow to the southeast — and clipped to the land, reads as mountains.
 - **Maps re-render every second** (they take the game state). Wrap the static base
   (coastlines, relief, inset) in `memo`, and build the path strings in `useMemo`.
+- **A malformed path fails silently**: the browser draws up to the first bad command
+  and only logs "Expected number" in the console. A long hand-written `C` chain got
+  two extra numbers (Lunde's hair). `grafikkG4.test.ts` counts the numbers after
+  every command in every portrait and logo path; reuse that check for new drawings.
+- **Ids from `useId` must be cleaned, not escaped**: `CSS.escape` doesn't exist in
+  the tests' Node environment, so `renderToStaticMarkup` crashed. Do as `Lerret`
+  does: `'r' + useId().replace(/[^a-zA-Z0-9]/g, '')`, then `url(#…)` directly.
+- **Logo knockouts use `fillRule="evenodd"`**, not masks: the hole shows the card
+  in any theme and needs no id.
 - **Collision tests must cover the worst case**: `norgeskartet.test.ts` checks every
   name (with room for the arrow), the longest rent and a two-digit badge with crown for
   all cities at once. That caught Oslo's badge and rent reaching into the inset.
@@ -176,6 +222,13 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   place it appears: list card, `.scene` detail view, Luksus storage, city view, gallery,
   the newspaper (`.avisbilde`), the buy moment (`Kjopsglimt`, 96/132 px) and the
   rival list (32 px).
+- For logos and portraits, the `ark` helper should take a selector *or* an array of
+  SVGs and keep each one's aspect ratio (`width / height`), since lockups and covers
+  aren't square. Rival stories rarely come up in Avisa; mock a cream `div` with
+  `figure.avisbilde.rival` holding cloned covers on the gallery page.
+- Startups only appear after a few game days: build the test save, then
+  `simuler(s, DAG_SEK * 7)`. The Selskaper sections are folded until you own
+  something there; click their headings open.
 - The gallery's stage row shows only stage n with n improvements (`trinnark(navn, px)`
   clones that row). An improvement at another stage (f3 at stage 0) is only checked
   by `grafikkG2.test.ts` unless you build that state in the game.
@@ -221,6 +274,14 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   visible. Coordinates are stored as hundredths with deltas from the previous point.
   That took the file from 39 KB to 23 KB gzipped (the bundle is about 222 KB gzipped
   after G3).
+- **Fonts as paths (G4)**: Folke approved Google Fonts (SIL Open Font License).
+  `curl -s "https://fonts.googleapis.com/css2?family=Oswald:wght@600"` with curl's
+  *default* user agent returns a `.ttf` url, a static instance at any weight (and
+  width, e.g. `Archivo:wdth,wght@125,800`). An old IE user agent returns EOT instead:
+  check that the file starts with `00 01 00 00`. The fonts live in the scratchpad
+  (`fonter/`); `node scripts/lag-ordmerker.mjs <folder>` writes `src/ui/ordmerker.ts`.
+  The script's own TrueType reader handles composite glyphs (Ø, Å) and GPOS kerning.
+  Relative commands in tenths took the file from 89 KB to 48 KB (12 KB gzipped).
 - **Douglas–Peucker on a closed ring**: first and last point are the same, so the
   line distance divides by zero. Use point distance for a degenerate segment. The
   first run returned zero points everywhere.
@@ -239,6 +300,11 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   helper that throws when `fra` is missing and keeps CRLF. **`styles.css` is CRLF**; the
   `.tsx` files are LF. Long drawings go in separate `.txt` snippet files that a script
   splices in between two markers.
+- **Git Bash `sed -i` turned `styles.css` into LF** (G3). The repo is safe: Git
+  normalises line endings (`core.autocrlf`), so `git show --stat` showed only the real
+  changes. The "LF will be replaced by CRLF" warnings on commit are normal. To check
+  for churn, look at the line counts in `--stat`, not the warnings. Restore CRLF with
+  a small node script if you want the working copy to match a fresh checkout.
 - **Never put JSX template strings (`${…}` inside backticks) into `node -e` through
   Bash.** Bash ate them twice and left broken code. Use the Edit tool or a `.mjs` file.
   `sed` lost the escaping in a regex too (`\(\.lerret\)`), so prefer Edit for test regexes.
@@ -256,6 +322,9 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   `BYPLAN` side and run `norgeskartet.test.ts` (names, badges, rent, inset), and
   `grafikkG3.test.ts` checks that it stands on land. A new foreign city needs a
   `BYPLASS` label side; the badge goes opposite automatically.
+- **G4 is done** (portraits, logos with wordmarks, startup marks). Not done: Avisa
+  still shows a generic icon for startup stories, because `ui/avisbilde.ts` (shared,
+  from Pack 41) has no `startup` kind. `StartupLogo` could go there; ask first.
 - The map data costs ~23 KB gzipped at startup. If loading time matters later,
   `Norgeskart`/`Verdenskart` could be lazy-loaded in Eiendom (a screen change; ask).
 - **The 32 px rival list** in Investeringer shows business drawings very small. The

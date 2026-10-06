@@ -84,8 +84,8 @@ function Bilde({ sak, stor = false }: { sak: Overskrift; stor?: boolean }) {
   const px = stor ? 88 : 44
   return (
     <figure className={`avisbilde ${b.art}${stor ? ' stor' : ''}`} aria-hidden="true">
-      {b.art === 'rival' && <Rivalportrett id={b.id} størrelse={px} />}
-      {b.art === 'papir' && <Papirlogo id={b.id} størrelse={Math.round(px * 0.7)} />}
+      {b.art === 'rival' && <Rivalportrett id={b.id} størrelse={stor ? 104 : 52} form="omslag" />}
+      {b.art === 'papir' && (stor ? <Papirlogo id={b.id} størrelse={32} ordmerke /> : <Papirlogo id={b.id} størrelse={Math.round(px * 0.7)} />)}
       {b.art === 'tegning' && <Illustrasjon id={b.id} størrelse={px} trinn={1} />}
       {b.art === 'ikon' && <Ikon navn={b.navn} størrelse={Math.round(px * 0.55)} />}
     </figure>

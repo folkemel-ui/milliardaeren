@@ -364,8 +364,8 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
         ‹ {p.klasse === 'aksje' ? 'Aksjer' : 'Krypto'}
       </button>
       <div className="kort">
-        <div className="detalj-topp">
-          <Papirlogo id={id} størrelse={48} />
+        <div className="detalj-topp papir-topp">
+          <Papirlogo id={id} størrelse={40} ordmerke />
           <div>
             <h1 className="skjerm-tittel">{p.navn}</h1>
             <span className="dempet liten">
