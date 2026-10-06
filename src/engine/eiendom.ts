@@ -5,6 +5,7 @@
 
 import { eiendomskurs } from './regioner'
 import type {
+  By,
   EiendomId,
   Eiendomstype,
   LagerId,
@@ -25,13 +26,26 @@ import { kunststatus } from './kunst'
  * Avkastningen faller jevnt med prisen: 30 % i timen for en hybel, rundt
  * 18 % for et kontorbygg og 8 % på Manhattan. Den er trygg og krever
  * ingenting av deg, men slår ikke bedriftene når de vokser.
+ *
+ * Fra Pakke 44 finnes de vanlige byggene i flere byer. Samme bygg har samme
+ * avkastning overalt, men prisen følger byen: Oslo rundt 20 % over Bergen,
+ * Trondheim rundt 10 % under, hytter i Trysil og Lofoten billigere enn Geilo.
+ * Hver by har sin egen region med sin egen pristrend (regioner.ts).
  */
 export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
+  'hybel-trondheim': { id: 'hybel-trondheim', navn: 'Hybel', sted: 'Moholt, Trondheim', by: 'Trondheim', pris: 225_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
   hybel: { id: 'hybel', navn: 'Hybel', sted: 'Møhlenpris, Bergen', by: 'Bergen', pris: 250_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
+  'hybel-oslo': { id: 'hybel-oslo', navn: 'Hybel', sted: 'Blindern, Oslo', by: 'Oslo', pris: 300_000, avkastning: 0.3, maksAntall: 8, statuskrav: 0 },
+  'leilighet-trondheim': { id: 'leilighet-trondheim', navn: 'Leilighet', sted: 'Bakklandet, Trondheim', by: 'Trondheim', pris: 1_900_000, avkastning: 0.25, maksAntall: 6, statuskrav: 0 },
+  'leilighet-bergen': { id: 'leilighet-bergen', navn: 'Leilighet', sted: 'Nordnes, Bergen', by: 'Bergen', pris: 2_100_000, avkastning: 0.25, maksAntall: 6, statuskrav: 0 },
   leilighet: { id: 'leilighet', navn: 'Leilighet', sted: 'Grünerløkka, Oslo', by: 'Oslo', pris: 2_500_000, avkastning: 0.25, maksAntall: 6, statuskrav: 0 },
+  'rekkehus-bergen': { id: 'rekkehus-bergen', navn: 'Rekkehus', sted: 'Fana, Bergen', by: 'Bergen', pris: 5_700_000, avkastning: 0.24, maksAntall: 5, statuskrav: 0 },
   rekkehus: { id: 'rekkehus', navn: 'Rekkehus', sted: 'Madla, Stavanger', by: 'Stavanger', pris: 6_000_000, avkastning: 0.24, maksAntall: 5, statuskrav: 0 },
+  'hytte-lofoten': { id: 'hytte-lofoten', navn: 'Rorbu', sted: 'Reine, Lofoten', by: 'Lofoten', pris: 10_000_000, avkastning: 0.22, maksAntall: 3, statuskrav: 0 },
+  'hytte-trysil': { id: 'hytte-trysil', navn: 'Hytte', sted: 'Trysilfjellet', by: 'Trysil', pris: 12_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
   hytte: { id: 'hytte', navn: 'Hytte', sted: 'Geilo', by: 'Geilo', pris: 15_000_000, avkastning: 0.22, maksAntall: 4, statuskrav: 0 },
   stockholm: { id: 'stockholm', navn: 'Leilighet på Östermalm', sted: 'Östermalm, Stockholm', by: 'Stockholm', pris: 30_000_000, avkastning: 0.2, maksAntall: 3, statuskrav: 0, reise: 1 },
+  'kontorbygg-stavanger': { id: 'kontorbygg-stavanger', navn: 'Kontorbygg', sted: 'Forus, Stavanger', by: 'Stavanger', pris: 70_000_000, avkastning: 0.18, maksAntall: 3, statuskrav: 0 },
   kontorbygg: { id: 'kontorbygg', navn: 'Kontorbygg', sted: 'Bjørvika, Oslo', by: 'Oslo', pris: 80_000_000, avkastning: 0.18, maksAntall: 4, statuskrav: 0 },
   kobenhavn: { id: 'kobenhavn', navn: 'Kontorhus i Nyhavn', sted: 'Nyhavn, København', by: 'København', pris: 150_000_000, avkastning: 0.17, maksAntall: 3, statuskrav: 0, reise: 1 },
   kjopesenter: { id: 'kjopesenter', navn: 'Kjøpesenter', sted: 'Trondheim', by: 'Trondheim', pris: 400_000_000, avkastning: 0.15, maksAntall: 3, statuskrav: 0 },
@@ -126,10 +140,40 @@ export function eiendomsverdi(s: Spilltilstand): number {
   return sum + jordverdi(s) + landemerkeverdi(s)
 }
 
-/** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren. */
+/** Eier du alt i en by, gir leien der så mye mer (Pakke 44). */
+export const BYEIER_BONUS = 0.1
+
+/** Byggene i en by. */
+export function byggI(by: By): EiendomId[] {
+  return EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].by === by)
+}
+
+/**
+ * Eier du hele byen? Det krever det høyeste antallet av hvert bygg der —
+ * alle hyblene og alle leilighetene, ikke bare én av hver. Byer uten bygg
+ * (bare jord) kan ikke eies slik.
+ */
+export function eierHeleByen(s: Spilltilstand, by: By): boolean {
+  const bygg = byggI(by)
+  return bygg.length > 0 && bygg.every((id) => (s.eiendommer[id] ?? 0) >= EIENDOMSTYPER[id].maksAntall)
+}
+
+/** Hvor mange enheter du eier i en by, av hvor mange som finnes. */
+export function enheterI(s: Spilltilstand, by: By): { eid: number; av: number } {
+  let eid = 0
+  let av = 0
+  for (const id of byggI(by)) {
+    eid += Math.min(s.eiendommer[id] ?? 0, EIENDOMSTYPER[id].maksAntall)
+    av += EIENDOMSTYPER[id].maksAntall
+  }
+  return { eid, av }
+}
+
+/** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren — og byeierbonusen. */
 export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
   const t = EIENDOMSTYPER[id]
-  return (t.pris * eiendomskurs(s, t.by) * t.avkastning * STANDARDER[standard(s, id)].leie) / 3600
+  const bonus = eierHeleByen(s, t.by) ? 1 + BYEIER_BONUS : 1
+  return (t.pris * eiendomskurs(s, t.by) * t.avkastning * STANDARDER[standard(s, id)].leie * bonus) / 3600
 }
 
 export function leiePerSek(s: Spilltilstand): number {

@@ -4,7 +4,7 @@
  * hentes fra motoren, så teksten alltid stemmer med spillet.
  */
 
-import { MEGLERHONORAR } from '../engine/eiendom'
+import { MEGLERHONORAR, BYEIER_BONUS } from '../engine/eiendom'
 import { FOND_GEBYR } from '../engine/fond'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
@@ -108,7 +108,8 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   eiendom: {
     tittel: 'Eiendom',
     tekst:
-      'Eiendom gir leie hvert sekund, også mens du er borte — den trenger ingen leder. Prisene følger landet og regionen. ' +
+      'Eiendom gir leie hvert sekund, også mens du er borte — den trenger ingen leder. Prisene følger landet og byens region, så samme bygg kan stige i én by og falle i en annen. ' +
+      `Eier du alle enhetene i en by, får du en krone på kartet og +${pst(BYEIER_BONUS)} leie der. ` +
       'Oppussing gir mer leie for godt, men så lenge håndverkerne holder på, kommer det ingen leie. ' +
       `Selger du, tar megleren ${pst(MEGLERHONORAR)}. Noen eiendommer krever status eller et fly for å komme dit.`,
   },

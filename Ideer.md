@@ -10,7 +10,6 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 Version 1.0 was reached with Pack 43. Next:
 
-- **Pack 44 – Cities that matter:** Buildings in more than one city, More price regions, City owner bonus
 - **Pack 45 – The wide world:** A real world map, Hotels abroad and holiday apartments, Day and night (bring up the parked Map ideas at the same time)
 
 ## Property
@@ -19,11 +18,8 @@ Version 1.0 was reached with Pack 43. Next:
 
 ## Map
 
-2. **Buildings in more than one city.** Each building type exists in only one city (Leilighet only in Oslo, Hybel only in Bergen), so the player never chooses where to buy. Let some types exist in several cities, each with its own price and region trend, so the map and the regions matter.
-3. **More price regions.** Only Oslo, Bergen, Stavanger and Fjellet have their own price trend; Trondheim, Lofoten and the rest follow the national index, so the trend rings show little. Give more cities their own region, or show regions as tinted areas on the map instead of a ring on each dot.
-4. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
-5. **City owner bonus.** Own every property in a city for a crown on the map and a small rent bonus there. Buying the sixth of something should feel different from the first — this gives a goal per city.
-6. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
+2. **A real world map.** The world map shows dots and routes but no land, and is separate from the Norway map. Give it a simple outline of Europe, with North America and the Middle East as insets — or make one zoomable map from Norway to the world.
+3. **Day and night.** The map darkens in the evening and lights come on in your cities, following the game clock, so the map changes while you watch.
 
 ## Parked (not chosen yet)
 

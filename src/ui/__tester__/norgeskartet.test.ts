@@ -49,7 +49,7 @@ describe('Norgeskartet', () => {
     }
   })
 
-  it('stedene med bare jord er de fire uten bygg', () => {
-    expect([...KUN_JORD].sort()).toEqual(['Hedmarken', 'Lista', 'Namdalen', 'Trysil'])
+  it('stedene med bare jord er de tre uten bygg — Trysil fikk hytter i Pakke 44', () => {
+    expect([...KUN_JORD].sort()).toEqual(['Hedmarken', 'Lista', 'Namdalen'])
   })
 })

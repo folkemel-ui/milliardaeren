@@ -5402,3 +5402,58 @@ button.maalstripe {
     border-radius: 18px;
   }
 }
+
+/* Byeier (Pakke 44): kronen på kartet og veien mot å eie hele byen. */
+.kart-krone {
+  fill: var(--gull);
+  stroke: var(--flate);
+  stroke-width: 1;
+  paint-order: stroke;
+}
+
+.byeier {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 6px;
+  margin: 4px 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.byeier.hel {
+  box-shadow: inset 0 0 0 1px var(--gull-mørk);
+}
+
+.byeier-krone {
+  display: grid;
+  color: var(--tekst-dempet);
+}
+
+.byeier.hel .byeier-krone {
+  color: var(--gull);
+}
+
+.byeier-tekst {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--skrift-2);
+}
+
+.byeier-spor {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--kant);
+  overflow: hidden;
+}
+
+.byeier-spor span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--gull);
+}

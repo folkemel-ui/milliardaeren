@@ -1,11 +1,11 @@
-import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
+import { BYEIER_BONUS, EIENDOMSSTIGEN, EIENDOMSTYPER, eierHeleByen, enheterI } from '../../engine/eiendom'
 import { eiendomSynlig, jordSynlig } from '../../engine/handlinger'
 import { HOST_ANDEL, JORD, JORDLISTE, landverdi, vaer } from '../../engine/jord'
 import { dagnummer } from '../../engine/kalender'
 import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from '../../engine/landemerker'
 import { REGIONER, regionFor } from '../../engine/regioner'
 import type { By, EiendomId, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
-import { endring, kortKroner, perSek } from '../format'
+import { endring, kortKroner, perSek, tall } from '../format'
 import { leieIBy, trendFor } from '../kart'
 import { Eiendomskort } from './Eiendomskort'
 import { Ikon } from './Ikoner'
@@ -79,6 +79,7 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
             </>
           )}
         </dl>
+        {bygg.length > 0 && <Byeier s={s} by={by} />}
         <button className="knapp knapp-liten" onClick={gatebilde}>
           <Ikon navn="sok" størrelse={14} /> Gatebildet
         </button>
@@ -116,5 +117,32 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
       )}
       {bygg.length + jord.length + merker.length === 0 && <p className="kort kort-tomt">Ingenting til salgs i {by} ennå.</p>}
     </>
+  )
+}
+
+/**
+ * Veien mot å eie hele byen: hvor mange av enhetene du har, og hva det gir.
+ * Når alt er ditt, står kronen og bonusen der i stedet.
+ */
+function Byeier({ s, by }: { s: Spilltilstand; by: By }) {
+  const { eid, av } = enheterI(s, by)
+  const hel = eierHeleByen(s, by)
+  return (
+    <div className={hel ? 'byeier hel' : 'byeier'}>
+      <span className="byeier-krone" aria-hidden="true">
+        <Ikon navn="krone" størrelse={16} />
+      </span>
+      <div className="byeier-tekst">
+        <strong>{hel ? 'Du eier hele byen' : `${eid} av ${av} enheter`}</strong>
+        <span className="dempet liten">
+          {hel ? `+${tall(BYEIER_BONUS * 100)} % leie på alt du eier her.` : `Eier du alle, gir leien her +${tall(BYEIER_BONUS * 100)} %.`}
+        </span>
+      </div>
+      {!hel && (
+        <span className="byeier-spor" aria-hidden="true">
+          <span style={{ width: `${(eid / av) * 100}%` }} />
+        </span>
+      )}
+    </div>
   )
 }

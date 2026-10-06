@@ -14,7 +14,7 @@
 import { SPILLVERSJON } from '../engine/start'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { lagEiendomsindeks, lagMarked, leggTilNyePapirer } from '../engine/marked'
-import { lagRegioner } from '../engine/regioner'
+import { lagRegioner, nyRegion, REGIONLISTE } from '../engine/regioner'
 import { EIENDOMSTYPER, START_LAGER } from '../engine/eiendom'
 import { lagDagsbilde } from '../engine/avis'
 import { sjekkPrestasjoner } from '../engine/prestasjoner'
@@ -238,6 +238,18 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       return { ...b, investert }
     }),
   }),
+  /* 19 → 20: to nye regioner, Trøndelag og Nord, med historikk like lang som
+     landsindeksens og avviket på null — prisene i Trondheim og Lofoten står
+     der de sto. De nye byggene i flere byer trenger ingen migrering. */
+  19: (s) => {
+    const marked = s.marked as Raatilstand
+    const regioner = marked.regioner as { frø: number; indekser: Record<string, unknown> } | undefined
+    if (!regioner) return s
+    const lengde = (((marked.eiendom as Raatilstand)?.historikk as number[]) ?? []).length
+    const indekser = { ...regioner.indekser }
+    for (const r of REGIONLISTE) if (!indekser[r]) indekser[r] = nyRegion(regioner.frø, r, lengde)
+    return { ...s, marked: { ...marked, regioner: { ...regioner, indekser } } }
+  },
 }
 
 export type MigreringsResultat =

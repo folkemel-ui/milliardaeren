@@ -126,7 +126,7 @@ export interface Marked {
   nyeFrø?: number
 }
 
-export type Region = 'oslo' | 'bergen' | 'stavanger' | 'fjellet'
+export type Region = 'oslo' | 'bergen' | 'stavanger' | 'fjellet' | 'trondelag' | 'nord'
 
 export interface Regionindeks {
   /** Logaritmisk avvik fra landsindeksen nå: regionens pris = landets · e^avvik. */
@@ -145,6 +145,9 @@ export interface Beholdning {
 
 export type EiendomId =
   | 'hybel' | 'leilighet' | 'rekkehus' | 'hytte'
+  // Pakke 44: de samme byggene i flere byer.
+  | 'hybel-trondheim' | 'hybel-oslo' | 'leilighet-bergen' | 'leilighet-trondheim'
+  | 'rekkehus-bergen' | 'hytte-trysil' | 'hytte-lofoten' | 'kontorbygg-stavanger'
   | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
   | 'stockholm' | 'kobenhavn' | 'berlin' | 'london' | 'dubai' | 'newyork'
 

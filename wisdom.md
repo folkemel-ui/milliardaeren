@@ -158,7 +158,7 @@ session; delete what stops being true.
 - **Think about existing saves when offering a balance option.** Lowering a business's
   income "to keep payback the same" cuts income for everyone who already owns it.
   Prefer changes where nobody loses what they have, or migrate.
-- **Save versions** (now 19): write the migration before bumping `SPILLVERSJON`; never
+- **Save versions** (now 20): write the migration before bumping `SPILLVERSJON`; never
   skip a step. Optional new fields can be read with `?? 0` without a version bump.
   `state/__tester__/migrering.test.ts` migrates old saves all the way to the latest and
   checks net worth, so a migration that changes value (v19 removed manager costs) means
@@ -262,6 +262,15 @@ session; delete what stops being true.
 - **Explanations** live in `ui/forklaringer.ts` and take numbers from engine constants.
   When a rule changes (tax on gains, loan cap, wages, dilution), update the text there.
 - **Map geometry** lives in `ui/norgeskartet.ts`; a test checks label overlaps.
+- **Cities and regions** (Pack 44): every Norwegian city has a region (six now), and abroad
+  follows the national index. Building types exist in several cities as separate ids
+  (`hybel-trondheim` …), listed in price order. Owning every unit in a city (`eierHeleByen`)
+  gives a crown on the map and +10 % rent there, applied inside `leieHverPerSek`. Save
+  version is now 20. How to add a region or a building in a new city is in `ARKITEKTUR.md`.
+- **Testing a migration on a real save**: park the browser tab on `/ikon.svg` while changing
+  the engine (stopping the server can wipe that port's storage), then load the game. The game
+  always copies the pre-migration save to `milliardaer.lagring.korrupt`. That's the safety
+  copy, not a failure.
 - **Charts**: load the `dataviz` skill before any chart work. Axis maths lives in pure
   `ui/grafakser.ts` (`verdimerker` = round gridline values, at least three; `tidsmerker` =
   clock times for ≤ 1 day, dates, or month + year for multi-year spans) and is tested in

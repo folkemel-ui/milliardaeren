@@ -5,6 +5,14 @@
 
 import { useRef, type TouchEvent } from 'react'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, leieHverPerSek } from '../engine/eiendom'
+export { eierHeleByen } from '../engine/eiendom'
+
+/** Kronen over en by du eier helt (Pakke 44): en sti med bunnen midt på (x, y). */
+export function kronesti(x: number, y: number, b = 9): string {
+  const h = b * 0.7
+  const v = x - b / 2
+  return `M${v} ${y} V${y - h} L${v + b * 0.25} ${y - h * 0.45} L${x} ${y - h * 1.05} L${v + b * 0.75} ${y - h * 0.45} L${v + b} ${y - h} V${y} Z`
+}
 import { regionEndring, regionFor } from '../engine/regioner'
 import type { By, Spilltilstand } from '../engine/types'
 import { tall } from './format'

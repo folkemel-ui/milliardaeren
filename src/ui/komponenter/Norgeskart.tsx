@@ -2,7 +2,7 @@ import { EIENDOMSSTIGEN, EIENDOMSTYPER } from '../../engine/eiendom'
 import { JORD, JORDLISTE } from '../../engine/jord'
 import { useRef } from 'react'
 import type { By, NorskBy, Spilltilstand } from '../../engine/types'
-import { kartLeie, leieIBy, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
+import { eierHeleByen, kartLeie, kronesti, leieIBy, trendFor, trendRing, useKlyp, useLangtrykk } from '../kart'
 import { perSek } from '../format'
 import { BYLISTE, byPunkt, etiketter, HOVEDOMRAADE, hovedpunkt, INNFELT, innfeltpunkt, KUN_JORD, navnestorrelse, radius, VISNING } from '../norgeskartet'
 import { Ikon } from './Ikoner'
@@ -159,6 +159,8 @@ function Byen({
       <circle cx={x} cy={y} r={14} className="kart-treff" />
       {trend && <circle cx={x} cy={y} r={r + 3} className={`kart-trend ${trend.klasse}`} style={{ strokeOpacity: trend.styrke }} />}
       <circle cx={x} cy={y} r={r} className="kart-prikk" />
+      {/* Eier du hele byen, står det en krone på skrå over prikken. */}
+      {eierHeleByen(s, by) && <path d={kronesti(x + r * 0.9, y - r * 0.9, 8)} className="kart-krone" />}
       {eid && (
         <text x={x} y={y + r * 0.43} className="kart-antall" textAnchor="middle" style={{ fontSize: r * 1.3 }}>
           {n}

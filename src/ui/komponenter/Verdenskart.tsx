@@ -1,6 +1,6 @@
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, FLY_REKKEFOLGE, LUKSUS, reiseNivaa } from '../../engine/eiendom'
 import type { By, Spilltilstand, Utenlandsby } from '../../engine/types'
-import { kartLeie, leieIBy, useLangtrykk } from '../kart'
+import { kartLeie, leieIBy, useLangtrykk, eierHeleByen, kronesti } from '../kart'
 import { Ikon } from './Ikoner'
 
 /*
@@ -83,6 +83,7 @@ export function Verdenskart({
             >
               <circle cx={x} cy={y} r={16} className="kart-treff" />
               <circle cx={x} cy={y} r={åpen ? r : 6} className="kart-prikk" />
+              {åpen && eierHeleByen(s, by) && <path d={kronesti(x + r * 0.9, y - r * 0.9, 9)} className="kart-krone" />}
               {!åpen && <Ikon navn="fly" størrelse={9} x={x - 4.5} y={y - 4.5} />}
               {n > 0 && (
                 <text x={x} y={y + 3.5} className="kart-antall" textAnchor="middle">

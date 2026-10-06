@@ -23,7 +23,8 @@ describe('byvisningen', () => {
     s.hoyesteFormue = 5e9
     expect(byerMedInnhold(s, ['Oslo', 'Hedmarken', 'New York'])).toEqual(['Oslo', 'Hedmarken'])
     const oslo = iByen(s, 'Oslo')
-    expect(oslo.bygg).toEqual(['leilighet', 'kontorbygg', 'naeringsbygg'])
+    // Hybelen på Blindern kom i Pakke 44.
+    expect(oslo.bygg).toEqual(['hybel-oslo', 'leilighet', 'kontorbygg', 'naeringsbygg'])
     expect(oslo.merker).toEqual(['hoppbakken', 'tarnet'])
     expect(iByen(s, 'Hedmarken').jord).toEqual(['gard-hedmarken'])
   })

@@ -12,12 +12,13 @@ import { migrer } from '../../state/migrering'
 import type { Spilltilstand } from '../types'
 
 describe('regionale eiendomspriser', () => {
-  it('byene hører til hver sin region, og resten følger landet', () => {
+  it('byene hører til hver sin region, og utlandet følger landet (Trøndelag og Nord fra Pakke 44)', () => {
     expect(regionFor('Oslo')).toBe('oslo')
     expect(regionFor('Hedmarken')).toBe('oslo')
     expect(regionFor('Lista')).toBe('stavanger')
     expect(regionFor('Geilo')).toBe('fjellet')
-    expect(regionFor('Trondheim')).toBeNull()
+    expect(regionFor('Trondheim')).toBe('trondelag')
+    expect(regionFor('Lofoten')).toBe('nord')
     expect(regionFor('Dubai')).toBeNull()
   })
 
@@ -42,7 +43,8 @@ describe('regionale eiendomspriser', () => {
       expect(f).toBeGreaterThan(0.7)
       expect(f).toBeLessThan(1.4)
     }
-    expect(byfaktor(s, 'Trondheim')).toBe(1)
+    // Utlandet følger landsindeksen.
+    expect(byfaktor(s, 'Dubai')).toBe(1)
   })
 
   it('priser, leie og landemerker følger byens region', () => {

@@ -5,7 +5,9 @@
  *
  * Avvikene trekkes fra en hash av regionen og tikket, ikke fra terningen,
  * så aksjer, krypto og alt annet fra samme frø blir nøyaktig som før.
- * Byer utenfor regionene (Trondheim, nord og utlandet) følger landsindeksen.
+ * Alle norske byer har en region; utlandet følger landsindeksen. Trøndelag
+ * og Nord kom i Pakke 44 (lagringsversjon 20), med egen hash per region, så
+ * de gamle regionene og alt annet er som før.
  */
 
 import { hashNormal, hashTekst } from './rng'
@@ -16,6 +18,8 @@ export const REGIONER: Record<Region, { navn: string; byer: By[] }> = {
   bergen: { navn: 'Bergen', byer: ['Bergen'] },
   stavanger: { navn: 'Stavanger', byer: ['Stavanger', 'Lista'] },
   fjellet: { navn: 'Fjellet', byer: ['Geilo', 'Trysil'] },
+  trondelag: { navn: 'Trøndelag', byer: ['Trondheim', 'Namdalen'] },
+  nord: { navn: 'Nord', byer: ['Lofoten'] },
 }
 
 export const REGIONLISTE = Object.keys(REGIONER) as Region[]
@@ -47,7 +51,11 @@ function steg(i: Regionindeks, frø: number, region: Region, tikk: number): void
 /** Ett tikk for alle regionene. Kalles rett etter landsindeksen, med samme tikknummer. Muterer. */
 export function regiontikk(m: Marked): void {
   if (!m.regioner) return
-  for (const r of REGIONLISTE) steg(m.regioner.indekser[r], m.regioner.frø, r, m.tikk)
+  for (const r of REGIONLISTE) {
+    const i = m.regioner.indekser[r]
+    // En region som mangler (en lagring som ikke er migrert ennå), står på null.
+    if (i) steg(i, m.regioner.frø, r, m.tikk)
+  }
 }
 
 /**
@@ -57,17 +65,20 @@ export function regiontikk(m: Marked): void {
  */
 export function lagRegioner(frø: number, historikkLengde: number): NonNullable<Marked['regioner']> {
   const indekser = {} as Record<Region, Regionindeks>
-  for (const r of REGIONLISTE) {
-    const i: Regionindeks = { avvik: 0, historikk: [] }
-    for (let t = 1; t <= historikkLengde * HISTORIKK_TIKK; t++) steg(i, frø, r, -t)
-    // Oppvarmingen gikk bakover i tikk; snu historikken så den eldste står først.
-    i.historikk.reverse()
-    const nå = i.avvik
-    i.historikk = i.historikk.map((a) => a - nå).slice(-historikkLengde)
-    i.avvik = 0
-    indekser[r] = i
-  }
+  for (const r of REGIONLISTE) indekser[r] = nyRegion(frø, r, historikkLengde)
   return { frø, indekser }
+}
+
+/** Én fersk region: historikk bakover i tid, og avviket på null nå, så prisene står der de sto. */
+export function nyRegion(frø: number, r: Region, historikkLengde: number): Regionindeks {
+  const i: Regionindeks = { avvik: 0, historikk: [] }
+  for (let t = 1; t <= historikkLengde * HISTORIKK_TIKK; t++) steg(i, frø, r, -t)
+  // Oppvarmingen gikk bakover i tikk; snu historikken så den eldste står først.
+  i.historikk.reverse()
+  const nå = i.avvik
+  i.historikk = i.historikk.map((a) => a - nå).slice(-historikkLengde)
+  i.avvik = 0
+  return i
 }
 
 /** Hvor mye dyrere (eller billigere) en by er enn landet akkurat nå: e^avvik. */
