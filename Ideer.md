@@ -12,15 +12,9 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v2.0 (Pack 51)
-
-Items from *Road to v2.0*. Commits: `Pakke N: …`.
-
-- **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus, A real-phone check and an outside playtest
-
 ### Game track: the road to v10.0 (Packs 52–56)
 
-Items from *Road to v10.0*, after v2.0. Engine work first, so the packs after it are built on firm ground and measured properly.
+Items from *Road to v10.0*. Commits: `Pakke N: …`. Engine work first, so the packs after it are built on firm ground and measured properly.
 
 - **Pack 52 – Firm ground for growth:** A save that stays small, UI tests, Measure speed on a built game
 - **Pack 53 – Money that hangs together:** Stocks linked to your industries, Bonds
@@ -45,52 +39,47 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G9 are done (the fo
 - **The graphics track never changes the engine's behaviour.** No dice, no balance, no save version — the golden master and the bench stay unchanged by every G pack.
 - **New content in the game track gets a drawing in the current style.** G1 has landed: new drawings follow the rules in the header of `Illustrasjoner.tsx` and are built with `Tegnestil.tsx`. If that is too much for the pack, leave the drawing to the graphics track and say so in the commit message.
 - **`Ideer.md`:** each track removes only its own finished items and pack line, by title. Pack numbers don't depend on item numbers, so renumbering is harmless.
-- **Releases:** v2.0 is reached with Pack 51. The graphics track can ship with it or after it. Folke decides.
-
-## Road to v2.0
-
-The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid ground to carry it.
-
-1. **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
-2. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
-3. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
-4. **A real-phone check and an outside playtest.** Pack 47 measured two hours away on this PC (a fresh game ~95 ms, a late game that owns everything ~300 ms, built like the real game) and estimates a slow phone at 4–5× that. Check it on a real slow phone, and let someone outside play before 2.0 is called done.
+- **Releases:** the game goes to the App Store at v10.0. Folke decides the version numbers on the way; the graphics track can ship with any game pack or after it.
 
 ## Road to v10.0
 
 The game is released on the App Store at v10.0. These were picked from the v10.0 list (8 October 2026). Not in the pack plan yet.
 
-5. **Franchises.** Open the same business in more cities, with a limit (for example one per city, at most three) and a bonus from the city's region. Copies were dropped in Pack 2 because they blew up the economy, so each franchise needs a real cost or a falling return — measured with the bench.
-6. **Bonds.** Government bonds with a fixed coupon whose price falls when the policy rate (Pack 49) rises, and rises when it falls. A step between the savings account and stocks.
-7. **Stocks linked to your industries.** Stocks have no industry today, though several match a business: Polaris Olje and the oil company, Bergen Shipping and the shipping company, Nordfjord Sjømat and the fish farm, Fjellfly and the airline, Nordre Bank and the bank, Kurv Dagligvare and the kiosk. Give each stock an industry, let the week's trend and company news move both, and show the link on both sides.
-8. **Vacancy, tenants and property managers.** Properties can stand empty, and bad tenants cost money. A property manager per city, hired like the business managers, lowers the risk — with a trait, like the parked *Managers with traits*: careful (little vacancy, a bit less rent), aggressive (more rent, more trouble) or local (knows the city, a small city bonus). Moved up from Parked.
-9. **Weather on property.** Pack 49's daily weather also moves rent: the cabin and Zermatt rent better in snow, Marbella in the sun — on top of the monthly seasons that already exist.
-10. **Interiors.** Upgrade the inside of your home and holiday homes: kitchen, art on the walls, a wine cellar. Gives status and shows on the detail page.
-11. **More countries.** There are 6 foreign cities today. Add more of the world, with its own currencies and exchange-rate risk: rent in euro, dollar or yen, converted at a rate that moves.
-12. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
-13. **One weather.** The farms have a weekly harvest weather ("Tørkesommer" can land in February), while Pack 49 has daily weather by season. Merge them, so the harvest follows the weather the weeks actually had.
-14. **A save that stays small.** Price histories, newspapers and records grow. Measure the save after 100 hours of play, trim what isn't needed, and guard the size with a test.
-15. **UI tests.** The engine is well tested; the screens are only checked by hand in the browser. Add click tests for the main flows: buy, upgrade, hire, borrow, open Avisa, sell.
-16. **Measure speed on a built game.** The engine runs 3–4× slower under Vitest than built, so `ytelse.test.ts` is noisy and its limits are guesses. Measure an esbuild bundle in the test (as Packs 47–49 did by hand), with limits that mean something on a phone.
+1. **Franchises.** Open the same business in more cities, with a limit (for example one per city, at most three) and a bonus from the city's region. Copies were dropped in Pack 2 because they blew up the economy, so each franchise needs a real cost or a falling return — measured with the bench.
+2. **Bonds.** Government bonds with a fixed coupon whose price falls when the policy rate (Pack 49) rises, and rises when it falls. A step between the savings account and stocks.
+3. **Stocks linked to your industries.** Stocks have no industry today, though several match a business: Polaris Olje and the oil company, Bergen Shipping and the shipping company, Nordfjord Sjømat and the fish farm, Fjellfly and the airline, Nordre Bank and the bank, Kurv Dagligvare and the kiosk. Give each stock an industry, let the week's trend and company news move both, and show the link on both sides.
+4. **Vacancy, tenants and property managers.** Properties can stand empty, and bad tenants cost money. A property manager per city, hired like the business managers, lowers the risk — with a trait, like the parked *Managers with traits*: careful (little vacancy, a bit less rent), aggressive (more rent, more trouble) or local (knows the city, a small city bonus). Moved up from Parked.
+5. **Weather on property.** Pack 49's daily weather also moves rent: the cabin and Zermatt rent better in snow, Marbella in the sun — on top of the monthly seasons that already exist.
+6. **Interiors.** Upgrade the inside of your home and holiday homes: kitchen, art on the walls, a wine cellar. Gives status and shows on the detail page.
+7. **More countries.** There are 6 foreign cities today. Add more of the world, with its own currencies and exchange-rate risk: rent in euro, dollar or yen, converted at a rate that moves.
+8. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
+9. **One weather.** The farms have a weekly harvest weather ("Tørkesommer" can land in February), while Pack 49 has daily weather by season. Merge them, so the harvest follows the weather the weeks actually had.
+10. **A save that stays small.** Price histories, newspapers and records grow. Measure the save after 100 hours of play, trim what isn't needed, and guard the size with a test.
+11. **UI tests.** The engine is well tested; the screens are only checked by hand in the browser. Add click tests for the main flows: buy, upgrade, hire, borrow, open Avisa, sell.
+12. **Measure speed on a built game.** The engine runs 3–4× slower under Vitest than built, so `ytelse.test.ts` is noisy and its limits are guesses. Measure an esbuild bundle in the test (as Packs 47–49 did by hand), with limits that mean something on a phone.
 
 ## Graphics
 
 Loose ends after G1–G7. Not in the pack plan yet.
 
-17. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
-18. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-19. **Motion in the detail scenes.** 39 of the 68 drawings never move (counted after G9): all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
-20. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-21. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
-22. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
-23. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on *Scenes that follow the clock*. Picked from the v10.0 list.
-24. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
+13. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
+14. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+15. **Motion in the detail scenes.** 39 of the 68 drawings never move (counted after G9): all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
+16. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
+17. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
+18. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
+19. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on *Scenes that follow the clock*. Picked from the v10.0 list.
+20. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
 
 ## Parked (not chosen yet)
 
 These ideas were suggested but not picked. They stay here so they can be moved up later. They are not part of any pack until they are chosen.
 
 **Game ideas**
+- **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
+- **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
+- **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
+- **A real-phone check and an outside playtest.** Pack 47 measured two hours away on this PC (a fresh game ~95 ms, a late game that owns everything ~300 ms, built like the real game) and estimates a slow phone at 4–5× that. Check it on a real slow phone, and let someone outside play before 2.0 is called done.
 - **Random events with choices.** Crashes, booms, strikes, scandals and inspections, each with two or three ways to respond. Drawn from a hash, not the die.
 - **Rivals that fight back.** Today the rivals grow and can be taken over, but never come after you. Let them bid against you for landmarks, try a hostile takeover of one of your businesses, or poach your staff.
 - **Daily and weekly missions.** Short goals with small rewards, so a five-minute visit has a point too.
