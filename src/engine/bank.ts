@@ -83,7 +83,11 @@ function nedbetalMed(s: Spilltilstand, belop: number): void {
  * alltid beholde.
  */
 export function sjekkMargin(s: Spilltilstand): void {
-  if (s.gjeld <= 0 || belaaningsgrad(s) <= MARGINKRAV) return
+  if (s.gjeld <= 0) return
+  // Kontantene og sparingen er en del av eiendelene, og ingen eiendel er
+  // negativ — dekker de alene gjelden med god margin, trengs ikke hele
+  // regnestykket. Sjekken går hvert sekund, så det sparer mye tid borte.
+  if (s.gjeld <= MARGINKRAV * (s.kontanter + s.sparing) || belaaningsgrad(s) <= MARGINKRAV) return
 
   // Sparekontoen tømmes inn på brukskontoen først.
   flyt(s, 'sparing', -s.sparing)

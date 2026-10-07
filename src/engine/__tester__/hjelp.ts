@@ -5,7 +5,16 @@
 
 import * as h from '../handlinger'
 import { maksLaanMotSikkerhet, maksNyttLaan } from '../formler'
-import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, Spilltilstand } from '../types'
+import { nyttSpill } from '../start'
+import { STIGEN } from '../innhold'
+import { EIENDOMSSTIGEN, EIENDOMSTYPER, LAGERLISTE, LUKSUSLISTE } from '../eiendom'
+import { MALERILISTE } from '../kunst'
+import { LANDEMERKELISTE } from '../landemerker'
+import { JORDLISTE } from '../jord'
+import { KLUBBNAVN } from '../klubb'
+import { PAPIRER } from '../marked'
+import { FONDLISTE } from '../fond'
+import type { Bedrift, BedriftstypeId, EiendomId, LagerId, LuksusId, PapirId, Spilltilstand } from '../types'
 
 function ok(u: h.Utfall): Spilltilstand {
   if (!u.ok) throw new Error(u.feil)
@@ -47,4 +56,36 @@ export function bedrift(type: BedriftstypeId, felt: Partial<Bedrift> = {}): Bedr
     fusjoner: 0,
     ...felt,
   }
+}
+
+/**
+ * Et sent spill der du eier alt: alle bransjene på høye nivåer med ansatte og
+ * leder, all eiendom, all jord, alle landemerker, all luksus, alle maleriene,
+ * en klubb, alle papirene og fondene og en andel i hver rival. Det tyngste en
+ * lagring kan bli — til ytelsestesten. Kjøp som ikke går, hoppes over.
+ */
+export function fulltSpill(): Spilltilstand {
+  let s = nyttSpill()
+  s.kontanter = 1e15
+  s.hoyesteFormue = 1e15
+  const prov = (u: h.Utfall) => {
+    if (u.ok) s = u.tilstand
+  }
+  for (const type of STIGEN) if (!s.bedrifter.some((b) => b.type === type)) prov(h.kjopBedrift(s, type))
+  for (const b of s.bedrifter) {
+    prov(h.oppgraderFlere(s, b.id, 120))
+    for (let i = 0; i < 10; i++) prov(h.ansett(s, b.id))
+    prov(h.ansettLeder(s, b.id))
+  }
+  for (const l of LAGERLISTE) for (let i = 0; i < 12; i++) prov(h.utvidLager(s, l))
+  for (const id of LUKSUSLISTE) prov(h.kjopLuksus(s, id))
+  for (const id of MALERILISTE) prov(h.kjopMaleri(s, id))
+  for (const id of LANDEMERKELISTE) prov(h.kjopLandemerke(s, id))
+  for (const id of EIENDOMSSTIGEN) for (let i = 0; i < EIENDOMSTYPER[id].maksAntall; i++) prov(h.kjopEiendom(s, id))
+  for (const id of JORDLISTE) prov(h.kjopJord(s, id))
+  prov(h.kjopKlubb(s, KLUBBNAVN[0]))
+  for (const id of Object.keys(PAPIRER) as PapirId[]) prov(h.kjopPapir(s, id, 1000))
+  for (const id of FONDLISTE) prov(h.kjopFond(s, id, 1e9))
+  for (const r of s.rivaler) prov(h.kjopRivalblokk(s, r.id))
+  return s
 }

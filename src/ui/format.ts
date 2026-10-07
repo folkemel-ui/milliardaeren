@@ -19,6 +19,7 @@ export function kompakt(n: number): string {
     const a = Math.abs(verdi)
     return `kr ${tall(verdi, a < 10 ? 2 : a < 100 ? 1 : 0)} ${enhet}`
   }
+  if (abs >= 999.5e9) return kort(n / 1e12, 'bill')
   if (abs >= 999.5e6) return kort(n / 1e9, 'mrd')
   if (abs >= 1e6) return kort(n / 1e6, 'mill')
   return kroner(n)

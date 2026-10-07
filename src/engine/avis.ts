@@ -110,6 +110,7 @@ function omDeg(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
     if (når === undefined || når <= før.sek) continue
     if (p.id === 'millionaer') saker.push({ type: 'deg', tittel: 'Ny millionær i byen!', tekst: `${t} som startet med en saftbod, har passert sin første million.` })
     else if (p.id === 'milliardaer') saker.push({ type: 'deg', tittel: 'MILLIARDÆR', tekst: 'Fra saftbod til milliard. Landets nyeste milliardær har nådd målet — og markedet holder pusten.' })
+    else if (p.id === 'billionaer') saker.push({ type: 'deg', tittel: 'BILLIONÆR', tekst: 'Tusen milliarder. Statistisk sentralbyrå vurderer å føre formuen som egen næring.' })
     else if (p.id === 'marginkrav') saker.push({ type: 'deg', tittel: 'Banken tvangsselger for kjent investor', tekst: `Etter en tøff dag i markedet måtte banken selge unna for ${t.toLowerCase()}.` })
   }
   for (const type of s.bedrifter.map((b) => b.type)) {

@@ -4,7 +4,7 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, type Utfall } from '../handlinger'
+import { ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, type Utfall } from '../handlinger'
 import { BUD, dagensForhandling, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
 import {
   ansettelsespris,
@@ -14,7 +14,9 @@ import {
   forbedringspris,
   maksAnsatte,
   nesteForbedring,
+  nesteMilepael,
   oppgraderingspris,
+  prisForNivaaer,
 } from '../formler'
 import { BEDRIFTSTYPER, STIGEN } from '../innhold'
 import { simuler } from '../simulering'
@@ -26,12 +28,26 @@ interface Kandidat {
   utfor: (s: Spilltilstand) => Utfall
 }
 
-function kandidater(s: Spilltilstand): Kandidat[] {
+function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
   const liste: Kandidat[] = []
   for (const b of s.bedrifter) {
     const naa = bedriftInntektPerSek(b)
     const opp: Bedrift = { ...b, nivaa: b.nivaa + 1 }
     liste.push({ pris: oppgraderingspris(b), gevinst: bedriftInntektPerSek(opp) - naa, utfor: (t) => oppgrader(t, b.id) })
+    // Den smarte boten (balansebenken, Pakke 47) ser som en spiller: har du råd
+    // til å gå helt opp til neste dobling, regnes det som ett kjøp. Den sparer
+    // ikke til det — det gjør de færreste. Den enkle boten ser bare neste nivå;
+    // gullmesteren spiller med den, så fasiten står fast når boten blir klokere.
+    const m = nesteMilepael(b.nivaa)
+    const tilDobling = m === null ? Infinity : prisForNivaaer(b, m - b.nivaa)
+    if (smart && m !== null && m - b.nivaa > 1 && tilDobling <= s.kontanter) {
+      const antall = m - b.nivaa
+      liste.push({
+        pris: tilDobling,
+        gevinst: bedriftInntektPerSek({ ...b, nivaa: m }) - naa,
+        utfor: (t) => oppgraderFlere(t, b.id, antall),
+      })
+    }
     const f = nesteForbedring(b)
     if (f && b.nivaa >= f.nivaa) {
       const med: Bedrift = { ...b, forbedringer: b.forbedringer + 1 }
@@ -74,13 +90,13 @@ function kandidater(s: Spilltilstand): Kandidat[] {
 }
 
 /** Betaler skatten i tide, så gjør beste kjøp så lenge det er råd til det. */
-export function botTrekk(s: Spilltilstand): Spilltilstand {
+export function botTrekk(s: Spilltilstand, smart = false): Spilltilstand {
   for (const r of s.skatt.regninger) {
     const u = betalSkatt(s, r.id)
     if (u.ok) s = u.tilstand
   }
   for (let i = 0; i < 1_000; i++) {
-    const beste = kandidater(s)
+    const beste = kandidater(s, smart)
       .filter((k) => k.gevinst > 0)
       .sort((a, b) => a.pris / a.gevinst - b.pris / b.gevinst)[0]
     if (!beste || beste.pris > s.kontanter) return s
@@ -92,9 +108,9 @@ export function botTrekk(s: Spilltilstand): Spilltilstand {
 }
 
 /** Spiller `sekunder` sekunder, med et trekk hvert `hvert` sekund. */
-export function botSpill(s: Spilltilstand, sekunder: number, hvert = 5, underveis?: (s: Spilltilstand) => void): Spilltilstand {
+export function botSpill(s: Spilltilstand, sekunder: number, hvert = 5, underveis?: (s: Spilltilstand) => void, smart = false): Spilltilstand {
   for (let t = 0; t < sekunder; t += hvert) {
-    s = simuler(botTrekk(s), Math.min(hvert, sekunder - t))
+    s = simuler(botTrekk(s, smart), Math.min(hvert, sekunder - t))
     underveis?.(s)
   }
   return s

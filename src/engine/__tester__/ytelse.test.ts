@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { BORTE_TAK_SEK } from '../innhold'
+import { fulltSpill } from './hjelp'
 
 /** CPU-tid (bruker + system) i millisekunder for det `arbeid` gjør i denne prosessen. */
 function cpuMs(arbeid: () => void): number {
@@ -30,5 +31,23 @@ describe('ytelse', () => {
     for (let i = 0; i < 3 && ms >= 500; i++) ms = Math.min(ms, cpuMs(() => simuler(s, BORTE_TAK_SEK, true)))
     if (process.env.BENK) console.log(`${BORTE_TAK_SEK} s borte: ${ms.toFixed(0)} ms CPU`)
     expect(ms).toBeLessThan(500)
+  })
+
+  it('også et sent spill der du eier alt (Pakke 47)', () => {
+    // Det tyngste en lagring kan bli: 13 bedrifter med ledere, 100 eiendommer,
+    // all luksus, kunst, landemerker, jord, klubb, papirer, fond og rivalandeler.
+    //
+    // Under Vitest går motoren 3–4 ganger tregere enn i det ferdige spillet
+    // (et nytt spill: ~350 ms her, ~95 ms bygget med esbuild og kjørt i Node).
+    // Det fulle spillet kostet ~950 ms her før Pakke 47 (~610 ms bygget) og
+    // ~600 ms etter (~300 ms bygget): leie, verdi og status regnes nå uten å
+    // gjenta det samme arbeidet for hver eiendom hvert sekund. Grensen fanger
+    // en glidning tilbake mot det gamle.
+    const s = fulltSpill()
+    simuler(s, 600, true)
+    let ms = Infinity
+    for (let i = 0; i < 3 && ms >= 850; i++) ms = Math.min(ms, cpuMs(() => simuler(s, BORTE_TAK_SEK, true)))
+    if (process.env.BENK) console.log(`${BORTE_TAK_SEK} s borte, fullt spill: ${ms.toFixed(0)} ms CPU`)
+    expect(ms).toBeLessThan(850)
   })
 })

@@ -24,12 +24,18 @@ describe('bransjestigen', () => {
     }
   })
 
-  it('første oppgradering koster en jevnt stigende andel av prisen fra kiosken', () => {
-    const fra = STIGEN.indexOf('kiosk')
-    const andeler = typer.slice(fra).map((t) => t.oppgraderingspris / t.pris)
+  it('første oppgradering koster en jevnt stigende andel av prisen fra kiosken til banken', () => {
+    const andeler = typer.slice(STIGEN.indexOf('kiosk'), STIGEN.indexOf('bank') + 1).map((t) => t.oppgraderingspris / t.pris)
     for (let i = 1; i < andeler.length; i++) expect(andeler[i]).toBeGreaterThanOrEqual(andeler[i - 1] - 1e-9)
     expect(andeler[0]).toBeCloseTo(0.25)
     expect(andeler.at(-1)).toBeLessThanOrEqual(0.8)
+  })
+
+  it('i sluttspillet stiger andelen igjen, fra halvparten (Pakke 47)', () => {
+    const andeler = typer.slice(STIGEN.indexOf('oljeselskap')).map((t) => t.oppgraderingspris / t.pris)
+    for (let i = 1; i < andeler.length; i++) expect(andeler[i]).toBeGreaterThanOrEqual(andeler[i - 1] - 1e-9)
+    expect(andeler[0]).toBeCloseTo(0.275)
+    expect(andeler.at(-1)).toBeLessThanOrEqual(0.4)
   })
 
   it('hver bransje har tegning, tre forbedringer og navn til avisa', () => {

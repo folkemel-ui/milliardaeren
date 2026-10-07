@@ -47,6 +47,9 @@ export const FEIRES: Record<string, Feiringsdata> = {
   'ti-mill': { tekst: 'kr 10 mill', niva: 'liten' },
   'hundre-mill': { tekst: 'kr 100 mill', niva: 'liten' },
   milliardaer: { tekst: 'MILLIARDÆR!', niva: 'milliard' },
+  'ti-mrd': { tekst: 'kr 10 mrd', niva: 'liten' },
+  'hundre-mrd': { tekst: 'kr 100 mrd', niva: 'liten' },
+  billionaer: { tekst: 'BILLIONÆR!', niva: 'milliard' },
 }
 
 const RANG: Record<Feiringsniva, number> = { liten: 0, stor: 1, milliard: 2 }

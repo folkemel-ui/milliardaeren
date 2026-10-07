@@ -28,6 +28,7 @@ export function kroner(n: number): string {
 /**
  * Kort form for store beløp: «kr 1,25 mill», «kr 12,5 mill», «kr 150 mill».
  * Tre gjeldende sifre, uten nuller på slutten — «kr 12 mill», ikke «kr 12,00 mill».
+ * Over tusen milliarder blir det billioner: «kr 1,5 bill» (Pakke 47).
  */
 export function kortKroner(n: number): string {
   const abs = Math.abs(n)
@@ -36,7 +37,8 @@ export function kortKroner(n: number): string {
     const tekst = tall(verdi, a < 10 ? 2 : a < 100 ? 1 : 0).replace(/(,\d*?)0+$/, '$1').replace(/,$/, '')
     return `kr ${tekst} ${enhet}`
   }
-  // Fra 999,5 mill går det over til milliarder, så det aldri står «kr 1 000 mill».
+  // Fra 999,5 mill går det over til milliarder, så det aldri står «kr 1 000 mill» — og videre til billioner.
+  if (abs >= 999.5e9) return kort(n / 1e12, 'bill')
   if (abs >= 999.5e6) return kort(n / 1e9, 'mrd')
   if (abs >= 1e6) return kort(n / 1e6, 'mill')
   return kroner(n)

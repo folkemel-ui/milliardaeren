@@ -86,7 +86,13 @@ export function kunstverdi(s: Spilltilstand): number {
 }
 
 export function kunststatus(s: Spilltilstand): number {
-  return mineMalerier(s).reduce((sum, id) => sum + MALERIER[id].status * (s.kunst.eide[id]!.utlant ? 2 : 1), 0)
+  // Uten mellomliste: statusen regnes flere ganger i sekundet.
+  let sum = 0
+  for (const id of MALERILISTE) {
+    const e = s.kunst?.eide[id]
+    if (e) sum += MALERIER[id].status * (e.utlant ? 2 : 1)
+  }
+  return sum
 }
 
 /** Nye dagspriser, utstillinger, og malerier som hentes hjem fra museet. Muterer. */

@@ -65,7 +65,10 @@ export function landemerkeleiePerSek(s: Spilltilstand): number {
 }
 
 export function landemerkestatus(s: Spilltilstand): number {
-  return mineLandemerker(s).reduce((sum, id) => sum + LANDEMERKER[id].status, 0)
+  // Uten mellomliste: statusen regnes flere ganger i sekundet.
+  let sum = 0
+  for (const id of LANDEMERKELISTE) if (eierDu(s, id)) sum += LANDEMERKER[id].status
+  return sum
 }
 
 /** Prisen akkurat nå: verdien når det er til salgs, med premie når en rival eier det. */

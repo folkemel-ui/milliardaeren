@@ -12,7 +12,7 @@ describe('kortKroner', () => {
     expect(k(1_500_000)).toBe('kr 1,5 mill')
     expect(k(12_500_000)).toBe('kr 12,5 mill')
     expect(k(2_500_000_000)).toBe('kr 2,5 mrd')
-    expect(k(1_000_000_000_000)).toBe('kr 1 000 mrd')
+    expect(k(1_000_000_000_000)).toBe('kr 1 bill') // Pakke 47: billioner over tusen milliarder
   })
 
   it('går over til neste enhet uten å vise «1 000 mill»', () => {

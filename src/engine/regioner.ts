@@ -26,8 +26,12 @@ export const REGIONLISTE = Object.keys(REGIONER) as Region[]
 
 /** Regionen en by hører til, eller null når den følger landsindeksen. */
 export function regionFor(by: By): Region | null {
-  return REGIONLISTE.find((r) => REGIONER[r].byer.includes(by)) ?? null
+  // Slått opp én gang per by: leien og verdien spør hvert sekund, for hver eiendom.
+  let r = REGION_FOR.get(by)
+  if (r === undefined) REGION_FOR.set(by, (r = REGIONLISTE.find((x) => REGIONER[x].byer.includes(by)) ?? null))
+  return r
 }
+const REGION_FOR = new Map<By, Region | null>()
 
 /*
  * Samme tikk og tidssteg som landsindeksen (5 s, historikk hvert 6. tikk).
@@ -85,8 +89,16 @@ export function nyRegion(frø: number, r: Region, historikkLengde: number): Regi
 export function byfaktor(s: Spilltilstand, by: By): number {
   const r = regionFor(by)
   const i = r ? s.marked.regioner?.indekser[r] : undefined
-  return i ? Math.exp(i.avvik) : 1
+  if (!i) return 1
+  // Avviket flyttes bare ved markedstikkene, men faktoren trengs hvert sekund
+  // for hver eiendom. Husk siste svar per indeks — det er det samme tallet.
+  const husket = BYFAKTOR.get(i)
+  if (husket && husket.avvik === i.avvik) return husket.faktor
+  const faktor = Math.exp(i.avvik)
+  BYFAKTOR.set(i, { avvik: i.avvik, faktor })
+  return faktor
 }
+const BYFAKTOR = new WeakMap<Regionindeks, { avvik: number; faktor: number }>()
 
 /** Eiendomsindeksen for en by: landet ganger regionens avvik. */
 export function eiendomskurs(s: Spilltilstand, by: By): number {

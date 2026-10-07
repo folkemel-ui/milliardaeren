@@ -53,24 +53,28 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   },
   oljeselskap: {
     id: 'oljeselskap', navn: 'Oljeselskap',
-    pris: 5_000_000_000, grunninntekt: 100_000, oppgraderingspris: 2_750_000_000, vekst: 1.1, laasesOppVed: 6_300_000_000,
+    pris: 5_000_000_000, grunninntekt: 170_000, oppgraderingspris: 1_375_000_000, vekst: 1.1, laasesOppVed: 6_300_000_000,
   },
-  // Sluttspillet etter milliarden: hvert trinn er rundt fire–fem ganger det forrige.
+  // Sluttspillet etter milliarden (Pakke 47): hvert trinn er tre–fire ganger det
+  // forrige, og hele stigen er nådd før billionen. Kjøpet tjener seg inn på rundt
+  // 30 000 sekunder, som banken, og oppgraderingene koster halvparten av det den
+  // tidlige stigen ville gitt — ellers blir hvert tiende-steg dobbelt så langt
+  // som det forrige. Målt med balansebenken: jevnt rundt 15 timer per tiende-steg.
   rederi: {
     id: 'rederi', navn: 'Rederi',
-    pris: 25_000_000_000, grunninntekt: 400_000, oppgraderingspris: 16_250_000_000, vekst: 1.1, laasesOppVed: 31_000_000_000,
+    pris: 20_000_000_000, grunninntekt: 680_000, oppgraderingspris: 6_500_000_000, vekst: 1.1, laasesOppVed: 25_000_000_000,
   },
   fiskeoppdrett: {
     id: 'fiskeoppdrett', navn: 'Fiskeoppdrett',
-    pris: 100_000_000_000, grunninntekt: 1_400_000, oppgraderingspris: 70_000_000_000, vekst: 1.1, laasesOppVed: 125_000_000_000,
+    pris: 60_000_000_000, grunninntekt: 2_000_000, oppgraderingspris: 21_000_000_000, vekst: 1.1, laasesOppVed: 75_000_000_000,
   },
   flyselskap: {
     id: 'flyselskap', navn: 'Flyselskap',
-    pris: 400_000_000_000, grunninntekt: 5_000_000, oppgraderingspris: 300_000_000_000, vekst: 1.1, laasesOppVed: 500_000_000_000,
+    pris: 200_000_000_000, grunninntekt: 6_700_000, oppgraderingspris: 75_000_000_000, vekst: 1.1, laasesOppVed: 250_000_000_000,
   },
   skisenter: {
     id: 'skisenter', navn: 'Skisenter',
-    pris: 1_500_000_000_000, grunninntekt: 17_000_000, oppgraderingspris: 1_200_000_000_000, vekst: 1.1, laasesOppVed: 1_900_000_000_000,
+    pris: 600_000_000_000, grunninntekt: 20_000_000, oppgraderingspris: 240_000_000_000, vekst: 1.1, laasesOppVed: 750_000_000_000,
   },
 }
 

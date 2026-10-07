@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 
 /** Ytelsestesten måler tid, og skal ikke dele maskinen med de andre testene. */
 const YTELSE = '**/ytelse.test.ts'
+/** Arbeidskopier andre økter har lagt i .claude/worktrees, skal ikke testes med. */
+const ARBEIDSKOPIER = '**/.claude/**'
 
 export default defineConfig({
   plugins: [react()],
@@ -18,8 +20,8 @@ export default defineConfig({
     // To grupper som kjører etter hverandre: alt annet i parallell først, så
     // ytelsestesten alene. I samme gruppe feilet den ofte på en travel maskin.
     projects: [
-      { extends: true, test: { name: 'enhet', exclude: [...configDefaults.exclude, YTELSE], sequence: { groupOrder: 0 } } },
-      { extends: true, test: { name: 'ytelse', include: [YTELSE], sequence: { groupOrder: 1 } } },
+      { extends: true, test: { name: 'enhet', exclude: [...configDefaults.exclude, ARBEIDSKOPIER, YTELSE], sequence: { groupOrder: 0 } } },
+      { extends: true, test: { name: 'ytelse', include: [YTELSE], exclude: [...configDefaults.exclude, ARBEIDSKOPIER], sequence: { groupOrder: 1 } } },
     ],
   },
 })

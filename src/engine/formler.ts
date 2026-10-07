@@ -38,7 +38,10 @@ import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltil
 
 /** Inntektsmultiplikatoren fra milepælene: ×2 for hver som er nådd. */
 export function milepaelfaktor(nivaa: number): number {
-  return 2 ** MILEPAELER.filter((m) => nivaa >= m).length
+  // Uten filter og nye lister: dette regnes for hver bedrift hvert sekund.
+  let n = 0
+  for (const m of MILEPAELER) if (nivaa >= m) n++
+  return 2 ** n
 }
 
 /** Neste nivå som dobler inntekten, eller null når alle er nådd. */
@@ -88,7 +91,10 @@ export function raadTil(b: Bedrift, kontanter: number): { antall: number; pris: 
 
 /** Produktet av forbedringene som er kjøpt. */
 export function forbedringsfaktor(b: Bedrift): number {
-  return FORBEDRINGER[b.type].slice(0, b.forbedringer).reduce((f, x) => f * x.faktor, 1)
+  const liste = FORBEDRINGER[b.type]
+  let f = 1
+  for (let i = 0; i < b.forbedringer && i < liste.length; i++) f *= liste[i].faktor
+  return f
 }
 
 /** Neste forbedring som kan kjøpes (kanskje ikke låst opp ennå), eller null når alle er kjøpt. */
@@ -231,11 +237,20 @@ export function maksKjop(s: Spilltilstand, id: PapirId): number {
   for (let i = 0; i < 8; i++) antall = s.kontanter / (handelskurs(s, id, antall) * (1 + KURTASJE))
   antall = rundAntall(id, antall)
   // Kappingen er konservativ, men sjekk likevel — avrunding skal aldri gi en avvist ordre.
-  const steg = PAPIRER[id].klasse === 'aksje' ? 1 : 0.0001
-  while (antall > 0 && antall * handelskurs(s, id, antall) * (1 + KURTASJE) > s.kontanter) {
-    antall = rundAntall(id, antall - steg)
+  const har = (a: number) => a * handelskurs(s, id, a) * (1 + KURTASJE) <= s.kontanter
+  if (antall <= 0 || har(antall)) return Math.max(0, antall)
+  // For mye: finn det største antallet du har råd til ved halvering, i hele
+  // enheter (én aksje, 1/10 000 mynt). Før gikk dette ned én enhet om gangen —
+  // med milliarder på konto kunne det ta minutter og fryse spillet (Pakke 47).
+  const perEnhet = PAPIRER[id].klasse === 'aksje' ? 1 : 10_000
+  let lav = 0
+  let hoy = Math.round(antall * perEnhet)
+  for (let i = 0; i < 100 && hoy - lav > 1; i++) {
+    const midt = Math.floor((lav + hoy) / 2)
+    if (har(midt / perEnhet)) lav = midt
+    else hoy = midt
   }
-  return Math.max(0, antall)
+  return lav / perEnhet
 }
 
 // ─────────────────────────────────────────────── Kjøp

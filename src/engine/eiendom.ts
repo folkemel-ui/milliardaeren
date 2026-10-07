@@ -136,11 +136,17 @@ export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
 
 /** Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker. */
 export function eiendomsverdi(s: Spilltilstand): number {
+  // Regnes hvert sekund: byens kurs regnes én gang per by, og bare for det du eier.
+  BYKURS.clear()
   let sum = 0
   for (const id of EIENDOMSSTIGEN) {
-    // Prisen (regionskursen) er dyr å regne ut — hopp over det du ikke eier.
     const antall = s.eiendommer[id] ?? 0
-    if (antall > 0) sum += antall * eiendomspris(s, id)
+    if (antall <= 0) continue
+    const t = EIENDOMSTYPER[id]
+    let kurs = BYKURS.get(t.by)
+    if (kurs === undefined) BYKURS.set(t.by, (kurs = eiendomskurs(s, t.by)))
+    // Samme regnestykke som eiendomspris.
+    sum += antall * (t.pris * kurs * STANDARDER[standard(s, id)].verdi)
   }
   return sum + jordverdi(s) + landemerkeverdi(s)
 }
@@ -158,16 +164,31 @@ export const SESONGER: Record<'sommer' | 'vinter', number[]> = {
 /** Leiefaktoren for en eiendom akkurat nå: 1 uten sesong, ellers månedens faktor. */
 export function sesongfaktor(s: Spilltilstand, id: EiendomId): number {
   const sesong = EIENDOMSTYPER[id].sesong
-  return sesong ? SESONGER[sesong][dato(dagnummer(s.sek)).maaned] : 1
+  return sesong ? SESONGER[sesong][maanedFor(dagnummer(s.sek))] : 1
 }
+
+/** Måneden for et dagnummer, husket for siste dag — leien spør hvert sekund. */
+function maanedFor(dag: number): number {
+  if (dag !== sisteDag) {
+    sisteDag = dag
+    sisteMaaned = dato(dag).maaned
+  }
+  return sisteMaaned
+}
+let sisteDag = NaN
+let sisteMaaned = 0
 
 /** Eier du alt i en by, gir leien der så mye mer (Pakke 44). */
 export const BYEIER_BONUS = 0.1
 
 /** Byggene i en by. */
-export function byggI(by: By): EiendomId[] {
-  return EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].by === by)
+export function byggI(by: By): readonly EiendomId[] {
+  // Regnes ut én gang per by: leien spør hvert sekund, for hver eiendom.
+  let liste = BYGG_I.get(by)
+  if (!liste) BYGG_I.set(by, (liste = EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].by === by)))
+  return liste
 }
+const BYGG_I = new Map<By, EiendomId[]>()
 
 /**
  * Eier du hele byen? Det krever det høyeste antallet av hvert bygg der —
@@ -193,17 +214,34 @@ export function enheterI(s: Spilltilstand, by: By): { eid: number; av: number } 
 /** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren — byeierbonusen og sesongen. */
 export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
   const t = EIENDOMSTYPER[id]
-  const bonus = eierHeleByen(s, t.by) ? 1 + BYEIER_BONUS : 1
-  return (t.pris * eiendomskurs(s, t.by) * t.avkastning * STANDARDER[standard(s, id)].leie * bonus * sesongfaktor(s, id)) / 3600
+  return leieHver(s, id, eiendomskurs(s, t.by), eierHeleByen(s, t.by) ? 1 + BYEIER_BONUS : 1)
+}
+
+/** Mellomlager for én utregning av leie eller verdi, tømt ved starten av hver — gjenbrukt så sekundet slipper nye objekter. */
+const BYKURS = new Map<By, number>()
+const BYBONUS = new Map<By, number>()
+
+/** Selve regnestykket, med byens kurs og byeierbonus regnet ut på forhånd. */
+function leieHver(s: Spilltilstand, id: EiendomId, kurs: number, bonus: number): number {
+  const t = EIENDOMSTYPER[id]
+  return (t.pris * kurs * t.avkastning * STANDARDER[standard(s, id)].leie * bonus * sesongfaktor(s, id)) / 3600
 }
 
 export function leiePerSek(s: Spilltilstand): number {
+  // Regnes hvert sekund: byens kurs og byeierbonus regnes én gang per by.
+  BYKURS.clear()
+  BYBONUS.clear()
   let sum = 0
   for (const id of EIENDOMSSTIGEN) {
-    // Under oppussing står enhetene tomme.
-    if (s.oppussing?.[id]) continue
     const antall = s.eiendommer[id] ?? 0
-    if (antall > 0) sum += antall * leieHverPerSek(s, id)
+    // Under oppussing står enhetene tomme.
+    if (antall <= 0 || s.oppussing?.[id]) continue
+    const by = EIENDOMSTYPER[id].by
+    let kurs = BYKURS.get(by)
+    if (kurs === undefined) BYKURS.set(by, (kurs = eiendomskurs(s, by)))
+    let bonus = BYBONUS.get(by)
+    if (bonus === undefined) BYBONUS.set(by, (bonus = eierHeleByen(s, by) ? 1 + BYEIER_BONUS : 1))
+    sum += antall * leieHver(s, id, kurs, bonus)
   }
   return sum + landemerkeleiePerSek(s)
 }

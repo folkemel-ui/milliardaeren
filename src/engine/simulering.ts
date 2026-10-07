@@ -4,7 +4,7 @@
  */
 
 import { betalRente, dekkUnderskudd, sjekkMargin } from './bank'
-import { bedriftInntektPerSek, inntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
+import { bedriftInntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
 import { leiePerSek, sjekkOppussing } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
 import { utbytteFor } from './kvartal'
@@ -40,14 +40,20 @@ export function simuler(s: Spilltilstand, antall = 1, borte = false): Spilltilst
 
 /** Ett sekund, på en tilstand simuleringen selv eier. */
 function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
-  const inntekt = inntektPerSek(s, borte)
+  // Det samme som inntektPerSek(s, borte), men hver bedrift og statusen regnes
+  // bare én gang: tallene trengs både til kontantene og til regnskapet under.
+  const faktor = statusfaktor(s)
+  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b)))
+  let sum = 0
+  for (let i = 0; i < perBedrift.length; i++) if (!(borte && !s.bedrifter[i].leder)) sum += perBedrift[i]
+  const inntekt = sum * faktor
   s.kontanter += inntekt
   s.totaltTjent += inntekt
   // Regnskapet per bedrift. Summen over står for kontantene; dette er bare bokføring.
-  const faktor = statusfaktor(s)
   const maalHistorikk = (s.sek + 1) % INNTEKT_HISTORIKK_SEK === 0
-  for (const b of s.bedrifter) {
-    const denne = borte && !b.leder ? 0 : bedriftInntektPerSek(b) * faktor
+  for (let i = 0; i < s.bedrifter.length; i++) {
+    const b = s.bedrifter[i]
+    const denne = borte && !b.leder ? 0 : perBedrift[i] * faktor
     b.tjent += denne
     if (maalHistorikk) {
       b.inntektHistorikk.push(denne)
