@@ -52,6 +52,16 @@ The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid groun
 11. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
 12. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
 
+## Graphics
+
+Loose ends after G1–G7. Not in the pack plan yet.
+
+13. **The last ten drawings.** The foreign properties are still in the old 48 × 48 style: Östermalm (Stockholm), Nyhavn (København), Mitte (Berlin), Mayfair (London), Palm Jumeirah (Dubai), the Manhattan penthouse (New York), and the Marbella flat and beach hotel and the Zermatt flat and alpine hotel. Redraw each from its real place, so the detail scenes show them at full size. With that, every drawing is in the new style, and the old style's code (`F`, `Svg`, `Grunn`, the old hairline rule and the 48 branch of the test) can go.
+14. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
+15. **Small things at small sizes.** The scale rule keeps small subjects small, so the kiosk and the lemonade stand are tiny in the 32 px rival list, and the snekke and the station wagon in the 64 px storage slots. Crop or zoom the drawing in those places so the subject fills the frame.
+16. **The views nobody has checked.** The street view and the buy moment have never been checked in the light theme, and opening a detail page from inside the street view has not been tried. Check them, and fix what turns up.
+17. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+
 ## Parked (not chosen yet)
 
 These ideas were suggested but not picked. They stay here so they can be moved up later. They are not part of any pack until they are chosen.
