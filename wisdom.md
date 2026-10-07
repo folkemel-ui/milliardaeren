@@ -203,6 +203,23 @@ session; delete what stops being true.
 - **Avisa takes five stories**: where a new kind of story goes in `gisUtAvis` decides
   what it pushes off the front page. The world's market stories sit after the rivals,
   because a merger test caught them pushing out the player's own merger.
+- **Click tests (Pack 52)** use happy-dom (a dev-only package — Folke allowed it for
+  test tools only). `src/ui/__tester__/klikk.ts` starts the whole app on a prepared save
+  (`vi.resetModules` per test, so the store starts fresh) and clicks like a player;
+  `klikk.test.ts` covers buy, upgrade, hire, borrow, Avisa, sell and every tab. Put
+  `// @vitest-environment happy-dom` at the top of such a file. Amounts contain hard
+  spaces («kr 1 200»): match them with `\s`, not a plain space. Investments and Profile
+  have no `h1`.
+- **Speed is measured on the built engine** (`ytelse.test.ts` bundles with esbuild and
+  runs a child Node process): a fresh game ≤ 100 ms, the heaviest save (`fulltSpill`)
+  ≤ 400 ms for two hours away — about 0.5 s and 2 s on a slow phone. Windows counts CPU
+  time in 15.6 ms steps, so one 95 ms run shows as 94, 109 or 125: the test times four
+  runs per sample and takes the best of five. On GitHub (`CI`) the limits get double
+  room so a slow runner can't block a deploy. After Pack 52: ~82 ms and ~290–330 ms.
+- **The save is written through `tilLagring`** (`state/lagringsformat.ts`): number
+  histories with 7 significant digits, everything else exact. A new number history must
+  be named `historikk`/`inntektHistorikk` (or `punkter`) to be rounded. Every list has a
+  cap; the heaviest save levels off at ~178 kB after ~120 game days (`pakke52.test.ts`).
 - **Know what the bot doesn't do**, or the bench will fool you: it never borrows, never
   hires managers, never buys property, luxury, stocks or startups, and reaches 1 mrd
   before it ever buys the Bank. Changes to those systems don't show in the bench — reason
