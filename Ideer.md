@@ -22,16 +22,15 @@ Items from *Road to v2.0*. Commits: `Pakke N: …`.
 - **Pack 50 – Things happen:** Random events with choices, Rivals that fight back, Daily and weekly missions
 - **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus
 
-### Graphics track (Packs G8–G11)
+### Graphics track (Packs G9–G11)
 
-Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G7 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish); new drawings follow the style G1 set.
+Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G8 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker); new drawings follow the style G1 set.
 
-- **Pack G8 – Lighter and quicker:** Lighter drawings, Feedback when you press a card, The goal strip scrolls away, The views nobody has checked
 - **Pack G9 – The last drawings:** The last ten drawings, Small things at small sizes
 - **Pack G10 – A living scene:** Motion in the detail scenes, Scenes that follow the clock
 - **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
 
-G8 comes first because the later packs add motion and night versions to every drawing, which should land on the lighter base. G10 waits for G9 so the night sky and the motion only have to be built for the new style. *Drawings for the v2.0 content* is not a pack: it runs alongside Packs 47–51, as each one lands.
+G10 waits for G9 so the night sky and the motion only have to be built for the new style. *Drawings for the v2.0 content* is not a pack: it runs alongside Packs 47–51, as each one lands.
 
 ### Working side by side
 
@@ -66,15 +65,11 @@ Loose ends after G1–G7. Not in the pack plan yet.
 13. **The last ten drawings.** The foreign properties are still in the old 48 × 48 style: Östermalm (Stockholm), Nyhavn (København), Mitte (Berlin), Mayfair (London), Palm Jumeirah (Dubai), the Manhattan penthouse (New York), and the Marbella flat and beach hotel and the Zermatt flat and alpine hotel. Redraw each from its real place, so the detail scenes show them at full size. With that, every drawing is in the new style, and the old style's code (`F`, `Svg`, `Grunn`, the old hairline rule and the 48 branch of the test) can go.
 14. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
 15. **Small things at small sizes.** The scale rule keeps small subjects small, so the kiosk and the lemonade stand are tiny in the 32 px rival list, and the snekke and the station wagon in the 64 px storage slots. Crop or zoom the drawing in those places so the subject fills the frame.
-16. **The views nobody has checked.** The street view and the buy moment have never been checked in the light theme, and opening a detail page from inside the street view has not been tried. Check them, and fix what turns up.
-17. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-18. **Motion in the detail scenes.** 44 of the 68 drawings never move: all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
-19. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-20. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
-21. **Lighter drawings.** Every drawing carries about 50 hidden setup elements (5 masks, a filter and about 10 gradients) whether it uses them or not. In a rich test game the Luksus tab has 42 drawings and 5,200 of its 5,800 elements are drawing parts, including 210 masks; Eiendom has 5,500 of 6,300. One shared set, or only what each drawing uses, removes roughly half of that, for faster tab switches and scrolling on slow phones.
-22. **Feedback when you press a card.** Only the gold buttons and the cup button react visibly when pressed. Cards that open a page (businesses, and everything from G7) show nothing until the page has grown out about a third of a second later. Give them a subtle pressed state.
-23. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
-24. **The goal strip scrolls away.** The whole top bar (`.toppfelt`) is sticky, the «Neste» goal strip included. On a phone it takes about 120 px without the strip and about 150 px with it, plus 65 px for the tab bar at the bottom, so more than a quarter of the screen is covered while you scroll. Keep the cash/net-worth row and the date line (day, week, time, Avisa) sticky, and let the goal strip stay in the page: it sits under the date line at the top and glides away beneath it when you scroll down.
+16. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+17. **Motion in the detail scenes.** 44 of the 68 drawings never move: all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
+18. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
+19. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
+20. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
 
 ## Parked (not chosen yet)
 

@@ -47,13 +47,19 @@ export function useTing(): Ting | null {
 }
 
 /**
- * Trykk på et kort åpner detaljsiden, men ikke når trykket traff en knapp
- * (kjøp, selg, pusse opp) eller noe annet som gjør noe selv.
+ * Et trykk på et kort som gjør `gjor`, men ikke når trykket traff en knapp
+ * (kjøp, selg, pusse opp) eller noe annet som gjør noe selv. Brukes av
+ * bedriftskortene også (G8).
  */
-export function trykkApner(t: Ting) {
+export function vedKorttrykk(gjor: () => void) {
   return (e: MouseEvent) => {
     const mal = e.target as Element | null
     if (mal?.closest?.('button, a, input, select, textarea, label, [role="button"]')) return
-    aapneTing(t)
+    gjor()
   }
+}
+
+/** Trykk på et kort åpner detaljsiden for tingen. */
+export function trykkApner(t: Ting) {
+  return vedKorttrykk(() => aapneTing(t))
 }

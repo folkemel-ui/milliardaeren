@@ -1,3 +1,4 @@
+import { vedKorttrykk } from '../detaljvisning'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
@@ -46,7 +47,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
   const [flytetall, legg] = useFlytetall()
 
   return (
-    <li className={`kort bedriftskort ${puls}`} data-ny={b.type}>
+    <li className={`kort bedriftskort kan-aapnes ${puls}`} data-ny={b.type} onClick={vedKorttrykk(åpne)}>
       {flytetall}
       <div className="bedriftskort-topp">
         <BedriftIkon type={b.type} nivaa={b.nivaa} forbedringer={b.forbedringer} />

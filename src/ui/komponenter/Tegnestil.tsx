@@ -12,7 +12,7 @@
  * - Tre avstander gir fast målestokk (METER): nær, gate og fjern.
  */
 
-import { createContext, useContext, useId, type ReactNode } from 'react'
+import { createContext, Fragment, useContext, useId, type ReactNode } from 'react'
 
 export type Materiale = { lys: string; flate: string; skygge: string }
 
@@ -83,7 +83,15 @@ export const maal = (avstand: Avstand, hva: keyof typeof MAAL) => MAAL[hva] * ME
 
 // ─────────────────────────────────────────────── Lerretet
 
-const Ider = createContext('t')
+/**
+ * Lerretets id og definisjonene tegningen har bedt om (G8). Hver tegning skriver
+ * bare ut de gradientene, maskene og filtrene den faktisk bruker: før fikk hver
+ * tegning alle sammen, rundt 50 skjulte elementer, og på Luksus var nesten
+ * halvparten av siden slike.
+ */
+type Lerretinfo = { id: string; brukt: Set<string> }
+
+const Ider = createContext<Lerretinfo>({ id: 't', brukt: new Set() })
 
 /**
  * Utklipp: tegningen uten himmel, bakke og bakgrunn — bare motivet med
@@ -92,105 +100,185 @@ const Ider = createContext('t')
  */
 export const Utklipp = createContext(false)
 
-/** Peker til en av lerretets felles gradienter, med lerretets egne id-er. */
+/** Peker til en av lerretets felles gradienter, med lerretets egne id-er, og melder at den trengs. */
 function useUrl() {
-  const id = useContext(Ider)
-  return (navn: string) => `url(#${id}${navn})`
+  const { id, brukt } = useContext(Ider)
+  return (navn: string) => {
+    brukt.add(navn)
+    return `url(#${id}${navn})`
+  }
 }
 
-/**
- * Lerretet: 96 × 96, en myk himmel som blekner ut mot kantene (ingen hard
- * boks), og felles gradienter for skygger og glans. Id-ene er unike per
- * tegning, så skjulte tegninger andre steder på siden aldri tar dem med seg.
- */
-export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: number; himmel?: keyof typeof HIMMEL | 'ingen'; children: ReactNode }) {
-  const id = 't' + useId().replace(/[^a-zA-Z0-9]/g, '')
-  if (useContext(Utklipp)) himmel = 'ingen'
-  const tema = himmel === 'inne' ? 'inne' : 'dag'
-  const [topp, horisont] = HIMMEL[tema]
-  return (
-    <svg className="illustrasjon lerret" width={størrelse} height={størrelse} viewBox="0 0 96 96" aria-hidden="true">
-      <defs>
+/** En maske trenger gradienten sin. */
+const TRENGER: Record<string, string> = { vm: 'v', km: 'k', nm: 'n', bm: 'b', rm: 'r' }
+
+/** Én definisjon etter navn. `tema` gjelder bare himmelen. */
+function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactNode {
+  const maske = (gradient: string) => (
+    <mask id={`${id}${navn}`}>
+      <rect x="0" y="0" width="96" height="96" fill={`url(#${id}${gradient})`} />
+    </mask>
+  )
+  switch (navn) {
+    case 'h': {
+      const [topp, horisont] = HIMMEL[tema]
+      return (
         <linearGradient id={`${id}h`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" style={{ stopColor: `var(--himmel-${tema}-topp, ${topp})` }} />
           <stop offset="0.85" style={{ stopColor: `var(--himmel-${tema}-horisont, ${horisont})` }} />
         </linearGradient>
+      )
+    }
+    case 'v':
+      return (
         <radialGradient id={`${id}v`} cx="0.5" cy="0.5" r="0.5">
           <stop offset="0.15" stopColor="#ffffff" stopOpacity="0.85" />
           <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.5" />
           <stop offset="0.8" stopColor="#ffffff" stopOpacity="0.14" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
-        <mask id={`${id}vm`}>
-          <rect x="0" y="0" width="96" height="96" fill={`url(#${id}v)`} />
-        </mask>
-        {/* Bakken blekner ut mot sidene. */}
+      )
+    case 'vm':
+      return maske('v')
+    // Bakken blekner ut mot sidene.
+    case 'k':
+      return (
         <linearGradient id={`${id}k`} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0" />
           <stop offset="0.14" stopColor="#ffffff" />
           <stop offset="0.86" stopColor="#ffffff" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-        <mask id={`${id}km`}>
-          <rect x="0" y="0" width="96" height="96" fill={`url(#${id}k)`} />
-        </mask>
-        {/* Havet blekner ut nederst, så det ikke slutter i en hard kant. */}
+      )
+    case 'km':
+      return maske('k')
+    // Havet blekner ut nederst, så det ikke slutter i en hard kant.
+    case 'n':
+      return (
         <linearGradient id={`${id}n`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0.84" stopColor="#ffffff" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-        <mask id={`${id}nm`}>
-          <rect x="0" y="0" width="96" height="96" fill={`url(#${id}n)`} />
-        </mask>
+      )
+    case 'nm':
+      return maske('n')
+    case 'b':
+      return (
         <radialGradient id={`${id}b`} gradientUnits="userSpaceOnUse" cx="48" cy={GRUNNLINJE - 3} r="58" gradientTransform={`translate(48 ${GRUNNLINJE - 3}) scale(1 0.3) translate(-48 -${GRUNNLINJE - 3})`}>
           <stop offset="0.55" stopColor="#ffffff" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
-        <mask id={`${id}bm`}>
-          <rect x="0" y="0" width="96" height="96" fill={`url(#${id}b)`} />
-        </mask>
-        {/* Slagskygge: mørkest inntil tingen, borte et stykke unna. */}
+      )
+    case 'bm':
+      return maske('b')
+    // Slagskygge: mørkest inntil tingen, borte et stykke unna.
+    case 's':
+      return (
         <linearGradient id={`${id}s`} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#000000" stopOpacity="0.34" />
           <stop offset="1" stopColor="#000000" stopOpacity="0" />
         </linearGradient>
-        {/* Mørkere nederst på en vegg, der lyset ikke når. */}
+      )
+    // Mørkere nederst på en vegg, der lyset ikke når.
+    case 'a':
+      return (
         <linearGradient id={`${id}a`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0.45" stopColor="#000000" stopOpacity="0" />
           <stop offset="1" stopColor="#000000" stopOpacity="0.18" />
         </linearGradient>
-        {/* Glans på glass og lakk: lys streif ovenfra til venstre. */}
+      )
+    // Glans på glass og lakk: lys streif ovenfra til venstre.
+    case 'g':
+      return (
         <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.45" />
           <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.06" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-        {/* Vann og blank flate: lysere inn mot horisonten. */}
+      )
+    // Vann og blank flate: lysere inn mot horisonten.
+    case 'd':
+      return (
         <linearGradient id={`${id}d`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.18" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-        {/* Speilbildet på et blankt gulv blekner nedover. */}
+      )
+    // Speilbildet på et blankt gulv blekner nedover.
+    case 'r':
+      return (
         <linearGradient id={`${id}r`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.26" />
           <stop offset="0.6" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
+      )
+    case 'rm':
+      return (
         <mask id={`${id}rm`} maskContentUnits="userSpaceOnUse">
           <rect x="0" y={GRUNNLINJE} width="96" height={96 - GRUNNLINJE} fill={`url(#${id}r)`} />
         </mask>
-        {/* Dis: hver farge blandes halvveis mot DISFARGE (#b3b2a5). */}
+      )
+    // Dis: hver farge blandes halvveis mot DISFARGE (#b3b2a5).
+    case 'dis':
+      return (
         <filter id={`${id}dis`} colorInterpolationFilters="sRGB">
           <feColorMatrix type="matrix" values="0.5 0 0 0 0.351  0 0.5 0 0 0.349  0 0 0.5 0 0.324  0 0 0 1 0" />
         </filter>
-        {/* Et lyskjegle ovenfra, for utstillingsrommet. */}
+      )
+    // Et lyskjegle ovenfra, for utstillingsrommet.
+    case 'l':
+      return (
         <radialGradient id={`${id}l`} cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor="#fff4dc" stopOpacity="0.3" />
           <stop offset="1" stopColor="#fff4dc" stopOpacity="0" />
         </radialGradient>
-      </defs>
+      )
+    default:
+      throw new Error(`Ukjent definisjon i lerretet: ${navn}`)
+  }
+}
+
+/**
+ * Definisjonene tegningen brukte. Står sist i lerretet: React tegner hele
+ * innholdet før neste søsken, så da vet vi hva som ble brukt. En url() kan
+ * peke fram i dokumentet, så rekkefølgen i SVG-en spiller ingen rolle.
+ */
+function Definisjoner({ tema }: { tema: keyof typeof HIMMEL }) {
+  const { id, brukt } = useContext(Ider)
+  const alle = new Set(brukt)
+  for (const navn of brukt) if (TRENGER[navn]) alle.add(TRENGER[navn])
+  if (alle.size === 0) return null
+  return (
+    <defs>
+      {[...alle].sort().map((navn) => (
+        <Fragment key={navn}>{definisjon(id, navn, tema)}</Fragment>
+      ))}
+    </defs>
+  )
+}
+
+/**
+ * Lerretet: 96 × 96, en myk himmel som blekner ut mot kantene (ingen hard
+ * boks), og felles gradienter for skygger og glans — bare de tegningen
+ * bruker. Id-ene er unike per tegning, så skjulte tegninger andre steder på
+ * siden aldri tar dem med seg.
+ */
+export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: number; himmel?: keyof typeof HIMMEL | 'ingen'; children: ReactNode }) {
+  const id = 't' + useId().replace(/[^a-zA-Z0-9]/g, '')
+  if (useContext(Utklipp)) himmel = 'ingen'
+  const tema = himmel === 'inne' ? 'inne' : 'dag'
+  // Nytt for hver tegning av lerretet; barna fyller det mens de tegnes.
+  const info: Lerretinfo = { id, brukt: new Set() }
+  if (himmel !== 'ingen') info.brukt.add('h').add('vm')
+  if (himmel === 'inne') info.brukt.add('l')
+  return (
+    <svg className="illustrasjon lerret" width={størrelse} height={størrelse} viewBox="0 0 96 96" aria-hidden="true">
       {himmel !== 'ingen' && <rect x="0" y="0" width="96" height="96" fill={`url(#${id}h)`} mask={`url(#${id}vm)`} />}
       {himmel === 'inne' && <ellipse cx="48" cy="62" rx="44" ry="30" fill={`url(#${id}l)`} />}
-      <Ider.Provider value={id}>{children}</Ider.Provider>
+      <Ider.Provider value={info}>
+        {children}
+        <Definisjoner tema={tema} />
+      </Ider.Provider>
     </svg>
   )
 }

@@ -549,6 +549,15 @@ figure {
 
 .kan-aapnes {
   cursor: pointer;
+  transition:
+    transform 0.1s ease-out,
+    background-color 0.1s ease-out;
+}
+
+/* G8: kortet synker litt mens du holder fingeren på det — men ikke når det er en knapp i kortet du trykker. */
+.kan-aapnes:active:not(:has(button:active, a:active, input:active)) {
+  transform: scale(0.985);
+  background-color: color-mix(in srgb, var(--flate-2) 60%, var(--flate));
 }
 
 .bilde-med-brikke .brikke {
@@ -4187,6 +4196,19 @@ button.merke {
   animation: ny-inn 0.4s ease-out 0.28s both;
 }
 
+/* Lyst tema (G8): mørk tekst trenger en lys flekk bak, ikke en mørk. */
+:root[data-theme='light'] .kjopsglimt {
+  background: radial-gradient(ellipse 280px 260px at 50% 50%, rgba(255, 255, 255, 0.92), transparent);
+}
+
+:root[data-theme='light'] .kjopsglimt-navn {
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme='light'] .kjopsglimt-bilde {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
 @keyframes kjopsglimt-vokse {
   from {
     opacity: 0;
@@ -4698,6 +4720,19 @@ button.merke {
   scrollbar-width: thin;
 }
 
+/* Mer av gata utenfor kanten (G8): den kanten blekner, så du ser at du kan rulle. */
+.gate.mer-hoyre {
+  mask-image: linear-gradient(90deg, #000 82%, transparent);
+}
+
+.gate.mer-venstre {
+  mask-image: linear-gradient(90deg, transparent, #000 18%);
+}
+
+.gate.mer-venstre.mer-hoyre {
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
 .tomt {
   flex: none;
 }
@@ -5199,7 +5234,14 @@ button.merke {
   box-shadow: 0 0 0 2px var(--flate);
 }
 
-/* Neste mål nederst i toppfeltet: tekst til venstre, beløpet til høyre, et tynt spor under. */
+/* Neste mål rett under toppfeltet: tekst til venstre, beløpet til høyre, et tynt spor under.
+   Feltet står utenfor det faste toppfeltet (G8), så det glir bort under datolinja når du ruller. */
+.maalfelt {
+  padding: 8px 16px 9px;
+  border-bottom: 1px solid var(--kant);
+  background: var(--bakgrunn);
+}
+
 .maalstripe {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -5207,7 +5249,6 @@ button.merke {
   column-gap: 10px;
   row-gap: 4px;
   width: 100%;
-  margin-top: -2px;
   padding: 0;
   background: none;
   border: 0;
@@ -5685,15 +5726,20 @@ button.maalstripe {
   .app {
     display: grid;
     grid-template-columns: var(--sidemeny) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     grid-template-areas:
       'meny topp'
+      'meny maal'
       'meny innhold';
     max-width: 1240px;
   }
 
   .toppfelt {
     grid-area: topp;
+  }
+
+  .maalfelt {
+    grid-area: maal;
   }
 
   .innhold {

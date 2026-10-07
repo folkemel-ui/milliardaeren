@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useFokusfelle } from './useFokusfelle'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, standard, STANDARDER } from '../../engine/eiendom'
 import { eiendomSynlig, jordSynlig } from '../../engine/handlinger'
@@ -16,6 +16,34 @@ import { Jordkort, Landemerkekort } from './JordOgLandemerker'
 type Valg = { slag: 'eiendom'; id: EiendomId } | { slag: 'jord'; id: JordId } | { slag: 'merke'; id: LandemerkeId }
 
 /**
+ * Gata ruller sidelengs når byen har mer enn det er plass til. Kanten der det
+ * står mer, blekner (G8): uten den så det ut som gata sluttet ved det tredje
+ * bygget. Gir klassene `mer-venstre` og `mer-hoyre`.
+ */
+function useRullekanter() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [kanter, settKanter] = useState('')
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const mal = () => {
+      const venstre = el.scrollLeft > 2
+      const hoyre = el.scrollLeft + el.clientWidth < el.scrollWidth - 2
+      settKanter(`${venstre ? ' mer-venstre' : ''}${hoyre ? ' mer-hoyre' : ''}`)
+    }
+    mal()
+    el.addEventListener('scroll', mal, { passive: true })
+    const obs = typeof ResizeObserver === 'function' ? new ResizeObserver(mal) : null
+    obs?.observe(el)
+    return () => {
+      el.removeEventListener('scroll', mal)
+      obs?.disconnect()
+    }
+  }, [])
+  return [ref, kanter] as const
+}
+
+/**
  * Gatebildet: byen på nært hold, som en gate. Hver eiendomstype står én gang,
  * tegnet stort, med antallet du eier — oppusset får en ramme, og stillas mens
  * håndverkerne er der. Ledige tomter er stiplet. Jord og landemerker står i
@@ -28,6 +56,7 @@ export function Gatebilde({ s, by, lukk }: { s: Spilltilstand; by: By; lukk: () 
   const boks = useRef<HTMLDivElement>(null)
   useFokusfelle(boks, lukk)
   const [valgt, velg] = useState<Valg | null>(null)
+  const [gata, kanter] = useRullekanter()
 
   // Typene du eier står som bygg; de du kan kjøpe men ikke eier ennå, som ledige tomter.
   const typer = EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].by === by && ((s.eiendommer[id] ?? 0) > 0 || eiendomSynlig(s, id)))
@@ -61,7 +90,7 @@ export function Gatebilde({ s, by, lukk }: { s: Spilltilstand; by: By; lukk: () 
           <p className="dempet">Ingenting her ennå. Byen åpner seg når formuen vokser.</p>
         ) : (
           <>
-            <div className="gate" role="list" aria-label={`Gata i ${by}`}>
+            <div ref={gata} className={`gate${kanter}`} role="list" aria-label={`Gata i ${by}`}>
               {jord.map((id) => {
                 const v: Valg = { slag: 'jord', id }
                 return (
