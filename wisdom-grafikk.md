@@ -4,7 +4,7 @@ For the session in charge of graphics and animation (packs G1–G7, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G5.
+Update it at the end of each G pack, and delete what stops being true. Updated after G6.
 
 ---
 
@@ -12,7 +12,7 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 
 - **What you own**: the drawings and how they render. That means `Illustrasjoner.tsx`,
   `Tegnestil.tsx`, `BedriftIkon.tsx`, portraits, crests, stadium, logos, the maps and
-  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), the wordmarks (`ordmerker.ts`, `scripts/lag-ordmerker.mjs`), `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
+  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), the paintings (`Malerier.tsx`), the wordmarks (`ordmerker.ts`, `scripts/lag-ordmerker.mjs`), `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
   *Working side by side* in `Ideer.md`. `styles.css`, the screens and `Ideer.md` are
   shared: touch only what the pack needs (G1 added two `utklipp` props in `Luksus.tsx`,
   nothing else).
@@ -62,7 +62,9 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   otherwise: the Bergen ids are Møhlenpris, Nordnes and Fana, `hybel-oslo` is
   Blindern, `leilighet` is Grünerløkka, `kontorbygg-stavanger` is Forus (inland). I
   had to move and redraw half the batch, and Bryggen was dropped. Grep the data
-  first and name the real places in the option.
+  first and name the real places in the option. In G6 that paid off: there are 9
+  paintings, not the 12 `Ideer.md` claimed, and Solheim spans 1911–1933 (romantic to
+  expressionist); both went into the question. Folke took all four recommendations.
 - **Put outside sources in the question.** Fetching Natural Earth was an option in
   the G3 questions, so Folke's answer was the approval. Do the same for any download,
   font or dataset: name the source, the licence and that nothing loads at runtime.
@@ -154,6 +156,22 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   terraces and towers go fjern (8 per storey). Watches break the rule on purpose (a
   macro shot); vehicles without people beside them may be compressed in length, never
   height. This is now written in the header of `Illustrasjoner.tsx`.
+- **The stadium (G6)** is its own 160 × 90 SVG in `Stadion.tsx`, seen as on TV. Only
+  the pitch has perspective: `bane(u, v)` maps along/into the pitch onto a gentle
+  trapezoid (near touchline y 82, far y 56), and players shrink with `v`. The crowd
+  is `Publikum`: rows that get lower and narrower going up, blocks of a dark club
+  colour with heads along the top, grey empty seats, a few scarves and white specks;
+  `fylt` sets how full. `Endetribune` draws the stands behind the goals. Colours:
+  palette `S` plus the club's colours from `drakt()`. Eliteserien has no masts (lights
+  in the glass roof) — `grafikkG6.test.ts` checks that.
+- **The paintings (G6)** live in `Malerier.tsx`: one `VERK` entry per painting with
+  its canvas size, frame (`gull` Solheim, `tre` Aske, `svart` Lind, `hvit` Vik) and
+  motif. Paintings use their own colours like real art, not palette `S`.
+  `Maleribilde` fits a square box (`størrelse`) or a fixed height (`hoyde`, the wall);
+  `maleriformat(id)` gives the framed size. The gallery wall (`Galleriveggen`,
+  `.kunstvegg`) sits at the top of Kunst in `Kunst.tsx`; loaned paintings show as a
+  dashed space with a "På museum" label. The engine's `farger` field is now unused
+  by the UI (left alone: engine data).
 - **Ground details go in `Kantfade`** (the windsock, the helipad's H, the red
   carpet): `utklipp` drops `Kantfade`, so they vanish in the hangar and harbour.
   `grafikkG5.test.ts` checks it. Wakes and rain are part of the drawing and stay.
@@ -329,9 +347,11 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   function and check only whitespace follows its `*/`.
 - **`cat > fil` without a heredoc waits for stdin** and hung Bash for two minutes.
   Write temporary files with the Write tool.
-- **A buy-everything test save crashed the game** at the day change: `avis.ts` has 8
-  titles but there are 12 status levels (an engine bug, flagged as its own task).
-  Keep test saves below status level 8 (`STATUSNIVAAER[7].poeng`) until it's fixed.
+- **A buy-everything test save crashed the game** in G5 (`avis.ts` had 8 titles for
+  12 status levels). Fixed in ff11ff2 by the task I flagged; test saves may own
+  everything again. The task pushed to `origin` while my commits were local, so the
+  next push was rejected: `git pull --rebase` (only my unpushed commits move), rerun
+  the tests, then push.
 - **A spawned task's worktree (`.claude/worktrees/…`) doubles the test count**:
   vitest picks it up. Both copies pass, so it's harmless; just don't be surprised.
 - **Long decimals in markup** come from shared helpers too (Bakke, Tre, `Figur`'s
@@ -393,8 +413,14 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   Marbella/Zermatt properties and the four landmarks. G7's detail scenes need them
   in the new style, so raise it before G7. `pakke42.test.ts` uses `kjopesenter` as
   its old-style example; change it when that one is redrawn.
-- **Not yet seen after G5**: the 34 new drawings in the light theme, in the street
-  view (`Gatebilde`) and in the buy moment (`Kjopsglimt`). Check them early in G6.
+- **G6 is done** (stadium, crowd, paintings, gallery wall). The G5 drawings were
+  checked in the light theme at the start of G6 and read well; the street view and
+  the buy moment are still unchecked.
+- **Shared tests describe the old art**: `pakke42.test.ts` counted the old dot crowd
+  (`r="0.85"`) and used `snekke` as its old-style example. When you redraw something,
+  grep the tests for its markup and update the counting, not the intent.
+- **Avisa shows a generic icon** for art exhibitions and startup stories
+  (`ui/avisbilde.ts`, shared). The paintings and startup logos could go there; ask.
 - **Small subjects in the 64 px storage slots**: the snekke and the station wagon are
   small in the harbour and garage because of the scale rule (like the kiosk in the
   rival list). G7 could crop or zoom the cutouts.

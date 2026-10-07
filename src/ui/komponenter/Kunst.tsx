@@ -13,24 +13,28 @@ import type { MaleriId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { endring, fortegnKroner, kortKroner } from '../format'
 import { Seksjon } from './Seksjon'
+import { Maleribilde } from './Malerier'
 
-/** Et lite maleri i gullramme, tegnet av maleriets tre farger. Formen følger id-en, så hvert er ulikt. */
-export function Miniatyr({ id, størrelse = 44 }: { id: MaleriId; størrelse?: number }) {
-  const [himmel, land, detalj] = MALERIER[id].farger
-  const n = MALERILISTE.indexOf(id)
-  const horisont = 22 + (n % 3) * 4
+/**
+ * Galleriveggen øverst i Kunst (G6): maleriene du eier henger på en vegg med
+ * lys ovenfra og en liten messingplate under. Et maleri som er lånt ut til
+ * museum, står som en tom plass med lapp.
+ */
+function Galleriveggen({ s }: { s: Spilltilstand }) {
+  const eide = MALERILISTE.filter((id) => s.kunst.eide[id])
+  if (eide.length === 0) return null
   return (
-    <svg width={størrelse} height={størrelse} viewBox="0 0 48 48" aria-hidden="true">
-      <rect x="2" y="2" width="44" height="44" rx="2" fill="#b8860b" />
-      <rect x="4.5" y="4.5" width="39" height="39" fill="#e3c26b" />
-      <rect x="7" y="7" width="34" height="34" fill={himmel} />
-      <polygon points={`7,${horisont + 6} ${14 + n},${horisont - 4} ${24 - (n % 4)},${horisont + 3} ${32 + (n % 3)},${horisont - 6} 41,${horisont + 2} 41,41 7,41`} fill={land} />
-      {n % 2 === 0 ? (
-        <circle cx={30 - n} cy={14 + (n % 3) * 2} r={3 + (n % 3)} fill={detalj} />
-      ) : (
-        <rect x={12 + n} y={horisont + 4} width="5" height="9" fill={detalj} />
-      )}
-    </svg>
+    <div className="kunstvegg" role="list" aria-label="Galleriveggen">
+      {eide.map((id) => {
+        const ute = s.kunst.eide[id]?.utlant
+        return (
+          <figure key={id} className={ute ? 'kunstvegg-plass tom' : 'kunstvegg-plass'} role="listitem">
+            <div className="kunstvegg-bilde">{ute ? <span className="kunstvegg-lapp">På museum</span> : <Maleribilde id={id} hoyde={64} />}</div>
+            <figcaption>{MALERIER[id].navn}</figcaption>
+          </figure>
+        )
+      })}
+    </div>
   )
 }
 
@@ -39,6 +43,7 @@ export function Kunst({ s }: { s: Spilltilstand }) {
   const eide = MALERILISTE.filter((id) => s.kunst.eide[id]).length
   return (
     <Seksjon id="luksus-kunst" tittel="Kunst" forklaring="kunst" sammendrag={eide ? `${eide} ${eide === 1 ? 'maleri' : 'malerier'} · ${kortKroner(verdi)}` : 'Ingen malerier'} harInnhold={eide > 0}>
+      <Galleriveggen s={s} />
       {verdi > 0 && <p className="dempet liten">Samlingen din er verdt {kortKroner(verdi)}.</p>}
       <ul className="kortliste">
         {MALERILISTE.map((id) => (
@@ -58,7 +63,7 @@ function Maleri({ s, id }: { s: Spilltilstand; id: MaleriId }) {
     <li className={eid ? 'kort maleri eid' : 'kort maleri'}>
       <div className="bedriftskort-topp">
         <div className="bedrift-ikon" aria-hidden="true">
-          <Miniatyr id={id} />
+          <Maleribilde id={id} størrelse={44} />
         </div>
         <div className="bedriftskort-midt">
           <h2>{m.navn}</h2>

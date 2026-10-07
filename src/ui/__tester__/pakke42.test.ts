@@ -19,7 +19,8 @@ describe('stadion', () => {
   })
 
   it('vokser: flere tilskuere for hver divisjon', () => {
-    const hoder = Array.from({ length: STADIONTRINN }, (_, d) => (tegn(d).match(/r="0.85"/g) ?? []).length)
+    // Hoder er små sirkler (G6: publikum som masse med hoder langs radene); spillerne og ballen er like på alle trinn.
+    const hoder = Array.from({ length: STADIONTRINN }, (_, d) => (tegn(d).match(/<circle[^>]* r="0\.\d+"/g) ?? []).length)
     expect(hoder.every((n, i) => i === 0 || n > hoder[i - 1])).toBe(true)
   })
 

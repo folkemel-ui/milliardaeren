@@ -8,6 +8,8 @@ import { PAPIRER } from '../../engine/marked'
 import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
 import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
 import { STARTUPNAVN, StartupLogo } from '../komponenter/StartupLogo'
+import { MALERIVERK, Maleribilde } from '../komponenter/Malerier'
+import { KUNSTNERE, MALERIER } from '../../engine/kunst'
 import { Stadion, STADIONTRINN } from '../komponenter/Stadion'
 import { DIVISJONER, KLUBBNAVN } from '../../engine/klubb'
 import { Verdenskart } from '../komponenter/Verdenskart'
@@ -209,6 +211,28 @@ export function Galleri() {
             </span>
             <figcaption>
               {DIVISJONER[d].navn} · {KLUBBNAVN[d % KLUBBNAVN.length]}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <h2 className="skjerm-tittel galleri-del">Malerier</h2>
+      <div className="galleri-logoer">
+        {MALERIVERK.map((id) => (
+          <figure key={id} className="galleri-logo">
+            <span className="galleri-mork galleri-ordmerke">
+              <Maleribilde id={id} størrelse={170} />
+            </span>
+            <span className="galleri-små">
+              <span className="galleri-mork">
+                <Maleribilde id={id} størrelse={44} />
+              </span>
+              <span className="galleri-lys">
+                <Maleribilde id={id} størrelse={44} />
+              </span>
+            </span>
+            <figcaption>
+              {MALERIER[id].navn} · {KUNSTNERE[MALERIER[id].kunstner].navn}, {MALERIER[id].aar}
             </figcaption>
           </figure>
         ))}
