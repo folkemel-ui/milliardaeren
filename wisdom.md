@@ -189,6 +189,20 @@ session; delete what stops being true.
   — once `stab` exists that adds nobody. Use `medNyAnsatt(b, grad)`. With only
   experienced staff the formulas are bit-for-bit the old ones (zeros added last), which
   is why the golden master didn't move.
+- **The world (Pack 49) lives in `engine/verden.ts`**: cycle phases, policy rate, daily
+  weather, weekly trends, holidays and weekdays, all from hashes, the same in every game.
+  `dagsbilde(s)` gives a day's factor per business type and is cached; income is
+  `bedriftInntektPerSek(b, dagsfaktor)`. In the UI use `bedriftInntektIDag(s, b)`, never
+  `bedriftInntektPerSek(b) * statusfaktor(s)`, or the card and the cash disagree.
+  Weekdays, weather and trends average to ×1 (`pakke49.test.ts` checks two years);
+  holidays are bonuses. The bench barely moved (1 mrd 6 h 37 min).
+- **Tests of base mechanics mock the calendar**: `vi.mock('../verden', async (ekte) =>
+  (await import('./utenKalender')).utenKalender(ekte))`. vi.mock is hoisted above the
+  imports, so a helper imported at the top is not ready yet ("Cannot access before
+  initialization") — import it inside the factory.
+- **Avisa takes five stories**: where a new kind of story goes in `gisUtAvis` decides
+  what it pushes off the front page. The world's market stories sit after the rivals,
+  because a merger test caught them pushing out the player's own merger.
 - **Know what the bot doesn't do**, or the bench will fool you: it never borrows, never
   hires managers, never buys property, luxury, stocks or startups, and reaches 1 mrd
   before it ever buys the Bank. Changes to those systems don't show in the bench — reason
