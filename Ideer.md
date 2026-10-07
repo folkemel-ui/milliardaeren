@@ -18,14 +18,25 @@ Items from *Road to v2.0*. Commits: `Pakke N: …`.
 
 - **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus, A real-phone check and an outside playtest
 
-### Graphics track (Packs G10–G11)
+### Game track: the road to v10.0 (Packs 52–56)
+
+Items from *Road to v10.0*, after v2.0. Engine work first, so the packs after it are built on firm ground and measured properly.
+
+- **Pack 52 – Firm ground for growth:** A save that stays small, UI tests, Measure speed on a built game
+- **Pack 53 – Money that hangs together:** Stocks linked to your industries, Bonds
+- **Pack 54 – Property with weather and people:** One weather, Weather on property, Vacancy, tenants and property managers
+- **Pack 55 – A bigger empire:** Franchises, More countries
+- **Pack 56 – The good life:** Interiors, Avisa on Sunday
+
+### Graphics track (Packs G10–G12)
 
 Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G9 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker, the last drawings); every drawing is now in the style G1 set.
 
 - **Pack G10 – A living scene:** Motion in the detail scenes, Scenes that follow the clock
 - **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
+- **Pack G12 – The living year:** Seasons in the drawings, Upgrades you can see
 
-*Drawings for the v2.0 content* is not a pack: it runs alongside Packs 47–51, as each one lands.
+*Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — franchises, more countries and interiors (Packs 55–56) will need new drawings.
 
 ### Working side by side
 
