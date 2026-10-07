@@ -19,6 +19,7 @@ import type { Utfall } from '../engine/handlinger'
 import { migrer } from './migrering'
 import { pakk, pakkUt } from './overforing'
 import { sjekkTilstand } from './sjekk'
+import { tilLagring } from './lagringsformat'
 import { taIgjen } from './borte'
 import { VELKOMST_ETTER_SEK } from '../ui/velkomst'
 import { visVarsel } from '../ui/varsler'
@@ -147,7 +148,7 @@ function lastFraDisk(): { type: 'tom' } | { type: 'ok'; tilstand: Spilltilstand 
 
 function skrivTilDisk(s: Spilltilstand): void {
   try {
-    localStorage.setItem(LAGERNOKKEL, JSON.stringify(s))
+    localStorage.setItem(LAGERNOKKEL, tilLagring(s))
     localStorage.setItem(SIST_AKTIV_NOKKEL, String(Date.now()))
   } catch {
     // Full disk eller privat modus — spillet fungerer, det lagres bare ikke.
@@ -383,7 +384,7 @@ export function reservekopiEndret(): number {
 
 function leggIReserve(s: Spilltilstand): void {
   try {
-    localStorage.setItem(ANGRENOKKEL, JSON.stringify(s))
+    localStorage.setItem(ANGRENOKKEL, tilLagring(s))
   } catch {
     // Privat modus — da finnes det heller ingen reservekopi.
   }

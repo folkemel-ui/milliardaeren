@@ -13,6 +13,7 @@
 import type { Spilltilstand } from '../engine/types'
 import { migrer } from './migrering'
 import { sjekkTilstand } from './sjekk'
+import { tilLagring } from './lagringsformat'
 
 const GZIP = 'MLD1:'
 const RÅ = 'MLD0:'
@@ -37,7 +38,7 @@ async function strøm(bytes: Uint8Array<ArrayBuffer>, transform: CompressionStre
 
 /** Pakker en spilltilstand til en kode. */
 export async function pakk(s: Spilltilstand): Promise<string> {
-  const bytes = new TextEncoder().encode(JSON.stringify(s))
+  const bytes = new TextEncoder().encode(tilLagring(s))
   if (typeof CompressionStream === 'undefined') return RÅ + tilBase64(bytes)
   return GZIP + tilBase64(await strøm(bytes, new CompressionStream('gzip')))
 }

@@ -1,17 +1,19 @@
 import { describe, expect, it } from 'vitest'
+import { tilLagring } from '../lagringsformat'
 import { nyttSpill } from '../../engine/start'
 import { simuler } from '../../engine/simulering'
 import { SPILLVERSJON } from '../../engine/start'
 import { pakk, pakkUt } from '../overforing'
 
 describe('flytte spillet', () => {
-  it('en kode pakkes ut til nøyaktig samme spill', async () => {
+  it('en kode pakkes ut til samme spill — historikkene med sju sifre (Pakke 52)', async () => {
     const s = simuler(nyttSpill(), 600)
     const kode = await pakk(s)
     expect(kode.startsWith('MLD1:')).toBe(true)
     const r = await pakkUt(kode)
     expect(r.ok).toBe(true)
-    if (r.ok) expect(r.tilstand).toEqual(s)
+    // Koden er det samme som lagringen: alt nøyaktig, bortsett fra grafhistorikkene.
+    if (r.ok) expect(r.tilstand).toEqual(JSON.parse(tilLagring(s)))
   })
 
   it('koden er kortere enn råteksten', async () => {

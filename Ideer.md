@@ -12,11 +12,10 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v10.0 (Packs 52–56)
+### Game track: the road to v10.0 (Packs 53–56)
 
 Items from *Road to v10.0*. Commits: `Pakke N: …`. Engine work first, so the packs after it are built on firm ground and measured properly.
 
-- **Pack 52 – Firm ground for growth:** A save that stays small, UI tests, Measure speed on a built game
 - **Pack 53 – Money that hangs together:** Stocks linked to your industries, Bonds
 - **Pack 54 – Property with weather and people:** One weather, Weather on property, Vacancy, tenants and property managers
 - **Pack 55 – A bigger empire:** Franchises, More countries
@@ -54,22 +53,19 @@ The game is released on the App Store at v10.0. These were picked from the v10.0
 7. **More countries.** There are 6 foreign cities today. Add more of the world, with its own currencies and exchange-rate risk: rent in euro, dollar or yen, converted at a rate that moves.
 8. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
 9. **One weather.** The farms have a weekly harvest weather ("Tørkesommer" can land in February), while Pack 49 has daily weather by season. Merge them, so the harvest follows the weather the weeks actually had.
-10. **A save that stays small.** Price histories, newspapers and records grow. Measure the save after 100 hours of play, trim what isn't needed, and guard the size with a test.
-11. **UI tests.** The engine is well tested; the screens are only checked by hand in the browser. Add click tests for the main flows: buy, upgrade, hire, borrow, open Avisa, sell.
-12. **Measure speed on a built game.** The engine runs 3–4× slower under Vitest than built, so `ytelse.test.ts` is noisy and its limits are guesses. Measure an esbuild bundle in the test (as Packs 47–49 did by hand), with limits that mean something on a phone.
 
 ## Graphics
 
 Loose ends after G1–G7. Not in the pack plan yet.
 
-13. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
-14. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-15. **Motion in the detail scenes.** 39 of the 68 drawings never move (counted after G9): all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
-16. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-17. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
-18. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
-19. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on *Scenes that follow the clock*. Picked from the v10.0 list.
-20. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
+10. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
+11. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+12. **Motion in the detail scenes.** 39 of the 68 drawings never move (counted after G9): all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
+13. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
+14. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
+15. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
+16. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on *Scenes that follow the clock*. Picked from the v10.0 list.
+17. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
 
 ## Parked (not chosen yet)
 

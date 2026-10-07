@@ -93,9 +93,12 @@ export function kanReiseTil(s: Spilltilstand, id: EiendomId): boolean {
 /** Utenlandsbyene du eier eiendom i. */
 export function byerUtenlands(s: Spilltilstand): Set<string> {
   const byer = new Set<string>()
-  for (const id of EIENDOMSSTIGEN) if (EIENDOMSTYPER[id].reise && (s.eiendommer[id] ?? 0) > 0) byer.add(EIENDOMSTYPER[id].by)
+  // Bare eiendommene i utlandet — prestasjonene spør hvert sekund.
+  for (const id of UTENLANDSEIENDOM) if ((s.eiendommer[id] ?? 0) > 0) byer.add(EIENDOMSTYPER[id].by)
   return byer
 }
+
+const UTENLANDSEIENDOM = EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].reise)
 
 export const UTENLANDSBYER = [...new Set(EIENDOMSSTIGEN.filter((id) => EIENDOMSTYPER[id].reise).map((id) => EIENDOMSTYPER[id].by))]
 
@@ -137,15 +140,18 @@ export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
 
 /** Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker. */
 export function eiendomsverdi(s: Spilltilstand): number {
+  if (!harEiendom(s)) return jordverdi(s) + landemerkeverdi(s)
   // Regnes hvert sekund: byens kurs regnes én gang per by, og bare for det du eier.
-  BYKURS.clear()
+  BYKURS.fill(NaN)
   let sum = 0
-  for (const id of EIENDOMSSTIGEN) {
+  for (let i = 0; i < EIENDOMSSTIGEN.length; i++) {
+    const id = EIENDOMSSTIGEN[i]
     const antall = s.eiendommer[id] ?? 0
     if (antall <= 0) continue
     const t = EIENDOMSTYPER[id]
-    let kurs = BYKURS.get(t.by)
-    if (kurs === undefined) BYKURS.set(t.by, (kurs = eiendomskurs(s, t.by)))
+    const nr = BYNR[i]
+    let kurs = BYKURS[nr]
+    if (Number.isNaN(kurs)) BYKURS[nr] = kurs = eiendomskurs(s, t.by)
     // Samme regnestykke som eiendomspris.
     sum += antall * (t.pris * kurs * STANDARDER[standard(s, id)].verdi)
   }
@@ -218,9 +224,16 @@ export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
   return leieHver(s, id, eiendomskurs(s, t.by), eierHeleByen(s, t.by) ? 1 + BYEIER_BONUS : 1)
 }
 
-/** Mellomlager for én utregning av leie eller verdi, tømt ved starten av hver — gjenbrukt så sekundet slipper nye objekter. */
-const BYKURS = new Map<By, number>()
-const BYBONUS = new Map<By, number>()
+/*
+ * Mellomlager for én utregning av leie eller verdi: byens kurs og byeierbonus,
+ * på plassen til byen i BYER. Tall i en gjenbrukt liste i stedet for et oppslag
+ * på bynavnet — leien og verdien regnes hvert sekund, for hver eiendom (Pakke 52).
+ * NaN betyr «ikke regnet ut ennå» i denne utregningen.
+ */
+const BYER = [...new Set(EIENDOMSSTIGEN.map((id) => EIENDOMSTYPER[id].by))]
+const BYNR = EIENDOMSSTIGEN.map((id) => BYER.indexOf(EIENDOMSTYPER[id].by))
+const BYKURS = new Float64Array(BYER.length)
+const BYBONUS = new Float64Array(BYER.length)
 
 /** Selve regnestykket, med byens kurs og byeierbonus regnet ut på forhånd. */
 function leieHver(s: Spilltilstand, id: EiendomId, kurs: number, bonus: number): number {
@@ -228,20 +241,30 @@ function leieHver(s: Spilltilstand, id: EiendomId, kurs: number, bonus: number):
   return (t.pris * kurs * t.avkastning * STANDARDER[standard(s, id)].leie * bonus * sesongfaktor(s, id)) / 3600
 }
 
+/** Eier du noen eiendom i det hele tatt? Et salg av den siste enheten fjerner nøkkelen. */
+function harEiendom(s: Spilltilstand): boolean {
+  for (const _ in s.eiendommer) return true
+  return false
+}
+
 export function leiePerSek(s: Spilltilstand): number {
+  // De fleste spill eier ingen eiendom lenge: da slipper sekundet å gå gjennom alle byggene.
+  if (!harEiendom(s)) return landemerkeleiePerSek(s)
   // Regnes hvert sekund: byens kurs og byeierbonus regnes én gang per by.
-  BYKURS.clear()
-  BYBONUS.clear()
+  BYKURS.fill(NaN)
+  BYBONUS.fill(NaN)
   let sum = 0
-  for (const id of EIENDOMSSTIGEN) {
+  for (let i = 0; i < EIENDOMSSTIGEN.length; i++) {
+    const id = EIENDOMSSTIGEN[i]
     const antall = s.eiendommer[id] ?? 0
     // Under oppussing står enhetene tomme.
     if (antall <= 0 || s.oppussing?.[id]) continue
     const by = EIENDOMSTYPER[id].by
-    let kurs = BYKURS.get(by)
-    if (kurs === undefined) BYKURS.set(by, (kurs = eiendomskurs(s, by)))
-    let bonus = BYBONUS.get(by)
-    if (bonus === undefined) BYBONUS.set(by, (bonus = eierHeleByen(s, by) ? 1 + BYEIER_BONUS : 1))
+    const nr = BYNR[i]
+    let kurs = BYKURS[nr]
+    if (Number.isNaN(kurs)) BYKURS[nr] = kurs = eiendomskurs(s, by)
+    let bonus = BYBONUS[nr]
+    if (Number.isNaN(bonus)) BYBONUS[nr] = bonus = eierHeleByen(s, by) ? 1 + BYEIER_BONUS : 1
     sum += antall * leieHver(s, id, kurs, bonus)
   }
   return sum + landemerkeleiePerSek(s)

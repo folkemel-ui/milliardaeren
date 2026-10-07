@@ -6,8 +6,8 @@
 
 import { inntektPerSek } from './formler'
 import { byerUtenlands, STATUSNIVAAER, statusnivaa, UTENLANDSBYER } from './eiendom'
-import { mineLandemerker, LANDEMERKELISTE } from './landemerker'
-import { mineMalerier } from './kunst'
+import { eierDu, LANDEMERKELISTE } from './landemerker'
+import { MALERILISTE } from './kunst'
 import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
 
@@ -38,6 +38,19 @@ export interface Prestasjon {
   beskrivelse: string
   klart: (s: Spilltilstand, f: Felles) => boolean
 }
+
+// Sjekkes hvert sekund, også for prestasjoner du er langt unna: uten nye lister.
+const antallLandemerker = (s: Spilltilstand) => {
+  let n = 0
+  for (const id of LANDEMERKELISTE) if (eierDu(s, id)) n++
+  return n
+}
+const antallMalerier = (s: Spilltilstand) => {
+  let n = 0
+  for (const id of MALERILISTE) if (s.kunst?.eide[id]) n++
+  return n
+}
+const harUtlant = (s: Spilltilstand) => MALERILISTE.some((id) => s.kunst?.eide[id]?.utlant)
 
 const antallEiendommer = (s: Spilltilstand) => Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0)
 const eierKlasse = (s: Spilltilstand, klasse: 'aksje' | 'krypto') =>
@@ -76,10 +89,10 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (_, f) => f.byerUtenlands().size >= UTENLANDSBYER.length },
   { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },
   { id: 'tommerhogger', navn: 'Tømmerhogger', beskrivelse: 'Hogg en skog', klart: (s) => s.hendelser.some((h) => h.tittel === 'Hogst') },
-  { id: 'landemerke', navn: 'Landemerke', beskrivelse: 'Eie et landemerke', klart: (s) => mineLandemerker(s).length > 0 },
-  { id: 'alle-landemerker', navn: 'Nasjonalskatt', beskrivelse: 'Eie alle landemerkene samtidig', klart: (s) => mineLandemerker(s).length === LANDEMERKELISTE.length },
-  { id: 'kunstsamler', navn: 'Kunstsamler', beskrivelse: 'Eie tre malerier', klart: (s) => mineMalerier(s).length >= 3 },
-  { id: 'mesen', navn: 'Mesen', beskrivelse: 'Lån ut et maleri til et museum', klart: (s) => mineMalerier(s).some((id) => s.kunst.eide[id]!.utlant) },
+  { id: 'landemerke', navn: 'Landemerke', beskrivelse: 'Eie et landemerke', klart: (s) => antallLandemerker(s) > 0 },
+  { id: 'alle-landemerker', navn: 'Nasjonalskatt', beskrivelse: 'Eie alle landemerkene samtidig', klart: (s) => antallLandemerker(s) === LANDEMERKELISTE.length },
+  { id: 'kunstsamler', navn: 'Kunstsamler', beskrivelse: 'Eie tre malerier', klart: (s) => antallMalerier(s) >= 3 },
+  { id: 'mesen', navn: 'Mesen', beskrivelse: 'Lån ut et maleri til et museum', klart: (s) => harUtlant(s) },
   { id: 'fusjon', navn: 'Fusjonist', beskrivelse: 'Slå sammen en rivals bedrift med din egen', klart: (s) => s.bedrifter.some((b) => (b.fusjoner ?? 0) > 0) },
   { id: 'klubbeier', navn: 'Klubbeier', beskrivelse: 'Kjøp en fotballklubb', klart: (s) => !!s.klubb },
   { id: 'forste-seier', navn: 'Tre poeng', beskrivelse: 'Vinn din første kamp', klart: (s) => (s.klubb?.seire ?? 0) > 0 },
