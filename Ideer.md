@@ -12,11 +12,10 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v2.0 (Packs 48–51)
+### Game track: the road to v2.0 (Packs 49–51)
 
 Items from *Road to v2.0*. Commits: `Pakke N: …`.
 
-- **Pack 48 – Your businesses, deeper:** Specialization at level 50, Staff with names and skills
 - **Pack 49 – The world turns:** Economic cycles, The calendar comes alive
 - **Pack 50 – Things happen:** Random events with choices, Rivals that fight back, Daily and weekly missions
 - **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus, A real-phone check and an outside playtest
@@ -43,28 +42,26 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G9 are done (the fo
 
 The theme of 2.0: what do I do once I'm rich? Plus the depth and the solid ground to carry it.
 
-1. **Specialization at level 50.** Choose a direction per business, for example *Volume* (more income) or *Premium* (higher value and status). The choice is permanent.
-2. **Staff with names and skills.** Junior, experienced or star; stars cost more but give more. (Managers with traits stay parked for now.)
-3. **Economic cycles.** A policy rate announced in Avisa, and boom and recession phases that move stocks, property and loan interest together. Includes a choice of fixed or variable rate (the variable rate follows the policy rate), and industry trends — weeks where "coffee is hot" (+20 % for cafés) or "the oil price falls", announced in the paper.
-4. **The calendar comes alive.** The calendar (from Monday 4 January 2027) starts to matter: holidays (Easter, 17 May with the sausage stand +200 %, Christmas), seasons and weather in the paper (sun for the lemonade stand, snow for the ski resort and the cabin), and weekday effects (restaurants and hotels earn more at the weekend, banks and offices on weekdays).
-5. **Random events with choices.** Crashes, booms, strikes, scandals and inspections, each with two or three ways to respond. Drawn from a hash, not the die.
-6. **Rivals that fight back.** Today the rivals grow and can be taken over, but never come after you. Let them bid against you for landmarks, try a hostile takeover of one of your businesses, or poach your staff.
-7. **Daily and weekly missions.** Short goals with small rewards, so a five-minute visit has a point too.
-8. **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
-9. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
-10. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
-11. **A real-phone check and an outside playtest.** Pack 47 measured two hours away on this PC (a fresh game ~95 ms, a late game that owns everything ~300 ms, built like the real game) and estimates a slow phone at 4–5× that. Check it on a real slow phone, and let someone outside play before 2.0 is called done.
+1. **Economic cycles.** A policy rate announced in Avisa, and boom and recession phases that move stocks, property and loan interest together. Includes a choice of fixed or variable rate (the variable rate follows the policy rate), and industry trends — weeks where "coffee is hot" (+20 % for cafés) or "the oil price falls", announced in the paper.
+2. **The calendar comes alive.** The calendar (from Monday 4 January 2027) starts to matter: holidays (Easter, 17 May with the sausage stand +200 %, Christmas), seasons and weather in the paper (sun for the lemonade stand, snow for the ski resort and the cabin), and weekday effects (restaurants and hotels earn more at the weekend, banks and offices on weekdays).
+3. **Random events with choices.** Crashes, booms, strikes, scandals and inspections, each with two or three ways to respond. Drawn from a hash, not the die.
+4. **Rivals that fight back.** Today the rivals grow and can be taken over, but never come after you. Let them bid against you for landmarks, try a hostile takeover of one of your businesses, or poach your staff.
+5. **Daily and weekly missions.** Short goals with small rewards, so a five-minute visit has a point too.
+6. **Take your group public.** List your own group on the exchange with its own ticker: sell shares to raise money, the price follows your quarterly results, and the shareholders can be unhappy.
+7. **A finish line.** Reaching #1 on the Forbes list or kr 1 trillion gives a proper ending: a closing screen and a front page in the paper. Then choose to keep playing or start over.
+8. **Start-over bonus.** Sell everything for "legacy points" that give a permanent bonus in the next game.
+9. **A real-phone check and an outside playtest.** Pack 47 measured two hours away on this PC (a fresh game ~95 ms, a late game that owns everything ~300 ms, built like the real game) and estimates a slow phone at 4–5× that. Check it on a real slow phone, and let someone outside play before 2.0 is called done.
 
 ## Graphics
 
 Loose ends after G1–G7. Not in the pack plan yet.
 
-12. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
-13. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-14. **Motion in the detail scenes.** 39 of the 68 drawings never move (counted after G9): all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
-15. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-16. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
-17. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
+10. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
+11. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+12. **Motion in the detail scenes.** 39 of the 68 drawings never move (counted after G9): all the watches, cars and planes, most properties, and three businesses (pølsebod, restaurant, flyselskap). Give each something small: the second hand ticks on the watches, the rotor and the propellers turn, a beacon blinks on the jets, a slow light sweep runs over the car paint, smoke rises from chimneys and a window lights up. Only on the big scene, and never with reduced motion.
+13. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
+14. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
+15. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
 
 ## Parked (not chosen yet)
 

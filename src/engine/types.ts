@@ -52,7 +52,23 @@ export interface Bedrift {
   forbedringer: number
   /** Hvor mange rivalbedrifter som er slått sammen med denne. Hver ganger inntekten. */
   fusjoner: number
+  /**
+   * De ansatte, med navn og nivå (Pakke 48). Like mange som `ansatte`. Mangler
+   * i eldre lagringer — da er alle erfarne, med navn regnet ut fra bedriften.
+   */
+  stab?: Ansatt[]
+  /** Retningen bedriften tok på nivå 50 (Pakke 48). Valget er for godt. */
+  retning?: Retning
 }
+
+export type Ansattgrad = 'junior' | 'erfaren' | 'stjerne'
+
+export interface Ansatt {
+  navn: string
+  grad: Ansattgrad
+}
+
+export type Retning = 'volum' | 'premium'
 
 export interface Forbedring {
   navn: string

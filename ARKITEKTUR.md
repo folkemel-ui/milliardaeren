@@ -50,6 +50,7 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | Regioner | `marked.regioner.frø` + region + tikk |
 | Papirene fra versjon 17 | `Hashkilde` på `marked.nyeFrø` + id + tikk |
 | Klubb til salgs | `<navn>:<dag>` |
+| Ansattnavn (`ansatte.ts`) | bedrift + sek + antall ved ansettelse; bedrift + plass for ansatte fra før Pakke 48 |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.
 

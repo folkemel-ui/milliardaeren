@@ -994,6 +994,123 @@ button.merke {
   gap: 6px;
 }
 
+/* De ansatte med navn og nivå, og valget mellom nivåene (Pakke 48). */
+.personale-tittel {
+  margin: 0 0 2px;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-fet);
+}
+
+.personale p {
+  margin: 0;
+}
+
+.stab {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stab-rad {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'navn knapp' 'tall knapp';
+  align-items: center;
+  column-gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--kant);
+}
+
+.stab-rad:first-child {
+  border-top: 0;
+}
+
+.stab-navn {
+  grid-area: navn;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-weight: var(--vekt-halvfet);
+}
+
+.stab-tall {
+  grid-area: tall;
+}
+
+.stab-rad .knapp {
+  grid-area: knapp;
+}
+
+.ansett-valg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.retning-valg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Én rad per nivå: navn og tall til venstre, kjøpsknappen til høyre — tre kolonner ble for trangt på mobil. */
+.ansett-grad {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'navn knapp' 'tall knapp' 'gir knapp';
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.ansett-grad > strong {
+  grid-area: navn;
+}
+
+.ansett-grad > .dempet:not(.laast-merke) {
+  grid-area: tall;
+}
+
+.ansett-grad > .pluss,
+.ansett-grad > .minus,
+.ansett-grad > .laast-merke {
+  grid-area: gir;
+}
+
+.ansett-grad > .knapp {
+  grid-area: knapp;
+  white-space: nowrap;
+}
+
+.retning-alternativ {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.retning-alternativ .knapp {
+  margin-top: auto;
+}
+
+.ansett-grad.laast,
+.retning-alternativ.laast {
+  opacity: 0.6;
+}
+
+.retning p {
+  margin: 0;
+}
+
 /* ─────────────────────────────────────────────── Profil */
 
 .profil-formue {

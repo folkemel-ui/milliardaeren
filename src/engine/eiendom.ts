@@ -19,6 +19,7 @@ import { klubbstatus } from './klubb'
 import { jordverdi } from './jord'
 import { landemerkeleiePerSek, landemerkestatus, landemerkeverdi } from './landemerker'
 import { kunststatus } from './kunst'
+import { premiumstatus } from './ansatte'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -364,9 +365,9 @@ export const STATUS_INNTEKT = 0.02
 /** … og så mye lavere rente (prosentpoeng per time). */
 export const STATUS_RENTEKUTT = 0.002
 
-/** Status fra luksusen, klubben og trofeene, landemerkene og kunsten. */
+/** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

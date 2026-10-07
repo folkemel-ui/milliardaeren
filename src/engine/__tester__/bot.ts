@@ -4,7 +4,7 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, type Utfall } from '../handlinger'
+import { ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, velgRetning, type Utfall } from '../handlinger'
 import { BUD, dagensForhandling, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
 import {
   ansettelsespris,
@@ -20,6 +20,7 @@ import {
 } from '../formler'
 import { BEDRIFTSTYPER, STIGEN } from '../innhold'
 import { simuler } from '../simulering'
+import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt } from '../ansatte'
 import type { Bedrift, Spilltilstand } from '../types'
 
 interface Kandidat {
@@ -54,8 +55,11 @@ function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
       liste.push({ pris: forbedringspris(b, f), gevinst: bedriftInntektPerSek(med) - naa, utfor: (t) => kjopForbedring(t, b.id) })
     }
     if (b.ansatte < maksAnsatte(b)) {
-      const ans: Bedrift = { ...b, ansatte: b.ansatte + 1 }
-      liste.push({ pris: ansettelsespris(b), gevinst: bedriftInntektPerSek(ans) - naa, utfor: (t) => ansett(t, b.id) })
+      // Den enkle boten ansetter bare erfarne, som før Pakke 48; den smarte vurderer alle nivåene.
+      for (const grad of smart ? GRADLISTE : (['erfaren'] as const)) {
+        if (b.nivaa < GRADER[grad].fraNivaa) continue
+        liste.push({ pris: ansettelsespris(b, grad), gevinst: bedriftInntektPerSek(medNyAnsatt(b, grad)) - naa, utfor: (t) => ansett(t, b.id, grad) })
+      }
     }
   }
   // Fusjoner: boten byr alltid sjenerøst, og godtar et motbud med én gang.
@@ -94,6 +98,14 @@ export function botTrekk(s: Spilltilstand, smart = false): Spilltilstand {
   for (const r of s.skatt.regninger) {
     const u = betalSkatt(s, r.id)
     if (u.ok) s = u.tilstand
+  }
+  // Den smarte boten velger volum på nivå 50: retningen er gratis, og volum gir inntekt.
+  if (smart) {
+    for (const b of s.bedrifter) {
+      if (!kanVelgeRetning(b)) continue
+      const u = velgRetning(s, b.id, 'volum')
+      if (u.ok) s = u.tilstand
+    }
   }
   for (let i = 0; i < 1_000; i++) {
     const beste = kandidater(s, smart)

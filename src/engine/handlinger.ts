@@ -5,6 +5,7 @@
 
 import {
   ansettelsespris,
+  bedriftsverdi,
   eierType,
   erLaastOpp,
   lederpris,
@@ -66,6 +67,7 @@ import {
   utforFusjon,
 } from './fusjon'
 import { flyt } from './portefolje'
+import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
 import { ledigIRunde } from './startups'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from './landemerker'
@@ -82,7 +84,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { PAPIRER, rundAntall } from './marked'
-import type { Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Spilltilstand, Taktikk } from './types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk } from './types'
 import { kortKroner } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
@@ -174,28 +176,53 @@ export function kjopForbedring(s: Spilltilstand, id: string): Utfall {
   })
 }
 
-export function ansett(s: Spilltilstand, id: string): Utfall {
+/**
+ * Ansetter én til, med et nivå: junior, erfaren eller — fra nivå 50 — stjerne.
+ * Den nye får et navn fra en hash av bedriften og tidspunktet (Pakke 48).
+ */
+export function ansett(s: Spilltilstand, id: string, grad: Ansattgrad = 'erfaren'): Utfall {
   const b = finn(s, id)
   if (!b) return feil('Fant ikke bedriften.')
+  if (!GRADER[grad]) return feil('Ukjent nivå.')
   if (b.ansatte >= maksAnsatte(b)) return feil('Det er ikke plass til flere ansatte. Oppgrader bedriften først.')
-  return investerI(s, id, ansettelsespris(b), (n) => {
+  if (b.nivaa < GRADER[grad].fraNivaa) return feil(`Stjernene vil ikke jobbe i en bedrift under nivå ${GRADER[grad].fraNivaa}.`)
+  return investerI(s, id, ansettelsespris(b, grad), (n) => {
+    n.stab = [...stab(n), { navn: ansattnavn(`${n.id}|${s.sek}|${n.ansatte}`), grad }]
     n.ansatte += 1
   }, false)
 }
 
 /** Sier opp en ansatt. Ingen kostnad og ingenting tilbake — bare lønnen forsvinner. */
-export function siOpp(s: Spilltilstand, id: string): Utfall {
+/** Sier opp den ansatte på plass `indeks` — eller den sist ansatte når ingen er valgt. */
+export function siOpp(s: Spilltilstand, id: string, indeks?: number): Utfall {
   const b = finn(s, id)
   if (!b) return feil('Fant ikke bedriften.')
   if (b.ansatte <= 0) return feil('Bedriften har ingen ansatte.')
+  const i = indeks ?? b.ansatte - 1
+  if (!Number.isInteger(i) || i < 0 || i >= b.ansatte) return feil('Fant ikke den ansatte.')
   const n = structuredClone(s)
-  finn(n, id)!.ansatte -= 1
+  const nb = finn(n, id)!
+  nb.stab = stab(nb).filter((_, j) => j !== i)
+  nb.ansatte -= 1
+  return { ok: true, tilstand: n }
+}
+
+/** Velger retning på nivå 50: volum eller premium. Gratis, men for godt (Pakke 48). */
+export function velgRetning(s: Spilltilstand, id: string, retning: Retning): Utfall {
+  const b = finn(s, id)
+  if (!b) return feil('Fant ikke bedriften.')
+  if (!RETNINGER[retning]) return feil('Ukjent retning.')
+  if (b.retning) return feil('Bedriften har allerede valgt retning.')
+  if (!kanVelgeRetning(b)) return feil(`Retningen velges på nivå ${RETNING_NIVAA}.`)
+  const n = structuredClone(s)
+  finn(n, id)!.retning = retning
   return { ok: true, tilstand: n }
 }
 
 /** Det du får for en bedrift du selger selv: det som er investert, minus rabatten. */
 export function bedriftssalgspris(b: Bedrift): number {
-  return Math.round(b.investert * (1 - BEDRIFTSSALG_RABATT))
+  // Verdien, ikke bare det investerte: en premiumbedrift selges for mer.
+  return Math.round(bedriftsverdi(b) * (1 - BEDRIFTSSALG_RABATT))
 }
 
 /**

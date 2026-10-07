@@ -2,7 +2,7 @@ import { vedKorttrykk } from '../detaljvisning'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
-  bedriftLonn,
+  lonnFor,
   lederpris,
   maksAnsatte,
   forbedringspris,
@@ -10,17 +10,18 @@ import {
   nesteMilepael,
   statusfaktor,
 } from '../../engine/formler'
-import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp } from '../../engine/handlinger'
+import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp, velgRetning } from '../../engine/handlinger'
+import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt, RETNING_NIVAA, RETNINGER, RETNINGSLISTE, retningsstatus, stab } from '../../engine/ansatte'
+import { Bekreftknapp } from './Bekreftknapp'
 import { kjop, type Kjopsmengde } from '../kjopsmengde'
 import {
-  ANSATT_BONUS,
   ANSATTE_PER_NIVAA,
   BEDRIFTSTYPER,
   BORTE_TAK_SEK,
   MAKS_ANSATTE,
   MILEPAELER,
 } from '../../engine/innhold'
-import type { Bedrift, Spilltilstand } from '../../engine/types'
+import type { Bedrift, Retning, Spilltilstand } from '../../engine/types'
 import { utfor, utforMed } from '../../state/lager'
 import { Koknapp, Koppknapp, useFlytetall, useHold } from './Hender'
 import { kortKroner, perSek, tall, varighet } from '../format'
@@ -56,6 +57,8 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
             {type.navn}
             <NyMerke id={b.type} />
             {b.leder && <span className="merke kant">Leder</span>}
+            {b.retning && <span className="merke kant">{RETNINGER[b.retning].navn}</span>}
+            {kanVelgeRetning(b) && <span className="merke gull">Velg retning</span>}
           </h2>
           <span className="dempet">
             Nivå {b.nivaa}
@@ -105,46 +108,75 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
 export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
   const maks = maksAnsatte(b)
   const fullt = b.ansatte >= maks
-  const ansPris = ansettelsespris(b)
   const ledPris = lederpris(b.type)
   const nesteplass = (Math.floor(b.nivaa / ANSATTE_PER_NIVAA) + 1) * ANSATTE_PER_NIVAA
-  const lonnHver = bedriftLonn({ ...b, ansatte: 1 })
-  // Hva én ansatt til gir netto: ekstra inntekt minus lønnen. Kan være negativt.
-  const nesteGir = (bedriftInntektPerSek({ ...b, ansatte: b.ansatte + 1 }) - bedriftInntektPerSek(b)) * statusfaktor(s)
+  const folk = stab(b)
 
   return (
     <div className="personale">
-      <div className="personale-rad">
-        <div>
-          <h3>
-            Ansatte <span className="dempet">{b.ansatte} / {maks}</span>
-          </h3>
-          <p className="dempet liten">
-            Hver ansatt gir +{tall(ANSATT_BONUS * 100)} % inntekt og koster fast {perSek(lonnHver).slice(1)} i lønn.
-            {fullt && maks < MAKS_ANSATTE && ` Ny plass på nivå ${nesteplass}.`}
-          </p>
-          {!fullt && (
-            <p className={nesteGir >= 0 ? 'pluss liten' : 'minus liten'}>
-              Én til gir {perSek(nesteGir)}
-              {nesteGir < 0 && ' — lønnen er større enn det den ansatte tjener inn'}
-            </p>
-          )}
-        </div>
-        <div className="personale-knapper">
-          <button
-            className="knapp knapp-gull knapp-liten"
-            disabled={fullt || s.kontanter < ansPris}
-            onClick={() => utfor(ansett(s, b.id))}
-          >
-            {fullt ? 'Fullt' : `Ansett · ${kortKroner(ansPris)}`}
-          </button>
-          {b.ansatte > 0 && (
-            <button className="knapp knapp-liten" onClick={() => utfor(siOpp(s, b.id))}>
-              Si opp én
-            </button>
-          )}
-        </div>
+      <div>
+        <h3 className="personale-tittel">
+          Ansatte <span className="dempet">{b.ansatte} / {maks}</span>
+        </h3>
+        <p className="dempet liten">
+          Lønnen er fast, uansett nivå: i en liten bedrift koster en ansatt mer enn den gir.
+          {fullt && maks < MAKS_ANSATTE && ` Ny plass på nivå ${nesteplass}.`}
+        </p>
       </div>
+
+      {folk.length > 0 && (
+        <ul className="stab" aria-label="De ansatte">
+          {folk.map((a, i) => (
+            <li key={`${a.navn}-${i}`} className="stab-rad">
+              <span className="stab-navn">
+                {a.navn}
+                <span className={`merke${a.grad === 'stjerne' ? ' gull' : a.grad === 'erfaren' ? ' kant' : ''}`}>{GRADER[a.grad].navn}</span>
+              </span>
+              <span className="dempet liten stab-tall">
+                +{tall(GRADER[a.grad].bonus * 100)} % · {perSek(lonnFor(b, a.grad)).slice(1)} i lønn
+              </span>
+              <button className="knapp knapp-liten" onClick={() => utfor(siOpp(s, b.id, i))} aria-label={`Si opp ${a.navn}`}>
+                Si opp
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {!fullt && (
+        <div className="ansett-valg" role="group" aria-label="Ansett">
+          {GRADLISTE.map((grad) => {
+            const g = GRADER[grad]
+            const laast = b.nivaa < g.fraNivaa
+            const pris = ansettelsespris(b, grad)
+            // Hva én til gir netto: ekstra inntekt minus lønnen. Kan være negativt.
+            const gir = (bedriftInntektPerSek(medNyAnsatt(b, grad)) - bedriftInntektPerSek(b)) * statusfaktor(s)
+            return (
+              <div key={grad} className={`ansett-grad${laast ? ' laast' : ''}`}>
+                <strong>{g.navn}</strong>
+                <span className="dempet liten">
+                  +{tall(g.bonus * 100)} % · {perSek(lonnFor(b, grad)).slice(1)}
+                </span>
+                {laast ? (
+                  <span className="dempet liten laast-merke">
+                    <Ikon navn="las" størrelse={12} /> Nivå {g.fraNivaa}
+                  </span>
+                ) : (
+                  <span className={`liten ${gir >= 0 ? 'pluss' : 'minus'}`}>Gir {perSek(gir)}</span>
+                )}
+                <button
+                  className="knapp knapp-gull knapp-liten"
+                  disabled={laast || s.kontanter < pris}
+                  onClick={() => utfor(ansett(s, b.id, grad))}
+                  aria-label={`Ansett ${g.navn.toLowerCase()} for ${kortKroner(pris)}`}
+                >
+                  {kortKroner(pris)}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <div className="personale-rad">
         <div>
@@ -169,6 +201,62 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
       </div>
     </div>
   )
+}
+
+/**
+ * Retningen på nivå 50 (Pakke 48): volum eller premium, for godt. Under nivå 50
+ * står det hva som kommer; etter valget står det hva bedriften valgte.
+ */
+export function Retningskort({ b, s }: { b: Bedrift; s: Spilltilstand }) {
+  if (b.retning) {
+    const r = RETNINGER[b.retning]
+    return (
+      <div className="retning">
+        <h2 className="kort-tittel">
+          Retning <span className="merke gull">{r.navn}</span>
+        </h2>
+        <p className="dempet liten">
+          {r.beskrivelse} {retningGir(b, b.retning)}.
+        </p>
+      </div>
+    )
+  }
+  const kan = kanVelgeRetning(b)
+  return (
+    <div className="retning">
+      <h2 className="kort-tittel">Retning</h2>
+      <p className="dempet liten">
+        {kan
+          ? 'Bedriften er stor nok til å velge vei. Valget er gratis, men det gjelder for godt.'
+          : `På nivå ${RETNING_NIVAA} velger bedriften vei, for godt. ${RETNING_NIVAA - b.nivaa} nivåer igjen.`}
+      </p>
+      <div className="retning-valg">
+        {RETNINGSLISTE.map((id) => (
+          <div key={id} className={`retning-alternativ${kan ? '' : ' laast'}`}>
+            <strong>{RETNINGER[id].navn}</strong>
+            <span className="dempet liten">{RETNINGER[id].beskrivelse}</span>
+            <span className="gull liten">{retningGir(b, id)}</span>
+            {kan && (
+              <Bekreftknapp className="knapp knapp-gull knapp-liten" ja={`Ja, ${RETNINGER[id].navn.toLowerCase()}`} varsel="Valget kan ikke angres." onJa={() => utfor(velgRetning(s, b.id, id))}>
+                Velg {RETNINGER[id].navn.toLowerCase()}
+              </Bekreftknapp>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Hva en retning gir, i tall: «+25 % inntekt» eller «+30 % verdi · +4 status». */
+function retningGir(b: Bedrift, id: Retning): string {
+  const r = RETNINGER[id]
+  const deler: string[] = []
+  if (r.inntekt !== 1) deler.push(`+${tall((r.inntekt - 1) * 100)} % inntekt`)
+  if (r.verdi !== 1) deler.push(`+${tall((r.verdi - 1) * 100)} % verdi`)
+  const status = retningsstatus({ ...b, retning: id })
+  if (status > 0) deler.push(`+${status} status`)
+  return deler.join(' · ')
 }
 
 /**

@@ -7,6 +7,7 @@
 import { MEGLERHONORAR, BYEIER_BONUS } from '../engine/eiendom'
 import { FOND_GEBYR } from '../engine/fond'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
+import { GRADER, RETNING_NIVAA, RETNINGER } from '../engine/ansatte'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
@@ -43,9 +44,11 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tittel: 'Bedriftene',
     tekst:
       `Hver oppgradering gir litt mer inntekt, og på nivå ${MILEPAELER.join(', ').replace(/, (?=[^,]*$)/, ' og ')} dobles den. ` +
-      `Ansatte gir ${pst(ANSATT_BONUS)} mer hver, men lønnen er fast: i en liten bedrift koster de mer enn de gir, og de lønner seg først rundt nivå 20. ` +
+      `En erfaren ansatt gir ${pst(ANSATT_BONUS)} mer, en junior ${pst(GRADER.junior.bonus)} for halv lønn, og fra nivå ${RETNING_NIVAA} en stjerne ${pst(GRADER.stjerne.bonus)} for tredobbel lønn. ` +
+      'Lønnen er fast: i en liten bedrift koster de ansatte mer enn de gir. Stjernene er dyre, men gir mest per plass — de lønner seg når plassene er fulle. ' +
+      `På nivå ${RETNING_NIVAA} velger hver bedrift retning for godt: volum gir ${pst(RETNINGER.volum.inntekt - 1)} mer inntekt, premium ${pst(RETNINGER.premium.verdi - 1)} mer verdi og status. ` +
       'Ansatte og ledere er driftskostnader — de øker ikke det bedriften er verdt. ' +
-      `Selger du en bedrift, får du det du har investert i den minus ${pst(BEDRIFTSSALG_RABATT)}. ` +
+      `Selger du en bedrift, får du det den er verdt minus ${pst(BEDRIFTSSALG_RABATT)}. ` +
       `Uten leder står bedriften stille når spillet har vært lukket i mer enn ett minutt. Med leder går den videre mens du er borte, i opptil ${tall(BORTE_TAK_SEK / 3600)} timer.`,
   },
   aksjer: {

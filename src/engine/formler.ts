@@ -28,11 +28,12 @@ import {
 } from './eiendom'
 import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import { fusjonsfaktor } from './fusjon'
+import { antallAv, GRADER, retningsfaktor, verdifaktor } from './ansatte'
 import { startupverdi } from './startups'
 import { klubbverdi } from './klubb'
 import { kunstverdi } from './kunst'
 import { fondverdi } from './fond'
-import type { Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
 
@@ -107,28 +108,35 @@ export function forbedringspris(b: Bedrift, f: Forbedring): number {
   return Math.round(t.oppgraderingspris * t.vekst ** (f.nivaa - 1) * FORBEDRING_PRISFAKTOR)
 }
 
-/** Inntekten fra nivået, forbedringene og fusjonene, før ansatte og lønn. */
+/** Inntekten fra nivået, forbedringene, fusjonene og retningen, før ansatte og lønn. */
 export function basisinntekt(b: Bedrift): number {
-  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b) * fusjonsfaktor(b)
+  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b) * fusjonsfaktor(b) * retningsfaktor(b)
 }
 
-/** Lønnen til de ansatte per sekund: fast per ansatt, uansett nivå. */
+/**
+ * Lønnen til de ansatte per sekund: fast per ansatt, uansett nivå. En erfaren
+ * koster LONN_PER_ANSATT ganger grunninntekten, en junior halvparten og en
+ * stjerne det tredobbelte (Pakke 48). Med bare erfarne er regnestykket det
+ * samme som før juniorene og stjernene fantes.
+ */
 export function bedriftLonn(b: Bedrift): number {
-  return BEDRIFTSTYPER[b.type].grunninntekt * LONN_PER_ANSATT * b.ansatte
+  const erfaren = BEDRIFTSTYPER[b.type].grunninntekt * LONN_PER_ANSATT
+  return erfaren * antallAv(b, 'erfaren') + erfaren * GRADER.junior.lonn * antallAv(b, 'junior') + erfaren * GRADER.stjerne.lonn * antallAv(b, 'stjerne')
 }
 
 /** Nettoinntekt per sekund: basis, pluss det de ansatte gir, minus lønnen deres. Kan bli negativ. */
 export function bedriftInntektPerSek(b: Bedrift): number {
-  return basisinntekt(b) * (1 + ANSATT_BONUS * b.ansatte) - bedriftLonn(b)
+  const bonus = 1 + ANSATT_BONUS * antallAv(b, 'erfaren') + GRADER.junior.bonus * antallAv(b, 'junior') + GRADER.stjerne.bonus * antallAv(b, 'stjerne')
+  return basisinntekt(b) * bonus - bedriftLonn(b)
 }
 
 /**
  * En bedrift er verdt det du har investert i den: kjøpet, oppgraderingene,
- * forbedringene og fusjonene. Ansatte og ledere er driftskostnader og
- * bokføres ikke — de koster nettoformue.
+ * forbedringene og fusjonene — og 30 % mer når den har valgt premium. Ansatte
+ * og ledere er driftskostnader og bokføres ikke — de koster nettoformue.
  */
 export function bedriftsverdi(b: Bedrift): number {
-  return b.investert
+  return b.investert * verdifaktor(b)
 }
 
 /**
@@ -269,8 +277,14 @@ export function maksAnsatte(b: Bedrift): number {
   return Math.min(MAKS_ANSATTE, 1 + Math.floor(b.nivaa / ANSATTE_PER_NIVAA))
 }
 
-export function ansettelsespris(b: Bedrift): number {
-  return Math.round(oppgraderingspris(b) * ANSETTELSE_FAKTOR * ANSETTELSE_VEKST ** b.ansatte)
+/** Prisen for neste ansettelse: dyrere for hver ansatt bedriften har, og etter nivået på den nye. */
+export function ansettelsespris(b: Bedrift, grad: Ansattgrad = 'erfaren'): number {
+  return Math.round(oppgraderingspris(b) * ANSETTELSE_FAKTOR * ANSETTELSE_VEKST ** b.ansatte * GRADER[grad].pris)
+}
+
+/** Lønnen for én ansatt av et nivå, per sekund. */
+export function lonnFor(b: Bedrift, grad: Ansattgrad): number {
+  return BEDRIFTSTYPER[b.type].grunninntekt * LONN_PER_ANSATT * GRADER[grad].lonn
 }
 
 export function lederpris(type: BedriftstypeId): number {

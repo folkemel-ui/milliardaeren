@@ -1,4 +1,4 @@
-import { bedriftInntektPerSek, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
+import { bedriftInntektPerSek, bedriftsverdi, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
 import { bedriftssalgspris, kjopForbedring, selgBedrift } from '../../engine/handlinger'
 import type { Kjopsmengde } from '../kjopsmengde'
 import { fusjonsfaktor } from '../../engine/fusjon'
@@ -10,7 +10,7 @@ import { utfor } from '../../state/lager'
 import { kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
 import { Scene } from '../komponenter/BedriftIkon'
-import { Oppgraderingsknapp, Personale } from '../komponenter/Bedriftskort'
+import { Oppgraderingsknapp, Personale, Retningskort } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
 import { useVoksUt } from '../overgang'
@@ -42,6 +42,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
             <h1 className="skjerm-tittel">
               {type.navn}
               {b.leder && <span className="merke kant">Leder</span>}
+              {b.retning && <span className="merke kant">{b.retning === 'volum' ? 'Volum' : 'Premium'}</span>}
             </h1>
             <span className="dempet">
               Nivå {b.nivaa}
@@ -137,6 +138,10 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
       </div>
 
       <div className="kort">
+        <Retningskort b={b} s={s} />
+      </div>
+
+      <div className="kort">
         <Personale b={b} s={s} />
       </div>
 
@@ -147,13 +152,13 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
             <p className="dempet liten">
               {s.bedrifter.length <= 1
                 ? 'Den siste bedriften din kan du ikke selge.'
-                : `Du får det du har investert, ${kortKroner(b.investert)}, minus ${tall(BEDRIFTSSALG_RABATT * 100)} %. Fusjonene forsvinner med den, og kjøper du bransjen igjen, starter du på nivå 1.`}
+                : `Du får det bedriften er verdt, ${kortKroner(bedriftsverdi(b))}, minus ${tall(BEDRIFTSSALG_RABATT * 100)} %. Fusjonene og retningen forsvinner med den, og kjøper du bransjen igjen, starter du på nivå 1.`}
             </p>
           </div>
           <Bekreftknapp
             className="knapp knapp-fare knapp-liten"
             disabled={s.bedrifter.length <= 1}
-            varsel={`Du taper ${kortKroner(b.investert - bedriftssalgspris(b))}.`}
+            varsel={`Du taper ${kortKroner(bedriftsverdi(b) - bedriftssalgspris(b))}.`}
             onJa={() => utfor(selgBedrift(s, b.id))}
           >
             Selg · {kortKroner(bedriftssalgspris(b))}
