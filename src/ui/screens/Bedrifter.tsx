@@ -9,6 +9,7 @@ import { kortKroner, perSek } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
 import { Seksjon } from '../komponenter/Seksjon'
+import { Dagen } from '../komponenter/Dagen'
 import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
 import { Forklaring } from '../komponenter/Forklaring'
 
@@ -40,6 +41,7 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
           ))}
         </div>
       </div>
+      <Dagen s={s} />
       <ul className="kortliste">
         {s.bedrifter.map((b) => (
           <Bedriftskort key={b.id} b={b} s={s} mengde={mengde} åpne={() => settValgt(b.id)} />

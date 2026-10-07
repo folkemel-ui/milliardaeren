@@ -1,4 +1,4 @@
-import { bedriftInntektPerSek, bedriftsverdi, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
+import { bedriftInntektIDag, bedriftsverdi, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
 import { bedriftssalgspris, kjopForbedring, selgBedrift } from '../../engine/handlinger'
 import type { Kjopsmengde } from '../kjopsmengde'
 import { fusjonsfaktor } from '../../engine/fusjon'
@@ -10,7 +10,7 @@ import { utfor } from '../../state/lager'
 import { kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
 import { Scene } from '../komponenter/BedriftIkon'
-import { Oppgraderingsknapp, Personale, Retningskort } from '../komponenter/Bedriftskort'
+import { IDag, Oppgraderingsknapp, Personale, Retningskort } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
 import { useVoksUt } from '../overgang'
@@ -19,7 +19,7 @@ import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 
 export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
-  const inntekt = bedriftInntektPerSek(b) * statusfaktor(s)
+  const inntekt = bedriftInntektIDag(s, b)
   const neste = nesteMilepael(b.nivaa)
   const punkter = [
     ...b.inntektHistorikk.map((v, i) => ({ sek: i * INNTEKT_HISTORIKK_SEK, verdi: v })),
@@ -53,7 +53,8 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
         </div>
         <div className="detalj-kurs">
           <span className={`tall-kjempe ${inntekt >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(inntekt)}</span>
-          <span className="dempet liten">Inntekt etter lønn{statusfaktor(s) > 1 && ' og statusbonus'}</span>
+          <span className="dempet liten">Inntekt i dag, etter lønn{statusfaktor(s) > 1 && ' og statusbonus'}</span>
+          <IDag s={s} b={b} />
         </div>
         {b.inntektHistorikk.length > 0 ? (
           <Linjegraf punkter={punkter} format={(n) => perSek(n)} farge="var(--pluss)" etikett={`Inntekten til ${type.navn}`} />

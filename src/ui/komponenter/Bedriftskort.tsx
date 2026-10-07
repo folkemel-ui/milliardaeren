@@ -1,6 +1,7 @@
 import { vedKorttrykk } from '../detaljvisning'
 import {
   ansettelsespris,
+  bedriftInntektIDag,
   bedriftInntektPerSek,
   lonnFor,
   lederpris,
@@ -13,6 +14,7 @@ import {
 import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp, velgRetning } from '../../engine/handlinger'
 import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt, RETNING_NIVAA, RETNINGER, RETNINGSLISTE, retningsstatus, stab } from '../../engine/ansatte'
 import { Bekreftknapp } from './Bekreftknapp'
+import { dagsbilde, grunner } from '../../engine/verden'
 import { kjop, type Kjopsmengde } from '../kjopsmengde'
 import {
   ANSATTE_PER_NIVAA,
@@ -66,8 +68,10 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
             {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'}`}
           </span>
         </div>
-        <span className={`${bedriftInntektPerSek(b) >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(bedriftInntektPerSek(b) * statusfaktor(s))}</span>
+        <span className={`${bedriftInntektIDag(s, b) >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(bedriftInntektIDag(s, b))}</span>
       </div>
+
+      <IDag s={s} b={b} />
 
       <div className="milepael">
         <div className="milepael-spor">
@@ -101,6 +105,23 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
         </button>
       </div>
     </li>
+  )
+}
+
+/**
+ * Dagens kalender for én bedrift (Pakke 49): «+30 % i dag · Helg». Vises bare
+ * når dagen gjør en forskjell på mer enn et par prosent.
+ */
+export function IDag({ s, b }: { s: Spilltilstand; b: Bedrift }) {
+  const d = dagsbilde(s)
+  const f = d.faktor[b.type]
+  if (Math.abs(f - 1) < 0.02) return null
+  const hvorfor = grunner(d, b.type, s.sek)
+  return (
+    <span className={`i-dag liten ${f > 1 ? 'pluss' : 'minus'}`}>
+      {f > 1 ? '+' : '−'}
+      {tall(Math.abs(f - 1) * 100)} % i dag{hvorfor.length > 0 && <span className="dempet"> · {hvorfor.join(', ')}</span>}
+    </span>
   )
 }
 

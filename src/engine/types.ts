@@ -397,6 +397,8 @@ export interface Spilltilstand {
   marked: Marked
   beholdning: Partial<Record<PapirId, Beholdning>>
   gjeld: number
+  /** Fastrente (Pakke 49): satsen per time og dagen bindingen går ut. Mangler: flytende rente. */
+  rentebinding?: { sats: number; tilDag: number }
   totaltUtbytte: number
   /** Siste hendelser, nyeste sist. Kappet i lengde. */
   hendelser: Hendelse[]

@@ -101,6 +101,23 @@ export function antallAv(b: Bedrift, grad: Ansattgrad): number {
   return n
 }
 
+/**
+ * Alle tre antallene i én runde gjennom lista — inntekten og lønnen trenger dem
+ * hvert sekund for hver bedrift, og antallAv tre ganger ville gått gjennom den tre ganger.
+ */
+export function teller(b: Bedrift): Record<Ansattgrad, number> {
+  if (!b.stab) return { junior: 0, erfaren: b.ansatte, stjerne: 0 }
+  // Lista endres aldri på stedet — ansett og siOpp lager en ny — så tellingen
+  // kan huskes per liste. Sparer mye når tiden borte regnes ut.
+  const husket = TELLINGER.get(b.stab)
+  if (husket) return husket
+  const n = { junior: 0, erfaren: 0, stjerne: 0 }
+  for (const a of b.stab) n[a.grad]++
+  TELLINGER.set(b.stab, n)
+  return n
+}
+const TELLINGER = new WeakMap<Ansatt[], Record<Ansattgrad, number>>()
+
 /** Bedriften med én ansatt til — til å regne på hva en ansettelse gir, uten å ansette. */
 export function medNyAnsatt(b: Bedrift, grad: Ansattgrad, navn = ''): Bedrift {
   return { ...b, ansatte: b.ansatte + 1, stab: [...stab(b), { navn, grad }] }

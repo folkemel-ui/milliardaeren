@@ -51,8 +51,13 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | Papirene fra versjon 17 | `Hashkilde` på `marked.nyeFrø` + id + tikk |
 | Klubb til salgs | `<navn>:<dag>` |
 | Ansattnavn (`ansatte.ts`) | bedrift + sek + antall ved ansettelse; bedrift + plass for ansatte fra før Pakke 48 |
+| Konjunkturen (`verden.ts`) | `konjunktur:<periode>` (28 dager per periode; periode 0 er alltid normal) |
+| Dagens vær (`verden.ts`) | `dagsvær:<dag>`, med sjanser etter sesong |
+| Ukas bransjetrend (`verden.ts`) | `trend:<spilluke>` |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.
+
+Verden fra Pakke 49 er den samme i alle spill: nøklene har ikke spillets frø i seg (et forsøk med regionfrøet fikk konjunkturen til å endre seg når en test fjernet regionene). Konjunkturen gir aksjene og eiendomsprisene ekstra drift i `markedstikk`, men trekker ikke ett tall mer fra terningen. Sakene den gir i avisa forskyver likevel terningen etter første dagsskifte, som alle nye saker gjør.
 
 ## Avisas bivirkning
 

@@ -28,7 +28,9 @@ import {
 } from './eiendom'
 import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import { fusjonsfaktor } from './fusjon'
-import { antallAv, GRADER, retningsfaktor, verdifaktor } from './ansatte'
+import { GRADER, retningsfaktor, teller, verdifaktor } from './ansatte'
+import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
+import { dagnummer } from './kalender'
 import { startupverdi } from './startups'
 import { klubbverdi } from './klubb'
 import { kunstverdi } from './kunst'
@@ -121,13 +123,24 @@ export function basisinntekt(b: Bedrift): number {
  */
 export function bedriftLonn(b: Bedrift): number {
   const erfaren = BEDRIFTSTYPER[b.type].grunninntekt * LONN_PER_ANSATT
-  return erfaren * antallAv(b, 'erfaren') + erfaren * GRADER.junior.lonn * antallAv(b, 'junior') + erfaren * GRADER.stjerne.lonn * antallAv(b, 'stjerne')
+  const n = teller(b)
+  return erfaren * n.erfaren + erfaren * GRADER.junior.lonn * n.junior + erfaren * GRADER.stjerne.lonn * n.stjerne
 }
 
-/** Nettoinntekt per sekund: basis, pluss det de ansatte gir, minus lønnen deres. Kan bli negativ. */
-export function bedriftInntektPerSek(b: Bedrift): number {
-  const bonus = 1 + ANSATT_BONUS * antallAv(b, 'erfaren') + GRADER.junior.bonus * antallAv(b, 'junior') + GRADER.stjerne.bonus * antallAv(b, 'stjerne')
-  return basisinntekt(b) * bonus - bedriftLonn(b)
+/**
+ * Nettoinntekt per sekund: basis, pluss det de ansatte gir, minus lønnen deres.
+ * Kan bli negativ. `dag` er dagens faktor fra kalenderen (ukedag, vær, trend,
+ * helligdag — Pakke 49); den virker på salget, ikke på lønnen.
+ */
+export function bedriftInntektPerSek(b: Bedrift, dag = 1): number {
+  const n = teller(b)
+  const bonus = 1 + ANSATT_BONUS * n.erfaren + GRADER.junior.bonus * n.junior + GRADER.stjerne.bonus * n.stjerne
+  return basisinntekt(b) * bonus * dag - bedriftLonn(b)
+}
+
+/** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor og statusbonusen. */
+export function bedriftInntektIDag(s: Spilltilstand, b: Bedrift): number {
+  return bedriftInntektPerSek(b, dagsfaktor(s, b.type)) * statusfaktor(s)
 }
 
 /**
@@ -144,7 +157,7 @@ export function bedriftsverdi(b: Bedrift): number {
  * leder — de andre er stengt, og da betales heller ingen lønn.
  */
 export function inntektPerSek(s: Spilltilstand, borte = false): number {
-  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b)), 0)
+  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b, dagsfaktor(s, b.type))), 0)
   return sum * statusfaktor(s)
 }
 
@@ -153,17 +166,36 @@ export function statusfaktor(s: Spilltilstand): number {
   return 1 + STATUS_INNTEKT * statusnivaa(s)
 }
 
-/** Renten per time, etter statusrabatt. */
+/**
+ * Flytende rente per time før statusrabatt: følger styringsrenten (Pakke 49).
+ * I normale tider (4 %) er den RENTE_PER_TIME, som før.
+ */
+export function flytendeRente(s: Spilltilstand): number {
+  return RENTE_PER_TIME * (styringsrente(s) / NORMAL_STYRINGSRENTE)
+}
+
+/** Fastrenten som gjelder nå, eller null når lånet har flytende rente (eller bindingen er ute). */
+export function fastrente(s: Spilltilstand): number | null {
+  const b = s.rentebinding
+  return b && dagnummer(s.sek) < b.tilDag ? b.sats : null
+}
+
+/** Renten per time, etter statusrabatt: fast hvis du har bundet den, ellers flytende. */
 export function rentesats(s: Spilltilstand): number {
-  return RENTE_PER_TIME - STATUS_RENTEKUTT * statusnivaa(s)
+  return (fastrente(s) ?? flytendeRente(s)) - STATUS_RENTEKUTT * statusnivaa(s)
 }
 
 export function rentePerSek(s: Spilltilstand): number {
   return (s.gjeld * rentesats(s)) / 3600
 }
 
+/** Sparerenten per time følger styringsrenten, som lånerenten (Pakke 49). */
+export function sparerente(s: Spilltilstand): number {
+  return SPARERENTE_PER_TIME * (styringsrente(s) / NORMAL_STYRINGSRENTE)
+}
+
 export function sparerentePerSek(s: Spilltilstand): number {
-  return (s.sparing * SPARERENTE_PER_TIME) / 3600
+  return (s.sparing * sparerente(s)) / 3600
 }
 
 /** Det som faktisk kommer inn hvert sekund: bedriftene, leien, sparerenten og rivalutbyttet, minus lånerenter. */

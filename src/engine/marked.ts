@@ -88,9 +88,9 @@ export function kursFra(fundament: number, avvik: number): number {
  * eiendomsindeksen. I helgen er børsen stengt — aksjene står stille, mens
  * kryptoen og eiendomsprisene går som før.
  */
-export function markedstikk(m: Marked, t: Terning, helg = false): void {
-  papirtikk(m, t, helg)
-  eiendomstikk(m.eiendom, m.tikk, t)
+export function markedstikk(m: Marked, t: Terning, helg = false, konjunktur = { aksjer: 0, eiendom: 0 }): void {
+  papirtikk(m, t, helg, konjunktur.aksjer)
+  eiendomstikk(m.eiendom, m.tikk, t, konjunktur.eiendom)
   regiontikk(m)
 }
 
@@ -107,9 +107,10 @@ function hashgrunnlag(nyeFrø: number, id: PapirId, tikk: number): number {
  * avviket svinger og trekkes tilbake, og en sjelden gang et hopp. Trekkene
  * fra kilden kommer i samme rekkefølge som alltid, så terningen går likt.
  */
-function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde): void {
+function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde, konjunktur = 0): void {
   const drag = p.klasse === 'krypto' ? stemning * (p.stemning ?? 1) : 0
-  k.fundament *= Math.exp((p.drift + STEMNINGSKRAFT * drag) * DT)
+  // Konjunkturen (Pakke 49) gir aksjene ekstra drift: opp i høykonjunktur, ned i lav. Null i normale tider.
+  k.fundament *= Math.exp((p.drift + STEMNINGSKRAFT * drag + (p.klasse === 'aksje' ? konjunktur : 0)) * DT)
   // En selskapsnyhet prises inn litt for hvert tikk, til den er ferdig.
   if (k.nyhet) {
     const steg = k.nyhet.igjen / k.nyhet.tikk
@@ -129,7 +130,7 @@ function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde): void {
   k.bunn = Math.min(k.bunn ?? k.kurs, k.kurs)
 }
 
-function papirtikk(m: Marked, t: Terning, helg = false): void {
+function papirtikk(m: Marked, t: Terning, helg = false, konjunktur = 0): void {
   m.tikk += 1
   const st = m.stemning
   m.stemning = Math.max(-1, Math.min(1, st - STEMNING_REVERSJON * st * DT + STEMNING_VOLATILITET * Math.sqrt(DT) * normal(t)))
@@ -142,7 +143,7 @@ function papirtikk(m: Marked, t: Terning, helg = false): void {
     // Stengt børs: kursen står, men historikken får fortsatt punkter, så grafen viser helgen som flat.
     if (!(helg && p.klasse === 'aksje')) {
       const kilde = NYE_PAPIRER.includes(id) ? new Hashkilde(hashgrunnlag(m.nyeFrø ?? 0, id, m.tikk)) : t
-      papirsteg(p, k, m.stemning, kilde)
+      papirsteg(p, k, m.stemning, kilde, konjunktur)
     }
     if (m.tikk % HISTORIKK_TIKK === 0) {
       k.historikk.push(k.kurs)
@@ -204,8 +205,8 @@ export function registrerDagslutt(m: Marked): void {
  */
 const EIENDOM = { drift: 0.01, volatilitet: 0.03, reversjon: 0.15, krakk: 0.0003, krakkMin: 0.1, krakkMaks: 0.25 }
 
-function eiendomstikk(k: Kurs, tikk: number, t: Terning): void {
-  k.fundament *= Math.exp(EIENDOM.drift * DT)
+function eiendomstikk(k: Kurs, tikk: number, t: Terning, konjunktur = 0): void {
+  k.fundament *= Math.exp((EIENDOM.drift + konjunktur) * DT)
   k.avvik += -EIENDOM.reversjon * k.avvik * DT + EIENDOM.volatilitet * Math.sqrt(DT) * normal(t)
   if (t.sjanse(EIENDOM.krakk)) k.avvik -= t.mellom(EIENDOM.krakkMin, EIENDOM.krakkMaks)
   k.kurs = kursFra(k.fundament, k.avvik)

@@ -3644,6 +3644,28 @@ button.merke {
   flex-wrap: wrap;
 }
 
+/* Dagen i dag (Pakke 49): dato, vær, helligdag, trender og konjunkturen på én linje. */
+.dagen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.dagen-dato {
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+  color: var(--tekst-dempet);
+  margin-right: 4px;
+}
+
+/* «+30 % i dag · Helg» på bedriftskortet. */
+.i-dag {
+  display: block;
+  margin: 6px 0 0;
+}
+
 .mengdevalg {
   flex: 0 0 auto;
 }

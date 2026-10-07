@@ -8,6 +8,7 @@ import { MEGLERHONORAR, BYEIER_BONUS } from '../engine/eiendom'
 import { FOND_GEBYR } from '../engine/fond'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
 import { GRADER, RETNING_NIVAA, RETNINGER } from '../engine/ansatte'
+import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from '../engine/verden'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
@@ -46,6 +47,8 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `Hver oppgradering gir litt mer inntekt, og på nivå ${MILEPAELER.join(', ').replace(/, (?=[^,]*$)/, ' og ')} dobles den. ` +
       `En erfaren ansatt gir ${pst(ANSATT_BONUS)} mer, en junior ${pst(GRADER.junior.bonus)} for halv lønn, og fra nivå ${RETNING_NIVAA} en stjerne ${pst(GRADER.stjerne.bonus)} for tredobbel lønn. ` +
       'Lønnen er fast: i en liten bedrift koster de ansatte mer enn de gir. Stjernene er dyre, men gir mest per plass — de lønner seg når plassene er fulle. ' +
+      'Kalenderen betyr noe: restauranter og hoteller tjener mest i helgen, bankene og kafeene på hverdager, saftbodene i sola og skisentrene i snøen. ' +
+      `Hver uke kan én bransje være het (+${pst(TREND)}) og én kald (−${pst(TREND)}). Over tid jevner det seg ut — helligdagene er rene bonuser, som 17. mai for pølsebodene. ` +
       `På nivå ${RETNING_NIVAA} velger hver bedrift retning for godt: volum gir ${pst(RETNINGER.volum.inntekt - 1)} mer inntekt, premium ${pst(RETNINGER.premium.verdi - 1)} mer verdi og status. ` +
       'Ansatte og ledere er driftskostnader — de øker ikke det bedriften er verdt. ' +
       `Selger du en bedrift, får du det den er verdt minus ${pst(BEDRIFTSSALG_RABATT)}. ` +
@@ -83,6 +86,8 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       `Du kan låne til gjelden er ${pst(MAKS_BELAANING)} av alt du eier — og aldri mer enn ${tall(LAANETAK_TIMER)} timer av inntekten din. ` +
       'Renten trekkes hvert sekund og er høy nok til at et lån bare lønner seg for de beste kjøpene. Jo høyere status, jo lavere rente. ' +
+      `Den flytende renten følger styringsrenten: ${FASER.lav.styringsrente} % i lavkonjunktur, ${NORMAL_STYRINGSRENTE} % i normale tider og ${FASER.hoy.styringsrente} % i høykonjunktur. ` +
+      `Du kan binde den i ${BINDING_DAGER} dager for ${tall(FAST_PAASLAG, 1)} prosentpoeng ekstra. Sparerenten følger styringsrenten den også. ` +
       `Stiger gjelden til ${pst(MARGINKRAV)} — for eksempel fordi kursene faller — kommer et marginkrav: banken selger av det du eier ` +
       `til du er nede på ${pst(MAKS_BELAANING)} igjen, og holder ikke det, tar den bedrifter.`,
   },

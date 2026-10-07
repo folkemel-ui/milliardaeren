@@ -6,6 +6,8 @@
 import {
   ansettelsespris,
   bedriftsverdi,
+  fastrente,
+  flytendeRente,
   eierType,
   erLaastOpp,
   lederpris,
@@ -49,7 +51,7 @@ import {
   statusnivaa,
   utvidelsespris,
 } from './eiendom'
-import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER } from './innhold'
+import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER, RENTE_PER_TIME } from './innhold'
 import { DAG_SEK, dagnummer, erHelg } from './kalender'
 import { leggTilHendelse } from './bank'
 import {
@@ -68,6 +70,7 @@ import {
 } from './fusjon'
 import { flyt } from './portefolje'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
+import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from './verden'
 import { ledigIRunde } from './startups'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from './landemerker'
@@ -799,6 +802,21 @@ export function laan(s: Spilltilstand, belop: number): Utfall {
   const n = structuredClone(s)
   n.kontanter += b
   n.gjeld += b
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Binder lånerenten (Pakke 49): dagens flytende rente pluss et påslag, låst i
+ * én fase. Bindingen kan ikke løses opp før den går ut — så kan du binde igjen
+ * eller la renten flyte.
+ */
+export function bindRente(s: Spilltilstand): Utfall {
+  if (fastrente(s) !== null) return feil('Renten er allerede bundet.')
+  const n = structuredClone(s)
+  n.rentebinding = {
+    sats: flytendeRente(s) + (RENTE_PER_TIME * FAST_PAASLAG) / NORMAL_STYRINGSRENTE,
+    tilDag: dagnummer(s.sek) + BINDING_DAGER,
+  }
   return { ok: true, tilstand: n }
 }
 

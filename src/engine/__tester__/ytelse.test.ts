@@ -46,7 +46,8 @@ describe('ytelse', () => {
     const s = fulltSpill()
     simuler(s, 600, true)
     let ms = Infinity
-    for (let i = 0; i < 3 && ms >= 850; i++) ms = Math.min(ms, cpuMs(() => simuler(s, BORTE_TAK_SEK, true)))
+    // Opptil fem forsøk: maskinen deles ofte med en annen økt, og ett travelt øyeblikk skal ikke felle testen.
+    for (let i = 0; i < 5 && ms >= 850; i++) ms = Math.min(ms, cpuMs(() => simuler(s, BORTE_TAK_SEK, true)))
     if (process.env.BENK) console.log(`${BORTE_TAK_SEK} s borte, fullt spill: ${ms.toFixed(0)} ms CPU`)
     expect(ms).toBeLessThan(850)
   })

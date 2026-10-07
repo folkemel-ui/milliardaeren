@@ -16,6 +16,7 @@ import { rivaltikk, rivalutbyttePerSek } from './rivaler'
 import { sjekkOrdre } from './ordre'
 import { Terning } from './rng'
 import { kotikk } from './hender'
+import { dagsbilde, konjunkturdrift } from './verden'
 import type { PapirId, Spilltilstand } from './types'
 
 /** Flere punkter enn dette, og historikken tynnes ut til halvparten. */
@@ -43,7 +44,9 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   // Det samme som inntektPerSek(s, borte), men hver bedrift og statusen regnes
   // bare én gang: tallene trengs både til kontantene og til regnskapet under.
   const faktor = statusfaktor(s)
-  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b)))
+  // Dagens kalender (Pakke 49): ukedag, vær, bransjetrend og helligdag per bransje.
+  const dag = dagsbilde(s).faktor
+  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dag[b.type])))
   let sum = 0
   for (let i = 0; i < perBedrift.length; i++) if (!(borte && !s.bedrifter[i].leder)) sum += perBedrift[i]
   const inntekt = sum * faktor
@@ -79,7 +82,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   sjekkOppussing(s)
 
   if (s.sek % MARKED_TIKK_SEK === 0) {
-    markedstikk(s.marked, terning, erHelg(s.sek))
+    markedstikk(s.marked, terning, erHelg(s.sek), konjunkturdrift(s))
     rivaltikk(s, terning, MARKED_TIKK_SEK / 3600)
     sjekkOrdre(s)
   }

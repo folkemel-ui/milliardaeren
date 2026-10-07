@@ -25,6 +25,7 @@ import { nettoformue } from './formler'
 import type { Terning } from './rng'
 import type { Avisutgave, Dagsbilde, LuksusId, Overskrift, PapirId, Spilltilstand } from './types'
 import { dagnummer } from './kalender'
+import { verdenssaker } from './verden'
 
 export const MAKS_UTGAVER = 7
 const MAKS_SAKER = 5
@@ -225,6 +226,8 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const startupsaker = startupsVedDagsskifte(s, t)
   const klubbsaker = klubbVedDagsskifte(s)
   const andre = [...jordVedDagsskifte(s), ...landemerkerVedDagsskifte(s), ...kunstVedDagsskifte(s)]
+  // Verden (Pakke 49): rentemøtet, ukas trender, helligdagen og været. Fra hasher, ikke terningen.
+  const verden = verdenssaker(s)
   // Rekkefølgen er viktigheten: deg selv og skatten først, så nyheter som
   // flytter kurser, kappløpet, dagens bevegelser og sladder. Lokalstoff fyller
   // på når det er stille.
@@ -236,9 +239,11 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...startupsaker.filter((x) => x.type === 'deg'),
     ...nyheter,
     ...omRivalene(s, før),
+    ...verden.marked,
     ...omMarkedet(s, før),
     ...startupsaker.filter((x) => x.type !== 'deg'),
     ...andre.filter((x) => x.type !== 'deg'),
+    ...verden.lokalt,
     ...sosietet(s, t),
   ].slice(0, MAKS_SAKER)
   const brukt = new Set(saker.map((x) => x.tittel))

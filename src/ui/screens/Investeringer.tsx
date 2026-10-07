@@ -9,6 +9,9 @@ import {
   papirverdi,
   rentePerSek,
   rentesats,
+  fastrente,
+  flytendeRente,
+  sparerente,
   sparerentePerSek,
 } from '../../engine/formler'
 import {
@@ -27,12 +30,16 @@ import {
   settInn,
   slettOrdre,
   taUt,
+  bindRente,
 } from '../../engine/handlinger'
+import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from '../../engine/verden'
+import { Konjunkturkort } from '../komponenter/Dagen'
+import { datotekst } from '../kalender'
 import { ORDRETYPER } from '../../engine/ordre'
 import { BLOKK, blokkpris, forbesliste, oppkjopspris, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../engine/rivaler'
-import { erHelg } from '../../engine/kalender'
+import { dagnummer, erHelg } from '../../engine/kalender'
 import { BUD, type BudId, dagensForhandling, FORMER, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../../engine/fusjon'
-import { BEDRIFTSTYPER, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME, SPARERENTE_PER_TIME } from '../../engine/innhold'
+import { BEDRIFTSTYPER, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../../engine/innhold'
 import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
 import { portefolje, sum, type Aktivaklasse } from '../../engine/portefolje'
 import type { BedriftstypeId, Ordretype, PapirId, Rival, Spilltilstand } from '../../engine/types'
@@ -889,7 +896,7 @@ function Sparekonto({ s }: { s: Spilltilstand }) {
           </span>
         </div>
         <div className="bank-rente">
-          <span className="etikett">Rente {tall(SPARERENTE_PER_TIME * 100)} % per time</span>
+          <span className="etikett">Rente {tall(sparerente(s) * 100, 2).replace(/,?0+$/, '')} % per time</span>
           <span className={s.sparing > 0 ? 'pluss' : 'dempet'}>{perSek(sparerentePerSek(s))}</span>
         </div>
       </div>
@@ -932,8 +939,10 @@ function Bank({ s }: { s: Spilltilstand }) {
   const kanBetale = Math.min(s.gjeld, s.kontanter)
   const fare = grad > MARGINKRAV * 0.9 ? 'kritisk' : grad > MAKS_BELAANING ? 'advarsel' : ''
 
+  const fast = fastrente(s)
   return (
     <>
+      <Konjunkturkort s={s} />
       <Sparekonto s={s} />
       <h2 className="seksjon-tittel">
         Fond <Forklaring tema="fond" />
@@ -952,7 +961,9 @@ function Bank({ s }: { s: Spilltilstand }) {
             </span>
           </div>
           <div className="bank-rente">
-            <span className="etikett">Rente {tall(rentesats(s) * 100, rentesats(s) === RENTE_PER_TIME ? 0 : 1)} % per time</span>
+            <span className="etikett">
+              {fast === null ? 'Flytende' : 'Fast'} rente {tall(rentesats(s) * 100, 2).replace(/,?0+$/, '')} % per time
+            </span>
             <span className={s.gjeld > 0 ? 'minus' : 'dempet'}>{perSek(-rentePerSek(s))}</span>
           </div>
         </div>
@@ -972,6 +983,33 @@ function Bank({ s }: { s: Spilltilstand }) {
             selger banken investeringene dine — og holder ikke det, tar den over bedrifter.
           </p>
         </div>
+      </div>
+
+      <div className="kort">
+        <div className="maal-topp">
+          <h2 className="kort-tittel">Rente</h2>
+          <span className={`merke${fast === null ? '' : ' kant'}`}>{fast === null ? 'Flytende' : 'Fast'}</span>
+        </div>
+        {fast === null ? (
+          <>
+            <p className="dempet liten">
+              Den flytende renten følger styringsrenten. Binder du, får du dagens rente pluss {tall(FAST_PAASLAG, 1)} prosentpoeng, låst i{' '}
+              {BINDING_DAGER} dager — da kan du ikke gå tilbake før tiden er ute.
+            </p>
+            <Bekreftknapp
+              className="knapp knapp-gull knapp-liten"
+              ja="Ja, bind renten"
+              varsel={`Låst til ${datotekst(dagnummer(s.sek) + BINDING_DAGER).toLowerCase()}.`}
+              onJa={() => utfor(bindRente(s))}
+            >
+              Bind renten · {tall(((flytendeRente(s) + (RENTE_PER_TIME * FAST_PAASLAG) / NORMAL_STYRINGSRENTE) * 100), 2).replace(/,?0+$/, '')} % per time
+            </Bekreftknapp>
+          </>
+        ) : (
+          <p className="dempet liten">
+            Renten er bundet til {datotekst(s.rentebinding!.tilDag).toLowerCase()}. Så går den over til flytende igjen, og du kan binde på nytt.
+          </p>
+        )}
       </div>
 
       <div className="kort">

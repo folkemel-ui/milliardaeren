@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+
+// Grunnmekanikken testes uten kalenderen fra Pakke 49 (den testes i pakke49.test.ts).
+vi.mock('../verden', async (ekte) => (await import('./utenKalender')).utenKalender(ekte))
 import { nyttSpill } from '../start'
 import { MAKS_HISTORIKKPUNKTER, simuler } from '../simulering'
 import { nettoformue } from '../formler'
