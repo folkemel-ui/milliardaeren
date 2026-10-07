@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
-(1 October 2026) and Pack 39 (5 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(1 October 2026), Pack 39 (5 October 2026) and Pack 47 (7 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -84,7 +84,18 @@ session; delete what stops being true.
   `git checkout <commit> -- src/engine`, measure, `git checkout HEAD -- src/engine`,
   `git stash pop`. (Untracked files survive a plain stash.)
 - To try a balance constant quickly: save the file content, swap the number, run the
-  bench, restore — and confirm with `git diff --stat` that the restore happened.
+  bench, restore — and confirm with `git diff --stat` that the restore happened. A
+  scratchpad `prov.mjs <name> '<json [[file, from, to], …]>'` that swaps, runs the long
+  bench and restores in a `finally` made five variants in a row cheap (Pack 47). Don't
+  run other tests or edit that file while it runs.
+- **`execSync` on Windows runs through cmd.exe**, where `^` is the escape character:
+  `git archive abc123^` silently became `abc123`. Use `abc123~1`. `tar -C "C:…"` reads
+  the drive letter as a remote host — run `tar -x` with `cwd` set instead.
+- **Vitest picks up other sessions' worktrees** in `.claude/worktrees/` (a stale one ran
+  the whole suite twice). `vite.config.ts` now excludes `**/.claude/**` in both projects.
+- **When Vitest prints nothing and hangs**, bundle the script with esbuild
+  (`npx esbuild x.ts --bundle --platform=node --format=esm --outfile=…`) and run it in
+  plain Node: output streams line by line, so you see where it stops.
 
 ## 4. Dev server and browser pane
 
@@ -148,9 +159,24 @@ session; delete what stops being true.
   with `OPPDATER_FASIT=1`, and record before → after net worth in the commit message.
   A change in `frø` alone means the die shifted while the economy stayed the same.
 - **Balance bench**: `BENK=1 npx vitest run src/engine/__tester__/balansebenken.test.ts`
-  prints the bot's time to each milestone. **Now 1 mrd ≈ 8 h 38 min** (after Pack 35;
-  it was 9 h 13 min before Packs 34–35). Folke has accepted this; earlier, 7 h 42 min was
-  rejected as too fast.
+  plays to kr 1 trillion (~2.5 min) and prints time to each milestone, time since the
+  previous one and what the bot owned. Without BENK it stops at 1 mrd so `npm test`
+  stays fast. Since Pack 47 the bench uses the **smart bot** (`botSpill(…, true)`),
+  which buys straight up to the next income doubling when it can afford it, as players
+  do. **Now 1 mrd ≈ 7 h 20 min, 10 mrd ≈ 17 h, 100 mrd ≈ 1 d 7 h, 1 trillion ≈ 1 d 23 h**
+  (Folke picked "steady, ~15 h per tenfold" after 1 mrd). The old simple bot gave
+  8 h 38 min to 1 mrd — the game didn't get faster, the bot got less clumsy; with the
+  same bot, 7 h 42 min was once rejected as too fast. The **golden master keeps the
+  simple bot**, so the fasit only moves when the engine does.
+- **A greedy one-level bot never pushes to a milestone**: the step from 126 to 127 is
+  worth almost nothing, so extra doublings at 150/200 changed nothing in the bench until
+  the bot could see them. Check that the bot *can* use a change before trusting a
+  "no effect" result.
+- **Late-game pace comes from the top businesses' payback**, not from more milestones:
+  upgrades cost ×1.1 per level while income grows linearly, so everything converges to
+  the top businesses' payback. Pack 47 set olje → skisenter to pay back in ~30 000 s with
+  upgrades at half the early ladder's share (`pakke35.test.ts` has a second rule for
+  that), and compressed the top so skisenter unlocks at 750 mrd, before the finish line.
 - **Know what the bot doesn't do**, or the bench will fool you: it never borrows, never
   hires managers, never buys property, luxury, stocks or startups, and reaches 1 mrd
   before it ever buys the Bank. Changes to those systems don't show in the bench — reason
@@ -160,6 +186,17 @@ session; delete what stops being true.
 - **Think about existing saves when offering a balance option.** Lowering a business's
   income "to keep payback the same" cuts income for everyone who already owns it.
   Prefer changes where nobody loses what they have, or migrate.
+- **Real old saves** (Pack 47): `scripts/lag-gamle-lagringer.mjs` pulls the source of
+  every save version from git, bundles that old engine with esbuild, plays a game with it
+  (bot, then a bit of everything that version knew, then 576 game days) and writes
+  `src/state/__tester__/gamle-lagringer/vN.json.gz`. `gamle-lagringer.test.ts` migrates
+  each, checks the load check, that everything owned survives, that net worth matches
+  the old engine **to the krone** (minus manager prices before v19), and plays a month on.
+  Versions 6 and 11 never existed in a commit. **When you bump the save version**, add
+  the bumping commit to `NESTE_BUMP` in the script and run it, so the version you leave
+  behind gets a real save too.
+- **A game day is 300 s** (`DAG_SEK`), not 86 400. "Two days" of simulated play is 576
+  game days.
 - **Save versions** (now 20): write the migration before bumping `SPILLVERSJON`; never
   skip a step. Optional new fields can be read with `?? 0` without a version bump.
   `state/__tester__/migrering.test.ts` migrates old saves all the way to the latest and
@@ -197,6 +234,24 @@ session; delete what stops being true.
   `BEDRIFTSTEGNINGER`. `pakke35.test.ts` checks the ladder rules: steps ≤ 16×, unlock at
   1.2–1.3 × price, first-upgrade share rising from 25 % (kiosk) to ≤ 80 %.
 - **Index funds keep their original members**; **every stock needs a `RAPPORTDAG` ≤ 26**.
+- **Late-game numbers break loops that step one unit at a time.** `maksKjop` stepped
+  down one share (or 1/10 000 coin) per iteration from an estimate; with trillions in
+  cash the estimate was millions of units off and the trade box's "Maks" hung. It now
+  bisects. Any loop whose iteration count grows with an amount of money needs the same.
+- **Vitest runs the engine 3–4× slower than the built game.** A fresh game's two hours
+  away: ~350 ms under Vitest, ~95 ms bundled with esbuild in Node. Measure real cost
+  with a bundled script, best of seven (the machine is shared with the other track).
+  `fulltSpill()` in `__tester__/hjelp.ts` builds the heaviest possible save (everything
+  owned); before Pack 47 it cost ~610 ms bundled, now ~300 ms. The second case in
+  `ytelse.test.ts` guards it at 850 ms under Vitest.
+- **Speed-ups must keep every number identical.** Pack 47 kept the same arithmetic in
+  the same order and only stopped repeating it: region lookup and `Math.exp` of the
+  region index cached (by the avvik value), the month cached per day, city factors
+  computed once per call into reused Maps, income and status computed once per second
+  in `sekund`, no `filter`/`slice` in per-second helpers. Summation order matters for
+  floats — don't regroup sums. The golden master can't see property or stocks (the bot
+  owns none), so argue exactness for those by reading, and test helpers against the old
+  formula (`pakke47.test.ts`).
 - **`ytelse.test.ts` runs last, alone**: `vite.config.ts` has two test projects, `enhet` and
   `ytelse`, with `sequence.groupOrder`, so a plain `npx vitest run` finishes everything else
   before timing. It measures the process's CPU time (`process.cpuUsage`), not wall-clock
@@ -277,7 +332,8 @@ session; delete what stops being true.
   (`formuetrinn`, status title, gold edge by status level).
 - **The logo exists in four places** that must match: `Logo.tsx`, `public/ikon.svg`,
   the loading screen in `index.html`, and `scripts/lag-ikoner.mjs`.
-- **Text**: amounts are `kr X` via `engine/tall.ts`; feminine nouns in a-form (Avisa, uka,
+- **Text**: amounts are `kr X` via `engine/tall.ts`; short forms go mill → mrd → bill
+  (`kr 2,00 bill` from 999,5 mrd, Pack 47); feminine nouns in a-form (Avisa, uka,
   gata, lista); plural «ordrer»; no «papir» in player text.
 - **Explanations** live in `ui/forklaringer.ts` and take numbers from engine constants.
   When a rule changes (tax on gains, loan cap, wages, dilution), update the text there.
