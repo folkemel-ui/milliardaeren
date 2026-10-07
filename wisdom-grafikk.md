@@ -4,7 +4,8 @@ For the session in charge of graphics and animation (packs G1–G7, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G6.
+Update it at the end of each G pack, and delete what stops being true. Updated after G7,
+the last planned pack: the notes now serve whoever draws new content later.
 
 ---
 
@@ -12,7 +13,7 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 
 - **What you own**: the drawings and how they render. That means `Illustrasjoner.tsx`,
   `Tegnestil.tsx`, `BedriftIkon.tsx`, portraits, crests, stadium, logos, the maps and
-  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), the paintings (`Malerier.tsx`), the wordmarks (`ordmerker.ts`, `scripts/lag-ordmerker.mjs`), `Oppgjor.tsx`, the logo files and `Galleri.tsx`. The full list is under
+  their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), the paintings (`Malerier.tsx`), the wordmarks (`ordmerker.ts`, `scripts/lag-ordmerker.mjs`), `Oppgjor.tsx`, the detail pages for things you own (`screens/Tingdetalj.tsx`, `ui/detaljvisning.ts`, G7), the logo files and `Galleri.tsx`. The full list is under
   *Working side by side* in `Ideer.md`. `styles.css`, the screens and `Ideer.md` are
   shared: touch only what the pack needs (G1 added two `utklipp` props in `Luksus.tsx`,
   nothing else).
@@ -28,7 +29,9 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   editing `Ideer.md`, check for commits you didn't make. Remove only your own pack line
   and items, by title.
 - **Your own server**: `milliardaer-grafikk` on port **5186** (`.claude/launch.json`).
-  5184 belongs to the game track. A fresh port starts with an empty save, so build one
+  5184 belongs to the game track. In G7, `preview_start` refused because an earlier
+  graphics session's server still held 5186. It serves this same folder with HMR, so
+  `navigate` to `http://localhost:5186/` in the pane worked fine; don't change ports. A fresh port starts with an empty save, so build one
   from `/ikon.svg` (recipe in `wisdom.md` §4). `kjopLuksus('seilbaat')` fails without a
   harbour slot, and failures come back as `{ ok: false, feil }`, so log them.
 
@@ -65,6 +68,11 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   first and name the real places in the option. In G6 that paid off: there are 9
   paintings, not the 12 `Ideer.md` claimed, and Solheim spans 1911–1933 (romantic to
   expressionist); both went into the question. Folke took all four recommendations.
+  For G7 Folke took three (detail page, bars + before→after, M draws itself) but
+  again *not* the bigger scope: of the 17 old drawings only the 7 Norwegian ones were
+  redrawn. Naming every place in the option (Kjøpesenter Trondheim, Aker Brygge,
+  Ytterskjær …) and saying what the smaller option leaves (foreign scenes at 150 px
+  in the old style) made the choice easy. Expect the smaller scope on art volume.
 - **Put outside sources in the question.** Fetching Natural Earth was an option in
   the G3 questions, so Folke's answer was the approval. Do the same for any download,
   font or dataset: name the source, the licence and that nothing loads at runtime.
@@ -175,6 +183,41 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 - **Ground details go in `Kantfade`** (the windsock, the helipad's H, the red
   carpet): `utklipp` drops `Kantfade`, so they vanish in the hangar and harbour.
   `grafikkG5.test.ts` checks it. Wakes and rain are part of the drawing and stay.
+- **The Norwegian landmarks and big buildings (G7)** are all at far distance.
+  Things at sea (lighthouse, island, castle) stand on `Bakke type="hav"` on a rock or
+  islet whose *front edge is irregular*: a straight front read as a concrete platform.
+  The reflection under them is a trapezoid polygon at ~0.2 opacity; a `rect` read as a
+  hard dark band. The lighthouse glow is two soft circles, not a beam. The ski hill
+  fills the bottom of the canvas, so it sits in the new `Bunnfade` (Tegnestil: fades the
+  bottom like the sea, and the sides like `Kantfade`); without it the snow ended in a hard
+  white edge on the dark card. The twisted Oslo tower is floor slices whose front width
+  is `s·cos v` and side width `s·sin v·0.7`, with `v` rising per floor: the lit face and
+  the shaded face swap places going up, and the silhouette swells in the middle.
+- **Detail pages for things you own (G7)**: `ui/detaljvisning.ts` is a tiny store
+  (`aapneTing`, `useTing`, `aapenTing`), because the same cards live in the list, the
+  city view, the street view, storage and the gallery wall. `FANE_FOR` says which
+  screen shows the page (Eiendom or Luksus); each screen closes it on unmount, so a tab
+  switch closes it. Every card (`Eiendomskort`, `Jordkort`, `Landemerkekort`,
+  `Luksuskort`, `Malerikort`) takes `iDetalj`: in the list the picture is an
+  `Apneknapp` and the whole card opens via `trykkApner` (ignores clicks on buttons,
+  links and inputs); on the page the card shows `Scene` (or `Maleriscene`, the painting
+  on the lit wall with a brass plate) instead of the picture. `useVoksUt` grows the page
+  out of the tapped `.kort` by itself. The facts below come from `Tingdetalj.tsx`.
+  Old-style drawings get `Scene`'s 150 px automatically.
+- **The statement (G7)**: `OppgjorBlokk` puts a 6 px bar under each row from one zero
+  line placed by the data (largest out ÷ (largest in + largest out)); in right, out left.
+  Bar colours are CSS vars (`--oppgjor-inn/ut/for/etter`) so `.avis` sets darker inks
+  on the cream paper. The row `Kurser, verdier og annet` = change in net worth − net
+  cash flow, so the numbers add up; the net worth before/after bars share one scale and
+  use `kortKroner` (full kroner squeezed the bars). Every value is written beside its
+  bar, so the rows are the table view and need no hover layer.
+- **The loading screen (G7)** lives in `index.html` (inline CSS). The M draws itself
+  with `pathLength="1"`, and `stroke-dasharray`/`-dashoffset` set *only inside the
+  keyframes* (with `both`), so with animation off the line is simply whole. The
+  inline script also reads `milliardaer.bevegelse`, so the in-game reduced-motion
+  setting holds from the first frame. The first view's fade is on `.app` with *no*
+  fill mode: a filled opacity animation keeps a stacking context on the whole app.
+
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
   `grafikkG4.test.ts` checks all three. The cream was the strictest: five colours that
@@ -304,6 +347,18 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
 - **White on a white card** (Vik's white frames) needs the light-theme hairline: give
   the SVG the class `illustrasjon` (as `Maleribilde` does) and the existing CSS adds
   the 0.6 px edge. `.stadion` has its own rule.
+- **Gallery captions end in "Ny stil"** for new drawings, so match them with
+  `startsWith`. Run the `ark` helper in a *separate* call after `location.reload()`:
+  in the same call the page wasn't ready and every drawing came back "mangler".
+- **A page-console script whose line starts with `(`** joins the line before it
+  (no semicolon), e.g. `const sec = …` then `({ … })` became a call. End lines with `;`.
+- **The loading screen**: editing `index.html` makes the pane open it as a static file
+  in a new tab. That is the perfect test bed: no game replaces it. Pause every
+  animation at a chosen time with
+  `el.getAnimations({ subtree: true }).forEach(a => { a.pause(); a.currentTime = t })`
+  and screenshot each stage. Close that tab afterwards.
+- **A report in Avisa** only shows when the open issue carries one. Mock it by cloning
+  the open `.regnskap .oppgjor` into the open `.avis` (`avis.prepend(clone)`).
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
   Reload, wrap `console.error`, click all five tabs, and read the wrapped list.
 
@@ -362,9 +417,15 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   the tests, then push.
 - **A spawned task's worktree (`.claude/worktrees/…`) doubles the test count**:
   vitest picks it up. Both copies pass, so it's harmless; just don't be surprised.
-- **Long decimals in markup** come from shared helpers too (Bakke, Tre, `Figur`'s
-  exact 0.21875 scale), so a "no long decimals" test can't pass without touching
-  G1–G3. Round inside your own helpers (`Urkasse` leaked `10.799999`) and move on.
+- **Long decimals in markup**: G7 rounded the shared helpers that leaked (`Tre`,
+  `Slagskygge`, the `fortau` lines in `Bakke`) with `r2` (exported from Tegnestil), and
+  `grafikkG7.test.ts` fails on 8+ decimals in the seven G7 drawings. Use `r2` for any
+  sum in a coordinate (`y - 1.3`, `g - 52.2` gave `31.799999999999997`). The test's
+  match shows only the tail (`1.79…`); find the full value with a throwaway test that
+  logs the surrounding markup. `Figur`'s exact 0.21875 scale is fine (5 decimals).
+- **`useSyncExternalStore` hooks need the third argument** (server snapshot) or a
+  `renderToStaticMarkup` test of any card that uses them crashes. `useNy` in
+  `ui/nymerker.ts` lacked it; G7 added `() => false`.
 - **The gallery doesn't always re-render after a splice**: reload before the
   contact sheet, and select figures by caption, not index (the order isn't the
   registry order).
@@ -388,13 +449,16 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   helper that throws when `fra` is missing and keeps CRLF. **`styles.css` is CRLF**; the
   `.tsx` files are LF. Long drawings go in separate `.txt` snippet files that a script
   splices in between two markers.
-- **Git Bash `sed -i` turned `styles.css` into LF** (G3). The repo is safe: Git
+- **Git Bash `sed -i` turns `styles.css` into LF** (G3, and again in G7 for a
+  one-word change). Never `sed` that file; use `fiks.mjs` or Edit. If it happens, check
+  `file src/styles.css` and restore CRLF with a node one-liner. The repo is safe: Git
   normalises line endings (`core.autocrlf`), so `git show --stat` showed only the real
   changes. The "LF will be replaced by CRLF" warnings on commit are normal. To check
   for churn, look at the line counts in `--stat`, not the warnings. Restore CRLF with
   a small node script if you want the working copy to match a fresh checkout.
-- **Never put JSX template strings (`${…}` inside backticks) into `node -e` through
-  Bash.** Bash ate them twice and left broken code. Use the Edit tool or a `.mjs` file.
+- **Never put backticks into `node -e` through Bash** — not JSX template strings, and
+  not Markdown with inline code either (in G7 Bash ran every inline-code name in this
+  file's §7 as a command and left blanks). Bash ate them three times. Use the Edit tool or a `.mjs` file.
   `sed` lost the escaping in a regex too (`\(\.lerret\)`), so prefer Edit for test regexes.
 - When a script asserts a count, count by hand first: I expected 13 keyframe px values
   and there were 10. The script threw halfway after the first part had already written.
@@ -402,37 +466,29 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
 
-## 7. Notes for the coming packs
+## 7. Notes for later (all seven G packs are done)
 
-- **G2 is done** (all 13 businesses). The old `Bedrift`, `Vekst`, `Kunder`, `Smabaat`,
-  `Utmerkelse` and `PLAKETT` are gone. `F`, `Svg` and `Grunn` remain for properties and luxury.
-- **G3 is done** (both maps, markers). If a new Norwegian city is added, give it a
-  `BYPLAN` side and run `norgeskartet.test.ts` (names, badges, rent, inset), and
-  `grafikkG3.test.ts` checks that it stands on land. A new foreign city needs a
-  `BYPLASS` label side; the badge goes opposite automatically.
-- **G4 is done** (portraits, logos with wordmarks, startup marks). Not done: Avisa
-  still shows a generic icon for startup stories, because `ui/avisbilde.ts` (shared,
-  from Pack 41) has no `startup` kind. `StartupLogo` could go there; ask first.
-- The map data costs ~23 KB gzipped at startup. If loading time matters later,
-  `Norgeskart`/`Verdenskart` could be lazy-loaded in Eiendom (a screen change; ask).
-- **The 32 px rival list** in Investeringer shows business drawings very small. The
-  scale rule makes the kiosk and the lemonade stand tiny there; G7 could crop or zoom.
-- **G5 is done** (19 luxury items, 15 properties, farms and forests; every owned id
-  has its own drawing). **Still old style, in no pack** (Folke chose not to include
-  them): `kjopesenter`, `naeringsbygg`, `oy`, the six foreign cities, the four
-  Marbella/Zermatt properties and the four landmarks. G7's detail scenes need them
-  in the new style, so raise it before G7. `pakke42.test.ts` uses `kjopesenter` as
-  its old-style example; change it when that one is redrawn.
-- **G6 is done** (stadium, crowd, paintings, gallery wall). The G5 drawings were
-  checked in the light theme at the start of G6 and read well; the street view and
-  the buy moment are still unchecked.
-- **Shared tests describe the old art**: `pakke42.test.ts` counted the old dot crowd
-  (`r="0.85"`) and used `snekke` as its old-style example. When you redraw something,
-  grep the tests for its markup and update the counting, not the intent.
-- **Avisa shows a generic icon** for art exhibitions and startup stories
-  (`ui/avisbilde.ts`, shared). The paintings and startup logos could go there; ask.
-- **Small subjects in the 64 px storage slots**: the snekke and the station wagon are
-  small in the harbour and garage because of the scale rule (like the kiosk in the
-  rival list). G7 could crop or zoom the cutouts.
+- **Still old style, in no pack** (Folke chose this in G5 and again in G7): the ten
+  foreign properties `stockholm`, `kobenhavn`, `berlin`, `london`, `dubai`,
+  `newyork` and the four Marbella/Zermatt ones. `grafikkG7.test.ts` lists them exactly,
+  so redrawing one means taking it off that list. `pakke42.test.ts` uses `stockholm`
+  as its old-style example. Read each one's `sted` before drawing.
 - Once every drawing is in `NY_STIL`, remove `F`, `Svg`, `Grunn`, the old hairline rule
   and the 48 branch of the test, and turn the "old style" note in the header into history.
+- **New content from the game track** gets a drawing in the current style. A new
+  Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
+  new foreign city a `BYPLASS` side, a new startup idea a mark in `STARTUPMERKER`, a new
+  owned thing a card with `iDetalj` and a case in `Tingdetalj.tsx`.
+- **Shared tests describe the art**: when you redraw something, grep the tests for its
+  markup and update the counting, not the intent (`pakke42.test.ts` counted the old
+  dot crowd; `pakke43.test.ts` matches the wide-layout selector).
+- **Not done, ask first** (shared files):
+  - Avisa shows a generic icon for startup stories and art exhibitions
+    (`ui/avisbilde.ts` has no startup or art kind); `StartupLogo` and `Maleribilde`
+    could go there.
+  - Small subjects stay small at small sizes because of the scale rule: the kiosk and
+    lemonade stand in the 32 px rival list, the snekke and station wagon in the 64 px
+    storage slots. A crop or zoom for those places is open.
+  - The street view and the buy moment were never checked in the light theme.
+  - The map data costs ~23 KB gzipped at startup; `Norgeskart`/`Verdenskart` could
+    be lazy-loaded in Eiendom (a screen change).
