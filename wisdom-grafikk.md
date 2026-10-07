@@ -1,11 +1,11 @@
 # wisdom-grafikk.md — the graphics track's own notes
 
-For the session in charge of graphics and animation (packs G1–G7, commits
+For the session in charge of graphics and animation (packs G1–G11, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G7,
-the last planned pack: the notes now serve whoever draws new content later.
+Update it at the end of each G pack, and delete what stops being true. Updated after G8.
+G9–G11 are planned in `Ideer.md`.
 
 ---
 
@@ -73,6 +73,16 @@ the last planned pack: the notes now serve whoever draws new content later.
   redrawn. Naming every place in the option (Kjøpesenter Trondheim, Aker Brygge,
   Ytterskjær …) and saying what the smaller option leaves (foreign scenes at 150 px
   in the old style) made the choice easy. Expect the smaller scope on art volume.
+- **Ask only where there is a real choice.** G8 had four items; two were design
+  (does anything of the goal strip stay; how does a card react to a press) and two were
+  technical (lighter drawings, the unchecked views). Two questions, both
+  recommendations taken. Nobody missed a question about how to slim down the defs.
+- **Measure the share before you promise a number in `Ideer.md`.** I wrote that
+  lighter drawings would remove "roughly half" of the page. It removed about half of
+  the *hidden definitions*, but those were only 10–30 % of each page: Luksus went from
+  5,200 to 3,700 drawing elements (−29 %), Bedrifter −23 %, Eiendom only −9 %. The
+  drawings' own shapes are the bulk (a property drawing is about 190 elements). Say
+  the real result in the report, and why the estimate was off.
 - **Put outside sources in the question.** Fetching Natural Earth was an option in
   the G3 questions, so Folke's answer was the approval. Do the same for any download,
   font or dataset: name the source, the licence and that nothing loads at runtime.
@@ -217,6 +227,33 @@ the last planned pack: the notes now serve whoever draws new content later.
   inline script also reads `milliardaer.bevegelse`, so the in-game reduced-motion
   setting holds from the first frame. The first view's fade is on `.app` with *no*
   fill mode: a filled opacity animation keeps a stacking context on the whole app.
+- **Each drawing writes only the definitions it uses (G8).** `useUrl` in Tegnestil
+  records every name it hands out in a set that `Lerret` creates per render, and
+  `Definisjoner`, the *last* child of the canvas, writes out those (plus the gradient a
+  mask needs, `TRENGER`). That works because React renders a component's whole subtree
+  before its next sibling, and `url(#…)` may point forward in the document. A new shared
+  effect goes into `definisjon()` with a name and is used through `useUrl`, never as a
+  hand-written `<defs>`. `grafikkG8.test.ts` checks that every drawing defines exactly
+  what it references. I did *not* move the constant ones into one global block: the
+  sky reads `--himmel-*` where the gradient is defined (Avisa sets them on its own
+  container), and a drawing rendered on its own (tests, a second root) would lose its
+  shadows silently.
+- **Cards that open a page (G8)**: business cards now open on a tap anywhere outside
+  their buttons too (`vedKorttrykk` in `ui/detaljvisning.ts`, the same rule as
+  `trykkApner`), and every `.kan-aapnes` card sinks to 98.5 % with a lighter
+  background while pressed. The rule is `:active:not(:has(button:active, …))`, so
+  pressing a buy button inside the card doesn't sink the card.
+- **The goal strip (G8)** is `.maalfelt`, a sibling *after* the sticky `.toppfelt`, not
+  inside it, so it scrolls with the page and slides under the header (z-index 10). In
+  the wide layout it has its own grid row (`'meny maal'`). The fixed top on a phone is
+  now 116 px instead of about 159 px.
+- **The light theme needs its own backdrop where text floats over the page**: the buy
+  moment's name sat on a 70 % black spot, fine for light text in the dark theme but
+  dark-on-dark in the light one. The light theme now gets a white spot.
+- **A sideways-scrolling row must show that it scrolls.** The street view's row had
+  exactly three buildings in view and nothing peeking in, so it looked complete.
+  `useRullekanter` (Gatebilde) sets `mer-venstre`/`mer-hoyre`, and CSS fades that edge
+  with `mask-image`.
 
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
@@ -357,6 +394,14 @@ the last planned pack: the notes now serve whoever draws new content later.
   animation at a chosen time with
   `el.getAnimations({ subtree: true }).forEach(a => { a.pause(); a.currentTime = t })`
   and screenshot each stage. Close that tab afterwards.
+- **A game where the goal strip shows** needs a modest save: the rich test save has
+  passed every goal. Stash the rich one in `milliardaer.test.original` from
+  `/ikon.svg`, build a fresh game there (`nyttSpill`, kr 3 mill, a few businesses,
+  `simuler(s, 600)`), test, then restore it from `/ikon.svg` and remove the stash key.
+- **`:active` can't be triggered from a script.** Synthetic clicks never show the
+  pressed state; check that the rule loads (`document.styleSheets`) and that
+  `CSS.supports('selector(:has(a))')`, and say in the report that the look itself was
+  not seen.
 - **A report in Avisa** only shows when the open issue carries one. Mock it by cloning
   the open `.regnskap .oppgjor` into the open `.avis` (`avis.prepend(clone)`).
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
@@ -449,6 +494,10 @@ the last planned pack: the notes now serve whoever draws new content later.
   helper that throws when `fra` is missing and keeps CRLF. **`styles.css` is CRLF**; the
   `.tsx` files are LF. Long drawings go in separate `.txt` snippet files that a script
   splices in between two markers.
+- **Never run Prettier on a file here.** There is no config, so it uses its defaults
+  (double quotes, semicolons) and rewrote all of `Toppfelt.tsx` (G8). Restore with
+  `git checkout -- <file>` and re-apply with a patch script; re-indent by hand. Some
+  files (`Toppfelt.tsx`) have a BOM *and* CRLF; the patch scripts keep both.
 - **Git Bash `sed -i` turns `styles.css` into LF** (G3, and again in G7 for a
   one-word change). Never `sed` that file; use `fiks.mjs` or Edit. If it happens, check
   `file src/styles.css` and restore CRLF with a node one-liner. The repo is safe: Git
@@ -466,7 +515,7 @@ the last planned pack: the notes now serve whoever draws new content later.
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
 
-## 7. Notes for later (all seven G packs are done)
+## 7. Notes for later (G1–G8 done; G9–G11 planned in `Ideer.md`)
 
 - **Still old style, in no pack** (Folke chose this in G5 and again in G7): the ten
   foreign properties `stockholm`, `kobenhavn`, `berlin`, `london`, `dubai`,
@@ -489,6 +538,5 @@ the last planned pack: the notes now serve whoever draws new content later.
   - Small subjects stay small at small sizes because of the scale rule: the kiosk and
     lemonade stand in the 32 px rival list, the snekke and station wagon in the 64 px
     storage slots. A crop or zoom for those places is open.
-  - The street view and the buy moment were never checked in the light theme.
   - The map data costs ~23 KB gzipped at startup; `Norgeskart`/`Verdenskart` could
     be lazy-loaded in Eiendom (a screen change).
