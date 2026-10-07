@@ -279,6 +279,11 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   SVGs and keep each one's aspect ratio (`width / height`), since lockups and covers
   aren't square. Rival stories rarely come up in Avisa; mock a cream `div` with
   `figure.avisbilde.rival` holding cloned covers on the gallery page.
+- After a test save jumps a day, Avisa opens by itself and covers the screen. Close
+  it with the button `aria-label="Lukk avisa"` before looking for anything.
+- A club and paintings for testing: `kjopKlubb(s, KLUBBNAVN[1])`, then set
+  `s.klubb.divisjon` (0–4) to see each stadium; `kjopMaleri` and `museum(s, id)`
+  give the gallery wall an owned and a loaned painting.
 - Startups only appear after a few game days: build the test save, then
   `simuler(s, DAG_SEK * 7)`. The Selskaper sections are folded until you own
   something there; click their headings open.
@@ -296,6 +301,9 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   gallery page.
 - Set the light theme with `document.documentElement.dataset.theme = 'light'`. CSS-var
   skies follow it at once; cloned SVGs do too.
+- **White on a white card** (Vik's white frames) needs the light-theme hairline: give
+  the SVG the class `illustrasjon` (as `Maleribilde` does) and the existing CSS adds
+  the 0.6 px edge. `.stadion` has its own rule.
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
   Reload, wrap `console.error`, click all five tabs, and read the wrapped list.
 
@@ -367,7 +375,9 @@ Update it at the end of each G pack, and delete what stops being true. Updated a
   JSON reused across steps. The old patch then runs by mistake. Give each patch its own
   file name (`g3-fjell.json`).
 - **Heredocs aren't reliable for backslashes either**: `\\d` in a regex came out as `\d`
-  through Bash. Write scripts with regexes using the Write tool.
+  through Bash. Write scripts with regexes using the Write tool. That includes the
+  JSON patch files for `fiks.mjs`: in G6 a heredoc JSON with `\.\d` in a test regex
+  failed to parse. Anything with a backslash goes through Write or Edit.
 - **An error screen during edits** ("Noe gikk galt", e.g. "reading 'x'") is usually HMR
   catching a half-applied multi-file change. Reload before you debug.
 - **Gallery maps run at midnight**: `?galleri` builds new games (`sek` 0), so the maps
