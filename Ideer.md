@@ -66,6 +66,7 @@ Loose ends after G1–G7. Not in the pack plan yet.
 20. **Scenes that follow the clock.** The maps already go dark at night (`morke(s.sek)`); the drawings are always midday. At night the detail scene gets a darker sky and lit windows (most drawings already have warm window lights). The season stays the same.
 21. **Lighter drawings.** Every drawing carries about 50 hidden setup elements (5 masks, a filter and about 10 gradients) whether it uses them or not. In a rich test game the Luksus tab has 42 drawings and 5,200 of its 5,800 elements are drawing parts, including 210 masks; Eiendom has 5,500 of 6,300. One shared set, or only what each drawing uses, removes roughly half of that, for faster tab switches and scrolling on slow phones.
 22. **Feedback when you press a card.** Only the gold buttons and the cup button react visibly when pressed. Cards that open a page (businesses, and everything from G7) show nothing until the page has grown out about a third of a second later. Give them a subtle pressed state.
+23. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
 
 ## Parked (not chosen yet)
 
