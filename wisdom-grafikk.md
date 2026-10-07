@@ -4,8 +4,8 @@ For the session in charge of graphics and animation (packs G1–G11, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G8.
-G9–G11 are planned in `Ideer.md`.
+Update it at the end of each G pack, and delete what stops being true. Updated after G9.
+G10–G11 are planned in `Ideer.md`.
 
 ---
 
@@ -73,6 +73,11 @@ G9–G11 are planned in `Ideer.md`.
   redrawn. Naming every place in the option (Kjøpesenter Trondheim, Aker Brygge,
   Ytterskjær …) and saying what the smaller option leaves (foreign scenes at 150 px
   in the old style) made the choice easy. Expect the smaller scope on art volume.
+  For G9 Folke took all three recommendations: every foreign property drawn from its
+  real place with the city's landmark in the haze, Marbella and Zermatt in their high
+  season, and close-ups only in the two tiny places. Naming the landmark per city in
+  the option (Stadshuset, Vor Frelsers Kirke, Fernsehturm, Big Ben, Empire State,
+  Burj Al Arab, La Concha, Matterhorn) made it concrete.
 - **Ask only where there is a real choice.** G8 had four items; two were design
   (does anything of the goal strip stay; how does a card react to a press) and two were
   technical (lighter drawings, the unchecked views). Two questions, both
@@ -255,6 +260,26 @@ G9–G11 are planned in `Ideer.md`.
   `useRullekanter` (Gatebilde) sets `mer-venstre`/`mer-hoyre`, and CSS fades that edge
   with `mask-image`.
 
+- **The ten foreign properties (G9)** are all at far distance and reuse two patterns:
+  a waterfront (quay strips in `Kantfade` over `Bakke type="hav"`, as Aker Brygge) for
+  Östermalm and Nyhavn, and a street (`fortau`/`asfalt`) for Mitte and Mayfair. New
+  helpers: `Palme` (curved trunk, seven leaf shapes), `LaConcha` and `Matterhorn`
+  (landmarks in haze, as components so two drawings can frame them differently) and
+  `Snogran` (spruce with snow). **A landmark in the haze must stay a hint**: Burj Al
+  Arab first rose to the top of the frame and took over the villa; at a third of the
+  height it reads as Dubai without competing.
+- **Close-ups (G9)**: `NAERBILDER` in Illustrasjoner holds a crop box [x, y, w, h] per
+  id; `Illustrasjon naerbilde={[maxW, maxH]}` fits that box into the size and sets
+  the canvas `viewBox` through the `Naerbilde` context. Business boxes are square
+  (rival list, 32 px); vehicle boxes follow the subject (wide cars, tall sailboats) and
+  get 86 × 74 in a 96 × 84 storage slot, which keeps a few pixels of air between slots.
+  Cars came out about 1.6× bigger, the snekke about 2.5×. A new business or a new
+  thing for the garage, harbour or hangar needs a box (`grafikkG9.test.ts` checks).
+- **The old style is gone (G9)**: `F`, `Svg` and `Grunn` are deleted, every id is in
+  `NY_STIL`, `Scene` is always 172 px and the gallery no longer badges "Ny stil". The
+  light-theme hairline rule *stays*: the paintings (white frames) and the stadium still
+  need it; only the drawings on the canvas (`.lerret`) are exempt.
+
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
   `grafikkG4.test.ts` checks all three. The cream was the strictest: five colours that
@@ -394,6 +419,13 @@ G9–G11 are planned in `Ideer.md`.
   animation at a chosen time with
   `el.getAnimations({ subtree: true }).forEach(a => { a.pause(); a.currentTime = t })`
   and screenshot each stage. Close that tab afterwards.
+- **Read crop boxes off a grid, don't measure them.** In G9 I tried to compute each
+  subject's box from `getBoundingClientRect` of the drawing's parts. It failed: some
+  drawings wrap everything in one masked group (bank, limousine, Formula 1 car came
+  back empty), and the cars measured only their showroom floor. A 10-unit grid
+  (`rutenett(names, px)`: lines every 10 units, red at 50) over each 132 px drawing,
+  read by eye, was quick and right. Then check every crop on a contact sheet: the first
+  round cut the bank's sign, the ship's bow and the snekke's bow.
 - **A game where the goal strip shows** needs a modest save: the rich test save has
   passed every goal. Stash the rich one in `milliardaer.test.original` from
   `/ikon.svg`, build a fresh game there (`nyttSpill`, kr 3 mill, a few businesses,
@@ -452,7 +484,10 @@ G9–G11 are planned in `Ideer.md`.
   `NY_STIL`. An empty `bytt` block deletes a function (old helpers like `Hjul`,
   `Klokke`, `Understell`). The first version's regex matched from the *first* `/**`
   in the file and silently kept old comments; find the last `\n/**` before the
-  function and check only whitespace follows its `*/`.
+  function and check only whitespace follows its `*/`. **`før` strands a doc comment**:
+  inserting a helper before `function Dubai(` put it *between* the old Dubai's comment
+  and its function, so the old one-liner was left above the helper (G9). Put a new
+  helper inside the same `bytt` block as the first drawing that uses it instead.
 - **`cat > fil` without a heredoc waits for stdin** and hung Bash for two minutes.
   Write temporary files with the Write tool.
 - **A buy-everything test save crashed the game** in G5 (`avis.ts` had 8 titles for
@@ -515,19 +550,13 @@ G9–G11 are planned in `Ideer.md`.
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
 
-## 7. Notes for later (G1–G8 done; G9–G11 planned in `Ideer.md`)
+## 7. Notes for later (G1–G9 done; G10–G11 planned in `Ideer.md`)
 
-- **Still old style, in no pack** (Folke chose this in G5 and again in G7): the ten
-  foreign properties `stockholm`, `kobenhavn`, `berlin`, `london`, `dubai`,
-  `newyork` and the four Marbella/Zermatt ones. `grafikkG7.test.ts` lists them exactly,
-  so redrawing one means taking it off that list. `pakke42.test.ts` uses `stockholm`
-  as its old-style example. Read each one's `sted` before drawing.
-- Once every drawing is in `NY_STIL`, remove `F`, `Svg`, `Grunn`, the old hairline rule
-  and the 48 branch of the test, and turn the "old style" note in the header into history.
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
   new foreign city a `BYPLASS` side, a new startup idea a mark in `STARTUPMERKER`, a new
-  owned thing a card with `iDetalj` and a case in `Tingdetalj.tsx`.
+  owned thing a card with `iDetalj` and a case in `Tingdetalj.tsx`, and a new business or
+  vehicle a close-up box in `NAERBILDER`.
 - **Shared tests describe the art**: when you redraw something, grep the tests for its
   markup and update the counting, not the intent (`pakke42.test.ts` counted the old
   dot crowd; `pakke43.test.ts` matches the wide-layout selector).
@@ -535,8 +564,7 @@ G9–G11 are planned in `Ideer.md`.
   - Avisa shows a generic icon for startup stories and art exhibitions
     (`ui/avisbilde.ts` has no startup or art kind); `StartupLogo` and `Maleribilde`
     could go there.
-  - Small subjects stay small at small sizes because of the scale rule: the kiosk and
-    lemonade stand in the 32 px rival list, the snekke and station wagon in the 64 px
-    storage slots. A crop or zoom for those places is open.
+  - The business cards' own 44 px pictures keep the full scene (Folke chose close-ups
+    only in the two tiny places); the kiosk is still small there.
   - The map data costs ~23 KB gzipped at startup; `Norgeskart`/`Verdenskart` could
     be lazy-loaded in Eiendom (a screen change).
