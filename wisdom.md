@@ -163,8 +163,10 @@ session; delete what stops being true.
   previous one and what the bot owned. Without BENK it stops at 1 mrd so `npm test`
   stays fast. Since Pack 47 the bench uses the **smart bot** (`botSpill(…, true)`),
   which buys straight up to the next income doubling when it can afford it, as players
-  do. **Now 1 mrd ≈ 7 h 20 min, 10 mrd ≈ 17 h, 100 mrd ≈ 1 d 7 h, 1 trillion ≈ 1 d 23 h**
-  (Folke picked "steady, ~15 h per tenfold" after 1 mrd). The old simple bot gave
+  do. After Pack 47: 1 mrd ≈ 7 h 20 min, 1 trillion ≈ 1 d 23 h (Folke picked "steady,
+  ~15 h per tenfold" after 1 mrd). **After Pack 48, with the smart bot picking volum at
+  level 50: 1 mrd ≈ 6 h 33 min, 10 mrd ≈ 15 h 29 min, 1 trillion ≈ 1 d 20 h.** Volum was
+  first +25 % (6 h 17 min); Folke chose +15 % to move the pace less. The old simple bot gave
   8 h 38 min to 1 mrd — the game didn't get faster, the bot got less clumsy; with the
   same bot, 7 h 42 min was once rejected as too fast. The **golden master keeps the
   simple bot**, so the fasit only moves when the engine does.
@@ -177,6 +179,16 @@ session; delete what stops being true.
   the top businesses' payback. Pack 47 set olje → skisenter to pay back in ~30 000 s with
   upgrades at half the early ladder's share (`pakke35.test.ts` has a second rule for
   that), and compressed the top so skisenter unlocks at 750 mrd, before the finish line.
+- **Measure each part of a pack alone** before tuning: switching one effect off at a
+  time (Pack 48: volum off, stars off) showed that all the speed-up came from volum and
+  that the bot never hired a star. Stars (4× price for 2.5× effect) only pay off when a
+  business's ten slots are full — Folke kept it that way.
+- **Staff live in `b.stab`** (Pack 48), with `ansatte` still the count. Old saves have no
+  `stab`: `stab(b)` then makes everyone experienced with names from a hash, so no save
+  version was needed. Never compute "one more hire" as `{ ...b, ansatte: b.ansatte + 1 }`
+  — once `stab` exists that adds nobody. Use `medNyAnsatt(b, grad)`. With only
+  experienced staff the formulas are bit-for-bit the old ones (zeros added last), which
+  is why the golden master didn't move.
 - **Know what the bot doesn't do**, or the bench will fool you: it never borrows, never
   hires managers, never buys property, luxury, stocks or startups, and reaches 1 mrd
   before it ever buys the Bank. Changes to those systems don't show in the bench — reason
