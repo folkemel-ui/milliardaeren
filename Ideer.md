@@ -22,9 +22,16 @@ Items from *Road to v2.0*. Commits: `Pakke N: …`.
 - **Pack 50 – Things happen:** Random events with choices, Rivals that fight back, Daily and weekly missions
 - **Pack 51 – The top (v2.0):** Take your group public, A finish line, Start-over bonus
 
-### Graphics track (Packs G1–G7)
+### Graphics track (Packs G8–G11)
 
-Commits: `Grafikkpakke GN: …`. All seven packs are done: G1 (the foundation), G2 (the businesses), G3 (the maps), G4 (faces and names), G5 (things you own), G6 (stadium and gallery) and G7 (the finish). New drawings follow the style G1 set.
+Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G7 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish); new drawings follow the style G1 set.
+
+- **Pack G8 – Lighter and quicker:** Lighter drawings, Feedback when you press a card, The goal strip scrolls away, The views nobody has checked
+- **Pack G9 – The last drawings:** The last ten drawings, Small things at small sizes
+- **Pack G10 – A living scene:** Motion in the detail scenes, Scenes that follow the clock
+- **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
+
+G8 comes first because the later packs add motion and night versions to every drawing, which should land on the lighter base. G10 waits for G9 so the night sky and the motion only have to be built for the new style. *Drawings for the v2.0 content* is not a pack: it runs alongside Packs 47–51, as each one lands.
 
 ### Working side by side
 
