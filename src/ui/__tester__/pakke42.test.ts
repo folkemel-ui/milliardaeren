@@ -8,6 +8,7 @@ import { DIVISJONER, KLUBBNAVN } from '../../engine/klubb'
 import { Stadion, STADIONTRINN } from '../komponenter/Stadion'
 import { drakt } from '../komponenter/Klubbvaapen'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
+import { Maleribilde } from '../komponenter/Malerier'
 
 const tegn = (divisjon: number, navn = KLUBBNAVN[0]) => renderToStaticMarkup(createElement(Stadion, { divisjon, navn }))
 
@@ -44,7 +45,9 @@ describe('det lyse temaet', () => {
   const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
 
   it('tegningene har en klasse, og får en hårfin kant bare i det lyse temaet', () => {
-    expect(renderToStaticMarkup(createElement(Illustrasjon, { id: 'stockholm' }))).toContain('class="illustrasjon"')
+    // Maleriene har klassen og får kanten (hvite rammer); tegningene på lerretet har himmel og slipper.
+    expect(renderToStaticMarkup(createElement(Maleribilde, { id: 'byen-sover' }))).toContain('class="maleri-bilde illustrasjon"')
+    expect(renderToStaticMarkup(createElement(Illustrasjon, { id: 'stockholm' }))).toContain('class="illustrasjon lerret"')
     expect(css).toMatch(/:root\[data-theme='light'\] \.illustrasjon:not\(\.lerret\),\s*:root\[data-theme='light'\] \.stadion \{\s*filter: drop-shadow/)
   })
 

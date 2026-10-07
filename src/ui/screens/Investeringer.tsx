@@ -825,7 +825,7 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
             return (
               <li key={rb.type}>
                 <div className="rivalbedrift-topp">
-                  <Illustrasjon id={rb.type} størrelse={32} />
+                  <Illustrasjon id={rb.type} størrelse={32} naerbilde={[32, 32]} />
                   <div>
                     <strong>{BEDRIFTSTYPER[rb.type].navn}</strong>
                     <span className="dempet liten">

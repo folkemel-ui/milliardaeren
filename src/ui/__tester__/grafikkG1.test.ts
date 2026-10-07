@@ -49,11 +49,9 @@ describe('målestokken (G1)', () => {
 })
 
 describe('tegningene i den nye stilen (G1)', () => {
-  it('finnes, og står på 96-lerretet; resten står på det gamle 48-rutenettet', () => {
-    expect(NY_STIL.every((id) => ILLUSTRASJONSIDER.includes(id))).toBe(true)
-    for (const id of ILLUSTRASJONSIDER) {
-      expect(tegn(id), id).toContain(NY_STIL.includes(id) ? 'viewBox="0 0 96 96"' : 'viewBox="0 0 48 48"')
-    }
+  it('alle står på 96-lerretet (den gamle 48-stilen er borte etter G9)', () => {
+    expect([...NY_STIL].sort()).toEqual([...ILLUSTRASJONSIDER].sort())
+    for (const id of ILLUSTRASJONSIDER) expect(tegn(id), id).toContain('viewBox="0 0 96 96"')
   })
 
   it('bruker bare palettens farger (pluss himmel, skygge, masker og lys)', () => {

@@ -19,8 +19,6 @@ import { nettoInn, nettoUt, OppgjorBlokk } from '../komponenter/Oppgjor'
 import { Luksuskort } from '../screens/Luksus'
 
 const SJU = ['kjopesenter', 'naeringsbygg', 'oy', 'fyret', 'hoppbakken', 'borgen', 'tarnet']
-/** Folke valgte å la de utenlandske stå i den gamle stilen (G7). */
-const UTENLANDS = ['stockholm', 'kobenhavn', 'berlin', 'london', 'dubai', 'newyork', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell']
 
 const tegning = (id: string) => renderToStaticMarkup(createElement(Illustrasjon, { id, størrelse: 96 }))
 
@@ -64,8 +62,8 @@ describe('de sju norske tegningene (G7)', () => {
     })
   })
 
-  it('bare de ti utenlandske står igjen i den gamle stilen', () => {
-    expect(ILLUSTRASJONSIDER.filter((id) => !NY_STIL.includes(id)).sort()).toEqual([...UTENLANDS].sort())
+  it('ingen står igjen i den gamle stilen (de ti utenlandske ble tegnet om i G9)', () => {
+    expect(ILLUSTRASJONSIDER.filter((id) => !NY_STIL.includes(id))).toEqual([])
   })
 })
 

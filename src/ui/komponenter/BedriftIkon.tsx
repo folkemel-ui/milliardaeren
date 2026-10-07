@@ -1,6 +1,6 @@
 import { memo, type ReactNode } from 'react'
 import { aapneTing, type Ting } from '../detaljvisning'
-import { Illustrasjon, NY_STIL, trinnFor } from './Illustrasjoner'
+import { Illustrasjon, trinnFor } from './Illustrasjoner'
 
 /**
  * Bildet på kortet for noe du kan eie, som en knapp: den åpner detaljsiden
@@ -44,13 +44,13 @@ export const BedriftIkon = memo(function BedriftIkon({
 
 /**
  * Tegningen stor, på en egen scene øverst i en detaljvisning. Bare her beveger
- * tegningene seg. Tegningene i den nye stilen har himmel og luft rundt seg, så
- * de fyller hele scenens høyde.
+ * tegningene seg. Tegningene har himmel og luft rundt seg, så de fyller hele
+ * scenens høyde.
  */
 export const Scene = memo(function Scene({ type, nivaa, forbedringer = 0 }: { type: string; nivaa?: number; forbedringer?: number }) {
   return (
     <div className="scene" aria-hidden="true">
-      <Illustrasjon id={type} størrelse={NY_STIL.includes(type) ? 172 : 150} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
+      <Illustrasjon id={type} størrelse={172} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
     </div>
   )
 })

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { redusertBevegelse, useBevegelse } from '../innstillinger'
-import { F } from './Illustrasjoner'
+import { S } from './Tegnestil'
 
 /**
  * Bevegelse på kartene (Pakke 46): et fly eller en båt som følger en sti
@@ -74,8 +74,8 @@ export function Flysymbol({ storrelse = 1 }: { storrelse?: number }) {
     <path
       transform={`scale(${storrelse})`}
       d="M4.2 0 L-0.8 -0.8 L-1.4 -3.6 L-2.4 -3.6 L-2.4 -0.9 L-3.6 -0.6 L-4.1 -1.7 L-4.7 -1.7 L-4.5 0 L-4.7 1.7 L-4.1 1.7 L-3.6 0.6 L-2.4 0.9 L-2.4 3.6 L-1.4 3.6 L-0.8 0.8 Z"
-      fill={F.hvit}
-      stroke={F.mork}
+      fill={S.hvit.lys}
+      stroke={S.mork.skygge}
       strokeWidth={0.5}
       strokeLinejoin="round"
     />
@@ -86,9 +86,9 @@ export function Flysymbol({ storrelse = 1 }: { storrelse?: number }) {
 export function Skipsymbol() {
   return (
     <>
-      <path d="M-4.4 0 L4.6 0 L3.4 1.8 L-3.6 1.8 Z" fill={F.rod} />
-      <rect x="-2.6" y="-1.7" width="4.2" height="1.7" fill={F.hvit} />
-      <rect x="0.2" y="-3" width="1" height="1.3" fill={F.mork} />
+      <path d="M-4.4 0 L4.6 0 L3.4 1.8 L-3.6 1.8 Z" fill={S.faluRod.lys} />
+      <rect x="-2.6" y="-1.7" width="4.2" height="1.7" fill={S.hvit.lys} />
+      <rect x="0.2" y="-3" width="1" height="1.3" fill={S.mork.skygge} />
     </>
   )
 }

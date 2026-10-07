@@ -2,7 +2,7 @@ import { BEDRIFTSTYPER } from '../../engine/innhold'
 import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
 import { JORD } from '../../engine/jord'
 import { LANDEMERKER } from '../../engine/landemerker'
-import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NY_STIL, type Trinn } from '../komponenter/Illustrasjoner'
+import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NAERBILDER, type Trinn } from '../komponenter/Illustrasjoner'
 import { Bakke, GRUNNLINJE, Kloss, Lerret, maal, METER, Person, S, Slagskygge, type Avstand, type Bakketype } from '../komponenter/Tegnestil'
 import { PAPIRER } from '../../engine/marked'
 import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
@@ -140,10 +140,10 @@ export function Galleri() {
   return (
     <main className="galleri">
       <h1 className="skjerm-tittel">Illustrasjoner</h1>
-      <p className="dempet">Hver tegning i 5× størrelse, og slik den vises i spillet — på mørk og lys bunn. De som er tegnet i den nye stilen, kommer først.</p>
+      <p className="dempet">Hver tegning i 5× størrelse, og slik den vises i spillet — på mørk og lys bunn. Der tegningen har et nærbilde (rivallista, lageret), står det til høyre for de små.</p>
       <Stilark />
       <div className="galleri-rutenett">
-        {[...ILLUSTRASJONSIDER].sort((a, b) => Number(NY_STIL.includes(b)) - Number(NY_STIL.includes(a))).map((id) => (
+        {ILLUSTRASJONSIDER.map((id) => (
           <figure key={id} className="galleri-kort">
             <div className="galleri-stor">
               <Illustrasjon id={id} størrelse={240} />
@@ -155,6 +155,11 @@ export function Galleri() {
               <span className="galleri-lys">
                 <Illustrasjon id={id} størrelse={44} />
               </span>
+              {NAERBILDER[id] && (
+                <span className="galleri-mork" title="Nærbilde">
+                  <Illustrasjon id={id} størrelse={44} naerbilde={BEDRIFTSTEGNINGER.includes(id) ? [32, 32] : [86, 74]} utklipp={!BEDRIFTSTEGNINGER.includes(id)} />
+                </span>
+              )}
             </div>
             {BEDRIFTSTEGNINGER.includes(id) && (
               <div className="galleri-trinn">
@@ -167,7 +172,7 @@ export function Galleri() {
               </div>
             )}
             <figcaption>
-              {navn(id)} {NY_STIL.includes(id) && <span className="merke gull">Ny stil</span>}
+              {navn(id)}
             </figcaption>
           </figure>
         ))}

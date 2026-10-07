@@ -100,6 +100,14 @@ const Ider = createContext<Lerretinfo>({ id: 't', brukt: new Set() })
  */
 export const Utklipp = createContext(false)
 
+/**
+ * Nærbilde (G9): et utsnitt rundt motivet, til steder der tegningen er så
+ * liten at kiosken eller snekka forsvinner (rivallista, plassene i garasjen,
+ * havna og hangaren). \`boks\` er utsnittet i lerretets enheter, \`bredde\` og
+ * \`hoyde\` størrelsen i piksler. Settes av \`Illustrasjon\` (\`naerbilde\`).
+ */
+export const Naerbilde = createContext<{ boks: readonly [number, number, number, number]; bredde: number; hoyde: number } | null>(null)
+
 /** Peker til en av lerretets felles gradienter, med lerretets egne id-er, og melder at den trengs. */
 function useUrl() {
   const { id, brukt } = useContext(Ider)
@@ -266,13 +274,20 @@ function Definisjoner({ tema }: { tema: keyof typeof HIMMEL }) {
 export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: number; himmel?: keyof typeof HIMMEL | 'ingen'; children: ReactNode }) {
   const id = 't' + useId().replace(/[^a-zA-Z0-9]/g, '')
   if (useContext(Utklipp)) himmel = 'ingen'
+  const naer = useContext(Naerbilde)
   const tema = himmel === 'inne' ? 'inne' : 'dag'
   // Nytt for hver tegning av lerretet; barna fyller det mens de tegnes.
   const info: Lerretinfo = { id, brukt: new Set() }
   if (himmel !== 'ingen') info.brukt.add('h').add('vm')
   if (himmel === 'inne') info.brukt.add('l')
   return (
-    <svg className="illustrasjon lerret" width={størrelse} height={størrelse} viewBox="0 0 96 96" aria-hidden="true">
+    <svg
+      className="illustrasjon lerret"
+      width={naer ? naer.bredde : størrelse}
+      height={naer ? naer.hoyde : størrelse}
+      viewBox={naer ? naer.boks.join(' ') : '0 0 96 96'}
+      aria-hidden="true"
+    >
       {himmel !== 'ingen' && <rect x="0" y="0" width="96" height="96" fill={`url(#${id}h)`} mask={`url(#${id}vm)`} />}
       {himmel === 'inne' && <ellipse cx="48" cy="62" rx="44" ry="30" fill={`url(#${id}l)`} />}
       <Ider.Provider value={info}>
@@ -601,9 +616,9 @@ export function Vindusrad({ x, y, antall, b, h, mellom, tent = 0, start = 0, kar
         const lyser = tent > 0 && (i + start) % tent === 0
         return (
           <g key={i}>
-            {karm && <rect x={vx - 0.5} y={y - 0.5} width={b + 1} height={h + 1} fill={karm} />}
+            {karm && <rect x={r2(vx - 0.5)} y={r2(y - 0.5)} width={r2(b + 1)} height={r2(h + 1)} fill={karm} />}
             <rect x={vx} y={y} width={b} height={h} fill={lyser ? S.vinduLys.flate : S.glass.skygge} />
-            {!lyser && <rect x={vx} y={y} width={b * 0.45} height={h} fill={S.glass.flate} opacity="0.5" />}
+            {!lyser && <rect x={vx} y={y} width={r2(b * 0.45)} height={h} fill={S.glass.flate} opacity="0.5" />}
           </g>
         )
       })}

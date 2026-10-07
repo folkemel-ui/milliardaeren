@@ -10,7 +10,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../../engine/start'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
-import { ILLUSTRASJONSIDER, Illustrasjon, NY_STIL } from '../komponenter/Illustrasjoner'
+import { Illustrasjon, NY_STIL } from '../komponenter/Illustrasjoner'
 import { Toppfelt } from '../komponenter/Toppfelt'
 
 const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
@@ -45,9 +45,6 @@ describe('lettere tegninger (G8)', () => {
     expect(snitt).toBeLessThan(30)
   })
 
-  it('de gamle tegningene tegnes fortsatt', () => {
-    for (const id of ILLUSTRASJONSIDER.filter((i) => !NY_STIL.includes(i))) expect(tegn(id), id).toContain('<svg')
-  })
 })
 
 describe('kort som åpner en side (G8)', () => {
