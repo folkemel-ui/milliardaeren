@@ -13,12 +13,14 @@ import type { MaleriId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { endring, fortegnKroner, kortKroner } from '../format'
 import { Seksjon } from './Seksjon'
-import { Maleribilde } from './Malerier'
+import { Maleribilde, Maleriscene } from './Malerier'
+import { aapneTing, trykkApner } from '../detaljvisning'
+import { Apneknapp } from './BedriftIkon'
 
 /**
  * Galleriveggen øverst i Kunst (G6): maleriene du eier henger på en vegg med
  * lys ovenfra og en liten messingplate under. Et maleri som er lånt ut til
- * museum, står som en tom plass med lapp.
+ * museum, står som en tom plass med lapp. Et trykk åpner maleriet stort (G7).
  */
 function Galleriveggen({ s }: { s: Spilltilstand }) {
   const eide = MALERILISTE.filter((id) => s.kunst.eide[id])
@@ -29,7 +31,9 @@ function Galleriveggen({ s }: { s: Spilltilstand }) {
         const ute = s.kunst.eide[id]?.utlant
         return (
           <figure key={id} className={ute ? 'kunstvegg-plass tom' : 'kunstvegg-plass'} role="listitem">
-            <div className="kunstvegg-bilde">{ute ? <span className="kunstvegg-lapp">På museum</span> : <Maleribilde id={id} hoyde={64} />}</div>
+            <button className="kunstvegg-bilde" aria-label={`Vis ${MALERIER[id].navn} stort`} onClick={() => aapneTing({ slag: 'maleri', id })}>
+              {ute ? <span className="kunstvegg-lapp">På museum</span> : <Maleribilde id={id} hoyde={64} />}
+            </button>
             <figcaption>{MALERIER[id].navn}</figcaption>
           </figure>
         )
@@ -47,24 +51,30 @@ export function Kunst({ s }: { s: Spilltilstand }) {
       {verdi > 0 && <p className="dempet liten">Samlingen din er verdt {kortKroner(verdi)}.</p>}
       <ul className="kortliste">
         {MALERILISTE.map((id) => (
-          <Maleri key={id} s={s} id={id} />
+          <Malerikort key={id} s={s} id={id} />
         ))}
       </ul>
     </Seksjon>
   )
 }
 
-function Maleri({ s, id }: { s: Spilltilstand; id: MaleriId }) {
+/** Kortet for et maleri. Et trykk åpner detaljsiden, der kortet står under maleriet på veggen (`iDetalj`). */
+export function Malerikort({ s, id, iDetalj = false }: { s: Spilltilstand; id: MaleriId; iDetalj?: boolean }) {
   const m = MALERIER[id]
   const eid = s.kunst.eide[id]
   const pris = maleripris(s, id)
   const siden = pris / m.startpris - 1
   return (
-    <li className={eid ? 'kort maleri eid' : 'kort maleri'}>
+    <li className={`kort maleri${eid ? ' eid' : ''}${iDetalj ? '' : ' kan-aapnes'}`} onClick={iDetalj ? undefined : trykkApner({ slag: 'maleri', id })}>
+      {iDetalj && <Maleriscene id={id} navn={m.navn} under={`${KUNSTNERE[m.kunstner].navn}, ${m.aar}`} utlant={eid?.utlant} />}
       <div className="bedriftskort-topp">
-        <div className="bedrift-ikon" aria-hidden="true">
-          <Maleribilde id={id} størrelse={44} />
-        </div>
+        {!iDetalj && (
+          <Apneknapp ting={{ slag: 'maleri', id }} navn={m.navn}>
+            <span className="bedrift-ikon">
+              <Maleribilde id={id} størrelse={44} />
+            </span>
+          </Apneknapp>
+        )}
         <div className="bedriftskort-midt">
           <h2>{m.navn}</h2>
           <span className="dempet liten">

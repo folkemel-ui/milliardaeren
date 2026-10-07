@@ -1,5 +1,19 @@
-import { memo } from 'react'
+import { memo, type ReactNode } from 'react'
+import { aapneTing, type Ting } from '../detaljvisning'
 import { Illustrasjon, NY_STIL, trinnFor } from './Illustrasjoner'
+
+/**
+ * Bildet på kortet for noe du kan eie, som en knapp: den åpner detaljsiden
+ * med den store scenen (G7). Hele kortet åpner den også (`trykkApner`); knappen
+ * er for tastaturet og skjermlesere.
+ */
+export function Apneknapp({ ting, navn, children }: { ting: Ting; navn: string; children: ReactNode }) {
+  return (
+    <button className="aapne-bilde" aria-label={`Vis ${navn} stort`} onClick={() => aapneTing(ting)}>
+      {children}
+    </button>
+  )
+}
 
 /**
  * Illustrasjonen i en rund flis — for bedrifter, eiendom og luksus. `stor`

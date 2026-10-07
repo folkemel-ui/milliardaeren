@@ -20,8 +20,11 @@ import { kjopLuksus, selgLuksus, utvidLager } from '../../engine/handlinger'
 import type { LagerId, LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
-import { BedriftIkon } from '../komponenter/BedriftIkon'
-import { useState, type ReactNode } from 'react'
+import { Apneknapp, BedriftIkon, Scene } from '../komponenter/BedriftIkon'
+import { trykkApner } from '../detaljvisning'
+import { useEffect, useState, type ReactNode } from 'react'
+import { aapneTing, FANE_FOR, useTing } from '../detaljvisning'
+import { Tingdetalj } from './Tingdetalj'
 import { Klubb, Klubbkort } from './Klubb'
 import { Kunst } from '../komponenter/Kunst'
 import { Seksjon } from '../komponenter/Seksjon'
@@ -33,7 +36,11 @@ const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
 export function Luksus({ s }: { s: Spilltilstand }) {
   const [klubb, settKlubb] = useState(false)
+  const ting = useTing()
+  // Detaljsiden lukkes når du bytter fane.
+  useEffect(() => () => aapneTing(null), [])
   if (klubb) return <Klubb s={s} tilbake={() => settKlubb(false)} />
+  if (ting && FANE_FOR[ting.slag] === 'luksus') return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>
@@ -110,15 +117,26 @@ function Status({ s }: { s: Spilltilstand }) {
   )
 }
 
-function Luksuskort({ s, id }: { s: Spilltilstand; id: LuksusId }) {
+/** Kortet for en luksusgjenstand. Et trykk åpner detaljsiden, der kortet står under den store scenen (`iDetalj`). */
+export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: LuksusId; iDetalj?: boolean }) {
   const g = LUKSUS[id]
   const eier = s.luksus.includes(id)
   const lager = LAGER_FOR[g.kategori]
   const ingenPlass = !eier && lager !== null && brukteplasser(s, lager) >= s.lager[lager]
 
   return (
-    <li className={eier ? 'kort kjopskort luksuskort eid' : 'kort kjopskort luksuskort'} data-ny={id}>
-      <BedriftIkon type={id} stor />
+    <li
+      className={`kort kjopskort luksuskort${eier ? ' eid' : ''}${iDetalj ? ' i-detalj' : ' kan-aapnes'}`}
+      data-ny={id}
+      onClick={iDetalj ? undefined : trykkApner({ slag: 'luksus', id })}
+    >
+      {iDetalj ? (
+        <Scene type={id} />
+      ) : (
+        <Apneknapp ting={{ slag: 'luksus', id }} navn={g.navn}>
+          <BedriftIkon type={id} stor />
+        </Apneknapp>
+      )}
       <div className="bedriftskort-midt">
         <h2>
           {g.navn}

@@ -18,12 +18,16 @@ import type { EiendomId, Spilltilstand } from '../../engine/types'
 import { dagnummer, dato, MÅNEDER } from '../../engine/kalender'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall, varighet } from '../format'
-import { BedriftIkon } from './BedriftIkon'
+import { Apneknapp, BedriftIkon, Scene } from './BedriftIkon'
 import { NyMerke } from './Kjopsglimt'
 import { Ikon } from './Ikoner'
+import { trykkApner } from '../detaljvisning'
 
-/** Kortet for én eiendomstype: leie, standard, og knappene for å kjøpe, selge og pusse opp. Brukes i lista og i gatebildet. */
-export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
+/**
+ * Kortet for én eiendomstype: leie, standard, og knappene for å kjøpe, selge og pusse opp. Brukes i lista og i gatebildet.
+ * Et trykk åpner detaljsiden; der står kortet selv under den store scenen (`iDetalj`).
+ */
+export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: EiendomId; iDetalj?: boolean }) {
   const t = EIENDOMSTYPER[id]
   const eier = s.eiendommer[id] ?? 0
   const pris = eiendomspris(s, id)
@@ -37,16 +41,21 @@ export function Eiendomskort({ s, id }: { s: Spilltilstand; id: EiendomId }) {
   const nesteStandard = STANDARDER[st + 1]
 
   return (
-    <li className="kort bedriftskort" data-ny={id}>
+    <li className={iDetalj ? 'kort bedriftskort' : 'kort bedriftskort kan-aapnes'} data-ny={id} onClick={iDetalj ? undefined : trykkApner({ slag: 'eiendom', id })}>
+      {iDetalj && <Scene type={id} />}
       <div className="bedriftskort-topp">
-        <div className="bilde-med-brikke">
-          <BedriftIkon type={id} stor />
-          {eier > 0 && (
-            <span className="brikke gull" aria-label={`${eier} av ${t.maksAntall} eid`}>
-              {eier}/{t.maksAntall}
+        {!iDetalj && (
+          <Apneknapp ting={{ slag: 'eiendom', id }} navn={t.navn}>
+            <span className="bilde-med-brikke">
+              <BedriftIkon type={id} stor />
+              {eier > 0 && (
+                <span className="brikke gull" aria-label={`${eier} av ${t.maksAntall} eid`}>
+                  {eier}/{t.maksAntall}
+                </span>
+              )}
             </span>
-          )}
-        </div>
+          </Apneknapp>
+        )}
         <div className="bedriftskort-midt">
           <h2>
             {t.navn}

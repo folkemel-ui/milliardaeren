@@ -16,7 +16,8 @@ import { dagnummer } from '../../engine/kalender'
 import type { By, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall } from '../format'
-import { BedriftIkon } from './BedriftIkon'
+import { Apneknapp, BedriftIkon, Scene } from './BedriftIkon'
+import { trykkApner } from '../detaljvisning'
 import { Seksjon } from './Seksjon'
 
 /** Gårder og skoger — filtrert på by når en by er valgt på kartet. */
@@ -49,16 +50,21 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
   )
 }
 
-/** Kortet for en gård eller skog. Uten `faktor` brukes denne ukas vær. */
-export function Jordkort({ s, id, faktor = vaer(dagnummer(s.sek)).faktor }: { s: Spilltilstand; id: JordId; faktor?: number }) {
+/** Kortet for en gård eller skog. Uten `faktor` brukes denne ukas vær. Et trykk åpner detaljsiden (`iDetalj`). */
+export function Jordkort({ s, id, faktor = vaer(dagnummer(s.sek)).faktor, iDetalj = false }: { s: Spilltilstand; id: JordId; faktor?: number; iDetalj?: boolean }) {
   const t = JORD[id]
   const eid = s.jord[id]
   const land = landverdi(s, id)
   const tommer = tommerverdi(s, id)
   return (
-    <li className={eid ? 'kort bedriftskort eid' : 'kort bedriftskort'}>
+    <li className={`kort bedriftskort${eid ? ' eid' : ''}${iDetalj ? '' : ' kan-aapnes'}`} onClick={iDetalj ? undefined : trykkApner({ slag: 'jord', id })}>
+      {iDetalj && <Scene type={id} />}
       <div className="bedriftskort-topp">
-        <BedriftIkon type={id} stor />
+        {!iDetalj && (
+          <Apneknapp ting={{ slag: 'jord', id }} navn={t.navn}>
+            <BedriftIkon type={id} stor />
+          </Apneknapp>
+        )}
         <div className="bedriftskort-midt">
           <h2>{t.navn}</h2>
           <span className="dempet">{t.sted}</span>
@@ -113,7 +119,7 @@ export function Landemerkeliste({ s }: { s: Spilltilstand }) {
   )
 }
 
-export function Landemerkekort({ s, id }: { s: Spilltilstand; id: LandemerkeId }) {
+export function Landemerkekort({ s, id, iDetalj = false }: { s: Spilltilstand; id: LandemerkeId; iDetalj?: boolean }) {
   const l = LANDEMERKER[id]
   const mitt = eierDu(s, id)
   const e = s.landemerker[id]
@@ -122,9 +128,14 @@ export function Landemerkekort({ s, id }: { s: Spilltilstand; id: LandemerkeId }
   const verdi = landemerkepris(s, id)
   const truet = !e && rivalerSomKan(s, id).length > 0
   return (
-    <li className={mitt ? 'kort bedriftskort eid' : 'kort bedriftskort'}>
+    <li className={`kort bedriftskort${mitt ? ' eid' : ''}${iDetalj ? '' : ' kan-aapnes'}`} onClick={iDetalj ? undefined : trykkApner({ slag: 'landemerke', id })}>
+      {iDetalj && <Scene type={id} />}
       <div className="bedriftskort-topp">
-        <BedriftIkon type={id} stor />
+        {!iDetalj && (
+          <Apneknapp ting={{ slag: 'landemerke', id }} navn={l.navn}>
+            <BedriftIkon type={id} stor />
+          </Apneknapp>
+        )}
         <div className="bedriftskort-midt">
           <h2>{l.navn}</h2>
           <span className="dempet">{l.sted}</span>

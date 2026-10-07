@@ -178,6 +178,20 @@ figure {
   display: flex;
   flex-direction: column;
   background: var(--bakgrunn);
+  /* Det første bildet glir fram over lasteskjermens bakgrunn i stedet for å stå der med ett (G7). */
+  animation: forste-bilde 0.35s ease-out;
+}
+
+@keyframes forste-bilde {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app {
+    animation: none;
+  }
 }
 
 @media (min-width: 520px) {
@@ -486,8 +500,24 @@ figure {
   row-gap: 8px;
 }
 
-.luksuskort > .bedrift-ikon {
+.luksuskort > .bedrift-ikon,
+.luksuskort > .aapne-bilde {
   grid-row: span 2;
+}
+
+/* På detaljsiden står scenen over hele kortet, med navnet til venstre og knappen til høyre under. */
+.luksuskort > .scene {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.kjopskort.luksuskort.i-detalj {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.luksuskort.i-detalj > :last-child {
+  justify-self: end;
 }
 
 .luksuskort > :last-child {
@@ -504,6 +534,21 @@ figure {
 .bilde-med-brikke {
   position: relative;
   flex: none;
+}
+
+/* G7: bildet på kortet for noe du eier er en knapp, og hele kortet åpner detaljsiden. */
+.aapne-bilde {
+  display: block;
+  flex: none;
+  border-radius: 16px;
+}
+
+.aapne-bilde .bilde-med-brikke {
+  display: block;
+}
+
+.kan-aapnes {
+  cursor: pointer;
 }
 
 .bilde-med-brikke .brikke {
@@ -2733,6 +2778,105 @@ button.merke {
 
 .avis .oppgjor .minus {
   color: #a3241a;
+}
+
+/* G7: oppgjøret som en årsrapport. Stolpene går fra én nullinje — inn til høyre, ut til venstre —
+   og formuen før og etter står som to stolper. Avisa har egne, mørkere farger på papiret. */
+.oppgjor {
+  --oppgjor-inn: var(--pluss);
+  --oppgjor-ut: var(--minus);
+  --oppgjor-for: var(--tekst-dempet);
+  --oppgjor-etter: var(--gull);
+}
+
+.avis .oppgjor {
+  --oppgjor-inn: #1d7a3e;
+  --oppgjor-ut: #a3241a;
+  --oppgjor-for: #a99d87;
+  --oppgjor-etter: #94782f;
+}
+
+.oppgjor-tall .med-stolpe {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.oppgjor-tall .med-stolpe dd {
+  display: contents;
+}
+
+.oppgjor-stolpe {
+  position: relative;
+  display: block;
+  flex-basis: 100%;
+  height: 6px;
+}
+
+.oppgjor-stolpe::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--null, 0%);
+  width: 1px;
+  background: var(--oppgjor-kant, var(--kant));
+}
+
+.oppgjor-stolpe > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.oppgjor-stolpe .inn,
+.oppgjor-stolpe .for,
+.oppgjor-stolpe .etter {
+  border-radius: 0 3px 3px 0;
+}
+
+.oppgjor-stolpe .inn {
+  background: var(--oppgjor-inn);
+}
+
+.oppgjor-stolpe .ut {
+  border-radius: 3px 0 0 3px;
+  background: var(--oppgjor-ut);
+}
+
+.oppgjor-stolpe .for {
+  background: var(--oppgjor-for);
+}
+
+.oppgjor-stolpe .etter {
+  background: var(--oppgjor-etter);
+}
+
+.oppgjor-formue {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 10px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.oppgjor-formue dd {
+  text-align: right;
+}
+
+.oppgjor-formue .oppgjor-stolpe {
+  height: 10px;
+}
+
+.oppgjor-formue .oppgjor-stolpe > span {
+  left: 0;
+}
+
+.oppgjor-formue .oppgjor-endring {
+  grid-column: 2 / -1;
+  font-weight: var(--vekt-fet);
 }
 
 .oppgjor-merknad {
@@ -5352,6 +5496,43 @@ button.maalstripe {
   filter: drop-shadow(2px 4px 4px rgb(0 0 0 / 0.45));
 }
 
+/* Maleriet stort på detaljsiden (G7): samme vegg og messingplate som galleriveggen. */
+.scene.maleriscene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-bottom: 12px;
+  background:
+    radial-gradient(ellipse 45% 70% at 50% 0%, rgb(255 236 200 / 0.18), transparent 70%),
+    linear-gradient(#3a352f, #2a2622 86%, #1f1c19 86%, #1f1c19 88%, #2a2622 88%);
+}
+
+.maleriscene-bilde {
+  line-height: 0;
+  filter: drop-shadow(3px 6px 6px rgb(0 0 0 / 0.5));
+}
+
+.maleriscene-bilde.tom {
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgb(255 255 255 / 0.25);
+  filter: none;
+}
+
+.maleriscene-plate {
+  padding: 1px 8px;
+  background: linear-gradient(#c9a54a, #94782f);
+  color: #1c1a16;
+  font-size: var(--skrift-1);
+  white-space: nowrap;
+}
+
+.maleriscene-plate strong {
+  font-weight: var(--vekt-halvfet);
+}
+
 .kunstvegg-plass.tom .kunstvegg-bilde {
   width: 72px;
   border: 1px dashed rgb(255 255 255 / 0.25);
@@ -5564,8 +5745,8 @@ button.maalstripe {
     background: var(--flate-2);
   }
 
-  /* Kortlistene i to spalter — ikke i vinduene som åpner seg over (gatebildet, valgt plass). */
-  .innhold .kortliste:not(.gate-kort, .lager-valgt) {
+  /* Kortlistene i to spalter — ikke i vinduene som åpner seg over (gatebildet, valgt plass) eller på en detaljside. */
+  .innhold .kortliste:not(.gate-kort, .lager-valgt, .tingkort) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;

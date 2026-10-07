@@ -200,6 +200,9 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
 /** Et punkt flyttet `d` enheter inn i bildet. */
 export const inn = (x: number, y: number, d: number): [number, number] => [+(x + d * DYBDE.x).toFixed(2), +(y + d * DYBDE.y).toFixed(2)]
 
+/** Avrundet til to desimaler, så flyttallsrester (56.60000000000001) ikke havner i markupen. */
+export const r2 = (n: number) => +n.toFixed(2)
+
 export const pkt = (...p: [number, number][]) => p.map(([x, y]) => `${+x.toFixed(2)},${+y.toFixed(2)}`).join(' ')
 
 /**
@@ -245,7 +248,7 @@ export function Slagskygge({ x1, x2, y = GRUNNLINJE, lengde, d = 0 }: { x1: numb
   const b = inn(x2, y, d)
   return (
     <g>
-      <ellipse cx={(x1 + x2) / 2} cy={y + 0.4} rx={(x2 - x1) / 2 + 2} ry="1.8" fill="#000000" opacity="0.28" />
+      <ellipse cx={r2((x1 + x2) / 2)} cy={r2(y + 0.4)} rx={r2((x2 - x1) / 2 + 2)} ry="1.8" fill="#000000" opacity="0.28" />
       <polygon points={pkt([x1 + (x2 - x1) * 0.3, y], a, b, [b[0] + lengde, b[1]], [a[0] + lengde * 0.6, y])} fill={u('s')} />
     </g>
   )
@@ -297,6 +300,20 @@ export function Kantfade({ children }: { children: ReactNode }) {
   return <g mask={u('km')}>{children}</g>
 }
 
+/**
+ * Bakke som fyller bunnen av lerretet (en åsside, snøen under en hoppbakke),
+ * blekner ut nederst og mot sidene, som havet gjør.
+ */
+export function Bunnfade({ children }: { children: ReactNode }) {
+  const u = useUrl()
+  if (useContext(Utklipp)) return null
+  return (
+    <g mask={u('km')}>
+      <g mask={u('nm')}>{children}</g>
+    </g>
+  )
+}
+
 // ─────────────────────────────────────────────── Bakken
 
 export type Bakketype = 'fortau' | 'gress' | 'kai' | 'gulv' | 'sno' | 'hav' | 'asfalt'
@@ -322,7 +339,7 @@ export function Bakke({ type }: { type: Bakketype }) {
         <>
           <rect x="0" y={g - 16} width="96" height="28" fill={S.stein.lys} />
           {[-24, -8, 8, 24, 40, 56, 72, 88, 104].map((x) => (
-            <line key={x} x1={x} y1={g + 6} x2={x + 6.6} y2={g - 16} stroke={S.stein.flate} strokeWidth="0.5" />
+            <line key={x} x1={x} y1={g + 6} x2={r2(x + 6.6)} y2={g - 16} stroke={S.stein.flate} strokeWidth="0.5" />
           ))}
           {[g - 9, g - 2].map((y) => (
             <line key={y} x1="0" y1={y} x2="96" y2={y} stroke={S.stein.flate} strokeWidth="0.5" />
@@ -446,8 +463,8 @@ export function Tre({ x, y = GRUNNLINJE, h, slag = 'lov' }: { x: number; y?: num
     })
     return (
       <g>
-        <ellipse cx={x + h * 0.12} cy={y} rx={h * 0.3} ry={h * 0.04} fill="#000000" opacity="0.22" />
-        <rect x={x - h * 0.03} y={y - h * 0.16} width={h * 0.06} height={h * 0.16} fill={S.treMork.flate} />
+        <ellipse cx={r2(x + h * 0.12)} cy={y} rx={r2(h * 0.3)} ry={r2(h * 0.04)} fill="#000000" opacity="0.22" />
+        <rect x={r2(x - h * 0.03)} y={r2(y - h * 0.16)} width={r2(h * 0.06)} height={r2(h * 0.16)} fill={S.treMork.flate} />
         {lag}
       </g>
     )
@@ -465,7 +482,7 @@ export function Tre({ x, y = GRUNNLINJE, h, slag = 'lov' }: { x: number; y?: num
   ]
   return (
     <g>
-      <ellipse cx={x + h * 0.14} cy={y} rx={h * 0.32} ry={h * 0.045} fill="#000000" opacity="0.22" />
+      <ellipse cx={r2(x + h * 0.14)} cy={y} rx={r2(h * 0.32)} ry={r2(h * 0.045)} fill="#000000" opacity="0.22" />
       <polygon points={pkt([x - h * 0.045, y], [x + h * 0.045, y], [x + h * 0.025, sentrum], [x - h * 0.025, sentrum])} fill={S.treMork.flate} />
       {klynger.map(([dx, dy, k, c], i) => (
         <circle key={i} cx={+(x + dx * r).toFixed(2)} cy={+(sentrum + dy * r).toFixed(2)} r={+(r * k).toFixed(2)} fill={c} />

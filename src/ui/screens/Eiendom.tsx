@@ -1,4 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { aapneTing, FANE_FOR, useTing } from '../detaljvisning'
+import { Tingdetalj } from './Tingdetalj'
 import {
   EIENDOM_SYNLIG_VED,
   EIENDOMSSTIGEN,
@@ -44,6 +46,10 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
   const indeks = s.marked.eiendom
   const lukkGate = useCallback(() => settGate(null), [])
   const indeksEndring = indeks.historikk.length ? indeks.kurs / indeks.historikk[0] - 1 : 0
+  const ting = useTing()
+  // Detaljsiden lukkes når du bytter fane.
+  useEffect(() => () => aapneTing(null), [])
+  if (ting && FANE_FOR[ting.slag] === 'eiendom') return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Eiendom" />
 
   return (
     <section className="skjerm">

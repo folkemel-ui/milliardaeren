@@ -52,7 +52,7 @@ export function fjernNy(id: string): void {
 }
 
 export function useNy(id: string): boolean {
-  return useSyncExternalStore(abonner, () => nye.includes(id))
+  return useSyncExternalStore(abonner, () => nye.includes(id), () => false)
 }
 
 /** Lytter etter trykk på merkede kort. Kalles én gang fra appen; gir tilbake en opprydding. */

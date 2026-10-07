@@ -60,7 +60,7 @@ describe('bredt oppsett', () => {
   it('fra 1024 px: sidemeny, og kortlistene i to spalter', () => {
     const bred = css.slice(css.indexOf('@media (min-width: 1024px)'))
     expect(bred).toMatch(/\.fanemeny \{[^}]*position: sticky/)
-    expect(bred).toMatch(/\.innhold \.kortliste:not\(\.gate-kort, \.lager-valgt\) \{[^}]*grid-template-columns: repeat\(2/)
+    expect(bred).toMatch(/\.innhold \.kortliste:not\(\.gate-kort, \.lager-valgt, \.tingkort\) \{[^}]*grid-template-columns: repeat\(2/)
     // Telefonen er urørt: logoen i menyen er skjult utenfor den brede skjermen.
     expect(css).toMatch(/\.fanemeny-logo \{\s*display: none;/)
   })

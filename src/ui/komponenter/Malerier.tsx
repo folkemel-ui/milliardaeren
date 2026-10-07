@@ -330,3 +330,23 @@ export const Maleribilde = memo(function Maleribilde({ id, størrelse = 44, hoyd
     </svg>
   )
 })
+
+/**
+ * Scenen øverst på detaljsiden for et maleri (G7): maleriet stort på
+ * galleriveggen, med lys ovenfra, skygge bak rammen og en messingplate under.
+ * Er det lånt ut til museum, står plassen tom med en lapp.
+ */
+export function Maleriscene({ id, navn, under, utlant = false }: { id: MaleriId; navn: string; under: string; utlant?: boolean }) {
+  const { b, h } = maleriformat(id)
+  const hoyde = Math.round(Math.min(116, (236 * h) / b))
+  return (
+    <div className="scene maleriscene" aria-hidden="true">
+      <div className={utlant ? 'maleriscene-bilde tom' : 'maleriscene-bilde'} style={utlant ? { width: Math.round((hoyde * b) / h), height: hoyde } : undefined}>
+        {utlant ? <span className="kunstvegg-lapp">På museum</span> : <Maleribilde id={id} hoyde={hoyde} />}
+      </div>
+      <span className="maleriscene-plate">
+        <strong>{navn}</strong> · {under}
+      </span>
+    </div>
+  )
+}
