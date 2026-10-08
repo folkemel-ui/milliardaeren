@@ -1,4 +1,4 @@
-import { EIENDOMSTYPER, eiendomspris, eierHeleByen, enheterI, kanReiseTil } from '../../engine/eiendom'
+import { EIENDOMSTYPER, eierHeleByen, enheterI, forvalterpaaslag, kanReiseTil, kjopsprisEiendom } from '../../engine/eiendom'
 import { kjopEiendom } from '../../engine/handlinger'
 import { regionFor, REGIONER } from '../../engine/regioner'
 import type { By, Spilltilstand } from '../../engine/types'
@@ -63,7 +63,7 @@ export function Bykort({ s, by, x, y, lukk }: { s: Spilltilstand; by: By; x: num
       {/* Bare det som er igjen å kjøpe, og høyst to — kortet skal ikke dekke kartet. */}
       {ledige.slice(0, 2).map((id) => {
         const t = EIENDOMSTYPER[id]
-        const pris = eiendomspris(s, id)
+        const pris = kjopsprisEiendom(s, id) + forvalterpaaslag(s, id)
         return (
           <button
             key={id}

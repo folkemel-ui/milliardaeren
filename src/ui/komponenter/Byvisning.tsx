@@ -1,7 +1,6 @@
 import { BYEIER_BONUS, EIENDOMSSTIGEN, EIENDOMSTYPER, eierHeleByen, enheterI } from '../../engine/eiendom'
 import { eiendomSynlig, jordSynlig } from '../../engine/handlinger'
-import { HOST_ANDEL, JORD, JORDLISTE, landverdi, vaer } from '../../engine/jord'
-import { dagnummer } from '../../engine/kalender'
+import { JORD, JORDLISTE, ukensGardHost } from '../../engine/jord'
 import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from '../../engine/landemerker'
 import { REGIONER, regionFor } from '../../engine/regioner'
 import type { By, EiendomId, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
@@ -45,8 +44,7 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
   const region = regionFor(by)
   // Jord gir avling hver mandag og har egne priser — en by med bare jord viser avlingen, ikke leie og boligpriser.
   const bareJord = bygg.length + merker.length === 0
-  const faktor = vaer(dagnummer(s.sek)).faktor
-  const avling = jord.filter((id) => s.jord[id] && JORD[id].type === 'gard').reduce((sum, id) => sum + landverdi(s, id) * HOST_ANDEL * faktor, 0)
+  const avling = jord.filter((id) => s.jord[id] && JORD[id].type === 'gard').reduce((sum, id) => sum + ukensGardHost(s, id), 0)
 
   return (
     <>

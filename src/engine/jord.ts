@@ -1,7 +1,9 @@
 /**
  * Gårder og skoger. Jorda stiger sakte i verdi, dag for dag.
  *
- * En gård gir avling hver mandag morgen — stor eller liten etter ukas vær.
+ * En gård gir avling hver mandag morgen — stor eller liten etter ukas vær, og
+ * for de dagene av uka du eide den (Pakke 57). Selger du midt i uka, får du
+ * avlingen så langt med salget.
  * En skog gir ingenting mens den vokser, men tømmeret blir verdt mer for hver
  * dag. Du bestemmer selv når du hogger: da får du betalt for tømmeret, og ny
  * skog plantes. Tømmeret vokser raskest i starten av midtfasen, så det lønner
@@ -134,17 +136,35 @@ export function jordKostpris(s: Spilltilstand): number {
   return JORDLISTE.reduce((sum, id) => sum + (s.jord?.[id]?.kostpris ?? 0), 0)
 }
 
-/** Avlingen gårdene dine gir for uka en spilldag hører til. */
-export function ukensHost(s: Spilltilstand, dag = dagnummer(s.sek)): number {
-  const v = vaer(dag)
-  return JORDLISTE.filter((id) => JORD[id].type === 'gard' && s.jord?.[id]).reduce((sum, id) => sum + landverdi(s, id) * HOST_ANDEL * v.faktor, 0)
+const UKE_SEK = 7 * DAG_SEK
+
+/**
+ * Avlingen én gård gir for uka spilldagen `dag` hører til, frem til `til` (et
+ * sekund): ukas vær ganget med andelen av uka du eide gården. Før fikk den som
+ * eide gården mandag morgen hele uka — kjøp søndag, selg mandag: +4,5 til
+ * +13 % av prisen etter meglerhonoraret.
+ */
+export function gardHost(s: Spilltilstand, id: JordId, dag: number, til: number): number {
+  const j = s.jord?.[id]
+  if (!j || JORD[id].type !== 'gard') return 0
+  const ukestart = Math.floor(dag / 7) * UKE_SEK
+  // For en gård er plantetSek dagen du kjøpte den: en gård hogges aldri.
+  const andel = Math.min(1, Math.max(0, (til - Math.max(ukestart, j.plantetSek)) / UKE_SEK))
+  return landverdi(s, id) * HOST_ANDEL * vaer(dag).faktor * andel
+}
+
+/** Avlingen en gård du eier, gir mandag for uka som går nå — for dagene du eier den. */
+export function ukensGardHost(s: Spilltilstand, id: JordId): number {
+  const dag = dagnummer(s.sek)
+  return gardHost(s, id, dag, (Math.floor(dag / 7) + 1) * UKE_SEK)
 }
 
 /** Mandag morgen høstes gårdene for uka som gikk. Gir avisens sak. Muterer. */
 export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   if (!s.jord || ukedag(s.sek) !== 0) return []
-  const forrige = dagnummer(s.sek) - 1
-  const host = ukensHost(s, forrige)
+  const dag = dagnummer(s.sek)
+  const forrige = dag - 1
+  const host = JORDLISTE.reduce((sum, id) => sum + gardHost(s, id, forrige, dag * DAG_SEK), 0)
   if (host <= 0) return []
   s.kontanter += host
   s.totaltHost += host

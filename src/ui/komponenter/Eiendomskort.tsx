@@ -3,6 +3,8 @@ import { dagsbilde, EIENDOMSVAER, VAERTYPER } from '../../engine/verden'
 import {
   EIENDOMSTYPER,
   eiendomspris,
+  forvalterpaaslag,
+  kjopsprisEiendom,
   flyFor,
   kanReiseTil,
   LUKSUS,
@@ -32,6 +34,8 @@ export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id:
   const t = EIENDOMSTYPER[id]
   const eier = s.eiendommer[id] ?? 0
   const pris = eiendomspris(s, id)
+  // En ny enhet koster oppussingen den hopper over, og forvalterens 5 % (Pakke 57).
+  const kjopspris = kjopsprisEiendom(s, id) + forvalterpaaslag(s, id)
   const st = standard(s, id)
   const fullt = eier >= t.maksAntall
   const manglerStatus = statusnivaa(s) < t.statuskrav
@@ -93,7 +97,7 @@ export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id:
           <div className={eier > 0 ? 'eiendom-knapper' : 'eiendom-knapper en'}>
             <button
               className="knapp knapp-gull"
-              disabled={fullt || manglerStatus || manglerFly || s.kontanter < pris}
+              disabled={fullt || manglerStatus || manglerFly || s.kontanter < kjopspris}
               onClick={() => utfor(kjopEiendom(s, id))}
             >
               {fullt
@@ -102,7 +106,7 @@ export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id:
                   ? `Krever status ${t.statuskrav}`
                   : manglerFly && fly
                     ? `Krever ${LUKSUS[fly].navn.toLowerCase()}`
-                    : `Kjøp · ${kortKroner(pris)}`}
+                    : `Kjøp · ${kortKroner(kjopspris)}`}
             </button>
             {eier > 0 && (
               <Bekreftknapp

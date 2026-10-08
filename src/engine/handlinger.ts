@@ -40,7 +40,8 @@ import {
   brukteplasser,
   byverdi,
   EIENDOM_SYNLIG_VED,
-  eiendomspris,
+  forvalterpaaslag,
+  kjopsprisEiendom,
   EIENDOMSTYPER,
   flyFor,
   kanReiseTil,
@@ -380,13 +381,17 @@ export function kjopEiendom(s: Spilltilstand, id: EiendomId): Utfall {
   if (!kanReiseTil(s, id)) return feil(`Du må ha ${LUKSUS[flyFor(id)!].navn.toLowerCase()} for å komme deg til ${t.by}.`)
   if ((s.eiendommer[id] ?? 0) >= t.maksAntall) return feil(`Du eier allerede alle ${t.maksAntall} som er til salgs.`)
   if (s.oppussing[id]) return feil('Vent til oppussingen er ferdig.')
-  const pris = eiendomspris(s, id)
-  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const pris = kjopsprisEiendom(s, id)
+  const paaslag = forvalterpaaslag(s, id)
+  if (s.kontanter < pris + paaslag) return feil('Du har ikke råd.')
   const n = structuredClone(s)
-  n.kontanter -= pris
+  n.kontanter -= pris + paaslag
   n.eiendommer[id] = (n.eiendommer[id] ?? 0) + 1
+  // Oppussingen enheten hopper over, går i kostprisen som en oppussing gjør.
   n.eiendomKostpris[id] = (n.eiendomKostpris[id] ?? 0) + pris
   flyt(n, 'eiendom', pris)
+  // Forvalteren tar sitt av det nye, som han tok av det du eide da han ble ansatt.
+  n.totaltForbruk += paaslag
   return { ok: true, tilstand: n }
 }
 

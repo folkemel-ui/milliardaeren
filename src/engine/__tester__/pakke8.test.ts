@@ -10,7 +10,7 @@ import { simuler } from '../simulering'
 import { kjopEiendom as kjopEiendomU, kjopForbedring, pussOpp, selgEiendom as selgEiendomU } from '../handlinger'
 import { bedriftInntektPerSek, forbedringsfaktor, forbedringspris, nesteForbedring, nettoformue } from '../formler'
 import { FORBEDRINGER } from '../innhold'
-import { EIENDOMSTYPER, eiendomspris, leiePerSek, oppussingspris, STANDARDER } from '../eiendom'
+import { EIENDOMSTYPER, eiendomspris, kjopsprisEiendom, leiePerSek, oppussingspris, STANDARDER } from '../eiendom'
 import { DAG_SEK } from '../kalender'
 import { kjopEiendom, selgEiendom } from './hjelp'
 import type { Spilltilstand } from '../types'
@@ -91,14 +91,18 @@ describe('oppussing', () => {
     expect(leieHver).toBeCloseTo(forventet)
   })
 
-  it('nye enheter av en oppusset type kjøpes ferdig oppusset — og koster deretter', () => {
+  it('nye enheter av en oppusset type kjøpes ferdig oppusset — og koster oppussingen de hopper over (Pakke 57)', () => {
     let s = kjopEiendom(rik(), 'hytte')
     s = simuler(ok(pussOpp(s, 'hytte')), STANDARDER[1].dager * DAG_SEK)
     const pris = eiendomspris(s, 'hytte')
     expect(pris).toBeCloseTo(EIENDOMSTYPER.hytte.pris * eiendomskurs(s, EIENDOMSTYPER.hytte.by) * STANDARDER[1].verdi)
     const kontanterFør = s.kontanter
+    const grunn = EIENDOMSTYPER.hytte.pris * eiendomskurs(s, EIENDOMSTYPER.hytte.by)
+    expect(kjopsprisEiendom(s, 'hytte')).toBeCloseTo(grunn * (1 + STANDARDER[1].kostnad))
     s = kjopEiendom(s, 'hytte')
-    expect(kontanterFør - s.kontanter).toBeCloseTo(pris)
+    expect(kontanterFør - s.kontanter).toBeCloseTo(grunn * (1 + STANDARDER[1].kostnad))
+    // Verdien er den samme som for den som ble pusset opp.
+    expect(eiendomspris(s, 'hytte')).toBeCloseTo(pris)
   })
 
   it('selger du alle enhetene, forsvinner standarden', () => {

@@ -1,6 +1,6 @@
 import { byverdi } from '../../engine/eiendom'
 import { ansettForvalter, sigOppForvalter } from '../../engine/handlinger'
-import { forvalter, FORVALTER_MINSTEPRIS, FORVALTERE, FORVALTERLISTE, forvalterpris, ledighet, uflaksSjanse } from '../../engine/utleie'
+import { forvalter, FORVALTER_ANDEL, FORVALTER_MINSTEPRIS, FORVALTERE, FORVALTERLISTE, forvalterpris, ledighet, uflaksSjanse } from '../../engine/utleie'
 import type { By, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
@@ -33,7 +33,9 @@ export function Forvalterkort({ s, by }: { s: Spilltilstand; by: By }) {
       </dl>
       {nå ? (
         <div className="personale-rad">
-          <p className="dempet liten">{FORVALTERE[nå].beskrivelse}</p>
+          <p className="dempet liten">
+            {FORVALTERE[nå].beskrivelse} Kjøper du mer i {by}, tar forvalteren {pst(FORVALTER_ANDEL)} av prisen. Selger du alt, slutter forvalteren.
+          </p>
           <Bekreftknapp className="knapp knapp-liten" ja="Ja, si opp" varsel="Du får ikke pengene tilbake." onJa={() => utfor(sigOppForvalter(s, by))}>
             Si opp
           </Bekreftknapp>
@@ -42,7 +44,8 @@ export function Forvalterkort({ s, by }: { s: Spilltilstand; by: By }) {
         <>
           <p className="dempet liten">
             En forvalter holder leilighetene fulle og leietakerne i sjakk. Koster {kortKroner(pris)} én gang —{' '}
-            {pris > FORVALTER_MINSTEPRIS ? `5 % av det du eier i ${by}.` : `minsteprisen; når du eier mer, er det 5 % av det du eier i ${by}.`}
+            {pris > FORVALTER_MINSTEPRIS ? `5 % av det du eier i ${by}` : `minsteprisen; når du eier mer, er det 5 % av det du eier i ${by}`}, og 5 % av alt du kjøper
+            der senere.
           </p>
           <div className="retning-valg">
             {FORVALTERLISTE.map((id) => {

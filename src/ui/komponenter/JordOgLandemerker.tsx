@@ -1,6 +1,6 @@
 import { hoggSkog, jordSynlig, kjopJord, kjopLandemerke, selgJord, selgLandemerke } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
-import { HOST_ANDEL, JORD, JORD_SYNLIG_VED, JORDLISTE, landverdi, skogalder, tommerverdi, vaer } from '../../engine/jord'
+import { HOST_ANDEL, JORD, JORD_SYNLIG_VED, JORDLISTE, landverdi, skogalder, tommerverdi, ukensGardHost, vaer } from '../../engine/jord'
 import {
   eierDu,
   kjopsprisLandemerke,
@@ -34,7 +34,7 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
       </p>
       <ul className="kortliste">
         {synlige.map((id) => (
-          <Jordkort key={id} s={s} id={id} faktor={v.faktor} />
+          <Jordkort key={id} s={s} id={id} />
         ))}
         {!by && neste && (
           <li className="kort kjopskort laast">
@@ -50,8 +50,8 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
   )
 }
 
-/** Kortet for en gård eller skog. Uten `faktor` brukes denne ukas vær. Et trykk åpner detaljsiden (`iDetalj`). */
-export function Jordkort({ s, id, faktor = vaer(dagnummer(s.sek)).faktor, iDetalj = false }: { s: Spilltilstand; id: JordId; faktor?: number; iDetalj?: boolean }) {
+/** Kortet for en gård eller skog. Avlingen er ukas, for dagene du eier gården. Et trykk åpner detaljsiden (`iDetalj`). */
+export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: JordId; iDetalj?: boolean }) {
   const t = JORD[id]
   const eid = s.jord[id]
   const land = landverdi(s, id)
@@ -77,7 +77,7 @@ export function Jordkort({ s, id, faktor = vaer(dagnummer(s.sek)).faktor, iDetal
       <p className="dempet liten">
         {t.type === 'gard'
           ? eid
-            ? `Avling denne uka: omtrent ${kortKroner(land * HOST_ANDEL * faktor)}`
+            ? `Avling denne uka: omtrent ${kortKroner(ukensGardHost(s, id))}`
             : `Gir omtrent ${kortKroner(land * HOST_ANDEL)} i uka i et normalt år`
           : eid
             ? `Tømmer ${kortKroner(tommer)} etter ${tall(skogalder(s, id))} dager`

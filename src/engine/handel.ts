@@ -4,13 +4,14 @@
  * samme kurtasje og flytter kursen likt. Ingen sjekker her — det gjør de som kaller.
  */
 
-import { eiendomspris, MEGLERHONORAR, restverdi } from './eiendom'
+import { eiendomspris, EIENDOMSTYPER, enheterI, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
 import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, PapirId, Spilltilstand } from './types'
 import { FOND_GEBYR, fondskurs } from './fond'
-import { landverdi, tommerverdi } from './jord'
+import { gardHost, landverdi, tommerverdi } from './jord'
+import { dagnummer } from './kalender'
 import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi } from './klubb'
@@ -51,6 +52,9 @@ export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
     delete n.eiendomKostpris[id]
     delete n.eiendomStandard[id]
     delete n.oppussing[id]
+    // Er det ingenting igjen i byen, slutter forvalteren der (Pakke 57).
+    const by = EIENDOMSTYPER[id].by
+    if (n.forvaltere?.[by] && enheterI(n, by).eid === 0) delete n.forvaltere[by]
   }
   return inntekt
 }
@@ -78,6 +82,11 @@ export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
 
 /** Selger en gård eller skog med tømmeret som står, minus meglerhonorar. */
 export function utforJordsalg(n: Spilltilstand, id: JordId): number {
+  // Avlingen så langt denne uka følger med salget (Pakke 57), som om det var mandag.
+  const host = gardHost(n, id, dagnummer(n.sek), n.sek)
+  n.kontanter += host
+  n.totaltHost += host
+  n.totaltLeie += host
   const inntekt = (landverdi(n, id) + tommerverdi(n, id)) * (1 - MEGLERHONORAR)
   n.kontanter += inntekt
   bokforGevinst(n, inntekt - (n.jord[id]?.kostpris ?? 0))

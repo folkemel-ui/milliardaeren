@@ -21,7 +21,7 @@ import { landemerkeleiePerSek, landemerkestatus, landemerkeverdi } from './lande
 import { kunststatus } from './kunst'
 import { premiumstatus } from './ansatte'
 import { dagsbilde } from './verden'
-import { leiefaktorBy } from './utleie'
+import { FORVALTER_ANDEL, forvalter, leiefaktorBy } from './utleie'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -130,6 +130,23 @@ export function standard(s: Spilltilstand, id: EiendomId): number {
 /** Pris (og verdi) for én enhet: katalogpris × eiendomsindeks × standardens verdifaktor. */
 export function eiendomspris(s: Spilltilstand, id: EiendomId): number {
   return EIENDOMSTYPER[id].pris * eiendomskurs(s, EIENDOMSTYPER[id].by) * STANDARDER[standard(s, id)].verdi
+}
+
+/**
+ * Hva én ny enhet koster (Pakke 57): grunnprisen pluss oppussingen den hopper
+ * over — like mye som å kjøpe en vanlig og pusse den opp, bare uten dagene uten
+ * leie. Verdien etterpå er eiendomspris, som for en oppusset enhet. Før kostet
+ * den bare verdien (×1,35 på Luksus mot ×1,65), så å pusse opp én og kjøpe
+ * resten etterpå var 7 % billigere.
+ */
+export function kjopsprisEiendom(s: Spilltilstand, id: EiendomId): number {
+  const oppussing = STANDARDER.slice(1, standard(s, id) + 1).reduce((sum, x) => sum + x.kostnad, 0)
+  return EIENDOMSTYPER[id].pris * eiendomskurs(s, EIENDOMSTYPER[id].by) * (1 + oppussing)
+}
+
+/** Det forvalteren i byen tar av et kjøp der (Pakke 57): 5 % av prisen, eller null uten forvalter. */
+export function forvalterpaaslag(s: Spilltilstand, id: EiendomId): number {
+  return forvalter(s, EIENDOMSTYPER[id].by) ? kjopsprisEiendom(s, id) * FORVALTER_ANDEL : 0
 }
 
 /** Hva det koster å pusse opp alle enhetene av en type ett trinn, eller null når det ikke går. */
