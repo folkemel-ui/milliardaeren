@@ -302,6 +302,9 @@ export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'obligasjon' | 'eiendom
 
 export type ObligasjonId = 'kort' | 'lang'
 
+/** En eiendomsforvalters stil (Pakke 54). */
+export type ForvalterId = 'forsiktig' | 'paagaende' | 'lokal'
+
 /**
  * Det du eier av én obligasjon. Kjøper du flere ganger, slås postene sammen:
  * renten blir snittet vektet med pålydende — verdien og kupongen er lineære i
@@ -424,6 +427,8 @@ export interface Spilltilstand {
   rentebinding?: { sats: number; tilDag: number }
   /** Statsobligasjoner (Pakke 53). Mangler i eldre lagringer: ingen. */
   obligasjoner?: Partial<Record<ObligasjonId, Obligasjonspost>>
+  /** Forvalterne for eiendommen, én per by (Pakke 54). Mangler: ingen. */
+  forvaltere?: Partial<Record<By, ForvalterId>>
   /** Selskapsnyheter som treffer bedriftene dine i samme bransje en stund (Pakke 53). */
   bransjenyheter?: Bransjenyhet[]
   totaltUtbytte: number

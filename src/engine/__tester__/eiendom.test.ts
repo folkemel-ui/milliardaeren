@@ -1,4 +1,7 @@
-﻿import { describe, expect, it } from 'vitest'
+﻿import { describe, expect, it, vi } from 'vitest'
+
+// Leie testes uten ledighet og forvaltere fra Pakke 54 (de testes i pakke54.test.ts).
+vi.mock('../utleie', async (ekte) => (await import('./utenUtleie')).utenUtleie(ekte))
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { bedrift, kjopEiendom, kjopLuksus, laan, maksNyttLaanFor, selgEiendom, selgLuksus, utvidLager } from './hjelp'

@@ -8,6 +8,7 @@ import type { By, EiendomId, JordId, LandemerkeId, Spilltilstand } from '../../e
 import { endring, kortKroner, perSek, tall } from '../format'
 import { leieIBy, trendFor } from '../kart'
 import { Eiendomskort } from './Eiendomskort'
+import { Forvalterkort } from './Forvalter'
 import { Ikon } from './Ikoner'
 import { Jordkort, Landemerkekort } from './JordOgLandemerker'
 
@@ -84,6 +85,8 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
           <Ikon navn="sok" størrelse={14} /> Gatebildet
         </button>
       </div>
+
+      {bygg.some((id) => (s.eiendommer[id] ?? 0) > 0) && <Forvalterkort s={s} by={by} />}
 
       {bygg.length > 0 && (
         <>

@@ -1,11 +1,13 @@
 /** Pakke 45: ferieboliger med sesong, og verdenskartet som vokser med flyene. */
 
 import { describe, expect, it } from 'vitest'
+import { dagsbilde } from '../../engine/verden'
+import { leiefaktorBy } from '../../engine/utleie'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, leieHverPerSek, SESONGER, sesongfaktor, UTENLANDSBYER } from '../../engine/eiendom'
 import { nyttSpill } from '../../engine/start'
 import { DAG_SEK, dagFra } from '../../engine/kalender'
 import { BREDDE, BYPLASS, byPunkt, HOYDE, INNFELT, LAND, projeksjon, utsnittFor } from '../verdenskartet'
-import type { Utenlandsby } from '../../engine/types'
+import type { Spilltilstand, Utenlandsby } from '../../engine/types'
 
 /** Et spill på en bestemt dato. */
 function på(maaned: number) {
@@ -40,8 +42,10 @@ describe('ferieboligene', () => {
   })
 
   it('leien følger sesongen', () => {
-    const sommer = leieHverPerSek(på(6), 'marbella-leilighet')
-    const vinter = leieHverPerSek(på(0), 'marbella-leilighet')
+    // Bare sesongen: været og ledigheten fra Pakke 54 regnes bort.
+    const ren = (s: Spilltilstand) => leieHverPerSek(s, 'marbella-leilighet') / ((dagsbilde(s).eiendom['marbella-leilighet'] ?? 1) * leiefaktorBy(s, 'Marbella'))
+    const sommer = ren(på(6))
+    const vinter = ren(på(0))
     expect(sommer / vinter).toBeCloseTo(1.8 / 0.5, 1)
   })
 })

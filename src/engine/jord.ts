@@ -9,7 +9,7 @@
  */
 
 import { DAG_SEK, dagnummer, ukedag } from './kalender'
-import { hashTekst, tilfeldig } from './rng'
+import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
 import type { JordId, NorskBy, Overskrift, Spilltilstand } from './types'
 import { kortKroner } from './tall'
 
@@ -43,18 +43,60 @@ export const TOMMER_MAKS = 3
 /** … og har vokst til en firedel av det etter så mange dager. Snittveksten er størst da. */
 export const TOMMER_DAGER = 36
 
-export const VAER = [
-  { navn: 'Tørkesommer', tekst: 'Åkrene er svidd. Bøndene ber om regn.', faktor: 0.4 },
-  { navn: 'Regnvær', tekst: 'Det regner mer enn det bør. Avlingene er magre.', faktor: 0.75 },
-  { navn: 'Normalt år', tekst: 'Et helt vanlig år for norske bønder.', faktor: 1 },
-  { navn: 'Godt år', tekst: 'Sol og regn i passe mengder. Kornet står høyt.', faktor: 1.3 },
-  { navn: 'Rekordår', tekst: 'Den beste avlingen i manns minne.', faktor: 1.6 },
+/**
+ * Ett vær (Pakke 54): avlingen følger været uka faktisk hadde — de sju dagene
+ * med norsk vær fra Pakke 49 — i stedet for et eget ukevær. Sol er godt for
+ * kornet, regn og snø mindre. Snittet for uka, jevnet ut per sesong, forsterkes
+ * så avlingene svinger omtrent like mye som før (fra rundt 0,4 til 1,6).
+ */
+const AVLING: Record<Vaertype, number> = { sol: 1.5, overskyet: 1, regn: 0.8, sno: 0.3 }
+const FORSTERKNING = 3
+
+const UKER = [
+  { fra: 1.35, navn: 'Rekorduke', tekst: 'Den beste avlingen i manns minne.' },
+  { fra: 1.1, navn: 'God uke', tekst: 'Sol og regn i passe mengder. Kornet står høyt.' },
+  { fra: 0.9, navn: 'Normal uke', tekst: 'En helt vanlig uke for norske bønder.' },
+  { fra: 0.65, navn: 'Svak uke', tekst: 'For lite sol. Avlingene er magre.' },
+  { fra: 0, navn: 'Elendig uke', tekst: 'Regn og kulde. Bøndene ber om sol.' },
 ] as const
 
-/** Været uka en spilldag hører til — trukket fra uka, ikke fra terningen. */
-export function vaer(dag: number) {
-  const u = tilfeldig(hashTekst(`vær:${Math.floor(dag / 7)}`))
-  return VAER[Math.min(VAER.length - 1, Math.floor(u * VAER.length))]
+export interface Ukevaer {
+  navn: string
+  tekst: string
+  faktor: number
+  /** Dagene med hvert vær den uka. */
+  dager: Record<Vaertype, number>
+}
+
+const HUSKET_UKE = new Map<number, Ukevaer>()
+
+/** Været uka en spilldag hører til, og hva det betyr for avlingen. Samme svar for alle dagene i uka. */
+export function vaer(dag: number): Ukevaer {
+  const uke = Math.floor(dag / 7)
+  const husket = HUSKET_UKE.get(uke)
+  if (husket) return husket
+  const dager: Record<Vaertype, number> = { sol: 0, overskyet: 0, regn: 0, sno: 0 }
+  let sum = 0
+  for (let d = uke * 7; d < uke * 7 + 7; d++) {
+    dager[vaerPaaDag(d)]++
+    sum += jevnetVaer(AVLING, 'norge', d)
+  }
+  const faktor = Math.min(1.8, Math.max(0.3, 1 + FORSTERKNING * (sum / 7 - 1)))
+  const u = UKER.find((x) => faktor >= x.fra)!
+  const ut: Ukevaer = { navn: u.navn, tekst: `${u.tekst} ${uketekst(dager)}`, faktor, dager }
+  if (HUSKET_UKE.size > 200) HUSKET_UKE.clear()
+  HUSKET_UKE.set(uke, ut)
+  return ut
+}
+
+/** «4 dager med sol, 2 med regn og 1 med snø.» */
+function uketekst(d: Record<Vaertype, number>): string {
+  const deler = ([['sol', 'sol'], ['regn', 'regn'], ['sno', 'snø'], ['overskyet', 'skyer']] as const)
+    .filter(([v]) => d[v] > 0)
+    .map(([v, navn], i) => `${d[v]}${i === 0 ? (d[v] === 1 ? ' dag' : ' dager') : ''} med ${navn}`)
+  if (deler.length === 0) return ''
+  const siste = deler.pop()!
+  return `${deler.length ? `${deler.join(', ')} og ${siste}` : siste}.`.replace(/^./, (c) => c.toUpperCase())
 }
 
 export function jordfaktor(s: Spilltilstand): number {

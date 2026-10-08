@@ -11,6 +11,7 @@ import { GRADER, RETNING_NIVAA, RETNINGER } from '../engine/ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from '../engine/verden'
 import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
+import { FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
@@ -130,6 +131,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Eiendom gir leie hvert sekund, også mens du er borte — den trenger ingen leder. Prisene følger landet og byens region, så samme bygg kan stige i én by og falle i en annen. ' +
       `Eier du alle enhetene i en by, får du en krone på kartet og +${pst(BYEIER_BONUS)} leie der. ` +
       'Ferieboligene i Marbella og Zermatt har sesong: Spania gir mest om sommeren, Alpene om vinteren, og over et år blir det det samme som en vanlig eiendom. ' +
+      'Været betyr noe for hyttene (snø), Lofoten (sol), Zermatt (snø i Alpene) og Marbella (sol i Syden) — i snitt jevner det seg ut. ' +
+      `Noe står alltid tomt: opptil ${pst(LEDIGHET_MAKS)} av leien i en by, ny hver uke, og hver mandag kan en dårlig leietaker koste en dags leie (${pst(UFLAKS_SJANSE)} sjanse). ` +
+      `En forvalter i byen holder det nede — forsiktig, pågående eller lokalkjent — og koster ${pst(FORVALTER_ANDEL)} av det du eier der, én gang. ` +
       'Oppussing gir mer leie for godt, men så lenge håndverkerne holder på, kommer det ingen leie. ' +
       `Selger du, tar megleren ${pst(MEGLERHONORAR)}. Noen eiendommer krever status eller et fly for å komme dit.`,
   },

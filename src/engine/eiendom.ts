@@ -20,6 +20,8 @@ import { jordverdi } from './jord'
 import { landemerkeleiePerSek, landemerkestatus, landemerkeverdi } from './landemerker'
 import { kunststatus } from './kunst'
 import { premiumstatus } from './ansatte'
+import { dagsbilde } from './verden'
+import { leiefaktorBy } from './utleie'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -221,7 +223,41 @@ export function enheterI(s: Spilltilstand, by: By): { eid: number; av: number } 
 /** Leie for én enhet per sekund. Følger indeksen og standarden — ikke verdifaktoren — byeierbonusen og sesongen. */
 export function leieHverPerSek(s: Spilltilstand, id: EiendomId): number {
   const t = EIENDOMSTYPER[id]
-  return leieHver(s, id, eiendomskurs(s, t.by), eierHeleByen(s, t.by) ? 1 + BYEIER_BONUS : 1)
+  return leieHver(s, id, eiendomskurs(s, t.by), byfaktorLeie(s, t.by), dagsbilde(s).eiendom[id] ?? 1)
+}
+
+/**
+ * Det som gjelder hele byen: byeierbonusen (Pakke 44), og hvor mye som står
+ * tomt og forvalterens stil (Pakke 54).
+ */
+function byfaktorLeie(s: Spilltilstand, by: By): number {
+  return (eierHeleByen(s, by) ? 1 + BYEIER_BONUS : 1) * leiefaktorBy(s, by)
+}
+
+/** Leien per sekund i én by: alle enhetene du eier der, uten de som pusses opp. */
+export function leieIByen(s: Spilltilstand, by: By): number {
+  let sum = 0
+  for (const id of byggI(by)) {
+    const antall = s.eiendommer[id] ?? 0
+    if (antall > 0 && !s.oppussing?.[id]) sum += antall * leieHverPerSek(s, id)
+  }
+  return sum
+}
+
+/** Det du eier i en by, til markedspris — grunnlaget for prisen på en forvalter. */
+export function byverdi(s: Spilltilstand, by: By): number {
+  let sum = 0
+  for (const id of byggI(by)) sum += (s.eiendommer[id] ?? 0) * eiendomspris(s, id)
+  return sum
+}
+
+/** Byene du eier eiendom i, med stedet for den dyreste — til avisa. */
+export function byerMedEiendom(s: Spilltilstand): { by: By; sted: string }[] {
+  const ut = new Map<By, string>()
+  for (const id of EIENDOMSSTIGEN) {
+    if ((s.eiendommer[id] ?? 0) > 0) ut.set(EIENDOMSTYPER[id].by, EIENDOMSTYPER[id].sted.split(',')[0])
+  }
+  return [...ut].map(([by, sted]) => ({ by, sted }))
 }
 
 /*
@@ -236,9 +272,9 @@ const BYKURS = new Float64Array(BYER.length)
 const BYBONUS = new Float64Array(BYER.length)
 
 /** Selve regnestykket, med byens kurs og byeierbonus regnet ut på forhånd. */
-function leieHver(s: Spilltilstand, id: EiendomId, kurs: number, bonus: number): number {
+function leieHver(s: Spilltilstand, id: EiendomId, kurs: number, bonus: number, vaer: number): number {
   const t = EIENDOMSTYPER[id]
-  return (t.pris * kurs * t.avkastning * STANDARDER[standard(s, id)].leie * bonus * sesongfaktor(s, id)) / 3600
+  return (t.pris * kurs * t.avkastning * STANDARDER[standard(s, id)].leie * bonus * sesongfaktor(s, id) * vaer) / 3600
 }
 
 /** Eier du noen eiendom i det hele tatt? Et salg av den siste enheten fjerner nøkkelen. */
@@ -253,6 +289,8 @@ export function leiePerSek(s: Spilltilstand): number {
   // Regnes hvert sekund: byens kurs og byeierbonus regnes én gang per by.
   BYKURS.fill(NaN)
   BYBONUS.fill(NaN)
+  // Været for eiendommene som merker det (Pakke 54), regnet én gang for dagen.
+  const vaer = dagsbilde(s).eiendom
   let sum = 0
   for (let i = 0; i < EIENDOMSSTIGEN.length; i++) {
     const id = EIENDOMSSTIGEN[i]
@@ -264,8 +302,8 @@ export function leiePerSek(s: Spilltilstand): number {
     let kurs = BYKURS[nr]
     if (Number.isNaN(kurs)) BYKURS[nr] = kurs = eiendomskurs(s, by)
     let bonus = BYBONUS[nr]
-    if (Number.isNaN(bonus)) BYBONUS[nr] = bonus = eierHeleByen(s, by) ? 1 + BYEIER_BONUS : 1
-    sum += antall * leieHver(s, id, kurs, bonus)
+    if (Number.isNaN(bonus)) BYBONUS[nr] = bonus = byfaktorLeie(s, by)
+    sum += antall * leieHver(s, id, kurs, bonus, vaer[id] ?? 1)
   }
   return sum + landemerkeleiePerSek(s)
 }

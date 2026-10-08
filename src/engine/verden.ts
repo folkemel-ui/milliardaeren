@@ -14,7 +14,7 @@
 import { STIGEN } from './innhold'
 import { dagFra, dagnummer, dato, ukedag } from './kalender'
 import { Hashkilde, hashTekst } from './rng'
-import type { BedriftstypeId, Overskrift, Spilltilstand } from './types'
+import type { BedriftstypeId, EiendomId, Overskrift, Spilltilstand } from './types'
 
 /**
  * Frøet for verden. Det samme i alle spill: et frø fra spillet (regionene) ble
@@ -145,14 +145,72 @@ function vaersnitt(type: BedriftstypeId, sesong: Sesong): number {
 }
 
 /** Været en spilldag, for hele landet. */
-export function dagensVaer(s: Spilltilstand, dag = dagnummer(s.sek)): Vaertype {
-  const sjanser = VAERSJANSE[sesongFor(dato(dag).maaned)]
-  let u = kilde(s, `dagsvær:${dag}`).neste()
+export function dagensVaer(_s: Spilltilstand, dag = dagnummer(_s.sek)): Vaertype {
+  return vaerPaaDag(dag, 'norge')
+}
+
+/**
+ * Været et sted (Pakke 54): Norge, Alpene (Zermatt) eller Syden (Marbella),
+ * hvert med sine sesonger. Norge bruker samme nøkkel som i Pakke 49, så
+ * været der er det samme som før.
+ */
+export type Vaersted = 'norge' | 'alpene' | 'syden'
+
+const STEDSJANSE: Record<Exclude<Vaersted, 'norge'>, Record<Sesong, Record<Vaertype, number>>> = {
+  alpene: {
+    vinter: { sol: 0.3, overskyet: 0.15, regn: 0, sno: 0.55 },
+    vaar: { sol: 0.4, overskyet: 0.25, regn: 0.1, sno: 0.25 },
+    sommer: { sol: 0.5, overskyet: 0.3, regn: 0.2, sno: 0 },
+    host: { sol: 0.3, overskyet: 0.35, regn: 0.25, sno: 0.1 },
+  },
+  syden: {
+    vinter: { sol: 0.55, overskyet: 0.3, regn: 0.15, sno: 0 },
+    vaar: { sol: 0.65, overskyet: 0.25, regn: 0.1, sno: 0 },
+    sommer: { sol: 0.9, overskyet: 0.1, regn: 0, sno: 0 },
+    host: { sol: 0.6, overskyet: 0.25, regn: 0.15, sno: 0 },
+  },
+}
+
+const sjanserFor = (sted: Vaersted, sesong: Sesong) => (sted === 'norge' ? VAERSJANSE[sesong] : STEDSJANSE[sted][sesong])
+
+export function vaerPaaDag(dag: number, sted: Vaersted = 'norge'): Vaertype {
+  const sjanser = sjanserFor(sted, sesongFor(dato(dag).maaned))
+  const nøkkel = sted === 'norge' ? `dagsvær:${dag}` : `dagsvær:${sted}:${dag}`
+  let u = new Hashkilde(hashTekst(nøkkel) | 0).neste()
   for (const [vaer, p] of Object.entries(sjanser) as [Vaertype, number][]) {
     if (u < p) return vaer
     u -= p
   }
   return 'overskyet'
+}
+
+/**
+ * Virkningen av været, jevnet ut så hver sesong i snitt gir ×1 på stedet:
+ * en solrik dag i Marbella om sommeren er vanlig og gir lite ekstra.
+ */
+export function jevnetVaer(virkning: Record<Vaertype, number>, sted: Vaersted, dag: number): number {
+  const sjanser = sjanserFor(sted, sesongFor(dato(dag).maaned))
+  let snitt = 0
+  for (const [v, p] of Object.entries(sjanser) as [Vaertype, number][]) snitt += p * virkning[v]
+  return virkning[vaerPaaDag(dag, sted)] / snitt
+}
+
+/**
+ * Eiendom som merker været (Pakke 54): hyttene vil ha snø, rorbuene og øya i
+ * Lofoten sol, Zermatt snø i Alpene og Marbella sol i Syden. Oppå sesongene
+ * fra Pakke 45, og i snitt ×1 per sesong.
+ */
+const SNOHYTTE: Record<Vaertype, number> = { sno: 1.4, sol: 1.1, overskyet: 1, regn: 0.7 }
+const SOLSTED: Record<Vaertype, number> = { sol: 1.3, overskyet: 1, regn: 0.7, sno: 0.8 }
+export const EIENDOMSVAER: Partial<Record<EiendomId, { sted: Vaersted; virkning: Record<Vaertype, number> }>> = {
+  hytte: { sted: 'norge', virkning: SNOHYTTE },
+  'hytte-trysil': { sted: 'norge', virkning: SNOHYTTE },
+  'hytte-lofoten': { sted: 'norge', virkning: SOLSTED },
+  oy: { sted: 'norge', virkning: SOLSTED },
+  'zermatt-leilighet': { sted: 'alpene', virkning: SNOHYTTE },
+  'zermatt-hotell': { sted: 'alpene', virkning: SNOHYTTE },
+  'marbella-leilighet': { sted: 'syden', virkning: SOLSTED },
+  'marbella-hotell': { sted: 'syden', virkning: SOLSTED },
 }
 
 // ─────────────────────────────────────────────── Bransjetrender
@@ -259,6 +317,10 @@ export function helligdag(dag: number): Helligdag | null {
 export interface Kalenderdag {
   dag: number
   vaer: Vaertype
+  /** Været i Alpene og Syden (Pakke 54). */
+  vaerUte: Record<Exclude<Vaersted, 'norge'>, Vaertype>
+  /** Leien for eiendom som merker været, ganges med dette i dag. Mangler: ×1. */
+  eiendom: Partial<Record<EiendomId, number>>
   helligdag: Helligdag | null
   trend: Trend
   /** Inntekten for hver bransje ganges med dette i dag. */
@@ -312,7 +374,12 @@ export function dagsbilde(s: Spilltilstand, dag = dagnummer(s.sek)): Kalenderdag
     f *= hellig?.virkning[type] ?? 1
     faktor[type] = f
   }
-  const d: Kalenderdag = { dag, vaer, helligdag: hellig, trend, faktor }
+  const eiendom: Partial<Record<EiendomId, number>> = {}
+  for (const [id, e] of Object.entries(EIENDOMSVAER) as [EiendomId, { sted: Vaersted; virkning: Record<Vaertype, number> }][]) {
+    eiendom[id] = jevnetVaer(e.virkning, e.sted, dag)
+  }
+  const vaerUte = { alpene: vaerPaaDag(dag, 'alpene'), syden: vaerPaaDag(dag, 'syden') }
+  const d: Kalenderdag = { dag, vaer, vaerUte, eiendom, helligdag: hellig, trend, faktor }
   // Et lite minne: dagene før og etter er de som spørres om.
   if (HUSKET.size > 64) HUSKET.clear()
   HUSKET.set(nøkkel, d)

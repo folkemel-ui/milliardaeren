@@ -1985,13 +1985,15 @@ button.merke {
 }
 
 .sparekonto,
-.obligasjon {
+.obligasjon,
+.forvalter {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .obligasjon p,
+.forvalter p,
 .bransje p {
   margin: 0;
 }

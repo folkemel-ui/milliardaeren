@@ -1,6 +1,9 @@
 /** Pakke 24: regionale eiendomspriser. */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+// Leie testes uten ledighet og forvaltere fra Pakke 54 (de testes i pakke54.test.ts).
+vi.mock('../utleie', async (ekte) => (await import('./utenUtleie')).utenUtleie(ekte))
 import { nyttSpill, SPILLVERSJON } from '../start'
 import { simuler } from '../simulering'
 import { nettoformue } from '../formler'

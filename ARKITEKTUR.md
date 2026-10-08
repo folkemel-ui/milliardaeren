@@ -43,7 +43,7 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | System | Nøkkel |
 |---|---|
 | Kø (`hender.ts`) | `hashTekst('kø') + sek` |
-| Vær (`jord.ts`) | `vær:<uke>` |
+| Vær på gårdene (`jord.ts`) | ingen egen nøkkel fra Pakke 54: avlingen regnes fra ukas sju dager med norsk vær |
 | Rivaler kjøper landemerker | `<landemerke>:<rival>:<dag>` |
 | Rivalens pris i fusjoner | `<rival>:<bransje>:<dag>` |
 | Kvartalsrapporter | `estimat:<id>:<dag>`, `resultat:<id>:<dag>` |
@@ -52,7 +52,9 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | Klubb til salgs | `<navn>:<dag>` |
 | Ansattnavn (`ansatte.ts`) | bedrift + sek + antall ved ansettelse; bedrift + plass for ansatte fra før Pakke 48 |
 | Konjunkturen (`verden.ts`) | `konjunktur:<periode>` (28 dager per periode; periode 0 er alltid normal) |
-| Dagens vær (`verden.ts`) | `dagsvær:<dag>`, med sjanser etter sesong |
+| Dagens vær (`verden.ts`) | `dagsvær:<dag>` for Norge, `dagsvær:<sted>:<dag>` for Alpene og Syden (Pakke 54), med sjanser etter sesong |
+| Ledighet (`utleie.ts`) | `ledighet:<by>\|<uke>` |
+| Dårlig leietaker (`utleie.ts`) | `leietaker:<by>\|<uke>` |
 | Ukas bransjetrend (`verden.ts`) | `trend:<spilluke>` |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.

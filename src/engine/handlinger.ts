@@ -38,6 +38,7 @@ import { FOND, FOND_GEBYR, fondskurs, fondStengt } from './fond'
 import { BLOKK, blokkpris, oppkjopspris } from './rivaler'
 import {
   brukteplasser,
+  byverdi,
   EIENDOM_SYNLIG_VED,
   eiendomspris,
   EIENDOMSTYPER,
@@ -73,6 +74,7 @@ import { flyt } from './portefolje'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { OBLIGASJONER } from './obligasjoner'
+import { FORVALTERE, forvalterpris } from './utleie'
 import { ledigIRunde } from './startups'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from './landemerker'
@@ -89,7 +91,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { PAPIRER, rundAntall } from './marked'
-import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk } from './types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk, By, ForvalterId } from './types'
 import { kortKroner } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
@@ -856,6 +858,31 @@ export function bindRente(s: Spilltilstand): Utfall {
     sats: flytendeRente(s) + (RENTE_PER_TIME * FAST_PAASLAG) / NORMAL_STYRINGSRENTE,
     tilDag: dagnummer(s.sek) + BINDING_DAGER,
   }
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Ansetter en eiendomsforvalter i en by (Pakke 54): en engangssum etter det du
+ * eier der, og en stil. Bytter du stil, sier du opp den gamle først.
+ */
+export function ansettForvalter(s: Spilltilstand, by: By, id: ForvalterId): Utfall {
+  if (!FORVALTERE[id]) return feil('Ukjent forvalter.')
+  if (s.forvaltere?.[by]) return feil('Byen har allerede en forvalter.')
+  const verdi = byverdi(s, by)
+  if (verdi <= 0) return feil('Du eier ingen eiendom i byen.')
+  const pris = forvalterpris(verdi)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.totaltForbruk += pris
+  n.forvaltere = { ...(n.forvaltere ?? {}), [by]: id }
+  return { ok: true, tilstand: n }
+}
+
+export function sigOppForvalter(s: Spilltilstand, by: By): Utfall {
+  if (!s.forvaltere?.[by]) return feil('Byen har ingen forvalter.')
+  const n = structuredClone(s)
+  delete n.forvaltere![by]
   return { ok: true, tilstand: n }
 }
 
