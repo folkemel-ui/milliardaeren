@@ -17,7 +17,7 @@ import {
   RENTE_PER_TIME,
   SPARERENTE_PER_TIME,
 } from './innhold'
-import { handelskurs, KURTASJE, PAPIRER, rundAntall } from './marked'
+import { handelskurs, KURTASJE, maksPerOrdre, PAPIRER, rundAntall } from './marked'
 import {
   eiendomsverdi,
   leiePerSek,
@@ -278,12 +278,14 @@ export function maksLaanMotSikkerhet(s: Spilltilstand): number {
 
 // ─────────────────────────────────────────────── Handel
 
-/** Hvor mange du har råd til å kjøpe, med kurtasje og kurstrykk regnet med. */
+/** Hvor mange du har råd til å kjøpe i én ordre, med kurtasje og kurstrykk regnet med. */
 export function maksKjop(s: Spilltilstand, id: PapirId): number {
-  const kurs = s.marked.kurser[id].kurs
-  let antall = s.kontanter / (kurs * (1 + KURTASJE))
-  for (let i = 0; i < 8; i++) antall = s.kontanter / (handelskurs(s, id, antall) * (1 + KURTASJE))
-  antall = rundAntall(id, antall)
+  if (s.kontanter <= 0) return 0
+  // Et kjøp koster dybde · −ln(1 − x) (Pakke 56), så x kan regnes ut direkte.
+  const dybde = PAPIRER[id].dybde
+  const x = -Math.expm1(-s.kontanter / (dybde * (1 + KURTASJE)))
+  // Med mye penger ville kursen gått mot uendelig; én ordre stopper der kursen dobles.
+  let antall = Math.min(rundAntall(id, (x * dybde) / s.marked.kurser[id].kurs), maksPerOrdre(s, id, 'kjop'))
   // Kappingen er konservativ, men sjekk likevel — avrunding skal aldri gi en avvist ordre.
   const har = (a: number) => a * handelskurs(s, id, a) * (1 + KURTASJE) <= s.kontanter
   if (antall <= 0 || har(antall)) return Math.max(0, antall)

@@ -118,8 +118,14 @@ export interface Papir {
 export interface Kurs {
   kurs: number
   fundament: number
-  /** Logaritmisk avvik fra fundamentet: kurs = fundament · e^avvik. */
+  /** Logaritmisk avvik fra fundamentet: kurs = fundament · e^(avvik + trykk). */
   avvik: number
+  /**
+   * Ditt eget kurstrykk, logaritmisk (Pakke 56): trekkes tilbake som avviket,
+   * men holdes for seg så fondene kan se bort fra det. Mangler i gamle lagringer,
+   * der trykket står i avviket.
+   */
+  trykk?: number
   /** Kursen hvert 30. sekund, de siste to timene. */
   historikk: number[]
   /** En selskapsnyhet som ennå ikke er ferdig priset inn: logaritmisk bevegelse igjen, fordelt på tikk. */
@@ -312,8 +318,13 @@ export type ForvalterId = 'forsiktig' | 'paagaende' | 'lokal'
  */
 export interface Obligasjonspost {
   palydende: number
-  /** Styringsrenten (i prosent) kupongen ble låst til. */
+  /** Renten (i prosent) kupongen ble låst til. */
   rente: number
+  /**
+   * Markedsrenten prisen måles mot (Pakke 56): posten er verdt pålydende når
+   * markedsrenten står her. Et snitt vektet med pålydende når du kjøper mer.
+   */
+  anker: number
   kostpris: number
 }
 

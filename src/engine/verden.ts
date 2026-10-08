@@ -12,7 +12,7 @@
  */
 
 import { STIGEN } from './innhold'
-import { dagFra, dagnummer, dato, ukedag } from './kalender'
+import { DAG_SEK, dagFra, dagnummer, dato, ukedag } from './kalender'
 import { Hashkilde, hashTekst } from './rng'
 import type { BedriftstypeId, EiendomId, Overskrift, Spilltilstand } from './types'
 
@@ -48,11 +48,17 @@ export const FASER: Record<Fase, { navn: string; aksjer: number; eiendom: number
 /** Perioden en spilldag hører til. */
 export const periode = (dag: number) => Math.floor(dag / FASE_DAGER)
 
+/** Sjansen for hver fase i en ny periode. Periodene trekkes hver for seg. */
+export const FASESJANSE: Record<Fase, number> = { hoy: 0.25, normal: 0.5, lav: 0.25 }
+
+/** Styringsrenten i snitt over tid: det en ny periode ventes å gi, uansett fasen nå (3,875 %). */
+export const LANGSIKTIG_STYRINGSRENTE = (Object.keys(FASER) as Fase[]).reduce((sum, f) => sum + FASESJANSE[f] * FASER[f].styringsrente, 0)
+
 /** Fasen i en periode: høy 25 %, normal 50 %, lav 25 %. Spillet starter i normale tider. */
 export function faseI(s: Spilltilstand, p: number): Fase {
   if (p <= 0) return 'normal'
   const u = kilde(s, `konjunktur:${p}`).neste()
-  return u < 0.25 ? 'hoy' : u >= 0.75 ? 'lav' : 'normal'
+  return u < FASESJANSE.hoy ? 'hoy' : u >= 1 - FASESJANSE.lav ? 'lav' : 'normal'
 }
 
 export function fase(s: Spilltilstand): Fase {
@@ -83,6 +89,11 @@ export const FAST_PAASLAG = 0.5
 export const BINDING_DAGER = FASE_DAGER
 
 /** Dager igjen av fasen som gjelder nå. */
+/** Sekunder til fasen er over. */
+export function sekIgjenAvFasen(s: Spilltilstand): number {
+  return (periode(dagnummer(s.sek)) + 1) * FASE_DAGER * DAG_SEK - s.sek
+}
+
 export function dagerIgjenAvFasen(s: Spilltilstand): number {
   const dag = dagnummer(s.sek)
   return (periode(dag) + 1) * FASE_DAGER - dag

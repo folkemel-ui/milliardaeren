@@ -10,7 +10,8 @@
  * spilldager med aviser, oppgjør og skatt).
  * Resultatet skrives komprimert som `vN.json.gz`, med formuen den gamle motoren regnet ut.
  *
- *     node scripts/lag-gamle-lagringer.mjs
+ *     node scripts/lag-gamle-lagringer.mjs        (alle)
+ *     node scripts/lag-gamle-lagringer.mjs 20     (bare versjon 20)
  *
  * Versjon 6 og 11 ble aldri lagt i en commit (Pakke 6 og Pakke 11 bumpet to
  * ganger), så de finnes ikke — migreringene deres testes likevel, siden
@@ -48,6 +49,8 @@ const NESTE_BUMP = {
   17: '717526b',
   18: '13abe59',
   19: '56b7f52',
+  // Versjon 20 ble bumpet i Pakke 56; lagringen lages fra Pakke 55, den siste commiten med versjon 20.
+  20: { fra: 'c55eb94' },
 }
 
 const sh = (cmd, cwd = ROT) => execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'inherit'] }).toString()
@@ -99,6 +102,7 @@ for (const navn of (M.klubb?.KLUBBNAVN ?? []).slice(0, 1)) prov('kjopKlubb', nav
 if (s.rivaler?.[0]) prov('kjopRivalblokk', s.rivaler[0].id)
 prov('settInn', 1_000_000)
 prov('laan', 100_000)
+prov('kjopObligasjon', 'lang', 1_000_000)
 for (const t of ['kjopBedrift']) for (const b of ['kiosk', 'kafe', 'restaurant']) prov(t, b)
 
 // To døgn med spilling (576 spilldager): aviser, oppgjør, skatt, klubbrunder og høst. Startupene dukker opp underveis.
@@ -111,17 +115,21 @@ export const resultat = { versjon: SPILLVERSJON, formue: nettoformue(s), tilstan
 
 mkdirSync(UT, { recursive: true })
 rmSync(ARBEID, { recursive: true, force: true })
+const bare = process.argv.slice(2)
 for (const [versjon, bump] of Object.entries(NESTE_BUMP)) {
+  if (bare.length && !bare.includes(versjon)) continue
+  // En bump-commit gir lagringen fra forelderen; { fra } gir den fra commiten selv.
+  const kilde = typeof bump === 'string' ? `${bump}~1` : bump.fra
   const dir = join(ARBEID, `v${versjon}`)
   mkdirSync(dir, { recursive: true })
-  sh(`git -C "${ROT}" archive ${bump}~1 src | tar -x`, dir)
+  sh(`git -C "${ROT}" archive ${kilde} src | tar -x`, dir)
   const inn = join(dir, 'src/__lag.ts')
   writeFileSync(inn, program(dir))
   const ut = join(dir, 'lag.mjs')
   await build({ entryPoints: [inn], bundle: true, format: 'esm', platform: 'node', outfile: ut, logLevel: 'error' })
   const { resultat } = await import(pathToFileURL(ut).href)
   if (resultat.versjon !== Number(versjon)) throw new Error(`v${versjon}: commiten har versjon ${resultat.versjon}`)
-  const json = JSON.stringify({ versjon: resultat.versjon, commit: sh(`git rev-parse --short ${bump}~1`).trim(), formue: Math.round(resultat.formue), tilstand: resultat.tilstand })
+  const json = JSON.stringify({ versjon: resultat.versjon, commit: sh(`git rev-parse --short ${kilde}`).trim(), formue: Math.round(resultat.formue), tilstand: resultat.tilstand })
   const gz = gzipSync(json, { level: 9 })
   writeFileSync(join(UT, `v${versjon}.json.gz`), gz)
   const t = resultat.tilstand

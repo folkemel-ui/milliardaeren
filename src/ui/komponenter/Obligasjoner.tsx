@@ -1,13 +1,14 @@
 import { kjopObligasjon, selgObligasjon } from '../../engine/handlinger'
 import {
   kupongsats,
+  markedsrente,
   OBLIGASJON_GEBYR,
   OBLIGASJONER,
   OBLIGASJONSLISTE,
   obligasjonskurs,
   obligasjonsverdiFor,
 } from '../../engine/obligasjoner'
-import { styringsrente } from '../../engine/verden'
+import { LANGSIKTIG_STYRINGSRENTE } from '../../engine/verden'
 import type { ObligasjonId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { endring, fortegnKroner, kortKroner, perSek, tall } from '../format'
@@ -29,7 +30,7 @@ export function Obligasjoner({ s }: { s: Spilltilstand }) {
 function Obligasjonskort({ s, id }: { s: Spilltilstand; id: ObligasjonId }) {
   const o = OBLIGASJONER[id]
   const post = s.obligasjoner?.[id]
-  const rente = styringsrente(s)
+  const rente = markedsrente(s, id)
   const verdi = obligasjonsverdiFor(s, id)
   const gevinst = post ? verdi - post.kostpris : 0
   const salg = verdi * (1 - OBLIGASJON_GEBYR)
@@ -41,13 +42,16 @@ function Obligasjonskort({ s, id }: { s: Spilltilstand; id: ObligasjonId }) {
           <span className="tall-stort">{post ? kortKroner(verdi) : '—'}</span>
         </div>
         <div className="bank-rente">
-          <span className="etikett">Kupong nå {prosent(kupongsats(id, rente) * 100)} per time</span>
+          <span className="etikett">
+            Markedsrente {prosent(rente)} · kupong {prosent(kupongsats(id, rente) * 100)} per time
+          </span>
           {post && <span className="pluss">{perSek((post.palydende * kupongsats(id, post.rente)) / 3600)}</span>}
         </div>
       </div>
       <p className="dempet liten">
-        Kupongen låses til styringsrenten den dagen du kjøper. Stiger renten ett prosentpoeng, faller verdien rundt {tall(o.varighet)} % —
-        og den stiger like mye når renten faller.
+        Kupongen låses til markedsrenten den dagen du kjøper: styringsrenten for resten av fasen, snittet over tid ({prosent(LANGSIKTIG_STYRINGSRENTE)})
+        for resten av løpetiden. Stiger markedsrenten ett prosentpoeng, faller verdien rundt {tall(o.varighet)} % — og den stiger like mye når
+        den faller.
       </p>
       {post && (
         <p className="liten">

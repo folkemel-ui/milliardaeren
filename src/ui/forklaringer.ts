@@ -48,9 +48,10 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   obligasjoner: {
     tittel: 'Statsobligasjoner',
     tekst:
-      'En obligasjon er et lån til staten. Kupongen låses til styringsrenten den dagen du kjøper og betales hvert sekund, litt over sparerenten — mer for den lange. ' +
-      `Prisen går motsatt vei av renten: stiger styringsrenten ett prosentpoeng, faller den korte rundt ${tall(OBLIGASJONER.kort.varighet)} % og den lange rundt ${tall(OBLIGASJONER.lang.varighet)} %. ` +
-      `Kjøp når renten er høy, og selg med gevinst når den faller. Et salg koster ${pst(OBLIGASJON_GEBYR, 1)}, og kupongene regnes som utbytte i regnskapet.`,
+      'En obligasjon er et lån til staten. Kupongen låses til markedsrenten den dagen du kjøper og betales hvert sekund, litt over sparerenten — mer for den lange. ' +
+      'Markedsrenten ser fremover: styringsrenten gjelder bare resten av fasen, og etter den ventes snittet over tid. Et faseskifte flytter derfor markedsrenten mindre, jo lengre løpetiden er. ' +
+      `Prisen går motsatt vei av markedsrenten: stiger den ett prosentpoeng, faller den korte rundt ${tall(OBLIGASJONER.kort.varighet)} % og den lange rundt ${tall(OBLIGASJONER.lang.varighet)} %. ` +
+      `Et salg koster ${pst(OBLIGASJON_GEBYR, 1)}, og kupongene regnes som utbytte i regnskapet.`,
   },
   bedrifter: {
     tittel: 'Bedriftene',

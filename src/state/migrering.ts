@@ -25,6 +25,8 @@ import { lagKunst } from '../engine/kunst'
 import { nyeKvartal } from '../engine/kvartal'
 import { klubbverdi } from '../engine/klubb'
 import { lederpris } from '../engine/formler'
+import { markedsrente, OBLIGASJONSLISTE } from '../engine/obligasjoner'
+import { styringsrente } from '../engine/verden'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -249,6 +251,20 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     const indekser = { ...regioner.indekser }
     for (const r of REGIONLISTE) if (!indekser[r]) indekser[r] = nyRegion(regioner.frø, r, lengde)
     return { ...s, marked: { ...marked, regioner: { ...regioner, indekser } } }
+  },
+  /* 20 → 21: obligasjonene prises mot markedsrenten (Pakke 56). Hver post får
+     et anker som gir nøyaktig den prisen den hadde mot styringsrenten, og
+     beholder kupongen — ingen vinner eller taper på oppdateringen. */
+  20: (s) => {
+    const obligasjoner = s.obligasjoner as Record<string, { rente: number }> | undefined
+    if (!obligasjoner) return s
+    const tilstand = s as unknown as Spilltilstand
+    const ny: Raatilstand = {}
+    for (const id of OBLIGASJONSLISTE) {
+      const p = obligasjoner[id]
+      if (p) ny[id] = { ...p, anker: markedsrente(tilstand, id) - (styringsrente(tilstand) - p.rente) }
+    }
+    return { ...s, obligasjoner: ny }
   },
 }
 

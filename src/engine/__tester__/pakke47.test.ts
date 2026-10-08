@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest'
 import { BEDRIFTSTYPER, STIGEN } from '../innhold'
 import { maksKjop, milepaelfaktor, forbedringsfaktor } from '../formler'
-import { handelskurs, KURTASJE, PAPIRER } from '../marked'
+import { handelskurs, KURTASJE, maksPerOrdre, PAPIRER } from '../marked'
 import { PRESTASJONER } from '../prestasjoner'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
@@ -84,7 +84,9 @@ describe('maks kjøp med svært mye penger', () => {
         // (Med billioner er én 1/10 000 mynt mindre enn tallets nøyaktighet, så «én til» kan ikke sjekkes.)
         const enhet = PAPIRER[id].klasse === 'aksje' ? 1 : 0.0001
         const rest = kontanter - kost(maks)
-        expect(rest <= kost(enhet) * 1.01 || rest <= kontanter * 1e-4, `${id} ${kontanter}`).toBe(true)
+        // Fra Pakke 56 kan én ordre høyst doble kursen — da er det taket, ikke pengene, som stopper.
+        const vedTaket = maks === maksPerOrdre(s, id, 'kjop')
+        expect(vedTaket || rest <= kost(enhet) * 1.01 || rest <= kontanter * 1e-4, `${id} ${kontanter}`).toBe(true)
       }
     }
   })

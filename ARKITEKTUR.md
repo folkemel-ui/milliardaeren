@@ -63,6 +63,8 @@ Verden fra Pakke 49 er den samme i alle spill: nøklene har ikke spillets frø i
 
 Ukas bransjetrend (Pakke 53, `bransjer.ts`) gir aksjen i den hete eller kalde bransjen ekstra drift på samme måte — uten et trekk mer. En selskapsnyhet som treffer bedriften din i bransjen, bruker nyheten terningen alt har trukket; ingen nye trekk.
 
+Ditt eget kurstrykk (Pakke 56) står i `Kurs.trykk`, ikke i `avvik`: kursen er `fundament · e^(avvik + trykk)`, og trykket trekkes tilbake like fort som avviket — regnet ut, uten terningen. Fondene ser bort fra det (`markedskurs`). Gamle lagringer har trykket fra før i avviket og ingen `trykk`; det er greit. Obligasjonenes markedsrente regnes av konjunkturens hash og hvor mye av fasen som er igjen — heller ikke den trekker noe.
+
 ## Avisas bivirkning
 
 Avisa har 3–5 saker (`avis.ts`). Først samles de ekte sakene; mangler det for å nå `MIN_SAKER`, fylles det på med lokalsaker med `t.velg(LOKALT)` — **fra hovedterningen**, og en duplikat koster et nytt trekk.

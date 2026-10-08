@@ -158,7 +158,7 @@ export function utforObligasjonssalg(n: Spilltilstand, id: ObligasjonId, andel =
   flyt(n, 'obligasjon', -inntekt)
   bokforGevinst(n, inntekt - p.kostpris * a)
   if (a >= 1 || p.palydende * (1 - a) < 1) delete n.obligasjoner![id]
-  else n.obligasjoner![id] = { palydende: p.palydende * (1 - a), rente: p.rente, kostpris: p.kostpris * (1 - a) }
+  else n.obligasjoner![id] = { ...p, palydende: p.palydende * (1 - a), kostpris: p.kostpris * (1 - a) }
   return inntekt
 }
 

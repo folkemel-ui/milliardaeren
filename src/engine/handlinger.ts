@@ -72,8 +72,8 @@ import {
 } from './fusjon'
 import { flyt } from './portefolje'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
-import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
-import { OBLIGASJONER } from './obligasjoner'
+import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from './verden'
+import { markedsrente, OBLIGASJONER } from './obligasjoner'
 import { FORVALTERE, forvalterpris } from './utleie'
 import { ledigIRunde } from './startups'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
@@ -90,9 +90,9 @@ import {
   startKlubb,
   TAKTIKKER,
 } from './klubb'
-import { PAPIRER, rundAntall } from './marked'
+import { maksPerOrdre, PAPIRER, rundAntall } from './marked'
 import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk, By, ForvalterId } from './types'
-import { kortKroner } from './tall'
+import { kortKroner, tall } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
 
@@ -259,12 +259,19 @@ export function borsenStengt(s: Spilltilstand, id: PapirId): boolean {
 
 const STENGT = 'Børsen er stengt i helgen. Den åpner mandag morgen.'
 
+function forStorOrdre(s: Spilltilstand, id: PapirId, retning: 'kjop' | 'selg'): string {
+  const maks = maksPerOrdre(s, id, retning)
+  const desimaler = PAPIRER[id].klasse === 'krypto' && maks < 100 ? 4 : 0
+  return `Høyst ${tall(maks, desimaler)} om gangen — en større ordre ville ${retning === 'kjop' ? 'mer enn doblet' : 'mer enn halvert'} kursen.`
+}
+
 export function kjopPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall {
   if (!PAPIRER[id]) return feil('Ukjent aksje eller mynt.')
   if (ikkeTall(antall)) return feil(UGYLDIG)
   if (borsenStengt(s, id)) return feil(STENGT)
   const a = rundAntall(id, antall)
   if (a <= 0) return feil('Velg hvor mye du vil kjøpe.')
+  if (a > maksPerOrdre(s, id, 'kjop')) return feil(forStorOrdre(s, id, 'kjop'))
   if (a > maksKjop(s, id)) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   const kostnad = utforKjop(n, id, a)
@@ -280,6 +287,7 @@ export function selgPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall
   // Et salg av (nesten) alt selger alt, så det ikke blir liggende støv igjen.
   const a = antall >= b.antall - 1e-9 ? b.antall : rundAntall(id, antall)
   if (a <= 0) return feil('Velg hvor mye du vil selge.')
+  if (a > maksPerOrdre(s, id, 'selg')) return feil(forStorOrdre(s, id, 'selg'))
   const n = structuredClone(s)
   const inntekt = utforSalg(n, id, a)
   const gevinst = inntekt - b.kostpris * (a / b.antall)
@@ -321,12 +329,15 @@ export function kjopObligasjon(s: Spilltilstand, id: ObligasjonId, belop: number
   const n = structuredClone(s)
   n.obligasjoner ??= {}
   const fra = n.obligasjoner[id]
-  const rente = styringsrente(n)
-  // En eldre post er verdt kurs · pålydende; den nye kjøpes til kurs 1 ved dagens rente.
+  // Den nye kjøpes til kurs 1, med kupongen låst til markedsrenten i dag (Pakke 56).
+  const rente = markedsrente(n, id)
   const palydende = (fra?.palydende ?? 0) + b
+  // Kursen er lineær i ankeret, så et vektet snitt holder verdien av den gamle posten der den var.
+  const snitt = (gammel: number) => (fra ? (fra.palydende * gammel + b * rente) / palydende : rente)
   n.obligasjoner[id] = {
     palydende,
-    rente: fra ? (fra.palydende * fra.rente + b * rente) / palydende : rente,
+    rente: snitt(fra?.rente ?? 0),
+    anker: snitt(fra?.anker ?? 0),
     kostpris: (fra?.kostpris ?? 0) + b,
   }
   n.kontanter -= b

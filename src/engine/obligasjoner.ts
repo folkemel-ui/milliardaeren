@@ -1,17 +1,25 @@
 /**
  * Statsobligasjoner (Pakke 53): et sted mellom sparekontoen og aksjene.
  *
- * Kupongen låses til styringsrenten den dagen du kjøper, og betales hvert
+ * Kupongen låses til markedsrenten den dagen du kjøper, og betales hvert
  * sekund som sparerenten — litt høyere, mer jo lengre løpetid. Prisen følger
- * styringsrenten den andre veien: stiger renten fra 4 til 5 %, faller den lange
- * obligasjonen rundt 8 % og den korte rundt 2 %. I en lavkonjunktur stiger de.
+ * markedsrenten den andre veien: stiger den ett prosentpoeng, faller den lange
+ * obligasjonen rundt 8 % og den korte rundt 2 %.
+ *
+ * Markedsrenten ser fremover (Pakke 56). Konjunkturene trekkes hver for seg, så
+ * etter fasen som går nå, ventes styringsrenten å bli snittet (3,875 %). En
+ * obligasjon løper lenger enn én fase, så markedsrenten er dagens styringsrente
+ * bare for den delen av løpetiden fasen har igjen, og snittet for resten. Før
+ * fulgte prisen styringsrenten alene — og i en høykonjunktur, med renten på
+ * topp, kunne den bare stige: +9 % i snitt ved hvert faseskifte.
  *
  * Kupongene regnes som utbytte i regnskapet, og en gevinst eller et tap ved
  * salg beskattes som andre gevinster.
  */
 
 import { SPARERENTE_PER_TIME } from './innhold'
-import { NORMAL_STYRINGSRENTE, styringsrente } from './verden'
+import { DAG_SEK } from './kalender'
+import { FASE_DAGER, LANGSIKTIG_STYRINGSRENTE, NORMAL_STYRINGSRENTE, sekIgjenAvFasen, styringsrente } from './verden'
 import type { ObligasjonId, Obligasjonspost, Spilltilstand } from './types'
 
 export const OBLIGASJONER: Record<ObligasjonId, { navn: string; kortnavn: string; varighet: number; paaslag: number }> = {
@@ -27,9 +35,19 @@ export const OBLIGASJON_GEBYR = 0.001
 /** Prisen aldri under dette per krone pålydende — en obligasjon blir ikke verdiløs. */
 const LAVESTE_KURS = 0.05
 
-/** Prisen per krone pålydende for en post, ved styringsrenten nå. */
-export function obligasjonskurs(s: Spilltilstand, id: ObligasjonId, post: Pick<Obligasjonspost, 'rente'>): number {
-  return Math.max(LAVESTE_KURS, 1 - (OBLIGASJONER[id].varighet * (styringsrente(s) - post.rente)) / 100)
+/**
+ * Markedsrenten for en løpetid, i prosent: styringsrenten for den delen av
+ * løpetiden fasen har igjen, snittet over tid for resten. Løpetiden regnes som
+ * `varighet` faser.
+ */
+export function markedsrente(s: Spilltilstand, id: ObligasjonId): number {
+  const vekt = Math.min(1, sekIgjenAvFasen(s) / (OBLIGASJONER[id].varighet * FASE_DAGER * DAG_SEK))
+  return LANGSIKTIG_STYRINGSRENTE + (styringsrente(s) - LANGSIKTIG_STYRINGSRENTE) * vekt
+}
+
+/** Prisen per krone pålydende for en post, ved markedsrenten nå. */
+export function obligasjonskurs(s: Spilltilstand, id: ObligasjonId, post: Pick<Obligasjonspost, 'anker'>): number {
+  return Math.max(LAVESTE_KURS, 1 - (OBLIGASJONER[id].varighet * (markedsrente(s, id) - post.anker)) / 100)
 }
 
 /** Det posten er verdt nå. */
@@ -51,7 +69,7 @@ export function obligasjonKostpris(s: Spilltilstand): number {
   return sum
 }
 
-/** Kupongrenten per time for en styringsrente: sparerenten ved den renten, pluss obligasjonens påslag. */
+/** Kupongrenten per time for en rente (i prosent): sparerenten ved den renten, pluss obligasjonens påslag. */
 export function kupongsats(id: ObligasjonId, rente: number): number {
   return SPARERENTE_PER_TIME * (rente / NORMAL_STYRINGSRENTE) * (1 + OBLIGASJONER[id].paaslag)
 }

@@ -1,12 +1,12 @@
 /**
  * Pakke 53 — penger som henger sammen: aksjer knyttet til bransjene dine, og
- * statsobligasjoner som følger styringsrenten.
+ * statsobligasjoner som følger renten — fra Pakke 56 markedsrenten.
  */
 
 import { describe, expect, it } from 'vitest'
 import { AKSJE_FOR, bransjenyhet, NYHET_DAGER, nyhetsfaktor, TRENDDRIFT, trenddrift } from '../bransjer'
-import { kupongPerSek, kupongsats, obligasjonsverdi, obligasjonsverdiFor } from '../obligasjoner'
-import { FASE_DAGER, faseI, styringsrente, ukensTrend } from '../verden'
+import { kupongPerSek, kupongsats, markedsrente, obligasjonsverdi, obligasjonsverdiFor } from '../obligasjoner'
+import { FASE_DAGER, faseI, LANGSIKTIG_STYRINGSRENTE, styringsrente, ukensTrend } from '../verden'
 import { DAG_SEK } from '../kalender'
 import { markedstikk, MARKED_TIKK_SEK, PAPIRER } from '../marked'
 import { bedriftInntektIDag, bedriftInntektPerSek, dagensFaktor, nettoformue, statusfaktor } from '../formler'
@@ -88,27 +88,44 @@ describe('aksjene og bransjene', () => {
 })
 
 describe('statsobligasjoner', () => {
-  it('kjøpes til pålydende, og den lange faller rundt 8 % når renten stiger ett poeng', () => {
+  it('kjøpes til pålydende, og den lange faller rundt 8 % når markedsrenten stiger ett poeng', () => {
     const normal = iFase('normal')
     const s = ok(kjopObligasjon(normal, 'lang', 1_000_000))
     expect(obligasjonsverdiFor(s, 'lang')).toBeCloseTo(1_000_000)
     expect(nettoformue(s)).toBeCloseTo(nettoformue(normal))
-    // Samme post i en høykonjunktur: styringsrenten er 5 %.
+    // Samme post i en høykonjunktur: markedsrenten stiger, og prisen faller 8 % per poeng.
     const hoy = { ...s, sek: iFase('hoy').sek }
     expect(styringsrente(hoy)).toBe(5)
-    expect(obligasjonsverdiFor(hoy, 'lang') / 1_000_000).toBeCloseTo(1 - 0.08)
-    // Og i en lavkonjunktur (2,5 %) stiger den.
-    const lav = { ...s, sek: iFase('lav').sek }
-    expect(obligasjonsverdiFor(lav, 'lang') / 1_000_000).toBeCloseTo(1 + 0.12)
-    // Den korte svinger fire ganger mindre.
+    const opp = markedsrente(hoy, 'lang') - markedsrente(s, 'lang')
+    expect(opp).toBeGreaterThan(0)
+    expect(obligasjonsverdiFor(hoy, 'lang') / 1_000_000).toBeCloseTo(1 - 0.08 * opp, 6)
+    // Og i en lavkonjunktur stiger den.
+    expect(obligasjonsverdiFor({ ...s, sek: iFase('lav').sek }, 'lang')).toBeGreaterThan(1_000_000)
+    // Den korte svinger fire ganger mindre per poeng.
     const kort = ok(kjopObligasjon(normal, 'kort', 1_000_000))
-    expect(obligasjonsverdiFor({ ...kort, sek: hoy.sek }, 'kort') / 1_000_000).toBeCloseTo(0.98)
+    const oppKort = markedsrente(hoy, 'kort') - markedsrente(normal, 'kort')
+    expect(obligasjonsverdiFor({ ...kort, sek: hoy.sek }, 'kort') / 1_000_000).toBeCloseTo(1 - 0.02 * oppKort, 6)
   })
 
-  it('kupongen er låst til renten ved kjøp og betales hvert sekund som utbytte', () => {
-    const s = ok(kjopObligasjon(iFase('hoy'), 'lang', 3_600_000))
+  it('markedsrenten er styringsrenten for resten av fasen, og snittet over tid etterpå (Pakke 56)', () => {
+    expect(LANGSIKTIG_STYRINGSRENTE).toBeCloseTo(3.875)
+    const hoy = iFase('hoy')
+    // Hele fasen igjen: den lange løper åtte faser og får 1/8 av forskjellen, den korte halvparten.
+    expect(markedsrente(hoy, 'lang')).toBeCloseTo(3.875 + 1.125 / 8)
+    expect(markedsrente(hoy, 'kort')).toBeCloseTo(3.875 + 1.125 / 2)
+    // Ved slutten av fasen står begge på snittet.
+    const slutt = { ...hoy, sek: hoy.sek + FASE_DAGER * DAG_SEK - 1 }
+    expect(markedsrente(slutt, 'lang')).toBeCloseTo(3.875, 3)
+    expect(markedsrente(slutt, 'kort')).toBeCloseTo(3.875, 3)
+  })
+
+  it('kupongen er låst til markedsrenten ved kjøp og betales hvert sekund som utbytte', () => {
+    const hoy = iFase('hoy')
+    const s = ok(kjopObligasjon(hoy, 'lang', 3_600_000))
+    const rente = markedsrente(hoy, 'lang')
+    expect(s.obligasjoner!.lang!.rente).toBeCloseTo(rente)
     expect(kupongsats('lang', 5)).toBeCloseTo(SPARERENTE_PER_TIME * (5 / 4) * 1.25)
-    expect(kupongPerSek(s)).toBeCloseTo(3_600_000 * kupongsats('lang', 5) / 3600)
+    expect(kupongPerSek(s)).toBeCloseTo((3_600_000 * kupongsats('lang', rente)) / 3600)
     // Låst: samme kupong selv om renten senere faller.
     expect(kupongPerSek({ ...s, sek: iFase('lav').sek })).toBeCloseTo(kupongPerSek(s))
     const etter = simuler(s, 10)
@@ -116,21 +133,26 @@ describe('statsobligasjoner', () => {
   })
 
   it('to kjøp til ulik rente er verdt det samme som to poster hver for seg', () => {
-    const a = ok(kjopObligasjon(iFase('hoy'), 'lang', 1_000_000))
-    const b = ok(kjopObligasjon({ ...a, sek: iFase('lav').sek }, 'lang', 2_000_000))
+    const hoy = iFase('hoy')
+    const a = ok(kjopObligasjon(hoy, 'lang', 1_000_000))
+    const lav = { ...a, sek: iFase('lav').sek }
+    const b = ok(kjopObligasjon(lav, 'lang', 2_000_000))
     const post = b.obligasjoner!.lang!
+    const r1 = markedsrente(hoy, 'lang')
+    const r2 = markedsrente(lav, 'lang')
     expect(post.palydende).toBe(3_000_000)
-    expect(post.rente).toBeCloseTo((1_000_000 * 5 + 2_000_000 * 2.5) / 3_000_000)
-    // I normale tider: den første (låst 5 %) er verdt 1,08 mill, den andre (2,5 %) 2 mill · 0,88.
+    expect(post.rente).toBeCloseTo((1_000_000 * r1 + 2_000_000 * r2) / 3_000_000)
     const normal = { ...b, sek: iFase('normal').sek }
-    expect(obligasjonsverdiFor(normal, 'lang')).toBeCloseTo(1_000_000 * 1.08 + 2_000_000 * 0.88)
+    const m = markedsrente(normal, 'lang')
+    expect(obligasjonsverdiFor(normal, 'lang')).toBeCloseTo(1_000_000 * (1 - 0.08 * (m - r1)) + 2_000_000 * (1 - 0.08 * (m - r2)))
   })
 
   it('salg gir verdien minus gebyret og bokfører gevinsten', () => {
     const s = ok(kjopObligasjon(iFase('hoy'), 'lang', 1_000_000))
     const lav = { ...s, sek: iFase('lav').sek }
     const solgt = ok(selgObligasjon(lav, 'lang', 1))
-    const verdi = 1_000_000 * (1 + 0.08 * 2.5)
+    const verdi = 1_000_000 * (1 - 0.08 * (markedsrente(lav, 'lang') - s.obligasjoner!.lang!.anker))
+    expect(verdi).toBeGreaterThan(1_000_000)
     expect(solgt.kontanter - lav.kontanter).toBeCloseTo(verdi * 0.999)
     expect(solgt.totaltGevinst - lav.totaltGevinst).toBeCloseTo(verdi * 0.999 - 1_000_000)
     expect(solgt.obligasjoner?.lang).toBeUndefined()

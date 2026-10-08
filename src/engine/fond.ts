@@ -5,10 +5,11 @@
  * kurs å lagre, og svinger mindre enn hvert enkelt papir.
  *
  * Fond kjøpes for et beløp, ikke et antall, har lavt gebyr og flytter ikke
- * kursene. Børsfondet handles bare når børsen er åpen.
+ * kursene — og ser bort fra trykket dine egne handler gir medlemmene.
+ * Børsfondet handles bare når børsen er åpen.
  */
 
-import { AKSJER, KRYPTO, NYE_PAPIRER, PAPIRER } from './marked'
+import { AKSJER, KRYPTO, markedskurs, NYE_PAPIRER, PAPIRER } from './marked'
 import { erHelg } from './kalender'
 import type { FondId, PapirId, Spilltilstand } from './types'
 
@@ -43,8 +44,9 @@ function kursAv(f: Fond, kurs: (id: PapirId) => number): number {
   return (100 * f.medlemmer.reduce((sum, id) => sum + kurs(id) / PAPIRER[id].startkurs, 0)) / f.medlemmer.length
 }
 
+/** Fondskursen ser bort fra ditt eget kurstrykk, så et fond ikke kan pumpes ved å kjøpe medlemmene (Pakke 56). */
 export function fondskurs(s: Spilltilstand, id: FondId): number {
-  return kursAv(FOND[id], (p) => s.marked.kurser[p].kurs)
+  return kursAv(FOND[id], (p) => markedskurs(s.marked.kurser[p]))
 }
 
 /** Fondets historikk, regnet ut av medlemmenes. Like lang som den korteste. */

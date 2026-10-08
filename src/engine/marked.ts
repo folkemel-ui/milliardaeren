@@ -18,8 +18,8 @@ export const HISTORIKK_TIKK = 6
 export const MAKS_KURSHISTORIKK = 240
 /** Kurtasje på hver handel. */
 export const KURTASJE = 0.005
-/** En enkelt handel kan flytte kursen høyst så mye (i logaritmisk avvik). */
-export const MAKS_KURSTRYKK = 0.15
+/** Én ordre kan høyst doble kursen, eller halvere den (Pakke 56). */
+export const MAKS_KURSTRYKK = Math.LN2
 
 export const PAPIRER: Record<PapirId, Papir> = {
   // ── Aksjer. Lav risiko betaler mest utbytte; høy risiko svinger mest.
@@ -83,6 +83,11 @@ export function kursFra(fundament: number, avvik: number): number {
   return fundament * Math.exp(avvik)
 }
 
+/** Kursen uten spillerens eget kurstrykk — det fondene regner med (Pakke 56). */
+export function markedskurs(k: Kurs): number {
+  return k.trykk ? k.kurs * Math.exp(-k.trykk) : k.kurs
+}
+
 /**
  * Ett markedstikk på en tilstand simuleringen eier: papirene, så
  * eiendomsindeksen. I helgen er børsen stengt — aksjene står stille, mens
@@ -130,7 +135,9 @@ function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde, konjunktur
     const opp = kilde.sjanse(0.5 + 0.2 * drag)
     k.avvik += (opp ? 1 : -1) * kilde.mellom(HOPP_MIN, HOPP_MAKS)
   }
-  k.kurs = kursFra(k.fundament, k.avvik)
+  // Ditt eget kurstrykk trekkes tilbake like fort som avviket, uten terningen.
+  if (k.trykk) k.trykk -= p.reversjon * k.trykk * DT
+  k.kurs = kursFra(k.fundament, k.avvik + (k.trykk ?? 0))
   k.topp = Math.max(k.topp ?? k.kurs, k.kurs)
   k.bunn = Math.min(k.bunn ?? k.kurs, k.kurs)
 }
@@ -264,26 +271,50 @@ export function lagMarked(frø: number): { marked: Marked; frø: number } {
 
 // ─────────────────────────────────────────────── Handel
 
-/**
- * Hvor mye en handel på `verdi` kroner flytter kursen (logaritmisk). Positiv
- * for kjøp, negativ for salg. Taket gjør at én ordre aldri flytter mer enn ~16 %.
+/*
+ * Kurstrykket (Pakke 56). Hver krone flytter kursen like mye, uansett hvordan
+ * ordren deles: kjøper du `q` til kursen p, går 1/p ned med q/dybde. Da koster
+ * kjøpet nøyaktig dybde · ln(p₁/p₀), og å selge det samme antallet tilbake gir
+ * nøyaktig det samme — mange små kjøp og ett stort salg går i null før kurtasjen.
+ * Før hadde hver ordre et tak på trykket, så ti kjøp betalte ti trykk, men ett
+ * salg bare ett: +113 % på Vikingtoken.
  */
-export function kurstrykk(id: PapirId, verdi: number): number {
-  const t = Math.min(MAKS_KURSTRYKK, Math.abs(verdi) / PAPIRER[id].dybde)
-  return Math.sign(verdi) * t
+
+/** Andelen av dybden en ordre på `antall` (positivt kjøp, negativt salg) tilsvarer. */
+function dybdeandel(s: Spilltilstand, id: PapirId, antall: number): number {
+  return (antall * s.marked.kurser[id].kurs) / PAPIRER[id].dybde
 }
 
-/** Snittprisen du får: halvveis mellom kursen før og etter trykket. */
+/**
+ * Hvor mye en ordre på `antall` flytter kursen (logaritmisk): positiv for kjøp,
+ * negativ for salg. Et kjøp nær hele dybden ville sendt kursen mot uendelig —
+ * handlingene stopper det ved MAKS_KURSTRYKK, og her holdes det endelig.
+ */
+export function kurstrykk(s: Spilltilstand, id: PapirId, antall: number): number {
+  return -Math.log1p(-Math.min(dybdeandel(s, id, antall), 0.999))
+}
+
+/** Snittprisen per stykk for en ordre på `antall` (positivt kjøp, negativt salg). */
 export function handelskurs(s: Spilltilstand, id: PapirId, antall: number): number {
   const kurs = s.marked.kurser[id].kurs
-  return kurs * Math.exp(kurstrykk(id, antall * kurs) / 2)
+  const x = dybdeandel(s, id, antall)
+  if (Math.abs(x) < 1e-12) return kurs
+  return (kurs * kurstrykk(s, id, antall)) / x
+}
+
+/** Det meste én ordre kan kjøpe eller selge, så kursen høyst dobles eller halveres. */
+export function maksPerOrdre(s: Spilltilstand, id: PapirId, retning: 'kjop' | 'selg'): number {
+  const enheter = PAPIRER[id].dybde / s.marked.kurser[id].kurs
+  // Kjøp: 1 − x ≥ e^−MAKS. Salg: 1 + x ≤ e^MAKS.
+  return rundAntall(id, retning === 'kjop' ? enheter * -Math.expm1(-MAKS_KURSTRYKK) : enheter * Math.expm1(MAKS_KURSTRYKK))
 }
 
 /** Flytter kursen etter en handel. Muterer — brukes bare på kopier. */
 export function flyttKurs(m: Marked, id: PapirId, antall: number): void {
   const k = m.kurser[id]
-  k.avvik += kurstrykk(id, antall * k.kurs)
-  k.kurs = kursFra(k.fundament, k.avvik)
+  const x = Math.min((antall * k.kurs) / PAPIRER[id].dybde, 0.999)
+  k.trykk = (k.trykk ?? 0) - Math.log1p(-x)
+  k.kurs = kursFra(k.fundament, k.avvik + k.trykk)
 }
 
 /** Aksjer handles i hele stykk; krypto i brøkdeler ned til 1/10 000. */

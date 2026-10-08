@@ -42,7 +42,7 @@ import { BLOKK, blokkpris, forbesliste, oppkjopspris, RIVALUTBYTTE, SALGSHONORAR
 import { dagnummer, erHelg } from '../../engine/kalender'
 import { BUD, type BudId, dagensForhandling, FORMER, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../../engine/fusjon'
 import { BEDRIFTSTYPER, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../../engine/innhold'
-import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
+import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, maksPerOrdre, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../engine/marked'
 import { portefolje, sum, type Aktivaklasse } from '../../engine/portefolje'
 import type { BedriftstypeId, Ordretype, PapirId, Rival, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
@@ -430,13 +430,15 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
   // «Maks» er ikke et fast tall: det følger kursen og kontantene, så kjøpet aldri avvises fordi kursen steg.
   const [alt, settAlt] = useState(false)
   const eier = s.beholdning[id]?.antall ?? 0
-  const maks = modus === 'kjop' ? maksKjop(s, id) : eier
+  // Én ordre kan høyst doble eller halvere kursen (Pakke 56); «Maks» stopper der.
+  const tak = maksPerOrdre(s, id, modus)
+  const maks = Math.min(modus === 'kjop' ? maksKjop(s, id) : eier, tak)
   const ønsket = alt ? maks : rundAntall(id, Number(tekst.replace(',', '.')) || 0)
   const a = modus === 'selg' ? Math.min(ønsket, eier) : ønsket
   const fortegn = modus === 'kjop' ? 1 : -1
   const pris = a > 0 ? handelskurs(s, id, fortegn * a) : 0
   const sum = a * pris * (1 + fortegn * KURTASJE)
-  const trykk = a > 0 ? Math.abs(Math.exp(kurstrykk(id, fortegn * a * s.marked.kurser[id].kurs)) - 1) : 0
+  const trykk = a > 0 ? Math.abs(Math.expm1(kurstrykk(s, id, fortegn * a))) : 0
 
   const velgAndel = (andel: number) => {
     settAlt(andel === 1)
@@ -511,8 +513,11 @@ function Handelsboks({ s, id }: { s: Spilltilstand; id: PapirId }) {
         )}
       </dl>
 
+      {maks === tak && maks > 0 && (
+        <p className="dempet liten">Høyst {fmtAntall(tak)} i én ordre — mer ville {modus === 'kjop' ? 'doblet' : 'halvert'} kursen. Resten kan tas i neste.</p>
+      )}
       {feil && <p className="feilmelding">{feil}</p>}
-      <button className="knapp knapp-gull" disabled={a <= 0 || (modus === 'kjop' && a > maks)} onClick={utførHandel}>
+      <button className="knapp knapp-gull" disabled={a <= 0 || a > maks} onClick={utførHandel}>
         {modus === 'kjop' ? 'Kjøp' : 'Selg'} {a > 0 ? fmtAntall(a) : ''}
       </button>
     </div>
