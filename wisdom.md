@@ -220,6 +220,17 @@ session; delete what stops being true.
   histories with 7 significant digits, everything else exact. A new number history must
   be named `historikk`/`inntektHistorikk` (or `punkter`) to be rounded. Every list has a
   cap; the heaviest save levels off at ~178 kB after ~120 game days (`pakke52.test.ts`).
+- **A new asset class (Pack 53, bonds)** touches: `Aktivaklasse` (types.ts), `KLASSER`,
+  `nullPerKlasse`, `klasseverdier` and `kostpris` (portefolje.ts), `eiendeler` (formler.ts, append
+  at the end so sums stay exact), the margin call (bank.ts), a `utfor*salg` in handel.ts
+  with `bokforGevinst`, `KLASSENAVN` and `TIL_UNDERFANE` (Investeringer.tsx), and two tests
+  that list the classes by hand (portefolje, migrering). Old saves miss the class in
+  `dagensFlyt`/`forrigeDag.verdier`: both are read with `?? 0`, so no migration.
+  Coupons count as dividends (`totaltUtbytte`) — not savings interest, because the
+  savings account's cost price is computed from `totaltSparerente`.
+- **Business income today = `dagensFaktor(s, type)`**: the calendar (Pack 49) times
+  company news in the industry (Pack 53, `nyhetsfaktor`). Use it (or `bedriftInntektIDag`)
+  everywhere income is shown.
 - **Know what the bot doesn't do**, or the bench will fool you: it never borrows, never
   hires managers, never buys property, luxury, stocks or startups, and reaches 1 mrd
   before it ever buys the Bank. Changes to those systems don't show in the bench — reason
