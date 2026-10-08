@@ -11,7 +11,8 @@
 const formaterere = new Map<number, Intl.NumberFormat>()
 
 export function tall(n: number, desimaler = 0): string {
-  const verdi = Number.isFinite(n) ? n : 0
+  // Det som rundes til null, er null — ikke «−0» (Pakke 58).
+  const verdi = Number.isFinite(n) && Math.abs(n) >= 0.5 / 10 ** desimaler ? n : 0
   let f = formaterere.get(desimaler)
   if (!f) {
     f = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: desimaler, maximumFractionDigits: desimaler })
@@ -20,9 +21,12 @@ export function tall(n: number, desimaler = 0): string {
   return f.format(verdi)
 }
 
-/** «kr 12 345». Brøkdeler rundes ned, så tallet aldri viser penger du ikke har. */
+/**
+ * «kr 12 345». Brøkdeler rundes ned, så tallet aldri viser penger du ikke har —
+ * men et flyttallsrest som −0,000000001 er null, ikke «kr −1».
+ */
 export function kroner(n: number): string {
-  return `kr ${tall(Math.floor(n))}`
+  return `kr ${tall(Math.floor(n + 1e-6))}`
 }
 
 /**

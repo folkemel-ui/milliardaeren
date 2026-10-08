@@ -459,6 +459,16 @@ export interface Spilltilstand {
   sparing: number
   totaltSparerente: number
   /**
+   * Kostprisen for sparekontoen (Pakke 58): det du har satt inn og ikke tatt
+   * ut igjen. Mangler i gamle lagringer til første innskudd eller uttak.
+   */
+  sparingKostpris?: number
+  /**
+   * Om du noen gang har tatt opp et lån selv (Pakke 58). Gjeld banken legger
+   * på når pengene tar slutt, teller ikke.
+   */
+  harLaant?: boolean
+  /**
    * Gevinst minus tap på alt som er solgt: papirer, fond, eiendom, jord,
    * landemerker, kunst, rivalandeler, startups og klubben. Skattes med inntekten.
    */

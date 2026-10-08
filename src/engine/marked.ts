@@ -319,5 +319,7 @@ export function flyttKurs(m: Marked, id: PapirId, antall: number): void {
 
 /** Aksjer handles i hele stykk; krypto i brøkdeler ned til 1/10 000. */
 export function rundAntall(id: PapirId, antall: number): number {
-  return PAPIRER[id].klasse === 'aksje' ? Math.floor(antall) : Math.floor(antall * 10_000) / 10_000
+  // En liten margin før avrundingen: 0,57 · 10 000 er 5 699,999… i flyttall, og ble 0,5699 (Pakke 58).
+  const ned = (x: number) => Math.floor(x + Math.abs(x) * 1e-12 + 1e-9)
+  return PAPIRER[id].klasse === 'aksje' ? ned(antall) : ned(antall * 10_000) / 10_000
 }

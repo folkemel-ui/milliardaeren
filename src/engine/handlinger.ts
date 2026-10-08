@@ -71,7 +71,7 @@ import {
   rivalensPris,
   utforFusjon,
 } from './fusjon'
-import { flyt } from './portefolje'
+import { flyt, settInnSparing, trekkFraSparing } from './portefolje'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from './verden'
 import { markedsrente, OBLIGASJONER } from './obligasjoner'
@@ -827,7 +827,7 @@ export function settInn(s: Spilltilstand, belop: number): Utfall {
   if (b <= 0) return feil('Du har ingen kontanter å sette inn.')
   const n = structuredClone(s)
   n.kontanter -= b
-  n.sparing += b
+  settInnSparing(n, b)
   flyt(n, 'sparing', b)
   return { ok: true, tilstand: n }
 }
@@ -837,14 +837,14 @@ export function taUt(s: Spilltilstand, belop: number): Utfall {
   const b = Math.min(belop, s.sparing)
   if (b <= 0) return feil('Sparekontoen er tom.')
   const n = structuredClone(s)
-  n.sparing -= b
+  trekkFraSparing(n, b)
   n.kontanter += b
   flyt(n, 'sparing', -b)
   // Restbeløp under én krone føres over, så kontoen faktisk blir tom.
   if (n.sparing < 1) {
     flyt(n, 'sparing', -n.sparing)
     n.kontanter += n.sparing
-    n.sparing = 0
+    trekkFraSparing(n, n.sparing)
   }
   return { ok: true, tilstand: n }
 }
@@ -859,6 +859,7 @@ export function laan(s: Spilltilstand, belop: number): Utfall {
   const n = structuredClone(s)
   n.kontanter += b
   n.gjeld += b
+  n.harLaant = true
   return { ok: true, tilstand: n }
 }
 

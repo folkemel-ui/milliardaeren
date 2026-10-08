@@ -7,9 +7,9 @@
  * må alt som er unndratt betales dobbelt tilbake.
  */
 
-import { leggTilHendelse } from './bank'
+import { leggTilHendelse, meldBankenDekket } from './bank'
 import { DAG_SEK } from './kalender'
-import { flyt } from './portefolje'
+import { flyt, trekkFraSparing } from './portefolje'
 import type { Terning } from './rng'
 import type { Oppgjor, Overskrift, Spilltilstand } from './types'
 import { kortKroner } from './tall'
@@ -55,9 +55,11 @@ export function trekkRegning(s: Spilltilstand, belop: number): void {
   const fraKontanter = Math.min(belop, Math.max(0, s.kontanter))
   s.kontanter -= fraKontanter
   const fraSparing = Math.min(belop - fraKontanter, s.sparing)
-  s.sparing -= fraSparing
+  trekkFraSparing(s, fraSparing)
   flyt(s, 'sparing', -fraSparing)
-  s.gjeld += belop - fraKontanter - fraSparing
+  const rest = belop - fraKontanter - fraSparing
+  s.gjeld += rest
+  if (rest > 0) meldBankenDekket(s, `Skatteregningen var større enn kontantene og sparekontoen. Banken la ${kortKroner(rest)} på gjelden — med rente.`)
   s.skatt.totaltBetalt += belop
 }
 

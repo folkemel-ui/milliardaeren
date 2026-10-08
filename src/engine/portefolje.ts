@@ -54,12 +54,35 @@ export function flyt(s: Spilltilstand, klasse: Aktivaklasse, belop: number): voi
   s.dagensFlyt[klasse] = (s.dagensFlyt[klasse] ?? 0) + belop
 }
 
+/**
+ * Kostprisen for sparekontoen: det du har satt inn og ikke tatt ut (Pakke 58).
+ * Før var den saldoen minus all rente noensinne, så et nytt innskudd etter et
+ * uttak viste renten fra før som avkastning. Gamle lagringer bruker den regelen
+ * til første innskudd eller uttak.
+ */
+export function sparingKostpris(s: Spilltilstand): number {
+  return s.sparingKostpris ?? Math.max(0, s.sparing - s.totaltSparerente)
+}
+
+/** Setter inn på sparekontoen; kostprisen øker like mye. Muterer. */
+export function settInnSparing(s: Spilltilstand, belop: number): void {
+  s.sparingKostpris = sparingKostpris(s) + belop
+  s.sparing += belop
+}
+
+/**
+ * Tar fra sparekontoen. Kostprisen krymper i takt med saldoen, så det som står
+ * igjen har den samme avkastningen som før. Muterer.
+ */
+export function trekkFraSparing(s: Spilltilstand, belop: number): void {
+  if (!(belop > 0)) return
+  const igjen = s.sparing - belop
+  s.sparingKostpris = s.sparing > 0 && igjen > 0 ? sparingKostpris(s) * (igjen / s.sparing) : 0
+  s.sparing = igjen
+}
+
 function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
-  if (klasse === 'sparing') {
-    // Avkastningen på sparekontoen er renten den har gitt — men aldri mer enn
-    // saldoen, så et uttak ikke etterlater «avkastning» på en tom konto.
-    return Math.max(0, s.sparing - s.totaltSparerente)
-  }
+  if (klasse === 'sparing') return sparingKostpris(s)
   if (klasse === 'startup') return startupKostpris(s)
   if (klasse === 'fond') return fondKostpris(s)
   if (klasse === 'obligasjon') return obligasjonKostpris(s)

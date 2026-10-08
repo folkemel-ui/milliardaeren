@@ -26,10 +26,15 @@ export function kompakt(n: number): string {
 }
 
 export function perSek(n: number): string {
-  const abs = Math.abs(n)
+  const verdi = Number.isFinite(n) ? n : 0
+  const abs = Math.abs(verdi)
   const tekst = abs >= 1e6 ? kortKroner(abs) : `kr ${tall(abs, abs < 10 && abs % 1 !== 0 ? 1 : 0)}`
-  return `${n >= 0 ? '+' : '−'}${tekst}/s`
+  // Et beløp som vises som null, får ikke minus.
+  return `${verdi < 0 && !NULL.test(tekst) ? '−' : '+'}${tekst}/s`
 }
+
+/** «kr 0» og «kr 0,0»: et beløp som vises som null. */
+const NULL = /^kr 0(,0+)?$/
 
 /** Kurs: to desimaler under tusen, ellers hele kroner. Småmynter får fire. */
 export function kurs(n: number): string {
@@ -40,14 +45,19 @@ export function kurs(n: number): string {
 
 /** «+kr 1 240», «−kr 141»; kort form over en million. */
 export function fortegnKroner(n: number): string {
-  const abs = Math.abs(n)
-  return `${n >= 0 ? '+' : '−'}${abs >= 1e6 ? kortKroner(abs) : kroner(abs)}`
+  const verdi = Number.isFinite(n) ? n : 0
+  const abs = Math.abs(verdi)
+  const tekst = abs >= 1e6 ? kortKroner(abs) : kroner(abs)
+  // Null har ikke fortegn: «kr 0», ikke «−kr 0» eller «+kr 0» (Pakke 58).
+  if (NULL.test(tekst)) return tekst
+  return `${verdi > 0 ? '+' : '−'}${tekst}`
 }
 
 /** «+3,2 %», «−1,0 %». */
 export function endring(andel: number): string {
-  const tekst = tall(Math.abs(andel * 100), 1)
-  return `${andel >= 0 ? '+' : '−'}${tekst} %`
+  const verdi = Number.isFinite(andel) ? andel : 0
+  const tekst = tall(Math.abs(verdi * 100), 1)
+  return `${verdi < 0 && tekst !== '0,0' ? '−' : '+'}${tekst} %`
 }
 
 /** Antall aksjer eller mynter: brøkdeler bare når det trengs, og færre jo større tallet er. */
@@ -68,5 +78,6 @@ export function varighet(sek: number): string {
   if (d > 0) return `${d} d ${t} t`
   if (t > 0) return m > 0 ? `${t} t ${m} min` : `${t} t`
   if (m > 0) return `${m} min`
-  return `${sek} s`
+  // Hele sekunder, med norsk tallformat — ikke «12.5 s».
+  return `${tall(Math.floor(Math.max(0, sek)))} s`
 }

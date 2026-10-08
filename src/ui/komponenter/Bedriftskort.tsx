@@ -3,6 +3,7 @@ import {
   ansettelsespris,
   bedriftInntektIDag,
   bedriftInntektPerSek,
+  dagensFaktor,
   lonnFor,
   lederpris,
   maksAnsatte,
@@ -174,7 +175,7 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
             const laast = b.nivaa < g.fraNivaa
             const pris = ansettelsespris(b, grad)
             // Hva én til gir netto: ekstra inntekt minus lønnen. Kan være negativt.
-            const gir = (bedriftInntektPerSek(medNyAnsatt(b, grad)) - bedriftInntektPerSek(b)) * statusfaktor(s)
+            const gir = (bedriftInntektPerSek(medNyAnsatt(b, grad), dagensFaktor(s, b.type)) - bedriftInntektPerSek(b, dagensFaktor(s, b.type))) * statusfaktor(s)
             return (
               <div key={grad} className={`ansett-grad${laast ? ' laast' : ''}`}>
                 <strong>{g.navn}</strong>

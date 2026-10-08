@@ -7,7 +7,7 @@
  * ingen kø, så balansen er den samme; køen er en bonus for den som følger med.
  */
 
-import { bedriftInntektPerSek, statusfaktor } from './formler'
+import { bedriftInntektIDag } from './formler'
 import { hashTekst, tilfeldig } from './rng'
 import type { Utfall } from './handlinger'
 import type { Spilltilstand } from './types'
@@ -68,7 +68,8 @@ export function kotikk(s: Spilltilstand, borte: boolean): void {
   if (s.ko || s.bedrifter.length === 0) return
   if (tilfeldig(KO_FRØ + s.sek) >= KO_SJANSE) return
   const b = s.bedrifter[Math.floor(tilfeldig(KO_FRØ + s.sek + 1) * s.bedrifter.length)]
-  const bonus = bedriftInntektPerSek(b) * statusfaktor(s) * KO_BONUS_SEK
+  // Tretti sekunder av det bedriften tjener i dag — med helligdag, vær og nyheter (Pakke 58).
+  const bonus = bedriftInntektIDag(s, b) * KO_BONUS_SEK
   if (bonus <= 0) return
   s.ko = { bedriftId: b.id, slutterSek: s.sek + KO_VARER_SEK, bonus }
 }

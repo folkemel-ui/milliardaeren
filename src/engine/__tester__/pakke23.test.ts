@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { aktivKo, betjenKo, kanSelgeSelv, KO_VARER_SEK, KOPPEPRIS, kotikk, MAKS_KOPPER_PER_SEK, selgKopp } from '../hender'
-import { bedriftInntektPerSek } from '../formler'
+import { bedriftInntektIDag } from '../formler'
 import type { Utfall } from '../handlinger'
 import type { Spilltilstand } from '../types'
 
@@ -50,11 +50,11 @@ function medKo(): Spilltilstand {
 }
 
 describe('kø ved disken', () => {
-  it('dannes av og til mens appen er åpen, og gir en halvt minutts inntekt', () => {
+  it('dannes av og til mens appen er åpen, og gir en halvt minutts inntekt — slik den er i dag (Pakke 58)', () => {
     const s = medKo()
     const ko = aktivKo(s)!
     const b = s.bedrifter.find((x) => x.id === ko.bedriftId)!
-    expect(ko.bonus).toBeCloseTo(bedriftInntektPerSek(b) * 30, 5)
+    expect(ko.bonus).toBeCloseTo(bedriftInntektIDag(s, b) * 30, 5)
     const n = ok(betjenKo(s))
     expect(n.kontanter).toBeCloseTo(s.kontanter + ko.bonus)
     expect(aktivKo(n)).toBeNull()

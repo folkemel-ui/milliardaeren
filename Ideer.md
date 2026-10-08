@@ -12,11 +12,10 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v10.0 (Packs 58–60)
+### Game track: the road to v10.0 (Packs 59–60)
 
-Items from *Bugs* and *Road to v10.0*. Commits: `Pakke N: …`. Bugs first, so franchises and more countries are measured on numbers that hold.
+Items from *Road to v10.0*. Commits: `Pakke N: …`. The bugs from the code review on 8 October were fixed in Packs 55–58, so franchises and more countries are measured on numbers that hold.
 
-- **Pack 58 – Honest numbers:** Automatic debt counts as a loan, The queue bonus ignores the day, The bond sale calls a loss a gain, Crypto amounts lose a crumb, Savings show a false return, Numbers with a stray minus
 - **Pack 59 – A bigger empire:** Franchises, More countries
 - **Pack 60 – The good life:** Interiors, Avisa on Sunday
 
@@ -57,17 +56,6 @@ Loose ends after G1–G7, and what was picked for v10.0.
 8. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
 9. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
 10. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
-
-## Bugs
-
-Found in a code review on 8 October 2026 (four reviewers, one per area); every item was reproduced with a script. The bench and the golden master can't see most of them: the bot never trades stocks, funds or bonds, buys property or hires managers.
-
-11. **Automatic debt counts as a loan.** When income goes below zero, `dekkUnderskudd` (`bank.ts`) quietly turns the shortfall into debt, which unlocks the loan achievement with no message. Easy early on: one experienced hire at the level-1 juice stand gives −kr 2.21/s. Tell the player, and give the achievement only for a real loan.
-12. **The queue bonus ignores the day.** `hender.ts` reckons "30 seconds of income" from `bedriftInntektPerSek × statusfaktor`, not `bedriftInntektIDag`: on 17. mai a queue pays kr 4 650 instead of kr 16 740. The hire preview «Gir …/s» in `Bedriftskort.tsx` has the same mistake and can show a minus on a day the hire pays.
-13. **The bond sale calls a loss a gain.** The confirm dialog (`Obligasjoner.tsx`) picks the word from value − cost before the 0.1 % fee, and the amount after it: right after buying kr 1 mill it says «en gevinst på kr 1 000», though the sale loses kr 1 000.
-14. **Crypto amounts lose a crumb.** `rundAntall` floors `antall × 10 000` with float error: buying 0.57 gives 0.5699.
-15. **Savings show a false return.** The savings account's cost price is `sparing − totaltSparerente` (lifetime interest), so after a full withdrawal and a new kr 10 mill deposit, the new money shows a return of +kr 100 501.
-16. **Numbers with a stray minus.** `kroner(-0)` gives «kr −0», a float leftover like −1e-9 gives «kr −1», `perSek(NaN)` gives «−kr 0/s», and `varighet(12.5)` gives «12.5 s» with a dot. Statistics show «+kr 0» in red.
 
 ## Parked (not chosen yet)
 

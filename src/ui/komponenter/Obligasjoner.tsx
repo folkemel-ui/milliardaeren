@@ -34,6 +34,8 @@ function Obligasjonskort({ s, id }: { s: Spilltilstand; id: ObligasjonId }) {
   const verdi = obligasjonsverdiFor(s, id)
   const gevinst = post ? verdi - post.kostpris : 0
   const salg = verdi * (1 - OBLIGASJON_GEBYR)
+  // Det salget faktisk gir mot kostprisen, etter gebyret — ordet og beløpet regnes av det samme.
+  const resultat = post ? salg - post.kostpris : 0
   return (
     <div className="kort obligasjon">
       <div className="bank-rad">
@@ -79,7 +81,7 @@ function Obligasjonskort({ s, id }: { s: Spilltilstand; id: ObligasjonId }) {
           <span className="etikett">Selg</span>
           <Bekreftknapp
             className="knapp knapp-liten"
-            varsel={`Du får ${kortKroner(salg)}, ${gevinst >= 0 ? 'en gevinst' : 'et tap'} på ${kortKroner(Math.abs(salg - post.kostpris))}.`}
+            varsel={`Du får ${kortKroner(salg)}, ${resultat >= 0 ? 'en gevinst' : 'et tap'} på ${kortKroner(Math.abs(resultat))}.`}
             onJa={() => utfor(selgObligasjon(s, id, 1))}
           >
             Selg alt · {kortKroner(salg)}

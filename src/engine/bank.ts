@@ -24,7 +24,8 @@ import { aktive, ide, utforStartupovertakelse } from './startups'
 import { FOND, FONDLISTE } from './fond'
 import { OBLIGASJONER, OBLIGASJONSLISTE } from './obligasjoner'
 import { selskapsverdi } from './rivaler'
-import { flyt } from './portefolje'
+import { flyt, trekkFraSparing } from './portefolje'
+import { DAG_SEK } from './kalender'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
 import { BEDRIFTSTYPER, MAKS_BELAANING, MAKS_HENDELSER, MARGINKRAV, TVANGSSALG_ANDEL } from './innhold'
 import { PAPIRER } from './marked'
@@ -33,6 +34,19 @@ import type { Hendelse, PapirId, Spilltilstand } from './types'
 export function leggTilHendelse(s: Spilltilstand, h: Omit<Hendelse, 'sek'>): void {
   s.hendelser.push({ sek: s.sek, ...h })
   if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+}
+
+export const BANKEN_DEKKET = 'Banken dekket det du manglet'
+
+/**
+ * Når pengene tar slutt og banken legger resten på gjelden, skal du få vite
+ * det (Pakke 58) — før skjedde det stille. Høyst én melding per spilldag, for
+ * et underskudd går hvert sekund. Muterer.
+ */
+export function meldBankenDekket(s: Spilltilstand, tekst: string): void {
+  const fra = s.sek - DAG_SEK
+  for (let i = s.hendelser.length - 1; i >= 0 && s.hendelser[i].sek > fra; i--) if (s.hendelser[i].tittel === BANKEN_DEKKET) return
+  leggTilHendelse(s, { tittel: BANKEN_DEKKET, tekst, alvor: 'advarsel' })
 }
 
 /**
@@ -47,7 +61,7 @@ export function betalRente(s: Spilltilstand): void {
   const fraKontanter = Math.min(rente, Math.max(0, s.kontanter))
   s.kontanter -= fraKontanter
   const fraSparing = Math.min(rente - fraKontanter, s.sparing)
-  s.sparing -= fraSparing
+  trekkFraSparing(s, fraSparing)
   flyt(s, 'sparing', -fraSparing)
   s.gjeld += rente - fraKontanter - fraSparing
 }
@@ -59,12 +73,13 @@ export function betalRente(s: Spilltilstand): void {
 export function dekkUnderskudd(s: Spilltilstand): void {
   if (s.kontanter >= 0) return
   const fraSparing = Math.min(-s.kontanter, s.sparing)
-  s.sparing -= fraSparing
+  trekkFraSparing(s, fraSparing)
   flyt(s, 'sparing', -fraSparing)
   s.kontanter += fraSparing
   if (s.kontanter < 0) {
     s.gjeld -= s.kontanter
     s.kontanter = 0
+    meldBankenDekket(s, 'Lønningene er større enn det bedriftene tjener, og kontantene og sparekontoen er tomme. Banken legger resten på gjelden — med rente. Se på bemanningen.')
   }
 }
 
@@ -94,7 +109,7 @@ export function sjekkMargin(s: Spilltilstand): void {
   // Sparekontoen tømmes inn på brukskontoen først.
   flyt(s, 'sparing', -s.sparing)
   s.kontanter += s.sparing
-  s.sparing = 0
+  trekkFraSparing(s, s.sparing)
   nedbetalMed(s, s.kontanter)
   const solgt: string[] = []
   const poster = (Object.keys(s.beholdning) as PapirId[]).sort(

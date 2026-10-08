@@ -77,7 +77,7 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'forste-aksje', navn: 'Børsnybegynner', beskrivelse: 'Kjøp en aksje', klart: (s) => eierKlasse(s, 'aksje') },
   { id: 'forste-krypto', navn: 'Kryptonysgjerrig', beskrivelse: 'Kjøp krypto', klart: (s) => eierKlasse(s, 'krypto') },
   { id: 'utbytte', navn: 'Rentier', beskrivelse: 'Få kr 10 000 i utbytte', klart: (s) => s.totaltUtbytte >= 1e4 },
-  { id: 'forste-laan', navn: 'Belånt', beskrivelse: 'Ta opp et lån', klart: (s) => s.gjeld > 0 },
+  { id: 'forste-laan', navn: 'Belånt', beskrivelse: 'Ta opp et lån', klart: (s) => !!s.harLaant },
   { id: 'marginkrav', navn: 'Lærepenger', beskrivelse: 'Overlev et marginkrav', klart: (s) => s.hendelser.some((h) => h.tittel === 'Marginkrav') },
   { id: 'huseier', navn: 'Huseier', beskrivelse: 'Kjøp en eiendom', klart: (s) => antallEiendommer(s) >= 1 },
   { id: 'utleier', navn: 'Utleier', beskrivelse: 'Eie fem eiendommer', klart: (s) => antallEiendommer(s) >= 5 },

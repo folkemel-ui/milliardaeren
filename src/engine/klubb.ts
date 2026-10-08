@@ -11,7 +11,7 @@
  * spillerne — å kjøpe den flytter bare penger, som alt annet.
  */
 
-import { leggTilHendelse } from './bank'
+import { leggTilHendelse, meldBankenDekket } from './bank'
 import { dagnummer } from './kalender'
 import { hashTekst, Terning } from './rng'
 import type { Kamp, Klubb, Lag, Overskrift, Spiller, Spilltilstand, Taktikk } from './types'
@@ -245,6 +245,7 @@ function betal(s: Spilltilstand, belop: number): void {
   if (s.kontanter < 0) {
     s.gjeld += -s.kontanter
     s.kontanter = 0
+    meldBankenDekket(s, 'Klubben koster mer enn du har på konto. Banken legger resten på gjelden — med rente.')
   }
 }
 
