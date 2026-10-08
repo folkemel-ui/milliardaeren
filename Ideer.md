@@ -12,12 +12,16 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v10.0 (Packs 55–56)
+### Game track: the road to v10.0 (Packs 55–60)
 
-Items from *Road to v10.0*. Commits: `Pakke N: …`. Engine work first, so the packs after it are built on firm ground and measured properly.
+Items from *Bugs* and *Road to v10.0*. Commits: `Pakke N: …`. Bugs first: the save fixes protect every player at the next save version bump, and the exploits have to be closed before franchises and more countries are measured.
 
-- **Pack 55 – A bigger empire:** Franchises, More countries
-- **Pack 56 – The good life:** Interiors, Avisa on Sunday
+- **Pack 55 – Safe saves:** Time away lost after a save update, Closing a hidden tab loses time, The rescued save gets overwritten, Double tap on import, Imported games celebrate their past
+- **Pack 56 – Fair markets:** Stock buys in pieces beat one big sale, Index funds can be pumped, Bonds can't lose at the end of a boom
+- **Pack 57 – Fair property:** A farm pays the whole week for one night, The property manager's fee doesn't grow, Cheap upgraded units
+- **Pack 58 – Honest numbers:** Automatic debt counts as a loan, The queue bonus ignores the day, The bond sale calls a loss a gain, Crypto amounts lose a crumb, Savings show a false return, Numbers with a stray minus
+- **Pack 59 – A bigger empire:** Franchises, More countries
+- **Pack 60 – The good life:** Interiors, Avisa on Sunday
 
 ### Graphics track (Packs G11–G12)
 
@@ -26,7 +30,7 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the f
 - **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
 - **Pack G12 – The living year:** Seasons in the drawings, Upgrades you can see
 
-*Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — franchises, more countries and interiors (Packs 55–56) will need new drawings.
+*Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — franchises, more countries and interiors (Packs 59–60) will need new drawings.
 
 ### Working side by side
 
@@ -56,6 +60,28 @@ Loose ends after G1–G7, and what was picked for v10.0.
 8. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
 9. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
 10. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
+
+## Bugs
+
+Found in a code review on 8 October 2026 (four reviewers, one per area); every item was reproduced with a script. The bench and the golden master can't see most of them: the bot never trades stocks, funds or bonds, buys property or hires managers.
+
+11. **Time away lost after a save update.** When a new version changes the save format, `lastFraDisk` (`state/lager.ts`) writes the migrated save at once, and `skrivTilDisk` stamps `sistAktiv` with the time now. `taIgjenBorteTid` then sees about 0 s away: no offline income and no welcome screen — up to 2 h lost for every returning player at every save version bump. Catch up before that write, or don't stamp `sistAktiv` there.
+12. **Closing a hidden tab loses time.** Hiding the tab saves at T1; a later `pagehide` saves the same state again but stamps `sistAktiv` with the closing time, so the hours in between are never counted (desktop: switch tab, close the browser later). Skip the `pagehide` write while `document.hidden`, or catch up first.
+13. **The rescued save gets overwritten.** Broken saves and every successful migration share one slot, `milliardaer.lagring.korrupt`. After «Start nytt spill» on the error screen, the next version bump overwrites the only copy of the old game — which the screen promised to keep.
+14. **Double tap on import.** «Ja, bytt spill» stays clickable while `importer()` runs (unzip, migrate, a test simulation). A second tap puts the already-imported game into the backup, and the original game is gone. Disable the button while it runs.
+15. **Imported games celebrate their past.** Importing, or swapping to the backup, diffs two unrelated games in `App.tsx`; only purchases are filtered out. The other game's achievements fire confetti (even «MILLIARDÆR!»), and its events and new-tab toasts appear. Swapping back and forth repeats it all.
+16. **Stock buys in pieces beat one big sale.** `kurstrykk` (`marked.ts`) caps one order's price move at 15 %, and a buy pays only half the move it makes. Ten maximum-size buys of VKT and one sell-all give +113 % after fees, in about 11 clicks (NFS: +26 % with 4 buys). Many small orders must never beat one big one — for example let the price impact fade back over time, or cap the move per paper per time window.
+17. **Index funds can be pumped.** `fondskurs` uses the members' current prices, and fund trades never move them. Buy a fund, push a few thin members up with direct buys, sell everything: +kr 176 000 risk-free on kr 10 mill in the crypto fund, and the gain grows with the fund stake.
+18. **Bonds can't lose at the end of a boom.** The policy rate is already at its top (5 %) in høykonjunktur, bonds are bought at par with no fee, and the UI shows how many days the phase has left. A long bond bought just before the switch: about +9 % expected per phase change, −0.1 % at worst (+19.9 % when it turns to lavkonjunktur).
+19. **A farm pays the whole week for one night.** `jordVedDagsskifte` (`jord.ts`) pays the week's harvest to whoever owns the farm when Monday starts. Buy on Sunday evening, sell on Monday: +4.5 % to +13 % of the price after the 3 % fee, every week, and the week's weather factor is shown in advance. Pay the harvest for the days owned.
+20. **The property manager's fee doesn't grow.** `ansettForvalter` charges 5 % of the city's property value once. Hire one for a single bedsit (kr 100 000), then buy kr 335 mill more in Oslo: all of it gets the ×1.05 rent and halved vacancy. The manager also stays after everything in the city is sold.
+21. **Cheap upgraded units.** New units cost price × the current standard (×1.35 at Luksus), while bringing a plain unit there costs 0.65 × price on top of the 1.0. Six Oslo flats: kr 24.5 mill bought plain and renovated, kr 22.8 mill if you renovate one first and buy five more — 7 % cheaper for the same result.
+22. **Automatic debt counts as a loan.** When income goes below zero, `dekkUnderskudd` (`bank.ts`) quietly turns the shortfall into debt, which unlocks the loan achievement with no message. Easy early on: one experienced hire at the level-1 juice stand gives −kr 2.21/s. Tell the player, and give the achievement only for a real loan.
+23. **The queue bonus ignores the day.** `hender.ts` reckons "30 seconds of income" from `bedriftInntektPerSek × statusfaktor`, not `bedriftInntektIDag`: on 17. mai a queue pays kr 4 650 instead of kr 16 740. The hire preview «Gir …/s» in `Bedriftskort.tsx` has the same mistake and can show a minus on a day the hire pays.
+24. **The bond sale calls a loss a gain.** The confirm dialog (`Obligasjoner.tsx`) picks the word from value − cost before the 0.1 % fee, and the amount after it: right after buying kr 1 mill it says «en gevinst på kr 1 000», though the sale loses kr 1 000.
+25. **Crypto amounts lose a crumb.** `rundAntall` floors `antall × 10 000` with float error: buying 0.57 gives 0.5699.
+26. **Savings show a false return.** The savings account's cost price is `sparing − totaltSparerente` (lifetime interest), so after a full withdrawal and a new kr 10 mill deposit, the new money shows a return of +kr 100 501.
+27. **Numbers with a stray minus.** `kroner(-0)` gives «kr −0», a float leftover like −1e-9 gives «kr −1», `perSek(NaN)` gives «−kr 0/s», and `varighet(12.5)` gives «12.5 s» with a dot. Statistics show «+kr 0» in red.
 
 ## Parked (not chosen yet)
 
