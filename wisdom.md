@@ -231,6 +231,15 @@ session; delete what stops being true.
 - **Business income today = `dagensFaktor(s, type)`**: the calendar (Pack 49) times
   company news in the industry (Pack 53, `nyhetsfaktor`). Use it (or `bedriftInntektIDag`)
   everywhere income is shown.
+- **Rent (Pack 54)** = price × index × yield × standard × city factor × season × weather
+  ÷ 3600, where the city factor (`byfaktorLeie`) holds the whole-city bonus, vacancy and
+  the manager's trait, and the weather factor comes from `dagsbilde(s).eiendom[id]`. Tests
+  of base rent mechanics mock vacancy with `__tester__/utenUtleie.ts` (like
+  `utenKalender`). The bot owns no property, so the golden master and the bench can't
+  see any of this — `pakke54.test.ts` and reasoning are the guard.
+- **One weather**: Norway's daily weather (`vaerPaaDag(dag)`) keeps Pack 49's hash key,
+  so adding places (`'alpene'`, `'syden'`) changed nothing at home. The farms' weekly
+  harvest (`jord.vaer`) is now the mean of that week's seven days, amplified ×3.
 - **Know what the bot doesn't do**, or the bench will fool you: it never borrows, never
   hires managers, never buys property, luxury, stocks or startups, and reaches 1 mrd
   before it ever buys the Bank. Changes to those systems don't show in the bench — reason
