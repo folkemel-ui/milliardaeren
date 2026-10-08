@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Avis } from './ui/komponenter/Avis'
-import { aktivVelkomst, lukkVelkomst, startSpillokke, useAvbrudd, useSpill, useVelkomst } from './state/lager'
+import { aktivVelkomst, lukkVelkomst, spillnummer, startSpillokke, useAvbrudd, useSpill, useVelkomst } from './state/lager'
 import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
 import { Velkomstskjerm } from './ui/komponenter/Velkomst'
 import { FANE_INNHOLD, FANER, Fanemeny, type Fane } from './ui/komponenter/Fanemeny'
@@ -79,6 +79,7 @@ export default function App() {
   // Retningen fanene glir: mot høyre når du går til en fane lenger til høyre.
   const [retning, settRetning] = useState<'hoyre' | 'venstre' | 'ingen'>('ingen')
   const forrige = useRef(s)
+  const forrigeSpill = useRef(spillnummer())
   const velkomst = useVelkomst()
   const sveip = useRef<{ x: number; y: number; t: number } | null>(null)
   const avbrudd = useAvbrudd()
@@ -104,10 +105,15 @@ export default function App() {
     const før = forrige.current
     forrige.current = s
     if (før === s) return
+    // Et importert spill, reservekopien eller et nytt spill: et annet spills fortid er ikke nyheter.
+    if (forrigeSpill.current !== spillnummer()) {
+      forrigeSpill.current = spillnummer()
+      return
+    }
     const funn = nytt(før, s)
     const feiring = stoersteFeiring(funn)
     if (feiring) visFeiring(feiring)
-    // Mange «kjøp» på en gang er ikke kjøp, men et annet spill: en importert lagring eller nytt spill.
+    // Mange «kjøp» på en gang er automatiske ordre — da vises ingen av dem som nye.
     const alleKjop = funn.filter((f) => f.type === 'kjop')
     const kjop = alleKjop.length > MAKS_KJOP_SAMTIDIG ? [] : alleKjop
     for (const k of kjop) merkNy(k.id)

@@ -13,6 +13,7 @@ export function FlyttSpillet() {
   const [melding, settMelding] = useState<string | null>(null)
   const [kode, settKode] = useState('')
   const [bekreft, settBekreft] = useState(false)
+  const [henter, settHenter] = useState(false)
 
   async function kopier() {
     const k = await eksporter()
@@ -56,7 +57,9 @@ export function FlyttSpillet() {
   }
 
   async function hentInn() {
+    settHenter(true)
     const feil = await importer(kode)
+    settHenter(false)
     settBekreft(false)
     if (feil) settMelding(feil)
     else {
@@ -100,8 +103,8 @@ export function FlyttSpillet() {
           <input type="file" accept=".txt,text/plain" onChange={(e) => lesFil(e.target.files?.[0])} />
         </label>
         {bekreft ? (
-          <button className="knapp knapp-fare" onClick={hentInn}>
-            Ja, bytt spill
+          <button className="knapp knapp-fare" disabled={henter} onClick={hentInn}>
+            {henter ? 'Henter inn …' : 'Ja, bytt spill'}
           </button>
         ) : (
           <button className="knapp" disabled={!kode.trim()} onClick={() => settBekreft(true)}>

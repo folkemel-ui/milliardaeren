@@ -414,7 +414,8 @@ session; delete what stops being true.
 - **Living maps** (Pack 46): day and night uses `morke(s.sek)` from `ui/dagognatt.ts` as a CSS var `--natt` on the map. Planes and the coastal ship are `<Reisende>` (`Bevegelse.tsx`), which moves via requestAnimationFrame and renders nothing with reduced motion. The buy ring is CSS (`.kart-puls`, `usePuls`). The city card (`Bykort.tsx`) is HTML over the SVG inside `.kart-ramme`. Hooks using `useSyncExternalStore` need a third argument (server snapshot), or `renderToStaticMarkup` tests fail.
 - **Testing a migration on a real save**: park the browser tab on `/ikon.svg` while changing
   the engine (stopping the server can wipe that port's storage), then load the game. The game
-  always copies the pre-migration save to `milliardaer.lagring.korrupt`. That's the safety
+  always copies the pre-migration save to `milliardaer.lagring.formigrering` (since Pack 55;
+  `.korrupt` is only for saves that failed to load). That's the safety
   copy, not a failure.
 - **Charts**: load the `dataviz` skill before any chart work. Axis maths lives in pure
   `ui/grafakser.ts` (`verdimerker` = round gridline values, at least three; `tidsmerker` =

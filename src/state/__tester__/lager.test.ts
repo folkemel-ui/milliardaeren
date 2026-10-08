@@ -4,6 +4,9 @@
  * modulen på nytt, som en ny side.
  */
 
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { gunzipSync } from 'node:zlib'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nyttSpill } from '../../engine/start'
 import { simuler } from '../../engine/simulering'
@@ -14,6 +17,7 @@ import { pakk } from '../overforing'
 const LAGRING = 'milliardaer.lagring'
 const ANGRE = 'milliardaer.lagring.angre'
 const KORRUPT = 'milliardaer.lagring.korrupt'
+const FOR_MIGRERING = 'milliardaer.lagring.formigrering'
 const SIST_AKTIV = 'milliardaer.sistAktiv'
 const EIER = 'milliardaer.eier'
 
@@ -24,6 +28,10 @@ let dok: { hidden: boolean }
 let reload: ReturnType<typeof vi.fn>
 
 const lest = (): Spilltilstand => JSON.parse(disk.get(LAGRING)!)
+
+/** En ekte lagring fra versjon 19, som må løftes når den lastes. */
+const gammelLagring = (): string =>
+  JSON.stringify(JSON.parse(gunzipSync(readFileSync(join(__dirname, 'gamle-lagringer', 'v19.json.gz'))).toString('utf8')).tilstand)
 
 function falskeGlobaler() {
   disk = new Map()
@@ -130,6 +138,51 @@ describe('tid borte', () => {
     expect((await åpne()).aktivVelkomst()).toBeNull()
     lagreSpill(nyttSpill(), 10 * 60)
     expect((await åpne()).aktivVelkomst()?.borteSek).toBe(600)
+  })
+
+  it('en lagring som løftes til en ny versjon, får likevel tiden borte (Pakke 55)', async () => {
+    const rå = gammelLagring()
+    const sek = (JSON.parse(rå) as Spilltilstand).sek
+    disk.set(LAGRING, rå)
+    disk.set(SIST_AKTIV, String(Date.now() - 3 * 3600 * 1000))
+    disk.set(KORRUPT, 'en ødelagt lagring fra før')
+    const l = await åpne()
+    expect(l.aktivVelkomst()?.borteSek).toBe(3 * 3600)
+    l.lagre()
+    expect(lest().sek).toBeGreaterThan(sek)
+    // Originalen ligger i sin egen nøkkel; den bergede lagringen står urørt.
+    expect(disk.get(FOR_MIGRERING)).toBe(rå)
+    expect(disk.get(KORRUPT)).toBe('en ødelagt lagring fra før')
+  })
+
+  it('en skjult fane som lukkes senere, mister ikke tiden imellom (Pakke 55)', async () => {
+    lagreSpill(nyttSpill())
+    const l = await åpne()
+    l.startSpillokke()
+    synlighet(true)
+    const skjult = Date.now()
+    vi.setSystemTime(skjult + 3 * 3600 * 1000)
+    for (const fn of vinduLyttere.pagehide ?? []) fn({})
+    expect(disk.get(SIST_AKTIV)).toBe(String(skjult))
+    expect((await åpne()).aktivVelkomst()?.borteSek).toBe(3 * 3600)
+  })
+
+  it('når lagringen feiler, regnes tiden borte likevel bare én gang', async () => {
+    lagreSpill(nyttSpill())
+    const l = await åpne()
+    l.startSpillokke()
+    const ved = lest().sek
+    // Full disk: spillet går 30 s og skjules, men ingenting av det kommer på disken.
+    const ekte = localStorage.setItem
+    vi.stubGlobal('localStorage', { ...localStorage, setItem: () => { throw new Error('full') } })
+    vi.advanceTimersByTime(30_000)
+    synlighet(true)
+    vi.setSystemTime(Date.now() + 20_000)
+    vi.stubGlobal('localStorage', { ...localStorage, setItem: ekte })
+    synlighet(false)
+    // 30 s spilt og 20 s borte — ikke de 30 sekundene en gang til.
+    expect(lest().sek - ved).toBeGreaterThanOrEqual(49)
+    expect(lest().sek - ved).toBeLessThanOrEqual(50)
   })
 
   it('en app som skjules og vises igjen, regner ut tiden imellom', async () => {
@@ -304,6 +357,27 @@ describe('import', () => {
     expect(await l.importer(kode)).toBeNull()
     expect(lest().sek).toBe(700)
     expect(l.lesReservekopi()?.sek).toBe(100)
+  })
+
+  it('et dobbelttrykk henter inn bare én gang, og det gamle spillet blir i reservekopien (Pakke 55)', async () => {
+    lagreSpill(simuler(nyttSpill(), 100))
+    const l = await åpne()
+    const kode = await pakk(simuler(nyttSpill(), 700))
+    const [første, andre] = await Promise.all([l.importer(kode), l.importer(kode)])
+    expect(første).toBeNull()
+    expect(andre).toMatch(/hentes alt inn/)
+    expect(lest().sek).toBe(700)
+    expect(l.lesReservekopi()?.sek).toBe(100)
+  })
+
+  it('hvert bytte av spill teller, så appen vet at det er et annet spill', async () => {
+    lagreSpill(simuler(nyttSpill(), 100))
+    const l = await åpne()
+    const før = l.spillnummer()
+    l.startPaaNytt()
+    expect(l.byttTilReservekopi()).toBeNull()
+    expect(await l.importer(await pakk(nyttSpill()))).toBeNull()
+    expect(l.spillnummer()).toBe(før + 3)
   })
 
   it('en ødelagt kode endrer ingenting', async () => {

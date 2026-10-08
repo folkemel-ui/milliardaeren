@@ -28,9 +28,12 @@ import type { Spilltilstand } from '../engine/types'
 const LAGERNOKKEL = 'milliardaer.lagring'
 /* «Start på nytt» og import sletter aldri: det forrige spillet legges her. */
 const ANGRENOKKEL = 'milliardaer.lagring.angre'
+/* En lagring som ikke kunne lastes. Bare feil skriver hit, så kopien står til neste feil. */
 const BERGENOKKEL = 'milliardaer.lagring.korrupt'
-/* Veggklokken da spillet sist ble lagret. Holdes utenfor spilltilstanden, så
-   motoren aldri ser ekte tid. */
+/* Lagringen slik den var før den sist ble løftet til en ny versjon. */
+const FOR_MIGRERING_NOKKEL = 'milliardaer.lagring.formigrering'
+/* Veggklokken spillet i lagringen hører til. Holdes utenfor spilltilstanden,
+   så motoren aldri ser ekte tid. */
 const SIST_AKTIV_NOKKEL = 'milliardaer.sistAktiv'
 /* Fanen som eier lagringen nå. */
 const EIERNOKKEL = 'milliardaer.eier'
@@ -102,9 +105,9 @@ function eierFortsatt(): boolean {
 
 /* En lagring som ikke kan brukes skal aldri forkastes stille: legg råteksten
    i en bergingsnøkkel før et nytt spill får skrive over posten. */
-function bergLagring(rå: string): void {
+function bergLagring(rå: string, nøkkel = BERGENOKKEL): void {
   try {
-    localStorage.setItem(BERGENOKKEL, rå)
+    localStorage.setItem(nøkkel, rå)
   } catch {
     /* full disk — da står i det minste originalen til den overskrives */
   }
@@ -140,16 +143,28 @@ function lastFraDisk(): { type: 'tom' } | { type: 'ok'; tilstand: Spilltilstand 
     return { type: 'feil', feil: r.feil }
   }
   if (r.migrert) {
-    bergLagring(rå)
-    skrivTilDisk(r.tilstand)
+    bergLagring(rå, FOR_MIGRERING_NOKKEL)
+    // Bare spillet: klokken står, så tiden borte fortsatt regnes fra sist det ble spilt.
+    try {
+      localStorage.setItem(LAGERNOKKEL, tilLagring(r.tilstand))
+    } catch {
+      /* full disk — det migreres på nytt neste gang */
+    }
   }
   return { type: 'ok', tilstand: r.tilstand }
 }
 
+/*
+ * Veggklokken spillet i minnet hører til: settes når tiden er regnet frem, og
+ * står stille mens appen er skjult. Lagringen stempler denne, ikke klokka nå,
+ * så en skjult fane som lukkes timer senere ikke stjeler tiden imellom.
+ */
+let klokke = Date.now()
+
 function skrivTilDisk(s: Spilltilstand): void {
   try {
     localStorage.setItem(LAGERNOKKEL, tilLagring(s))
-    localStorage.setItem(SIST_AKTIV_NOKKEL, String(Date.now()))
+    localStorage.setItem(SIST_AKTIV_NOKKEL, String(klokke))
   } catch {
     // Full disk eller privat modus — spillet fungerer, det lagres bare ikke.
   }
@@ -203,10 +218,10 @@ export function lukkVelkomst(): void {
   for (const l of velkomstLyttere) l()
 }
 
-/** Regner ut tiden siden sist lagring, og viser velkomsten etter en lengre pause. */
-function taIgjenBorteTid(s: Spilltilstand): Spilltilstand {
-  const borte = sekunderBorte()
+/** Regner ut tiden borte, og viser velkomsten etter en lengre pause. */
+function taIgjenBorteTid(s: Spilltilstand, borte: number): Spilltilstand {
   const etter = taIgjen(s, borte)
+  klokke = Date.now()
   if (borte >= VELKOMST_ETTER_SEK) {
     velkomst = { borteSek: borte, før: s, etter }
     for (const l of velkomstLyttere) l()
@@ -227,7 +242,7 @@ let tilstand: Spilltilstand = (() => {
     return nyttSpill()
   }
   try {
-    return taIgjenBorteTid(lagret.tilstand)
+    return taIgjenBorteTid(lagret.tilstand, sekunderBorte())
   } catch (e) {
     avbrudd = { type: 'feil', melding: e instanceof Error ? e.message : String(e) }
     return lagret.tilstand
@@ -328,6 +343,7 @@ function steg(): void {
     meldFeil(e)
     return
   }
+  klokke = Date.now()
   if (naa - sistLagret >= LAGRE_HVERT_MS) {
     sistLagret = naa
     lagre()
@@ -346,7 +362,8 @@ function vedSynlighet(): void {
     return
   }
   try {
-    sett(taIgjenBorteTid(tilstand))
+    // Fra klokken i minnet, ikke disken: feilet lagringen da appen ble skjult, regnes tiden likevel bare én gang.
+    sett(taIgjenBorteTid(tilstand, Math.max(0, Math.floor((Date.now() - klokke) / 1000))))
   } catch (e) {
     meldFeil(e)
     return
@@ -400,6 +417,25 @@ function lesReserve(): Tolket | null {
   }
 }
 
+/* Øker hver gang spillet byttes ut med et annet, så appen ikke feirer det andre spillets fortid. */
+let spillnr = 0
+
+export function spillnummer(): number {
+  return spillnr
+}
+
+/** Bytter ut spillet: det gamle blir reservekopi, og tiden begynner på nytt fra nå. */
+function byttSpill(ny: Spilltilstand): void {
+  leggIReserve(tilstand)
+  lukkVelkomst()
+  spillnr++
+  restMs = 0
+  sisteMaaling = null
+  klokke = Date.now()
+  sett(ny)
+  lagre()
+}
+
 /** Nøkkeltall for reservekopien, eller null når det ikke finnes noen som kan brukes. */
 export function lesReservekopi(): { formue: number; sek: number } | null {
   const r = lesReserve()
@@ -415,12 +451,7 @@ export function byttTilReservekopi(): string | null {
   const r = lesReserve()
   if (!r) return 'Det finnes ingen reservekopi.'
   if (!r.ok) return r.feil
-  leggIReserve(tilstand)
-  lukkVelkomst()
-  restMs = 0
-  sisteMaaling = null
-  sett(r.tilstand)
-  lagre()
+  byttSpill(r.tilstand)
   return null
 }
 
@@ -453,22 +484,25 @@ export function eksporter(): Promise<string> {
  * «Start på nytt». Tiden mellom eksport og import regnes ikke som tid borte.
  * Gir en feilmelding, eller null når det gikk.
  */
+/* En import tar et øyeblikk (pakke ut, migrere, prøvespille). Et trykk til i
+   mellomtiden ville lagt det importerte spillet i reservekopien over det gamle. */
+let importerer = false
+
 export async function importer(kode: string): Promise<string | null> {
-  const r = await pakkUt(kode)
-  if (!r.ok) return r.feil
-  leggIReserve(tilstand)
-  restMs = 0
-  sisteMaaling = null
-  sett(r.tilstand)
-  lagre()
-  return null
+  if (importerer) return 'Spillet hentes alt inn.'
+  importerer = true
+  try {
+    const r = await pakkUt(kode)
+    if (!r.ok) return r.feil
+    byttSpill(r.tilstand)
+    return null
+  } finally {
+    importerer = false
+  }
 }
 
 // ─────────────────────────────────────────────── Nytt spill
 
 export function startPaaNytt(): void {
-  leggIReserve(tilstand)
-  restMs = 0
-  sett(nyttSpill(Date.now() % 1_000_000))
-  lagre()
+  byttSpill(nyttSpill(Date.now() % 1_000_000))
 }

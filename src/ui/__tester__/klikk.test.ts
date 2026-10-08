@@ -105,4 +105,22 @@ describe('klikk gjennom appen', () => {
       expect(app.rot.querySelector('.skjerm'), fane).not.toBeNull()
     }
   })
+
+  it('å bytte til reservekopien feirer ikke det andre spillets fortid (Pakke 55)', async () => {
+    app = await startApp(rikt())
+    // Reservekopien er en milliardær med prestasjoner dette spillet ikke har.
+    const annet = rikt()
+    annet.kontanter = 2e10
+    annet.hoyesteFormue = 2e10
+    annet.prestasjoner = { ...annet.prestasjoner, milliardaer: 10, 'ti-mrd': 20 }
+    localStorage.setItem('milliardaer.lagring.angre', JSON.stringify(annet))
+    await app.fane('Profil')
+    await app.trykk(app.knapp('Innstillinger'))
+    await app.trykk(app.knapp(/Bytt til reservekopien/))
+    await app.trykk(app.knapp(/^Ja, bytt$/))
+    await app.vent(50)
+    expect(app.spill().kontanter).toBeGreaterThanOrEqual(2e10)
+    expect(document.querySelector('.feiring')).toBeNull()
+    expect(document.querySelectorAll('.varsel')).toHaveLength(0)
+  })
 })
