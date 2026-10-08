@@ -1,11 +1,11 @@
 # wisdom-grafikk.md — the graphics track's own notes
 
-For the session in charge of graphics and animation (packs G1–G11, commits
+For the session in charge of graphics and animation (packs G1–G12, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G9.
-G10–G11 are planned in `Ideer.md`.
+Update it at the end of each G pack, and delete what stops being true. Updated after G10.
+G11–G12 are planned in `Ideer.md`.
 
 ---
 
@@ -78,6 +78,17 @@ G10–G11 are planned in `Ideer.md`.
   season, and close-ups only in the two tiny places. Naming the landmark per city in
   the option (Stadshuset, Vor Frelsers Kirke, Fernsehturm, Big Ben, Empire State,
   Burj Al Arab, La Concha, Matterhorn) made it concrete.
+  For G10 Folke took all three recommendations again: a real night (sky near black,
+  the subject at about a third with a blue tint, warm windows with a halo), watches on
+  the phone's real time, and night only on the big scene. Stating the game clock's
+  rhythm in the question (a day is 5 minutes, so it's night about one visit in three)
+  made the night option concrete.
+- **Count before you quote.** `Ideer.md` said 39 of 68 drawings never moved; the real
+  count was 35 (plus the bank below 100 and the street kitchen's first stage). Worse,
+  that count was made with every improvement bought: the lemonade stand, the kiosk and
+  the ski centre only move *because of* an improvement, so at level 1 with nothing
+  bought they stood still. Count at f = 0 as well as f = 3. `grafikkG10.test.ts` now
+  checks every stage at both.
 - **Ask only where there is a real choice.** G8 had four items; two were design
   (does anything of the goal strip stay; how does a card react to a press) and two were
   technical (lighter drawings, the unchecked views). Two questions, both
@@ -280,6 +291,50 @@ G10–G11 are planned in `Ideer.md`.
   light-theme hairline rule *stays*: the paintings (white frames) and the stadium still
   need it; only the drawings on the canvas (`.lerret`) are exempt.
 
+- **The big scene is special (G10).** `IScenen` (Tegnestil, a context) is true only
+  inside `Scene` (BedriftIkon). Everything that costs extra or changes with time lives
+  behind it: the night layer, the watch hands, the light over the car paint and the
+  window that switches on and off. Lists, cards, Avisa, the gallery and the buy moment
+  never see it, so they stay at midday, at ten past ten, and as light as G8 made them.
+- **How night works (G10).** The detail page (`Bedriftdetalj`, `Tingdetalj`) sets
+  `style={nattstil(s.sek)}` (`--natt` 0–1 from `morke`, in `ui/dagognatt.ts`). Nothing
+  re-renders: the CSS var does it all. In the scene, `Lerret` (only for `himmel="dag"`;
+  indoor drawings stay lit) draws:
+  1. the sky from the `hn` gradient: day colours `color-mix`ed toward `--himmel-natt-*`
+     (dark theme defaults in `NATTHIMMEL`), and a few `Stjerner` whose opacity follows
+     `--natt`;
+  2. the subject inside the `natt` filter: every channel multiplied by a flood colour
+     between white and `NATTFARGE` (`color-mix` with `--natt`);
+  3. the subject **again**, in `.nattlag`: CSS paints every fill and stroke black except
+     the window-light colours (`LYSFARGER` = `S.vinduLys`), `.nattvindu` and `.nattlys`;
+     the layer has the `glod` blur filter and `mix-blend-mode: screen` at opacity
+     `--natt`. Black adds nothing under screen, so only the lights shine, and something
+     standing in front of a window is black in that layer too and hides the light.
+  Classes for drawings: `nattvindu` (dark by day, lit at night; `Vindu` and `Vindusrad`
+  pick about two in three with `tennesOmNatta`), `nattskjul` (hidden in the night layer,
+  e.g. the glass sheen over a window), `nattlys` (a light in another colour, like the
+  red `Blinklys`), `bare-natt` (only in the night layer). The scene box itself darkens
+  with `--scene-natt` per theme; in the light theme it reads like a framed night photo.
+- **Watches show real time (G10).** `Urkasse` reads `new Date()` only in the scene and
+  draws each hand straight up inside a `Viser`: the inline style sets
+  `transform: rotate(now)`, `transform-origin` at the dial centre (`transform-box:
+  view-box`) and `animation-delay: -t`, and the animation turns from 0° to 360°. With
+  reduced motion the animation never runs, so the inline rotation shows the time it was
+  drawn — never 12 o'clock. The pocket watch's small seconds tick (`tikk`, `steps(60)`).
+  All five have a seconds hand now (also in the lists, at 200°).
+- **Light over the car paint (G10).** `Lakksveip` renders the car a third time inside a
+  `<mask>` (CSS `.lakkmaske` makes every fill white, `.ikke-lakk` — the wheels — black)
+  and moves a soft white band across it. The band is drawn left of the canvas, so with
+  no animation it's simply not there. A car with its own wheels (the supercar) needs
+  `className="ikke-lakk"` on them.
+- **New motion classes (G10)**: `anim-dreie` (rotate, `--omlop` for speed), `anim-propell`
+  (side-view propeller flips), `anim-rotor` (main rotor seen from the side), `anim-blink`
+  (`Blinklys`), `anim-svai` (trees and palms, from the foot), `anim-vindu` (a window that
+  lights for half of 18 s; `Vindu tennes` / `Vindusrad tennes={i}`), `anim-sveip`,
+  `anim-viser`. **Decide the resting state**: with the in-game reduced motion the
+  animation runs 0.01 ms once and the element falls back to its own style — the window
+  stays lit, the beacon on, the band off-canvas.
+
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
   `grafikkG4.test.ts` checks all three. The cream was the strictest: five colours that
@@ -363,6 +418,25 @@ G10–G11 are planned in `Ideer.md`.
   volume over the ears, an uneven hairline and a few light and dark strands.
 - **Logo knockouts use `fillRule="evenodd"`**, not masks: the hole shows the card
   in any theme and needs no id.
+- **`feBlend multiply` is wrong for semi-transparent shapes (G10).** The first night
+  filter flooded a dark colour, cut it to the subject (`in SourceAlpha`) and blended
+  it. Where the subject was 70 % opaque (everything in `Dis`), the blend raised the
+  alpha to ~87 % and darkened the colour only by half, so the hazy hills glowed grey
+  against the night. `feComposite operator="arithmetic" k1="1"` with a full-opacity
+  flood multiplies the channels and leaves alpha exactly as it was. The flood's
+  colour can follow a CSS var (`flood-color` is a CSS property; `color-mix` works).
+- **`Dis` adds a constant (G10).** Its colour matrix mixes toward `DISFARGE` with an
+  offset, so black comes out light grey. In a layer meant to be black (the night
+  layer), switch child filters off: `.nattlag [filter] { filter: none }`.
+- **A CSS transform replaces the element's `transform` attribute.** The windswept trees
+  at Lista sit in `<g transform="rotate(14 …)">`; putting `anim-svai` on that same `g`
+  would have thrown the rotation away. Put the animation class on an inner `g`.
+- **`.scene [class*='anim-']` sets `transform-box: fill-box; transform-origin: center`.**
+  A rotor or a hand that must turn around a given point needs an inline
+  `transformBox: 'view-box'` and `transformOrigin: 'Xpx Ypx'` (px = canvas units).
+- **Keyframes with only `to` start from the element's own transform.** The hands carry
+  an inline `rotate(now)`, so `tegning-dreie` needs an explicit `from { rotate(0) }` or
+  they turn from "now" to 360° and jump.
 - **Collision tests must cover the worst case**: `norgeskartet.test.ts` checks every
   name (with room for the arrow), the longest rent and a two-digit badge with crown for
   all cities at once. That caught Oslo's badge and rent reaching into the inset.
@@ -436,6 +510,21 @@ G10–G11 are planned in `Ideer.md`.
   not seen.
 - **A report in Avisa** only shows when the open issue carries one. Mock it by cloning
   the open `.regnskap .oppgjor` into the open `.avis` (`avis.prepend(clone)`).
+- **Render real scenes into an overlay (G10).** Cloning gallery SVGs can't show the
+  scene: night and the watch hands live only inside `Scene`. Import React, ReactDOM
+  and `BedriftIkon.tsx` from the page by their real URLs
+  (`performance.getEntriesByType('resource')`, e.g. `deps/react.js?v=…`; take
+  `.default` of the module), then `createRoot` a grid of `<div class="detalj"
+  style="--natt: 0|0.5|1"><Scene …/></div>`. Keep the helper's source in
+  `sessionStorage` and `await eval(sessionStorage.sc)` after each reload, in a
+  separate call. `getAnimations({ subtree: true })` + `pause()` + `currentTime` freezes
+  every motion at a chosen moment for the screenshot. A `px` option smaller than 172
+  overflows: `Scene` is always 172 px.
+- **The game stops while the pane is hidden** (`document.visibilityState` is
+  `hidden`), so the clock doesn't move then. To see dusk arrive in the real game,
+  keep the pane visible (a `resize_window` shows it) and wait: a game hour is 12.5 s.
+  Editing `sek` in the save while the game runs is overwritten on reload (as
+  `wisdom.md` says) — and wasn't needed.
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
   Reload, wrap `console.error`, click all five tabs, and read the wrapped list.
 
@@ -489,7 +578,13 @@ G10–G11 are planned in `Ideer.md`.
   and its function, so the old one-liner was left above the helper (G9). Put a new
   helper inside the same `bytt` block as the first drawing that uses it instead.
 - **`cat > fil` without a heredoc waits for stdin** and hung Bash for two minutes.
-  Write temporary files with the Write tool.
+  Write temporary files with the Write tool. It happened again in G10 (a stray
+  `cat > "$TMP/x";` in front of a `node -e`): the command went to the background
+  and had to be stopped with `TaskStop`.
+- **`Illustrasjoner.tsx` and `Tegnestil.tsx` are CRLF in the working copy** (HEAD
+  stores LF; `core.autocrlf`). Multi-line `from` strings with `\n` don't match the raw
+  file, so patch with the scratchpad `fiks.mjs` (normalises, patches, writes back with
+  the file's own line endings and BOM) — rebuild it if it's gone.
 - **A buy-everything test save crashed the game** in G5 (`avis.ts` had 8 titles for
   12 status levels). Fixed in ff11ff2 by the task I flagged; test saves may own
   everything again. The task pushed to `origin` while my commits were local, so the
@@ -526,8 +621,9 @@ G10–G11 are planned in `Ideer.md`.
 - Draw in batches of three or four, then look at all stages on a contact sheet. Every
   batch found two or three layout bugs that tests can't see.
 - Patch with `.mjs` files written by the Write tool, using a `filPatch(fil, [[fra, til]])`
-  helper that throws when `fra` is missing and keeps CRLF. **`styles.css` is CRLF**; the
-  `.tsx` files are LF. Long drawings go in separate `.txt` snippet files that a script
+  helper that throws when `fra` is missing and keeps CRLF. **`styles.css` is CRLF**, and
+  so are `Illustrasjoner.tsx` and `Tegnestil.tsx` in the working copy (G10); other
+  `.tsx` files vary — check with `file`. Long drawings go in separate `.txt` snippet files that a script
   splices in between two markers.
 - **Never run Prettier on a file here.** There is no config, so it uses its defaults
   (double quotes, semicolons) and rewrote all of `Toppfelt.tsx` (G8). Restore with
@@ -550,13 +646,20 @@ G10–G11 are planned in `Ideer.md`.
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
 
-## 7. Notes for later (G1–G9 done; G10–G11 planned in `Ideer.md`)
+## 7. Notes for later (G1–G10 done; G11–G12 planned in `Ideer.md`)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
   new foreign city a `BYPLASS` side, a new startup idea a mark in `STARTUPMERKER`, a new
   owned thing a card with `iDetalj` and a case in `Tingdetalj.tsx`, and a new business or
-  vehicle a close-up box in `NAERBILDER`.
+  vehicle a close-up box in `NAERBILDER`. Since G10 it also needs **something that
+  moves in the scene at every stage, with no improvements bought**, and warm windows in
+  `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
+  detail page must set `style={nattstil(s.sek)}`.
+- **G12 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
+  page, and the night layer shows how to change a drawing in CSS without re-rendering
+  it. Snow could follow the same pattern (a `--vinter` var and a snow layer), but the
+  date changes only once a game day, so re-rendering with a prop is also cheap.
 - **Shared tests describe the art**: when you redraw something, grep the tests for its
   markup and update the counting, not the intent (`pakke42.test.ts` counted the old
   dot crowd; `pakke43.test.ts` matches the wide-layout selector).
