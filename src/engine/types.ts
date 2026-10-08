@@ -96,6 +96,8 @@ export interface Papir {
   navn: string
   klasse: 'aksje' | 'krypto'
   risiko: Risiko
+  /** Bransjen selskapet hører til (Pakke 53): ukas trend flytter kursen, og nyhetene treffer bedriftene dine i bransjen. */
+  bransje?: BedriftstypeId
   startkurs: number
   /** Hvor fort den «riktige verdien» vokser. */
   drift: number
@@ -296,7 +298,28 @@ export interface Dagsbilde {
   fusjoner?: string[]
 }
 
-export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'eiendom' | 'sparing' | 'rival' | 'startup'
+export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'obligasjon' | 'eiendom' | 'sparing' | 'rival' | 'startup'
+
+export type ObligasjonId = 'kort' | 'lang'
+
+/**
+ * Det du eier av én obligasjon. Kjøper du flere ganger, slås postene sammen:
+ * renten blir snittet vektet med pålydende — verdien og kupongen er lineære i
+ * renten, så det blir nøyaktig det samme som å holde postene hver for seg.
+ */
+export interface Obligasjonspost {
+  palydende: number
+  /** Styringsrenten (i prosent) kupongen ble låst til. */
+  rente: number
+  kostpris: number
+}
+
+export interface Bransjenyhet {
+  type: BedriftstypeId
+  /** Inntekten ganges med dette, til og med dagen før tilDag. */
+  faktor: number
+  tilDag: number
+}
 
 export interface Rekorder {
   hoyesteInntekt: number
@@ -399,6 +422,10 @@ export interface Spilltilstand {
   gjeld: number
   /** Fastrente (Pakke 49): satsen per time og dagen bindingen går ut. Mangler: flytende rente. */
   rentebinding?: { sats: number; tilDag: number }
+  /** Statsobligasjoner (Pakke 53). Mangler i eldre lagringer: ingen. */
+  obligasjoner?: Partial<Record<ObligasjonId, Obligasjonspost>>
+  /** Selskapsnyheter som treffer bedriftene dine i samme bransje en stund (Pakke 53). */
+  bransjenyheter?: Bransjenyhet[]
   totaltUtbytte: number
   /** Siste hendelser, nyeste sist. Kappet i lengde. */
   hendelser: Hendelse[]

@@ -11,6 +11,7 @@ import { erHelg } from './kalender'
 import { AKSJER, MARKED_TIKK_SEK, PAPIRER } from './marked'
 import type { Terning } from './rng'
 import type { Overskrift, Spilltilstand } from './types'
+import { bransjenyhet } from './bransjer'
 
 /** Sjansen for at en børsdag har en selskapsnyhet. */
 export const NYHET_SJANSE = 0.5
@@ -57,5 +58,7 @@ export function selskapsnyheter(s: Spilltilstand, t: Terning): Overskrift[] {
   const bevegelse = Math.log(mal.opp ? 1 + storrelse : 1 - storrelse)
   const k = s.marked.kurser[id]
   k.nyhet = { igjen: (k.nyhet?.igjen ?? 0) + bevegelse, tikk: NYHET_TIKK }
-  return [{ type: 'marked', tittel: mal.tittel(PAPIRER[id].navn), tekst: mal.tekst }]
+  // Eier du en bedrift i selskapets bransje, merker den nyheten også (Pakke 53).
+  const bransje = bransjenyhet(s, id, mal.opp)
+  return [{ type: 'marked', tittel: mal.tittel(PAPIRER[id].navn), tekst: bransje ? `${mal.tekst} ${bransje}` : mal.tekst }]
 }

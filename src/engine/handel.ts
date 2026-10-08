@@ -8,12 +8,13 @@ import { eiendomspris, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
-import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, PapirId, Spilltilstand } from './types'
+import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, PapirId, Spilltilstand } from './types'
 import { FOND_GEBYR, fondskurs } from './fond'
 import { landverdi, tommerverdi } from './jord'
 import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi } from './klubb'
+import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
 
 /**
  * Bokfører gevinst (eller tap, negativt) på et salg: det du fikk, minus det du
@@ -145,6 +146,22 @@ export function utforSalg(n: Spilltilstand, id: PapirId, antall: number): number
 }
 
 /** Selger et helt fond, eller et beløp av det, etter gebyr. Returnerer hva du fikk. */
+/**
+ * Selger `andel` (0–1) av en obligasjonspost til dagens pris, minus gebyret.
+ * Gevinsten eller tapet mot kostprisen bokføres. Gir det du fikk.
+ */
+export function utforObligasjonssalg(n: Spilltilstand, id: ObligasjonId, andel = 1): number {
+  const p = n.obligasjoner![id]!
+  const a = Math.min(1, Math.max(0, andel))
+  const inntekt = obligasjonsverdiFor(n, id) * a * (1 - OBLIGASJON_GEBYR)
+  n.kontanter += inntekt
+  flyt(n, 'obligasjon', -inntekt)
+  bokforGevinst(n, inntekt - p.kostpris * a)
+  if (a >= 1 || p.palydende * (1 - a) < 1) delete n.obligasjoner![id]
+  else n.obligasjoner![id] = { palydende: p.palydende * (1 - a), rente: p.rente, kostpris: p.kostpris * (1 - a) }
+  return inntekt
+}
+
 export function utforFondssalg(n: Spilltilstand, id: FondId, belop = Infinity): number {
   const b = n.fond[id]!
   const kurs = fondskurs(n, id)

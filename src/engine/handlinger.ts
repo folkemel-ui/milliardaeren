@@ -23,6 +23,7 @@ import {
 import {
   utforEiendomssalg,
   utforFondssalg,
+  utforObligasjonssalg,
   utforJordsalg,
   utforKjop,
   utforKlubbsalg,
@@ -70,7 +71,8 @@ import {
 } from './fusjon'
 import { flyt } from './portefolje'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
-import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from './verden'
+import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
+import { OBLIGASJONER } from './obligasjoner'
 import { ledigIRunde } from './startups'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from './jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from './landemerker'
@@ -87,7 +89,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { PAPIRER, rundAntall } from './marked'
-import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk } from './types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk } from './types'
 import { kortKroner } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
@@ -304,6 +306,43 @@ export function kjopFond(s: Spilltilstand, id: FondId, belop: number): Utfall {
 }
 
 /** Selger andeler for et beløp (før gebyr), eller alt. */
+/**
+ * Kjøper statsobligasjoner for `belop` (Pakke 53). Kupongen låses til
+ * styringsrenten i dag; har du fra før, blir renten snittet vektet med
+ * pålydende — det samme som å eie postene hver for seg.
+ */
+export function kjopObligasjon(s: Spilltilstand, id: ObligasjonId, belop: number): Utfall {
+  if (!OBLIGASJONER[id]) return feil('Ukjent obligasjon.')
+  if (ikkeTall(belop)) return feil(UGYLDIG)
+  const b = Math.floor(Math.min(belop, s.kontanter))
+  if (b <= 0) return feil('Velg hvor mye du vil kjøpe for.')
+  const n = structuredClone(s)
+  n.obligasjoner ??= {}
+  const fra = n.obligasjoner[id]
+  const rente = styringsrente(n)
+  // En eldre post er verdt kurs · pålydende; den nye kjøpes til kurs 1 ved dagens rente.
+  const palydende = (fra?.palydende ?? 0) + b
+  n.obligasjoner[id] = {
+    palydende,
+    rente: fra ? (fra.palydende * fra.rente + b * rente) / palydende : rente,
+    kostpris: (fra?.kostpris ?? 0) + b,
+  }
+  n.kontanter -= b
+  flyt(n, 'obligasjon', b)
+  n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, b)
+  return { ok: true, tilstand: n }
+}
+
+/** Selger en andel (0–1) av en obligasjonspost. */
+export function selgObligasjon(s: Spilltilstand, id: ObligasjonId, andel = 1): Utfall {
+  if (!s.obligasjoner?.[id]) return feil('Du eier ingen slike obligasjoner.')
+  if (ikkeTall(andel) || andel <= 0) return feil('Velg hvor mye du vil selge.')
+  const n = structuredClone(s)
+  const inntekt = utforObligasjonssalg(n, id, andel)
+  n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, inntekt)
+  return { ok: true, tilstand: n }
+}
+
 export function selgFond(s: Spilltilstand, id: FondId, belop = Infinity): Utfall {
   if (!s.fond[id]) return feil('Du eier ingen andeler.')
   if (fondStengt(s, id)) return feil(STENGT)

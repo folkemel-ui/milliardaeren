@@ -23,11 +23,11 @@ export const MAKS_KURSTRYKK = 0.15
 
 export const PAPIRER: Record<PapirId, Papir> = {
   // ── Aksjer. Lav risiko betaler mest utbytte; høy risiko svinger mest.
-  NFS: { id: 'NFS', navn: 'Nordfjord Sjømat', klasse: 'aksje', risiko: 'lav', startkurs: 180, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0007, dybde: 2e9, hopp: 0 },
+  NFS: { id: 'NFS', navn: 'Nordfjord Sjømat', klasse: 'aksje', bransje: 'fiskeoppdrett', risiko: 'lav', startkurs: 180, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0007, dybde: 2e9, hopp: 0 },
   FJK: { id: 'FJK', navn: 'Fjellkraft', klasse: 'aksje', risiko: 'lav', startkurs: 95, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.00085, dybde: 2e9, hopp: 0 },
   VTK: { id: 'VTK', navn: 'Vikingtelekom', klasse: 'aksje', risiko: 'lav', startkurs: 42, drift: 0.02, volatilitet: 0.035, reversjon: 0.5, utbytte: 0.0007, dybde: 1.5e9, hopp: 0 },
-  BSH: { id: 'BSH', navn: 'Bergen Shipping', klasse: 'aksje', risiko: 'middels', startkurs: 260, drift: 0.03, volatilitet: 0.06, reversjon: 0.4, utbytte: 0.00035, dybde: 1e9, hopp: 0 },
-  POL: { id: 'POL', navn: 'Polaris Olje', klasse: 'aksje', risiko: 'middels', startkurs: 310, drift: 0.03, volatilitet: 0.07, reversjon: 0.4, utbytte: 0.0004, dybde: 1e9, hopp: 0 },
+  BSH: { id: 'BSH', navn: 'Bergen Shipping', klasse: 'aksje', bransje: 'rederi', risiko: 'middels', startkurs: 260, drift: 0.03, volatilitet: 0.06, reversjon: 0.4, utbytte: 0.00035, dybde: 1e9, hopp: 0 },
+  POL: { id: 'POL', navn: 'Polaris Olje', klasse: 'aksje', bransje: 'oljeselskap', risiko: 'middels', startkurs: 310, drift: 0.03, volatilitet: 0.07, reversjon: 0.4, utbytte: 0.0004, dybde: 1e9, hopp: 0 },
   NLT: { id: 'NLT', navn: 'Nordlys Tech', klasse: 'aksje', risiko: 'høy', startkurs: 520, drift: 0.05, volatilitet: 0.12, reversjon: 0.3, utbytte: 0, dybde: 4e8, hopp: 0.0005 },
   AUB: { id: 'AUB', navn: 'Aurora Bioteknologi', klasse: 'aksje', risiko: 'høy', startkurs: 75, drift: 0.04, volatilitet: 0.15, reversjon: 0.3, utbytte: 0, dybde: 3e8, hopp: 0.001 },
   TRS: { id: 'TRS', navn: 'Trollspill', klasse: 'aksje', risiko: 'høy', startkurs: 140, drift: 0.05, volatilitet: 0.13, reversjon: 0.3, utbytte: 0, dybde: 3e8, hopp: 0.0005 },
@@ -39,9 +39,9 @@ export const PAPIRER: Record<PapirId, Papir> = {
   VKT: { id: 'VKT', navn: 'Vikingtoken', klasse: 'krypto', risiko: 'høy', startkurs: 3.2, drift: 0, volatilitet: 0.5, reversjon: 0.2, utbytte: 0, dybde: 8e7, hopp: 0.0025 },
   LKS: { id: 'LKS', navn: 'Laksecoin', klasse: 'krypto', risiko: 'høy', startkurs: 0.85, drift: 0, volatilitet: 0.6, reversjon: 0.2, utbytte: 0, dybde: 5e7, hopp: 0.003 },
   // ── Børsnotert i versjon 17: bransjer børsen manglet.
-  NRB: { id: 'NRB', navn: 'Nordre Bank', klasse: 'aksje', risiko: 'lav', startkurs: 120, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0008, dybde: 2e9, hopp: 0 },
-  KRV: { id: 'KRV', navn: 'Kurv Dagligvare', klasse: 'aksje', risiko: 'lav', startkurs: 64, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.00075, dybde: 1.5e9, hopp: 0 },
-  FJF: { id: 'FJF', navn: 'Fjellfly', klasse: 'aksje', risiko: 'middels', startkurs: 35, drift: 0.025, volatilitet: 0.08, reversjon: 0.4, utbytte: 0.0002, dybde: 6e8, hopp: 0.0005 },
+  NRB: { id: 'NRB', navn: 'Nordre Bank', klasse: 'aksje', bransje: 'bank', risiko: 'lav', startkurs: 120, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0008, dybde: 2e9, hopp: 0 },
+  KRV: { id: 'KRV', navn: 'Kurv Dagligvare', klasse: 'aksje', bransje: 'kiosk', risiko: 'lav', startkurs: 64, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.00075, dybde: 1.5e9, hopp: 0 },
+  FJF: { id: 'FJF', navn: 'Fjellfly', klasse: 'aksje', bransje: 'flyselskap', risiko: 'middels', startkurs: 35, drift: 0.025, volatilitet: 0.08, reversjon: 0.4, utbytte: 0.0002, dybde: 6e8, hopp: 0.0005 },
   ROM: { id: 'ROM', navn: 'Romfart Nord', klasse: 'aksje', risiko: 'høy', startkurs: 900, drift: 0.06, volatilitet: 0.16, reversjon: 0.3, utbytte: 0, dybde: 2e8, hopp: 0.001 },
   // Stabilkronen følger ikke stemningen og holder seg rundt 10 kr — et sted å parkere kryptopenger.
   STK: { id: 'STK', navn: 'Stabilkrone', klasse: 'krypto', risiko: 'lav', startkurs: 10, drift: 0, volatilitet: 0.01, reversjon: 4, utbytte: 0, dybde: 5e9, hopp: 0, stemning: 0 },
@@ -88,8 +88,13 @@ export function kursFra(fundament: number, avvik: number): number {
  * eiendomsindeksen. I helgen er børsen stengt — aksjene står stille, mens
  * kryptoen og eiendomsprisene går som før.
  */
-export function markedstikk(m: Marked, t: Terning, helg = false, konjunktur = { aksjer: 0, eiendom: 0 }): void {
-  papirtikk(m, t, helg, konjunktur.aksjer)
+export function markedstikk(
+  m: Marked,
+  t: Terning,
+  helg = false,
+  konjunktur: { aksjer: number; eiendom: number; papirer?: Partial<Record<PapirId, number>> } = { aksjer: 0, eiendom: 0 },
+): void {
+  papirtikk(m, t, helg, konjunktur.aksjer, konjunktur.papirer)
   eiendomstikk(m.eiendom, m.tikk, t, konjunktur.eiendom)
   regiontikk(m)
 }
@@ -130,7 +135,7 @@ function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde, konjunktur
   k.bunn = Math.min(k.bunn ?? k.kurs, k.kurs)
 }
 
-function papirtikk(m: Marked, t: Terning, helg = false, konjunktur = 0): void {
+function papirtikk(m: Marked, t: Terning, helg = false, konjunktur = 0, perPapir?: Partial<Record<PapirId, number>>): void {
   m.tikk += 1
   const st = m.stemning
   m.stemning = Math.max(-1, Math.min(1, st - STEMNING_REVERSJON * st * DT + STEMNING_VOLATILITET * Math.sqrt(DT) * normal(t)))
@@ -143,7 +148,8 @@ function papirtikk(m: Marked, t: Terning, helg = false, konjunktur = 0): void {
     // Stengt børs: kursen står, men historikken får fortsatt punkter, så grafen viser helgen som flat.
     if (!(helg && p.klasse === 'aksje')) {
       const kilde = NYE_PAPIRER.includes(id) ? new Hashkilde(hashgrunnlag(m.nyeFrø ?? 0, id, m.tikk)) : t
-      papirsteg(p, k, m.stemning, kilde, konjunktur)
+      // Ukas bransjetrend (Pakke 53) legges på konjunkturen for selskapene i bransjen.
+      papirsteg(p, k, m.stemning, kilde, konjunktur + (perPapir?.[id] ?? 0))
     }
     if (m.tikk % HISTORIKK_TIKK === 0) {
       k.historikk.push(k.kurs)

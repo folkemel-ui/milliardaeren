@@ -9,6 +9,8 @@ import { FOND_GEBYR } from '../engine/fond'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
 import { GRADER, RETNING_NIVAA, RETNINGER } from '../engine/ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from '../engine/verden'
+import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
+import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
@@ -37,10 +39,18 @@ export type Tema =
   | 'landemerker'
   | 'kunst'
   | 'klubb'
+  | 'obligasjoner'
 
 const trinn = SKATTETRINN.slice(1)
 
 export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
+  obligasjoner: {
+    tittel: 'Statsobligasjoner',
+    tekst:
+      'En obligasjon er et lån til staten. Kupongen låses til styringsrenten den dagen du kjøper og betales hvert sekund, litt over sparerenten — mer for den lange. ' +
+      `Prisen går motsatt vei av renten: stiger styringsrenten ett prosentpoeng, faller den korte rundt ${tall(OBLIGASJONER.kort.varighet)} % og den lange rundt ${tall(OBLIGASJONER.lang.varighet)} %. ` +
+      `Kjøp når renten er høy, og selg med gevinst når den faller. Et salg koster ${pst(OBLIGASJON_GEBYR, 1)}, og kupongene regnes som utbytte i regnskapet.`,
+  },
   bedrifter: {
     tittel: 'Bedriftene',
     tekst:
@@ -59,7 +69,8 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       'En aksje er en bit av et børsnotert selskap. Kursen går opp og ned, og selskapet betaler utbytte hver børsdag — de trygge betaler mest. ' +
       `Hver handel koster ${pst(KURTASJE, 1)} i kurtasje, og store handler flytter kursen. Børsen er stengt i helgene. ` +
-      'Én gang i måneden legger hvert selskap frem tall; analytikernes estimat kommer noen dager før.',
+      'Én gang i måneden legger hvert selskap frem tall; analytikernes estimat kommer noen dager før. ' +
+      `Seks selskaper hører til en bransje du kan eie: ukas trend flytter kursen, og en nyhet om selskapet gir bedriften din i bransjen ${pst(NYHET_VIRKNING)} mer eller mindre i ${NYHET_DAGER} dager.`,
   },
   krypto: {
     tittel: 'Krypto',

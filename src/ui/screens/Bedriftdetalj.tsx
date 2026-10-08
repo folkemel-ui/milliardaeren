@@ -11,6 +11,7 @@ import { kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
 import { Scene } from '../komponenter/BedriftIkon'
 import { IDag, Oppgraderingsknapp, Personale, Retningskort } from '../komponenter/Bedriftskort'
+import { BedriftBorsen } from '../komponenter/Bransje'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
 import { nattstil } from '../dagognatt'
@@ -138,6 +139,8 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
           })}
         </ul>
       </div>
+
+      <BedriftBorsen s={s} b={b} />
 
       <div className="kort">
         <Retningskort b={b} s={s} />

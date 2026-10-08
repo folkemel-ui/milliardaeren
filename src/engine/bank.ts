@@ -7,6 +7,7 @@ import { bedriftsverdi, belaaningsgrad, rentePerSek } from './formler'
 import {
   utforEiendomssalg,
   utforFondssalg,
+  utforObligasjonssalg,
   utforJordsalg,
   utforKlubbsalg,
   utforLandemerkesalg,
@@ -21,6 +22,7 @@ import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from './landemer
 import { maleripris, MALERIER, mineMalerier } from './kunst'
 import { aktive, ide, utforStartupovertakelse } from './startups'
 import { FOND, FONDLISTE } from './fond'
+import { OBLIGASJONER, OBLIGASJONSLISTE } from './obligasjoner'
 import { selskapsverdi } from './rivaler'
 import { flyt } from './portefolje'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
@@ -111,6 +113,14 @@ export function sjekkMargin(s: Spilltilstand): void {
     utforFondssalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(FOND[id].navn)
+  }
+  // Så obligasjonene (Pakke 53).
+  for (const id of OBLIGASJONSLISTE) {
+    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (!s.obligasjoner?.[id]) continue
+    utforObligasjonssalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(OBLIGASJONER[id].navn)
   }
   // Så eierandeler i rivalselskaper, den største først.
   for (const r of [...(s.rivaler ?? [])].filter((x) => x.andel > 0).sort((a, b) => b.andel * selskapsverdi(b) - a.andel * selskapsverdi(a))) {

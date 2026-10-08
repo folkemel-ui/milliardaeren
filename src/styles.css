@@ -1984,10 +1984,29 @@ button.merke {
   border-color: var(--gull-mørk);
 }
 
-.sparekonto {
+.sparekonto,
+.obligasjon {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.obligasjon p,
+.bransje p {
+  margin: 0;
+}
+
+/* Aksjen og bransjen hører sammen (Pakke 53): et lite kort på begge sider. */
+.bransje {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bransje-aksje {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .spare-rad {

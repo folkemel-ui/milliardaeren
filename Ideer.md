@@ -12,11 +12,10 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v10.0 (Packs 53–56)
+### Game track: the road to v10.0 (Packs 54–56)
 
 Items from *Road to v10.0*. Commits: `Pakke N: …`. Engine work first, so the packs after it are built on firm ground and measured properly.
 
-- **Pack 53 – Money that hangs together:** Stocks linked to your industries, Bonds
 - **Pack 54 – Property with weather and people:** One weather, Weather on property, Vacancy, tenants and property managers
 - **Pack 55 – A bigger empire:** Franchises, More countries
 - **Pack 56 – The good life:** Interiors, Avisa on Sunday
@@ -44,25 +43,23 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the f
 The game is released on the App Store at v10.0. These were picked from the v10.0 list (8 October 2026). Not in the pack plan yet.
 
 1. **Franchises.** Open the same business in more cities, with a limit (for example one per city, at most three) and a bonus from the city's region. Copies were dropped in Pack 2 because they blew up the economy, so each franchise needs a real cost or a falling return — measured with the bench.
-2. **Bonds.** Government bonds with a fixed coupon whose price falls when the policy rate (Pack 49) rises, and rises when it falls. A step between the savings account and stocks.
-3. **Stocks linked to your industries.** Stocks have no industry today, though several match a business: Polaris Olje and the oil company, Bergen Shipping and the shipping company, Nordfjord Sjømat and the fish farm, Fjellfly and the airline, Nordre Bank and the bank, Kurv Dagligvare and the kiosk. Give each stock an industry, let the week's trend and company news move both, and show the link on both sides.
-4. **Vacancy, tenants and property managers.** Properties can stand empty, and bad tenants cost money. A property manager per city, hired like the business managers, lowers the risk — with a trait, like the parked *Managers with traits*: careful (little vacancy, a bit less rent), aggressive (more rent, more trouble) or local (knows the city, a small city bonus). Moved up from Parked.
-5. **Weather on property.** Pack 49's daily weather also moves rent: the cabin and Zermatt rent better in snow, Marbella in the sun — on top of the monthly seasons that already exist.
-6. **Interiors.** Upgrade the inside of your home and holiday homes: kitchen, art on the walls, a wine cellar. Gives status and shows on the detail page.
-7. **More countries.** There are 6 foreign cities today. Add more of the world, with its own currencies and exchange-rate risk: rent in euro, dollar or yen, converted at a rate that moves.
-8. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
-9. **One weather.** The farms have a weekly harvest weather ("Tørkesommer" can land in February), while Pack 49 has daily weather by season. Merge them, so the harvest follows the weather the weeks actually had.
+2. **Vacancy, tenants and property managers.** Properties can stand empty, and bad tenants cost money. A property manager per city, hired like the business managers, lowers the risk — with a trait, like the parked *Managers with traits*: careful (little vacancy, a bit less rent), aggressive (more rent, more trouble) or local (knows the city, a small city bonus). Moved up from Parked.
+3. **Weather on property.** Pack 49's daily weather also moves rent: the cabin and Zermatt rent better in snow, Marbella in the sun — on top of the monthly seasons that already exist.
+4. **Interiors.** Upgrade the inside of your home and holiday homes: kitchen, art on the walls, a wine cellar. Gives status and shows on the detail page.
+5. **More countries.** There are 6 foreign cities today. Add more of the world, with its own currencies and exchange-rate risk: rent in euro, dollar or yen, converted at a rate that moves.
+6. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
+7. **One weather.** The farms have a weekly harvest weather ("Tørkesommer" can land in February), while Pack 49 has daily weather by season. Merge them, so the harvest follows the weather the weeks actually had.
 
 ## Graphics
 
 Loose ends after G1–G7, and what was picked for v10.0.
 
-10. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
-11. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-12. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-13. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
-14. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
-15. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
+8. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
+9. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+10. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
+11. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
+12. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
+13. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
 
 ## Parked (not chosen yet)
 

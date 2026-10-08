@@ -17,6 +17,8 @@ import { sjekkOrdre } from './ordre'
 import { Terning } from './rng'
 import { kotikk } from './hender'
 import { dagsbilde, konjunkturdrift } from './verden'
+import { nyhetsfaktor, trenddrift } from './bransjer'
+import { kupongPerSek } from './obligasjoner'
 import type { PapirId, Spilltilstand } from './types'
 
 /** Flere punkter enn dette, og historikken tynnes ut til halvparten. */
@@ -46,7 +48,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const faktor = statusfaktor(s)
   // Dagens kalender (Pakke 49): ukedag, vær, bransjetrend og helligdag per bransje.
   const dag = dagsbilde(s).faktor
-  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dag[b.type])))
+  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dag[b.type] * nyhetsfaktor(s, b.type))))
   let sum = 0
   for (let i = 0; i < perBedrift.length; i++) if (!(borte && !s.bedrifter[i].leder)) sum += perBedrift[i]
   const inntekt = sum * faktor
@@ -71,6 +73,12 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const rivalutbytte = rivalutbyttePerSek(s)
   s.kontanter += rivalutbytte
   s.totaltUtbytte += rivalutbytte
+  // Kupongene fra statsobligasjonene (Pakke 53) regnes som utbytte.
+  const kupong = kupongPerSek(s)
+  if (kupong > 0) {
+    s.kontanter += kupong
+    s.totaltUtbytte += kupong
+  }
   // Leien kommer uansett — eiendom trenger ingen leder.
   const leie = leiePerSek(s)
   s.kontanter += leie
@@ -82,7 +90,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   sjekkOppussing(s)
 
   if (s.sek % MARKED_TIKK_SEK === 0) {
-    markedstikk(s.marked, terning, erHelg(s.sek), konjunkturdrift(s))
+    markedstikk(s.marked, terning, erHelg(s.sek), { ...konjunkturdrift(s), papirer: trenddrift(s) })
     rivaltikk(s, terning, MARKED_TIKK_SEK / 3600)
     sjekkOrdre(s)
   }

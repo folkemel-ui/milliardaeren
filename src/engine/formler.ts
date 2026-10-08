@@ -30,6 +30,8 @@ import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import { fusjonsfaktor } from './fusjon'
 import { GRADER, retningsfaktor, teller, verdifaktor } from './ansatte'
 import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
+import { nyhetsfaktor } from './bransjer'
+import { kupongPerSek, obligasjonsverdi } from './obligasjoner'
 import { dagnummer } from './kalender'
 import { startupverdi } from './startups'
 import { klubbverdi } from './klubb'
@@ -138,9 +140,14 @@ export function bedriftInntektPerSek(b: Bedrift, dag = 1): number {
   return basisinntekt(b) * bonus * dag - bedriftLonn(b)
 }
 
+/** Alt som endrer en bransjes inntekt i dag: kalenderen (Pakke 49) og nyhetene i bransjen (Pakke 53). */
+export function dagensFaktor(s: Spilltilstand, type: BedriftstypeId): number {
+  return dagsfaktor(s, type) * nyhetsfaktor(s, type)
+}
+
 /** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor og statusbonusen. */
 export function bedriftInntektIDag(s: Spilltilstand, b: Bedrift): number {
-  return bedriftInntektPerSek(b, dagsfaktor(s, b.type)) * statusfaktor(s)
+  return bedriftInntektPerSek(b, dagensFaktor(s, b.type)) * statusfaktor(s)
 }
 
 /**
@@ -157,7 +164,7 @@ export function bedriftsverdi(b: Bedrift): number {
  * leder — de andre er stengt, og da betales heller ingen lønn.
  */
 export function inntektPerSek(s: Spilltilstand, borte = false): number {
-  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b, dagsfaktor(s, b.type))), 0)
+  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b, dagensFaktor(s, b.type))), 0)
   return sum * statusfaktor(s)
 }
 
@@ -200,7 +207,7 @@ export function sparerentePerSek(s: Spilltilstand): number {
 
 /** Det som faktisk kommer inn hvert sekund: bedriftene, leien, sparerenten og rivalutbyttet, minus lånerenter. */
 export function nettoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) - rentePerSek(s)
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) + kupongPerSek(s) - rentePerSek(s)
 }
 
 // ─────────────────────────────────────────────── Formue
@@ -227,7 +234,8 @@ export function eiendeler(s: Spilltilstand): number {
     rivalverdi(s) +
     startupverdi(s) +
     klubbverdi(s) +
-    kunstverdi(s)
+    kunstverdi(s) +
+    obligasjonsverdi(s)
   )
 }
 
@@ -246,7 +254,7 @@ export function belaaningsgrad(s: Spilltilstand): number {
 
 /** Alt som kommer inn per sekund før lånerentene: bedriftene, leien, sparerenten og rivalutbyttet. */
 export function bruttoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s)
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) + kupongPerSek(s)
 }
 
 /** Så stor kan gjelden bli etter inntekten: LAANETAK_TIMER timer av det som kommer inn. */

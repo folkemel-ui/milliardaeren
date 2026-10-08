@@ -34,6 +34,8 @@ import {
 } from '../../engine/handlinger'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from '../../engine/verden'
 import { Konjunkturkort } from '../komponenter/Dagen'
+import { PapirBransje } from '../komponenter/Bransje'
+import { Obligasjoner } from '../komponenter/Obligasjoner'
 import { datotekst } from '../kalender'
 import { ORDRETYPER } from '../../engine/ordre'
 import { BLOKK, blokkpris, forbesliste, oppkjopspris, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../engine/rivaler'
@@ -80,6 +82,7 @@ const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Underfane> = {
   aksje: 'bors',
   krypto: 'bors',
   fond: 'bank',
+  obligasjon: 'bank',
   rival: 'selskaper',
   startup: 'selskaper',
   sparing: 'bank',
@@ -133,6 +136,7 @@ const KLASSENAVN: Record<Aktivaklasse, string> = {
   aksje: 'Aksjer',
   krypto: 'Krypto',
   fond: 'Indeksfond',
+  obligasjon: 'Obligasjoner',
   eiendom: 'Eiendom',
   rival: 'Rivalselskaper',
   startup: 'Startups',
@@ -388,6 +392,7 @@ function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId; tilbak
         <Kursgraf s={s} id={id} />
       </div>
       <Nokkeltall s={s} id={id} />
+      <PapirBransje s={s} id={id} />
 
       {eier && (
         <dl className="kort statistikk">
@@ -944,6 +949,10 @@ function Bank({ s }: { s: Spilltilstand }) {
     <>
       <Konjunkturkort s={s} />
       <Sparekonto s={s} />
+      <h2 className="seksjon-tittel">
+        Obligasjoner <Forklaring tema="obligasjoner" />
+      </h2>
+      <Obligasjoner s={s} />
       <h2 className="seksjon-tittel">
         Fond <Forklaring tema="fond" />
       </h2>

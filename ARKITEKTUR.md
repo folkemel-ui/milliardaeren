@@ -59,6 +59,8 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 
 Verden fra Pakke 49 er den samme i alle spill: nøklene har ikke spillets frø i seg (et forsøk med regionfrøet fikk konjunkturen til å endre seg når en test fjernet regionene). Konjunkturen gir aksjene og eiendomsprisene ekstra drift i `markedstikk`, men trekker ikke ett tall mer fra terningen. Sakene den gir i avisa forskyver likevel terningen etter første dagsskifte, som alle nye saker gjør.
 
+Ukas bransjetrend (Pakke 53, `bransjer.ts`) gir aksjen i den hete eller kalde bransjen ekstra drift på samme måte — uten et trekk mer. En selskapsnyhet som treffer bedriften din i bransjen, bruker nyheten terningen alt har trukket; ingen nye trekk.
+
 ## Avisas bivirkning
 
 Avisa har 3–5 saker (`avis.ts`). Først samles de ekte sakene; mangler det for å nå `MIN_SAKER`, fylles det på med lokalsaker med `t.velg(LOKALT)` — **fra hovedterningen**, og en duplikat koster et nytt trekk.

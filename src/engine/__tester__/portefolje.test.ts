@@ -120,7 +120,7 @@ describe('porteføljen', () => {
     const u = kjopPapir(rik(), 'NFS', 1000)
     if (!u.ok) throw new Error(u.feil)
     const neste = simuler(u.tilstand, DAG_SEK)
-    expect(neste.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0, fond: 0 })
+    expect(neste.dagensFlyt).toEqual({ aksje: 0, krypto: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0, fond: 0, obligasjon: 0 })
     expect(neste.forrigeDag.verdier.aksje).toBeGreaterThan(0)
   })
 

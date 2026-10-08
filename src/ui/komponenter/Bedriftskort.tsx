@@ -15,6 +15,7 @@ import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp, velgRetning
 import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt, RETNING_NIVAA, RETNINGER, RETNINGSLISTE, retningsstatus, stab } from '../../engine/ansatte'
 import { Bekreftknapp } from './Bekreftknapp'
 import { dagsbilde, grunner } from '../../engine/verden'
+import { nyhetsfaktor } from '../../engine/bransjer'
 import { kjop, type Kjopsmengde } from '../kjopsmengde'
 import {
   ANSATTE_PER_NIVAA,
@@ -114,9 +115,11 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
  */
 export function IDag({ s, b }: { s: Spilltilstand; b: Bedrift }) {
   const d = dagsbilde(s)
-  const f = d.faktor[b.type]
+  const nyhet = nyhetsfaktor(s, b.type)
+  const f = d.faktor[b.type] * nyhet
   if (Math.abs(f - 1) < 0.02) return null
   const hvorfor = grunner(d, b.type, s.sek)
+  if (nyhet !== 1) hvorfor.unshift(nyhet > 1 ? 'God nyhet' : 'Dårlig nyhet')
   return (
     <span className={`i-dag liten ${f > 1 ? 'pluss' : 'minus'}`}>
       {f > 1 ? '+' : '−'}
