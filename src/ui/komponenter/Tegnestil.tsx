@@ -108,6 +108,21 @@ export const Utklipp = createContext(false)
  */
 export const Naerbilde = createContext<{ boks: readonly [number, number, number, number]; bredde: number; hoyde: number } | null>(null)
 
+/**
+ * Den store scenen (G10): sann bare øverst i detaljvisningene (`Scene`). Bare
+ * der følger tegningen klokka — natt når siden rundt setter `--natt` (0–1,
+ * `morke` i ui/dagognatt.ts) — og klokkene viser ekte tid. Lister, kort, Avisa
+ * og galleriet står alltid midt på dagen, og slipper det ekstra natt-laget.
+ */
+export const IScenen = createContext(false)
+
+/**
+ * Farger som lyser om natta: vinduslyset og lampene. Natt-laget i scenen viser
+ * bare disse (og alt med klassen `nattlys` eller `nattvindu`); resten blir svart.
+ * styles.css har de samme fargene — endres paletten, må de følge med.
+ */
+export const LYSFARGER = ['#f3dca4', '#e8c98a', '#c9a66a'] as const
+
 /** Peker til en av lerretets felles gradienter, med lerretets egne id-er, og melder at den trengs. */
 function useUrl() {
   const { id, brukt } = useContext(Ider)
@@ -119,6 +134,12 @@ function useUrl() {
 
 /** En maske trenger gradienten sin. */
 const TRENGER: Record<string, string> = { vm: 'v', km: 'k', nm: 'n', bm: 'b', rm: 'r' }
+
+/** Himmelen om natta, i mørkt tema (det lyse har sine i styles.css). */
+export const NATTHIMMEL = ['#0c1220', '#2a3046'] as const
+
+/** Fargen motivet dempes mot om natta: mørk blå. */
+export const NATTFARGE = '#25324f'
 
 /** Én definisjon etter navn. `tema` gjelder bare himmelen. */
 function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactNode {
@@ -137,6 +158,40 @@ function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactN
         </linearGradient>
       )
     }
+    // Himmelen i scenen (G10): dagens farger blandet mot natta etter --natt.
+    case 'hn': {
+      const [topp, horisont] = HIMMEL.dag
+      const bland = (dag: string, natt: string) => `color-mix(in srgb, ${dag}, ${natt} calc(var(--natt, 0) * 100%))`
+      return (
+        <linearGradient id={`${id}hn`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style={{ stopColor: bland(`var(--himmel-dag-topp, ${topp})`, `var(--himmel-natt-topp, ${NATTHIMMEL[0]})`) }} />
+          <stop offset="0.85" style={{ stopColor: bland(`var(--himmel-dag-horisont, ${horisont})`, `var(--himmel-natt-horisont, ${NATTHIMMEL[1]})`) }} />
+        </linearGradient>
+      )
+    }
+    // Natta over motivet (G10): fargene ganges med en farge mellom hvitt (dag)
+    // og mørk blå (natt). Hvor langt mot blått styres av --natt, så klokka
+    // trenger ingen ny tegning. «arithmetic» med k1 = 1 ganger hver kanal og
+    // lar gjennomsiktigheten være som den er (disen bak blir like mørk).
+    case 'natt':
+      return (
+        <filter id={`${id}natt`} filterUnits="userSpaceOnUse" x="0" y="0" width="96" height="96" colorInterpolationFilters="sRGB">
+          <feFlood style={{ floodColor: `color-mix(in srgb, #ffffff, ${NATTFARGE} calc(var(--natt, 0) * 82%))` }} result="f" />
+          <feComposite in="f" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" />
+        </filter>
+      )
+    // Lysene om natta får en myk glorie.
+    case 'glod':
+      return (
+        <filter id={`${id}glod`} filterUnits="userSpaceOnUse" x="0" y="0" width="96" height="96" colorInterpolationFilters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.3" result="b" />
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      )
     case 'v':
       return (
         <radialGradient id={`${id}v`} cx="0.5" cy="0.5" r="0.5">
@@ -276,10 +331,14 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
   if (useContext(Utklipp)) himmel = 'ingen'
   const naer = useContext(Naerbilde)
   const tema = himmel === 'inne' ? 'inne' : 'dag'
+  // Natt bare ute og bare i scenen: bilene og klokkene står inne, i lyset sitt.
+  const natt = useContext(IScenen) && himmel === 'dag'
+  const h = natt ? 'hn' : 'h'
   // Nytt for hver tegning av lerretet; barna fyller det mens de tegnes.
   const info: Lerretinfo = { id, brukt: new Set() }
-  if (himmel !== 'ingen') info.brukt.add('h').add('vm')
+  if (himmel !== 'ingen') info.brukt.add(h).add('vm')
   if (himmel === 'inne') info.brukt.add('l')
+  if (natt) info.brukt.add('natt').add('glod')
   return (
     <svg
       className="illustrasjon lerret"
@@ -288,13 +347,51 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
       viewBox={naer ? naer.boks.join(' ') : '0 0 96 96'}
       aria-hidden="true"
     >
-      {himmel !== 'ingen' && <rect x="0" y="0" width="96" height="96" fill={`url(#${id}h)`} mask={`url(#${id}vm)`} />}
+      {himmel !== 'ingen' && <rect x="0" y="0" width="96" height="96" fill={`url(#${id}${h})`} mask={`url(#${id}vm)`} />}
       {himmel === 'inne' && <ellipse cx="48" cy="62" rx="44" ry="30" fill={`url(#${id}l)`} />}
+      {natt && <Stjerner id={id} />}
       <Ider.Provider value={info}>
-        {children}
+        {natt ? (
+          <>
+            {/* Motivet, mørknet etter --natt. */}
+            <g filter={`url(#${id}natt)`}>{children}</g>
+            {/* Det samme motivet en gang til, der bare lysene har farge
+                (styles.css gjør resten svart) — lagt over med «screen», så
+                vinduene lyser gjennom natta. Det som står foran et vindu, er
+                svart her også og skjuler lyset riktig. */}
+            <g className="nattlag" filter={`url(#${id}glod)`}>
+              {children}
+            </g>
+          </>
+        ) : (
+          children
+        )}
         <Definisjoner tema={tema} />
       </Ider.Provider>
     </svg>
+  )
+}
+
+/** Stjernene på nattehimmelen: synlige bare når det er mørkt (styles.css). */
+const STJERNER: [number, number, number][] = [
+  [12, 12, 0.45],
+  [24, 6, 0.35],
+  [33, 17, 0.3],
+  [47, 9, 0.4],
+  [61, 4, 0.3],
+  [70, 14, 0.45],
+  [83, 9, 0.35],
+  [88, 22, 0.3],
+  [7, 26, 0.3],
+]
+
+function Stjerner({ id }: { id: string }) {
+  return (
+    <g className="stjerner" mask={`url(#${id}vm)`}>
+      {STJERNER.map(([x, y, r]) => (
+        <circle key={x} cx={x} cy={y} r={r} fill="#f1ece0" />
+      ))}
+    </g>
   )
 }
 
@@ -379,6 +476,34 @@ export function Speiling({ children }: { children: ReactNode }) {
   return (
     <g mask={u('rm')} opacity="0.8">
       <g transform={`translate(0 ${2 * GRUNNLINJE}) scale(1 -1)`}>{children}</g>
+    </g>
+  )
+}
+
+/**
+ * Lyset som glir over lakken (G10): et lyst bånd som sveiper over bilen fra
+ * venstre, med en pause, bare i scenen. Båndet holdes innenfor bilens omriss
+ * med en maske laget av den samme tegningen (`children`), der alt er hvitt
+ * unntatt det som har klassen `ikke-lakk` (dekkene). Uten bevegelse står båndet
+ * utenfor lerretet og synes ikke.
+ */
+export function Lakksveip({ children }: { children: ReactNode }) {
+  const { id } = useContext(Ider)
+  const iScenen = useContext(IScenen)
+  const utklipp = useContext(Utklipp)
+  if (!iScenen || utklipp) return null
+  const m = `${id}lakk`
+  return (
+    <g>
+      <mask id={m} maskUnits="userSpaceOnUse" x="0" y="0" width="96" height="96">
+        <g className="lakkmaske">{children}</g>
+      </mask>
+      <g mask={`url(#${m})`}>
+        <g className="anim-sveip">
+          <polygon points="-14,40 -3,40 -11,92 -22,92" fill="#ffffff" opacity="0.1" />
+          <polygon points="-10,40 -6,40 -14,92 -18,92" fill="#ffffff" opacity="0.16" />
+        </g>
+      </g>
     </g>
   )
 }
@@ -605,10 +730,31 @@ export function Lampe({ x, y, r = 2.6 }: { x: number; y: number; r?: number }) {
 }
 
 /**
- * En rad vinduer: `antall` vinduer, `b` × `h` store med `mellom` mellom,
- * fra (x, y). Hvert `tent`-te vindu (fra `start`) lyser varmt.
+ * Et blinkende varsellys (G10): rødt på toppen av fly og master, hvitt
+ * på vingespissene. Lyser gjennom natta (`nattlys`) og blinker i scenen.
  */
-export function Vindusrad({ x, y, antall, b, h, mellom, tent = 0, start = 0, karm }: { x: number; y: number; antall: number; b: number; h: number; mellom: number; tent?: number; start?: number; karm?: string }) {
+export function Blinklys({ x, y, r = 1, farge = S.tegl.lys, sen = false }: { x: number; y: number; r?: number; farge?: string; sen?: boolean }) {
+  return (
+    <g className="nattlys">
+      <circle className={sen ? 'anim-blink sen' : 'anim-blink'} cx={x} cy={y} r={r} fill={farge} />
+    </g>
+  )
+}
+
+/**
+ * Tennes dette vinduet om natta? Omtrent to av tre mørke vinduer, spredt etter
+ * plassen sin, så ikke hele rader lyser likt (G10).
+ */
+export const tennesOmNatta = (x: number, y: number, i = 0) => (Math.round(x * 3) + Math.round(y * 7) + i * 5) % 3 !== 0
+
+/**
+ * En rad vinduer: `antall` vinduer, `b` × `h` store med `mellom` mellom,
+ * fra (x, y). Hvert `tent`-te vindu (fra `start`) lyser varmt. Om natta, i
+ * scenen, tennes de fleste av de andre også (`nattvindu`). Vinduet nummer
+ * `tennes` (fra 0) slår lyset av og på med jevne mellomrom i scenen.
+ */
+export function Vindusrad({ x, y, antall, b, h, mellom, tent = 0, start = 0, karm, tennes }: { x: number; y: number; antall: number; b: number; h: number; mellom: number; tent?: number; start?: number; karm?: string; tennes?: number }) {
+  const iScenen = useContext(IScenen)
   return (
     <g>
       {Array.from({ length: antall }, (_, i) => {
@@ -617,8 +763,9 @@ export function Vindusrad({ x, y, antall, b, h, mellom, tent = 0, start = 0, kar
         return (
           <g key={i}>
             {karm && <rect x={r2(vx - 0.5)} y={r2(y - 0.5)} width={r2(b + 1)} height={r2(h + 1)} fill={karm} />}
-            <rect x={vx} y={y} width={b} height={h} fill={lyser ? S.vinduLys.flate : S.glass.skygge} />
-            {!lyser && <rect x={vx} y={y} width={r2(b * 0.45)} height={h} fill={S.glass.flate} opacity="0.5" />}
+            <rect x={vx} y={y} width={b} height={h} fill={lyser ? S.vinduLys.flate : S.glass.skygge} className={!lyser && tennesOmNatta(vx, y, i) ? 'nattvindu' : undefined} />
+            {!lyser && <rect x={vx} y={y} width={r2(b * 0.45)} height={h} fill={S.glass.flate} opacity="0.5" className="nattskjul" />}
+            {iScenen && !lyser && i === tennes && <rect className="anim-vindu" x={vx} y={y} width={b} height={h} fill={S.vinduLys.flate} />}
           </g>
         )
       })}

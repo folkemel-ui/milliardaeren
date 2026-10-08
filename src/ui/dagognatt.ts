@@ -30,3 +30,11 @@ export function dognet(sek: number): Dognet {
   if (t < 8) return 'morgen'
   return 'dag'
 }
+
+/**
+ * Natta til den store scenen i en detaljvisning (G10): `--natt` på siden rundt,
+ * så tegningen mørkner i CSS og ikke tegnes på nytt hvert sekund.
+ */
+export function nattstil(sek: number): Record<string, string> {
+  return { '--natt': morke(sek).toFixed(2) }
+}

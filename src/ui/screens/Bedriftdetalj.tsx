@@ -13,6 +13,7 @@ import { Scene } from '../komponenter/BedriftIkon'
 import { IDag, Oppgraderingsknapp, Personale, Retningskort } from '../komponenter/Bedriftskort'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
+import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
 import { Bekreftknapp } from '../komponenter/Bekreftknapp'
@@ -30,7 +31,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
   const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
 
   return (
-    <section className="skjerm detalj" ref={voks}>
+    <section className="skjerm detalj" ref={voks} style={nattstil(s.sek)}>
       <button className="tilbake" onClick={tilbake}>
         ‹ Bedrifter
       </button>

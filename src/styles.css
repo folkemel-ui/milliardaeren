@@ -35,6 +35,9 @@
   --bakgrunn: #0d0c0a;
   --flate: #181613;
   --flate-2: #211e1a;
+  /* Natta i scenen (G10); himmelen om natta står i Tegnestil.tsx (NATTHIMMEL). */
+  --scene-natt: #0b0f1a;
+  --scene-natt-styrke: 60%;
   --kant: #2e2a23;
   --tekst: #f4efe4;
   --tekst-dempet: #9d9587;
@@ -110,6 +113,11 @@
   --himmel-dag-horisont: #efe3cb;
   --himmel-inne-topp: #c9c4bc;
   --himmel-inne-horisont: #e6e1d8;
+  /* Natta i scenen (G10): en blå kveldshimmel, og scenen mørkner nesten helt. */
+  --himmel-natt-topp: #1a2440;
+  --himmel-natt-horisont: #4a5370;
+  --scene-natt: #141a2b;
+  --scene-natt-styrke: 88%;
   --kart-hav: #cddbe4;
   --kart-land: #ece4d4;
   --kart-naboland: #dfddd7;
@@ -685,6 +693,174 @@ figure {
   .scene .sen {
     animation-delay: -1.6s;
   }
+
+  /* G10: rotorer, propeller, blinkende lys, trær i vinden, et vindu som
+     tennes, lyset over billakken. Hver tegning har sin egen bevegelse. */
+  .scene .anim-dreie {
+    animation: tegning-dreie var(--omlop, 1s) linear infinite;
+  }
+
+  .scene .anim-propell {
+    animation: tegning-propell 0.16s linear infinite;
+  }
+
+  .scene .anim-rotor {
+    animation: tegning-rotor 0.3s linear infinite;
+  }
+
+  .scene .anim-blink {
+    animation: tegning-blink 1.8s steps(1, end) infinite;
+  }
+
+  .scene .anim-svai {
+    transform-origin: center bottom;
+    animation: tegning-svai 6s ease-in-out infinite;
+  }
+
+  .scene .anim-vindu {
+    animation: tegning-vindu 18s ease-in-out infinite;
+  }
+
+  .scene .anim-sveip {
+    animation: tegning-sveip 7s ease-in-out infinite;
+  }
+
+  /* Viserne dreier om midten av urskiva (satt i tegningen); hvor langt de har
+     kommet, setter tegningen med en negativ forsinkelse. */
+  .scene .anim-viser {
+    animation: tegning-dreie var(--omlop) linear infinite;
+  }
+
+  .scene .anim-viser.tikk {
+    animation-timing-function: steps(60, end);
+  }
+}
+
+@keyframes tegning-dreie {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tegning-propell {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(-1);
+  }
+}
+
+@keyframes tegning-rotor {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.12);
+  }
+}
+
+@keyframes tegning-blink {
+  0% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0.12;
+  }
+}
+
+@keyframes tegning-svai {
+  0%,
+  100% {
+    transform: skewX(0deg);
+  }
+  50% {
+    transform: skewX(-2.2deg);
+  }
+}
+
+@keyframes tegning-vindu {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  50%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tegning-sveip {
+  0% {
+    transform: translateX(calc(-34px * var(--utslag, 1)));
+  }
+  55%,
+  100% {
+    transform: translateX(calc(52px * var(--utslag, 1)));
+  }
+}
+
+/* Natt i scenen (G10). Siden rundt setter --natt (0–1) etter klokka. Natt-laget
+   er motivet en gang til, der alt unntatt lysene er svart, lagt over med
+   «screen»: bare vinduene og lampene lyser igjennom. Fargene er LYSFARGER i
+   Tegnestil.tsx. Dette er ikke bevegelse, så det gjelder også med mindre
+   bevegelse slått på. */
+.scene .nattlag {
+  opacity: var(--natt, 0);
+  mix-blend-mode: screen;
+}
+
+.scene .stjerner {
+  opacity: calc(var(--natt, 0) * 0.9);
+}
+
+.nattlag [fill]:not([fill='#f3dca4'], [fill='#e8c98a'], [fill='#c9a66a'], .nattvindu, .nattlys, .nattlys *) {
+  fill: #000;
+}
+
+.nattlag [stroke]:not([stroke='#f3dca4'], [stroke='#e8c98a'], [stroke='#c9a66a'], .nattlys, .nattlys *) {
+  stroke: #000;
+}
+
+.nattlag .nattvindu {
+  fill: #e8c98a;
+}
+
+/* Disen (Dis) blander fargene mot en lys grå og ville gjort det svarte grått. */
+.nattlag [filter] {
+  filter: none;
+}
+
+/* Masken til lyset over billakken (Lakksveip): bilen hvit, dekkene ikke. */
+.lakkmaske [fill]:not([fill='none']) {
+  fill: #fff;
+}
+
+.lakkmaske [stroke] {
+  stroke: #fff;
+}
+
+.lakkmaske .ikke-lakk,
+.lakkmaske .ikke-lakk * {
+  fill: #000;
+  stroke: #000;
+}
+
+.nattlag .nattskjul,
+.lerret .bare-natt {
+  display: none;
+}
+
+.nattlag .bare-natt {
+  display: inline;
 }
 
 @keyframes tegning-damp {
@@ -788,6 +964,15 @@ figure {
   margin-bottom: 12px;
   border-radius: 12px;
   background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--gull) 9%, var(--flate-2)), var(--flate-2) 70%);
+}
+
+/* Om natta mørkner scenen med himmelen (G10). */
+.detalj .scene {
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    color-mix(in srgb, color-mix(in srgb, var(--gull) 9%, var(--flate-2)), var(--scene-natt) calc(var(--natt, 0) * var(--scene-natt-styrke))),
+    color-mix(in srgb, var(--flate-2), var(--scene-natt) calc(var(--natt, 0) * var(--scene-natt-styrke))) 70%
+  );
 }
 
 .dempet-ikon {

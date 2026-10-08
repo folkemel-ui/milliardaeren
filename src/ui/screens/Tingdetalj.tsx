@@ -10,6 +10,7 @@ import { fortegnKroner, kortKroner, perSek, tall } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
+import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
 import { Luksuskort } from './Luksus'
 
@@ -22,7 +23,7 @@ export function Tingdetalj({ s, ting, tilbake, fane }: { s: Spilltilstand; ting:
   const voks = useVoksUt<HTMLElement>()
   const [kort, fakta] = innhold(s, ting)
   return (
-    <section className="skjerm detalj tingdetalj" ref={voks}>
+    <section className="skjerm detalj tingdetalj" ref={voks} style={nattstil(s.sek)}>
       <button className="tilbake" onClick={tilbake}>
         ‹ {fane}
       </button>

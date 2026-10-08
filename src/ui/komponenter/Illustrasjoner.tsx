@@ -60,8 +60,8 @@
  * om, og den gamle stilen er borte. Alle tegninger står i `NY_STIL`.
  */
 
-import { memo, type ReactNode } from 'react'
-import { r2, Naerbilde, Bakke, Bunnfade, Dis, GRUNNLINJE, HORISONT, Utklipp, Kantfade, Kloss, Lampe, Lerret, Person as Figur, Plakett, S, Saltak, Slagskygge, Speiling, Bunnskygge, Glans, Tre, Vindusrad, inn, maal, pkt, type Materiale } from './Tegnestil'
+import { memo, useContext, type ReactNode } from 'react'
+import { r2, Blinklys, IScenen, Lakksveip, tennesOmNatta, Naerbilde, Bakke, Bunnfade, Dis, GRUNNLINJE, HORISONT, Utklipp, Kantfade, Kloss, Lampe, Lerret, Person as Figur, Plakett, S, Saltak, Slagskygge, Speiling, Bunnskygge, Glans, Tre, Vindusrad, inn, maal, pkt, type Materiale } from './Tegnestil'
 
 type P = { størrelse?: number }
 /** Hvor langt en bedrift har vokst: 0 ved nivå 1, 1 ved 25, 2 ved 50, 3 ved 100. */
@@ -84,6 +84,7 @@ type B = (trinn: Trinn, f: number) => ReactNode
  * med stripet markise fra 25, en fløy med parasoll og kunder ved 50, og ved
  * 100 hvitmalt disk med messingkant, lyslenke og et sitrontre. Forbedringene:
  * saftpresse på disken, isboks med isbiter og en grønn sukkerfri dunk med vimpel.
+ * I scenen vipper skiltet på bordet og kappa på markisen i vinden (G10).
  */
 const saftbod: B = (t, f) => {
   const g = GRUNNLINJE
@@ -133,7 +134,7 @@ const saftbod: B = (t, f) => {
           {[0, 2, 4].map((i) => (
             <polygon key={i} points={`${19 + i * 8.33},31 ${27.33 + i * 8.33},31 ${25.33 + i * 9.33},39 ${16 + i * 9.33},39`} fill={S.oker.flate} />
           ))}
-          <path d={`M16 39 ${Array.from({ length: 8 }, (_, i) => `Q${19.5 + i * 7} 42.4 ${23 + i * 7} 39`).join(' ')} Z`} fill={S.oker.skygge} />
+          <path className="anim-duve" d={`M16 39 ${Array.from({ length: 8 }, (_, i) => `Q${19.5 + i * 7} 42.4 ${23 + i * 7} 39`).join(' ')} Z`} fill={S.oker.skygge} />
           <rect x="16" y="39" width="56" height="0.8" fill="#000000" opacity="0.2" />
           <Kloss x={31} y={31} b={26} h={8} d={3} m={S.treverk} />
           <rect x="40" y="24.6" width="5.4" height="5.4" rx="0.6" fill={S.hvit.lys} opacity="0.85" />
@@ -171,12 +172,14 @@ const saftbod: B = (t, f) => {
           <rect x="62" y="72.4" width="2" height="11.6" fill={S.treverk.skygge} />
           <Kloss x={x0} y={72.4} b={disk.b} h={2.4} d={10} m={S.treverk} />
           <g transform="rotate(-3 46 77)">
+            <g className="anim-duve">
             <rect x="37" y="73" width="18" height="9.6" rx="0.6" fill={S.hvit.flate} />
             <circle cx="42" cy="77.8" r="2.8" fill={S.oker.lys} />
             <circle cx="42" cy="77.8" r="2" fill={S.oker.flate} opacity="0.5" />
             <path d="M42 75.8 V79.8 M40 77.8 H44" stroke={S.hvit.lys} strokeWidth="0.35" />
             <rect x="46" y="75.6" width="7" height="1" rx="0.5" fill={S.treverk.flate} />
             <rect x="46" y="78" width="5" height="1" rx="0.5" fill={S.treverk.flate} />
+            </g>
           </g>
         </g>
       )}
@@ -239,7 +242,8 @@ const saftbod: B = (t, f) => {
  * Pølseboden (gateavstand): en pølsevogn med parasoll på nivå 1, en rød
  * pølsebu med luke fra 25, en overbygd terrasse med ståbord og kunder ved 50,
  * og ved 100 gullskrift, lamper og blomsterkasser. Forbedringene: grillplate i
- * stål, en stor sennepsflaske med skilt, og food trucken parkert bak.
+ * stål, en stor sennepsflaske med skilt, og food trucken parkert bak. I
+ * scenen damper pølsene på disken (G10).
  */
 const polsebod: B = (t, f) => {
   const g = GRUNNLINJE
@@ -334,8 +338,10 @@ const polsebod: B = (t, f) => {
           <line x1="58" y1="74" x2="62" y2="72" stroke={S.metall.skygge} strokeWidth="0.8" strokeLinecap="round" />
         </g>
       )}
-      {/* På disken: pølser i brød. */}
+      {/* På disken: pølser i brød, med damp (G10). */}
       {polse(disk.x + 13, disk.y - 2.2)}
+      <path className="anim-damp" d={`M${disk.x + 15} ${disk.y - 3.2} q-1 -1.4 0 -2.8 q1 -1.4 0 -2.8`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" strokeLinecap="round" />
+      <path className="anim-damp sen" d={`M${disk.x + 17.6} ${disk.y - 3.2} q-1 -1.4 0 -2.8 q1 -1.4 0 -2.8`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" strokeLinecap="round" />
       {/* Grillplate i stål. */}
       {f >= 1 && (
         <g>
@@ -470,6 +476,11 @@ const gatekjokken: B = (t, f) => {
       )}
       {!stor && (
         <g>
+          {/* Lufteventilen med os fra grillen (G10). */}
+          <rect x="37" y={topp - 4} width="2.4" height="4" fill={S.metall.flate} />
+          <rect x="36.6" y={topp - 4.6} width="3.2" height="0.8" fill={S.metall.skygge} />
+          <circle className="anim-roeyk" cx="38.4" cy={topp - 7.6} r="1.4" fill={S.hvit.flate} opacity="0.6" />
+          <circle className="anim-roeyk sen" cx="39.8" cy={topp - 10.6} r="1.9" fill={S.hvit.flate} opacity="0.38" />
           <rect x="42" y={topp - 9} width="12" height="8" rx="1.4" fill={S.mork.flate} />
           {burger(48, topp - 4.4, 0.8)}
         </g>
@@ -522,7 +533,8 @@ const gatekjokken: B = (t, f) => {
  * Kiosken (ny stil, gateavstand): en liten paviljong i puss med skiltbånd,
  * markise over luka og dør til høyre. Nivå 25 får en isboks med flagg, 50
  * kunder, 100 gullkant, lamper og plakett. Forbedringene: kaffe (skilt og
- * maskin), pakkeautomat og døgnåpent (måneskilt og varmt lys inne).
+ * maskin), pakkeautomat og døgnåpent (måneskilt og varmt lys inne). I scenen
+ * går folk forbi på fortauet (G10).
  */
 const kiosk: B = (t, f) => {
   const g = GRUNNLINJE
@@ -653,9 +665,17 @@ const kiosk: B = (t, f) => {
       )}
       {t >= 3 && <Plakett x={28} y={47.2} />}
       {/* Kunder: to ved nivå 50, tre ved 100. */}
+      {/* Før kundene kommer, går noen forbi (G10). */}
+      {t < 2 && (
+        <g className="anim-glid">
+          <Figur x={16} y={g + 4.2} avstand="gate" klaer={S.oker} hud={S.hudMork} har={S.mork.skygge} />
+        </g>
+      )}
       {t >= 2 && (
         <>
-          <Figur x={42} y={g + 1.6} avstand="gate" klaer={S.petrol} vendt={-1} />
+          <g className="anim-glid sen">
+            <Figur x={42} y={g + 1.6} avstand="gate" klaer={S.petrol} vendt={-1} />
+          </g>
           <Figur x={18} y={g + 4.2} avstand="gate" klaer={S.oker} hud={S.hudMork} har={S.mork.skygge} />
         </>
       )}
@@ -799,7 +819,8 @@ const kafe: B = (t, f) => {
  * et stort buevindu, ved 50 kommer baldakin over døra og gjester, og ved 100
  * dørvakt, messinglamper, blomsterkasser og gullskrift. Forbedringene:
  * kjendiskokken i vinduet, vinkjeller (tønne og kjellervindu) og
- * Michelin-skiltet ved døra.
+ * Michelin-skiltet ved døra. I scenen flakker lysene på bordene og det ryker
+ * fra kjøkkenet (G10).
  */
 const restaurant: B = (t, f) => {
   const g = GRUNNLINJE
@@ -827,6 +848,10 @@ const restaurant: B = (t, f) => {
         <rect key={y} x="32" y={y} width="34" height="0.4" fill={S.stein.skygge} opacity="0.6" />
       ))}
       <Kloss x={31} y={28} b={36} h={2.4} d={20} m={S.hvit} />
+      {/* Ventilen fra kjøkkenet, med os (G10). */}
+      <Kloss x={60} y={23.6} b={3} h={4.4} d={2} m={S.metall} />
+      <circle className="anim-roeyk" cx="61.8" cy="16.4" r="1.6" fill={S.hvit.flate} opacity="0.55" />
+      <circle className="anim-roeyk sen" cx="63.6" cy="12.6" r="2.1" fill={S.hvit.flate} opacity="0.35" />
       {stor ? (
         [35, 45.6, 56.2].map((x) => (
           <g key={x}>
@@ -852,11 +877,11 @@ const restaurant: B = (t, f) => {
         <rect key={x} x={x} y="53.8" width={i % 2 ? 3 : 4} height="1.2" rx="0.6" fill={t >= 3 ? S.gull.lys : S.hvit.flate} />
       ))}
       <rect x="35" y="59" width="17" height="20" fill={S.vinduLys.flate} />
-      {[39, 47].map((x) => (
+      {[39, 47].map((x, i) => (
         <g key={x}>
           <rect x={x - 2.6} y="73" width="5.2" height="1" fill={S.hvit.lys} />
           <rect x={x - 0.4} y="74" width="0.8" height="5" fill={S.mork.flate} />
-          <circle cx={x} cy="71.6" r="1" fill={S.vinduLys.lys} />
+          <circle className={i ? 'anim-flamme sen' : 'anim-flamme'} cx={x} cy="71.6" r="1" fill={S.vinduLys.lys} />
         </g>
       ))}
       {/* Kjendiskokken i vinduet. */}
@@ -1037,6 +1062,7 @@ const hotell: B = (t, f) => {
  * og ved 100 marmor, gullkant, flagg og lamper. Forbedringene: en digital
  * søyle for nettbanken, en egen inngang for formuesforvaltning under
  * gullkantet baldakin, og et kurstikker-bånd over inngangen for investeringsbanken.
+ * I scenen går en kunde forbi på fortauet (G10).
  */
 const bank: B = (t, f) => {
   const g = GRUNNLINJE
@@ -1158,9 +1184,17 @@ const bank: B = (t, f) => {
           <rect x={(tempel ? 8 : 16) + 2.4} y={g - 7.4} width="1.2" height="3" fill={S.glass.lys} />
         </g>
       )}
+      {/* En kunde på vei forbi (G10), før kundene kommer ved 50. */}
+      {t < 2 && (
+        <g className="anim-glid">
+          <Figur x={78} y={g + 4} avstand="gate" klaer={S.petrol} ben={S.mork.skygge} vendt={-1} />
+        </g>
+      )}
       {t >= 2 && (
         <>
-          <Figur x={38} y={g + 4} avstand="gate" klaer={S.marine} ben={S.mork.skygge} />
+          <g className="anim-glid">
+            <Figur x={38} y={g + 4} avstand="gate" klaer={S.marine} ben={S.mork.skygge} />
+          </g>
           <Figur x={84} y={g + 5} avstand="gate" klaer={S.vin} hud={S.hudMork} har={S.mork.skygge} vendt={-1} />
         </>
       )}
@@ -1536,7 +1570,7 @@ function Passasjerfly({ x, gy, L, slag, hale }: { x: number; gy: number; L: numb
       <rect x={px(0.12)} y={r(ft + H * 0.62)} width={r(L * 0.84)} height={r(H * 0.12)} fill={hale} />
       {/* Vinduene og cockpiten. */}
       {Array.from({ length: Math.floor(0.6 / 0.032) }, (_, i) => (
-        <circle key={i} cx={px(0.2 + i * 0.032)} cy={r(ft + H * 0.38)} r={r(H * 0.09)} fill={S.glass.skygge} />
+        <circle key={i} className="nattvindu" cx={px(0.2 + i * 0.032)} cy={r(ft + H * 0.38)} r={r(H * 0.09)} fill={S.glass.skygge} />
       ))}
       <path d={`M${px(0.9)} ${r(ft + H * 0.18)} L${px(0.955)} ${r(ft + H * 0.26)} L${px(0.97)} ${r(ft + H * 0.42)} L${px(0.9)} ${r(ft + H * 0.42)} Z`} fill={S.mork.flate} />
       {/* Vingen og motorene. */}
@@ -1554,6 +1588,10 @@ function Passasjerfly({ x, gy, L, slag, hale }: { x: number; gy: number; L: numb
         </g>
       )}
       <Glans points={`${px(0.2)},${r(ft)} ${px(0.6)},${r(ft)} ${px(0.5)},${r(ft + H * 0.3)} ${px(0.2)},${r(ft + H * 0.3)}`} />
+      {/* Varsellysene (G10): rødt oppe og under, hvitt på halen. */}
+      <Blinklys x={px(0.5)} y={r(ft - 0.5)} r={r(Math.max(0.6, H * 0.08))} />
+      <Blinklys x={px(0.62)} y={r(fb + 0.4)} r={r(Math.max(0.5, H * 0.06))} sen />
+      <Blinklys x={px(0.07)} y={r(ft - H * 1.7)} r={r(Math.max(0.5, H * 0.07))} farge={S.hvit.lys} sen />
     </g>
   )
 }
@@ -1662,7 +1700,8 @@ const flyselskap: B = (t, f) => {
  * hytte på nivå 1, et ordentlig fjell med stolheis, flere nedfarter og lodge
  * fra 25, skiløpere i bakkene ved 50, og ved 100 lysløype, opplyst hotell og
  * plakett. Forbedringene: gondolbane til toppen (gondolene glir), snøkanoner
- * langs nedfarten og en hoppbakke med tribune for vinter-OL.
+ * langs nedfarten og en hoppbakke med tribune for vinter-OL. I scenen går
+ * skitrekket og stolheisen (G10).
  */
 const skisenter: B = (t, f) => {
   const g = GRUNNLINJE
@@ -1708,7 +1747,7 @@ const skisenter: B = (t, f) => {
         const lx = (stor ? 48 : 40) + k * (stor ? 10 : 7)
         const ly = g - 8 + k * ((topp[1] + (stor ? 4 : 2)) - (g - 8))
         return (
-          <g key={k}>
+          <g key={k} className={k === 0.5 ? 'anim-gondol sen' : 'anim-gondol'}>
             <rect x={lx - 0.3} y={ly} width="0.6" height="4" fill={S.metall.skygge} />
             <rect x={lx - 1.2} y={ly - 0.2} width="2.4" height="0.5" fill={S.metall.skygge} />
             {stor && <rect x={lx + 1.4} y={ly + 2} width="1.6" height="1.2" fill={S.marine.flate} />}
@@ -1789,16 +1828,22 @@ const skisenter: B = (t, f) => {
 
 // ─────────────────────────────────────────────── Boligene i ny stil (G5)
 
-/** Et vindu med karm; `lys` gir varmt lys inne, `sprosse` deler det i fire. */
-function Vindu({ x, y, b, h, karm = S.hvit.lys, lys = false, sprosse = true }: { x: number; y: number; b: number; h: number; karm?: string; lys?: boolean; sprosse?: boolean }) {
+/**
+ * Et vindu med karm; `lys` gir varmt lys inne, `sprosse` deler det i fire.
+ * Om natta, i scenen, tennes de fleste mørke vinduene (`nattvindu`), og med
+ * `tennes` slås lyset av og på i dette vinduet med jevne mellomrom (G10).
+ */
+function Vindu({ x, y, b, h, karm = S.hvit.lys, lys = false, sprosse = true, tennes = false }: { x: number; y: number; b: number; h: number; karm?: string; lys?: boolean; sprosse?: boolean; tennes?: boolean }) {
+  const iScenen = useContext(IScenen)
   const k = Math.max(0.4, +(b * 0.12).toFixed(2))
   const ib = +(b - 2 * k).toFixed(2)
   const ih = +(h - 2 * k).toFixed(2)
   return (
     <g>
       <rect x={x} y={y} width={b} height={h} fill={karm} />
-      <rect x={+(x + k).toFixed(2)} y={+(y + k).toFixed(2)} width={ib} height={ih} fill={lys ? S.vinduLys.flate : S.glass.skygge} />
-      {!lys && <rect x={+(x + k).toFixed(2)} y={+(y + k).toFixed(2)} width={+(ib * 0.45).toFixed(2)} height={ih} fill={S.glass.flate} opacity="0.5" />}
+      <rect x={+(x + k).toFixed(2)} y={+(y + k).toFixed(2)} width={ib} height={ih} fill={lys ? S.vinduLys.flate : S.glass.skygge} className={!lys && tennesOmNatta(x, y) ? 'nattvindu' : undefined} />
+      {!lys && <rect x={+(x + k).toFixed(2)} y={+(y + k).toFixed(2)} width={+(ib * 0.45).toFixed(2)} height={ih} fill={S.glass.flate} opacity="0.5" className="nattskjul" />}
+      {tennes && iScenen && !lys && <rect className="anim-vindu" x={+(x + k).toFixed(2)} y={+(y + k).toFixed(2)} width={ib} height={ih} fill={S.vinduLys.flate} />}
       {sprosse && (
         <>
           <rect x={+(x + b / 2 - k * 0.35).toFixed(2)} y={y} width={+(k * 0.7).toFixed(2)} height={h} fill={karm} />
@@ -1859,7 +1904,7 @@ function Sykkel({ x, y = GRUNNLINJE, farge = S.vin.flate }: { x: number; y?: num
  * Hybelen i Bergen (gateavstand, Møhlenpris): et hvitt trehus med skifertak
  * og gavlen mot oss, og hybelen i kjelleren — egen dør ned, et lite vindu med
  * lys i og sykkelen lent mot muren. Det regner, naboen har paraply, og Ulriken
- * med masta står i dis bak.
+ * med masta står i dis bak. I scenen går lyset av og på i stua (G10).
  */
 function Hybel({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -1883,7 +1928,7 @@ function Hybel({ størrelse = 48 }: P) {
       <Saltak x={22} y={g - 36} b={50} d={22} h={18} m={S.skifer} gavl={S.hvit} />
       <rect x="21" y={g - 9.6} width="52" height="1" fill={S.hvit.skygge} />
       <Vindu x={27} y={g - 31} b={8} h={11} />
-      <Vindu x={40} y={g - 31} b={8} h={11} />
+      <Vindu x={40} y={g - 31} b={8} h={11} tennes />
       <Vindu x={43} y={g - 49} b={8} h={8} />
       {/* Inngangen med trapp. */}
       <Kloss x={56} b={14} h={9} d={6} m={S.stein} />
@@ -1912,7 +1957,8 @@ function Hybel({ størrelse = 48 }: P) {
 /**
  * Hybelen i Oslo (gateavstand, Blindern): en sveitservilla i kremhvitt med
  * bratt skifertak, utskåret pynt langs gavlen og glassveranda — hybelen er
- * på loftet, med lys i gavlvinduet. T-banen går forbi på fyllingen bak.
+ * på loftet, med lys i gavlvinduet. T-banen går forbi på fyllingen bak. I
+ * scenen glir T-banen og lyset går av og på i stua (G10).
  */
 function HybelBlindern({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -1923,12 +1969,14 @@ function HybelBlindern({ størrelse = 48 }: P) {
       <Kantfade>
         <Dis>
           <polygon points="0,64 96,62 96,68 0,70" fill={S.stein.flate} />
-          <path d="M2 61 L62 60 Q65 60 65.6 57 L65.6 52.4 Q65 50.4 62 50.4 L2 50.6 Z" fill={S.metall.lys} />
-          <path d="M60.6 50.5 L62 50.4 Q65 50.4 65.6 52.4 L65.6 57 Q65 60 62 60 L60.6 60 Z" fill={S.marine.flate} />
-          <rect x="4" y="52.6" width="54" height="3.4" fill={S.mork.flate} />
-          {[16, 30, 44].map((x) => (
-            <rect key={x} x={x} y="51" width="0.8" height="9" fill={S.metall.skygge} />
-          ))}
+          <g className="anim-glid">
+            <path d="M2 61 L62 60 Q65 60 65.6 57 L65.6 52.4 Q65 50.4 62 50.4 L2 50.6 Z" fill={S.metall.lys} />
+            <path d="M60.6 50.5 L62 50.4 Q65 50.4 65.6 52.4 L65.6 57 Q65 60 62 60 L60.6 60 Z" fill={S.marine.flate} />
+            <rect className="nattvindu" x="4" y="52.6" width="54" height="3.4" fill={S.mork.flate} />
+            {[16, 30, 44].map((x) => (
+              <rect key={x} x={x} y="51" width="0.8" height="9" fill={S.metall.skygge} />
+            ))}
+          </g>
         </Dis>
       </Kantfade>
       <Bakke type="gress" />
@@ -1962,7 +2010,7 @@ function HybelBlindern({ størrelse = 48 }: P) {
       <rect x="26" y={g - 32.6} width="42" height="1.2" fill={S.gran.flate} />
       <Vindu x={43.6} y={g - 44.6} b={7} h={9} lys karm={S.hvit.lys} />
       {[31, 54].map((x) => (
-        <Vindu key={x} x={x} y={g - 27} b={7} h={13} karm={S.hvit.lys} />
+        <Vindu key={x} x={x} y={g - 27} b={7} h={13} karm={S.hvit.lys} tennes={x === 54} />
       ))}
       <Sykkel x={70} farge={S.marine.lys} />
     </Lerret>
@@ -1972,7 +2020,8 @@ function HybelBlindern({ størrelse = 48 }: P) {
 /**
  * Hybelen i Trondheim (fjern avstand, Moholt studentby): to høye studenttårn
  * i lyst massivtre med vindusrutenett og lys her og der, en lav teglblokk
- * foran, sykler, trær og studenter på vei til forelesning.
+ * foran, sykler, trær og studenter på vei til forelesning. I scenen går
+ * lyset av og på på en hybel (G10).
  */
 function HybelMoholt({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -1983,7 +2032,7 @@ function HybelMoholt({ størrelse = 48 }: P) {
       <Kloss x={x} b={18} h={etasjer * e + 2} d={14} m={tre} />
       <Kledning x={x} y={g - etasjer * e - 2} b={18} h={etasjer * e + 2} farge={tre.skygge} mellom={1.5} />
       {Array.from({ length: etasjer }, (_, k) => (
-        <Vindusrad key={k} x={x + 1.8} y={g - (k + 1) * e + 1} antall={3} b={3.6} h={4.6} mellom={2.4} tent={4} start={k + start} />
+        <Vindusrad key={k} x={x + 1.8} y={g - (k + 1) * e + 1} antall={3} b={3.6} h={4.6} mellom={2.4} tent={4} start={k + start} tennes={k === 5 - start ? 1 : undefined} />
       ))}
     </g>
   )
@@ -2024,7 +2073,8 @@ function HybelMoholt({ størrelse = 48 }: P) {
 /**
  * Leiligheten i Oslo (fjern avstand, Grünerløkka): en okergul bygård fra
  * 1890-tallet med gesimser, kafé med markise på gateplan og mansardtak med
- * arker, lys i noen av vinduene. Den blå trikken går forbi.
+ * arker, lys i noen av vinduene. Den blå trikken går forbi — i scenen
+ * glir den, og lyset går av og på i en leilighet (G10).
  */
 function LeilighetGrunerlokka({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -2051,7 +2101,7 @@ function LeilighetGrunerlokka({ størrelse = 48 }: P) {
       {etasjer.map((y, i) => (
         <g key={y}>
           <rect x="19.4" y={y + e - 0.8} width="56.6" height="0.8" fill={S.oker.lys} />
-          <Vindusrad x={23.6} y={y + 1.6} antall={7} b={3.2} h={4.8} mellom={4.2} karm={S.hvit.lys} tent={i === 1 ? 3 : 0} start={i} />
+          <Vindusrad x={23.6} y={y + 1.6} antall={7} b={3.2} h={4.8} mellom={4.2} karm={S.hvit.lys} tent={i === 1 ? 3 : 0} start={i} tennes={i === 2 ? 4 : undefined} />
         </g>
       ))}
       <rect x="19" y={g - 44.8} width="58" height="1.4" fill={S.oker.lys} />
@@ -2081,13 +2131,15 @@ function LeilighetGrunerlokka({ størrelse = 48 }: P) {
       {/* Kjøreledningen og den blå trikken. */}
       <line x1="0" y1={g - 13} x2="96" y2={g - 12} stroke={S.mork.flate} strokeWidth="0.3" />
       <path d={`M68 ${g - 12.2} L70 ${g - 9.4} L72 ${g - 12.2}`} fill="none" stroke={S.mork.flate} strokeWidth="0.4" />
-      <path d={`M52 ${g + 5} L52 ${g - 6.4} Q52.4 ${g - 9} 55 ${g - 9.2} L86 ${g - 9.2} Q89.6 ${g - 9} 90.4 ${g - 5} L90.6 ${g + 5} Z`} fill={S.sjo.flate} />
-      <path d={`M52 ${g + 1} L90.6 ${g + 1} L90.6 ${g + 5} L52 ${g + 5} Z`} fill={S.hvit.flate} />
-      <path d={`M54 ${g - 7.4} L88.6 ${g - 7.4} L89 ${g - 3.4} L54 ${g - 3.4} Z`} fill={S.mork.flate} />
-      {[60, 68, 76, 84].map((x) => (
-        <rect key={x} x={x} y={g - 7.4} width="0.8" height="4" fill={S.sjo.flate} />
-      ))}
-      <path d={`M55 ${g - 9} L86 ${g - 9}`} stroke={S.sjo.lys} strokeWidth="0.7" />
+      <g className="anim-glid">
+        <path d={`M52 ${g + 5} L52 ${g - 6.4} Q52.4 ${g - 9} 55 ${g - 9.2} L86 ${g - 9.2} Q89.6 ${g - 9} 90.4 ${g - 5} L90.6 ${g + 5} Z`} fill={S.sjo.flate} />
+        <path d={`M52 ${g + 1} L90.6 ${g + 1} L90.6 ${g + 5} L52 ${g + 5} Z`} fill={S.hvit.flate} />
+        <path className="nattvindu" d={`M54 ${g - 7.4} L88.6 ${g - 7.4} L89 ${g - 3.4} L54 ${g - 3.4} Z`} fill={S.mork.flate} />
+        {[60, 68, 76, 84].map((x) => (
+          <rect key={x} x={x} y={g - 7.4} width="0.8" height="4" fill={S.sjo.flate} />
+        ))}
+        <path d={`M55 ${g - 9} L86 ${g - 9}`} stroke={S.sjo.lys} strokeWidth="0.7" />
+      </g>
     </Lerret>
   )
 }
@@ -2151,7 +2203,8 @@ function Bryggerekka({ størrelse = 48 }: P) {
 /**
  * En rekke med fem rekkehus (fjern avstand): beiset tre med pulttak, store
  * vinduer, hekk og plen foran og en bil ved den siste. `bakgrunn` setter
- * stedet bak rekka; `regn` legger på et lett bergensregn.
+ * stedet bak rekka; `regn` legger på et lett bergensregn. I scenen går lyset
+ * av og på i det fjerde huset (G10).
  */
 function Rekkerad({ størrelse, farger, bakgrunn, regn = false }: { størrelse: number; farger: Materiale[]; bakgrunn: ReactNode; regn?: boolean }) {
   const g = GRUNNLINJE
@@ -2170,7 +2223,7 @@ function Rekkerad({ størrelse, farger, bakgrunn, regn = false }: { størrelse: 
             <Kloss x={x} b={14} h={2 * e + 1} d={12} m={m} />
             <polygon points={`${x - 0.4},${g - 2 * e - 1} ${x + 14.4},${g - 2 * e - 1} ${x + 14.4},${g - 2 * e - 3.6} ${x - 0.4},${g - 2 * e - 2}`} fill={S.mork.flate} />
             <Kledning x={x} y={g - 2 * e - 1} b={14} h={2 * e + 1} farge={m.skygge} mellom={1.6} />
-            <Vindu x={x + 1.6} y={g - 2 * e + 1.2} b={10} h={4.6} karm={S.hvit.flate} lys={i === 1} sprosse={false} />
+            <Vindu x={x + 1.6} y={g - 2 * e + 1.2} b={10} h={4.6} karm={S.hvit.flate} lys={i === 1} sprosse={false} tennes={i === 3} />
             <Vindu x={x + 1.6} y={g - e + 1.4} b={5.6} h={5} karm={S.hvit.flate} sprosse={false} />
             <rect x={x + 9} y={g - 6} width="3.2" height="6" fill={S.treMork.skygge} />
             <rect x={x + 0.6} y={g + 1.2} width="9" height="2.6" rx="1.3" fill={S.gran.flate} />
@@ -2244,7 +2297,7 @@ function RekkehusFana({ størrelse = 48 }: P) {
 /**
  * Leiligheten i Bergen (fjern avstand, Nordnes): hvite trehus med skifertak
  * som trapper seg opp en bratt brosteinsgate, med gatelykt og fjellene i
- * dis bak.
+ * dis bak. I scenen rusler en nabo i gata og lyset går av og på (G10).
  */
 function LeilighetNordnes({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -2278,7 +2331,7 @@ function LeilighetNordnes({ størrelse = 48 }: P) {
           <Kledning x={x} y={y - 16} b={16} h={20} farge={S.hvit.skygge} mellom={1.4} />
           <Saltak x={x} y={y - 16} b={16} d={12} h={8} m={S.skifer} gavl={S.hvit} overheng={1} />
           <Vindu x={x + 2.4} y={y - 12.6} b={3.6} h={4.6} lys={i === 2} />
-          <Vindu x={x + 10} y={y - 12.6} b={3.6} h={4.6} />
+          <Vindu x={x + 10} y={y - 12.6} b={3.6} h={4.6} tennes={i === 1} />
           <Vindu x={x + 2.4} y={y - 5} b={3.6} h={4.6} />
           <rect x={x + 10.4} y={y - 4.4} width="3.4" height="6.4" fill={S.marine.flate} />
           <Vindu x={x + 6.2} y={y - 22} b={3.6} h={3.6} />
@@ -2286,7 +2339,9 @@ function LeilighetNordnes({ størrelse = 48 }: P) {
       ))}
       <line x1="86" y1={g - 14} x2="86" y2={g - 30} stroke={S.mork.flate} strokeWidth="0.6" />
       <Lampe x={86} y={g - 30.6} r={1.4} />
-      <Figur x={36} y={g + 2} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <g className="anim-glid">
+        <Figur x={36} y={g + 2} avstand="fjern" klaer={S.vin} vendt={-1} />
+      </g>
     </Lerret>
   )
 }
@@ -2643,7 +2698,8 @@ function KontorbyggStavanger({ størrelse = 48 }: P) {
  * Kjøpesenteret i Trondheim (fjern avstand): et stort, lavt senter med et
  * høyt glassatrium over hovedinngangen, skiltmast med logo, et parkeringshus
  * ved siden av, en full parkeringsplass foran med folk og handlevogner, og
- * Nidarosdomen med det grønne kobberspiret i dis bak.
+ * Nidarosdomen med det grønne kobberspiret i dis bak. I scenen går folk over
+ * plassen og lyset på skiltmasta blinker (G10).
  */
 function Kjopesenter({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -2710,6 +2766,7 @@ function Kjopesenter({ størrelse = 48 }: P) {
       <rect x="5.4" y={g - 34} width="1.4" height="32" fill={S.skifer.skygge} />
       <rect x="2.4" y={g - 33} width="4.4" height="6" fill={S.vin.flate} />
       {pose(3.2, g - 31.4)}
+      <Blinklys x={4.6} y={g - 34.8} r={0.8} />
       {/* Parkeringsplassen, folk og handlevogner. */}
       {biler.map((m, i) => {
         const rad = i % 2
@@ -2721,9 +2778,13 @@ function Kjopesenter({ størrelse = 48 }: P) {
           </g>
         )
       })}
-      <Figur x={22} y={g - 2} avstand="fjern" klaer={S.marine} />
+      <g className="anim-glid">
+        <Figur x={22} y={g - 2} avstand="fjern" klaer={S.marine} />
+      </g>
       <Figur x={58} y={g - 1.4} avstand="fjern" klaer={S.vin} vendt={-1} />
-      <Figur x={64} y={g - 2} avstand="fjern" klaer={S.oker} />
+      <g className="anim-glid sen">
+        <Figur x={64} y={g - 2} avstand="fjern" klaer={S.oker} />
+      </g>
       {[24.4, 60].map((x) => (
         <g key={x}>
           <rect x={x} y={g - 4.4} width="2.6" height="1.8" fill="none" stroke={S.metall.lys} strokeWidth="0.3" />
@@ -2900,7 +2961,8 @@ function Langhus({ x, y = GRUNNLINJE, b, h, d, m, tak, takH }: { x: number; y?: 
 /**
  * Gården på Hedmarken (fjern avstand): en stor rød låve med hvite detaljer
  * og låvebru, hvitt våningshus med trær rundt, en silo, gule kornåkre foran
- * og Mjøsa med åsene i dis bak.
+ * og Mjøsa med åsene i dis bak. I scenen ryker det fra pipa og lyset går av og
+ * på i stua (G10).
  */
 function GardHedmarken({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -2925,8 +2987,12 @@ function GardHedmarken({ størrelse = 48 }: P) {
       <Tre x={36} h={18} />
       {/* Våningshuset. */}
       <Langhus x={14} b={20} h={10} d={12} m={S.hvit} tak={S.skifer} takH={6} />
+      {/* Pipa med røyk (G10). */}
+      <rect x="27" y={g - 19.4} width="1.8" height="5" fill={S.tegl.flate} />
+      <circle className="anim-roeyk" cx="28.4" cy={g - 21.6} r="1.2" fill={S.hvit.flate} opacity="0.6" />
+      <circle className="anim-roeyk sen" cx="29.8" cy={g - 24.4} r="1.6" fill={S.hvit.flate} opacity="0.4" />
       {[16.6, 21.6, 26.6].map((x) => (
-        <Vindu key={x} x={x} y={g - 8} b={2.6} h={3.4} sprosse={false} />
+        <Vindu key={x} x={x} y={g - 8} b={2.6} h={3.4} sprosse={false} tennes={x === 21.6} />
       ))}
       <rect x="31" y={g - 5.4} width="2" height="5.4" fill={S.treMork.flate} />
       {/* Siloen og låven med låvebrua. */}
@@ -2950,7 +3016,8 @@ function GardHedmarken({ størrelse = 48 }: P) {
 /**
  * Gården på Lista (fjern avstand): flatt kystlandskap med steingjerder over
  * markene, et hvitt våningshus og en liten rød låve, vindskjeve trær, sauer
- * på beite og havet med Lista fyr i dis bak.
+ * på beite og havet med Lista fyr i dis bak. I scenen bøyer trærne seg i
+ * vinden og fyret blinker (G10).
  */
 function GardLista({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -2968,6 +3035,8 @@ function GardLista({ størrelse = 48 }: P) {
           <rect x="84" y={HORISONT - 16} width="3" height="12" fill={S.hvit.lys} />
           <rect x="83.6" y={HORISONT - 18} width="3.8" height="2.4" fill={S.faluRod.flate} />
         </Dis>
+        {/* Fyrlyset blinker (G10). */}
+        <Blinklys x={85.5} y={HORISONT - 16.8} r={0.9} farge={S.vinduLys.lys} />
       </Kantfade>
       <Bakke type="gress" />
       {/* Steingjerdene over markene. */}
@@ -2986,14 +3055,18 @@ function GardLista({ størrelse = 48 }: P) {
       <Slagskygge x1={22} x2={72} lengde={10} d={14} />
       {/* Vindskjeve trær. */}
       <g transform={`rotate(14 12 ${g - 4})`}>
-        <Tre x={12} y={g - 4} h={16} />
+        <g className="anim-svai">
+          <Tre x={12} y={g - 4} h={16} />
+        </g>
       </g>
       <g transform={`rotate(14 80 ${g - 4})`}>
-        <Tre x={80} y={g - 4} h={13} />
+        <g className="anim-svai sen">
+          <Tre x={80} y={g - 4} h={13} />
+        </g>
       </g>
       <Langhus x={24} y={g - 4} b={24} h={10} d={12} m={S.hvit} tak={S.skifer} takH={6} />
       {[26.6, 31.6, 41.6].map((x) => (
-        <Vindu key={x} x={x} y={g - 12} b={2.6} h={3.4} sprosse={false} />
+        <Vindu key={x} x={x} y={g - 12} b={2.6} h={3.4} sprosse={false} tennes={x === 31.6} />
       ))}
       <rect x="36.4" y={g - 9.4} width="2" height="5.4" fill={S.marine.flate} />
       <Langhus x={54} y={g - 4} b={18} h={8} d={12} m={S.faluRod} tak={S.skifer} takH={5} />
@@ -3008,7 +3081,8 @@ function GardLista({ størrelse = 48 }: P) {
 
 /**
  * Skogen i Trysil (fjern avstand): granskog over åsene, en grusvei med
- * tømmerstabel i veikanten og Trysilfjellet med skibakkene i dis bak.
+ * tømmerstabel i veikanten og Trysilfjellet med skibakkene i dis bak. I
+ * scenen går vinden gjennom granene (G10).
  */
 function SkogTrysil({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3032,8 +3106,10 @@ function SkogTrysil({ størrelse = 48 }: P) {
         <path d={`M38 ${g + 12} Q44 ${g + 2} 50 ${g - 4} Q54 ${g - 9} 50 ${g - 16}`} fill="none" stroke={S.puss.skygge} strokeWidth="5" />
         <path d={`M38 ${g + 12} Q44 ${g + 2} 50 ${g - 4} Q54 ${g - 9} 50 ${g - 16}`} fill="none" stroke={S.puss.flate} strokeWidth="3.4" />
       </Kantfade>
-      {trær.map(([x, y, h]) => (
-        <Tre key={`${x}-${y}`} x={x} y={y} h={h} slag="gran" />
+      {trær.map(([x, y, h], i) => (
+        <g key={`${x}-${y}`} className={i % 3 === 0 ? 'anim-svai' : i % 3 === 1 ? 'anim-svai sen' : undefined}>
+          <Tre x={x} y={y} h={h} slag="gran" />
+        </g>
       ))}
       {/* Tømmerstabelen i veikanten. */}
       {[0, 1, 2].map((rad) =>
@@ -3051,7 +3127,7 @@ function SkogTrysil({ størrelse = 48 }: P) {
 /**
  * Skogen i Namdalen (fjern avstand): Namsen bukter seg gjennom blandingsskog
  * av gran og bjørk, med tømmer stablet ved elva, ei lita rød bu og lave fjell
- * i dis bak.
+ * i dis bak. I scenen rører trærne seg og elva glitrer (G10).
  */
 function SkogNamdalen({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3074,13 +3150,17 @@ function SkogNamdalen({ størrelse = 48 }: P) {
       {/* Elva som bukter seg mot oss. */}
       <Kantfade>
         <path d={`M44 ${g - 18} Q50 ${g - 12} 42 ${g - 6} Q32 ${g + 2} 44 ${g + 12} L62 ${g + 12} Q48 ${g + 2} 56 ${g - 6} Q62 ${g - 12} 50 ${g - 18} Z`} fill={S.sjo.flate} />
-        <path d={`M46 ${g - 10} Q42 ${g - 6} 40 ${g - 2} M48 ${g + 4} Q50 ${g + 8} 54 ${g + 10}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.7" />
+        <path className="anim-boelge" d={`M46 ${g - 10} Q42 ${g - 6} 40 ${g - 2} M48 ${g + 4} Q50 ${g + 8} 54 ${g + 10}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.7" />
       </Kantfade>
-      {gran.map(([x, y, h]) => (
-        <Tre key={`g${x}-${y}`} x={x} y={y} h={h} slag="gran" />
+      {gran.map(([x, y, h], i) => (
+        <g key={`g${x}-${y}`} className={i % 2 ? 'anim-svai sen' : undefined}>
+          <Tre x={x} y={y} h={h} slag="gran" />
+        </g>
       ))}
-      {bjork.map(([x, y, h]) => (
-        <Tre key={`b${x}-${y}`} x={x} y={y} h={h} />
+      {bjork.map(([x, y, h], i) => (
+        <g key={`b${x}-${y}`} className={i % 2 ? 'anim-svai' : 'anim-svai sen'}>
+          <Tre x={x} y={y} h={h} />
+        </g>
       ))}
       {/* Den røde bua og tømmeret ved elva. */}
       <Langhus x={22} y={g - 2} b={9} h={5} d={6} m={S.faluRod} tak={S.skifer} takH={3} />
@@ -3581,7 +3661,8 @@ function Kobenhavn({ størrelse = 48 }: P) {
  * Bygården i Mitte (fjern avstand): en pyntet gründerzeit-gård i fem etasjer
  * på et gatehjørne, med rundt hjørnetårn og kuppel, lyse gesimser, balkonger
  * med jernrekkverk og butikker med markiser i gateplanet, lindetrær, en gul
- * trikk på vei forbi, og Fernsehturm i dis bak.
+ * trikk på vei forbi, og Fernsehturm i dis bak. I scenen glir trikken,
+ * lindene rører seg og lyset på tårnet blinker (G10).
  */
 function Berlin({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3599,6 +3680,7 @@ function Berlin({ størrelse = 48 }: P) {
           <rect x="74.2" y="19.2" width="9.2" height="1.4" fill={S.metall.lys} />
           <rect x="78.4" y="6" width="0.8" height="10" fill={S.vin.lys} />
         </Dis>
+        <Blinklys x={78.8} y={6} r={0.8} />
       </Kantfade>
       <Bakke type="asfalt" />
       <Slagskygge x1={8} x2={88} y={fot} lengde={12} d={12} />
@@ -3613,7 +3695,7 @@ function Berlin({ størrelse = 48 }: P) {
       {[1, 2, 3, 4].map((k) => (
         <g key={k}>
           <rect x="14" y={r2(fot - (k + 1) * e + 7.2)} width="56" height="0.8" fill={S.puss.lys} />
-          <Vindusrad x={17} y={etasjeY(k)} antall={9} b={2.6} h={4.2} mellom={3.15} karm={S.hvit.lys} tent={k % 2 ? 4 : 0} start={k} />
+          <Vindusrad x={17} y={etasjeY(k)} antall={9} b={2.6} h={4.2} mellom={3.15} karm={S.hvit.lys} tent={k % 2 ? 4 : 0} start={k} tennes={k === 2 ? 5 : undefined} />
         </g>
       ))}
       {[2, 3].map((k) => (
@@ -3649,12 +3731,14 @@ function Berlin({ størrelse = 48 }: P) {
       <line x1="11" y1={fot - 50.6} x2="11" y2={fot - 54.6} stroke={S.gull.flate} strokeWidth="0.4" />
       <rect x="6" y={fot - 7} width="10" height="7" fill={S.vinduLys.skygge} />
       {/* Lindetrærne og trikken. */}
-      {[22, 52, 84].map((x) => (
-        <Tre key={x} x={x} y={fot + 2} h={14} />
+      {[22, 52, 84].map((x, i) => (
+        <g key={x} className={i % 2 ? 'anim-svai sen' : 'anim-svai'}>
+          <Tre x={x} y={fot + 2} h={14} />
+        </g>
       ))}
       <rect x="0" y={g + 3} width="96" height="0.4" fill={S.metall.skygge} />
       <rect x="0" y={g + 5.4} width="96" height="0.4" fill={S.metall.skygge} />
-      <g>
+      <g className="anim-glid">
         <rect x="30" y={g - 4.6} width="38" height="9" rx="1.6" fill={S.oker.lys} />
         <rect x="30" y={g + 2.4} width="38" height="2" fill={S.oker.skygge} />
         <Vindusrad x={32} y={g - 3.4} antall={8} b={3} h={3.2} mellom={1.5} />
@@ -3670,7 +3754,8 @@ function Berlin({ størrelse = 48 }: P) {
  * Byhuset i Mayfair (fjern avstand): en rekke hvite stukkaturhus i fem
  * etasjer med søylebuer over dørene, svarte jerngjerder, balkongen som går
  * langs hele første etasje og pipene på taket — ditt med den mørkeblå døra —
- * en svart drosje ved fortauskanten, en platan og Big Ben i dis bak.
+ * en svart drosje ved fortauskanten, en platan og Big Ben i dis bak. I scenen
+ * ryker det fra en pipe, platanen rører seg og lyset går av og på (G10).
  */
 function London({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3715,12 +3800,16 @@ function London({ størrelse = 48 }: P) {
             karm={S.hvit.lys}
             tent={k === 2 ? 5 : 0}
             start={k}
+            tennes={k === 1 ? 7 : undefined}
           />
         </g>
       ))}
       {/* Balkongen langs første etasje, og gesimsen og pipene på toppen. */}
       <rect x="4" y={r2(fot - 2 * e - 0.4)} width="70" height="1.2" fill={S.mork.flate} />
       <rect x="3" y={fot - 41.2} width="72" height="1.6" fill={S.hvit.lys} />
+      {/* Røyk fra én av pipene (G10). */}
+      <circle className="anim-roeyk" cx={r2(hus[1] + 8.4)} cy={r2(fot - 48.4)} r="1.2" fill={S.hvit.flate} opacity="0.55" />
+      <circle className="anim-roeyk sen" cx={r2(hus[1] + 9.8)} cy={r2(fot - 51)} r="1.6" fill={S.hvit.flate} opacity="0.35" />
       {hus.map((x) => (
         <g key={x}>
           <Kloss x={r2(x + 6)} y={fot - 41} b={4} h={4} d={3} m={S.hvit} />
@@ -3744,7 +3833,9 @@ function London({ størrelse = 48 }: P) {
         <line key={x} x1={x} y1={fot + 1.4} x2={x} y2={fot + 3.4} stroke={S.mork.flate} strokeWidth="0.25" />
       ))}
       {/* Platanen og den svarte drosjen. */}
-      <Tre x={84} y={g + 2} h={22} />
+      <g className="anim-svai">
+        <Tre x={84} y={g + 2} h={22} />
+      </g>
       <g>
         <path d={`M30 ${g + 6} V${g + 3} Q30.4 ${g + 1.6} 32 ${g + 1.4} L34 ${g - 0.8} Q38 ${g - 1.6} 41.6 ${g - 0.8} L43.4 ${g + 1.4} Q45 ${g + 1.8} 45 ${g + 3.4} V${g + 6} Z`} fill={S.mork.flate} />
         <path d={`M34.6 ${g + 1.2} L35.6 ${g - 0.2} H38 V${g + 1.2} Z M38.8 ${g + 1.2} V${g - 0.2} H41.2 L42.2 ${g + 1.2} Z`} fill={S.glass.skygge} />
@@ -3868,7 +3959,8 @@ function LaConcha({ dx = 0 }: { dx?: number }) {
  * Ferieleiligheten i Marbella (fjern avstand, høysesong om sommeren): en hvit
  * andalusisk leilighetsblokk i tre terrasser oppover lia, med takstein,
  * buede vinduer og bougainvillea over rekkverkene, bassenget foran med
- * solsenger og en parasoll, folk i vannet, palmer og La Concha i dis bak.
+ * solsenger og en parasoll, folk i vannet, palmer og La Concha i dis bak. I
+ * scenen rører palmene seg og vannet i bassenget krusner seg (G10).
  */
 function Ferieleilighet({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3907,16 +3999,21 @@ function Ferieleilighet({ størrelse = 48 }: P) {
       {/* Bassenget, solsengene og parasollen. */}
       <rect x="18" y={fot + 2} width="40" height="4" fill={S.sjo.lys} />
       <rect x="18" y={fot + 2} width="40" height="0.6" fill={S.hvit.lys} opacity="0.8" />
-      <circle cx="30" cy={fot + 3.6} r="0.8" fill={S.hud.flate} />
-      <path d={`M28.4 ${fot + 4.6} q1.6 -0.8 3.2 0`} fill="none" stroke={S.hvit.lys} strokeWidth="0.3" />
+      <circle className="anim-duve" cx="30" cy={fot + 3.6} r="0.8" fill={S.hud.flate} />
+      <path className="anim-boelge" d={`M28.4 ${fot + 4.6} q1.6 -0.8 3.2 0`} fill="none" stroke={S.hvit.lys} strokeWidth="0.3" />
+      <path className="anim-boelge sen" d={`M44 ${fot + 4} q1.6 -0.8 3.2 0`} fill="none" stroke={S.hvit.lys} strokeWidth="0.3" />
       {[60, 64.6].map((x) => (
         <rect key={x} x={x} y={fot + 4} width="3.6" height="1" rx="0.4" fill={S.hvit.lys} />
       ))}
       <line x1="66" y1={fot + 4} x2="66" y2={fot - 2.6} stroke={S.mork.lys} strokeWidth="0.3" />
       <polygon points={pkt([62, fot - 1.6], [66, fot - 3.4], [70, fot - 1.6])} fill={S.oker.lys} />
       <Figur x={63} y={fot + 4} avstand="fjern" klaer={S.vin} />
-      <Palme x={7} y={fot + 4} h={24} boy={-1} />
-      <Palme x={82} y={fot + 5} h={22} />
+      <g className="anim-svai sen">
+        <Palme x={7} y={fot + 4} h={24} boy={-1} />
+      </g>
+      <g className="anim-svai">
+        <Palme x={82} y={fot + 5} h={22} />
+      </g>
     </Lerret>
   )
 }
@@ -4032,7 +4129,8 @@ function Snogran({ x, y = GRUNNLINJE, h }: { x: number; y?: number; h: number })
  * Skileiligheten i Zermatt (fjern avstand, høysesong om vinteren): et stort
  * chaletbygg med steinsokkel og etasjer i mørk lerk, hvite balkonger, varmt lys
  * i vinduene og tung snø på taket, granene med snø, skiløpere med skiene på
- * skulderen og Matterhorn bak.
+ * skulderen og Matterhorn bak. I scenen går skiløperne og lyset går av og
+ * på (G10).
  */
 function Skileilighet({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -4050,7 +4148,7 @@ function Skileilighet({ størrelse = 48 }: P) {
       <Saltak x={18} y={fot - 32} b={46} d={14} h={13} m={S.sno} gavl={S.treMork} overheng={3} />
       {[0, 1, 2].map((k) => (
         <g key={k}>
-          <Vindusrad x={21} y={r2(fot - 10 - (k + 1) * e + 2)} antall={8} b={3} h={3.8} mellom={2.4} tent={2} start={k} karm={S.treverk.lys} />
+          <Vindusrad x={21} y={r2(fot - 10 - (k + 1) * e + 2)} antall={8} b={3} h={3.8} mellom={2.4} tent={2} start={k} karm={S.treverk.lys} tennes={k === 1 ? 2 : undefined} />
           {k < 2 && (
             <>
               <rect x="18" y={r2(fot - 10 - (k + 1) * e + 6)} width="46" height="1" fill={S.hvit.lys} />
@@ -4072,7 +4170,7 @@ function Skileilighet({ størrelse = 48 }: P) {
         [66, S.vin],
         [70, S.marine],
       ].map(([x, klaer]) => (
-        <g key={x as number}>
+        <g key={x as number} className={x === 66 ? 'anim-glid' : 'anim-glid sen'}>
           <Figur x={x as number} y={g + 2} avstand="fjern" klaer={klaer as Materiale} />
           <line x1={(x as number) - 1.6} y1={g - 3.6} x2={(x as number) + 2.2} y2={g - 1.2} stroke={S.oker.flate} strokeWidth="0.4" />
         </g>
@@ -4147,7 +4245,8 @@ function Alpehotell({ størrelse = 48 }: P) {
  * Toppleiligheten på Manhattan (fjern avstand): penthouse i glass på toppen
  * av et tårn, med takterrasse, trær i kasser, et lite basseng og noen ved
  * rekkverket, tårnets fasade som forsvinner nedover, og skylinen med Empire
- * State Building i dis rundt.
+ * State Building i dis rundt. I scenen blinker lyset på Empire State, vannet
+ * i bassenget krusner seg og trærne rører seg i vinden der oppe (G10).
  */
 function NewYork({ størrelse = 48 }: P) {
   const tak = 50
@@ -4158,6 +4257,7 @@ function NewYork({ størrelse = 48 }: P) {
           {/* Empire State Building: avtrappet tårn med spir. */}
           <polygon points="6,96 6,40 8,40 8,30 10,30 10,22 11.6,22 11.6,14 13,14 13,22 14.6,22 14.6,30 16.6,30 16.6,40 18.6,40 18.6,96" fill={S.stein.lys} />
           <rect x="12" y="4" width="0.6" height="10" fill={S.stein.lys} />
+          <Blinklys x={12.3} y={4} r={0.7} />
           {[
             [0, 52, 7],
             [20, 46, 6],
@@ -4173,13 +4273,14 @@ function NewYork({ størrelse = 48 }: P) {
       <Bunnfade>
         <Kloss x={24} y={110} b={48} h={60} d={14} m={S.skifer} />
         {Array.from({ length: 7 }, (_, k) => tak + 4 + k * 6).map((y, k) => (
-          <Vindusrad key={y} x={25.4} y={y} antall={10} b={3} h={3.6} mellom={1.6} tent={k % 2 ? 4 : 0} start={k} />
+          <Vindusrad key={y} x={25.4} y={y} antall={10} b={3} h={3.6} mellom={1.6} tent={k % 2 ? 4 : 0} start={k} tennes={k === 0 ? 6 : undefined} />
         ))}
       </Bunnfade>
       {/* Takterrassen: glassrekkverk, basseng, trær i kasser. */}
       <rect x="24" y={tak - 2.4} width="48" height="2.4" fill={S.glass.lys} opacity="0.55" />
       <rect x="24" y={tak - 2.6} width="48" height="0.4" fill={S.metall.lys} />
       <polygon points={pkt([56, tak - 1.2], [70, tak - 1.2], inn(70, tak - 1.2, 8), inn(56, tak - 1.2, 8))} fill={S.sjo.lys} />
+      <path className="anim-boelge" d={`M60 ${tak - 2.6} q1.6 -0.6 3.2 0`} fill="none" stroke={S.hvit.lys} strokeWidth="0.3" />
       {/* Penthouset i glass, med lys inne. */}
       <Slagskygge x1={30} x2={56} y={tak - 1} lengde={8} d={10} />
       <Kloss x={30} y={tak - 1} b={26} h={12} d={10} m={S.glass} />
@@ -4193,7 +4294,9 @@ function NewYork({ størrelse = 48 }: P) {
       {[27, 60].map((x) => (
         <g key={x}>
           <rect x={x - 2} y={tak - 3} width="4" height="2" fill={S.treMork.flate} />
-          <Tre x={x} y={tak - 2.6} h={8} />
+          <g className={x === 27 ? 'anim-svai' : 'anim-svai sen'}>
+            <Tre x={x} y={tak - 2.6} h={8} />
+          </g>
         </g>
       ))}
       <Figur x={66} y={tak - 1} avstand="fjern" klaer={S.hvit} vendt={-1} />
@@ -4219,7 +4322,7 @@ function Bilhjul({ x, r = 6, stil, m = S.metall, kaliper }: { x: number; r?: num
       return [+(x + Math.cos(v) * l).toFixed(2), +(cy + Math.sin(v) * l).toFixed(2)]
     })
   return (
-    <g>
+    <g className="ikke-lakk">
       <circle cx={x} cy={cy} r={r} fill={S.mork.skygge} />
       <circle cx={x} cy={cy} r={+(r - 0.7).toFixed(2)} fill="none" stroke={S.mork.flate} strokeWidth="0.5" />
       {stil === 'stal' && (
@@ -4297,7 +4400,8 @@ function Hjulbue({ x, r, bunn = 80 }: { x: number; r: number; bunn?: number }) {
 
 /**
  * Utstillingsrommet til bilene (som superbilen fra G1): blankt gulv, lys
- * ovenfra, bilen speiler seg i gulvet og har en mørk kontaktskygge.
+ * ovenfra, bilen speiler seg i gulvet og har en mørk kontaktskygge. I scenen
+ * glir et lys over lakken (`Lakksveip`, G10).
  */
 function Utstilling({ størrelse, fra = 8, til = 90, children }: { størrelse: number; fra?: number; til?: number; children: () => ReactNode }) {
   return (
@@ -4306,6 +4410,7 @@ function Utstilling({ størrelse, fra = 8, til = 90, children }: { størrelse: n
       <Speiling>{children()}</Speiling>
       <ellipse cx={(fra + til) / 2} cy={GRUNNLINJE + 0.3} rx={(til - fra) / 2} ry="2" fill="#000000" opacity="0.45" />
       {children()}
+      <Lakksveip>{children()}</Lakksveip>
     </Lerret>
   )
 }
@@ -4428,7 +4533,7 @@ function SuperbilKarosseri() {
       <path d="M78 79 L89.2 78.6" stroke={S.mork.flate} strokeWidth="1" />
       {/* Hjulene: dekk, felg med fem eiker, bremsekaliper. */}
       {hjul.map((x) => (
-        <g key={x}>
+        <g key={x} className="ikke-lakk">
           <circle cx={x} cy={g - 6.4} r="6.4" fill={S.mork.skygge} />
           <circle cx={x} cy={g - 6.4} r="4.6" fill={S.metall.skygge} />
           <path d={`M${x - 3.4} ${g - 9.6} A4.4 4.4 0 0 1 ${x + 1} ${g - 10.8}`} fill="none" stroke={S.oker.flate} strokeWidth="1.4" />
@@ -4453,6 +4558,9 @@ function Superbil({ størrelse = 48 }: P) {
       </Speiling>
       <ellipse cx="49" cy={GRUNNLINJE + 0.3} rx="40" ry="2" fill="#000000" opacity="0.45" />
       <SuperbilKarosseri />
+      <Lakksveip>
+        <SuperbilKarosseri />
+      </Lakksveip>
     </Lerret>
   )
 }
@@ -4686,11 +4794,30 @@ function Klokkeskrin({ størrelse, eske, fôr, logo = false, kant, children }: {
 }
 
 /**
+ * En viser som går (G10): tegnet rett opp fra (cx, cy) og dreid så langt `t`
+ * sekunder av et omløp på `omlop` sekunder tilsier. Animasjonen tar over derfra
+ * (en negativ forsinkelse); med mindre bevegelse står viseren der den ble
+ * tegnet. `tikk` hopper ett sekund om gangen, som de små sekundene i et lommeur.
+ */
+function Viser({ cx, cy, omlop, t, tikk = false, children }: { cx: number; cy: number; omlop: number; t: number; tikk?: boolean; children: ReactNode }) {
+  return (
+    <g
+      className={tikk ? 'anim-viser tikk' : 'anim-viser'}
+      style={{ transformBox: 'view-box', transformOrigin: `${cx}px ${cy}px`, transform: `rotate(${r2((t / omlop) * 360)}deg)`, animationDelay: `-${r2(t)}s`, ['--omlop' as string]: `${omlop}s` }}
+    >
+      {children}
+    </g>
+  )
+}
+
+/**
  * Et armbåndsur sett rett forfra: kasse med lys og skygge, lunette, skive med
  * indekser og visere som står på ti over ti, krone til høyre og glans på glasset.
  * `lunette` og `ekstra` legger til det som er spesielt for hver klokke.
  */
 function Urkasse({ cx = 49, cy = 52, R = 14, kasse, skive, visere, indeks, sekund, lunette, ekstra, dotter = false, horn = true }: { cx?: number; cy?: number; R?: number; kasse: Materiale; skive: string; visere: string; indeks: string; sekund?: string; lunette?: ReactNode; ekstra?: ReactNode; dotter?: boolean; horn?: boolean }) {
+  // Ekte tid bare i scenen; i lister og galleri står de på ti over ti.
+  const naa = useContext(IScenen) ? new Date() : null
   const r = +(R - 2.6).toFixed(2)
   const n = (v: number) => +v.toFixed(2)
   const p = (v: number, l: number) => [+(cx + Math.sin(v) * l).toFixed(2), +(cy - Math.cos(v) * l).toFixed(2)]
@@ -4726,9 +4853,28 @@ function Urkasse({ cx = 49, cy = 52, R = 14, kasse, skive, visere, indeks, sekun
         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={indeks} strokeWidth={i % 3 === 0 ? 1.2 : 0.6} strokeLinecap="round" />
       })}
       {ekstra}
-      <line x1={cx} y1={cy} x2={tx} y2={ty} stroke={visere} strokeWidth="1.4" strokeLinecap="round" />
-      <line x1={cx} y1={cy} x2={mx} y2={my} stroke={visere} strokeWidth="0.95" strokeLinecap="round" />
-      {sekund && <line x1={cx} y1={cy} x2={sx} y2={sy} stroke={sekund} strokeWidth="0.35" />}
+      {naa ? (
+        // I scenen: viserne viser klokka på telefonen og går (G10).
+        <>
+          <Viser cx={cx} cy={cy} omlop={43200} t={(naa.getHours() % 12) * 3600 + naa.getMinutes() * 60 + naa.getSeconds()}>
+            <line x1={cx} y1={cy} x2={cx} y2={n(cy - r * 0.5)} stroke={visere} strokeWidth="1.4" strokeLinecap="round" />
+          </Viser>
+          <Viser cx={cx} cy={cy} omlop={3600} t={naa.getMinutes() * 60 + naa.getSeconds()}>
+            <line x1={cx} y1={cy} x2={cx} y2={n(cy - r * 0.8)} stroke={visere} strokeWidth="0.95" strokeLinecap="round" />
+          </Viser>
+          {sekund && (
+            <Viser cx={cx} cy={cy} omlop={60} t={naa.getSeconds() + naa.getMilliseconds() / 1000}>
+              <line x1={cx} y1={n(cy + r * 0.2)} x2={cx} y2={n(cy - r * 0.86)} stroke={sekund} strokeWidth="0.35" />
+            </Viser>
+          )}
+        </>
+      ) : (
+        <>
+          <line x1={cx} y1={cy} x2={tx} y2={ty} stroke={visere} strokeWidth="1.4" strokeLinecap="round" />
+          <line x1={cx} y1={cy} x2={mx} y2={my} stroke={visere} strokeWidth="0.95" strokeLinecap="round" />
+          {sekund && <line x1={cx} y1={cy} x2={sx} y2={sy} stroke={sekund} strokeWidth="0.35" />}
+        </>
+      )}
       <circle cx={cx} cy={cy} r="1" fill={visere} />
       {/* Glansen på glasset. */}
       <path d={`M${p(-1.9, r * 0.9).join(' ')} A${n(r * 0.9)} ${n(r * 0.9)} 0 0 1 ${p(-0.3, r * 0.9).join(' ')} Q${n(cx - r * 0.3)} ${n(cy - r * 0.45)} ${p(-1.9, r * 0.9).join(' ')} Z`} fill="#ffffff" opacity="0.16" />
@@ -4756,7 +4902,7 @@ function Gullklokke({ størrelse = 48 }: P) {
     <Klokkeskrin størrelse={størrelse} eske={S.treMork} fôr={S.puss}>
       {rem(29, 10)}
       {rem(cy + 12, 10)}
-      <Urkasse cx={cx} cy={cy} R={13.4} kasse={S.gull} skive={S.puss.lys} visere={S.treMork.skygge} indeks={S.gull.skygge} />
+      <Urkasse cx={cx} cy={cy} R={13.4} kasse={S.gull} skive={S.puss.lys} visere={S.treMork.skygge} indeks={S.gull.skygge} sekund={S.gull.skygge} />
     </Klokkeskrin>
   )
 }
@@ -4788,6 +4934,7 @@ function Mesterverk({ størrelse = 48 }: P) {
         skive={S.marine.flate}
         visere={S.metall.lys}
         indeks={S.metall.lys}
+        sekund={S.gull.lys}
         lunette={
           <g>
             {Array.from({ length: 36 }, (_, i) => {
@@ -4868,6 +5015,7 @@ function Dykkerklokke({ størrelse = 48 }: P) {
  * kjedet lagt i en bue. I vinrødt skinn med vinrød fløyel.
  */
 function Lommeur({ størrelse = 48 }: P) {
+  const naa = useContext(IScenen) ? new Date() : null
   const cx = 52
   const cy = 52
   return (
@@ -4894,7 +5042,13 @@ function Lommeur({ størrelse = 48 }: P) {
         ekstra={
           <g>
             <circle cx={cx} cy={cy + 4.6} r="2.4" fill="none" stroke={S.mork.lys} strokeWidth="0.35" />
-            <line x1={cx} y1={cy + 4.6} x2={cx + 1.2} y2={cy + 3.2} stroke={S.mork.flate} strokeWidth="0.3" />
+            {naa ? (
+              <Viser cx={cx} cy={cy + 4.6} omlop={60} t={naa.getSeconds()} tikk>
+                <line x1={cx} y1={cy + 4.6} x2={cx} y2={cy + 2.8} stroke={S.mork.flate} strokeWidth="0.3" />
+              </Viser>
+            ) : (
+              <line x1={cx} y1={cy + 4.6} x2={cx + 1.2} y2={cy + 3.2} stroke={S.mork.flate} strokeWidth="0.3" />
+            )}
           </g>
         }
       />
@@ -4936,6 +5090,7 @@ function Diamantklokke({ størrelse = 48 }: P) {
         skive={S.mork.skygge}
         visere={S.gull.lys}
         indeks={S.hvit.lys}
+        sekund={S.hvit.lys}
         dotter
         lunette={
           <g>
@@ -5207,7 +5362,8 @@ function Superyacht({ størrelse = 48 }: P) {
 /**
  * Propellflyet (gateavstand, på en gressstripe): et privat turbopropfly med
  * lavvinge, hvitt med vinrød og okerfarget stripe, cockpit og tre
- * kabinvinduer, firebladet propell i fart og vindpølsa ved stripa.
+ * kabinvinduer, firebladet propell i fart og vindpølsa ved stripa. I scenen
+ * går propellen, pølsa blafrer og lyset på finnen blinker (G10).
  */
 function Propellfly({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -5217,8 +5373,10 @@ function Propellfly({ størrelse = 48 }: P) {
       <Kantfade>
         {/* Vindpølsa ved enden av stripa. */}
         <line x1="34" y1={g - 14} x2="34" y2={g - 36} stroke={h.flate} strokeWidth="0.6" />
-        <path d={`M34.4 ${g - 36} L43 ${g - 34.8} L43 ${g - 33} L34.4 ${g - 33.4} Z`} fill={S.oker.flate} />
-        <path d={`M37.2 ${g - 35.6} L40 ${g - 35.2} L40 ${g - 33.2} L37.2 ${g - 33.4} Z`} fill={h.lys} />
+        <g className="anim-flagg">
+          <path d={`M34.4 ${g - 36} L43 ${g - 34.8} L43 ${g - 33} L34.4 ${g - 33.4} Z`} fill={S.oker.flate} />
+          <path d={`M37.2 ${g - 35.6} L40 ${g - 35.2} L40 ${g - 33.2} L37.2 ${g - 33.4} Z`} fill={h.lys} />
+        </g>
       </Kantfade>
       <Bakke type="gress" />
       <ellipse cx="50" cy={g + 0.4} rx="34" ry="1.6" fill="#000000" opacity="0.22" />
@@ -5243,7 +5401,7 @@ function Propellfly({ størrelse = 48 }: P) {
       {/* Cockpit og kabinvinduer. */}
       <path d={`M66 ${g - 18.8} L72 ${g - 18.6} L77.4 ${g - 16} L66 ${g - 15.8} Z`} fill={S.mork.flate} />
       {[46, 52, 58].map((x) => (
-        <rect key={x} x={x} y={g - 17.4} width="3.6" height="2.4" rx="1" fill={S.glass.skygge} />
+        <rect key={x} className="nattvindu" x={x} y={g - 17.4} width="3.6" height="2.4" rx="1" fill={S.glass.skygge} />
       ))}
       <Glans points={`66.6,${g - 18.6} 70,${g - 18.5} 68,${g - 16} 66.4,${g - 16}`} />
       {/* Vingen, sett fra siden. */}
@@ -5251,7 +5409,8 @@ function Propellfly({ størrelse = 48 }: P) {
       {/* Spinneren og propellen i fart. */}
       <path d={`M88 ${g - 13.4} Q91.8 ${g - 11.4} 88 ${g - 9.2} Z`} fill={S.vin.flate} />
       <ellipse cx="89.6" cy={g - 11.3} rx="1" ry="9" fill={S.mork.flate} opacity="0.22" />
-      <path d={`M89.6 ${g - 11.3} L89.2 ${g - 19.4} M89.6 ${g - 11.3} L90 ${g - 3.6}`} stroke={S.mork.flate} strokeWidth="0.8" strokeLinecap="round" />
+      <path className="anim-propell" d={`M89.6 ${g - 11.3} L89.2 ${g - 19.4} M89.6 ${g - 11.3} L90 ${g - 3.6}`} stroke={S.mork.flate} strokeWidth="0.8" strokeLinecap="round" />
+      <Blinklys x={17.4} y={g - 31.6} r={0.9} />
     </Lerret>
   )
 }
@@ -5290,7 +5449,7 @@ function Forretningsjet({ størrelse = 48 }: P) {
       {/* Cockpit og ovale vinduer. */}
       <path d={`M82 ${g - 14.6} Q86.6 ${g - 13.8} 88.8 ${g - 12} L82.6 ${g - 11.8} Z`} fill={S.mork.flate} />
       {[40, 45, 50, 55, 60, 65].map((x) => (
-        <ellipse key={x} cx={x} cy={g - 12.2} rx="1.2" ry="1.5" fill={S.glass.skygge} />
+        <ellipse key={x} className="nattvindu" cx={x} cy={g - 12.2} rx="1.2" ry="1.5" fill={S.glass.skygge} />
       ))}
       {/* Motoren bak og vingen. */}
       <path d={`M24 ${g - 14.6} L28 ${g - 13.4}`} stroke={h.skygge} strokeWidth="1.4" />
@@ -5305,6 +5464,10 @@ function Forretningsjet({ størrelse = 48 }: P) {
         <line key={d} x1={+(73.6 - d * 0.5).toFixed(2)} y1={g - 7.6 + d} x2={+(77.6 - d * 0.55).toFixed(2)} y2={g - 7.6 + d} stroke={h.skygge} strokeWidth="0.4" />
       ))}
       <path d={`M77.6 ${g - 7.6} L73.6 ${g}`} stroke={S.metall.skygge} strokeWidth="0.5" />
+      {/* Varsellysene (G10). */}
+      <Blinklys x={50} y={g - 15.6} />
+      <Blinklys x={58} y={g - 7.2} r={0.8} sen />
+      <Blinklys x={23.4} y={g - 31.2} r={0.8} farge={S.hvit.lys} sen />
     </Lerret>
   )
 }
@@ -5312,7 +5475,8 @@ function Forretningsjet({ størrelse = 48 }: P) {
 /**
  * Helikopteret (gateavstand, på helipaden): et lett tomotors helikopter i
  * vinrødt med hvit stripe, stor glasskuppel, skrog med skyvedør, fenestron
- * i halen, meier og rotorbladene i ro. H-en på plattformen foran.
+ * i halen, meier og rotorbladene. H-en på plattformen foran. I scenen går
+ * rotorene og lyset på finnen blinker (G10).
  */
 function Helikopter({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -5332,13 +5496,13 @@ function Helikopter({ størrelse = 48 }: P) {
       <path d={`M26 ${g - 18} L5 ${g - 20.6} L5 ${g - 18.6} L26 ${g - 12.6} Z`} fill={m.flate} />
       <path d={`M2 ${g - 18} L4 ${g - 31} L10.6 ${g - 31} L11 ${g - 17} Z`} fill={m.flate} />
       <circle cx="6.8" cy={g - 21.6} r="3.2" fill={S.mork.flate} />
-      <path d={`M4.4 ${g - 21.6} H9.2 M6.8 ${g - 24} V${g - 19.2}`} stroke={S.metall.skygge} strokeWidth="0.5" />
+      <path className="anim-dreie" style={{ ['--omlop' as string]: '0.4s' }} d={`M4.4 ${g - 21.6} H9.2 M6.8 ${g - 24} V${g - 19.2}`} stroke={S.metall.skygge} strokeWidth="0.5" />
       <path d={`M8 ${g - 19.4} L18 ${g - 19.8} L18 ${g - 18.6} L8.4 ${g - 18.2} Z`} fill={m.skygge} />
       {/* Motordekselet og rotoren. */}
       <path d={`M34 ${g - 22.6} L36.4 ${g - 27} L52 ${g - 27} L54 ${g - 22.6} Z`} fill={S.metall.flate} />
       <rect x="35.6" y={g - 25.6} width="3" height="1.6" rx="0.6" fill={S.mork.flate} />
       <rect x="43.4" y={g - 30} width="1.4" height="3.2" fill={S.metall.skygge} />
-      <path d={`M6 ${g - 29.6} Q44 ${g - 31.6} 88 ${g - 29.2}`} fill="none" stroke={S.mork.flate} strokeWidth="1" strokeLinecap="round" />
+      <path className="anim-rotor" style={{ transformBox: 'view-box', transformOrigin: `44px ${g - 30.4}px` }} d={`M6 ${g - 29.6} Q44 ${g - 31.6} 88 ${g - 29.2}`} fill="none" stroke={S.mork.flate} strokeWidth="1" strokeLinecap="round" />
       <ellipse cx="44" cy={g - 30.4} rx="2" ry="1" fill={S.metall.flate} />
       {/* Skroget. */}
       <path d={`M24 ${g - 8} L24 ${g - 16} Q26 ${g - 22} 36 ${g - 23} L52 ${g - 23} Q64 ${g - 22.6} 68 ${g - 16} Q70 ${g - 11} 66 ${g - 8.4} Q62 ${g - 6.6} 56 ${g - 6.6} L30 ${g - 6.6} Q25 ${g - 7} 24 ${g - 8} Z`} fill={m.flate} />
@@ -5350,6 +5514,7 @@ function Helikopter({ størrelse = 48 }: P) {
       <Glans points={`56,${g - 22} 61,${g - 21} 61.4,${g - 15} 59,${g - 15}`} />
       <rect x="38" y={g - 20.4} width="12" height="7.4" rx="1.6" fill={S.mork.flate} />
       <path d={`M37 ${g - 21} V${g - 7.4}`} stroke={m.skygge} strokeWidth="0.5" />
+      <Blinklys x={7.2} y={g - 31.8} r={0.9} />
     </Lerret>
   )
 }
