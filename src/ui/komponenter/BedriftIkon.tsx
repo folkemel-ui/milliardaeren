@@ -23,6 +23,13 @@ export function Apneknapp({ ting, navn, children }: { ting: Ting; navn: string; 
  * rundt dem tegnes på nytt hvert sekund. Med `nivaa` vokser en bedrift
  * (nivå 25, 50 og 100) — tegningen byttes bare når trinnet endrer seg.
  */
+/**
+ * Bedrifter som vises som nærbilde (`NAERBILDER`) også på kortet, fordi
+ * motivet ellers blir for lite på 44–60 px. Saftboden står på nær avstand med
+ * mye himmel rundt; nærbildet gjør den halvannen gang så stor.
+ */
+const NAER_PAA_KORTET = new Set(['saftbod'])
+
 export const BedriftIkon = memo(function BedriftIkon({
   type,
   dempet = false,
@@ -37,8 +44,14 @@ export const BedriftIkon = memo(function BedriftIkon({
   stor?: boolean
 }) {
   return (
-    <div className={`bedrift-ikon${stor ? ' stor' : ''}${dempet ? ' dempet-ikon' : ''}`} aria-hidden="true">
-      <Illustrasjon id={type} størrelse={stor ? 60 : 44} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
+    <div className={`bedrift-ikon${stor ? ' stor' : ''}${dempet ? ' dempet-ikon' : ''}${NAER_PAA_KORTET.has(type) ? ' naer' : ''}`} aria-hidden="true">
+      <Illustrasjon
+        id={type}
+        størrelse={stor ? 60 : 44}
+        trinn={trinnFor(nivaa)}
+        forbedringer={forbedringer}
+        naerbilde={NAER_PAA_KORTET.has(type) ? [stor ? 60 : 44, stor ? 60 : 44] : undefined}
+      />
     </div>
   )
 })

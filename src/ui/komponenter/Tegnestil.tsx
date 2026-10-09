@@ -544,7 +544,7 @@ export function Bunnfade({ children }: { children: ReactNode }) {
 
 // ─────────────────────────────────────────────── Bakken
 
-export type Bakketype = 'fortau' | 'gress' | 'kai' | 'gulv' | 'sno' | 'hav' | 'asfalt'
+export type Bakketype = 'fortau' | 'gress' | 'kai' | 'gulv' | 'sno' | 'hav' | 'asfalt' | 'brostein' | 'promenade'
 
 /** Horisonten over åpent hav (`hav`). */
 export const HORISONT = 56
@@ -654,6 +654,32 @@ export function Bakke({ type }: { type: Bakketype }) {
           <g mask={u('nm')}>{innhold}</g>
         </g>
       )
+    // Brostein på et torg: rader av runde steiner (avrundede streker), forskjøvet annenhver rad.
+    case 'brostein':
+      innhold = (
+        <>
+          <rect x="0" y={g - 16} width="96" height="28" fill={S.stein.flate} />
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <line key={i} x1="-4" y1={r2(g - 13.6 + i * 4.4)} x2="100" y2={r2(g - 13.6 + i * 4.4)} stroke={S.stein.lys} strokeWidth={r2(1.3 + i * 0.25)} strokeDasharray={`${r2(2.2 + i * 0.4)} ${r2(1.4 + i * 0.2)}`} strokeDashoffset={i % 2 ? 1.8 : 0} strokeLinecap="round" opacity="0.7" />
+          ))}
+        </>
+      )
+      break
+    // Strandpromenaden: en stripe sand bakerst og plankegang i tre.
+    case 'promenade':
+      innhold = (
+        <>
+          <rect x="0" y={g - 16} width="96" height="5" fill={S.puss.lys} />
+          <rect x="0" y={g - 11} width="96" height="23" fill={S.treverk.lys} />
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+            <line key={i} x1="0" y1={r2(g - 8 + i * 3.4)} x2="96" y2={r2(g - 8 + i * 3.4)} stroke={S.treverk.flate} strokeWidth="0.4" />
+          ))}
+          {[[14, 0], [46, 1], [78, 2], [30, 3], [62, 4], [8, 5], [88, 5]].map(([x, i]) => (
+            <line key={`${x}-${i}`} x1={x} y1={r2(g - 8 + i * 3.4)} x2={x} y2={r2(g - 4.6 + i * 3.4)} stroke={S.treverk.flate} strokeWidth="0.4" />
+          ))}
+        </>
+      )
+      break
     case 'asfalt':
       innhold = (
         <>

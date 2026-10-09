@@ -538,6 +538,12 @@ figure {
   border-radius: 16px;
 }
 
+/* Et nærbilde på kortet (saftboden) går helt ut i kanten av utsnittet; en myk
+   kant gjør at det blekner ut i flisa som de andre tegningene. */
+.bedrift-ikon.naer svg {
+  mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+}
+
 /* Et tall på bildet, som «3/8» for eiendom du eier. */
 .bilde-med-brikke {
   position: relative;
@@ -734,6 +740,33 @@ figure {
   .scene .anim-viser.tikk {
     animation-timing-function: steps(60, end);
   }
+
+  /* Saftboden: kanna vippes og strålen renner, en kunde drikker (to bilder
+     av armen), og en veps sirkler over saften med dirrende vinger. */
+  .scene .anim-skjenk {
+    animation: tegning-skjenk 6s ease-in-out infinite;
+  }
+
+  .scene .anim-strale {
+    animation: tegning-strale 6s linear infinite;
+  }
+
+  .scene .anim-sipp {
+    animation: tegning-sipp 7s linear infinite;
+  }
+
+  .scene .anim-sipp-ned {
+    animation: tegning-sipp-ned 7s linear infinite;
+  }
+
+  .scene .anim-veps {
+    animation: tegning-veps 3.4s ease-in-out infinite;
+  }
+
+  .scene .anim-vinge {
+    transform-origin: center bottom;
+    animation: tegning-vinge 0.08s linear infinite alternate;
+  }
 }
 
 @keyframes tegning-dreie {
@@ -762,6 +795,89 @@ figure {
   }
   50% {
     transform: scaleX(0.12);
+  }
+}
+
+@keyframes tegning-skjenk {
+  0%,
+  25%,
+  90%,
+  100% {
+    transform: rotate(-35deg);
+  }
+  40%,
+  75% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tegning-strale {
+  0%,
+  40% {
+    opacity: 0;
+  }
+  44%,
+  72% {
+    opacity: 1;
+  }
+  76%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tegning-sipp {
+  0%,
+  38% {
+    opacity: 0;
+  }
+  41%,
+  78% {
+    opacity: 1;
+  }
+  81%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tegning-sipp-ned {
+  0%,
+  38% {
+    opacity: 1;
+  }
+  41%,
+  78% {
+    opacity: 0;
+  }
+  81%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tegning-veps {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(calc(1.4px * var(--utslag, 1)), calc(-0.8px * var(--utslag, 1)));
+  }
+  50% {
+    transform: translate(calc(0.4px * var(--utslag, 1)), calc(-1.8px * var(--utslag, 1)));
+  }
+  75% {
+    transform: translate(calc(-1.2px * var(--utslag, 1)), calc(-0.7px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-vinge {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0.35);
   }
 }
 

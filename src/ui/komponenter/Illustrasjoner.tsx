@@ -61,7 +61,7 @@
  */
 
 import { memo, useContext, type ReactNode } from 'react'
-import { r2, Blinklys, IScenen, Lakksveip, tennesOmNatta, Naerbilde, Bakke, Bunnfade, Dis, GRUNNLINJE, HORISONT, Utklipp, Kantfade, Kloss, Lampe, Lerret, Person as Figur, Plakett, S, Saltak, Slagskygge, Speiling, Bunnskygge, Glans, Tre, Vindusrad, inn, maal, pkt, type Materiale } from './Tegnestil'
+import { r2, Blinklys, IScenen, Lakksveip, tennesOmNatta, Naerbilde, Bakke, Bunnfade, Dis, GRUNNLINJE, HORISONT, Utklipp, Kantfade, Kloss, Lampe, Lerret, MAAL, Person as Figur, Plakett, S, Saltak, Slagskygge, Speiling, Bunnskygge, Glans, Tre, Vindusrad, inn, maal, pkt, type Materiale } from './Tegnestil'
 
 type P = { størrelse?: number }
 /** Hvor langt en bedrift har vokst: 0 ved nivå 1, 1 ved 25, 2 ved 50, 3 ved 100. */
@@ -80,49 +80,415 @@ type B = (trinn: Trinn, f: number) => ReactNode
 // ─────────────────────────────────────────────── Bedrifter
 
 /**
- * Saftboden (nær avstand): et bord med pappskilt på nivå 1, en ordentlig bod
- * med stripet markise fra 25, en fløy med parasoll og kunder ved 50, og ved
- * 100 hvitmalt disk med messingkant, lyslenke og et sitrontre. Forbedringene:
- * saftpresse på disken, isboks med isbiter og en grønn sukkerfri dunk med vimpel.
- * I scenen vipper skiltet på bordet og kappa på markisen i vinden (G10).
+ * Ordet SAFT, malt for hånd: fire bokstaver som streker, `h` høye, med
+ * øvre venstre hjørne i (x, y). Ingen `<text>` — bokstavene er stier.
+ */
+function Saftord({ x, y, h, farge, bredde }: { x: number; y: number; h: number; farge: string; bredde: number }) {
+  const b = h * 0.66
+  const mellom = h * 0.28
+  const BOKSTAVER = [
+    'M0.92 0.16 Q0.78 0 0.5 0 Q0.08 0 0.1 0.27 Q0.12 0.48 0.5 0.5 Q0.92 0.52 0.9 0.76 Q0.88 1 0.5 1 Q0.2 1 0.06 0.84',
+    'M0 1 L0.5 0 L1 1 M0.22 0.62 L0.78 0.62',
+    'M0.12 1 L0.12 0 L0.95 0 M0.12 0.48 L0.75 0.48',
+    'M0 0 L1 0 M0.5 0 L0.5 1',
+  ]
+  const d = BOKSTAVER.map((s, i) => {
+    const x0 = x + i * (b + mellom)
+    return s.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, px: string, py: string) => `${r2(x0 + Number(px) * b)} ${r2(y + Number(py) * h)}`)
+  }).join(' ')
+  return <path d={d} fill="none" stroke={farge} strokeWidth={bredde} strokeLinecap="round" strokeLinejoin="round" />
+}
+
+/** Et glass rød saft med sugerør, `h` høyt, med øvre venstre hjørne i (x, y): saftbodens merke. */
+function Saftglass({ x, y, h }: { x: number; y: number; h: number }) {
+  const b = h * 0.72
+  return (
+    <g>
+      <line x1={r2(x + b * 0.62)} y1={r2(y + h * 0.35)} x2={r2(x + b * 0.95)} y2={r2(y - h * 0.3)} stroke={S.hvit.lys} strokeWidth={r2(h * 0.09)} strokeLinecap="round" />
+      <polygon points={pkt([x, y], [x + b, y], [x + b * 0.86, y + h], [x + b * 0.14, y + h])} fill={S.glass.lys} />
+      <polygon points={pkt([x + b * 0.05, y + h * 0.3], [x + b * 0.95, y + h * 0.3], [x + b * 0.86, y + h], [x + b * 0.14, y + h])} fill={S.vin.lys} />
+      <polygon points={pkt([x + b * 0.1, y + h * 0.3], [x + b * 0.3, y + h * 0.3], [x + b * 0.32, y + h * 0.92], [x + b * 0.2, y + h * 0.92])} fill={S.hvit.lys} opacity="0.35" />
+    </g>
+  )
+}
+
+/**
+ * En batterilykt, stående med bunnen på (x, y). Slukket om dagen; om natta
+ * tennes glasset (`nattvindu`) og natt-laget gir det en glorie.
+ */
+function Lykt({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <rect x={x} y={r2(y - 1)} width="3.4" height="1" rx="0.3" fill={S.mork.lys} />
+      <rect x={r2(x + 0.3)} y={r2(y - 5)} width="2.8" height="4" fill={S.glass.skygge} className="nattvindu" />
+      <rect x={r2(x + 0.9)} y={r2(y - 4.6)} width="0.6" height="3.2" fill={S.glass.lys} opacity="0.5" className="nattskjul" />
+      <rect x={r2(x + 0.3)} y={r2(y - 5)} width="0.5" height="4" fill={S.mork.lys} />
+      <rect x={r2(x + 2.6)} y={r2(y - 5)} width="0.5" height="4" fill={S.mork.lys} />
+      <polygon points={pkt([x, y - 5], [x + 3.4, y - 5], [x + 2.7, y - 6.2], [x + 0.7, y - 6.2])} fill={S.mork.flate} />
+      <path d={`M${r2(x + 0.9)} ${r2(y - 6.2)} Q${r2(x + 1.7)} ${r2(y - 8.2)} ${r2(x + 2.5)} ${r2(y - 6.2)}`} fill="none" stroke={S.mork.lys} strokeWidth="0.4" />
+    </g>
+  )
+}
+
+/**
+ * En veps som sirkler over saften — bare i scenen, der den flyr i en liten
+ * sløyfe og vingene dirrer. I lista ville den vært et prikk.
+ */
+function Veps({ x, y }: { x: number; y: number }) {
+  if (!useContext(IScenen)) return null
+  return (
+    <g className="anim-veps">
+      <g className="anim-vinge">
+        <ellipse cx={r2(x - 0.2)} cy={r2(y - 0.7)} rx="0.55" ry="0.7" fill={S.hvit.lys} opacity="0.7" />
+        <ellipse cx={r2(x + 0.35)} cy={r2(y - 0.65)} rx="0.5" ry="0.65" fill={S.hvit.lys} opacity="0.55" />
+      </g>
+      <ellipse cx={x} cy={y} rx="0.9" ry="0.5" fill={S.oker.lys} />
+      <rect x={r2(x - 0.3)} y={r2(y - 0.5)} width="0.3" height="1" fill={S.mork.skygge} />
+      <rect x={r2(x + 0.25)} y={r2(y - 0.5)} width="0.3" height="1" fill={S.mork.skygge} />
+      <circle cx={r2(x - 1)} cy={y} r="0.38" fill={S.mork.skygge} />
+    </g>
+  )
+}
+
+/** Armene til folka ved saftboden, fra høyre skulder: albue og hånd, i figurens egne enheter (20 høy). */
+type Armstilling = 'ned' | 'frem' | 'skjenk' | 'opp' | 'holde'
+const ARM: Record<Armstilling, [[number, number], [number, number]]> = {
+  ned: [[0.2, 2.8], [0.4, 5.6]],
+  frem: [[1.7, 2.8], [4.9, 2.4]],
+  skjenk: [[1.5, 2.8], [4.4, 1.6]],
+  opp: [[1.9, 2.6], [-1, -2.2]],
+  holde: [[0.6, 3], [2.6, 4.2]],
+}
+
+/** Skulderen og armen er litt mindre på et barn. */
+const skulder = (barn: boolean): [number, number] => (barn ? [2.5, -12.4] : [2.9, -15])
+const armskala = (barn: boolean) => (barn ? 0.8 : 1)
+/** Hvor stor figuren er: `m` meter høy på nær avstand, tegnet 20 enheter høy. */
+const figurskala = (m: number) => r2(((m / MAAL.person) * maal('naer', 'person')) / 20)
+
+/** Hånda til en figur som står på (x, y), i lerretets enheter — der kanna eller koppen skal være. */
+function haand(x: number, y: number, m: number, barn: boolean, arm: Armstilling): [number, number] {
+  const k = figurskala(m)
+  const [sx, sy] = skulder(barn)
+  const [hx, hy] = ARM[arm][1]
+  return [r2(x + (sx + hx * armskala(barn)) * k), r2(y + (sy + hy * armskala(barn)) * k)]
+}
+
+/** Én arm, i figurens enheter: skulder, albue, hånd. */
+function Arm({ barn, arm, klaer, hud, kopp = false }: { barn: boolean; arm: Armstilling; klaer: Materiale; hud: Materiale; kopp?: boolean }) {
+  // Den som betaler (armen frem), holder et bankkort.
+  const kort = arm === 'frem'
+  const [sx, sy] = skulder(barn)
+  const a = armskala(barn)
+  const [[ax, ay], [hx, hy]] = ARM[arm]
+  const albue: [number, number] = [sx + ax * a, sy + ay * a]
+  const hand: [number, number] = [sx + hx * a, sy + hy * a]
+  return (
+    <g>
+      <path d={`M${sx} ${sy} L${r2(albue[0])} ${r2(albue[1])} L${r2(hand[0])} ${r2(hand[1])}`} fill="none" stroke={klaer.skygge} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={r2(hand[0])} cy={r2(hand[1])} r="0.6" fill={hud.flate} />
+      {kopp && <polygon points={pkt([hand[0] - 0.45, hand[1] - 1.3], [hand[0] + 0.7, hand[1] - 1.3], [hand[0] + 0.55, hand[1] + 0.25], [hand[0] - 0.3, hand[1] + 0.25])} fill={S.hvit.lys} />}
+      {kort && <rect x={r2(hand[0] + 0.2)} y={r2(hand[1] - 0.9)} width="1.5" height="1" rx="0.15" fill={S.marine.lys} />}
+    </g>
+  )
+}
+
+/**
+ * Folk ved saftboden: selgerne og kundene, i sommerklær. Bygget som `Person`
+ * (20 enheter høy, skalert til `m` meter på nær avstand), men med barn,
+ * caps, shorts, forkle og en høyre arm som kan skjenke, betale eller drikke.
+ * Drikker figuren, veksler armen mellom koppen ved munnen og koppen nede
+ * (to bilder, `anim-sipp`); i ro står koppen ved munnen.
+ */
+function Saftfolk({
+  x,
+  y,
+  m,
+  klaer,
+  hud = S.hud,
+  har = S.treMork.skygge,
+  ben = S.mork.flate,
+  shorts = false,
+  caps,
+  forkle = false,
+  barn = false,
+  arm = 'ned',
+}: {
+  x: number
+  y: number
+  m: number
+  klaer: Materiale
+  hud?: Materiale
+  har?: string
+  ben?: string
+  shorts?: boolean
+  caps?: string
+  forkle?: boolean
+  barn?: boolean
+  arm?: Armstilling | 'ingen'
+}) {
+  const k = figurskala(m)
+  const p = barn ? { ben: 7.4, topp: 12.8, hode: 16.1, r: 2.25 } : { ben: 9, topp: 15.6, hode: 18.4, r: 1.75 }
+  const hodeskala = r2(p.r / 1.75)
+  return (
+    <g transform={`translate(${x} ${y}) scale(${k} ${k})`}>
+      <ellipse cx="0.6" cy="0" rx="3.4" ry="0.7" fill="#000000" opacity="0.25" />
+      {[-2, 0.3].map((bx) => (
+        <g key={bx}>
+          <rect x={bx} y={-p.ben} width="1.8" height={p.ben} rx="0.8" fill={shorts ? hud.flate : ben} />
+          {shorts && <rect x={bx} y={-p.ben} width="1.8" height={r2(p.ben * 0.45)} rx="0.5" fill={ben} />}
+        </g>
+      ))}
+      <path d={`M-3 ${-p.ben} L-2.6 ${-p.topp} Q0 ${r2(-p.topp - 1.4)} 2.6 ${-p.topp} L3 ${-p.ben} Z`} fill={klaer.flate} />
+      <path d={`M0.8 ${-p.ben} L1.1 ${r2(-p.topp - 0.8)} Q2.2 ${r2(-p.topp - 0.4)} 2.6 ${-p.topp} L3 ${-p.ben} Z`} fill={klaer.skygge} />
+      {/* Barnet har en stripete T-skjorte. */}
+      {barn &&
+        [p.topp - 2, p.topp - 3.8].map((s) => (
+          <rect key={s} x="-2.8" y={r2(-s)} width="5.6" height="0.6" fill={S.hvit.lys} opacity="0.8" />
+        ))}
+      {forkle && <path d={`M-1.6 ${r2(-p.topp + 1.2)} H1.6 L1.9 ${r2(-p.ben + 3)} H-1.9 Z`} fill={S.hvit.flate} />}
+      <rect x="-3.8" y={r2(-p.topp + 0.2)} width="1.3" height={r2(p.topp - p.ben - 0.6)} rx="0.65" fill={klaer.lys} />
+      {arm !== 'ingen' && <Arm barn={barn} arm={arm} klaer={klaer} hud={hud} kopp={arm === 'opp' || arm === 'holde'} />}
+      <rect x="-0.7" y={r2(-p.hode + p.r - 0.75)} width="1.4" height="1.4" fill={hud.skygge} />
+      <g transform={`translate(0 ${-p.hode}) scale(${hodeskala})`}>
+        <circle cx="0" cy="0" r="1.75" fill={hud.flate} />
+        {barn && <ellipse cx="-2" cy="0.3" rx="0.7" ry="1.2" fill={har} />}
+        {caps ? (
+          <>
+            <path d="M-1.9 -0.2 Q-1.8 -2.3 0.1 -2.2 Q1.9 -2.1 1.9 -0.4 Z" fill={caps} />
+            <path d="M1.1 -0.6 L3.3 -0.3 L3.2 0.1 L1.1 0 Z" fill={caps} />
+          </>
+        ) : (
+          <path d="M-1.8 -0.2 Q-1.6 -2.2 0.2 -2 Q1.9 -1.8 1.8 0 Q0.9 -1.2 -0.2 -0.8 Q-1.1 -0.4 -1.8 -0.2 Z" fill={har} />
+        )}
+      </g>
+    </g>
+  )
+}
+
+/**
+ * En kunde som drikker: to bilder av armen, koppen ved munnen og koppen
+ * nede, som veksler i scenen (`anim-sipp`). I ro, og i lista, drikker hun.
+ */
+function Drikker(p: Parameters<typeof Saftfolk>[0]) {
+  const k = figurskala(p.m)
+  const hud = p.hud ?? S.hud
+  return (
+    <g>
+      <Saftfolk {...p} arm="ingen" />
+      <g className="anim-sipp-ned" opacity="0">
+        <g transform={`translate(${p.x} ${p.y}) scale(${k} ${k})`}>
+          <Arm barn={!!p.barn} arm="holde" klaer={p.klaer} hud={hud} kopp />
+        </g>
+      </g>
+      <g className="anim-sipp">
+        <g transform={`translate(${p.x} ${p.y}) scale(${k} ${k})`}>
+          <Arm barn={!!p.barn} arm="opp" klaer={p.klaer} hud={hud} kopp />
+        </g>
+      </g>
+    </g>
+  )
+}
+
+/**
+ * Kanna selgeren skjenker fra, med strålen ned i koppen på disken. Kanna
+ * henger i hånda (`h`, lerretets enheter) og er vippet; i scenen rettes den
+ * opp og vippes igjen (`anim-skjenk`), og strålen kommer bare når den heller.
+ * `bunn` er der koppen står.
+ */
+function Skjenk({ h, k, bunn }: { h: [number, number]; k: number; bunn: number }) {
+  const [hx, hy] = h
+  const VIPP = 35
+  // Tuten etter vippen, i lerretets enheter: (4.2, −2.6) fra hånda, dreid VIPP grader.
+  const v = (VIPP * Math.PI) / 180
+  const tx = r2(hx + (4.2 * Math.cos(v) + 2.6 * Math.sin(v)) * k)
+  const ty = r2(hy + (4.2 * Math.sin(v) - 2.6 * Math.cos(v)) * k)
+  const koppTopp = r2(bunn - 2.6)
+  return (
+    <g>
+      {/* Koppen som fylles. */}
+      <polygon points={pkt([tx - 1.2, koppTopp], [tx + 1.2, koppTopp], [tx + 0.95, bunn], [tx - 0.95, bunn])} fill={S.hvit.lys} />
+      <rect x={r2(tx - 1.05)} y={r2(koppTopp + 0.3)} width="2.1" height="0.8" fill={S.vin.lys} opacity="0.8" />
+      <rect className="anim-strale" x={r2(tx - 0.35)} y={ty} width="0.7" height={r2(koppTopp + 0.6 - ty)} rx="0.35" fill={S.vin.lys} />
+      <g className="anim-skjenk" style={{ transformBox: 'view-box', transformOrigin: `${hx}px ${hy}px` }}>
+        <g transform={`translate(${hx} ${hy}) scale(${k}) rotate(${VIPP})`}>
+          <path d="M0.6 -1.6 Q-0.6 -0.4 0.6 0.9" fill="none" stroke={S.glass.flate} strokeWidth="0.5" />
+          <rect x="0.6" y="-2.2" width="2.8" height="3.8" rx="0.4" fill={S.glass.lys} opacity="0.7" />
+          <rect x="0.8" y="-1.1" width="2.4" height="2.5" rx="0.3" fill={S.vin.lys} />
+          <polygon points="3.4,-2.2 4.2,-2.6 3.4,-1.5" fill={S.glass.lys} />
+          <rect x="1.1" y="-2" width="0.5" height="3.2" fill={S.hvit.lys} opacity="0.5" />
+        </g>
+      </g>
+    </g>
+  )
+}
+
+/**
+ * Saftboden (nær avstand) — rød saft, og et sted som vokser med boden:
+ * på nivå 1 et bord ved hageporten, med et barn bak og et pappskilt med SAFT
+ * teipet til bordkanten, og porten åpen mot et hus i hagen; fra 25 en ordentlig bod med stripet markise utenfor en
+ * butikk, og en ungdom i caps bak disken; ved 50 strandpromenaden, med eieren
+ * og en hjelper, en sidebod med bærkurver og kunder i kø (én betaler med kort); og ved 100 et torg med
+ * brostein, gatelykt, hvitmalt disk med messingkant og lyslenke. Forbedringene:
+ * saftpresse med bær, en stålbalje med isbiter (og dugg på dunkene) og en egen
+ * sukkerfri dunk med grønn etikett. Selgeren skjenker hele tiden; i scenen
+ * vipper kanna, en kunde drikker, skiltet og markisen rører seg, og en veps
+ * sirkler over saften. Lykta og gatelykta er slukket om dagen og tennes om
+ * natta. Dunkene, koppene og bærene har sine virkelige mål på nær avstand
+ * (en dunk 9,5 enheter ≈ 50 cm, en kopp 2,6 ≈ 14 cm, en bærkurv 2,2 ≈ 12 cm).
  */
 const saftbod: B = (t, f) => {
   const g = GRUNNLINJE
   const bod = t >= 1
-  const disk = bod ? { x: 22, b: 44, y: 68 } : { x: 26, b: 40, y: 70 }
+  const disk = bod ? { x: 22, b: 44, y: 68 } : { x: 22, b: 48, y: 70 }
   const x0 = disk.x
-  const fot = disk.y - 1.2
+  const fot = r2(disk.y - 1.2)
   const panel = t >= 3 ? S.hvit : S.oker
-  const dunk = (x: number, saft: Materiale, liten: boolean) => {
-    const h = liten ? 10 : 13
-    const b = liten ? 7 : 9
+  // Hvor tingene står på disken, fra venstre.
+  const plass = bod ? { dunk: 25, sukkerfri: 32.8, presse: 40.5, is: 48.4, kopper: 55.5 } : { dunk: 24, sukkerfri: 31.8, presse: 61.4, is: 73, kopper: 50.6 }
+  // Isen står i disken fra 25; ved bordet står isbøtta på gresset.
+  const isb = bod ? fot : g + 1.5
+  const dunk = (x: number, liten: boolean, sukkerfri: boolean) => {
+    const h = liten ? 7.5 : 9.5
+    const b = liten ? 5.5 : 7
+    const topp = r2(fot - h)
     return (
       <g>
-        <rect x={x} y={fot - h} width={b} height={h} rx="1.2" fill={saft.lys} />
-        <rect x={x} y={fot - h} width={b} height={h * 0.3} rx="1.2" fill={S.hvit.lys} opacity="0.55" />
-        <rect x={x + b - 2} y={fot - h} width="2" height={h} fill={saft.flate} opacity="0.6" />
-        <circle cx={x + b * 0.4} cy={fot - h * 0.45} r={b * 0.18} fill={S.hvit.lys} opacity="0.8" />
-        <rect x={x - 0.4} y={fot - h - 1.4} width={b + 0.8} height="1.6" rx="0.6" fill={S.metall.flate} />
-        <rect x={x + b * 0.35} y={fot - 2.2} width="2.2" height="1.4" fill={S.metall.skygge} />
-        <Glans points={`${x},${fot - h} ${x + b * 0.45},${fot - h} ${x},${fot - h * 0.3}`} />
+        <rect x={x} y={topp} width={b} height={h} rx="1.2" fill={S.vin.lys} />
+        <rect x={x} y={topp} width={b} height={r2(h * 0.3)} rx="1.2" fill={S.hvit.lys} opacity="0.55" />
+        <rect x={r2(x + b - 2)} y={topp} width="2" height={h} fill={S.vin.flate} opacity="0.6" />
+        {sukkerfri ? (
+          <>
+            <rect x={x} y={r2(fot - h * 0.62)} width={b} height="2.4" fill={S.lov.lys} />
+            <circle cx={r2(x + b * 0.45)} cy={r2(fot - h * 0.62 + 1.2)} r="0.9" fill={S.hvit.lys} />
+            <circle cx={r2(x + b * 0.45)} cy={r2(fot - h * 0.62 + 1.2)} r="0.4" fill="none" stroke={S.lov.skygge} strokeWidth="0.3" />
+          </>
+        ) : (
+          <circle cx={r2(x + b * 0.4)} cy={r2(fot - h * 0.45)} r={r2(b * 0.18)} fill={S.hvit.lys} opacity="0.8" />
+        )}
+        {/* Dugg på dunken når saften er iskald. */}
+        {f >= 2 &&
+          [[0.2, 0.55], [0.5, 0.7], [0.3, 0.85], [0.65, 0.5], [0.15, 0.75]].map(([dx, dy]) => (
+            <circle key={`${dx}-${dy}`} cx={r2(x + dx * b)} cy={r2(topp + dy * h)} r="0.35" fill={S.hvit.lys} opacity="0.75" />
+          ))}
+        <rect x={r2(x - 0.4)} y={r2(topp - 1.4)} width={r2(b + 0.8)} height="1.6" rx="0.6" fill={S.metall.flate} />
+        <rect x={r2(x + b * 0.35)} y={r2(fot - 1.8)} width="1.6" height="1.1" fill={S.metall.skygge} />
+        <Glans points={pkt([x, topp], [x + b * 0.45, topp], [x, fot - h * 0.3])} />
       </g>
     )
   }
+  // Selgerne: et barn på nivå 1, en ungdom fra 25, eieren og en hjelper fra 50.
+  const selger = bod ? { x: 44, y: 76, m: t >= 2 ? 1.78 : 1.6, barn: false } : { x: 45, y: 76, m: 1.25, barn: true }
+  const hand = haand(selger.x, selger.y, selger.m, selger.barn, 'skjenk')
   return (
     <>
-      <Bakke type="fortau" />
+      {/* Stedet: hageporten (1), butikken (25), strandpromenaden (50), torget (100). */}
+      {t === 2 && (
+        <Kantfade>
+          <rect x="0" y="50" width="96" height="20" fill={S.sjo.flate} />
+          <rect x="0" y="50" width="96" height="1.6" fill={S.sjo.lys} opacity="0.55" />
+          {[[8, 56], [30, 54], [60, 57], [84, 55]].map(([x, y]) => (
+            <polyline key={x} className="anim-boelge" points={`${x},${y} ${x + 3},${y - 0.9} ${x + 6},${y}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.5" strokeLinecap="round" />
+          ))}
+          <Dis>
+            <polygon points="10,49.6 10,42 15,49.6" fill={S.hvit.lys} />
+            <polygon points="8.6,49.8 16,49.8 15,51 9.4,51" fill={S.mork.lys} />
+          </Dis>
+          <rect x="0" y="64.6" width="96" height="5" fill={S.puss.flate} />
+          {/* Rekkverket langs promenaden. */}
+          <rect x="0" y="59.4" width="96" height="0.7" fill={S.metall.skygge} />
+          <rect x="0" y="63" width="96" height="0.4" fill={S.metall.skygge} />
+          {[2, 12, 22, 32, 42, 52, 62, 72, 82, 92].map((x) => (
+            <rect key={x} x={x} y="59.4" width="0.6" height="6.4" fill={S.metall.skygge} />
+          ))}
+        </Kantfade>
+      )}
+      <Bakke type={t === 0 ? 'gress' : t === 2 ? 'promenade' : t === 3 ? 'brostein' : 'fortau'} />
+      {t === 0 && (
+        <>
+          <Bunnfade>
+            <polygon points="70,68 82,68 96,96 60,96" fill={S.stein.lys} opacity="0.85" />
+          </Bunnfade>
+          <Kantfade>
+            {/* Gjennom porten: plenen, grusveien videre og huset i hagen. */}
+            <rect x="70" y="55" width="12" height="14" fill={S.gress.flate} />
+            <polygon points="72.4,69 79.6,69 77.2,57 74.8,57" fill={S.stein.lys} opacity="0.85" />
+            <Dis>
+              <rect x="70.6" y="47.4" width="10.8" height="9.6" fill={S.faluRod.flate} />
+              <polygon points="69.6,47.6 76,42.4 82.4,47.6" fill={S.skifer.flate} />
+              <rect x="72.4" y="50" width="2.4" height="2.8" fill={S.glass.skygge} className="nattvindu" />
+              <rect x="77.2" y="50" width="2.4" height="2.8" fill={S.glass.skygge} className="nattvindu" />
+            </Dis>
+            <rect x="0" y="56" width="68.4" height="13" fill={S.lov.skygge} />
+            <rect x="83.6" y="56" width="12.4" height="13" fill={S.lov.skygge} />
+            {[0, 9, 18, 27, 36, 45, 54, 63, 86, 95].map((x, i) => (
+              <circle key={x} cx={x} cy={i % 2 ? 54 : 52.5} r={i % 3 ? 6 : 7} fill={i % 2 ? S.lov.skygge : S.lov.flate} />
+            ))}
+            {[3, 12, 21, 30, 39, 48, 57].map((x) => (
+              <circle key={x} cx={x} cy="49.6" r="2.4" fill={S.lov.lys} opacity="0.6" />
+            ))}
+            {/* Stakittet, åpent ved porten. */}
+            <rect x="0" y="61" width="70" height="1" fill={S.hvit.skygge} />
+            <rect x="0" y="65.6" width="70" height="1" fill={S.hvit.skygge} />
+            <rect x="82" y="61" width="14" height="1" fill={S.hvit.skygge} />
+            <rect x="82" y="65.6" width="14" height="1" fill={S.hvit.skygge} />
+            {[1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 84, 88, 92].map((x) => (
+              <polygon key={x} points={pkt([x, 69], [x, 58.4], [x + 0.7, 57.4], [x + 1.4, 58.4], [x + 1.4, 69])} fill={S.hvit.flate} />
+            ))}
+            <rect x="68.4" y="55.6" width="2" height="13.4" fill={S.hvit.lys} />
+            <rect x="81.6" y="55.6" width="2" height="13.4" fill={S.hvit.lys} />
+          </Kantfade>
+        </>
+      )}
+      {t === 1 && (
+        <Kantfade>
+          <rect x="0" y="0" width="96" height="69" fill={S.tegl.flate} />
+          <rect x="0" y="64" width="96" height="5" fill={S.stein.flate} />
+          {/* Butikkvinduet med varmt lys, og døra. */}
+          <rect x="64" y="25" width="30" height="5" fill={S.mork.flate} />
+          <rect x="65" y="33" width="28" height="31" fill={S.treMork.flate} />
+          <rect x="66.4" y="34.4" width="25.2" height="28" fill={S.vinduLys.flate} />
+          <rect x="78.4" y="34.4" width="1.2" height="28" fill={S.treMork.flate} />
+          <rect x="66.4" y="54" width="25.2" height="8.4" fill={S.treMork.skygge} opacity="0.5" />
+          <rect x="4" y="30" width="13" height="39" fill={S.treMork.flate} />
+          <rect x="6" y="32.4" width="9" height="15" fill={S.glass.skygge} className="nattvindu" />
+        </Kantfade>
+      )}
+      {t === 3 && (
+        <g>
+          <rect x="6.3" y="27" width="1.4" height="43" fill={S.mork.flate} />
+          <rect x="5.3" y="68" width="3.4" height="2.4" fill={S.mork.skygge} />
+          <polygon points="4.2,24.6 9.8,24.6 8.8,22.6 5.2,22.6" fill={S.mork.flate} />
+          {/* Gatelykta: slukket om dagen, tent om natta. */}
+          <rect x="5.2" y="24.6" width="3.6" height="5.2" fill={S.glass.skygge} className="nattvindu" />
+          <rect x="5.8" y="25.2" width="0.7" height="4" fill={S.glass.lys} opacity="0.5" className="nattskjul" />
+          <rect x="4.6" y="29.8" width="4.8" height="0.8" fill={S.mork.flate} />
+        </g>
+      )}
       <Slagskygge x1={x0} x2={x0 + disk.b + (t >= 2 ? 16 : 0)} lengde={14} d={12} />
-      {/* Fløyen med parasoll fra nivå 50. */}
+      {/* Sidebua med bær og parasoll fra nivå 50. */}
       {t >= 2 && (
         <g>
-          <line x1="76" y1={g - 12} x2="76" y2="45" stroke={S.metall.skygge} strokeWidth="0.8" />
-          <path d="M60 50 Q76 39 92 50 Z" fill={t >= 3 ? S.hvit.lys : S.oker.lys} />
-          <path d="M76 41.6 Q86 43 92 50 L76 50 Z" fill={t >= 3 ? S.hvit.flate : S.oker.flate} />
-          <Kloss x={66} b={18} h={12} d={10} m={S.treverk} front={panel.skygge} />
-          {[70, 74, 78].map((x) => (
-            <circle key={x} cx={x} cy={g - 13.4} r="1.6" fill={S.oker.lys} />
-          ))}
-          <circle cx="72" cy={g - 15.6} r="1.6" fill={S.oker.flate} />
+          <line x1="78" y1={g - 12} x2="78" y2="45" stroke={S.metall.skygge} strokeWidth="0.8" />
+          <path d="M65 50 Q78 40 91 50 Z" fill={t >= 3 ? S.hvit.lys : S.oker.lys} />
+          <path d="M78 42.4 Q86.4 43.6 91 50 L78 50 Z" fill={t >= 3 ? S.hvit.flate : S.oker.flate} />
+          <Kloss x={68} b={16} h={12} d={10} m={S.treverk} front={panel.skygge} />
+          <Kloss x={70} y={g - 12} b={12} h={2.4} d={6} m={S.treverk} />
+          {/* Kurver med bringebær og solbær, to rader. */}
+          {[0, 1].map((rad) =>
+            [0, 1, 2, 3, 4].map((i) => {
+              const x = r2(70.6 + i * 2.4 + rad * 1.6)
+              const y = r2(g - 14.4 - rad * 1)
+              const bar = (i + rad) % 3 === 2 ? S.mork.lys : S.vin.lys
+              return (
+                <g key={`${rad}-${i}`}>
+                  <ellipse cx={r2(x + 1.05)} cy={r2(y - 0.1)} rx="1" ry="0.55" fill={bar} />
+                  <rect x={x} y={y} width="2.1" height="1.3" fill={S.treverk.lys} />
+                  <rect x={x} y={y} width="2.1" height="0.35" fill={S.treverk.flate} />
+                </g>
+              )
+            }),
+          )}
         </g>
       )}
       {/* Boden: stolper, markise og skilt fra nivå 25. */}
@@ -132,17 +498,21 @@ const saftbod: B = (t, f) => {
           <rect x="63" y="34" width="2" height="34" fill={S.treverk.skygge} />
           <polygon points="19,31 69,31 72,39 16,39" fill={S.hvit.lys} />
           {[0, 2, 4].map((i) => (
-            <polygon key={i} points={`${19 + i * 8.33},31 ${27.33 + i * 8.33},31 ${25.33 + i * 9.33},39 ${16 + i * 9.33},39`} fill={S.oker.flate} />
+            <polygon key={i} points={`${r2(19 + i * 8.33)},31 ${r2(27.33 + i * 8.33)},31 ${r2(25.33 + i * 9.33)},39 ${r2(16 + i * 9.33)},39`} fill={S.oker.flate} />
           ))}
           <path className="anim-duve" d={`M16 39 ${Array.from({ length: 8 }, (_, i) => `Q${19.5 + i * 7} 42.4 ${23 + i * 7} 39`).join(' ')} Z`} fill={S.oker.skygge} />
           <rect x="16" y="39" width="56" height="0.8" fill="#000000" opacity="0.2" />
-          <Kloss x={31} y={31} b={26} h={8} d={3} m={S.treverk} />
-          <rect x="40" y="24.6" width="5.4" height="5.4" rx="0.6" fill={S.hvit.lys} opacity="0.85" />
-          <rect x="40.6" y="26.6" width="4.2" height="3" fill={S.oker.lys} />
-          <circle cx="45.6" cy="25.2" r="1.6" fill={S.oker.flate} />
-          <path d="M44.2 25.2 H47" stroke={S.hvit.lys} strokeWidth="0.3" />
-          <rect x="48.6" y="26.6" width="5" height="0.9" rx="0.45" fill={S.treverk.lys} />
-          <rect x="48.6" y="28.4" width="3.6" height="0.9" rx="0.45" fill={S.treverk.lys} />
+          {/* Skiltet: et rødt saftglass og SAFT, malt på et bord. */}
+          <Kloss x={30} y={31} b={28} h={9} d={3} m={S.treverk} front={S.treMork.flate} />
+          <Saftglass x={32.4} y={23.4} h={6.2} />
+          <Saftord x={39.4} y={24} h={5} farge={S.hvit.lys} bredde={1.1} />
+        </g>
+      )}
+      {/* Lykta henger på stolpen til lyslenka kommer (100). */}
+      {(t === 1 || t === 2) && (
+        <g>
+          <line x1="26.4" y1="40" x2="26.4" y2="42.4" stroke={S.mork.lys} strokeWidth="0.4" />
+          <Lykt x={24.7} y={49.6} />
         </g>
       )}
       {/* Nivå 100: lyslenke under markisen. */}
@@ -154,86 +524,90 @@ const saftbod: B = (t, f) => {
           ))}
         </g>
       )}
+      {/* Hjelperen bak dunkene, fra nivå 50. */}
+      {t >= 2 && <Saftfolk x={31} y={75} m={1.64} klaer={S.petrol} caps={S.vin.flate} forkle={t >= 3} />}
       {/* Selgeren bak disken. */}
-      <Figur x={x0 + disk.b * 0.62} y={disk.y + 8} avstand="naer" klaer={S.marine} />
+      {selger.barn ? (
+        <Saftfolk x={selger.x} y={selger.y} m={selger.m} barn klaer={S.oker} har={S.oker.skygge} arm="skjenk" />
+      ) : t === 1 ? (
+        <Saftfolk x={selger.x} y={selger.y} m={selger.m} klaer={S.marine} caps={S.vin.flate} arm="skjenk" />
+      ) : (
+        <Saftfolk x={selger.x} y={selger.y} m={selger.m} klaer={S.marine} har={S.mork.flate} forkle arm="skjenk" />
+      )}
       {/* Disken: et bord på nivå 1, en malt disk fra 25. */}
       {bod ? (
         <g>
           <Kloss x={x0} b={disk.b} h={g - disk.y} d={12} m={S.treverk} front={panel.flate} />
           {Array.from({ length: 8 }, (_, i) => (
-            <rect key={i} x={x0 + 5 + i * 5} y={disk.y + 1.6} width="0.5" height={g - disk.y - 1.6} fill={panel.skygge} opacity="0.7" />
+            <rect key={i} x={x0 + 5 + i * 5} y={r2(disk.y + 1.6)} width="0.5" height={r2(g - disk.y - 1.6)} fill={panel.skygge} opacity="0.7" />
           ))}
-          <rect x={x0 - 1} y={disk.y - 0.6} width={disk.b + 2} height="1.6" fill={t >= 3 ? S.gull.flate : S.treverk.lys} />
+          <rect x={x0 - 1} y={r2(disk.y - 0.6)} width={disk.b + 2} height="1.6" fill={t >= 3 ? S.gull.flate : S.treverk.lys} />
           <Bunnskygge x={x0} y={disk.y} b={disk.b} h={g - disk.y} />
         </g>
       ) : (
         <g>
-          <rect x="28" y="72.4" width="2" height="11.6" fill={S.treverk.skygge} />
-          <rect x="62" y="72.4" width="2" height="11.6" fill={S.treverk.skygge} />
+          <rect x="24" y="72.4" width="2" height="11.6" fill={S.treverk.skygge} />
+          <rect x="66" y="72.4" width="2" height="11.6" fill={S.treverk.skygge} />
           <Kloss x={x0} y={72.4} b={disk.b} h={2.4} d={10} m={S.treverk} />
-          <g transform="rotate(-3 46 77)">
+          {/* Pappskiltet: et glass rød saft og SAFT med tusj. */}
+          {/* Pappen henger i to teipbiter fra bordkanten og vipper litt i vinden. */}
+          <g transform="rotate(-2 46 73)">
             <g className="anim-duve">
-            <rect x="37" y="73" width="18" height="9.6" rx="0.6" fill={S.hvit.flate} />
-            <circle cx="42" cy="77.8" r="2.8" fill={S.oker.lys} />
-            <circle cx="42" cy="77.8" r="2" fill={S.oker.flate} opacity="0.5" />
-            <path d="M42 75.8 V79.8 M40 77.8 H44" stroke={S.hvit.lys} strokeWidth="0.35" />
-            <rect x="46" y="75.6" width="7" height="1" rx="0.5" fill={S.treverk.flate} />
-            <rect x="46" y="78" width="5" height="1" rx="0.5" fill={S.treverk.flate} />
+              <rect x="33" y="73" width="26" height="9.6" rx="0.6" fill={S.puss.lys} />
+              <rect x="33" y="81.6" width="26" height="1" fill={S.puss.skygge} opacity="0.6" />
+              <Saftglass x={35.2} y={74.6} h={6.4} />
+              <Saftord x={41.6} y={75.6} h={4.2} farge={S.vin.flate} bredde={0.85} />
             </g>
           </g>
+          {[34.4, 54.6].map((x) => (
+            <rect key={x} x={x} y="71.4" width="3" height="2.6" fill={S.hvit.lys} opacity="0.75" />
+          ))}
         </g>
       )}
-      {/* På disken: dunken med saft og koppene. */}
-      {dunk(x0 + 3, S.oker, false)}
+      {/* På disken: dunken med rød saft, koppene og kanna som skjenker. */}
+      {dunk(plass.dunk, false, false)}
       {[0, 1, 2].map((i) => (
-        <polygon key={i} points={`${x0 + disk.b - 8},${fot - i * 1.4} ${x0 + disk.b - 3},${fot - i * 1.4} ${x0 + disk.b - 3.4},${fot - 4 - i * 1.4} ${x0 + disk.b - 7.6},${fot - 4 - i * 1.4}`} fill={i === 2 ? S.hvit.lys : S.hvit.flate} />
+        <polygon key={i} points={pkt([plass.kopper, fot - i * 0.7], [plass.kopper + 2.4, fot - i * 0.7], [plass.kopper + 2.15, fot - 2.6 - i * 0.7], [plass.kopper + 0.25, fot - 2.6 - i * 0.7])} fill={i === 2 ? S.hvit.lys : S.hvit.flate} />
       ))}
-      {/* Sukkerfri linje: en grønn dunk og en grønn vimpel. */}
-      {f >= 3 && (
-        <g>
-          {dunk(x0 + 13, S.bjork, true)}
-          <line x1={x0 + 1} y1={disk.y} x2={x0 + 1} y2={disk.y - 16} stroke={S.treverk.skygge} strokeWidth="0.6" />
-          <polygon className="anim-flagg" points={`${x0 + 1.3},${disk.y - 16} ${x0 + 7},${disk.y - 14} ${x0 + 1.3},${disk.y - 12}`} fill={S.gran.lys} />
-        </g>
-      )}
-      {/* Saftpressen. */}
+      <Skjenk h={hand} k={figurskala(selger.m)} bunn={fot} />
+      {/* Sukkerfri linje: en egen dunk med grønn etikett. */}
+      {f >= 3 && dunk(plass.sukkerfri, true, true)}
+      {/* Saftpressen: en spakpresse med bær på toppen, og en skål bær. */}
       {f >= 1 && (
         <g>
-          <rect x={x0 + 22} y={fot - 3} width="6" height="3" rx="0.6" fill={S.metall.flate} />
-          <polygon points={`${x0 + 23},${fot - 3} ${x0 + 27},${fot - 3} ${x0 + 25},${fot - 6}`} fill={S.metall.lys} />
-          <line x1={x0 + 27.6} y1={fot - 2.6} x2={x0 + 30.6} y2={fot - 9} stroke={S.metall.skygge} strokeWidth="0.9" strokeLinecap="round" />
-          <circle cx={x0 + 25} cy={fot - 7.2} r="1.3" fill={S.oker.lys} />
+          <rect x={plass.presse} y={r2(fot - 1.2)} width="6" height="1.2" rx="0.3" fill={S.metall.skygge} />
+          <rect x={r2(plass.presse + 4.2)} y={r2(fot - 9)} width="1.1" height="8" fill={S.metall.flate} />
+          <polygon points={pkt([plass.presse + 0.6, fot - 5.6], [plass.presse + 4.4, fot - 5.6], [plass.presse + 3.6, fot - 3], [plass.presse + 1.4, fot - 3])} fill={S.metall.lys} />
+          <rect x={r2(plass.presse + 1.6)} y={r2(fot - 3)} width="1.8" height="1.8" fill={S.vin.lys} />
+          <line x1={r2(plass.presse + 4.8)} y1={r2(fot - 8.6)} x2={r2(plass.presse + 0.4)} y2={r2(fot - 12.6)} stroke={S.metall.skygge} strokeWidth="0.9" strokeLinecap="round" />
+          {[[1.5, 6], [2.3, 6.1], [3.1, 6], [1.9, 6.6], [2.7, 6.7]].map(([dx, dy]) => (
+            <circle key={dx * 10 + dy} cx={r2(plass.presse + dx)} cy={r2(fot - dy)} r="0.42" fill={dx === 2.7 ? S.mork.lys : S.vin.flate} />
+          ))}
         </g>
       )}
-      {/* Isboksen på bakken, med lokket oppe. */}
+      {/* Isen: en stålbalje full av isbiter. */}
       {f >= 2 && (
         <g>
-          <polygon points={`70,${g + 1} 81,${g + 1} 83,${g - 5} 72,${g - 5}`} fill={S.hvit.skygge} />
-          <Kloss x={70} y={g + 8} b={12} h={7} d={6} m={S.petrol} />
-          {[71.6, 74.4, 77.2, 80].map((x, i) => (
-            <rect key={x} x={x + (i % 2) * 0.6} y={g - 0.6 - (i % 2)} width="2" height="2" rx="0.3" fill={S.hvit.lys} />
+          {[[0.6, 4.4], [2, 4.9], [3.4, 4.5], [1.3, 5.7], [2.7, 5.8]].map(([dx, dy]) => (
+            <rect key={dx * 10 + dy} x={r2(plass.is + dx)} y={r2(isb - dy)} width="1.5" height="1.5" rx="0.3" fill={dy > 5 ? S.hvit.lys : S.glass.lys} transform={`rotate(${dx * 12} ${r2(plass.is + dx + 0.75)} ${r2(isb - dy + 0.75)})`} />
           ))}
+          {!bod && <ellipse cx={r2(plass.is + 3.4)} cy={isb} rx="4" ry="0.8" fill="#000000" opacity="0.25" />}
+          <polygon points={pkt([plass.is, isb - 3.6], [plass.is + 5.6, isb - 3.6], [plass.is + 5, isb], [plass.is + 0.6, isb])} fill={S.metall.flate} />
+          <rect x={plass.is} y={r2(isb - 3.8)} width="5.6" height="0.8" rx="0.3" fill={S.metall.lys} />
         </g>
       )}
-      {/* Nivå 100: sitrontre i krukke, og plaketten. */}
-      {t >= 3 && (
-        <g>
-          <Tre x={81} y={g - 15} h={17} />
-          {[[78, 59], [83, 57], [80.6, 62], [84.4, 61]].map(([x, y]) => (
-            <circle key={`${x}-${y}`} cx={x} cy={y} r="0.9" fill={S.oker.lys} />
-          ))}
-          <polygon points={`77.6,${g - 16} 84.4,${g - 16} 83.6,${g - 12} 78.4,${g - 12}`} fill={S.tegl.flate} />
-          <Plakett x={x0 + 28} y={disk.y + 4} />
-        </g>
-      )}
-      {/* Kunder: to ved nivå 50, tre ved 100. */}
+      <Veps x={bod ? 29.5 : 28} y={bod ? 53.5 : 55.5} />
+      {/* Nivå 100: plaketten. */}
+      {t >= 3 && <Plakett x={x0 + 28} y={disk.y + 4} />}
+      {/* Kundene i kø til venstre, i sommerklær: én betaler, én drikker (og én venter ved 100). */}
+      {t === 0 && <Lykt x={17} y={g + 2} />}
+      {t >= 3 && <Saftfolk x={13} y={g - 1} m={1.7} klaer={S.gran} ben={S.marine.flate} hud={S.hudMork} har={S.mork.skygge} />}
       {t >= 2 && (
         <>
-          <Figur x={11} y={g + 6} avstand="naer" klaer={S.petrol} hud={S.hudMork} har={S.mork.skygge} />
-          <Figur x={19} y={g + 3} avstand="naer" klaer={S.vin} ben={S.marine.skygge} />
+          <Drikker x={6} y={g + 3} m={1.72} klaer={S.petrol} hud={S.hudMork} har={S.mork.skygge} ben={S.treverk.skygge} shorts />
+          <Saftfolk x={19} y={g + 4.5} m={1.76} klaer={S.hvit} ben={S.marine.flate} shorts caps={S.petrol.flate} arm="frem" />
         </>
       )}
-      {t >= 3 && <Figur x={88} y={g + 7} avstand="naer" klaer={S.oker} vendt={-1} />}
     </>
   )
 }
@@ -5905,12 +6279,13 @@ export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk',
 /**
  * Nærbildene (G9): utsnittet rundt motivet, [x, y, bredde, høyde] i lerretets
  * enheter, for steder der tegningen er så liten at motivet forsvinner.
- * Bedriftene er målt på trinn 0 og er kvadratiske (rivallista, 32 px); bilene,
+ * Bedriftene er målt på trinn 0 og er kvadratiske (rivallista, 32 px; saftboden
+ * også på kortet, se `NAER_PAA_KORTET` i BedriftIkon); bilene,
  * båtene og flyene er brede eller høye som motivet (plassene i lageret).
  * Lest av på et rutenett over tegningen i ?galleri.
  */
 export const NAERBILDER: Record<string, readonly [number, number, number, number]> = {
-  saftbod: [26, 42, 48, 48],
+  saftbod: [12, 22, 64, 64],
   polsebod: [32, 40, 48, 48],
   gatekjokken: [31, 42, 46, 46],
   kiosk: [26, 34, 56, 56],
