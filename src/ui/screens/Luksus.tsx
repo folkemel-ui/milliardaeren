@@ -32,6 +32,7 @@ import { Seksjon } from '../komponenter/Seksjon'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { NyMerke } from '../komponenter/Kjopsglimt'
 import { Ikon, type Ikonnavn } from '../komponenter/Ikoner'
+import { useTilbake } from '../tilbake'
 
 const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
 
@@ -40,8 +41,11 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   const ting = useTing()
   // Detaljsiden lukkes når du bytter fane.
   useEffect(() => () => aapneTing(null), [])
+  const egenTing = ting !== null && FANE_FOR[ting.slag] === 'luksus'
+  useTilbake(klubb, () => settKlubb(false))
+  useTilbake(egenTing, () => aapneTing(null))
   if (klubb) return <Klubb s={s} tilbake={() => settKlubb(false)} />
-  if (ting && FANE_FOR[ting.slag] === 'luksus') return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
+  if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>

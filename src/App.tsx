@@ -23,6 +23,9 @@ import { Investeringer } from './ui/screens/Investeringer'
 import { Luksus } from './ui/screens/Luksus'
 import { Profil } from './ui/screens/Profil'
 import { lyttEtterKorttrykk } from './ui/overgang'
+import { lyttEtterTilbake, useTilbake } from './ui/tilbake'
+import { Hendelseslogg } from './ui/komponenter/Hendelseslogg'
+import type { Mål } from './ui/varsler'
 
 const FANENOKKEL = 'milliardaer.fane'
 const GYLDIGE: Fane[] = ['bedrifter', 'investeringer', 'eiendom', 'luksus', 'profil']
@@ -73,6 +76,7 @@ export default function App() {
     return faneAapen(s, f) ? f : 'bedrifter'
   })
   const [avisÅpen, settAvisÅpen] = useState(false)
+  const [loggÅpen, settLoggÅpen] = useState(false)
   // «Nytt i 1.0» for en spiller som kommer tilbake etter en oppdatering. En ny spiller merkes som oppdatert med en gang.
   const [nyheter, settNyheter] = useState(() => visNyheter(s.sek))
   const lukkAvis = useCallback(() => settAvisÅpen(false), [])
@@ -91,6 +95,7 @@ export default function App() {
   }, [])
   useEffect(lyttEtterNyTrykk, [])
   useEffect(lyttEtterKorttrykk, [])
+  useEffect(lyttEtterTilbake, [])
 
   // Har du valgt at avisen skal åpne seg selv, og en ulest utgave venter ved oppstart, kommer den med én gang.
   useEffect(() => {
@@ -135,11 +140,11 @@ export default function App() {
     // Varselvalget i Innstillinger bestemmer hvilke som vises. Avisa har sitt eget valg.
     const andre = funn.filter((f) => f.type !== 'avis' && vises(f))
     if (andre.length > MAKS_ENKELTVARSLER) {
-      visVarsel({ type: 'god', tittel: `${andre.length} hendelser mens du var borte`, tekst: 'Se Bank → Hendelser og Profil.', mål: 'investeringer' })
+      visVarsel({ type: 'god', tittel: `${andre.length} hendelser mens du var borte`, tekst: 'Alt står i hendelsesloggen.', mål: 'hendelser' })
     } else {
       for (const f of andre) {
         if (f.type === 'hendelse') {
-          visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'investeringer' })
+          visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'hendelser' })
         } else if (f.type === 'prestasjon') {
           visVarsel({ type: 'god', tittel: `Prestasjon: ${f.navn}`, mål: 'profil' })
         } else if (f.type === 'fane') {
@@ -173,12 +178,16 @@ export default function App() {
     }
   }
 
+  // En annen fane enn Bedrifter er et steg i historikken: tilbake går hjem, og fra Bedrifter ut av spillet.
+  useTilbake(fane !== 'bedrifter', () => velg('bedrifter'))
+  const gåTil = (m: Mål) => (m === 'hendelser' ? settLoggÅpen(true) : velg(m))
+
   // En annen fane har tatt over, eller noe gikk galt: da vises ikke spillet.
   if (avbrudd) return <Avbruddskjerm a={avbrudd} />
 
   return (
     <div className="app">
-      <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} gåTil={velg} />
+      <Toppfelt s={s} tilProfil={() => velg('profil')} åpneAvis={() => settAvisÅpen(true)} åpneLogg={() => settLoggÅpen(true)} gåTil={velg} />
       <main
         key={fane}
         className={`innhold gli-${retning}`}
@@ -208,8 +217,8 @@ export default function App() {
         {fane === 'profil' && <Profil s={s} />}
       </main>
       <Fanemeny aktiv={fane} velg={velg} aapen={(f) => faneAapen(s, f)} />
-      <Varselstabel gåTil={velg} />
-      {velkomst && !avisÅpen && (
+      <Varselstabel gåTil={gåTil} />
+      {velkomst && !avisÅpen && !loggÅpen && (
         <Velkomstskjerm
           v={velkomst}
           lukk={lukkVelkomst}
@@ -217,11 +226,16 @@ export default function App() {
             lukkVelkomst()
             settAvisÅpen(true)
           }}
+          seHendelser={() => {
+            lukkVelkomst()
+            settLoggÅpen(true)
+          }}
           gåTil={velg}
         />
       )}
       {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
-      {nyheter && !velkomst && !avisÅpen && (
+      {loggÅpen && <Hendelseslogg s={s} lukk={() => settLoggÅpen(false)} />}
+      {nyheter && !velkomst && !avisÅpen && !loggÅpen && (
         <Nyheter
           lukk={() => {
             merkVersjonSett()

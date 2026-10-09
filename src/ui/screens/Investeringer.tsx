@@ -68,17 +68,10 @@ import { Papirlogo } from '../komponenter/Papirlogo'
 import { Ikon } from '../komponenter/Ikoner'
 import { Rivalportrett } from '../komponenter/Rivalportrett'
 import { Forklaring } from '../komponenter/Forklaring'
+import { borsdel, INVESTERINGSDELER, investeringsdel, type Borsdel, type Investeringsdel } from '../deler'
+import { useTilbake } from '../tilbake'
 
-type Underfane = 'oversikt' | 'bors' | 'selskaper' | 'bank'
-
-const UNDERFANER: { id: Underfane; navn: string }[] = [
-  { id: 'oversikt', navn: 'Oversikt' },
-  { id: 'bors', navn: 'Børs' },
-  { id: 'selskaper', navn: 'Selskaper' },
-  { id: 'bank', navn: 'Bank' },
-]
-
-const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Underfane> = {
+const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Investeringsdel> = {
   aksje: 'bors',
   krypto: 'bors',
   fond: 'bank',
@@ -97,22 +90,33 @@ function endringTo(s: Spilltilstand, id: PapirId): number {
 }
 
 export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom: () => void }) {
-  const [fane, settFane] = useState<Underfane>('oversikt')
+  // Delen huskes, som Profil og Børs (Pakke 61).
+  const fane = investeringsdel.bruk()
+  const settFane = investeringsdel.sett
   const [valgt, settValgt] = useState<PapirId | null>(null)
+  useTilbake(valgt !== null, () => settValgt(null))
 
   if (valgt) return <Papirdetalj s={s} id={valgt} tilbake={() => settValgt(null)} />
 
   return (
     <section className="skjerm">
-      <div className="segment" role="tablist">
-        {UNDERFANER.map((f) => (
+      <div className="segment" role="tablist" aria-label="Investeringer">
+        {INVESTERINGSDELER.map((f) => (
           <button key={f.id} role="tab" aria-selected={fane === f.id} className={fane === f.id ? 'aktiv' : ''} onClick={() => settFane(f.id)}>
             {f.navn}
           </button>
         ))}
       </div>
       {fane === 'oversikt' && (
-        <Oversikt s={s} velg={(k) => (k === 'eiendom' ? tilEiendom() : settFane(TIL_UNDERFANE[k]))} />
+        <Oversikt
+          s={s}
+          velg={(k) => {
+            if (k === 'eiendom') return tilEiendom()
+            // Aksjer og Krypto åpner Børs på riktig liste.
+            if (k === 'aksje' || k === 'krypto') borsdel.sett(k)
+            settFane(TIL_UNDERFANE[k])
+          }}
+        />
       )}
       {fane === 'bors' && <Bors s={s} velg={settValgt} />}
       {fane === 'selskaper' && (
@@ -215,16 +219,7 @@ function Endring({ kroner: k, andel, liten = false }: { kroner: number; andel: n
 
 // ─────────────────────────────────────────────── Børsen
 
-type Klasse = 'aksje' | 'krypto'
-const BORSVALG = 'milliardaer.borsvalg'
-
-function lesBorsvalg(): Klasse {
-  try {
-    return localStorage.getItem(BORSVALG) === 'krypto' ? 'krypto' : 'aksje'
-  } catch {
-    return 'aksje'
-  }
-}
+type Klasse = Borsdel
 
 /**
  * Børsfanen: et lite dashbord med aksjene og kryptoen dine — verdien, hva du
@@ -232,15 +227,8 @@ function lesBorsvalg(): Klasse {
  * bryter: trykk på en, og lista under viser den klassen.
  */
 function Bors({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => void }) {
-  const [klasse, settKlasse] = useState<Klasse>(lesBorsvalg)
-  const bytt = (k: Klasse) => {
-    settKlasse(k)
-    try {
-      localStorage.setItem(BORSVALG, k)
-    } catch {
-      /* bare en bekvemmelighet */
-    }
-  }
+  const klasse = borsdel.bruk()
+  const bytt = borsdel.sett
   return (
     <>
       <div className="dashbord" role="tablist" aria-label="Aksjer eller krypto">
@@ -1060,22 +1048,6 @@ function Bank({ s }: { s: Spilltilstand }) {
         </div>
       </div>
 
-      <div className="kort">
-        <h2 className="kort-tittel">Hendelser</h2>
-        {s.hendelser.length === 0 ? (
-          <p className="dempet liten">Ingen hendelser ennå.</p>
-        ) : (
-          <ul className="hendelser">
-            {[...s.hendelser].reverse().slice(0, 10).map((h, i) => (
-              <li key={i} className={`hendelse ${h.alvor}`}>
-                <strong>{h.tittel}</strong>
-                <span className="dempet liten">for {varighet(Math.max(0, s.sek - h.sek))} siden</span>
-                <p className="liten">{h.tekst}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
     </>
   )
 }

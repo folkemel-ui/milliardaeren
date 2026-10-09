@@ -1,11 +1,13 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { useTilbake } from '../tilbake'
 
 const FOKUSERBARE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 /**
  * Fokus for et vindu over spillet (avisen, velkomsten, gatebildet):
  * flytter fokus inn når vinduet åpnes, holder Tab inne i det, lukker på
- * Escape og gir fokus tilbake dit det var når vinduet lukkes.
+ * Escape og gir fokus tilbake dit det var når vinduet lukkes. Tilbakeknappen
+ * og tilbakesveipet lukker det også (Pakke 61).
  *
  * `boks` er selve vinduet og må ha tabIndex={-1}, så det kan ta imot
  * fokus selv. `lukk` kan være en ny funksjon hver gang — effekten kjører
@@ -14,6 +16,7 @@ const FOKUSERBARE = 'a[href], button:not([disabled]), input:not([disabled]), sel
 export function useFokusfelle(boks: RefObject<HTMLElement | null>, lukk: () => void) {
   const lukkRef = useRef(lukk)
   lukkRef.current = lukk
+  useTilbake(true, () => lukkRef.current())
 
   useEffect(() => {
     const forrige = document.activeElement instanceof HTMLElement ? document.activeElement : null

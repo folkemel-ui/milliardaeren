@@ -1,14 +1,13 @@
 import { useEffect, useMemo } from 'react'
 import type { Feiringsniva } from '../hendelsesstrom'
-import { avsluttFeiring, fjernVarsel, useFeiring, useVarsler, type Varsel } from '../varsler'
+import { avsluttFeiring, fjernVarsel, useFeiring, useVarsler, type Mål, type Varsel } from '../varsler'
 import { redusertBevegelse } from '../innstillinger'
-import type { Fane } from './Fanemeny'
 import { Ikon, type Ikonnavn } from './Ikoner'
 
 const IKON: Record<Varsel['type'], Ikonnavn | null> = { god: 'gnist', advarsel: 'advarsel', kritisk: 'alarm', feil: null, avis: 'avis' }
 
 /** Varslene, stablet over fanemenyen. Trykk går dit varselet gjelder; krysset lukker. */
-export function Varselstabel({ gåTil }: { gåTil: (f: Fane) => void }) {
+export function Varselstabel({ gåTil }: { gåTil: (m: Mål) => void }) {
   const varsler = useVarsler()
   return (
     <div className="varsler" aria-live="polite">

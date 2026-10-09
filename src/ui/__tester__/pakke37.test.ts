@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { formuetrinn } from '../komponenter/Toppfelt'
 import { byerMedInnhold, iByen } from '../komponenter/Byvisning'
-import { settProfildel, PROFILDELER } from '../profilfane'
+import { settProfildel, PROFILDELER } from '../deler'
 import { nyttSpill } from '../../engine/start'
 
 describe('formuetrinn', () => {

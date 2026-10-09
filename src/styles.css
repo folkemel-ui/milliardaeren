@@ -309,6 +309,11 @@ figure {
   font-weight: var(--vekt-halvfet);
 }
 
+/* Bjella for hendelsesloggen (Pakke 61): bare ikonet, så datolinja får plass. */
+.hendelsesknapp {
+  padding: 0 6px;
+}
+
 .ulest-prikk {
   position: absolute;
   top: 2px;
@@ -2000,6 +2005,12 @@ button.merke {
 
 .hendelse p {
   grid-column: 1 / -1;
+}
+
+.hendelse-tid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .hendelse.advarsel {

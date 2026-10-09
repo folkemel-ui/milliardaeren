@@ -12,6 +12,7 @@ import { Seksjon } from '../komponenter/Seksjon'
 import { Dagen } from '../komponenter/Dagen'
 import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
 import { Forklaring } from '../komponenter/Forklaring'
+import { useTilbake } from '../tilbake'
 
 export function Bedrifter({ s }: { s: Spilltilstand }) {
   const [valgt, settValgt] = useState<string | null>(null)
@@ -25,6 +26,7 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
 
   // Bedriften kan forsvinne mens siden er åpen (banken kan ta den over).
   const detalj = valgt ? s.bedrifter.find((b) => b.id === valgt) : undefined
+  useTilbake(detalj !== undefined, () => settValgt(null))
   if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengde} tilbake={() => settValgt(null)} />
 
   return (

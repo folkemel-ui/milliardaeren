@@ -25,6 +25,8 @@ import { Gatebilde } from '../komponenter/Gatebilde'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { REGIONER, REGIONLISTE, regionEndring } from '../../engine/regioner'
 import { RulleTall } from '../komponenter/RulleTall'
+import { kartdel } from '../deler'
+import { useTilbake } from '../tilbake'
 
 /** Byene i Norge, i stigens rekkefølge: først byggene, så jorda og landemerkene. */
 const NORSKE_BYER: By[] = [
@@ -37,7 +39,8 @@ const NORSKE_BYER: By[] = [
 
 export function Eiendom({ s }: { s: Spilltilstand }) {
   const [by, settBy] = useState<By | null>(null)
-  const [kart, settKart] = useState<'norge' | 'verden'>('norge')
+  // Norge eller Verden huskes, som delene i de andre fanene (Pakke 61).
+  const kart = kartdel.bruk()
   // Byen som vises i gatebildet, eller null.
   const [gate, settGate] = useState<By | null>(null)
   const synlige = EIENDOMSSTIGEN.filter((id) => eiendomSynlig(s, id))
@@ -49,7 +52,11 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
   const ting = useTing()
   // Detaljsiden lukkes når du bytter fane.
   useEffect(() => () => aapneTing(null), [])
-  if (ting && FANE_FOR[ting.slag] === 'eiendom') return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Eiendom" />
+  // En by, og en detaljside over den, er hvert sitt steg tilbake.
+  useTilbake(by !== null, () => settBy(null))
+  const egenTing = ting !== null && FANE_FOR[ting.slag] === 'eiendom'
+  useTilbake(egenTing, () => aapneTing(null))
+  if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Eiendom" />
 
   return (
     <section className="skjerm">
@@ -76,7 +83,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
               aria-selected={kart === k}
               className={kart === k ? 'aktiv' : ''}
               onClick={() => {
-                settKart(k)
+                kartdel.sett(k)
                 settBy(null)
               }}
             >

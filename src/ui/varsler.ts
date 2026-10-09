@@ -8,6 +8,9 @@ import { useSyncExternalStore } from 'react'
 import type { Fane } from './komponenter/Fanemeny'
 import type { Feiringsdata, Kjopsart } from './hendelsesstrom'
 
+/** Hvor et trykk på et varsel tar deg: en fane, eller hendelsesloggen (Pakke 61). */
+export type Mål = Fane | 'hendelser'
+
 export type Varseltype = 'god' | 'advarsel' | 'kritisk' | 'feil' | 'avis'
 
 export interface Varsel {
@@ -16,7 +19,7 @@ export interface Varsel {
   tittel: string
   tekst?: string
   /** Hvor et trykk på varselet tar deg. */
-  mål?: Fane
+  mål?: Mål
   /** En knapp i varselet, for eksempel «Les» for avisen. */
   handling?: { tekst: string; utfør: () => void }
 }

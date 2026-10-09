@@ -6,9 +6,10 @@ import { kompakt, perSek } from '../format'
 import { klokke, kortDato, ukenummer } from '../kalender'
 import { Ikon, IkonProfil } from './Ikoner'
 import { RulleTall } from './RulleTall'
-import { settProfildel } from '../profilfane'
+import { settProfildel } from '../deler'
 import { faneAapen, nesteMaal } from '../progresjon'
 import { kortKroner } from '../format'
+import { antallUsette, useHendelserSett } from '../hendelsessett'
 import type { Fane } from './Fanemeny'
 
 /**
@@ -22,19 +23,34 @@ export function formuetrinn(formue: number): 0 | 1 | 2 | 3 {
 
 /**
  * Fast toppfelt: kontanter og tempo til venstre, nettoformuen i midten,
- * profil til høyre — og under, datolinja med klokka og avisen. Kanten under
+ * profil til høyre — og under, datolinja med klokka, bjella for hendelsene
+ * (Pakke 61) og avisen. Kanten under
  * blir gylnere for hvert statusnivå, og tittelen din står under formuen.
  * Rett under står det neste målet (Pakke 40). Det ligger utenfor det faste
  * feltet (G8): det står der øverst på siden, men glir bort under datolinja når
  * du ruller, så toppen dekker mindre av skjermen.
  */
-export function Toppfelt({ s, tilProfil, åpneAvis, gåTil }: { s: Spilltilstand; tilProfil: () => void; åpneAvis: () => void; gåTil: (f: Fane) => void }) {
+export function Toppfelt({
+  s,
+  tilProfil,
+  åpneAvis,
+  åpneLogg,
+  gåTil,
+}: {
+  s: Spilltilstand
+  tilProfil: () => void
+  åpneAvis: () => void
+  åpneLogg: () => void
+  gåTil: (f: Fane) => void
+}) {
   const dag = dagnummer(s.sek)
   const siste = s.avis[s.avis.length - 1]
   const ulest = siste !== undefined && siste.dag > s.avisLest
   const formue = nettoformue(s)
   const nivaa = statusnivaa(s)
   const styrke = nivaa / (STATUSNIVAAER.length - 1)
+  useHendelserSett()
+  const usette = antallUsette(s)
 
   return (
     <>
@@ -78,6 +94,10 @@ export function Toppfelt({ s, tilProfil, åpneAvis, gåTil }: { s: Spilltilstand
           ) : (
             erHelg(s.sek) && <span className="merke varsel">Børsen stengt</span>
           )}
+          <button className="avisknapp hendelsesknapp" onClick={åpneLogg} aria-label={usette ? `Hendelser, ${usette} nye` : 'Hendelser'}>
+            <Ikon navn="bjelle" størrelse={18} />
+            {usette > 0 && <span className="ulest-prikk" />}
+          </button>
           <button className="avisknapp" onClick={åpneAvis} aria-label={ulest ? 'Avisa, ny utgave' : 'Avisa'}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <rect x="3" y="4" width="15" height="16" rx="1.5" />

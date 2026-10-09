@@ -61,7 +61,7 @@ describe('kort som åpner en side (G8)', () => {
 
 describe('målstripa (G8)', () => {
   it('står etter det faste toppfeltet, ikke i det', () => {
-    const html = renderToStaticMarkup(createElement(Toppfelt, { s: nyttSpill(), tilProfil: () => {}, åpneAvis: () => {}, gåTil: () => {} }))
+    const html = renderToStaticMarkup(createElement(Toppfelt, { s: nyttSpill(), tilProfil: () => {}, åpneAvis: () => {}, åpneLogg: () => {}, gåTil: () => {} }))
     const header = html.match(/<header[\s\S]*?<\/header>/)?.[0] ?? ''
     expect(header).not.toContain('maalstripe')
     expect(html).toMatch(/<\/header><div class="maalfelt">/)

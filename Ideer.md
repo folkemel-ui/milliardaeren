@@ -10,15 +10,14 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 Version 1.0 was reached with Pack 43.
 
-Order across the tracks: G11 and Pack 61 can start at once. Pack 62 comes before G12 and Pack 64.
+Order across the tracks: Pack 62 comes before G12 and Pack 64.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track (Packs 61–64)
+### Game track (Packs 62–64)
 
-Items from *Navigation* and *Football club*. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. The navigation packs belong here because they change the screens' logic (App, the tab parts).
+Items from *Navigation* and *Football club*. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. Pack 61 made back go back, gave every set of parts the same memory and put the event log behind a bell in the top bar. The navigation packs belong here because they change the screens' logic (App, the tab parts).
 
-- **Pack 61 – Back goes back:** Back goes back, Parts remember the same way, The event log where you look for it
 - **Pack 62 – Luksus in parts:** Luksus in parts, The club gets its own place, Everything you own in one place
 - **Pack 63 – Shorter lists:** The map switch filters the property list, Sort businesses by income, Funds on the exchange
 - **Pack 64 – A club that matters:** Stadium upgrades, Fixed league teams. Comes after Pack 62, so the club has its own place first. The graphics track draws the upgrades in `Stadion.tsx` alongside it, as with *Drawings for the v2.0 content*.
@@ -58,15 +57,12 @@ Loose ends after G1–G7, and what was picked for v10.0.
 
 From a review of how the game is organised (9 October 2026), measured at phone width (375 × 812) in a late game that owns everything. Lengths are in screens of 812 px.
 
-1. **Back goes back.** No page adds a browser history step, so the phone's back button and the back swipe leave the game (or close it when installed) instead of closing a business, a stock, a thing you own, the club or the street view. Every detail page and tab adds a history step, so back and the back swipe go one level up.
-2. **The map switch filters the property list.** The Eiendom tab is 12 screens: all 29 property types in one list, Norway and abroad mixed. The Norge/Verden switch changes only the map; the list below it stays the same. Let the switch filter the list too, or group the list by city or country.
-3. **Luksus in parts.** The tab holds six things in 7 screens: status, the club, three storage scenes, the lists of cars, watches, boats and planes, homes (4.9 screens down) and art (5 screens down). The 16 cars, boats and planes show twice, in their storage scene and in the lists. Split it into parts like Investments and Profile, e.g. *Samling · Hjem · Kunst · Klubb*, with the storage scene as the only view of the vehicles.
-4. **The club gets its own place.** The football club, with its own screen, league, matches and stadium, is a card inside Luksus and easy to miss — and it isn't luxury. Give it its own part (see *Luksus in parts*).
-5. **Everything you own in one place.** The Investments overview counts property (96 % of the portfolio in the test game) though property has its own tab, and leaves out businesses, luxury, art, the club and the homes. Profile shows only the total. Show net worth split by every kind on Profil → Meg, each row a way to its tab.
-6. **Sort businesses by income.** The cards stand in buy order, so in a late game the lemonade stand is on top and the businesses that earn the most are at the bottom of a 4.6-screen list (13 cards of about 290 px). Add a choice to sort by income; buy order stays the default.
-7. **The event log where you look for it.** The log sits at the bottom of Investments → Bank, 3.3 screens down; the «N hendelser mens du var borte» notice sends you there, and events open the Investments tab by default. Move it somewhere that fits, e.g. a button in the top bar beside Avisa or a part on Profile.
-8. **Funds on the exchange.** Bank holds six things: the economy card, savings, bonds, funds, loans and the event log. Index funds are bought like shares, so put them in Børs with stocks and crypto; Bank keeps savings, bonds and loans.
-9. **Parts remember the same way.** Profile remembers its part and Børs remembers stocks or crypto, but Investments always opens on Oversikt. Pick one rule for every set of parts.
+1. **The map switch filters the property list.** The Eiendom tab is 12 screens: all 29 property types in one list, Norway and abroad mixed. The Norge/Verden switch changes only the map; the list below it stays the same. Let the switch filter the list too, or group the list by city or country.
+2. **Luksus in parts.** The tab holds six things in 7 screens: status, the club, three storage scenes, the lists of cars, watches, boats and planes, homes (4.9 screens down) and art (5 screens down). The 16 cars, boats and planes show twice, in their storage scene and in the lists. Split it into parts like Investments and Profile, e.g. *Samling · Hjem · Kunst · Klubb*, with the storage scene as the only view of the vehicles.
+3. **The club gets its own place.** The football club, with its own screen, league, matches and stadium, is a card inside Luksus and easy to miss — and it isn't luxury. Give it its own part (see *Luksus in parts*).
+4. **Everything you own in one place.** The Investments overview counts property (96 % of the portfolio in the test game) though property has its own tab, and leaves out businesses, luxury, art, the club and the homes. Profile shows only the total. Show net worth split by every kind on Profil → Meg, each row a way to its tab.
+5. **Sort businesses by income.** The cards stand in buy order, so in a late game the lemonade stand is on top and the businesses that earn the most are at the bottom of a 4.6-screen list (13 cards of about 290 px). Add a choice to sort by income; buy order stays the default.
+6. **Funds on the exchange.** Bank holds five things: the economy card, savings, bonds, funds and loans. Index funds are bought like shares, so put them in Børs with stocks and crypto; Bank keeps savings, bonds and loans.
 
 ## Football club
 

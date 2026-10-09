@@ -13,11 +13,13 @@ export function Velkomstskjerm({
   v,
   lukk,
   lesAvis,
+  seHendelser,
   gåTil,
 }: {
   v: Velkomst
   lukk: () => void
   lesAvis: () => void
+  seHendelser: () => void
   gåTil: (f: Fane) => void
 }) {
   const o = useMemo(() => oppsummer(v.før, v.etter, v.borteSek), [v])
@@ -110,7 +112,7 @@ export function Velkomstskjerm({
               <span>
                 <Ikon navn="bjelle" størrelse={16} /> {o.hendelser} {o.hendelser === 1 ? 'hendelse' : 'hendelser'}
               </span>
-              <button className="knapp knapp-liten" onClick={() => (gåTil('investeringer'), lukk())}>
+              <button className="knapp knapp-liten" onClick={seHendelser}>
                 Se
               </button>
             </li>
