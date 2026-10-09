@@ -619,6 +619,14 @@ session; delete what stops being true.
 - **Parts (Pack 61)**: every set of parts is a `lagDelvalg(key, parts)` in `ui/deler.ts`
   (remembered in localStorage, first part by default, settable from outside). A new set
   of parts goes there too, not in a `useState`.
+  Luksus (Pack 62) is Samling · Hjem · Kunst · Klubb with the status card above the
+  parts. **A part must not open on a folded `Seksjon`** (a new player sees only a header):
+  use `Delhode` from `Seksjon.tsx` for a part's own heading. The club lives in its part
+  (`Klubbdel`), so notices about it use `mål: 'klubb'`.
+- **Net worth by kind (Pack 62)**: `ui/formuedeler.ts` on Profil → Meg. A new kind of
+  thing you own needs a row there (and in `eiendeler`), or the rows stop summing to net
+  worth — `pakke62.test.ts` checks the sum on `fulltSpill`. The Investments overview
+  leaves property out on purpose.
 - **Event log (Pack 61)**: `Hendelseslogg.tsx` behind the bell in the date line; what's
   been seen is a `sek` in localStorage (`ui/hendelsessett.ts`). A notice can point at it
   with `mål: 'hendelser'` (`Mål` in `ui/varsler.ts`).
