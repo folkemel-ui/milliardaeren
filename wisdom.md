@@ -67,7 +67,7 @@ session; delete what stops being true.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59 and 60.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -108,6 +108,12 @@ session; delete what stops being true.
   must be empty; if it isn't, the other track is committing — wait until `HEAD` moves.
   And a push carries the other track's commits too: Pack 61's push took G11 along, so
   check `git log origin/master` before saying something is or isn't pushed.
+
+- **Look before you push.** The other track commits to the same local `master`. Run
+  `git log --oneline origin/master..master` *before* `git push`, not in the same command:
+  after Pack 61 the push also sent the graphics session's fresh G11 commit live, and Folke
+  heard about it afterwards. If the list holds the other track's commits, name them and
+  ask before pushing.
 
 ## 3. Tools on this machine
 
@@ -222,6 +228,11 @@ session; delete what stops being true.
   reach the event stream. To test celebrations, call `visFeiring` directly.
 - Check at phone width (`resize_window` preset mobile) and in both themes. Reset the
   viewport to desktop when done.
+- **SVG elements have no `.click()`.** A selector that lands on an `<svg>` (or a child) throws
+  `click is not a function`. Dispatch `new MouseEvent('click', { bubbles: true })` instead,
+  and make a helper throw when the selector finds nothing: in Pack 61 a missed club-card
+  selector let two `history.back()` calls walk out of the game to `/ikon.svg`. Likewise
+  `[role=dialog]` also matches the map's city card (`.bykort`), not just pop-ups.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   `styles.css` silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:
