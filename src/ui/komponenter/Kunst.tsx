@@ -12,7 +12,7 @@ import {
 import type { MaleriId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { endring, fortegnKroner, kortKroner } from '../format'
-import { Seksjon } from './Seksjon'
+import { Delhode } from './Seksjon'
 import { Maleribilde, Maleriscene } from './Malerier'
 import { aapneTing, trykkApner } from '../detaljvisning'
 import { Apneknapp } from './BedriftIkon'
@@ -46,7 +46,8 @@ export function Kunst({ s }: { s: Spilltilstand }) {
   const verdi = kunstverdi(s)
   const eide = MALERILISTE.filter((id) => s.kunst.eide[id]).length
   return (
-    <Seksjon id="luksus-kunst" tittel="Kunst" forklaring="kunst" sammendrag={eide ? `${eide} ${eide === 1 ? 'maleri' : 'malerier'} · ${kortKroner(verdi)}` : 'Ingen malerier'} harInnhold={eide > 0}>
+    <>
+      <Delhode tittel="Kunst" forklaring="kunst" sammendrag={eide ? `${eide} ${eide === 1 ? 'maleri' : 'malerier'} · ${kortKroner(verdi)}` : 'Ingen malerier'} />
       <Galleriveggen s={s} />
       {verdi > 0 && <p className="dempet liten">Samlingen din er verdt {kortKroner(verdi)}.</p>}
       <ul className="kortliste">
@@ -54,7 +55,7 @@ export function Kunst({ s }: { s: Spilltilstand }) {
           <Malerikort key={id} s={s} id={id} />
         ))}
       </ul>
-    </Seksjon>
+    </>
   )
 }
 

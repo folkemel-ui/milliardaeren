@@ -1,6 +1,6 @@
 /**
- * Delene i fanene (Pakke 61): Investeringer, Børs, Eiendomskartet og Profil
- * følger samme regel — de åpner der du var sist, også etter omlasting.
+ * Delene i fanene (Pakke 61): Investeringer, Børs, Eiendomskartet, Profil og
+ * Luksus (Pakke 62) følger samme regel — de åpner der du var sist, også etter omlasting.
  * Valget huskes i nettleseren, ikke i lagringen, og kan settes utenfra
  * (skattemerket åpner Regnskap, Oversikt åpner Børs på krypto), så hvert
  * sett er en liten delt tilstand, ikke en useState i skjermen.
@@ -69,17 +69,28 @@ export const INVESTERINGSDELER: { id: Investeringsdel; navn: string }[] = [
   { id: 'bank', navn: 'Bank' },
 ]
 
+/** Luksus i deler (Pakke 62). Klubben har sin egen del; den er ikke luksus. */
+export type Luksusdel = 'samling' | 'hjem' | 'kunst' | 'klubb'
+
+export const LUKSUSDELER: { id: Luksusdel; navn: string }[] = [
+  { id: 'samling', navn: 'Samling' },
+  { id: 'hjem', navn: 'Hjem' },
+  { id: 'kunst', navn: 'Kunst' },
+  { id: 'klubb', navn: 'Klubb' },
+]
+
 export type Borsdel = 'aksje' | 'krypto'
 export type Kartdel = 'norge' | 'verden'
 
 // Nøklene fra før Pakke 61 beholdes, så valgene spillerne har gjort, står.
 export const profildel = lagDelvalg<Profildel>('milliardaer.profilfane', PROFILDELER.map((d) => d.id))
 export const investeringsdel = lagDelvalg<Investeringsdel>('milliardaer.investeringsdel', INVESTERINGSDELER.map((d) => d.id))
+export const luksusdel = lagDelvalg<Luksusdel>('milliardaer.luksusdel', LUKSUSDELER.map((d) => d.id))
 export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'krypto'])
 export const kartdel = lagDelvalg<Kartdel>('milliardaer.eiendomskart', ['norge', 'verden'])
 
 /** Alle settene, for testen som sjekker at de følger samme regel. */
-export const ALLE_DELVALG = { profildel, investeringsdel, borsdel, kartdel }
+export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel }
 
 export const settProfildel = profildel.sett
 export const useProfildel = profildel.bruk

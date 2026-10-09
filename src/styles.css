@@ -3450,7 +3450,8 @@ button.merke {
   margin: 12px 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* minmax(0, …): et langt ord i en prestasjon skal ikke skyve kolonnen ut av skjermen. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -3489,6 +3490,7 @@ button.merke {
   font-size: var(--skrift-1);
   color: var(--tekst-dempet);
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .rekorder {
@@ -4065,6 +4067,53 @@ button.merke {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* Overskriften for en hel del, uten fold (Pakke 62). */
+.del-hode {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+/* Hva formuen består av, på Profil → Meg (Pakke 62). */
+.formuerader {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.formuerad-knapp {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto 12px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  border-top: 1px solid var(--kant);
+  text-align: left;
+  color: inherit;
+}
+
+.formuerad.under .formuerad-knapp {
+  min-height: 34px;
+}
+
+.formuerad.under .formuerad-navn {
+  padding-left: 12px;
+  color: var(--tekst-dempet);
+}
+
+.formuerad-verdi {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.formuerad.sum .formuerad-knapp {
+  border-top-color: var(--tekst);
+  font-weight: var(--vekt-fet);
 }
 
 .lagerkort-topp {

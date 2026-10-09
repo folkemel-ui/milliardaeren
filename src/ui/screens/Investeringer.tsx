@@ -89,7 +89,7 @@ function endringTo(s: Spilltilstand, id: PapirId): number {
   return h.length ? s.marked.kurser[id].kurs / h[0] - 1 : 0
 }
 
-export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom: () => void }) {
+export function Investeringer({ s }: { s: Spilltilstand }) {
   // Delen huskes, som Profil og Børs (Pakke 61).
   const fane = investeringsdel.bruk()
   const settFane = investeringsdel.sett
@@ -111,7 +111,6 @@ export function Investeringer({ s, tilEiendom }: { s: Spilltilstand; tilEiendom:
         <Oversikt
           s={s}
           velg={(k) => {
-            if (k === 'eiendom') return tilEiendom()
             // Aksjer og Krypto åpner Børs på riktig liste.
             if (k === 'aksje' || k === 'krypto') borsdel.sett(k)
             settFane(TIL_UNDERFANE[k])
@@ -147,8 +146,9 @@ const KLASSENAVN: Record<Aktivaklasse, string> = {
   sparing: 'Sparekonto',
 }
 
-function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Aktivaklasse) => void }) {
-  const poster = portefolje(s)
+function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Exclude<Aktivaklasse, 'eiendom'>) => void }) {
+  // Eiendom har sin egen fane og sin egen rad i formuen på Profil (Pakke 62), så den er ikke med her.
+  const poster = portefolje(s).filter((p): p is typeof p & { klasse: Exclude<Aktivaklasse, 'eiendom'> } => p.klasse !== 'eiendom')
   const total = sum(poster)
   const avkastning = total.verdi - total.kostpris
   const startIDag = total.verdi - total.iDag
@@ -203,7 +203,7 @@ function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Aktivaklasse) => vo
           )
         })}
       </ul>
-      <p className="dempet liten">Bedriftene er ikke med her — de finner du under Bedrifter.</p>
+      <p className="dempet liten">Bedriftene og eiendommene har egne faner. Hele formuen, delt opp, står på Profil.</p>
     </>
   )
 }

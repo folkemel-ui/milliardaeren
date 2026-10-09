@@ -17,7 +17,9 @@ import { forbesliste } from '../../engine/rivaler'
 import { Logo } from '../komponenter/Logo'
 import { Ikon } from '../komponenter/Ikoner'
 import { Merke } from '../komponenter/Merke'
-import { PROFILDELER, settProfildel, useProfildel } from '../deler'
+import { investeringsdel, luksusdel, PROFILDELER, settProfildel, useProfildel } from '../deler'
+import { formuedeler, GRUPPEFARGE, type Formuemaal } from '../formuedeler'
+import type { Fane } from '../komponenter/Fanemeny'
 import { Statistikk } from '../komponenter/Statistikk'
 import { kommendeMaal } from '../progresjon'
 import { settBevegelse, settVarsler, useBevegelse, useVarselnivaa } from '../innstillinger'
@@ -218,7 +220,7 @@ function Innstillingskort() {
  * Profil i fire deler: Meg (formuen, målet og det du har oppnådd), Regnskap
  * (skatt og oppgjør), Statistikk (hvor inntekten kommer fra) og Innstillinger. Delen du sist hadde åpen, huskes.
  */
-export function Profil({ s }: { s: Spilltilstand }) {
+export function Profil({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
   const del = useProfildel()
   const ubetalt = s.skatt.regninger.length > 0
   return (
@@ -231,7 +233,7 @@ export function Profil({ s }: { s: Spilltilstand }) {
           </button>
         ))}
       </div>
-      {del === 'meg' && <Meg s={s} />}
+      {del === 'meg' && <Meg s={s} gåTil={gåTil} />}
       {del === 'regnskap' && (
         <>
           <Skattekort s={s} />
@@ -244,7 +246,88 @@ export function Profil({ s }: { s: Spilltilstand }) {
   )
 }
 
-function Meg({ s }: { s: Spilltilstand }) {
+/**
+ * Hva formuen består av (Pakke 62): én tynn stolpe med en farge per fane, og
+ * under den en rad per slags ting, med verdi og andel skrevet ut — radene er
+ * både forklaringen til fargene og tabellen. Et trykk går til fanen og delen.
+ */
+function Formuedeler({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
+  const f = formuedeler(s)
+  const brutto = f.grupper.reduce((sum, g) => sum + g.verdi, 0)
+  const gaa = (m: Formuemaal) => {
+    if (m.investeringsdel) investeringsdel.sett(m.investeringsdel)
+    if (m.luksusdel) luksusdel.sett(m.luksusdel)
+    gåTil(m.fane)
+  }
+  // Små andeler med én desimal, og det som er mindre enn det, som «< 0,1 %» — aldri «0,0 %» for noe du eier.
+  const andel = (v: number) => {
+    if (brutto <= 0) return ''
+    const a = v / brutto
+    return a < 0.0005 ? '< 0,1 %' : `${tall(a * 100, a < 0.01 ? 1 : 0)} %`
+  }
+  return (
+    <div className="kort formuedeler">
+      <h2 className="kort-tittel">Hva formuen består av</h2>
+      {brutto > 0 && (
+        <div className="fordeling" role="img" aria-label="Formuen fordelt på fanene; radene under har tallene">
+          {f.grupper.map((g) => (
+            <span key={g.gruppe} className="fordeling-del" style={{ flexGrow: g.verdi, background: GRUPPEFARGE[g.gruppe] }} title={`${g.navn}: ${kortKroner(g.verdi)}`} />
+          ))}
+        </div>
+      )}
+      <ul className="formuerader">
+        {f.rader.map((r) => {
+          const innhold = (
+            <>
+              {r.under ? <span className="formuerad-innrykk" aria-hidden="true" /> : <i className="kilde-farge" style={{ background: GRUPPEFARGE[r.gruppe] }} aria-hidden="true" />}
+              <span className="formuerad-navn">{r.navn}</span>
+              <span className="dempet liten">{andel(r.verdi)}</span>
+              <span className="formuerad-verdi">{kortKroner(r.verdi)}</span>
+              <span className="gull" aria-hidden="true">
+                {r.maal ? '›' : ''}
+              </span>
+            </>
+          )
+          return (
+            <li key={r.id} className={r.under ? 'formuerad under' : 'formuerad'}>
+              {r.maal ? (
+                <button className="formuerad-knapp" onClick={() => gaa(r.maal!)}>
+                  {innhold}
+                </button>
+              ) : (
+                <div className="formuerad-knapp">{innhold}</div>
+              )}
+            </li>
+          )
+        })}
+        {f.gjeld > 0 && (
+          <li className="formuerad">
+            <button className="formuerad-knapp" onClick={() => gaa({ fane: 'investeringer', investeringsdel: 'bank' })}>
+              <span className="formuerad-innrykk" aria-hidden="true" />
+              <span className="formuerad-navn">Gjeld</span>
+              <span />
+              <span className="formuerad-verdi minus">−{kortKroner(f.gjeld)}</span>
+              <span className="gull" aria-hidden="true">
+                ›
+              </span>
+            </button>
+          </li>
+        )}
+        <li className="formuerad sum">
+          <div className="formuerad-knapp">
+            <span className="formuerad-innrykk" aria-hidden="true" />
+            <span className="formuerad-navn">Nettoformue</span>
+            <span />
+            <span className="formuerad-verdi">{kortKroner(f.netto)}</span>
+            <span />
+          </div>
+        </li>
+      </ul>
+    </div>
+  )
+}
+
+function Meg({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
   const verdi = nettoformue(s)
   const andel = fremdrift(verdi)
   return (
@@ -259,6 +342,8 @@ function Meg({ s }: { s: Spilltilstand }) {
         </span>
         <Formuegraf punkter={s.historikk.punkter} naa={{ sek: s.sek, verdi }} />
       </div>
+
+      <Formuedeler s={s} gåTil={gåTil} />
 
       <div className="kort">
         <div className="maal-topp">

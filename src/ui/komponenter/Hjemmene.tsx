@@ -4,7 +4,7 @@ import type { Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { Ikon } from './Ikoner'
-import { Seksjon } from './Seksjon'
+import { Delhode } from './Seksjon'
 
 /**
  * Hjemmene (Pakke 60): tre steder du bor, og rommene du innreder i dem. Hvert
@@ -14,7 +14,8 @@ export function Hjemmene({ s }: { s: Spilltilstand }) {
   const ferdige = Object.values(s.hjem ?? {}).reduce((sum, n) => sum + (n ?? 0), 0)
   const alle = HJEMLISTE.reduce((sum, h) => sum + HJEM[h].rom.reduce((n, r) => n + ROM[r].trinn.length, 0), 0)
   return (
-    <Seksjon id="luksus-hjem" tittel="Hjemmene" sammendrag={`${ferdige} av ${alle} trinn`} harInnhold={ferdige > 0}>
+    <>
+      <Delhode tittel="Hjemmene" sammendrag={`${ferdige} av ${alle} trinn`} />
       <p className="dempet liten">
         Husene har du; innredningen kjøper du, rom for rom. Hvert trinn gir status, og {tall(INNREDNING_VERDI * 100)} % av det du har brukt teller i formuen
         {hjemkostnad(s) > 0 && ` (${kortKroner(hjemkostnad(s) * INNREDNING_VERDI)} nå, ${tall(hjemstatus(s))} statuspoeng)`}. Et rom kan ikke selges for seg.
@@ -22,7 +23,7 @@ export function Hjemmene({ s }: { s: Spilltilstand }) {
       {HJEMLISTE.map((h) => (
         <Hjemkort key={h} s={s} id={h} />
       ))}
-    </Seksjon>
+    </>
   )
 }
 

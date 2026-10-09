@@ -22,6 +22,20 @@ function lagreValg(id: string, åpen: boolean): void {
 }
 
 /**
+ * Overskriften for en hel del (Pakke 62): Hjem og Kunst er hver sin del i
+ * Luksus, og en del som åpner på en sammenfoldet seksjon, ser tom ut.
+ */
+export function Delhode({ tittel, sammendrag, forklaring }: { tittel: string; sammendrag?: string; forklaring?: Tema }) {
+  return (
+    <div className="del-hode">
+      <h2 className="seksjon-tittel">{tittel}</h2>
+      {sammendrag && <span className="dempet liten">{sammendrag}</span>}
+      {forklaring && <Forklaring tema={forklaring} />}
+    </div>
+  )
+}
+
+/**
  * En seksjon du kan folde sammen. Uten eget valg er den åpen når du har noe
  * i den (`harInnhold`), og lukket ellers. Trykker du på overskriften, huskes
  * valget ditt.

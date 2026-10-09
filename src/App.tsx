@@ -26,15 +26,16 @@ import { lyttEtterKorttrykk } from './ui/overgang'
 import { lyttEtterTilbake, useTilbake } from './ui/tilbake'
 import { Hendelseslogg } from './ui/komponenter/Hendelseslogg'
 import type { Mål } from './ui/varsler'
+import { luksusdel } from './ui/deler'
 
 const FANENOKKEL = 'milliardaer.fane'
 const GYLDIGE: Fane[] = ['bedrifter', 'investeringer', 'eiendom', 'luksus', 'profil']
 
 /** Hvilken fane en hendelse hører hjemme i — dit tar et trykk på varselet deg. */
-const HENDELSE_FANE: Record<string, Fane> = {
-  Trofé: 'luksus',
-  Opprykk: 'luksus',
-  Nedrykk: 'luksus',
+const HENDELSE_FANE: Record<string, Mål> = {
+  Trofé: 'klubb',
+  Opprykk: 'klubb',
+  Nedrykk: 'klubb',
   Hogst: 'eiendom',
   Bokettersyn: 'profil',
   'Skatt innkrevd': 'profil',
@@ -180,7 +181,14 @@ export default function App() {
 
   // En annen fane enn Bedrifter er et steg i historikken: tilbake går hjem, og fra Bedrifter ut av spillet.
   useTilbake(fane !== 'bedrifter', () => velg('bedrifter'))
-  const gåTil = (m: Mål) => (m === 'hendelser' ? settLoggÅpen(true) : velg(m))
+  const gåTil = (m: Mål) => {
+    if (m === 'hendelser') return settLoggÅpen(true)
+    if (m === 'klubb') {
+      luksusdel.sett('klubb')
+      return velg('luksus')
+    }
+    velg(m)
+  }
 
   // En annen fane har tatt over, eller noe gikk galt: da vises ikke spillet.
   if (avbrudd) return <Avbruddskjerm a={avbrudd} />
@@ -211,10 +219,10 @@ export default function App() {
         }}
       >
         {fane === 'bedrifter' && <Bedrifter s={s} />}
-        {fane === 'investeringer' && <Investeringer s={s} tilEiendom={() => velg('eiendom')} />}
+        {fane === 'investeringer' && <Investeringer s={s} />}
         {fane === 'eiendom' && <Eiendom s={s} />}
         {fane === 'luksus' && <Luksus s={s} />}
-        {fane === 'profil' && <Profil s={s} />}
+        {fane === 'profil' && <Profil s={s} gåTil={velg} />}
       </main>
       <Fanemeny aktiv={fane} velg={velg} aapen={(f) => faneAapen(s, f)} />
       <Varselstabel gåTil={gåTil} />
@@ -230,7 +238,7 @@ export default function App() {
             lukkVelkomst()
             settLoggÅpen(true)
           }}
-          gåTil={velg}
+          gåTil={gåTil}
         />
       )}
       {avisÅpen && <Avis s={s} lukk={lukkAvis} />}

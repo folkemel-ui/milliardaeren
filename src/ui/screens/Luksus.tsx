@@ -25,7 +25,7 @@ import { trykkApner } from '../detaljvisning'
 import { useEffect, useState, type ReactNode } from 'react'
 import { aapneTing, FANE_FOR, useTing } from '../detaljvisning'
 import { Tingdetalj } from './Tingdetalj'
-import { Klubb, Klubbkort } from './Klubb'
+import { Klubbdel } from './Klubb'
 import { Kunst } from '../komponenter/Kunst'
 import { Hjemmene } from '../komponenter/Hjemmene'
 import { Seksjon } from '../komponenter/Seksjon'
@@ -33,49 +33,85 @@ import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { NyMerke } from '../komponenter/Kjopsglimt'
 import { Ikon, type Ikonnavn } from '../komponenter/Ikoner'
 import { useTilbake } from '../tilbake'
+import { LUKSUSDELER, luksusdel } from '../deler'
 
-const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
+/** Prisrekkefølge: lista over det som er til salgs, og klokkene, starter med det billigste. */
+const etterPris = (a: LuksusId, b: LuksusId) => LUKSUS[a].pris - LUKSUS[b].pris
 
+/**
+ * Luksus i fire deler (Pakke 62): Samling (garasjen, havna, hangaren og
+ * klokkene), Hjem, Kunst og Klubb. Statusen står over delene, for alle fire
+ * gir statuspoeng. Delen du sist hadde åpen, huskes.
+ */
 export function Luksus({ s }: { s: Spilltilstand }) {
-  const [klubb, settKlubb] = useState(false)
+  const del = luksusdel.bruk()
   const ting = useTing()
   // Detaljsiden lukkes når du bytter fane.
   useEffect(() => () => aapneTing(null), [])
   const egenTing = ting !== null && FANE_FOR[ting.slag] === 'luksus'
-  useTilbake(klubb, () => settKlubb(false))
   useTilbake(egenTing, () => aapneTing(null))
-  if (klubb) return <Klubb s={s} tilbake={() => settKlubb(false)} />
   if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>
       <Status s={s} />
-      <Klubbkort s={s} aapne={() => settKlubb(true)} />
-
-      <div className="lagerliste">
-        {LAGERLISTE.map((l) => (
-          <Lagerkort key={l} s={s} lager={l} />
+      <div className="segment" role="tablist" aria-label="Luksus">
+        {LUKSUSDELER.map((d) => (
+          <button key={d.id} role="tab" aria-selected={del === d.id} className={del === d.id ? 'aktiv' : ''} onClick={() => luksusdel.sett(d.id)}>
+            {d.navn}
+          </button>
         ))}
       </div>
-
-      {KATEGORIER.map((k) => {
-        const ider = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === k).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)
-        const eid = ider.filter((id) => s.luksus.includes(id)).length
-        return (
-          <Seksjon key={k} id={`luksus-${k}`} tittel={KATEGORINAVN[k]} sammendrag={`${eid} av ${ider.length} eid`} harInnhold={eid > 0}>
-            <ul className="kortliste">
-              {ider.map((id) => (
-                <Luksuskort key={id} s={s} id={id} />
-              ))}
-            </ul>
-          </Seksjon>
-        )
-      })}
-
-      <Hjemmene s={s} />
-
-      <Kunst s={s} />
+      {del === 'samling' && <Samling s={s} />}
+      {del === 'hjem' && <Hjemmene s={s} />}
+      {del === 'kunst' && <Kunst s={s} />}
+      {del === 'klubb' && <Klubbdel s={s} />}
     </section>
+  )
+}
+
+/** Hvilken luksuskategori som står i hvert lager. */
+const KATEGORI_I: Record<LagerId, LuksusKategori> = { garasje: 'bil', havn: 'baat', hangar: 'fly' }
+
+/**
+ * Samlingen: bilene, båtene og flyene du eier, står bare i scenen sin
+ * (garasjen, havna, hangaren). Under hver scene ligger det som er til salgs,
+ * så hver ting vises én gang. Klokkene ligger i bankboksen og har ingen scene.
+ */
+function Samling({ s }: { s: Spilltilstand }) {
+  const klokker = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === 'klokke').sort(etterPris)
+  const eideKlokker = klokker.filter((id) => s.luksus.includes(id))
+  return (
+    <>
+      {LAGERLISTE.map((l) => (
+        <div key={l} className="lagerliste">
+          <Lagerkort s={s} lager={l} />
+          <TilSalgs s={s} kategori={KATEGORI_I[l]} />
+        </div>
+      ))}
+      <Seksjon id="luksus-klokke" tittel={KATEGORINAVN.klokke} sammendrag={`${eideKlokker.length} av ${klokker.length} eid`} harInnhold={eideKlokker.length > 0}>
+        <ul className="kortliste">
+          {[...eideKlokker, ...klokker.filter((id) => !s.luksus.includes(id))].map((id) => (
+            <Luksuskort key={id} s={s} id={id} />
+          ))}
+        </ul>
+      </Seksjon>
+    </>
+  )
+}
+
+/** Det i kategorien du ikke eier ennå. Sammenfoldet fra start: den ledige plassen i scenen viser alt det neste. */
+function TilSalgs({ s, kategori }: { s: Spilltilstand; kategori: LuksusKategori }) {
+  const ider = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === kategori && !s.luksus.includes(id)).sort(etterPris)
+  if (ider.length === 0) return null
+  return (
+    <Seksjon id={`luksus-salg-${kategori}`} tittel={`${KATEGORINAVN[kategori]} til salgs`} sammendrag={`${ider.length} · fra ${kortKroner(LUKSUS[ider[0]].pris)}`} harInnhold={false}>
+      <ul className="kortliste">
+        {ider.map((id) => (
+          <Luksuskort key={id} s={s} id={id} />
+        ))}
+      </ul>
+    </Seksjon>
   )
 }
 
@@ -169,9 +205,6 @@ export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: L
 }
 
 const LAGERIKON: Record<LagerId, Ikonnavn> = { garasje: 'garasje', havn: 'anker', hangar: 'hangar' }
-
-/** Hvilken luksuskategori som står i hvert lager. */
-const KATEGORI_I: Record<LagerId, LuksusKategori> = { garasje: 'bil', havn: 'baat', hangar: 'fly' }
 
 type Lagervalg = { slag: 'eid'; id: LuksusId } | { slag: 'ledig' } | null
 

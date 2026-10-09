@@ -30,58 +30,32 @@ import { tidTilNesteRunde } from '../../engine/startups'
 import type { Kamp, Klubb as KlubbT, Spilltilstand, Taktikk } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
-import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
 import { Klubbvaapen } from '../komponenter/Klubbvaapen'
 import { Stadion } from '../komponenter/Stadion'
 import { Forklaring } from '../komponenter/Forklaring'
 
-/** Kortet i Luksus-fanen: kjøp en klubb, eller åpne den du har. */
-export function Klubbkort({ s, aapne }: { s: Spilltilstand; aapne: () => void }) {
-  const k = s.klubb
-  if (!k) {
-    const laast = s.hoyesteFormue < KLUBB_LAAST_OPP
+/**
+ * Klubb-delen i Luksus (Pakke 62): klubben din rett i delen, uten egen side
+ * og tilbakeknapp. Uten klubb er den til salgs — eller låst til formuen har
+ * vært høy nok.
+ */
+export function Klubbdel({ s }: { s: Spilltilstand }) {
+  if (s.klubb) return <Klubbside s={s} k={s.klubb} />
+  if (s.hoyesteFormue < KLUBB_LAAST_OPP) {
     return (
-      <button className="kort klubbkort" onClick={aapne} disabled={laast}>
+      <div className="kort klubbkort">
         <span className="klubb-emoji" aria-hidden="true">
           <Ikon navn="ball" størrelse={26} />
         </span>
         <span className="klubbkort-midt">
           <strong>Fotballklubb</strong>
-          <span className="dempet liten">
-            {laast ? `Til salgs når nettoformuen har vært ${kortKroner(KLUBB_LAAST_OPP)}` : 'Kjøp en klubb i 4. divisjon og ta den til toppen'}
-          </span>
+          <span className="dempet liten">Til salgs når nettoformuen har vært {kortKroner(KLUBB_LAAST_OPP)}</span>
         </span>
-        {!laast && <span className="gull">›</span>}
-      </button>
+      </div>
     )
   }
-  const neste = nesteKamp(k)
-  return (
-    <button className="kort klubbkort eid" onClick={aapne}>
-      <Klubbvaapen navn={k.navn} størrelse={44} />
-      <span className="klubbkort-midt">
-        <strong>{k.navn}</strong>
-        <span className="dempet liten">
-          {plassering(k)}. plass i {DIVISJONER[k.divisjon].navn}
-          {neste && ` · neste: ${neste.motstander.navn}`}
-        </span>
-      </span>
-      <span className="gull">›</span>
-    </button>
-  )
-}
-
-export function Klubb({ s, tilbake }: { s: Spilltilstand; tilbake: () => void }) {
-  const voks = useVoksUt<HTMLElement>()
-  return (
-    <section className="skjerm detalj" ref={voks}>
-      <button className="tilbake" onClick={tilbake}>
-        ‹ Luksus
-      </button>
-      {s.klubb ? <Klubbside s={s} k={s.klubb} /> : <Klubbkjop s={s} />}
-    </section>
-  )
+  return <Klubbkjop s={s} />
 }
 
 function Klubbkjop({ s }: { s: Spilltilstand }) {
@@ -90,9 +64,9 @@ function Klubbkjop({ s }: { s: Spilltilstand }) {
   const { klubb, pris } = klubbTilSalgs(s, navn)
   return (
     <div className="kort klubbkjop">
-      <h1 className="skjerm-tittel">
+      <h2 className="skjerm-tittel">
         Kjøp en fotballklubb <Forklaring tema="klubb" />
-      </h1>
+      </h2>
       <p className="dempet">
         Klubbene i 4. divisjon er til salgs. Du får en tropp på {klubb.spillere.length} spillere og sponsorpengene for første sesong.
         Klubben spiller én kamp hver spilldag.
@@ -137,9 +111,9 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
           <div className="klubbtopp-navn">
             <Klubbvaapen navn={k.navn} størrelse={52} />
             <div>
-              <h1 className="skjerm-tittel">
+              <h2 className="skjerm-tittel">
                 {k.navn} <Forklaring tema="klubb" />
-              </h1>
+              </h2>
               <span className="dempet">
                 {DIVISJONER[k.divisjon].navn} · sesong {k.sesong}
               </span>

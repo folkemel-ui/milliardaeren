@@ -4,7 +4,7 @@ import type { Velkomst } from '../../state/lager'
 import { oppsummer } from '../velkomst'
 import { UTFALLTEKST } from '../../engine/kvartal'
 import { fortegnKroner, kortKroner, varighet } from '../format'
-import type { Fane } from './Fanemeny'
+import type { Mål } from '../varsler'
 import { RulleTall } from './RulleTall'
 import { Ikon } from './Ikoner'
 
@@ -20,7 +20,7 @@ export function Velkomstskjerm({
   lukk: () => void
   lesAvis: () => void
   seHendelser: () => void
-  gåTil: (f: Fane) => void
+  gåTil: (m: Mål) => void
 }) {
   const o = useMemo(() => oppsummer(v.før, v.etter, v.borteSek), [v])
   const kappet = o.borteSek > o.telteSek
@@ -87,7 +87,7 @@ export function Velkomstskjerm({
               <span>
                 <Ikon navn="ball" størrelse={16} /> {o.kamper.length} {o.kamper.length === 1 ? 'kamp' : 'kamper'}: {seire} {seire === 1 ? 'seier' : 'seire'}, {uavgjort} uavgjort, {tap} tap
               </span>
-              <button className="knapp knapp-liten" onClick={() => (gåTil('luksus'), lukk())}>
+              <button className="knapp knapp-liten" onClick={() => (gåTil('klubb'), lukk())}>
                 Klubben
               </button>
             </li>
