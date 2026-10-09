@@ -38,7 +38,7 @@ describe('avisas bilder', () => {
 
   it('ellers et tema, børssaker en graf — og lokalsaker gjerne ingenting', () => {
     expect(avisbilde(sak('Skatteoppgjøret er klart'))).toEqual({ art: 'ikon', navn: 'kvittering' })
-    expect(avisbilde(sak('Bølgen FK 2–1 Fjordby IL'))).toEqual({ art: 'ikon', navn: 'ball' })
+    expect(avisbilde(sak('Bølgen FK 2–1 Fjordby IL'))).toEqual({ art: 'kamp', hjemme: 'Bølgen FK', borte: 'Fjordby IL' })
     expect(avisbilde(sak('Kryptofeber', 'marked'))).toEqual({ art: 'ikon', navn: 'mynt' })
     expect(avisbilde(sak('Noe skjer på børsen', 'marked'))).toEqual({ art: 'ikon', navn: 'graf' })
     expect(avisbilde(sak('Bybanen forsinket', 'lokalt'))).toBeNull()

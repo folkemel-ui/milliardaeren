@@ -22,11 +22,10 @@ Items from *Navigation* and *Football club*. Commits: `Pakke N: …`. Packs 55�
 - **Pack 63 – Shorter lists:** The map switch filters the property list, Sort businesses by income, Funds on the exchange
 - **Pack 64 – A club that matters:** Stadium upgrades, Fixed league teams. Comes after Pack 62, so the club has its own place first. The graphics track draws the upgrades in `Stadion.tsx` alongside it, as with *Drawings for the v2.0 content*.
 
-### Graphics track (Packs G11–G13)
+### Graphics track (Packs G12–G13)
 
-Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker, the last drawings, a living scene); every drawing is now in the style G1 set, and moves and follows the clock on the big scene.
+Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G11 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker, the last drawings, a living scene, moments and pictures); every drawing is now in the style G1 set, and moves and follows the clock on the big scene.
 
-- **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
 - **Pack G12 – Scenes that grow:** Upgrades you can see, Scenes for the homes. Comes after Pack 62, so the homes' scenes and detail page land in the new *Hjem* part.
 - **Pack G13 – The living year:** Seasons in the drawings. Last, so the new upgrade steps and home scenes get their seasons too.
 
@@ -45,13 +44,10 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the f
 
 Loose ends after G1–G7, and what was picked for v10.0.
 
-1. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
-2. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-3. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-4. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
-5. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
-6. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
-7. **Scenes for the homes.** Pack 60 brought three homes to furnish (Hjemmet in Oslo, Hytta at Geilo, Feriehuset in Marbella), three rooms each in three levels, shown as a list with level dots on the Luksus tab. Give each home a scene in the G1 style where the furnished rooms show as they are bought (kitchen, living room with the art wall, wine cellar; fireplace lounge, sauna, hot tub; terrace, pool, guest wing), and a detail page. Picked with Pack 60 (9 October 2026).
+1. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+2. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
+3. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
+4. **Scenes for the homes.** Pack 60 brought three homes to furnish (Hjemmet in Oslo, Hytta at Geilo, Feriehuset in Marbella), three rooms each in three levels, shown as a list with level dots on the Luksus tab. Give each home a scene in the G1 style where the furnished rooms show as they are bought (kitchen, living room with the art wall, wine cellar; fireplace lounge, sauna, hot tub; terrace, pool, guest wing), and a detail page. Picked with Pack 60 (9 October 2026).
 
 ## Navigation
 

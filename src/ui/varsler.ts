@@ -104,5 +104,5 @@ export function avsluttKjop(nr: number): void {
 }
 
 export function useKjop(): Kjopsglimt | null {
-  return useSyncExternalStore(abonner, () => kjop)
+  return useSyncExternalStore(abonner, () => kjop, () => kjop)
 }

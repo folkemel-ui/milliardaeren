@@ -10,15 +10,22 @@ import { EIENDOMSTYPER, LUKSUS } from '../engine/eiendom'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { PRESTASJONER } from '../engine/prestasjoner'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
-import type { BedriftstypeId, EiendomId, Hendelse, Spilltilstand } from '../engine/types'
+import { JORD } from '../engine/jord'
+import { LANDEMERKER } from '../engine/landemerker'
+import { MALERIER } from '../engine/kunst'
+import { ide } from '../engine/startups'
+import type { BedriftstypeId, EiendomId, Hendelse, JordId, LandemerkeId, MaleriId, Spilltilstand } from '../engine/types'
 import { FANE_AAPNER, faneAapen } from './progresjon'
 import type { Fane } from './komponenter/Fanemeny'
 
 /**
  * Et kjøp som fortjener et øyeblikk: første bedrift av en type, første
- * eiendom av en type, en luksusting — eller en fusjon med en rivals bedrift.
+ * eiendom av en type, en luksusting, en gård eller skog, et landemerke, et
+ * maleri, fotballklubben, første andel i en startup — eller en fusjon med en
+ * rivals bedrift. For klubben er `id` klubbens navn (våpenet tegnes fra
+ * det), for en startup selskapets navn (logoen er nøklet på det).
  */
-export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus' | 'fusjon'
+export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus' | 'jord' | 'landemerke' | 'maleri' | 'klubb' | 'startup' | 'fusjon'
 
 export type Nytt =
   | { type: 'hendelse'; hendelse: Hendelse }
@@ -97,6 +104,23 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   }
   for (const id of etter.luksus) {
     if (!før.luksus.includes(id)) funn.push({ type: 'kjop', art: 'luksus', id, navn: LUKSUS[id].navn })
+  }
+  // Grafikkpakke G11: alt annet du kjøper, får også et øyeblikk.
+  for (const id of Object.keys(etter.jord ?? {}) as JordId[]) {
+    if (etter.jord[id] && !før.jord?.[id]) funn.push({ type: 'kjop', art: 'jord', id, navn: JORD[id].navn })
+  }
+  for (const id of Object.keys(etter.landemerker ?? {}) as LandemerkeId[]) {
+    if (etter.landemerker[id]?.eier === 'deg' && før.landemerker?.[id]?.eier !== 'deg') {
+      funn.push({ type: 'kjop', art: 'landemerke', id, navn: LANDEMERKER[id].navn })
+    }
+  }
+  for (const id of Object.keys(etter.kunst?.eide ?? {}) as MaleriId[]) {
+    if (etter.kunst.eide[id] && !før.kunst?.eide[id]) funn.push({ type: 'kjop', art: 'maleri', id, navn: MALERIER[id].navn })
+  }
+  if (etter.klubb && etter.klubb.navn !== før.klubb?.navn) funn.push({ type: 'kjop', art: 'klubb', id: etter.klubb.navn, navn: etter.klubb.navn })
+  for (const st of etter.startups ?? []) {
+    const fra = før.startups?.find((x) => x.id === st.id)
+    if (st.andel > 0 && !(fra && fra.andel > 0)) funn.push({ type: 'kjop', art: 'startup', id: ide(st).navn, navn: ide(st).navn })
   }
   // En fane som har åpnet seg (Pakke 40).
   for (const f of Object.keys(FANE_AAPNER) as Fane[]) {

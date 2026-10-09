@@ -208,10 +208,10 @@ const RESERVE: Merke = {
 
 export const STARTUPNAVN = STARTUP_IDEER.map((i) => i.navn)
 
-/** Logoen til en startup. */
-export function StartupLogo({ navn, liten = false }: { navn: string; liten?: boolean }) {
+/** Logoen til en startup. `størrelse` overstyrer de to faste (kjøpsøyeblikket, Avisa). */
+export function StartupLogo({ navn, liten = false, størrelse }: { navn: string; liten?: boolean; størrelse?: number }) {
   const s = STARTUPMERKER[navn] ?? RESERVE
-  const px = liten ? 22 : 40
+  const px = størrelse ?? (liten ? 22 : 40)
   return (
     <svg className={liten ? 'startup-logo liten' : 'startup-logo'} width={px} height={px} viewBox="0 0 24 24" aria-hidden="true">
       {s.tegning(s.farge, bland(s.farge, '#ffffff', 0.45))}

@@ -1,11 +1,12 @@
 # wisdom-grafikk.md — the graphics track's own notes
 
-For the session in charge of graphics and animation (packs G1–G12, commits
+For the session in charge of graphics and animation (packs G1–G13, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G10
-and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are planned in `Ideer.md`.
+Update it at the end of each G pack, and delete what stops being true. Updated after G10,
+the Saftbod and Pølsebod redraws (10 October 2026, outside any pack) and G11 (11 October
+2026). G12–G13 are planned in `Ideer.md`.
 
 ---
 
@@ -83,6 +84,11 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   the phone's real time, and night only on the big scene. Stating the game clock's
   rhythm in the question (a day is 5 minutes, so it's night about one visit in three)
   made the night option concrete.
+  For G11 Folke took all three recommendations: an exhibition shows *your* dearest work
+  by the artist, else the artist's dearest; every club story gets your crest (the title
+  with a trophy); and only the six purchases the item named (homes wait for G12).
+  Counting the real data first (4 artists, 9 paintings, 2–3 each) is what made the
+  exhibition question answerable.
 - **Count before you quote.** `Ideer.md` said 39 of 68 drawings never moved; the real
   count was 35 (plus the bank below 100 and the street kitchen's first stage). Worse,
   that count was made with every improvement bought: the lemonade stand, the kiosk and
@@ -388,6 +394,30 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   `.bedrift-ikon.naer svg` masks it with a radial gradient. Without the mask the crop
   was a hard square tile among the soft vignettes of the other cards; the brick wall
   at level 25 made it a red block. Other businesses can join the set.
+
+- **Buy moments for everything (G11).** `nytt()` in `ui/hendelsesstrom.ts` finds the
+  purchase (a `Kjopsart` per kind: `jord`, `landemerke` — only when `eier` turns `'deg'`,
+  so a rival's purchase is silent —, `maleri`, `klubb`, `startup` on the *first* stake
+  only), and `Kjopsbilde` in `Kjopsglimt.tsx` picks the picture. App passes `art`/`id`/
+  `navn` through untouched, so no game-track file changed. For the club and a startup the
+  `id` is the *name* (the crest and the logo are keyed on it). App calls `merkNy(id)` for
+  every purchase; the new kinds have no NY badge on their cards, so those keys just sit
+  in the capped list (20) — harmless. `StartupLogo` takes `størrelse` now.
+- **A painting needs a wall behind it.** On the dark buy-moment tile Maja Lind's black
+  frame vanished (and Vik's white one would on the light tile). The tile behind a painting
+  is the gallery wall in both themes (`.kjopsglimt-bilde.maleri`). Check every frame kind
+  (gull, tre, svart, hvit) wherever a painting appears on a plain surface.
+- **Avisa's pictures (G11)**: `avisbilde(sak, bakgrunn)` has new kinds `kamp` (both
+  crests, home team left), `klubb` (crest, `pokal` for a title), `maleri` and `startup`
+  (`konkurs` prints grey). They come from exact title patterns in `egenSak`, checked
+  *before* the rivals' surnames: «Ola Lunde legger opp» used to print Ingrid Lunde's
+  portrait. Only two pictures read today's state (`Avisbakgrunn`: the club you own, for a
+  retiring player whose story doesn't name the club, and the paintings you own); the
+  `Utgave` memo computes it once per issue. A new story kind in the engine with its own
+  picture goes into `egenSak` with a test in `grafikkG11.test.ts`.
+- **Mock Avisa in a test save** by replacing `s.avis.at(-1).saker` from `/ikon.svg` and
+  setting `avisLest` below that day; reorder the stories and reload to see each kind as
+  the main story (88 px) and in the column (44 px).
 
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
@@ -707,8 +737,24 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
 - **The Write tool refuses a file changed since it was last read**, such as a patch
   JSON reused across steps. The old patch then runs by mistake. Give each patch its own
   file name (`g3-fjell.json`).
+- **Mixed hunks in a shared file (G11)**: the game track was mid-pack in `styles.css`,
+  `varsler.ts` and `Ideer.md` at the same time. Stage only your part by building the
+  index version yourself: `git show HEAD:<file>` into the scratchpad, apply your own
+  `fiks.mjs` patch to that copy, then `git update-index --cacheinfo 100644,$(git
+  hash-object -w <copy>),<file>`. Check with `git diff --cached <file>` that only your
+  hunks are staged, and that their working-copy changes are untouched.
+- **The index is shared too.** Both sessions stage into the same `.git/index`. In G11 the
+  game track staged all of Pack 61 a minute before I staged G11, so a plain `git commit`
+  by either of us would have taken the other's work, and my `update-index` overwrote
+  their staged version of the three shared files. **Before staging, run `git diff
+  --cached --name-only`: if it isn't empty, the other track is committing — wait** (a
+  background loop that exits when `git rev-parse HEAD` changes), then stage and commit.
+  I undid my staging by giving them back "working copy minus my patches" for the shared
+  files. Reversing a patch whose `to` is empty doesn't work: `''` matches at position 0,
+  so the removed line came back at the top of the file. Re-insert it before an anchor.
 - **Heredocs aren't reliable for backslashes either**: `\\d` in a regex came out as `\d`
-  through Bash. Write scripts with regexes using the Write tool. That includes the
+  through Bash. In G11 it went further: `node - <<'EOF'` with `\\d` in a template string
+  wrote a bare `d` (`/(d+)–(d+)/`); tsc can't see that, only a test can. Write scripts with regexes using the Write tool. That includes the
   JSON patch files for `fiks.mjs`: in G6 a heredoc JSON with `\.\d` in a test regex
   failed to parse. Anything with a backslash goes through Write or Edit.
 - **An error screen during edits** ("Noe gikk galt", e.g. "reading 'x'") is usually HMR
@@ -755,7 +801,7 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
 
-## 7. Notes for later (G1–G10 done; G11–G13 planned in `Ideer.md`)
+## 7. Notes for later (G1–G11 done; G12–G13 planned in `Ideer.md`)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -780,9 +826,8 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   (25), the string of lights burning by day (100), and white cup stacks (Folke didn't
   pick "cups you can recognise").
 - **Not done, ask first** (shared files):
-  - Avisa shows a generic icon for startup stories and art exhibitions
-    (`ui/avisbilde.ts` has no startup or art kind); `StartupLogo` and `Maleribilde`
-    could go there.
+  - The homes (Pack 60) are still bought in silence; give them a buy moment with their
+    scene when G12 draws them.
   - The business cards' own 44 px pictures keep the full scene, except the Saftbod
     (`NAER_PAA_KORTET`, Folke picked it on 10 October); the kiosk is still small there.
   - The map data costs ~23 KB gzipped at startup; `Norgeskart`/`Verdenskart` could

@@ -1,8 +1,10 @@
 /**
  * Avisas bilder og seksjoner: hver sak får en liten tegning etter hva den
- * handler om — en rival, et papir, en bedrift, en luksusting, et landemerke
- * eller et tema — og en seksjon over overskriften. Bare ut fra teksten i
- * saken, så gamle utgaver får bilder også. Ren funksjon, så den kan testes.
+ * handler om — en rival, et papir, en bedrift, en luksusting, et landemerke,
+ * en kamp, klubben, et maleri, en startup eller et tema — og en seksjon over
+ * overskriften. Ut fra teksten i saken, så gamle utgaver får bilder også;
+ * bare maleriet og spilleren som legger opp ser på hva du eier nå. Ren
+ * funksjon, så den kan testes.
  */
 
 import { START_RIVALER } from '../engine/rivaler'
@@ -10,7 +12,9 @@ import { PAPIRER } from '../engine/marked'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { LUKSUS } from '../engine/eiendom'
 import { LANDEMERKER } from '../engine/landemerker'
-import type { Overskrift, PapirId, Spilltilstand } from '../engine/types'
+import { KUNSTNERE, MALERIER, MALERILISTE } from '../engine/kunst'
+import { STARTUP_IDEER } from '../engine/startups'
+import type { MaleriId, Overskrift, PapirId, Spilltilstand } from '../engine/types'
 import type { Ikonnavn } from './komponenter/Ikoner'
 
 export type Avisbilde =
@@ -18,6 +22,50 @@ export type Avisbilde =
   | { art: 'papir'; id: PapirId }
   | { art: 'tegning'; id: string }
   | { art: 'ikon'; navn: Ikonnavn }
+  /** En kamp (G11): begge lagenes våpen, hjemmelaget til venstre. */
+  | { art: 'kamp'; hjemme: string; borte: string }
+  /** Klubbens våpen: opprykk, nedrykk, en spiller som legger opp — og med pokal når serien er vunnet. */
+  | { art: 'klubb'; navn: string; pokal?: boolean }
+  | { art: 'maleri'; id: MaleriId }
+  /** Startupens logo; en konkurs trykkes i grått. */
+  | { art: 'startup'; navn: string; konkurs?: boolean }
+
+/** Det avisa trenger å vite om deg for to av bildene. */
+export interface Avisbakgrunn {
+  /** Klubben du eier nå — saken om en spiller som legger opp, nevner den ikke. */
+  klubb?: string
+  /** Maleriene du eier — en utstilling viser ditt dyreste av kunstnerens verk. */
+  malerier?: readonly MaleriId[]
+}
+
+const KAMP = /^(.+) (\d+)–(\d+) (.+)$/
+const STARTUPSAK = /^(.+) (søker penger|er konkurs|kjøpt opp|til børs)$/
+const STARTUPNAVN = new Set(STARTUP_IDEER.map((i) => i.navn))
+
+/** Kunstnerens dyreste verk blant dem du eier, ellers kunstnerens dyreste. */
+function utstillingsbilde(kunstner: string, eide: readonly MaleriId[] = []): MaleriId | null {
+  const verk = MALERILISTE.filter((id) => KUNSTNERE[MALERIER[id].kunstner].navn === kunstner).sort(
+    (a, b) => MALERIER[b].startpris - MALERIER[a].startpris,
+  )
+  return verk.find((id) => eide.includes(id)) ?? verk[0] ?? null
+}
+
+/** Saker om klubben, kampene og kunsten — mønstrene er så presise at de går foran rivalenes etternavn. */
+function egenSak(tittel: string, b: Avisbakgrunn): Avisbilde | null {
+  const kamp = KAMP.exec(tittel)
+  if (kamp) return { art: 'kamp', hjemme: kamp[1], borte: kamp[4] }
+  const opp = /^OPPRYKK: (.+) til /.exec(tittel) ?? /^Nedrykk for (.+)$/.exec(tittel)
+  if (opp) return { art: 'klubb', navn: opp[1] }
+  const vinner = /^(.+) vinner .+!$/.exec(tittel)
+  if (vinner) return { art: 'klubb', navn: vinner[1], pokal: true }
+  if (/ legger opp$/.test(tittel)) return b.klubb ? { art: 'klubb', navn: b.klubb } : { art: 'ikon', navn: 'ball' }
+  const utstilling = /^Stor utstilling for (.+)$/.exec(tittel)
+  const verk = utstilling && utstillingsbilde(utstilling[1], b.malerier)
+  if (verk) return { art: 'maleri', id: verk }
+  const st = STARTUPSAK.exec(tittel)
+  if (st && STARTUPNAVN.has(st[1])) return { art: 'startup', navn: st[1], konkurs: st[2] === 'er konkurs' || undefined }
+  return null
+}
 
 /** Hele ordet, ikke en del av et annet («Aas» skal ikke treffe «Aasen»). */
 function harOrd(tekst: string, ord: string): boolean {
@@ -49,7 +97,9 @@ const TEMA: [RegExp, Ikonnavn][] = [
 ]
 
 /** Bildet til en sak, eller null når ingenting passer (lokalsakene står gjerne uten). */
-export function avisbilde(sak: Overskrift): Avisbilde | null {
+export function avisbilde(sak: Overskrift, bakgrunn: Avisbakgrunn = {}): Avisbilde | null {
+  const egen = egenSak(sak.tittel, bakgrunn)
+  if (egen) return egen
   const t = `${sak.tittel} ${sak.tekst}`
   for (const r of START_RIVALER) {
     const etternavn = r.navn.split(' ').at(-1)!

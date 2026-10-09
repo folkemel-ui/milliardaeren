@@ -4733,6 +4733,18 @@ button.merke {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
 }
 
+/* G11: et maleri henger på galleriveggen, i begge temaer — en svart ramme
+   forsvant på den mørke flisen, og en hvit ville forsvinne på den lyse. */
+.kjopsglimt-bilde.maleri {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 22%, rgb(255 236 200 / 0.24), transparent 75%),
+    linear-gradient(#3f3a33, #2a2622);
+}
+
+.kjopsglimt-bilde.maleri svg {
+  filter: drop-shadow(3px 6px 6px rgb(0 0 0 / 0.5));
+}
+
 @keyframes kjopsglimt-vokse {
   from {
     opacity: 0;
@@ -6002,6 +6014,35 @@ button.maalstripe {
 
 .avisbilde.rival {
   padding: 2px;
+}
+
+/* G11: en kamp viser begge lagenes våpen side om side, hjemmelaget til venstre. */
+.avisbilde.kamp {
+  grid-auto-flow: column;
+  gap: 3px;
+}
+
+.avisbilde.klubb {
+  position: relative;
+}
+
+/* Serien er vunnet: en liten pokal i hjørnet av våpenet, i trykksverte-gull. */
+.avisbilde-pokal {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  display: grid;
+  padding: 2px;
+  border: 1px solid #1c1a16;
+  border-radius: 50%;
+  background: #ebe4d4;
+  color: #7a5a12;
+}
+
+/* En startup som har gått konkurs, trykkes i grått. */
+.avisbilde.konkurs svg {
+  filter: grayscale(1);
+  opacity: 0.55;
 }
 
 /* Hovedsaken: stor forbokstav. */
