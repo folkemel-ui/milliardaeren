@@ -358,12 +358,25 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   - **The product on the sign**: `Saftglass` (a red glass with a straw) and `Saftord`
     (SAFT as stroked paths, each letter on a 0–1 box, 0.66 × h wide with 0.28 × h
     between).
-  - **People**: `Saftfolk` is a `Person`-like figure with `barn`, `caps`, `shorts`,
-    `forkle` and a right arm in `ARM` poses (`ned`, `frem` holding a bank card, `skjenk`,
-    `opp`, `holde`). `haand()` gives the hand in canvas units, so the jug and the stream
-    are placed from the same numbers as the arm. It lives in `Illustrasjoner.tsx` next
-    to the Saftbod; move it to Tegnestil if a second drawing wants it (G12's *Upgrades
-    you can see* likely will).
+  - **People**: `Folk` (Tegnestil) is a `Person`-like figure for any distance
+    (`avstand`) with `barn`, `caps`, `papirhatt`, `shorts`, `forkle` (a colour),
+    `skjerf`, a right arm in `ARM` poses (`ned`, `frem`, `skjenk`, `opp`, `holde`,
+    `grill`) and `ting` in the hand (`kopp`, `kort`, `polse`, `tang` — the tongs move
+    with `anim-vend`). `Spiser` is the two-frame eater/drinker. `haand()` gives the hand
+    in canvas units, so a jug, a stream or a pot is placed from the same numbers as the
+    arm. Mirror a figure with `speil(x, …)` (Pølseboden) when it must reach left.
+  - **Words on signs**: `Ord` + `ordbredde` (Illustrasjoner) draw any word from the
+    `BOKSTAVER` table (S A F T E N P so far; add a glyph on a 0–1 box when needed).
+- **The Pølsebod (redrawn 10 October, same approach)**: pølse i lompe at real size
+  (1.9 units ≈ 19 cm at street distance), a pot with steam from level 1, a menu by the
+  hatch; park (1), street corner with taxi and street lamp (25), football ground on
+  match day with fans in scarves (50), ferry quay with the ferry in the haze and a gull
+  (100). The owner hands out a hot dog (mirrored) to a customer paying at the hatch;
+  guests stand *behind* the standing tables, drawn before them. The mustard improvement
+  is a jar on the counter plus a chalkboard A-frame (`Krittavle`) with SENNEP. Its card
+  uses the close-up too (`NAER_PAA_KORTET`). Found in its sense pass: a food truck
+  above the ground (on the sea at stage 3), a street lamp and a sign on the same spot,
+  guests hiding the tables, then a guest hidden by the stand's side wall.
 - **Lamps are off by day.** A lantern or street lamp whose glass is `S.glass.skygge` with
   `className="nattvindu"` (plus a `nattskjul` sheen) is dark by day and glows at night
   through the night layer. A `Lampe` (always lit, with a glow circle) is only right for
