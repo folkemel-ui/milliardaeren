@@ -4,8 +4,8 @@ For the session in charge of graphics and animation (packs G1–G12, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
-Update it at the end of each G pack, and delete what stops being true. Updated after G10.
-G11–G12 are planned in `Ideer.md`.
+Update it at the end of each G pack, and delete what stops being true. Updated after G10
+and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are planned in `Ideer.md`.
 
 ---
 
@@ -102,6 +102,17 @@ G11–G12 are planned in `Ideer.md`.
 - **Put outside sources in the question.** Fetching Natural Earth was an option in
   the G3 questions, so Folke's answer was the approval. Do the same for any download,
   font or dataset: name the source, the licence and that nothing loads at runtime.
+- **"If you were to improve X, what would you change?"** gets a numbered list, grouped
+  (what it is, where it stands, people, improvements, small sizes and night), each point
+  with what is wrong *now* and a concrete fix. Look at the drawing first, at every stage
+  with f = 0 and f = 3, big and at 44 px. Folke then answers **"Add 1, 2, 3 … to
+  saftbod, and show me"**: that means *build it now*, not add it to `Ideer.md`.
+- **When a picked number doesn't match its note, ask.** Folke wrote "7 (option to sort
+  by income)", but sorting was item 6. One `AskUserQuestion` with the three readings
+  settled it at once ("only 6").
+- **Folke draws on screenshots of the browser pane** (a red ring around the problem) and
+  asks "can you find more?". Take that as a request for a full sense check, not just
+  the one fix; see §5 *Does it make sense?*.
 - **After each pack, Folke asks what you learned.** Update this file before the pack
   commit, then re-read it once for anything missing. That's cheaper than a second round.
 - Report each item as what it looks like now. Say plainly what's still mixed or still
@@ -335,6 +346,36 @@ G11–G12 are planned in `Ideer.md`.
   animation runs 0.01 ms once and the element falls back to its own style — the window
   stays lit, the beacon on, the band off-canvas.
 
+- **The Saftbod (redrawn 10 October, outside any pack)** is the model for a small
+  business that tells a story:
+  - **Red saft** (`S.vin`) everywhere the product shows: dispensers, jug, stream, berries.
+  - **The seller grows up**: a child (level 1), a teenager in a cap (25), the owner
+    in an apron plus a helper (50, 100).
+  - **The place grows**: a garden gate with a hedge, a picket fence and a house in the
+    haze (1); outside a brick shop (25); a seaside boardwalk with a railing (50); a
+    cobbled square with a street lamp (100). Two new `Bakke` types make that possible:
+    `brostein` (rows of round-capped dashes) and `promenade` (sand strip plus boards).
+  - **The product on the sign**: `Saftglass` (a red glass with a straw) and `Saftord`
+    (SAFT as stroked paths, each letter on a 0–1 box, 0.66 × h wide with 0.28 × h
+    between).
+  - **People**: `Saftfolk` is a `Person`-like figure with `barn`, `caps`, `shorts`,
+    `forkle` and a right arm in `ARM` poses (`ned`, `frem` holding a bank card, `skjenk`,
+    `opp`, `holde`). `haand()` gives the hand in canvas units, so the jug and the stream
+    are placed from the same numbers as the arm. It lives in `Illustrasjoner.tsx` next
+    to the Saftbod; move it to Tegnestil if a second drawing wants it (G12's *Upgrades
+    you can see* likely will).
+- **Lamps are off by day.** A lantern or street lamp whose glass is `S.glass.skygge` with
+  `className="nattvindu"` (plus a `nattskjul` sheen) is dark by day and glows at night
+  through the night layer. A `Lampe` (always lit, with a glow circle) is only right for
+  lights that really burn by day (the level-100 string of lights, by G2's "warm light"
+  rule). Folke spotted nothing here, but a street lamp glowing at noon was one of the
+  nine things that didn't make sense.
+- **Card close-ups (`NAER_PAA_KORTET` in BedriftIkon)**: the Saftbod's card uses its
+  `NAERBILDER` crop (now [12, 22, 64, 64], 1.5×) with class `naer`, and CSS
+  `.bedrift-ikon.naer svg` masks it with a radial gradient. Without the mask the crop
+  was a hard square tile among the soft vignettes of the other cards; the brick wall
+  at level 25 made it a red block. Other businesses can join the set.
+
 - **Logo colours are mid-tones**: luminance 0.126–0.30 gives ≥ 3:1 on the dark card
   (#181613), the light card (#ffffff) *and* the newspaper's cream (#ebe4d4).
   `grafikkG4.test.ts` checks all three. The cream was the strictest: five colours that
@@ -437,6 +478,19 @@ G11–G12 are planned in `Ideer.md`.
 - **Keyframes with only `to` start from the element's own transform.** The hands carry
   an inline `rotate(now)`, so `tegning-dreie` needs an explicit `from { rotate(0) }` or
   they turn from "now" to 360° and jump.
+- **A bent arm can't swing as one rigid piece.** Rotating the whole drinking arm around
+  the shoulder pushed the elbow into the chest. Draw two poses instead (cup at the
+  mouth, cup lowered) and cross-fade them with opacity keyframes (`anim-sipp`,
+  `anim-sipp-ned`): a two-frame animation reads as movement at this size. The lowered
+  pose carries `opacity="0"` as an attribute, so the resting state (lists, reduced
+  motion) is the action itself: the customer drinking, the jug pouring.
+- **Turning something held in a scaled figure**: put the moving part in its own wrapper
+  `g` *outside* the figure's `translate … scale` group, with no transform attribute of its
+  own, `transformBox: 'view-box'` and `transformOrigin` at the hand in canvas px. Inside
+  it, the same `translate scale` plus the static tilt (`rotate(35)`). The keyframes undo
+  the tilt (`rotate(-35deg)` = upright), so with no animation the jug pours. The stream
+  is a separate rect with matching opacity keyframes, placed at the spout computed from
+  the same angle.
 - **Collision tests must cover the worst case**: `norgeskartet.test.ts` checks every
   name (with room for the arrow), the longest rent and a two-digit badge with crown for
   all cities at once. That caught Oslo's badge and rent reaching into the inset.
@@ -525,6 +579,36 @@ G11–G12 are planned in `Ideer.md`.
   keep the pane visible (a `resize_window` shows it) and wait: a game hour is 12.5 s.
   Editing `sek` in the save while the game runs is overwritten on reload (as
   `wisdom.md` says) — and wasn't needed.
+- **Does it make sense? Do this pass before you show anything.** The first Saftbod I
+  showed had nine things that didn't make sense, and the tests caught none of them. Folke
+  circled one (SAFT ran off its sign); a deliberate pass found eight more. Check each:
+  - **Real size, from `METER`.** At near distance 18 units are a metre: the dispensers
+    were 13 units (72 cm), the cups 4–4.6 (22–25 cm), the berries 2.2 (12 cm). Write the
+    real size next to each prop before drawing it (dispenser 9.5 ≈ 50 cm, cup 2.6 ≈
+    14 cm, berry basket 2.2 ≈ 12 cm).
+  - **Text fits its surface.** Compute the word's width (4 letters × 0.66h + 3 × 0.28h)
+    against the sign, don't eyeball it.
+  - **Everything hangs on or stands on something**: a card on a table edge needs tape or
+    string.
+  - **Hidden props show up where you don't expect.** A crate hidden behind the table lifted
+    the child, so their legs showed above the tabletop, as if standing on it.
+  - **Paths lead somewhere**: a drive up to an open gate needs something behind the gate,
+    not a hedge.
+  - **Lights match the time of day** (see §3).
+  - **Hands that act hold something** (a bank card to pay, a cup to drink).
+- **Zoom into one drawing**: render it in the overlay, then set the root `svg`'s
+  `viewBox` to the area (`'14 38 70 50'`) and its width/height to ~740 px; resize the pane
+  by 1 px for a fresh frame. **A stale frame fooled me once**: the screenshot still
+  showed the previous zoomed drawing, and I "saw" the stream 2 units off the spout. To
+  check a position, measure: `getBoundingClientRect` of both parts, divided by the
+  rendered width / 96, gives canvas units (58.0 vs 58.4: it was fine).
+- **Freeze motion to check a pivot**: two `Scene`s side by side, each with
+  `getAnimations({ subtree: true })` paused at a different `currentTime` (1.0 s: jug
+  upright, cup lowered; 2.9 s: pouring, drinking). One look proves both poses and the
+  pivot.
+- **Leave the result in the pane for Folke**: a labelled contact sheet (stage × f = 0/3,
+  plus the card pictures) in two columns of 340 px, at the pane's own size (preset
+  desktop). Four columns overflowed the pane.
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
   Reload, wrap `console.error`, click all five tabs, and read the wrapped list.
 
@@ -642,6 +726,18 @@ G11–G12 are planned in `Ideer.md`.
   `sed` lost the escaping in a regex too (`\(\.lerret\)`), so prefer Edit for test regexes.
 - When a script asserts a count, count by hand first: I expected 13 keyframe px values
   and there were 10. The script threw halfway after the first part had already written.
+- **A splice must start at the first helper.** `splice-saft.mjs` replaced from the
+  drawing's doc comment to the next drawing, but the new helpers (`Saftord`, `Lykt`,
+  `Saftfolk` …) sat *above* that comment, so the second run left a duplicate of every
+  helper. `tsc` caught it ("Duplicate function implementation"). Start at the first
+  helper's comment when it exists, and keep the whole block (helpers + drawing) in one
+  snippet file that the script owns.
+- **Patch the snippet, then re-splice**: small fixes went into the snippet with
+  `fiks.mjs` (JSON `[from, to]` pairs, all checked before writing) and the snippet was
+  spliced again, so the snippet stays the source of truth. The Edit tool on the snippet
+  works too, after a Read (the scripts change it on disk).
+- **The full test suite logs "Timeout calling onTaskUpdate"** under load while every
+  test passes; `wisdom.md` §5 explains it. Report it as that, with the pass count.
 - Chroma (RGB max − min) is the "muted" measure, not HSL saturation, which calls pale
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
@@ -663,11 +759,18 @@ G11–G12 are planned in `Ideer.md`.
 - **Shared tests describe the art**: when you redraw something, grep the tests for its
   markup and update the counting, not the intent (`pakke42.test.ts` counted the old
   dot crowd; `pakke43.test.ts` matches the wide-layout selector).
+- **What the Saftbod taught that the other small businesses lack**: red-for-the-product,
+  a readable sign, customers in a queue beside the counter (not on top of the product),
+  a place that grows, and a light that keeps the scene alive at night. The Pølsebod,
+  Gatekjøkken and Kiosk could get the same treatment. Offer it as a list; don't start
+  unasked. Left in the Saftbod on purpose: the empty sign band over the shop window
+  (25), the string of lights burning by day (100), and white cup stacks (Folke didn't
+  pick "cups you can recognise").
 - **Not done, ask first** (shared files):
   - Avisa shows a generic icon for startup stories and art exhibitions
     (`ui/avisbilde.ts` has no startup or art kind); `StartupLogo` and `Maleribilde`
     could go there.
-  - The business cards' own 44 px pictures keep the full scene (Folke chose close-ups
-    only in the two tiny places); the kiosk is still small there.
+  - The business cards' own 44 px pictures keep the full scene, except the Saftbod
+    (`NAER_PAA_KORTET`, Folke picked it on 10 October); the kiosk is still small there.
   - The map data costs ~23 KB gzipped at startup; `Norgeskart`/`Verdenskart` could
     be lazy-loaded in Eiendom (a screen change).

@@ -54,6 +54,16 @@ session; delete what stops being true.
   findings in the code yourself before passing them on, then give Folke one ranked,
   numbered list (serious / medium / minor) with real numbers ("+113 % in 11 clicks"). The
   17 bugs became a *Bugs* section and Packs 55–58, grouped by the files they touch.
+- **"Look at the navigation and how everything is organised"** (10 October) worked as:
+  read `App.tsx`, the tab bar and each screen's parts, then measure in a late game at
+  375 × 812. A script clicked every tab and every segment button and recorded the page
+  height in screens, the headings and the button count. The list then quoted numbers:
+  Eiendom 12 screens with 29 property types, Luksus 7.1 screens with the 16 vehicles
+  shown twice, the first business card at 303 px of 812, the event log 3.3 screens down
+  in Bank. Also grep for behaviour nobody sees on a PC: there was no
+  `pushState`/`popstate` at all, so the phone's back button leaves the game. Folke
+  picked nine of twelve; they are the *Navigation* section in `Ideer.md`, not yet in
+  packs or assigned to a track.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
@@ -153,7 +163,11 @@ session; delete what stops being true.
   build a state with `nyttSpill`, big `kontanter`/`hoyesteFormue`, `kjopBedrift`,
   `oppgraderFlere`, `kjopLuksus`, `kjopEiendom`, `kjopJord`, `kjopLandemerke`,
   `kjopKlubb`, `simuler(s, 900)`, then `localStorage.setItem('milliardaer.lagring', JSON.stringify(s))`
-  and navigate to `/`. A helper like `ok = (u, s) => u.ok ? u.tilstand : s` hides failed
+  and navigate to `/`. **Quickest late game**: on `/ikon.svg`,
+  `(await import('/src/engine/__tester__/hjelp.ts')).fulltSpill()` gives a save that owns
+  everything (13 businesses at level 121, all property, luxury, art, a club). `hjelp.ts`
+  doesn't import Vitest, so it loads in the page. Then `simuler(s, 3000)`, set
+  `kontanter`, save. A helper like `ok = (u, s) => u.ok ? u.tilstand : s` hides failed
   actions: upgrades failed quietly once, wages outran income and every chart went
   negative. Set `b.nivaa` directly, or log failures. Simulating 40 days takes < 1 s, so
   charts and stats can get weeks of history.
