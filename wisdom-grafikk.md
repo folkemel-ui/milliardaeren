@@ -755,7 +755,7 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
 
-## 7. Notes for later (G1–G10 done; G11–G12 planned in `Ideer.md`)
+## 7. Notes for later (G1–G10 done; G11–G13 planned in `Ideer.md`)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -765,7 +765,7 @@ and after the Saftbod redraw (10 October 2026, outside any pack). G11–G12 are 
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **G12 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
+- **G13 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
   it. Snow could follow the same pattern (a `--vinter` var and a snow layer), but the
   date changes only once a game day, so re-rendering with a prop is also cheap.

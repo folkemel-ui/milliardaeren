@@ -10,19 +10,26 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 Version 1.0 was reached with Pack 43.
 
+Order across the tracks: G11 and Pack 61 can start at once. Pack 62 comes before G12 and Pack 64.
+
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track
+### Game track (Packs 61–64)
 
-No game packs planned. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. Next: pick from *Parked* or a new list. Commits: `Pakke N: …`.
+Items from *Navigation* and *Football club*. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. The navigation packs belong here because they change the screens' logic (App, the tab parts).
 
+- **Pack 61 – Back goes back:** Back goes back, Parts remember the same way, The event log where you look for it
+- **Pack 62 – Luksus in parts:** Luksus in parts, The club gets its own place, Everything you own in one place
+- **Pack 63 – Shorter lists:** The map switch filters the property list, Sort businesses by income, Funds on the exchange
+- **Pack 64 – A club that matters:** Stadium upgrades, Fixed league teams. Comes after Pack 62, so the club has its own place first. The graphics track draws the upgrades in `Stadion.tsx` alongside it, as with *Drawings for the v2.0 content*.
 
-### Graphics track (Packs G11–G12)
+### Graphics track (Packs G11–G13)
 
 Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker, the last drawings, a living scene); every drawing is now in the style G1 set, and moves and follows the clock on the big scene.
 
 - **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
-- **Pack G12 – The living year:** Seasons in the drawings, Upgrades you can see
+- **Pack G12 – Scenes that grow:** Upgrades you can see, Scenes for the homes. Comes after Pack 62, so the homes' scenes and detail page land in the new *Hjem* part.
+- **Pack G13 – The living year:** Seasons in the drawings. Last, so the new upgrade steps and home scenes get their seasons too.
 
 *Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — Pack 59 drew Amsterdam, Roma and Paris itself (a rough Vespa in Roma could use a finer hand); the homes from Pack 60 are an item of their own (*Scenes for the homes*).
 
