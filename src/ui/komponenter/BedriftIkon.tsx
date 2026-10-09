@@ -25,10 +25,11 @@ export function Apneknapp({ ting, navn, children }: { ting: Ting; navn: string; 
  */
 /**
  * Bedrifter som vises som nærbilde (`NAERBILDER`) også på kortet, fordi
- * motivet ellers blir for lite på 44–60 px. Saftboden står på nær avstand med
- * mye himmel rundt; nærbildet gjør den halvannen gang så stor.
+ * motivet ellers blir for lite på 44–60 px: saftboden (nær avstand, mye himmel
+ * rundt) og pølseboden (en liten bu på gateavstand). Nærbildet gjør dem omtrent
+ * halvannen til to ganger så store.
  */
-const NAER_PAA_KORTET = new Set(['saftbod'])
+const NAER_PAA_KORTET = new Set(['saftbod', 'polsebod'])
 
 export const BedriftIkon = memo(function BedriftIkon({
   type,

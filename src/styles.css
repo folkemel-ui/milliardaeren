@@ -767,6 +767,12 @@ figure {
     transform-origin: center bottom;
     animation: tegning-vinge 0.08s linear infinite alternate;
   }
+
+  /* Pølseboden: tanga snur pølsene. */
+  .scene .anim-vend {
+    transform-origin: left center;
+    animation: tegning-vend 2.6s ease-in-out infinite;
+  }
 }
 
 @keyframes tegning-dreie {
@@ -869,6 +875,17 @@ figure {
   }
   75% {
     transform: translate(calc(-1.2px * var(--utslag, 1)), calc(-0.7px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-vend {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-18deg);
   }
 }
 

@@ -823,6 +823,209 @@ export function Person({ x, y = GRUNNLINJE, avstand, klaer, hud = S.hud, har = S
   )
 }
 
+// ─────────────────────────────────────────────── Folk som gjør noe
+
+/**
+ * Armene til `Folk`, fra høyre skulder: albue og hånd, i figurens egne enheter
+ * (20 høy). `frem` rekker over en disk (betaler, bestiller), `skjenk` holder en
+ * kanne foran brystet, `opp` har hånda ved munnen, `holde` nede foran magen og
+ * `grill` ned over en grillplate.
+ */
+export type Armstilling = 'ned' | 'frem' | 'skjenk' | 'opp' | 'holde' | 'grill'
+const ARM: Record<Armstilling, [[number, number], [number, number]]> = {
+  ned: [[0.2, 2.8], [0.4, 5.6]],
+  frem: [[1.7, 2.8], [4.9, 2.4]],
+  skjenk: [[1.5, 2.8], [4.4, 1.6]],
+  opp: [[1.9, 2.6], [-1, -2.2]],
+  holde: [[0.6, 3], [2.6, 4.2]],
+  grill: [[1.4, 3], [4, 3.6]],
+}
+
+/** Det hånda holder: en kopp, et bankkort, en pølse i lompe eller en grilltang. */
+export type Haandting = 'kopp' | 'kort' | 'polse' | 'tang'
+
+/** Skulderen og armen er litt mindre på et barn. */
+const skulder = (barn: boolean): [number, number] => (barn ? [2.5, -12.4] : [2.9, -15])
+const armskala = (barn: boolean) => (barn ? 0.8 : 1)
+
+/** Hvor stor en figur er: `m` meter høy på avstanden, tegnet 20 enheter høy. */
+export const figurskala = (m: number, avstand: Avstand = 'naer') => r2(((m / MAAL.person) * maal(avstand, 'person')) / 20)
+
+/** Hånda til en figur som står på (x, y), i lerretets enheter — der kanna, koppen eller tangen er. */
+export function haand(x: number, y: number, m: number, barn: boolean, arm: Armstilling, avstand: Avstand = 'naer'): [number, number] {
+  const k = figurskala(m, avstand)
+  const [sx, sy] = skulder(barn)
+  const [hx, hy] = ARM[arm][1]
+  return [r2(x + (sx + hx * armskala(barn)) * k), r2(y + (sy + hy * armskala(barn)) * k)]
+}
+
+/** Tingen i hånda, i figurens enheter, med hånda i (x, y). */
+function Ting({ ting, x, y }: { ting: Haandting; x: number; y: number }) {
+  switch (ting) {
+    case 'kopp':
+      return <polygon points={pkt([x - 0.45, y - 1.3], [x + 0.7, y - 1.3], [x + 0.55, y + 0.25], [x - 0.3, y + 0.25])} fill={S.hvit.lys} />
+    case 'kort':
+      return <rect x={r2(x + 0.2)} y={r2(y - 0.9)} width="1.5" height="1" rx="0.15" fill={S.marine.lys} />
+    case 'polse':
+      // Pølse i lompe, holdt på skrå: pølsa stikker opp av den lyse lompa.
+      return (
+        <g transform={`rotate(-35 ${r2(x)} ${r2(y)})`}>
+          <rect x={r2(x - 0.3)} y={r2(y - 1.6)} width="0.7" height="2.6" rx="0.35" fill={S.tegl.lys} />
+          <rect x={r2(x - 0.55)} y={r2(y - 0.7)} width="1.2" height="1.6" rx="0.3" fill={S.puss.lys} />
+        </g>
+      )
+    case 'tang':
+      // Tanga snur pølsene: i scenen vipper den litt opp og ned (`anim-vend`).
+      return (
+        <g className="anim-vend">
+          <line x1={r2(x)} y1={r2(y)} x2={r2(x + 2.2)} y2={r2(y + 1.3)} stroke={S.metall.skygge} strokeWidth="0.35" strokeLinecap="round" />
+          <line x1={r2(x)} y1={r2(y + 0.3)} x2={r2(x + 2.2)} y2={r2(y + 1.7)} stroke={S.metall.flate} strokeWidth="0.35" strokeLinecap="round" />
+        </g>
+      )
+  }
+}
+
+/** Én arm, i figurens enheter: skulder, albue, hånd, og det hånda holder. */
+export function Arm({ barn, arm, klaer, hud, ting }: { barn: boolean; arm: Armstilling; klaer: Materiale; hud: Materiale; ting?: Haandting }) {
+  const [sx, sy] = skulder(barn)
+  const a = armskala(barn)
+  const [[ax, ay], [hx, hy]] = ARM[arm]
+  const albue: [number, number] = [sx + ax * a, sy + ay * a]
+  const hand: [number, number] = [sx + hx * a, sy + hy * a]
+  return (
+    <g>
+      <path d={`M${sx} ${sy} L${r2(albue[0])} ${r2(albue[1])} L${r2(hand[0])} ${r2(hand[1])}`} fill="none" stroke={klaer.skygge} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={r2(hand[0])} cy={r2(hand[1])} r="0.6" fill={hud.flate} />
+      {ting && <Ting ting={ting} x={hand[0]} y={hand[1]} />}
+    </g>
+  )
+}
+
+export type Folkprops = {
+  x: number
+  y: number
+  /** Høyden i meter. */
+  m: number
+  klaer: Materiale
+  avstand?: Avstand
+  hud?: Materiale
+  har?: string
+  ben?: string
+  shorts?: boolean
+  /** Fargen på capsen. */
+  caps?: string
+  /** En hvit papirhatt, som i en pølsebu. */
+  papirhatt?: boolean
+  /** Fargen på forkleet. */
+  forkle?: string
+  /** Fargen på et skjerf, som på kampdag. */
+  skjerf?: string
+  barn?: boolean
+  arm?: Armstilling | 'ingen'
+  ting?: Haandting
+}
+
+/**
+ * Folk som gjør noe (Saftboden, Pølseboden): bygget som `Person` (20 enheter
+ * høy, skalert til `m` meter på avstanden), men med barn, caps, papirhatt,
+ * shorts, forkle, skjerf og en høyre arm som kan skjenke, betale, grille eller
+ * spise, med noe i hånda.
+ */
+export function Folk({
+  x,
+  y,
+  m,
+  klaer,
+  avstand = 'naer',
+  hud = S.hud,
+  har = S.treMork.skygge,
+  ben = S.mork.flate,
+  shorts = false,
+  caps,
+  papirhatt = false,
+  forkle,
+  skjerf,
+  barn = false,
+  arm = 'ned',
+  ting,
+}: Folkprops) {
+  const k = figurskala(m, avstand)
+  const p = barn ? { ben: 7.4, topp: 12.8, hode: 16.1, r: 2.25 } : { ben: 9, topp: 15.6, hode: 18.4, r: 1.75 }
+  const hodeskala = r2(p.r / 1.75)
+  return (
+    <g transform={`translate(${x} ${y}) scale(${k} ${k})`}>
+      <ellipse cx="0.6" cy="0" rx="3.4" ry="0.7" fill="#000000" opacity="0.25" />
+      {[-2, 0.3].map((bx) => (
+        <g key={bx}>
+          <rect x={bx} y={-p.ben} width="1.8" height={p.ben} rx="0.8" fill={shorts ? hud.flate : ben} />
+          {shorts && <rect x={bx} y={-p.ben} width="1.8" height={r2(p.ben * 0.45)} rx="0.5" fill={ben} />}
+        </g>
+      ))}
+      <path d={`M-3 ${-p.ben} L-2.6 ${-p.topp} Q0 ${r2(-p.topp - 1.4)} 2.6 ${-p.topp} L3 ${-p.ben} Z`} fill={klaer.flate} />
+      <path d={`M0.8 ${-p.ben} L1.1 ${r2(-p.topp - 0.8)} Q2.2 ${r2(-p.topp - 0.4)} 2.6 ${-p.topp} L3 ${-p.ben} Z`} fill={klaer.skygge} />
+      {/* Barnet har en stripete T-skjorte. */}
+      {barn &&
+        [p.topp - 2, p.topp - 3.8].map((s) => (
+          <rect key={s} x="-2.8" y={r2(-s)} width="5.6" height="0.6" fill={S.hvit.lys} opacity="0.8" />
+        ))}
+      {forkle && <path d={`M-1.6 ${r2(-p.topp + 1.2)} H1.6 L1.9 ${r2(-p.ben + 3)} H-1.9 Z`} fill={forkle} />}
+      <rect x="-3.8" y={r2(-p.topp + 0.2)} width="1.3" height={r2(p.topp - p.ben - 0.6)} rx="0.65" fill={klaer.lys} />
+      {arm !== 'ingen' && <Arm barn={barn} arm={arm} klaer={klaer} hud={hud} ting={ting} />}
+      <rect x="-0.7" y={r2(-p.hode + p.r - 0.75)} width="1.4" height="1.4" fill={hud.skygge} />
+      {skjerf && (
+        <g>
+          <rect x="-1.9" y={r2(-p.topp - 0.9)} width="3.8" height="1.2" rx="0.5" fill={skjerf} />
+          <rect x="0.6" y={r2(-p.topp + 0.2)} width="1" height="3.2" fill={skjerf} />
+          <rect x="0.6" y={r2(-p.topp + 1.4)} width="1" height="0.6" fill={S.hvit.lys} />
+        </g>
+      )}
+      <g transform={`translate(0 ${-p.hode}) scale(${hodeskala})`}>
+        <circle cx="0" cy="0" r="1.75" fill={hud.flate} />
+        {barn && <ellipse cx="-2" cy="0.3" rx="0.7" ry="1.2" fill={har} />}
+        {caps ? (
+          <>
+            <path d="M-1.9 -0.2 Q-1.8 -2.3 0.1 -2.2 Q1.9 -2.1 1.9 -0.4 Z" fill={caps} />
+            <path d="M1.1 -0.6 L3.3 -0.3 L3.2 0.1 L1.1 0 Z" fill={caps} />
+          </>
+        ) : (
+          <path d="M-1.8 -0.2 Q-1.6 -2.2 0.2 -2 Q1.9 -1.8 1.8 0 Q0.9 -1.2 -0.2 -0.8 Q-1.1 -0.4 -1.8 -0.2 Z" fill={har} />
+        )}
+        {papirhatt && (
+          <>
+            <path d="M-2 -0.9 L-1.5 -3.2 L1.6 -3.2 L2.1 -0.9 Z" fill={S.hvit.lys} />
+            <rect x="-2" y="-1.4" width="4.1" height="0.5" fill={S.hvit.skygge} />
+          </>
+        )}
+      </g>
+    </g>
+  )
+}
+
+/**
+ * Noen som spiser eller drikker: to bilder av armen, tingen ved munnen og
+ * tingen nede, som veksler i scenen (`anim-sipp`, `anim-sipp-ned`). I ro, og
+ * i lista, er tingen ved munnen.
+ */
+export function Spiser(p: Folkprops & { ting: Haandting }) {
+  const k = figurskala(p.m, p.avstand)
+  const hud = p.hud ?? S.hud
+  return (
+    <g>
+      <Folk {...p} arm="ingen" />
+      <g className="anim-sipp-ned" opacity="0">
+        <g transform={`translate(${p.x} ${p.y}) scale(${k} ${k})`}>
+          <Arm barn={!!p.barn} arm="holde" klaer={p.klaer} hud={hud} ting={p.ting} />
+        </g>
+      </g>
+      <g className="anim-sipp">
+        <g transform={`translate(${p.x} ${p.y}) scale(${k} ${k})`}>
+          <Arm barn={!!p.barn} arm="opp" klaer={p.klaer} hud={hud} ting={p.ting} />
+        </g>
+      </g>
+    </g>
+  )
+}
+
 /**
  * Gullplaketten ved nivå 100 i den nye stilen: en mørk plate med gullramme
  * og en stjerne, 12 × 8.6 enheter, med øvre venstre hjørne i (x, y).
