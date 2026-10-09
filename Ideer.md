@@ -63,6 +63,19 @@ From a look at why the club feels stale (10 October 2026). The club's money hard
 1. **Stadium upgrades.** Spend money on the stadium — more seats, floodlights, a VIP lounge — to raise ticket income (today a flat `billett` per division) and the club's value. A division could ask for a stadium of a certain size before you're let up. The stadium drawing (`Stadion.tsx`) belongs to the graphics track; it should show the upgrades.
 2. **Fixed league teams.** Today `nySerie` draws nine new opponents every season. Keep the same teams from season to season instead — the ones that finish top go up, the bottom ones come down from the division above — so names come back, and old foes with them.
 
+## Room to grow
+
+From a look at whether the setup holds as the game grows (10 October 2026). The engine's rules, the saves (22 versions, each tested from a real old save) and the tests hold up; these are the places that won't. Measured after Pack 62.
+
+1. **Per-second cost on a budget.** The heaviest save costs ~300–430 ms of CPU for two hours away against the speed test's 400 ms limit — about 1.5–2 s on a slow phone — and every new system that works each second adds to it. Move what changes slowly (rent, weather, trends, achievements) from every second to every minute or game day, and give each system its own share of the budget in the speed test.
+2. **A home for new areas.** The tab bar holds five tabs, and Investeringer, Luksus and Profil each have four parts (Profil already needs the squeezed `segment-fem` row). Bigger new areas (your own listed company, more sports) have nowhere obvious to go. Decide the rule before the next one: when something gets its own tab, how many parts a tab may have, and what a sixth place would look like.
+3. **Each track in its own worktree.** The game and graphics tracks share one working folder. In Packs 61–62 that took a hand-built index to keep the other track's CSS out of a commit, sent the graphics track's G11 live inside a game-track push, and needs a `git status` check before every commit. Give each track its own git worktree (its own folder and branch), merged into master when a pack is done.
+4. **Split styles.css.** One file of 6 622 lines that both tracks edit, where short class names have clashed before (`.statistikk`). Split it into a file per screen or component, so each track touches only its own.
+5. **Load drawings and maps when needed.** The game is one 1 MB script (300 kB gzipped) that a phone must parse before the first frame. The drawings (`Illustrasjoner.tsx`, 6 449 lines), the maps and the gallery could load when they are first shown.
+6. **Smaller screen files.** `Investeringer.tsx` is 1 053 lines with 15 components and `handlinger.ts` 964 lines. Split Investeringer into a file per part (Oversikt, Børs, Selskaper, Bank) and the actions by area.
+7. **A test suite that stays quiet.** 723 tests take 79 s, and every full run now ends with the runner's «Timeout calling onTaskUpdate». Harmless today, but an error on every run hides a real one. Run the heavy full-app click tests as their own group, as the speed test already is.
+8. **Measure the per-second re-render.** The whole screen re-renders every game second, and only 10 components are memoized. Nobody has measured what that costs on a large screen on a phone; measure it before deciding whether anything needs to change.
+
 ## Parked (not chosen yet)
 
 These ideas were suggested but not picked. They stay here so they can be moved up later. They are not part of any pack until they are chosen.
