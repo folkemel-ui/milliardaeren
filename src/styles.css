@@ -3217,6 +3217,41 @@ button.merke {
   line-height: 1.4;
 }
 
+/* «Uka di» i søndagsavisa (Pakke 60). */
+.uka-di-tittel {
+  margin: 14px 0 6px;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tekst-dempet);
+}
+
+.uka-di-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--skrift-2);
+}
+
+.uka-di-liste li {
+  display: grid;
+  grid-template-columns: 2.2em 1fr auto;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--kant);
+}
+
+.uka-di-liste li.deg {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+}
+
+.uka-di-plass {
+  color: var(--tekst-dempet);
+  font-variant-numeric: tabular-nums;
+}
+
 .utgave-oppgjor {
   margin-top: 6px;
   font-size: var(--skrift-2);

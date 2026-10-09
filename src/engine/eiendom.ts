@@ -22,6 +22,7 @@ import { kunststatus } from './kunst'
 import { premiumstatus } from './ansatte'
 import { dagsbilde } from './verden'
 import { FORVALTER_ANDEL, forvalter, leiefaktorBy } from './utleie'
+import { hjemstatus } from './hjemmene'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -448,7 +449,7 @@ export const STATUS_RENTEKUTT = 0.002
 
 /** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

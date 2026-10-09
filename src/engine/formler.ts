@@ -32,6 +32,7 @@ import { GRADER, retningsfaktor, teller, verdifaktor } from './ansatte'
 import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { nyhetsfaktor } from './bransjer'
 import { filialfaktor } from './filialer'
+import { hjemverdi } from './hjemmene'
 import { kupongPerSek, obligasjonsverdi } from './obligasjoner'
 import { dagnummer } from './kalender'
 import { startupverdi } from './startups'
@@ -244,7 +245,9 @@ export function eiendeler(s: Spilltilstand): number {
     startupverdi(s) +
     klubbverdi(s) +
     kunstverdi(s) +
-    obligasjonsverdi(s)
+    obligasjonsverdi(s) +
+    // Innredningen i hjemmene (Pakke 60) til halv pris. Lagt til sist, så summene ellers står helt likt.
+    hjemverdi(s)
   )
 }
 

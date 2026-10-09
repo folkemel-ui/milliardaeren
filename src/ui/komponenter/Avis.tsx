@@ -6,6 +6,7 @@ import { utfor } from '../../state/lager'
 import { datotekst } from '../kalender'
 import { tall } from '../format'
 import { OppgjorBlokk, oppgjorTittel } from './Oppgjor'
+import { UkaDi } from './UkaDi'
 import { Ikon } from './Ikoner'
 import { Illustrasjon } from './Illustrasjoner'
 import { Papirlogo } from './Papirlogo'
@@ -126,6 +127,12 @@ const Utgave = memo(
             {utgave.oppgjor?.map((o) => (
               <OppgjorBlokk key={o.periode} o={o} s={s} />
             ))}
+            {/* Søndagsavisa (Pakke 60): «Uka di» etter ukeoppgjøret. */}
+            {utgave.oppgjor
+              ?.filter((o) => o.periode === 'uke' && o.formuekurve)
+              .map((o) => (
+                <UkaDi key="uka-di" o={o} />
+              ))}
           </>
         ) : (
           <>

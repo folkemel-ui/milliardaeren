@@ -73,6 +73,7 @@ import {
 } from './fusjon'
 import { flyt, settInnSparing, trekkFraSparing } from './portefolje'
 import { FILIAL_FRA_NIVAA, FILIALBYER, filialer, filialpris, MAKS_FILIALER } from './filialer'
+import { HJEM, hjemAapent, hjemFor, nesteTrinn, ROM, romtrinn } from './hjemmene'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from './verden'
 import { markedsrente, OBLIGASJONER } from './obligasjoner'
@@ -93,7 +94,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { maksPerOrdre, PAPIRER, rundAntall } from './marked'
-import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk, By, ForvalterId, NorskBy } from './types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk, By, ForvalterId, NorskBy, RomId } from './types'
 import { kortKroner, tall } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
@@ -441,6 +442,25 @@ export function pussOpp(s: Spilltilstand, id: EiendomId): Utfall {
 }
 
 // ─────────────────────────────────────────────── Luksus og lager
+
+/**
+ * Innreder neste trinn i et rom (Pakke 60). Pengene går som luksus: halvparten
+ * teller i formuen (hjemverdi), og rommet kan ikke selges for seg.
+ */
+export function innred(s: Spilltilstand, rom: RomId): Utfall {
+  const r = ROM[rom]
+  if (!r) return feil('Ukjent rom.')
+  const hjem = hjemFor(rom)
+  if (!hjemAapent(s, hjem)) return feil(`${HJEM[hjem].navn} er ikke ditt ennå.`)
+  const trinn = nesteTrinn(s, rom)
+  if (!trinn) return feil(`${r.navn} er ferdig innredet.`)
+  if (s.kontanter < trinn.pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= trinn.pris
+  n.totaltForbruk += trinn.pris
+  n.hjem = { ...(n.hjem ?? {}), [rom]: romtrinn(s, rom) + 1 }
+  return { ok: true, tilstand: n }
+}
 
 export function kjopLuksus(s: Spilltilstand, id: LuksusId): Utfall {
   const g = LUKSUS[id]

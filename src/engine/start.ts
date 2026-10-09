@@ -91,7 +91,7 @@ export function nyttSpill(startfrø = 20260927): Spilltilstand {
     kvartal: nyeKvartal(),
   }
   s.forrigeDag = lagDagsbilde(s)
-  s.ukestart = periodestart(s)
+  s.ukestart = periodestart(s, true)
   s.maanedstart = periodestart(s)
   s.aarstart = periodestart(s)
   s.hoyesteFormue = nettoformue(s)

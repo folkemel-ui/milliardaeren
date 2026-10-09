@@ -27,6 +27,7 @@ import { aapneTing, FANE_FOR, useTing } from '../detaljvisning'
 import { Tingdetalj } from './Tingdetalj'
 import { Klubb, Klubbkort } from './Klubb'
 import { Kunst } from '../komponenter/Kunst'
+import { Hjemmene } from '../komponenter/Hjemmene'
 import { Seksjon } from '../komponenter/Seksjon'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { NyMerke } from '../komponenter/Kjopsglimt'
@@ -66,6 +67,8 @@ export function Luksus({ s }: { s: Spilltilstand }) {
           </Seksjon>
         )
       })}
+
+      <Hjemmene s={s} />
 
       <Kunst s={s} />
     </section>

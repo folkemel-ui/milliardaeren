@@ -264,6 +264,13 @@ export interface Periodestart {
   /** Hva hver bedrift hadde tjent totalt ved periodens start, etter id. */
   bedrifter: Record<string, number>
   kurser: Record<PapirId, number>
+  /**
+   * Bare ved ukestart (Pakke 60): prisen per enhet på det du eide, etter nøkkel
+   * («papir:NFS», «eiendom:berlin» …), og kjøpt og solgt så langt — så
+   * søndagsavisa kan finne ukas beste og verste investering og ukas handel.
+   */
+  enhetspriser?: Record<string, number>
+  handel?: Handelstotal
 }
 
 export interface Oppgjor {
@@ -291,6 +298,15 @@ export interface Oppgjor {
   /** Ukas beste og verste aksje (bare for uker). */
   vinner?: { id: PapirId; endring: number }
   taper?: { id: PapirId; endring: number }
+  /** «Uka di» i søndagsavisa (Pakke 60), bare for uker: formuen ved hver dags start og ved slutten. */
+  formuekurve?: number[]
+  /** Forbes-lista den søndagen: de fem øverste, og deg om du ikke er blant dem. */
+  forbes?: { plass: number; navn: string; formue: number; deg: boolean }[]
+  /** Kjøpt og solgt i uka, per aktivaklasse (uten sparekontoen). */
+  handel?: { klasse: Aktivaklasse; kjopt: number; solgt: number }[]
+  /** Ukas beste og verste investering blant det du eide hele uka. */
+  besteInvestering?: { navn: string; endring: number }
+  versteInvestering?: { navn: string; endring: number }
 }
 
 /** Et øyeblikksbilde ved forrige dagsskifte, så avisen kan melde hva som har endret seg. */
@@ -312,6 +328,15 @@ export interface Dagsbilde {
 }
 
 export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'obligasjon' | 'eiendom' | 'sparing' | 'rival' | 'startup'
+
+/** Rommene i hjemmene (Pakke 60). */
+export type RomId = 'kjokken' | 'stue' | 'vinkjeller' | 'peisestue' | 'badstue' | 'boblebad' | 'terrasse' | 'basseng' | 'gjestefloy'
+
+/** Alt du har kjøpt og solgt per aktivaklasse, totalt (Pakke 60). Ukeavisa ser på differansen. */
+export interface Handelstotal {
+  kjopt: Partial<Record<Aktivaklasse, number>>
+  solgt: Partial<Record<Aktivaklasse, number>>
+}
 
 export type ObligasjonId = 'kort' | 'lang'
 
@@ -438,6 +463,10 @@ export interface Spilltilstand {
   totaltTjent: number
   /** Den høyeste nettoformuen du har hatt. Låser opp bransjer — og låser aldri igjen. */
   hoyesteFormue: number
+  /** Innredningen i hjemmene (Pakke 60): hvor mange trinn som er kjøpt i hvert rom. */
+  hjem?: Partial<Record<RomId, number>>
+  /** Alt kjøpt og solgt per aktivaklasse (Pakke 60). Mangler i eldre lagringer til første handel. */
+  handelTotalt?: Handelstotal
   marked: Marked
   beholdning: Partial<Record<PapirId, Beholdning>>
   gjeld: number

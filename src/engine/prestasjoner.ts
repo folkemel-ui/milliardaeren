@@ -11,6 +11,7 @@ import { MALERILISTE } from './kunst'
 import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
 import { FILIALBYER } from './filialer'
+import { ROM, ROMLISTE } from './hjemmene'
 
 /**
  * Verdier flere prestasjoner trenger, regnet ut høyst én gang per sjekk.
@@ -70,6 +71,14 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'billionaer', navn: 'Billionær', beskrivelse: 'Nå kr 1 billion', klart: (s) => s.hoyesteFormue >= 1e12 },
   { id: 'to-bedrifter', navn: 'Småbedriftseier', beskrivelse: 'Eie to bedrifter', klart: (s) => s.bedrifter.length >= 2 },
   { id: 'fem-bedrifter', navn: 'Konsernsjef', beskrivelse: 'Eie fem bedrifter', klart: (s) => s.bedrifter.length >= 5 },
+  // Pakke 60: hjemmene.
+  { id: 'innflytting', navn: 'Innflyttingsfest', beskrivelse: 'Innred det første rommet', klart: (s) => !!s.hjem && ROMLISTE.some((r) => (s.hjem![r] ?? 0) > 0) },
+  {
+    id: 'drommehjem',
+    navn: 'Drømmehjem',
+    beskrivelse: 'Innred alle rommene i alle hjemmene helt',
+    klart: (s) => !!s.hjem && ROMLISTE.every((r) => (s.hjem![r] ?? 0) >= ROM[r].trinn.length),
+  },
   // Pakke 59: filialer.
   { id: 'forste-filial', navn: 'Kjede', beskrivelse: 'Åpne en filial', klart: (s) => s.bedrifter.some((b) => !!b.filialer?.length) },
   {

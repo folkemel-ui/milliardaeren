@@ -52,6 +52,11 @@ export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
 /** Bokfører penger inn i (+) eller ut av (−) en klasse. Muterer — brukes på kopier. */
 export function flyt(s: Spilltilstand, klasse: Aktivaklasse, belop: number): void {
   s.dagensFlyt[klasse] = (s.dagensFlyt[klasse] ?? 0) + belop
+  // Til søndagsavisa (Pakke 60): kjøpt og solgt hver for seg, ikke bare netto.
+  if (belop === 0) return
+  const t = (s.handelTotalt ??= { kjopt: {}, solgt: {} })
+  if (belop > 0) t.kjopt[klasse] = (t.kjopt[klasse] ?? 0) + belop
+  else t.solgt[klasse] = (t.solgt[klasse] ?? 0) - belop
 }
 
 /**
