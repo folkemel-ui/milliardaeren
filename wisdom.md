@@ -171,7 +171,7 @@ session; delete what stops being true.
   name from the `.cpuprofile`, and compare old and new side by side. Time old and new
   *interleaved*, best of five or more: the machine's load swings 30 % within minutes.
 - **To read Vitest's «Unhandled Error»**, write the run to a scratchpad log and strip the
-  colour codes (`sed 's/[[0-9;]*m//g'`) before grepping — grep on the coloured output
+  colour codes (`sed 's/\x1b\[[0-9;]*m//g'`) before grepping — grep on the coloured output
   found nothing and cost two extra runs of the suite.
 - **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
 
