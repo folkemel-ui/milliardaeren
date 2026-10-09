@@ -10,6 +10,7 @@ import { eierDu, LANDEMERKELISTE } from './landemerker'
 import { MALERILISTE } from './kunst'
 import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
+import { FILIALBYER } from './filialer'
 
 /**
  * Verdier flere prestasjoner trenger, regnet ut høyst én gang per sjekk.
@@ -69,6 +70,15 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'billionaer', navn: 'Billionær', beskrivelse: 'Nå kr 1 billion', klart: (s) => s.hoyesteFormue >= 1e12 },
   { id: 'to-bedrifter', navn: 'Småbedriftseier', beskrivelse: 'Eie to bedrifter', klart: (s) => s.bedrifter.length >= 2 },
   { id: 'fem-bedrifter', navn: 'Konsernsjef', beskrivelse: 'Eie fem bedrifter', klart: (s) => s.bedrifter.length >= 5 },
+  // Pakke 59: filialer.
+  { id: 'forste-filial', navn: 'Kjede', beskrivelse: 'Åpne en filial', klart: (s) => s.bedrifter.some((b) => !!b.filialer?.length) },
+  {
+    id: 'landsdekkende',
+    navn: 'Landsdekkende',
+    beskrivelse: 'Ha filialer i alle seks byene',
+    // Sjekkes hvert sekund: uten filialer svarer den uten å lage noe.
+    klart: (s) => s.bedrifter.some((b) => !!b.filialer?.length) && new Set(s.bedrifter.flatMap((b) => (b.filialer ?? []).map((f) => f.by))).size >= FILIALBYER.length,
+  },
   { id: 'niva-25', navn: 'Dobbelt opp', beskrivelse: 'Få en bedrift til nivå 25', klart: (s) => s.bedrifter.some((b) => b.nivaa >= 25) },
   { id: 'niva-100', navn: 'Hundre!', beskrivelse: 'Få en bedrift til nivå 100', klart: (s) => s.bedrifter.some((b) => b.nivaa >= 100) },
   { id: 'forste-ansatt', navn: 'Arbeidsgiver', beskrivelse: 'Ansett din første medarbeider', klart: (s) => s.bedrifter.some((b) => b.ansatte > 0) },

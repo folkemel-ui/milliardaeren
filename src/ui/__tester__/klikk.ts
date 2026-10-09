@@ -95,6 +95,8 @@ export async function startApp(spill?: Spilltilstand): Promise<App> {
     },
     lukk() {
       act(() => react.unmount())
+      // Klokken tikker ellers videre etter at testens dokument er revet ned.
+      lager.stoppSpillokke()
       document.body.replaceChildren()
     },
   }

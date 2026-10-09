@@ -18,6 +18,8 @@ import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
 import { Bekreftknapp } from '../komponenter/Bekreftknapp'
+import { Filialkort } from '../komponenter/Filialer'
+import { filialer } from '../../engine/filialer'
 
 export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
@@ -50,6 +52,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
               Nivå {b.nivaa}
               {b.ansatte > 0 && ` · ${b.ansatte} ansatte`}
               {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'} (×${tall(fusjonsfaktor(b), 2)} inntekt)`}
+              {filialer(b).length > 0 && ` · filialer i ${filialer(b).map((f) => f.by).join(', ')}`}
             </span>
           </div>
         </div>
@@ -119,6 +122,8 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
           })}
         </ul>
       </div>
+
+      <Filialkort s={s} b={b} />
 
       <div className="kort">
         <h2 className="kort-tittel">Milepæler</h2>

@@ -72,6 +72,7 @@ import {
   utforFusjon,
 } from './fusjon'
 import { flyt, settInnSparing, trekkFraSparing } from './portefolje'
+import { FILIAL_FRA_NIVAA, FILIALBYER, filialer, filialpris, MAKS_FILIALER } from './filialer'
 import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from './ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from './verden'
 import { markedsrente, OBLIGASJONER } from './obligasjoner'
@@ -92,7 +93,7 @@ import {
   TAKTIKKER,
 } from './klubb'
 import { maksPerOrdre, PAPIRER, rundAntall } from './marked'
-import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk, By, ForvalterId } from './types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, EiendomId, FondId, JordId, LagerId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, Ordretype, PapirId, Retning, Spilltilstand, Taktikk, By, ForvalterId, NorskBy } from './types'
 import { kortKroner, tall } from './tall'
 
 export type Utfall = { ok: true; tilstand: Spilltilstand } | { ok: false; feil: string }
@@ -125,6 +126,23 @@ function investerI(s: Spilltilstand, id: string, pris: number, endring: (b: Bedr
   else n.totaltForbruk += pris
   endring(b)
   return { ok: true, tilstand: n }
+}
+
+/**
+ * Åpner en filial for bedriften i en norsk by (Pakke 59). Prisen går inn i det
+ * du har investert, som en oppgradering: bedriftens verdi og salgspris følger med.
+ */
+export function aapneFilial(s: Spilltilstand, id: string, by: NorskBy): Utfall {
+  const b = finn(s, id)
+  if (!b) return feil('Fant ikke bedriften.')
+  if (!FILIALBYER.includes(by)) return feil('Du kan ikke åpne filial der.')
+  if (filialer(b).some((f) => f.by === by)) return feil(`${BEDRIFTSTYPER[b.type].navn} har allerede en filial i ${by}.`)
+  if (b.nivaa < FILIAL_FRA_NIVAA) return feil(`Filialer åpner ved nivå ${FILIAL_FRA_NIVAA}.`)
+  const pris = filialpris(b)
+  if (pris === null) return feil(`Høyst ${MAKS_FILIALER} filialer per bedrift.`)
+  return investerI(s, id, pris, (n) => {
+    n.filialer = [...filialer(n), { by, aapnetSek: s.sek }]
+  })
 }
 
 export function kjopBedrift(s: Spilltilstand, type: BedriftstypeId): Utfall {

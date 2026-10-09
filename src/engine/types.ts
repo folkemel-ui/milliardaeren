@@ -59,6 +59,8 @@ export interface Bedrift {
   stab?: Ansatt[]
   /** Retningen bedriften tok på nivå 50 (Pakke 48). Valget er for godt. */
   retning?: Retning
+  /** Filialene (Pakke 59), i den rekkefølgen de ble åpnet. Mangler i eldre lagringer. */
+  filialer?: { by: NorskBy; aapnetSek: number }[]
 }
 
 export type Ansattgrad = 'junior' | 'erfaren' | 'stjerne'
@@ -176,9 +178,14 @@ export type EiendomId =
   | 'marbella-leilighet' | 'marbella-hotell' | 'zermatt-leilighet' | 'zermatt-hotell'
   | 'kontorbygg' | 'kjopesenter' | 'naeringsbygg' | 'oy'
   | 'stockholm' | 'kobenhavn' | 'berlin' | 'london' | 'dubai' | 'newyork'
+  // Pakke 59: flere land.
+  | 'amsterdam' | 'roma' | 'paris'
 
 export type NorskBy = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten' | 'Hedmarken' | 'Lista' | 'Trysil' | 'Namdalen'
-export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Marbella' | 'Zermatt' | 'Dubai' | 'New York'
+export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Marbella' | 'Zermatt' | 'Dubai' | 'New York' | 'Amsterdam' | 'Roma' | 'Paris'
+
+/** Valutaene eiendom i utlandet handles i (Pakke 59). */
+export type Valuta = 'SEK' | 'DKK' | 'EUR' | 'GBP' | 'CHF' | 'USD' | 'AED'
 export type By = NorskBy | Utenlandsby
 
 export interface Eiendomstype {
@@ -440,6 +447,11 @@ export interface Spilltilstand {
   obligasjoner?: Partial<Record<ObligasjonId, Obligasjonspost>>
   /** Forvalterne for eiendommen, én per by (Pakke 54). Mangler: ingen. */
   forvaltere?: Partial<Record<By, ForvalterId>>
+  /**
+   * Valutakursene der spillet var da valutaene kom (Pakke 59, versjon 22),
+   * logaritmisk. Mangler i nye spill: der starter kursene på 1.
+   */
+  valutaanker?: Partial<Record<Valuta, number>>
   /** Selskapsnyheter som treffer bedriftene dine i samme bransje en stund (Pakke 53). */
   bransjenyheter?: Bransjenyhet[]
   totaltUtbytte: number

@@ -27,6 +27,7 @@ import { klubbverdi } from '../engine/klubb'
 import { lederpris } from '../engine/formler'
 import { markedsrente, OBLIGASJONSLISTE } from '../engine/obligasjoner'
 import { styringsrente } from '../engine/verden'
+import { valutaankerVed } from '../engine/valuta'
 import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
@@ -266,6 +267,10 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     }
     return { ...s, obligasjoner: ny }
   },
+  /* 21 → 22: valuta for eiendom i utlandet (Pakke 59). Kursene ankres der
+     spillet er nå, så ingen eiendom endrer verdi av oppdateringen. Filialene
+     og de nye byene trenger ingen migrering. */
+  21: (s) => ({ ...s, valutaanker: valutaankerVed(s.sek as number) }),
 }
 
 export type MigreringsResultat =

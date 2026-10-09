@@ -59,7 +59,10 @@ export const INNFELT: Record<'New York' | 'Dubai', Innfelt> = {
 }
 
 /** Byene på verdenskartet, og hvilken side navnet står på. */
-export const BYPLASS: Record<Utenlandsby, { pos: Punkt; etikett: 'høyre' | 'venstre' | 'under' }> = {
+/** Hvor navnet står ved prikken. «over» kom i Pakke 59, for Amsterdam mellom London og Paris. */
+export type Etikettside = 'høyre' | 'venstre' | 'under' | 'over'
+
+export const BYPLASS: Record<Utenlandsby, { pos: Punkt; etikett: Etikettside }> = {
   Stockholm: { pos: [18.07, 59.33], etikett: 'under' },
   København: { pos: [12.57, 55.68], etikett: 'høyre' },
   Berlin: { pos: [13.4, 52.52], etikett: 'høyre' },
@@ -68,6 +71,10 @@ export const BYPLASS: Record<Utenlandsby, { pos: Punkt; etikett: 'høyre' | 'ven
   Zermatt: { pos: [7.75, 46.02], etikett: 'høyre' },
   'New York': { pos: [-74.0, 40.71], etikett: 'under' },
   Dubai: { pos: [55.27, 25.2], etikett: 'under' },
+  // Pakke 59: flere land.
+  Amsterdam: { pos: [4.9, 52.37], etikett: 'over' },
+  Paris: { pos: [2.35, 48.86], etikett: 'venstre' },
+  Roma: { pos: [12.5, 41.9], etikett: 'høyre' },
 }
 
 export const OSLO_POS: Punkt = [10.75, 59.91]
@@ -126,9 +133,10 @@ export function byPunkt(by: Utenlandsby, nivaa: number): [number, number] | null
 
 /**
  * Antallsmerket på verdenskartet (G3): som på Norgeskartet, på motsatt side av
- * navnet — oppe til venstre når navnet står til høyre, ellers oppe til høyre.
+ * navnet — oppe til venstre når navnet står til høyre, nede til høyre når det
+ * står over, ellers oppe til høyre.
  */
-export function merkeboksVerden(x: number, y: number, r: number, sifre: number, krone: boolean, etikett: 'høyre' | 'venstre' | 'under') {
+export function merkeboksVerden(x: number, y: number, r: number, sifre: number, krone: boolean, etikett: Etikettside) {
   const b = merkebredde(sifre) + (krone ? KRONEPLASS : 0)
-  return { x: etikett === 'høyre' ? x - r * 0.6 - b : x + r * 0.6, y: y - r * 0.6 - MERKE_HOYDE, b, h: MERKE_HOYDE }
+  return { x: etikett === 'høyre' ? x - r * 0.6 - b : x + r * 0.6, y: etikett === 'over' ? y + r * 0.6 : y - r * 0.6 - MERKE_HOYDE, b, h: MERKE_HOYDE }
 }

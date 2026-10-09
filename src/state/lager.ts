@@ -374,6 +374,11 @@ function vedSynlighet(): void {
 }
 
 let startet = false
+let klokkeslag: ReturnType<typeof setInterval> | null = null
+
+function vedLagring(e: StorageEvent): void {
+  if (e.key === EIERNOKKEL && e.newValue && e.newValue !== faneId) settAvbrudd({ type: 'annen-fane' })
+}
 
 /** Starter klokken. Trygg å kalle flere ganger. */
 export function startSpillokke(): void {
@@ -381,13 +386,28 @@ export function startSpillokke(): void {
   startet = true
   // Lagre med en gang, så klokken for tid borte alltid er satt.
   lagre()
-  setInterval(steg, 200)
+  klokkeslag = setInterval(steg, 200)
   document.addEventListener('visibilitychange', vedSynlighet)
   window.addEventListener('pagehide', lagre)
   // En ny fane har åpnet spillet: denne stopper, så den ikke skriver over.
-  window.addEventListener('storage', (e) => {
-    if (e.key === EIERNOKKEL && e.newValue && e.newValue !== faneId) settAvbrudd({ type: 'annen-fane' })
-  })
+  window.addEventListener('storage', vedLagring)
+}
+
+/**
+ * Stopper klokken og lytterne igjen. Appen selv stopper aldri — klikktestene
+ * gjør det når de lukker appen, så klokken ikke tikker videre etter at testens
+ * dokument er revet ned.
+ */
+export function stoppSpillokke(): void {
+  if (!startet) return
+  startet = false
+  if (klokkeslag) clearInterval(klokkeslag)
+  klokkeslag = null
+  if (ventendeLagring) clearTimeout(ventendeLagring)
+  ventendeLagring = null
+  document.removeEventListener('visibilitychange', vedSynlighet)
+  window.removeEventListener('pagehide', lagre)
+  window.removeEventListener('storage', vedLagring)
 }
 
 // ─────────────────────────────────────────────── Reservekopien

@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import { dagsbilde } from '../../engine/verden'
 import { leiefaktorBy } from '../../engine/utleie'
+import { valutafaktor } from '../../engine/valuta'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, leieHverPerSek, SESONGER, sesongfaktor, UTENLANDSBYER } from '../../engine/eiendom'
 import { nyttSpill } from '../../engine/start'
 import { DAG_SEK, dagFra } from '../../engine/kalender'
@@ -42,8 +43,9 @@ describe('ferieboligene', () => {
   })
 
   it('leien følger sesongen', () => {
-    // Bare sesongen: været og ledigheten fra Pakke 54 regnes bort.
-    const ren = (s: Spilltilstand) => leieHverPerSek(s, 'marbella-leilighet') / ((dagsbilde(s).eiendom['marbella-leilighet'] ?? 1) * leiefaktorBy(s, 'Marbella'))
+    // Bare sesongen: været og ledigheten fra Pakke 54 og euroen fra Pakke 59 regnes bort.
+    const ren = (s: Spilltilstand) =>
+      leieHverPerSek(s, 'marbella-leilighet') / ((dagsbilde(s).eiendom['marbella-leilighet'] ?? 1) * leiefaktorBy(s, 'Marbella') * valutafaktor(s, 'EUR'))
     const sommer = ren(på(6))
     const vinter = ren(på(0))
     expect(sommer / vinter).toBeCloseTo(1.8 / 0.5, 1)

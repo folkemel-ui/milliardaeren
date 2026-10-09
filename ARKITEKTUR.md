@@ -56,12 +56,15 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | Ledighet (`utleie.ts`) | `ledighet:<by>\|<uke>` |
 | Dårlig leietaker (`utleie.ts`) | `leietaker:<by>\|<uke>` |
 | Ukas bransjetrend (`verden.ts`) | `trend:<spilluke>` |
+| Valutakursene (`valuta.ts`, Pakke 59) | `valuta:<sti>:<lag>:<knute>` — tre glatte lag (14, 4 og 1 spilldag mellom knutene); DKK følger EUR, AED følger USD. Et spill fra før versjon 22 har `valutaanker` så kursen står på 1 der det var |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.
 
 Verden fra Pakke 49 er den samme i alle spill: nøklene har ikke spillets frø i seg (et forsøk med regionfrøet fikk konjunkturen til å endre seg når en test fjernet regionene). Konjunkturen gir aksjene og eiendomsprisene ekstra drift i `markedstikk`, men trekker ikke ett tall mer fra terningen. Sakene den gir i avisa forskyver likevel terningen etter første dagsskifte, som alle nye saker gjør.
 
 Ukas bransjetrend (Pakke 53, `bransjer.ts`) gir aksjen i den hete eller kalde bransjen ekstra drift på samme måte — uten et trekk mer. En selskapsnyhet som treffer bedriften din i bransjen, bruker nyheten terningen alt har trukket; ingen nye trekk.
+
+Filialene (Pakke 59, `filialer.ts`) ganger inntekten før lønn med andelen og regionens `byfaktor` — samme regionindeks som eiendommen, uten et trekk mer. Uten filialer er faktoren nøyaktig 1, så ingenting annet flytter seg. Boten kjøper filialer bare som smart bot (benken); gullmesteren ser dem aldri.
 
 Ditt eget kurstrykk (Pakke 56) står i `Kurs.trykk`, ikke i `avvik`: kursen er `fundament · e^(avvik + trykk)`, og trykket trekkes tilbake like fort som avviket — regnet ut, uten terningen. Fondene ser bort fra det (`markedskurs`). Gamle lagringer har trykket fra før i avviket og ingen `trykk`; det er greit. Obligasjonenes markedsrente regnes av konjunkturens hash og hvor mye av fasen som er igjen — heller ikke den trekker noe.
 

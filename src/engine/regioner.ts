@@ -11,6 +11,7 @@
  */
 
 import { hashNormal, hashTekst } from './rng'
+import { valutafaktor, valutaForBy } from './valuta'
 import type { By, Marked, Region, Regionindeks, Spilltilstand } from './types'
 
 export const REGIONER: Record<Region, { navn: string; byer: By[] }> = {
@@ -100,9 +101,13 @@ export function byfaktor(s: Spilltilstand, by: By): number {
 }
 const BYFAKTOR = new WeakMap<Regionindeks, { avvik: number; faktor: number }>()
 
-/** Eiendomsindeksen for en by: landet ganger regionens avvik. */
+/**
+ * Eiendomsindeksen for en by: landet ganger regionens avvik — og i utlandet
+ * valutakursen (Pakke 59), så pris, verdi, leie og oppussing følger den.
+ */
 export function eiendomskurs(s: Spilltilstand, by: By): number {
-  return s.marked.eiendom.kurs * byfaktor(s, by)
+  const v = valutaForBy(by)
+  return v ? s.marked.eiendom.kurs * byfaktor(s, by) * valutafaktor(s, v) : s.marked.eiendom.kurs * byfaktor(s, by)
 }
 
 /** Prisendringen i en region (eller hele landet med null) over historikken som vises — de siste to timene. */

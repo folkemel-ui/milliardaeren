@@ -31,6 +31,7 @@ import { fusjonsfaktor } from './fusjon'
 import { GRADER, retningsfaktor, teller, verdifaktor } from './ansatte'
 import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { nyhetsfaktor } from './bransjer'
+import { filialfaktor } from './filialer'
 import { kupongPerSek, obligasjonsverdi } from './obligasjoner'
 import { dagnummer } from './kalender'
 import { startupverdi } from './startups'
@@ -145,9 +146,17 @@ export function dagensFaktor(s: Spilltilstand, type: BedriftstypeId): number {
   return dagsfaktor(s, type) * nyhetsfaktor(s, type)
 }
 
-/** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor og statusbonusen. */
+/**
+ * Alt inntekten (før lønn) ganges med for én bedrift i dag: kalenderen og
+ * nyhetene i bransjen, og filialene (Pakke 59). Uten filialer er det dagensFaktor.
+ */
+export function bedriftsfaktor(s: Spilltilstand, b: Bedrift): number {
+  return dagensFaktor(s, b.type) * filialfaktor(s, b)
+}
+
+/** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor, filialene og statusbonusen. */
 export function bedriftInntektIDag(s: Spilltilstand, b: Bedrift): number {
-  return bedriftInntektPerSek(b, dagensFaktor(s, b.type)) * statusfaktor(s)
+  return bedriftInntektPerSek(b, bedriftsfaktor(s, b)) * statusfaktor(s)
 }
 
 /**
@@ -164,7 +173,7 @@ export function bedriftsverdi(b: Bedrift): number {
  * leder — de andre er stengt, og da betales heller ingen lønn.
  */
 export function inntektPerSek(s: Spilltilstand, borte = false): number {
-  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b, dagensFaktor(s, b.type))), 0)
+  const sum = s.bedrifter.reduce((sum, b) => (borte && !b.leder ? sum : sum + bedriftInntektPerSek(b, bedriftsfaktor(s, b))), 0)
   return sum * statusfaktor(s)
 }
 

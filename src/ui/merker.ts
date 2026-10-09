@@ -22,6 +22,8 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   billionaer: { ikon: 'krone', grad: 'gull' },
   'to-bedrifter': { ikon: 'bedrift', grad: 'bronse' },
   'fem-bedrifter': { ikon: 'bedrift', grad: 'solv' },
+  'forste-filial': { ikon: 'bedrift', grad: 'bronse' },
+  landsdekkende: { ikon: 'bedrift', grad: 'gull' },
   'niva-25': { ikon: 'pil', grad: 'bronse' },
   'niva-100': { ikon: 'pil', grad: 'gull' },
   'forste-ansatt': { ikon: 'personer', grad: 'bronse' },

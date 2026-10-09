@@ -322,7 +322,7 @@ describe('reiser', () => {
     sjekkPrestasjoner(s)
     expect(s.prestasjoner.utenlands).toBeDefined()
     expect(s.prestasjoner.verdensborger).toBeDefined()
-    // Seks byer fra Pakke 11, pluss Marbella og Zermatt fra Pakke 45.
-    expect(UTENLANDSBYER).toHaveLength(8)
+    // Seks byer fra Pakke 11, Marbella og Zermatt fra Pakke 45, og Amsterdam, Roma og Paris fra Pakke 59.
+    expect(UTENLANDSBYER).toHaveLength(11)
   })
 })

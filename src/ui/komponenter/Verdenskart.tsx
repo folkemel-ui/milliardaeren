@@ -192,7 +192,7 @@ function Verdensby({
       )}
       <text
         x={e === 'høyre' ? x + r + 3.5 : e === 'venstre' ? x - r - 3.5 : x}
-        y={e === 'under' ? y + r + 10.5 : y + 3.5}
+        y={e === 'under' ? y + r + 10.5 : e === 'over' ? y - r - 4.5 : y + 3.5}
         textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
         className="kart-navn"
       >
@@ -201,7 +201,7 @@ function Verdensby({
       {valgt && leie > 0 && (
         <text
           x={e === 'høyre' ? x + r + 3.5 : e === 'venstre' ? x - r - 3.5 : x}
-          y={e === 'under' ? y + r + 19 : y + 12}
+          y={e === 'under' ? y + r + 19 : e === 'over' ? y - r - 13 : y + 12}
           textAnchor={e === 'høyre' ? 'start' : e === 'venstre' ? 'end' : 'middle'}
           className="kart-leie"
         >

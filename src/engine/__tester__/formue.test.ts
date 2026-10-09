@@ -39,8 +39,15 @@ describe('formuehistorikken', () => {
     expect(s.historikk.punkter.map((p) => p.sek)).toEqual([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
   })
 
-  it('tynnes ut og holder seg under taket, uansett hvor lenge du spiller', { timeout: 60_000 }, () => {
-    const s = simuler(nyttSpill(), 7 * 24 * 60 * 60)
+  it('tynnes ut og holder seg under taket, uansett hvor lenge du spiller', { timeout: 60_000 }, async () => {
+    // Ett døgn om gangen, med en pause imellom: et langt kall uten pause får
+    // testkjøreren til å gi opp å vente på svar. simuler(s, n) er det samme som
+    // n enkeltsekunder, så spillet blir nøyaktig det samme.
+    let s = nyttSpill()
+    for (let d = 0; d < 7; d++) {
+      s = simuler(s, 24 * 60 * 60)
+      await new Promise((r) => setTimeout(r, 0))
+    }
     const h = s.historikk
     expect(h.punkter.length).toBeLessThanOrEqual(MAKS_HISTORIKKPUNKTER)
     expect(h.punkter.length).toBeGreaterThan(MAKS_HISTORIKKPUNKTER / 2 - 1)

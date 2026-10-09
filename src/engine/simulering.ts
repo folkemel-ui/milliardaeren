@@ -10,6 +10,7 @@ import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
 import { utbytteFor } from './kvartal'
 import { fondsutbytteIDag } from './fond'
 import { erDagsskifte, erHelg } from './kalender'
+import { filialfaktor } from './filialer'
 import { gisUtAvis } from './avis'
 import { sjekkPrestasjoner } from './prestasjoner'
 import { rivaltikk, rivalutbyttePerSek } from './rivaler'
@@ -48,7 +49,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   const faktor = statusfaktor(s)
   // Dagens kalender (Pakke 49): ukedag, vær, bransjetrend og helligdag per bransje.
   const dag = dagsbilde(s).faktor
-  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dag[b.type] * nyhetsfaktor(s, b.type))))
+  // Filialene (Pakke 59) går med bedriften: står den stille mens du er borte, gjør de det også.
+  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dag[b.type] * nyhetsfaktor(s, b.type) * filialfaktor(s, b))))
   let sum = 0
   for (let i = 0; i < perBedrift.length; i++) if (!(borte && !s.bedrifter[i].leder)) sum += perBedrift[i]
   const inntekt = sum * faktor

@@ -4,7 +4,8 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, velgRetning, type Utfall } from '../handlinger'
+import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, velgRetning, type Utfall } from '../handlinger'
+import { besteFilialby, filialbidrag, filialer, filialfaktor, filialpris } from '../filialer'
 import { BUD, dagensForhandling, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
 import {
   ansettelsespris,
@@ -32,9 +33,19 @@ interface Kandidat {
 function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
   const liste: Kandidat[] = []
   for (const b of s.bedrifter) {
-    const naa = bedriftInntektPerSek(b)
+    // Filialene ganger inntekten før lønn (Pakke 59). Uten filialer er ff nøyaktig 1, som før.
+    const ff = filialfaktor(s, b)
+    const inntekt = (x: Bedrift) => bedriftInntektPerSek(x, ff)
+    const naa = inntekt(b)
     const opp: Bedrift = { ...b, nivaa: b.nivaa + 1 }
-    liste.push({ pris: oppgraderingspris(b), gevinst: bedriftInntektPerSek(opp) - naa, utfor: (t) => oppgrader(t, b.id) })
+    liste.push({ pris: oppgraderingspris(b), gevinst: inntekt(opp) - naa, utfor: (t) => oppgrader(t, b.id) })
+    // En filial gir en andel av inntekten før lønn: inntekten ved faktor 1 minus ved faktor 0.
+    const fpris = filialpris(b)
+    const by = besteFilialby(s, b)
+    if (smart && fpris !== null && by) {
+      const brutto = bedriftInntektPerSek(b, 1) - bedriftInntektPerSek(b, 0)
+      liste.push({ pris: fpris, gevinst: brutto * filialbidrag(s, b.type, by, filialer(b).length), utfor: (t) => aapneFilial(t, b.id, by) })
+    }
     // Den smarte boten (balansebenken, Pakke 47) ser som en spiller: har du råd
     // til å gå helt opp til neste dobling, regnes det som ett kjøp. Den sparer
     // ikke til det — det gjør de færreste. Den enkle boten ser bare neste nivå;
@@ -45,20 +56,20 @@ function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
       const antall = m - b.nivaa
       liste.push({
         pris: tilDobling,
-        gevinst: bedriftInntektPerSek({ ...b, nivaa: m }) - naa,
+        gevinst: inntekt({ ...b, nivaa: m }) - naa,
         utfor: (t) => oppgraderFlere(t, b.id, antall),
       })
     }
     const f = nesteForbedring(b)
     if (f && b.nivaa >= f.nivaa) {
       const med: Bedrift = { ...b, forbedringer: b.forbedringer + 1 }
-      liste.push({ pris: forbedringspris(b, f), gevinst: bedriftInntektPerSek(med) - naa, utfor: (t) => kjopForbedring(t, b.id) })
+      liste.push({ pris: forbedringspris(b, f), gevinst: inntekt(med) - naa, utfor: (t) => kjopForbedring(t, b.id) })
     }
     if (b.ansatte < maksAnsatte(b)) {
       // Den enkle boten ansetter bare erfarne, som før Pakke 48; den smarte vurderer alle nivåene.
       for (const grad of smart ? GRADLISTE : (['erfaren'] as const)) {
         if (b.nivaa < GRADER[grad].fraNivaa) continue
-        liste.push({ pris: ansettelsespris(b, grad), gevinst: bedriftInntektPerSek(medNyAnsatt(b, grad)) - naa, utfor: (t) => ansett(t, b.id, grad) })
+        liste.push({ pris: ansettelsespris(b, grad), gevinst: inntekt(medNyAnsatt(b, grad)) - naa, utfor: (t) => ansett(t, b.id, grad) })
       }
     }
   }

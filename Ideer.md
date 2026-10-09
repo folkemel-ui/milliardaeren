@@ -12,11 +12,10 @@ Version 1.0 was reached with Pack 43.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track: the road to v10.0 (Packs 59–60)
+### Game track: the road to v10.0 (Pack 60)
 
-Items from *Road to v10.0*. Commits: `Pakke N: …`. The bugs from the code review on 8 October were fixed in Packs 55–58, so franchises and more countries are measured on numbers that hold.
+Items from *Road to v10.0*. Commits: `Pakke N: …`. The bugs from the code review on 8 October were fixed in Packs 55–58; franchises and more countries landed in Pack 59.
 
-- **Pack 59 – A bigger empire:** Franchises, More countries
 - **Pack 60 – The good life:** Interiors, Avisa on Sunday
 
 ### Graphics track (Packs G11–G12)
@@ -26,7 +25,7 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the f
 - **Pack G11 – Moments and pictures:** Buy moments for everything, Real pictures in Avisa, Club crests in Avisa
 - **Pack G12 – The living year:** Seasons in the drawings, Upgrades you can see
 
-*Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — franchises, more countries and interiors (Packs 59–60) will need new drawings.
+*Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — Pack 59 drew Amsterdam, Roma and Paris itself (a rough Vespa in Roma could use a finer hand); interiors (Pack 60) will need new drawings.
 
 ### Working side by side
 
@@ -39,23 +38,21 @@ Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G10 are done (the f
 
 ## Road to v10.0
 
-The game is released on the App Store at v10.0. These were picked from the v10.0 list (8 October 2026). Not in the pack plan yet.
+The game is released on the App Store at v10.0. These were picked from the v10.0 list (8 October 2026).
 
-1. **Franchises.** Open the same business in more cities, with a limit (for example one per city, at most three) and a bonus from the city's region. Copies were dropped in Pack 2 because they blew up the economy, so each franchise needs a real cost or a falling return — measured with the bench.
-2. **Interiors.** Upgrade the inside of your home and holiday homes: kitchen, art on the walls, a wine cellar. Gives status and shows on the detail page.
-3. **More countries.** There are 6 foreign cities today. Add more of the world, with its own currencies and exchange-rate risk: rent in euro, dollar or yen, converted at a rate that moves.
-4. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
+1. **Interiors.** Upgrade the inside of your home and holiday homes: kitchen, art on the walls, a wine cellar. Gives status and shows on the detail page.
+2. **Avisa on Sunday.** A weekly edition with charts, the Forbes list and your week: what you earned, bought and sold, and the best and worst investment.
 
 ## Graphics
 
 Loose ends after G1–G7, and what was picked for v10.0.
 
-5. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
-6. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
-7. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
-8. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
-9. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
-10. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
+3. **Real pictures in Avisa.** Startup stories ("søker penger", "til børs", "kjøpt opp", "er konkurs") show a generic spark icon, and art exhibitions a generic frame. Show the startup's own logo and the painting itself instead, as the rivals and the stocks already have.
+4. **Drawings for the v2.0 content.** New businesses, cities or things to own from Packs 47–51 need drawings, detail pages and map labels in the current style, as each pack lands.
+5. **Buy moments for everything.** Only a business, a property or a luxury item gets the buy moment (`Kjopsglimt`). A farm, a forest, a landmark (up to kr 15 mrd), a painting, the football club and a startup stake are bought in silence. Give them the same moment, with their drawing, the painting, the club's crest or the startup's logo.
+6. **Club crests in Avisa.** Match stories ("Sjøholt SK 2–1 Nordvik BK") show a generic football icon, though every club in the game has a crest (`Klubbvaapen`, drawn from the club's name). Show both teams' crests on a match story.
+7. **Seasons in the drawings.** Snow on roofs and ground in winter, green summers and autumn colours, following the date and Pack 49's weather. Builds on G10's night scenes (the clock and the night layer in `Tegnestil.tsx`). Picked from the v10.0 list.
+8. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
 
 ## Parked (not chosen yet)
 

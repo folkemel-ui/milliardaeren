@@ -3,6 +3,8 @@ import { eiendomSynlig, jordSynlig } from '../../engine/handlinger'
 import { JORD, JORDLISTE, ukensGardHost } from '../../engine/jord'
 import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from '../../engine/landemerker'
 import { REGIONER, regionFor } from '../../engine/regioner'
+import { kronekurs, valutaendring, valutaForBy } from '../../engine/valuta'
+import { DAG_SEK } from '../../engine/kalender'
 import type { By, EiendomId, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
 import { endring, kortKroner, perSek, tall } from '../format'
 import { leieIBy, trendFor } from '../kart'
@@ -10,6 +12,8 @@ import { Eiendomskort } from './Eiendomskort'
 import { Forvalterkort } from './Forvalter'
 import { Ikon } from './Ikoner'
 import { Jordkort, Landemerkekort } from './JordOgLandemerker'
+
+const UKE_SEK = 7 * DAG_SEK
 
 /** Landemerkene vises når de første er innen rekkevidde — samme grense som i lista. */
 const landemerkerSynlige = (s: Spilltilstand) => s.hoyesteFormue >= LANDEMERKER.fyret.pris * 0.25
@@ -44,6 +48,8 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
   const region = regionFor(by)
   // Jord gir avling hver mandag og har egne priser — en by med bare jord viser avlingen, ikke leie og boligpriser.
   const bareJord = bygg.length + merker.length === 0
+  // Utlandet handles i landets valuta (Pakke 59): pris, verdi og leie følger kursen.
+  const valuta = valutaForBy(by)
   const avling = jord.filter((id) => s.jord[id] && JORD[id].type === 'gard').reduce((sum, id) => sum + ukensGardHost(s, id), 0)
 
   return (
@@ -75,6 +81,15 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
                 <dt className="etikett">Priser · {region ? REGIONER[region].navn : 'landet'}</dt>
                 <dd className={trend >= 0 ? 'pluss' : 'minus'}>{endring(trend)}</dd>
               </div>
+              {valuta && (
+                <div>
+                  <dt className="etikett">1 {valuta} · siste uke</dt>
+                  <dd>
+                    kr {tall(kronekurs(s, valuta), 2)}{' '}
+                    <span className={valutaendring(s, valuta, UKE_SEK) >= 0 ? 'pluss' : 'minus'}>{endring(valutaendring(s, valuta, UKE_SEK))}</span>
+                  </dd>
+                </div>
+              )}
             </>
           )}
         </dl>
