@@ -652,6 +652,17 @@ the Saftbod and Pølsebod redraws (10 October 2026, outside any pack) and G11 (1
 - **Leave the result in the pane for Folke**: a labelled contact sheet (stage × f = 0/3,
   plus the card pictures) in two columns of 340 px, at the pane's own size (preset
   desktop). Four columns overflowed the pane.
+- **A contact sheet of buy moments (G11)**: import the real `varsler.ts` (its `?t=` URL
+  from `performance.getEntriesByType('resource')`), call `visKjop({ art, id, navn })` for
+  each kind, wait ~300 ms and clone `.kjopsglimt-bilde`, the heading and the name into a
+  fixed grid. Clones restart their animations (the moment fades out and the sheen
+  covers the picture), so add `#ark * { animation: none !important }` and hide
+  `.kjopsglimt-skjaer`. End with `avsluttKjop(9999)`-style cleanup so no moment is left
+  on screen. Three columns fit the pane at preset desktop.
+- **"Push please" when the other track already pushed**: `git push` said "Everything
+  up-to-date" because the game track's push carried G11 along. Fetch and show
+  `git log origin/master` so the answer says where the commit is, not just that nothing
+  happened.
 - Console errors with an old `?t=` timestamp are leftovers from HMR between patches.
   Reload, wrap `console.error`, click all five tabs, and read the wrapped list.
 

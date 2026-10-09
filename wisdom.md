@@ -100,6 +100,14 @@ session; delete what stops being true.
   then test exactly what you stage: `git checkout-index -a --prefix=<scratch>/idx/`, link
   `node_modules` as a junction, run `tsc` and the tests there, and remove the junction
   before the folder.
+- **The index is shared between the two sessions** (Pack 61 / G11, 10 October). Pack 61
+  was staged when the graphics session staged G11 a minute later, so a plain `git commit`
+  from either would have taken the other's work, and the graphics session's
+  `update-index` overwrote Pack 61's staged copy of three shared files (it put them back
+  before Pack 61 was committed). Before you stage anything, `git diff --cached --name-only`
+  must be empty; if it isn't, the other track is committing — wait until `HEAD` moves.
+  And a push carries the other track's commits too: Pack 61's push took G11 along, so
+  check `git log origin/master` before saying something is or isn't pushed.
 
 ## 3. Tools on this machine
 
