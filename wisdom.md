@@ -170,6 +170,9 @@ session; delete what stops being true.
 - **Profile with `node --cpu-prof`** on a bundled script, sum the self time per function
   name from the `.cpuprofile`, and compare old and new side by side. Time old and new
   *interleaved*, best of five or more: the machine's load swings 30 % within minutes.
+- **To read Vitest's «Unhandled Error»**, write the run to a scratchpad log and strip the
+  colour codes (`sed 's/[[0-9;]*m//g'`) before grepping — grep on the coloured output
+  found nothing and cost two extra runs of the suite.
 - **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
 
 ## 4. Dev server and browser pane
@@ -211,6 +214,14 @@ session; delete what stops being true.
   `performance.getEntriesByType('resource')` and import that one, then call
   `visKjop`/`visFeiring`. Listeners registered in `App` also stay on the old module —
   reload before testing.
+- **Scan every page a pack touches for overflow**, not just when a number looks odd:
+  list the elements whose right edge passes `document.documentElement.clientWidth`. In
+  Pack 62 it found an old bug (the achievements grid, `repeat(2, 1fr)` with long words, was
+  1–2 px too wide). Two-column grids of text need `minmax(0, 1fr)`.
+- **The 1-px resize doesn't always give a true frame**: in Pack 62 it produced a
+  screenshot cut off on the right, and a theme switch via `data-theme` never showed in a
+  screenshot at all. When that happens, check with DOM numbers (rects, `scrollWidth`,
+  computed colours) and say in the report which checks were DOM-only.
 - **In mobile emulation `innerWidth` grows** when content overflows. Measure against
   `document.documentElement.clientWidth`.
 - **Never import `/src/state/lager.ts`** from the page — a second store claims ownership
