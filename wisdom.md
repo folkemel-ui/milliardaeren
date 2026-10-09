@@ -64,6 +64,11 @@ session; delete what stops being true.
   `pushState`/`popstate` at all, so the phone's back button leaves the game. Folke
   picked nine of twelve; they became the *Navigation* section and Packs 61–63 on the
   game track (Pack 61 done on 10 October).
+- **Always say what comes next** (asked 10 October). The pack plan in `Ideer.md` has a
+  **«Next up»** paragraph: the next pack, what it contains in plain words and with real
+  numbers, why it is next, and the questions you will ask when it starts. When a pack is
+  done, rewrite that paragraph for the following pack in the same commit, and end the
+  report to Folke with the same description.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.

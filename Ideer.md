@@ -10,23 +10,28 @@ A suggested order, grouped so each pack feels complete when played. The order is
 
 Version 1.0 was reached with Pack 43.
 
-Order across the tracks: Pack 62 is done, so G12 and Pack 64 can both start.
+Order across the tracks (most important first): **Pack 63 comes first, while the graphics track is paused** — it moves both tracks into their own worktrees and splits `styles.css`, which every pack touches. Then G12 and the game packs can run side by side again.
+
+**Next up: Pack 63 – A better workshop.** Nothing a player sees; it makes every later pack safer and quicker. (1) Each track gets its own git worktree — its own folder and branch, merged into master when a pack is done — so a commit or push can never pick up the other track's half-done work (in Packs 61–62 that took a hand-built index and once sent G11 live by accident). (2) `styles.css` (6 622 lines, edited by both tracks) is split into a file per screen or component, so each track touches only its own. (3) The heavy full-app click tests run as their own group, so the suite (723 tests, 79 s) stops ending every run with «Timeout calling onTaskUpdate». Questions at the start: branch names and who merges, and how fine the CSS split goes.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track (Packs 63–64)
+### Game track (Packs 63–66)
 
-Items from *Navigation* and *Football club*. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. Pack 61 made back go back, gave every set of parts the same memory and put the event log behind a bell in the top bar. Pack 62 split Luksus into Samling · Hjem · Kunst · Klubb and showed the whole net worth, split by kind, on Profil → Meg. The navigation packs belong here because they change the screens' logic (App, the tab parts).
+Items from *Room to grow*, *Navigation* and *Football club*, most important first. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. Pack 61 made back go back, gave every set of parts the same memory and put the event log behind a bell in the top bar. Pack 62 split Luksus into Samling · Hjem · Kunst · Klubb and showed the whole net worth, split by kind, on Profil → Meg. The navigation packs belong here because they change the screens' logic (App, the tab parts).
 
-- **Pack 63 – Shorter lists:** The map switch filters the property list, Sort businesses by income, Funds on the exchange
-- **Pack 64 – A club that matters:** Stadium upgrades, Fixed league teams. The club has its own part in Luksus since Pack 62. The graphics track draws the upgrades in `Stadion.tsx` alongside it, as with *Drawings for the v2.0 content*.
+- **Pack 63 – A better workshop:** Each track in its own worktree, Split styles.css, A test suite that stays quiet. First, while the graphics track is paused: it changes how both tracks work.
+- **Pack 64 – Time on a budget:** Measure the per-second re-render, Per-second cost on a budget. The real ceiling: the heaviest save is at the speed test's limit, and every new system adds to it. Measure first, then move what changes slowly off the per-second path.
+- **Pack 65 – Shorter lists:** The map switch filters the property list, Sort businesses by income, Funds on the exchange, Smaller screen files. Moving the funds already opens up `Investeringer.tsx`, so it is split into a file per part in the same go.
+- **Pack 66 – A club that matters:** A home for new areas, Stadium upgrades, Fixed league teams. The rule for where new areas go is decided first, since a bigger club is the first thing that might want more than a part in Luksus. The graphics track draws the upgrades in `Stadion.tsx` alongside it, as with *Drawings for the v2.0 content*.
 
-### Graphics track (Packs G12–G13)
+### Graphics track (Packs G12–G14)
 
-Items from *Graphics*. Commits: `Grafikkpakke GN: …`. G1–G11 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker, the last drawings, a living scene, moments and pictures); every drawing is now in the style G1 set, and moves and follows the clock on the big scene.
+Items from *Graphics* and *Room to grow*. Commits: `Grafikkpakke GN: …`. G1–G11 are done (the foundation, the businesses, the maps, faces and names, things you own, stadium and gallery, the finish, lighter and quicker, the last drawings, a living scene, moments and pictures); every drawing is now in the style G1 set, and moves and follows the clock on the big scene.
 
-- **Pack G12 – Scenes that grow:** Upgrades you can see, Scenes for the homes. The homes' scenes and detail page go in the *Hjem* part of Luksus (Pack 62).
-- **Pack G13 – The living year:** Seasons in the drawings. Last, so the new upgrade steps and home scenes get their seasons too.
+- **Pack G12 – A lighter start:** Load drawings and maps when needed. After Pack 63. First on this track, so the new drawings in G13 and G14 land in chunks that load when shown, not in the start-up script.
+- **Pack G13 – Scenes that grow:** Upgrades you can see, Scenes for the homes. The homes' scenes and detail page go in the *Hjem* part of Luksus (Pack 62).
+- **Pack G14 – The living year:** Seasons in the drawings. Last, so the new upgrade steps and home scenes get their seasons too.
 
 *Drawings for the v2.0 content* is not a pack: it runs alongside the game packs, as each one lands — Pack 59 drew Amsterdam, Roma and Paris itself (a rough Vespa in Roma could use a finer hand); the homes from Pack 60 are an item of their own (*Scenes for the homes*).
 
@@ -65,7 +70,7 @@ From a look at why the club feels stale (10 October 2026). The club's money hard
 
 ## Room to grow
 
-From a look at whether the setup holds as the game grows (10 October 2026). The engine's rules, the saves (22 versions, each tested from a real old save) and the tests hold up; these are the places that won't. Measured after Pack 62.
+From a look at whether the setup holds as the game grows (10 October 2026). The engine's rules, the saves (22 versions, each tested from a real old save) and the tests hold up; these are the places that won't. Measured after Pack 62. In Packs 63–66 and G12.
 
 1. **Per-second cost on a budget.** The heaviest save costs ~300–430 ms of CPU for two hours away against the speed test's 400 ms limit — about 1.5–2 s on a slow phone — and every new system that works each second adds to it. Move what changes slowly (rent, weather, trends, achievements) from every second to every minute or game day, and give each system its own share of the budget in the speed test.
 2. **A home for new areas.** The tab bar holds five tabs, and Investeringer, Luksus and Profil each have four parts (Profil already needs the squeezed `segment-fem` row). Bigger new areas (your own listed company, more sports) have nowhere obvious to go. Decide the rule before the next one: when something gets its own tab, how many parts a tab may have, and what a sixth place would look like.
