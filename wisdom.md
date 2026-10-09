@@ -1,7 +1,8 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
-(1 October 2026), Pack 39 (5 October 2026) and Pack 47 (7 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
+(the bug review and the last v10.0 game items, 8–9 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -46,6 +47,19 @@ session; delete what stops being true.
 - **Check your own claims against the code.** Grep before you write a list item about
   what the game has or lacks — two list items in earlier sessions described things that
   already existed.
+- **"Are there any bugs?"** worked as a parallel review (8 October): four agents, one per
+  area (money and trading, businesses and simulation, property and assets, saving and
+  UI), each told to *reproduce* every finding with a scratchpad script and report only
+  confirmed ones with file:line, numbers and what was ruled out. Spot-check the worst
+  findings in the code yourself before passing them on, then give Folke one ranked,
+  numbered list (serious / medium / minor) with real numbers ("+113 % in 11 clicks"). The
+  17 bugs became a *Bugs* section and Packs 55–58, grouped by the files they touch.
+- **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
+  real numbers behind each item, and name the design choices you'll ask about when the
+  pack starts. Don't start building.
+- **Folke picked the recommended option on every question in Packs 56, 57, 59 and 60.**
+  Spend the effort on making the recommended option right, with numbers, and on saying
+  plainly what the alternative costs (other track's files, existing saves, pace).
 
 ## 2. Repo workflow
 
@@ -60,6 +74,12 @@ session; delete what stops being true.
   (a separate small step; check with `grep -n "^## "` afterwards).
 - `ARKITEKTUR.md` (repo root) documents the dice, the hashes, the newspaper's side effect
   and how to add content safely. Update it when randomness or migrations change.
+- **Touching the graphics track's files**: sometimes a game pack must (Pack 59 needed three
+  unique drawings in `Illustrasjoner.tsx` and three `BYPLASS` entries plus a new label side
+  in `verdenskartet.ts`/`Verdenskart.tsx`). Keep it minimal, check `git status` first that
+  the other track has nothing uncommitted there, and list the touched files in the commit
+  message. Art you leave for later becomes an item in the Graphics list (Pack 60's home
+  scenes), not a silent gap.
 
 ## 3. Tools on this machine
 
@@ -96,14 +116,37 @@ session; delete what stops being true.
 - **When Vitest prints nothing and hangs**, bundle the script with esbuild
   (`npx esbuild x.ts --bundle --platform=node --format=esm --outfile=…`) and run it in
   plain Node: output streams line by line, so you see where it stops.
+- **Patch scripts: check every `from` before writing anything.** The pattern that worked in
+  Packs 55–60: collect `plan(file, [[from, to], …])` calls, loop once to throw on any
+  missing `from`, and only then write. A stale anchor (an import line changed two packs
+  ago) then costs nothing instead of leaving half a patch behind. Use `t.replace(from, () => to)`
+  so `$` in the replacement isn't read as a pattern.
+- **Never sed backticks or `${`.** A `sed 's/\\`/`/g'` meant to unescape a test file put a
+  backtick at the start of every line. And when you write a `.ts` file directly with the
+  Write tool, don't carry over the `\`` and `\${` escapes from a JS patch script.
+- **Bash heredocs still break** on long scripts with backticks (Pack 56: "unexpected EOF
+  while looking for matching `''"). Anything longer than a few lines goes in a scratchpad
+  file via the Write tool.
+- **Run the committed code side by side** without stashing: `git worktree add <scratch>/wt HEAD`,
+  link `node_modules` with `cmd //c mklink //J "<wt>\node_modules" "<repo>\node_modules"`,
+  run there. Clean up in that order — `cmd //c rmdir "<wt>\node_modules"` first, *then*
+  `git worktree remove --force` — or the removal deletes the real `node_modules`. For
+  engine-only comparisons, `git archive HEAD src | tar -x -C <scratch>/base` and bundle
+  from there.
+- **Profile with `node --cpu-prof`** on a bundled script, sum the self time per function
+  name from the `.cpuprofile`, and compare old and new side by side. Time old and new
+  *interleaved*, best of five or more: the machine's load swings 30 % within minutes.
+- **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
 
 ## 4. Dev server and browser pane
 
 - Ports 5180–5182 are often held by other chats. `.claude/launch.json` has
   `milliardaer-test3` on **5184** with its own origin and save, and
   `milliardaer-grafikk` on **5186** for the graphics track (the two tracks run at the
-  same time, so each has its own port and save).
-- **The 5184 test save is not durable.** On 1 October the pane's storage for that origin
+  same time, so each has its own port and save). In Packs 55–60 another chat held 5184
+  (`preview_start` refuses a server another chat started); `milliardaer-test2` on 5182
+  was free. Its storage was usually wiped between starts — expect to rebuild the save.
+- **Test saves are not durable** (5184, 5182 …). On 1 October the pane's storage for that origin
   was wiped when the test server restarted (not by game code — nothing in `src` clears
   storage). Rebuild a rich test game when needed: open `/ikon.svg` (the game isn't
   running there), `import('/src/engine/start.ts')`, `handlinger.ts` and `simulering.ts`,
@@ -134,9 +177,15 @@ session; delete what stops being true.
   `document.documentElement.clientWidth`.
 - **Never import `/src/state/lager.ts`** from the page — a second store claims ownership
   and pauses the game. Engine modules and `ui/varsler.ts` are safe.
-- **Editing a running save**: set `localStorage['milliardaer.eier']` to a dummy value
-  first, wait, write `milliardaer.lagring`, remove the dummy, reload. Or write it from
-  `/ikon.svg`, where the game isn't running.
+- **Editing a running save: do it from `/ikon.svg`.** Navigate there (the game isn't
+  running), edit `milliardaer.lagring`, set `milliardaer.sistAktiv` to `Date.now()`, then
+  navigate to `/`. The old dummy-`eier` trick failed in Pack 58: removing the dummy
+  handed ownership back, and the reload's `pagehide` saved the in-memory game over the edit.
+- **To read crowded SVG (map labels, small art)**, clone the `<svg>` into a fixed overlay
+  with a zoomed `viewBox` (`x y w h` around the area) at `100vw`. That beat both
+  `resize_window` to 1280 px (scaled down to unreadable) and `zoom` on the narrow pane.
+- **A browser tab that outlives its dev server** keeps logging `WebSocket connection …
+  failed`. Those are old; reload and check that the count stops growing.
 - Load-time catch-up grants achievements before the app starts watching, so they never
   reach the event stream. To test celebrations, call `visFeiring` directly.
 - Check at phone width (`resize_window` preset mobile) and in both themes. Reset the
@@ -169,7 +218,17 @@ session; delete what stops being true.
   first +25 % (6 h 17 min); Folke chose +15 % to move the pace less. The old simple bot gave
   8 h 38 min to 1 mrd — the game didn't get faster, the bot got less clumsy; with the
   same bot, 7 h 42 min was once rejected as too fast. The **golden master keeps the
-  simple bot**, so the fasit only moves when the engine does.
+  simple bot**, so the fasit only moves when the engine does. **After Pack 59 (branches):
+  1 mrd ≈ 6 h 12 min, 10 mrd ≈ 13 h 47 min** (6 h 36 / 15 h 28 without branches, same
+  machine). New bot behaviour goes behind `smart` so the golden master can't see it.
+- **Tune on the bench with a plain-Node script**, not Vitest: a temporary
+  `src/engine/__tester__/zz-benk.ts` (bot to 1 mrd and 10 mrd, prints the times), bundled
+  once per variant with the constant swapped by `sed` and restored from a backup copy.
+  Six variants ran in ten minutes. Delete the `zz-` files before committing.
+- **A greedy bot gives cliffs, not curves.** Branch price ×3.7 made 1 mrd 12 % faster, ×4
+  made it *slower* than no branches at all — the bot bought branches for the smallest
+  businesses early and either ran away or wasted the money. A gate (branches from level
+  50) made the result stable; tune with a rule like that rather than on a knife-edge price.
 - **A greedy one-level bot never pushes to a milestone**: the step from 126 to 127 is
   worth almost nothing, so extra doublings at 150/200 changed nothing in the bench until
   the bot could see them. Check that the bot *can* use a change before trusting a
@@ -216,6 +275,17 @@ session; delete what stops being true.
   time in 15.6 ms steps, so one 95 ms run shows as 94, 109 or 125: the test times four
   runs per sample and takes the best of five. On GitHub (`CI`) the limits get double
   room so a slow runner can't block a deploy. After Pack 52: ~82 ms and ~290–330 ms.
+  After Pack 59 the heaviest save is ~10 % heavier (more property, the exchange rates)
+  and sits near 400 ms when the machine is busy — but the committed code measured 454 ms
+  in the same hour, so compare interleaved before blaming a change. Pack 59's first
+  currency version cost +120 ms: a template string and `hashTekst` per call, every
+  second. Cache per-second values once per second for *all* keys, keep knot values
+  until time passes them, and use a `Map` for city → currency.
+- **"Timeout calling onTaskUpdate"** at the end of a passing run is the runner starving
+  under load, not a test failure. It appeared when Pack 59 made the suite ~10 % heavier
+  and the machine was busy, never when the heavy files ran alone. Long synchronous tests
+  should yield (`await new Promise((r) => setTimeout(r, 0))` between chunks, like the
+  bench); `simuler(s, n)` equals n single seconds, so chunking changes nothing.
 - **The save is written through `tilLagring`** (`state/lagringsformat.ts`): number
   histories with 7 significant digits, everything else exact. A new number history must
   be named `historikk`/`inntektHistorikk` (or `punkter`) to be rounded. Every list has a
@@ -249,19 +319,82 @@ session; delete what stops being true.
 - **Think about existing saves when offering a balance option.** Lowering a business's
   income "to keep payback the same" cuts income for everyone who already owns it.
   Prefer changes where nobody loses what they have, or migrate.
+- **How money leaked (the 8 October review)** — check every new mechanic against these:
+  - *A cap per action is a discount.* The stock price-impact cap applied per order, so ten
+    capped buys and one capped sale made +113 %. Pricing must be path-independent (Pack 56:
+    1/p falls by quantity/depth, cost = depth · ln(p₁/p₀)); a cap may only *limit the
+    order size*, never the price paid.
+  - *A predictable switch is free money.* Bonds priced on today's policy rate could only
+    rise when a boom (rate at its top) ended: +9 % expected per switch. Anything priced
+    on a known, mean-reverting state must price the *expectation* (Pack 56's market rate:
+    today's rate for the rest of the phase, the long-run 3,875 % after).
+  - *Paying whoever owns it at the moment* — the farm harvest went to the Monday-morning
+    owner, so a Sunday-to-Monday flip paid a week. Pay for time owned, and pay the part
+    so far on a sale (Pack 57, `gardHost`).
+  - *A fee fixed at the start* — the manager's 5 % was taken once, on what you owned that
+    day, and covered everything bought later. Fees must follow what they cover.
+  - *Price = value when value < cost* — new units in a renovated building cost their value
+    (×1,35) but renovating cost ×1,65, so renovate one and buy the rest. Buying must cost
+    what the cheapest way to the same state costs (`kjopsprisEiendom` vs `eiendomspris`).
+  - *Derived prices that the player can push* — fund prices followed member prices the
+    player could pump. Keep the player's own impact separate (`Kurs.trykk`) and let
+    derived prices ignore it (`markedskurs`).
+  The test for each: a round trip with no time passing must lose the fees, and the
+  expected value of a predictable event must be about zero. Reproduce the exploit in the
+  pack's test, and show it fails on the old code (stash the engine files, run that test).
+- **Time away (Pack 55)**: the store keeps `klokke`, the wall-clock time the in-memory
+  game belongs to; saves stamp `sistAktiv` with it, not with "now". It stands still while
+  the tab is hidden, so a later `pagehide` can't steal the hours; a migration on load
+  writes the save *without* stamping, or every save-format bump erased the time away.
+  Swaps (import, backup, start over) go through `byttSpill`, which bumps `spillnummer` so
+  `App` doesn't celebrate the other game's history; `importer` refuses a second call
+  while one runs. Tests that start the app must call `stoppSpillokke()` when done.
+- **Savings move only through `settInnSparing`/`trekkFraSparing`** (Pack 58), so the
+  cost basis follows; any new code that takes from the savings account must use them.
+  Debt the bank adds when cash and savings run out (`dekkUnderskudd`, club wages, tax)
+  goes through `meldBankenDekket` (one toast per game day) and doesn't count as a loan
+  (`harLaant` is set only by `laan`).
+- **Business income shown or paid = `bedriftsfaktor(s, b)`** since Pack 59: the day
+  (calendar × news) times `filialfaktor` for branches. Exactly 1 without branches, so
+  nothing else moved. `bedriftInntektIDag` uses it; the simulation multiplies
+  `filialfaktor` in `sekund`.
+- **Foreign property is in its own currency** (Pack 59, `valuta.ts`): `eiendomskurs`
+  multiplies foreign cities by `valutafaktor`, so price, value, rent and renovation all
+  follow. Rates are smooth hash waves, the same in every game, anchored per save.
+- **`flyt` also counts bought and sold** (`handelTotalt`, Pack 60) for the Sunday paper's
+  «Uka di». Every `flyt` with a positive amount is a purchase, a negative one a sale; the
+  report leaves the savings account out. The weekly report stores its own curve, Forbes
+  list, trades and best/worst investment, so old Sunday papers stay true.
+- **A new foreign city** needs: the `Utenlandsby` and `EiendomId` types, an
+  `EIENDOMSTYPER` entry in price order with a yield between its neighbours
+  (`pakke11`'s ladder test), `VALUTA_FOR`, a `BYPLASS` entry whose label doesn't hit its
+  neighbours (`'over'` exists since Pack 59; check with the overlay clone), a *unique*
+  drawing in `ILLUSTRASJONER` and `NY_STIL` (`grafikkG5.test.ts` rejects shared drawings),
+  and the foreign-city count in `pakke11.test.ts` (Verdensborger needs them all).
+- **A new achievement needs a medal** in `ui/merker.ts` (`ikoner.test.ts` checks).
+  Achievements are checked every second: return early when the player can't have it yet.
 - **Real old saves** (Pack 47): `scripts/lag-gamle-lagringer.mjs` pulls the source of
   every save version from git, bundles that old engine with esbuild, plays a game with it
   (bot, then a bit of everything that version knew, then 576 game days) and writes
   `src/state/__tester__/gamle-lagringer/vN.json.gz`. `gamle-lagringer.test.ts` migrates
   each, checks the load check, that everything owned survives, that net worth matches
   the old engine **to the krone** (minus manager prices before v19), and plays a month on.
-  Versions 6 and 11 never existed in a commit. **When you bump the save version**, add
-  the bumping commit to `NESTE_BUMP` in the script and run it, so the version you leave
-  behind gets a real save too.
+  Versions 6 and 11 never existed in a commit. **When you bump the save version**, give
+  the version you leave behind a real save *before* committing: add
+  `N: { fra: '<the last commit with version N>' }` to `NESTE_BUMP` (usually `HEAD`'s hash)
+  and run `node scripts/lag-gamle-lagringer.mjs N` — the argument builds only that
+  version, so the others stay byte-identical. (The older entries name the *bumping*
+  commit and build from its parent; `{ fra }` exists because that hash isn't known yet.)
+  The program buys a bit of everything the version had; add a `prov('kjop…')` line when
+  a new kind of thing appears (Pack 56 added a bond).
 - **A game day is 300 s** (`DAG_SEK`), not 86 400. "Two days" of simulated play is 576
   game days.
-- **Save versions** (now 20): write the migration before bumping `SPILLVERSJON`; never
-  skip a step. Optional new fields can be read with `?? 0` without a version bump.
+- **Save versions** (now 22 — 21 for the bonds' anchor in Pack 56, 22 for the currency
+  anchor in Pack 59): write the migration before bumping `SPILLVERSJON`; never
+  skip a step. A migration that changes how something is *priced* must keep today's
+  value exactly: Pack 56 gave each bond post an `anker` that reproduces its old price,
+  Pack 59 anchored every currency where the save was (`valutaanker`), and both have a
+  test that a real old save keeps its value. Optional new fields can be read with `?? 0` without a version bump.
   `state/__tester__/migrering.test.ts` migrates old saves all the way to the latest and
   checks net worth, so a migration that changes value (v19 removed manager costs) means
   updating those expectations on purpose.
@@ -318,7 +451,7 @@ session; delete what stops being true.
 - **`ytelse.test.ts` runs last, alone**: `vite.config.ts` has two test projects, `enhet` and
   `ytelse`, with `sequence.groupOrder`, so a plain `npx vitest run` finishes everything else
   before timing. It measures the process's CPU time (`process.cpuUsage`), not wall-clock
-  time. Two hours away costs ~300–390 ms CPU against a 500 ms limit. If it creeps up,
+  time. Two hours away costs ~300–430 ms CPU against the 400 ms limit for the heaviest save. If it creeps up,
   profile from `/ikon.svg` in the browser by timing engine functions 7 200 times each;
   the per-second checks (achievements, net worth, rent) are where the time goes.
   `sjekkPrestasjoner` computes income, status level and foreign cities once per check via
@@ -404,8 +537,8 @@ session; delete what stops being true.
 - **Cities and regions** (Pack 44): every Norwegian city has a region (six now), and abroad
   follows the national index. Building types exist in several cities as separate ids
   (`hybel-trondheim` …), listed in price order. Owning every unit in a city (`eierHeleByen`)
-  gives a crown on the map and +10 % rent there, applied inside `leieHverPerSek`. Save
-  version is now 20. How to add a region or a building in a new city is in `ARKITEKTUR.md`.
+  gives a crown on the map and +10 % rent there, applied inside `leieHverPerSek`. How to
+  add a region or a building in a new city is in `ARKITEKTUR.md`.
 - **World map** (Pack 45): geometry in pure `ui/verdenskartet.ts`, with simplified coastlines as
   lon/lat, Mercator, one view per plane (`UTSNITT`) and two insets (`INNFELT`) for New York and
   Dubai. A new foreign city needs a `BYPLASS` entry, and `pakke45.test.ts` checks it shows
