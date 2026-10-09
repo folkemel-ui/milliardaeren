@@ -61,6 +61,13 @@ From a review of how the game is organised (9 October 2026), measured at phone w
 8. **Funds on the exchange.** Bank holds six things: the economy card, savings, bonds, funds, loans and the event log. Index funds are bought like shares, so put them in Børs with stocks and crypto; Bank keeps savings, bonds and loans.
 9. **Parts remember the same way.** Profile remembers its part and Børs remembers stocks or crypto, but Investments always opens on Oversikt. Pick one rule for every set of parts.
 
+## Football club
+
+From a look at why the club feels stale (10 October 2026). The club's money hardly matters: in 4. divisjon it loses about kr 15k a day (wages ~68k against tickets ~25k and sponsor ~28k), and the opponents are drawn anew every season, so no league ever feels familiar.
+
+1. **Stadium upgrades.** Spend money on the stadium — more seats, floodlights, a VIP lounge — to raise ticket income (today a flat `billett` per division) and the club's value. A division could ask for a stadium of a certain size before you're let up. The stadium drawing (`Stadion.tsx`) belongs to the graphics track; it should show the upgrades.
+2. **Fixed league teams.** Today `nySerie` draws nine new opponents every season. Keep the same teams from season to season instead — the ones that finish top go up, the bottom ones come down from the division above — so names come back, and old foes with them.
+
 ## Parked (not chosen yet)
 
 These ideas were suggested but not picked. They stay here so they can be moved up later. They are not part of any pack until they are chosen.
