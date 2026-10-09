@@ -62,8 +62,8 @@ session; delete what stops being true.
   shown twice, the first business card at 303 px of 812, the event log 3.3 screens down
   in Bank. Also grep for behaviour nobody sees on a PC: there was no
   `pushState`/`popstate` at all, so the phone's back button leaves the game. Folke
-  picked nine of twelve; they are the *Navigation* section in `Ideer.md`, not yet in
-  packs or assigned to a track.
+  picked nine of twelve; they became the *Navigation* section and Packs 61–63 on the
+  game track (Pack 61 done on 10 October).
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
@@ -90,6 +90,16 @@ session; delete what stops being true.
   the other track has nothing uncommitted there, and list the touched files in the commit
   message. Art you leave for later becomes an item in the Graphics list (Pack 60's home
   scenes), not a silent gap.
+
+- **Sharing a file with the other track's uncommitted work** (Pack 61: the graphics
+  session was mid-G11 in `styles.css` and `varsler.ts`). Don't stash — it pulls their
+  work out from under them. Build the index version yourself: take `git show HEAD:<file>`,
+  apply only your own replacements (the same `[from, to]` list as the patch script), write
+  it with `git hash-object -w --no-filters` and `git update-index --cacheinfo
+  100644,<hash>,<path>`. Check `git diff` (index → working tree) shows only their lines,
+  then test exactly what you stage: `git checkout-index -a --prefix=<scratch>/idx/`, link
+  `node_modules` as a junction, run `tsc` and the tests there, and remove the junction
+  before the folder.
 
 ## 3. Tools on this machine
 
@@ -535,7 +545,7 @@ session; delete what stops being true.
   lines and no confetti, the million a little thin gold confetti, and only 1 mrd the full
   show. Buy and merge moments use `Kjopsglimt`.
 - **Screens**: Profil is split into four parts — Meg, Regnskap, Statistikk, Innstillinger —
-  via `ui/profilfane.ts` (remembered, settable from outside — the tax badge opens
+  via `ui/deler.ts` (remembered, settable from outside — the tax badge opens
   Regnskap; the tab row uses `.segment-fem` so four fit at phone width;
   `pakke37.test.ts` lists the parts). Property has a city view
   (`Byvisning.tsx`, city buttons under the map). The top bar shows progress
@@ -576,6 +586,23 @@ session; delete what stops being true.
   capping their count per period (`maksNavn`), and check with bounding rects at 375 px.
 - Shared cards (`Eiendomskort`, `Jordkort`, `Landemerkekort`) are used in the lists, the
   street view and the city view — change the card once.
+
+- **Back (Pack 61)**: `ui/tilbake.ts` keeps a stack of open layers mirrored in the
+  browser history; each entry carries only its depth (`{ milliardaer: n }`), so
+  `popstate` closes layers until the stack is that deep, and a layer closed by a button
+  removes its step with one batched `history.go(-n)`. **A new detail page or view
+  must call `useTilbake(open, close)`** before any early return; a pop-up that uses
+  `useFokusfelle` gets it for free. A tab other than Bedrifter is one layer, however
+  many tabs you visit. happy-dom supports `pushState`/`go`/`popstate`, so click tests
+  can press back with `history.back()` (`pakke61.test.ts`). In the browser pane,
+  one back too many leaves the game for the page you came from (`/ikon.svg`) — that's
+  correct, not a bug.
+- **Parts (Pack 61)**: every set of parts is a `lagDelvalg(key, parts)` in `ui/deler.ts`
+  (remembered in localStorage, first part by default, settable from outside). A new set
+  of parts goes there too, not in a `useState`.
+- **Event log (Pack 61)**: `Hendelseslogg.tsx` behind the bell in the date line; what's
+  been seen is a `sek` in localStorage (`ui/hendelsessett.ts`). A notice can point at it
+  with `mål: 'hendelser'` (`Mål` in `ui/varsler.ts`).
 
 ## 7. Verifying well
 
