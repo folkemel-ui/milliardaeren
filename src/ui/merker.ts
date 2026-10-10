@@ -56,6 +56,9 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   opprykk: { ikon: 'pil', grad: 'solv' },
   seriemester: { ikon: 'trofe', grad: 'gull' },
   'eliteserie-gull': { ikon: 'medalje', grad: 'gull' },
+  cupmester: { ikon: 'trofe', grad: 'gull' },
+  europa: { ikon: 'globus', grad: 'solv' },
+  europamester: { ikon: 'globus', grad: 'gull' },
   oljebaron: { ikon: 'drape', grad: 'gull' },
   skikonge: { ikon: 'fjell', grad: 'gull' },
   // Pakke 70: de skjulte.

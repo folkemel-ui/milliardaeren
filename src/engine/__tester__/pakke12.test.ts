@@ -25,6 +25,8 @@ import {
   RUNDER_PER_SESONG,
   rundensKamper,
   tabell,
+  CUPMESTER,
+  TV_PENGER,
 } from '../klubb'
 import { sjekkPrestasjoner } from '../prestasjoner'
 import type { Spilltilstand } from '../types'
@@ -81,8 +83,8 @@ describe('klubben', () => {
     s.hoyesteFormue = 1e9
     const før = nettoformue(s)
     const n = ok(kjopKlubb(s, KLUBBNAVN[0]))
-    // Bare sponsorpengene for første sesong kommer i tillegg.
-    expect(nettoformue(n)).toBeCloseTo(før + DIVISJONER[0].sponsor, 0)
+    // Bare sponsorpengene og TV-pengene (Pakke 73) for første sesong kommer i tillegg.
+    expect(nettoformue(n)).toBeCloseTo(før + DIVISJONER[0].sponsor + TV_PENGER[0], 0)
     expect(n.klubb!.spillere.length).toBeGreaterThanOrEqual(MIN_TROPP)
     expect(n.klubb!.lag).toHaveLength(ANTALL_LAG)
     expect(kjopKlubb(n, KLUBBNAVN[1]).ok).toBe(false)
@@ -97,7 +99,7 @@ describe('klubben', () => {
     const k = s.klubb!
     expect(k.runde).toBe(1)
     expect(k.lag.every((l) => l.spilt === 1)).toBe(true)
-    expect(k.kamper).toHaveLength(1)
+    expect(k.kamper.filter((m) => !m.turnering)).toHaveLength(1)
     expect(k.lonn).toBe(lonn)
     expect(saker[0].tittel).toContain(k.navn)
     // Hjemmekamp gir billettinntekter, bortekamp ikke.
@@ -116,7 +118,7 @@ describe('klubben', () => {
     expect(k.runde).toBe(0)
     expect(k.divisjon).toBe(1)
     expect(k.opprykk).toBe(1)
-    expect(s.trofeer).toHaveLength(1)
+    expect(s.trofeer.filter((t) => t.navn !== CUPMESTER)).toHaveLength(1)
     expect(k.lag.every((l) => l.spilt === 0)).toBe(true)
     expect(k.spillere.find((p) => p.alder === alder + 1) ?? k.spillere.length).toBeTruthy()
     expect(k.sponsor).toBe(DIVISJONER[1].sponsor)

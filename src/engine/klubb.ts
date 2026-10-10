@@ -20,8 +20,8 @@
 import { leggTilHendelse, meldBankenDekket } from './bank'
 import { dagnummer } from './kalender'
 import { hashTekst, Terning } from './rng'
-import { tall } from './tall'
-import type { Akademi, Formasjon, Kamp, Klubb, Lag, Maalhendelse, Motlag, Overskrift, Posisjon, Sesongoppsummering, Spiller, Spillerstatistikk, Spillervurdering, Spilltilstand, Taktikk } from './types'
+import { kortKroner, tall } from './tall'
+import type { Akademi, Formasjon, Kamp, Klubb, Lag, Maalhendelse, Motlag, Overskrift, Posisjon, Sesongoppsummering, Spiller, Spillerstatistikk, Spillervurdering, Spilltilstand, Taktikk, Turnering, Utslag } from './types'
 
 /**
  * `publikum` er hvor mange som vil se en hjemmekamp når laget går midt på
@@ -82,8 +82,10 @@ export const KJOPSPREMIE = 0.15
 export const SALGSRABATT = 0.15
 /** Megler og advokater tar så mye når klubben selges. */
 export const KLUBBSALG_HONORAR = 0.1
-/** Hvert trofé gir så mange statuspoeng. */
+/** Hvert trofé gir så mange statuspoeng … */
 export const TROFE_STATUS = 3
+/** … og et europeisk så mange (Pakke 73). */
+export const EUROPA_STATUS = 5
 const MARKED_ANTALL = 6
 const PENSJONSALDER = 35
 
@@ -399,7 +401,220 @@ export function lagstyrke(k: Klubb): number {
 }
 
 export function klubbstatus(s: Spilltilstand): number {
-  return (s.klubb ? DIVISJONER[s.klubb.divisjon].status : 0) + (s.trofeer?.length ?? 0) * TROFE_STATUS
+  let sum = s.klubb ? DIVISJONER[s.klubb.divisjon].status : 0
+  for (const t of s.trofeer ?? []) sum += t.navn === EUROPAMESTER ? EUROPA_STATUS : TROFE_STATUS
+  return sum
+}
+
+// ─────────────────────────────────────────────── Cupen, Europa og pengene (Pakke 73)
+
+/** TV-penger per sesong, betalt ved sesongstart sammen med sponsoren. */
+export const TV_PENGER = [300_000, 1_500_000, 6_000_000, 20_000_000, 60_000_000] as const
+/** Premie ved sesongslutt, som andel av TV-pengene: vinneren alt, toeren halvparten, treeren en firedel. */
+export const PLASSPREMIE = [1, 0.5, 0.25] as const
+/** Cupen: så stor andel av divisjonens TV-penger for hver runde du vinner … */
+export const CUP_RUNDEPREMIE = 0.02
+/** … og så mye til cupmesteren. */
+export const CUP_PREMIE = 40_000_000
+/** Europa: premien for hver runde du vinner — kvartfinalen, semifinalen og finalen. */
+export const EUROPA_PREMIER = [10_000_000, 20_000_000, 40_000_000] as const
+export const CUPMESTER = 'Cupmester'
+export const EUROPAMESTER = 'Europamester'
+/** Rundenavnene i cupen (seks runder) og i Europa (tre). */
+export const CUPRUNDER = ['1. runde', '2. runde', '3. runde', 'Kvartfinale', 'Semifinale', 'Finale'] as const
+export const EUROPARUNDER = ['Kvartfinale', 'Semifinale', 'Finale'] as const
+/** Dagen i sesongen (1–9) hver cuprunde spilles, og hver Europa-runde. */
+export const CUPDAGER = [1, 3, 5, 7, 8, 9] as const
+export const EUROPADAGER = [2, 4, 6] as const
+/** Så mange lag står over første runde: Eliteserien og de fire beste i 1. divisjon. */
+export const CUPSEEDER = 14
+/** Europeiske klubber å trekke blant; styrkene ligger over Eliteserien (75). */
+export const EUROPAKLUBBER = [
+  'Real Castellano', 'Athletic Montserra', 'Olympique Valcourt', 'FC Bergamonte', 'Dynamo Ostwald', 'Sparta Vltavia',
+  'Noordzee FC', 'Dunmore Celtic', 'Alvorada SC', 'Bosporus SK', 'Rapid Donaustadt', 'Hansa Küstenstadt',
+  'Steaua Carpatia', 'Brøndhavn BK', 'Malmköping FF', 'Helsingin Kotka',
+] as const
+export const EUROPA_STYRKE = [78, 92] as const
+
+export function tvpenger(k: Klubb): number {
+  return TV_PENGER[k.divisjon]
+}
+
+/** Alle de femti lagene med styrke: din divisjon fra tabellen, resten fra seriene. Du er med som deg. */
+function alleLag(k: Klubb): (Motlag & { deg?: boolean; divisjon: number })[] {
+  const ut: (Motlag & { deg?: boolean; divisjon: number })[] = []
+  for (let d = 0; d < DIVISJONER.length; d++) {
+    if (d === k.divisjon) {
+      for (const l of k.lag) ut.push(l.navn === k.navn ? { navn: k.navn, styrke: 0, deg: true, divisjon: d } : { navn: l.navn, styrke: l.styrke, divisjon: d })
+    } else for (const m of k.serier[d]) ut.push({ navn: m.navn, styrke: m.styrke, divisjon: d })
+  }
+  return ut
+}
+
+/** Ny cup ved sesongstart: alle femti, de fjorten beste står over første runde. Trekningen har sin egen terning. */
+export function nyCup(k: Klubb): Utslag {
+  const alle = alleLag(k)
+  const styrkeAv = (l: (typeof alle)[number]) => (l.deg ? lagstyrke(k) : l.styrke)
+  const seedet = new Set<string>()
+  for (const l of alle) if (l.divisjon === DIVISJONER.length - 1) seedet.add(l.navn)
+  for (const l of alle.filter((x) => x.divisjon === DIVISJONER.length - 2).sort((a, b) => styrkeAv(b) - styrkeAv(a)).slice(0, CUPSEEDER - ANTALL_LAG)) seedet.add(l.navn)
+  const frø = hashTekst(`${k.navn}:${k.sesong}:cup`)
+  const t = new Terning(frø)
+  // De useedede trekkes først, så første runde kan spilles rett av lista; seedene legges bakerst.
+  const useedet = stokk(alle.filter((l) => !seedet.has(l.navn)), t)
+  const seeder = stokk(alle.filter((l) => seedet.has(l.navn)), t)
+  return { sesong: k.sesong, runde: 0, lag: [...useedet, ...seeder].map(({ navn, styrke, deg }) => (deg ? { navn, styrke, deg } : { navn, styrke })), ute: false, naadd: 0, frø: t.fro }
+}
+
+/** Europa neste sesong, for Eliteserie-mesteren: sju klubber fra lista, trukket med egen terning. */
+export function nyEuropa(k: Klubb, sesong: number): Utslag {
+  const frø = hashTekst(`${k.navn}:${sesong}:europa`)
+  const t = new Terning(frø)
+  const klubber = stokk([...EUROPAKLUBBER], t).slice(0, 7)
+  const lag = klubber.map((navn) => ({ navn, styrke: Math.round(t.mellom(EUROPA_STYRKE[0], EUROPA_STYRKE[1])) }))
+  return { sesong, runde: 0, lag: stokk([{ navn: k.navn, styrke: 0, deg: true }, ...lag], t), ute: false, naadd: 0, frø: t.fro }
+}
+
+function stokk<T>(liste: T[], t: Terning): T[] {
+  const ut = [...liste]
+  for (let i = ut.length - 1; i > 0; i--) {
+    const j = Math.floor(t.neste() * (i + 1))
+    ;[ut[i], ut[j]] = [ut[j], ut[i]]
+  }
+  return ut
+}
+
+/** Hvor langt du kom: rundenavnet du røk ut i, eller mesteren. */
+export function naaddTekst(u: Utslag, turnering: Turnering): string {
+  const runder = turnering === 'cup' ? CUPRUNDER : EUROPARUNDER
+  if (!u.ute && u.lag.length === 1 && u.lag[0].deg) return turnering === 'cup' ? CUPMESTER : EUROPAMESTER
+  if (!u.ute) return `Venter på ${runder[u.runde] ?? runder[runder.length - 1].toLowerCase()}`
+  return runder[Math.min(u.naadd, runder.length - 1)]
+}
+
+/** Neste motstander i turneringen, når du er med og runden er trukket av lista. Du er alltid i et par. */
+export function nesteUtslagskamp(u: Utslag | undefined): Motlag | null {
+  if (!u || u.ute) return null
+  const i = u.lag.findIndex((l) => l.deg)
+  if (i < 0) return null
+  // Første cuprunde: de fjorten seedene står bakerst og spiller ikke.
+  const spiller = u.runde === 0 && u.lag.length > 32 ? u.lag.length - CUPSEEDER : u.lag.length
+  if (i >= spiller) return null
+  const j = i % 2 === 0 ? i + 1 : i - 1
+  return j < spiller ? u.lag[j] : null
+}
+
+/** Legger penger i klubbkassa. Muterer. */
+function inntekt(s: Spilltilstand, k: Klubb, felt: 'tv' | 'premier', belop: number): void {
+  s.kontanter += belop
+  s.totaltKlubb = (s.totaltKlubb ?? 0) + belop
+  k[felt] = (k[felt] ?? 0) + belop
+}
+
+/**
+ * Din kamp utenfor serien: samme regnestykke og rapport som en seriekamp, men
+ * med turneringens terning, og uavgjort avgjøres på straffer. Muterer.
+ */
+function spillUtslagskamp(s: Spilltilstand, k: Klubb, t: Terning, mot: Motlag, hjemme: boolean, turnering: Turnering, runde: number): Kamp {
+  const ditt = lagprofil(k)
+  const [xh, xb] = hjemme ? forventetMaal(ditt, mot.styrke, k.taktikk, 'balansert') : forventetMaal(mot.styrke, ditt, 'balansert', k.taktikk)
+  const mh = maal(t, xh)
+  const mb = maal(t, xb)
+  const kamp: Kamp = { sesong: k.sesong, runde, motstander: mot.navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh, turnering }
+  kamprapport(k, kamp, hjemme ? xh : xb, hjemme ? xb : xh)
+  if (kamp.maalFor === kamp.maalMot) kamp.straffer = t.sjanse(0.5) ? 'deg' : 'dem'
+  if (kamp.hjemme) {
+    kamp.tilskuere = tilskuere(k, form(k))
+    const billett = kamp.tilskuere * DIVISJONER[k.divisjon].billettpris
+    s.kontanter += billett
+    s.totaltKlubb = (s.totaltKlubb ?? 0) + billett
+    k.billetter += billett
+  }
+  k.kamper.push(kamp)
+  if (k.kamper.length > 10) k.kamper.shift()
+  return kamp
+}
+
+const vantDu = (kamp: Kamp) => kamp.maalFor > kamp.maalMot || kamp.straffer === 'deg'
+
+/**
+ * Spiller en runde i en utslagsturnering: parene fra lista i rekkefølge,
+ * vinnerne går videre. Andres kamper avgjøres av styrke og turneringens
+ * terning; din spilles som en kamp med rapport. Gir din kamp, om du spilte.
+ * Muterer.
+ */
+function spillUtslagsrunde(s: Spilltilstand, k: Klubb, u: Utslag, turnering: Turnering): Kamp | null {
+  const t = new Terning(u.frø)
+  const runder = turnering === 'cup' ? CUPRUNDER : EUROPARUNDER
+  const spiller = u.runde === 0 && u.lag.length > 32 ? u.lag.length - CUPSEEDER : u.lag.length
+  const videre: Utslag['lag'] = []
+  let din: Kamp | null = null
+  for (let i = 0; i + 1 < spiller; i += 2) {
+    const a = u.lag[i]
+    const b = u.lag[i + 1]
+    if (a.deg || b.deg) {
+      const hjemme = !!a.deg
+      const mot = hjemme ? b : a
+      din = spillUtslagskamp(s, k, t, mot, hjemme, turnering, u.runde)
+      videre.push(vantDu(din) ? (hjemme ? a : b) : mot)
+    } else {
+      const [xa, xb] = forventetMaal(a.styrke, b.styrke, 'balansert', 'balansert')
+      const ma = maal(t, xa)
+      const mb = maal(t, xb)
+      videre.push(ma > mb || (ma === mb && t.sjanse(0.5)) ? a : b)
+    }
+  }
+  for (let i = spiller; i < u.lag.length; i++) videre.push(u.lag[i])
+  if (din) {
+    if (vantDu(din)) {
+      u.naadd = u.runde + 1
+      inntekt(s, k, 'premier', turnering === 'cup' ? Math.round(tvpenger(k) * CUP_RUNDEPREMIE) : EUROPA_PREMIER[u.runde])
+    } else u.ute = true
+  }
+  u.lag = stokk(videre, t)
+  u.runde++
+  u.frø = t.fro
+  // Mesteren: bare du igjen.
+  if (!u.ute && u.runde >= runder.length) u.lag = u.lag.filter((l) => l.deg)
+  return din
+}
+
+/** Cupen og Europa på dagens dag i sesongen. Gir avisens saker. Muterer. */
+function spillTurneringer(s: Spilltilstand, k: Klubb, dag: number): Overskrift[] {
+  const saker: Overskrift[] = []
+  if (dag === 1) k.cup = nyCup(k)
+  for (const turnering of ['cup', 'europa'] as const) {
+    const u = k[turnering]
+    const dager = turnering === 'cup' ? CUPDAGER : EUROPADAGER
+    const runde = (dager as readonly number[]).indexOf(dag)
+    if (!u || runde < 0 || u.runde !== runde) continue
+    const runder = turnering === 'cup' ? CUPRUNDER : EUROPARUNDER
+    const navn = turnering === 'cup' ? 'Cupen' : 'Europa'
+    const din = spillUtslagsrunde(s, k, u, turnering)
+    if (!din) continue
+    const vant = vantDu(din)
+    const siste = u.runde >= runder.length
+    if (vant && siste) {
+      const trofe = turnering === 'cup' ? CUPMESTER : EUROPAMESTER
+      s.trofeer.push({ navn: trofe, sesong: k.sesong, klubb: k.navn })
+      if (turnering === 'cup') inntekt(s, k, 'premier', CUP_PREMIE)
+      saker.push({ type: 'deg', tittel: `${k.navn} er ${trofe.toLowerCase()}!`, tekst: `${din.maalFor}–${din.maalMot} mot ${din.motstander} i finalen${din.straffer ? ', avgjort på straffer' : ''}. Byen feiret til langt på natt.` })
+      leggTilHendelse(s, { tittel: 'Trofé', tekst: `${k.navn} vant ${navn.toLowerCase() === 'cupen' ? 'cupen' : 'Europa'}.`, alvor: 'info' })
+    } else {
+      const scorere = scorertekst(din)
+      saker.push({
+        type: 'deg',
+        tittel: `${navn}: ${din.hjemme ? `${k.navn} ${din.maalFor}–${din.maalMot} ${din.motstander}` : `${din.motstander} ${din.maalMot}–${din.maalFor} ${k.navn}`}`,
+        tekst: `${runder[u.runde - 1]}${din.straffer ? `, avgjort på straffer — ${vant ? 'videre' : 'ute'}` : vant ? ' — videre' : ' — ute'}.${scorere ? ` Mål: ${scorere}.` : ''}`,
+      })
+    }
+  }
+  return saker
+}
+
+/** TV-pengene for sesongen, med sponsoren. Muterer. */
+function betalTv(s: Spilltilstand, k: Klubb): void {
+  inntekt(s, k, 'tv', tvpenger(k))
 }
 
 // ─────────────────────────────────────────────── Serien
@@ -830,6 +1045,16 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
     neste: fra,
   }
   if (priser.aaretsSpiller) saker.push({ type: 'deg', tittel: `${priser.aaretsSpiller.navn} er årets spiller i ${k.navn}`, tekst: `Snitt ${tall(priser.aaretsSpiller.snitt, 1)} over sesongen.${priser.toppscorer ? ` Toppscorer: ${priser.toppscorer.navn} med ${priser.toppscorer.maal} mål.` : ''}` })
+  // Plasspremien (Pakke 73): vinneren får TV-pengene en gang til, toeren halvparten, treeren en firedel.
+  if (plass <= PLASSPREMIE.length) {
+    const premie = Math.round(tvpenger(k) * PLASSPREMIE[plass - 1])
+    inntekt(s, k, 'premier', premie)
+    saker.push({ type: 'deg', tittel: `${kortKroner(premie)} i premie til ${k.navn}`, tekst: `Nummer ${plass} i ${div.navn} gir penger i kassa.` })
+  }
+  oppsummering.tv = k.tv ?? 0
+  oppsummering.premier = k.premier ?? 0
+  if (k.cup) oppsummering.cup = naaddTekst(k.cup, 'cup')
+  if (k.europa) oppsummering.europa = naaddTekst(k.europa, 'europa')
   if (plass === 1) {
     const navn = k.divisjon === DIVISJONER.length - 1 ? 'Seriemester i Eliteserien' : `Vinner av ${div.navn}`
     oppsummering.trofe = navn
@@ -895,7 +1120,16 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
   // Sesongtallene nullstilles; karrieren står (Pakke 72).
   for (const p of k.spillere) delete p.sesong
   delete k.toppscorere
+  // Cupen er over; Europa venter Eliteserie-mesteren neste sesong (Pakke 73).
+  delete k.cup
+  delete k.tv
+  delete k.premier
+  if (fra === DIVISJONER.length - 1 && plass === 1) {
+    k.europa = nyEuropa(k, k.sesong)
+    saker.push({ type: 'deg', tittel: `${k.navn} skal spille i Europa`, tekst: `Seriegullet gir plass i kvartfinalen mot ${nesteUtslagskamp(k.europa)?.navn ?? 'Europas beste'}. Kampene spilles mellom seriekampene.` })
+  } else delete k.europa
   betalSponsor(s, k)
+  betalTv(s, k)
   return saker
 }
 
@@ -917,10 +1151,11 @@ export function klubbTilSalgs(s: Spilltilstand, navn: string): { klubb: Klubb; p
   return { klubb, pris }
 }
 
-/** Første sesongs sponsoravtale betales når klubben kjøpes. Muterer. */
+/** Første sesongs sponsoravtale og TV-penger betales når klubben kjøpes. Muterer. */
 export function startKlubb(s: Spilltilstand, k: Klubb): void {
   s.klubb = k
   betalSponsor(s, k)
+  betalTv(s, k)
 }
 
 const resultat = (kamp: Kamp) => (kamp.maalFor > kamp.maalMot ? 'seier' : kamp.maalFor === kamp.maalMot ? 'uavgjort' : 'tap')
@@ -943,6 +1178,8 @@ export function klubbVedDagsskifte(s: Spilltilstand): Overskrift[] {
     tittel: kamp.hjemme ? `${k.navn} ${kamp.maalFor}–${kamp.maalMot} ${kamp.motstander}` : `${kamp.motstander} ${kamp.maalMot}–${kamp.maalFor} ${k.navn}`,
     tekst: `${tekst} i ${DIVISJONER[k.divisjon].navn}.${scorere ? ` Mål: ${scorere}.` : ''}${beste ? ` Banens beste: ${beste.navn} (${tall(beste.vurdering, 1)}).` : ''} Laget ligger på ${plassering(k)}. plass.`,
   })
+  // Cupen og Europa spilles ved siden av serien, på faste dager i sesongen (Pakke 73).
+  saker.push(...spillTurneringer(s, k, k.runde))
   const lonn = lonnPerDag(k)
   betal(s, lonn)
   s.totaltKlubb = (s.totaltKlubb ?? 0) - lonn

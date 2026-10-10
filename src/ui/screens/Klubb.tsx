@@ -4,6 +4,13 @@ import { byggAkademi, byggStadion, kjopKlubb, kjopSpiller, selgKlubb, selgSpille
 import {
   AKADEMITRINN,
   ANTALL_LAG,
+  CUPDAGER,
+  CUPRUNDER,
+  EUROPADAGER,
+  EUROPARUNDER,
+  naaddTekst,
+  nesteUtslagskamp,
+  tvpenger,
   FORMASJONSLISTE,
   JUNIOR_TIL,
   lagprofil,
@@ -51,7 +58,7 @@ import {
   type Stadiondel,
 } from '../../engine/klubb'
 import { tidTilNesteRunde } from '../../engine/startups'
-import type { Kamp, Klubb as KlubbT, Posisjon, Sesongoppsummering, Spiller, Spilltilstand, Taktikk } from '../../engine/types'
+import type { Kamp, Klubb as KlubbT, Posisjon, Sesongoppsummering, Spiller, Spilltilstand, Taktikk, Turnering, Utslag } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { Ikon } from '../komponenter/Ikoner'
@@ -128,7 +135,7 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
   // Hvem som starter neste kamp, og på hvilken plass (Pakke 71).
   const plasser = new Map<number, Posisjon>()
   for (const { plass, spiller } of startellever(k)) if (spiller) plasser.set(spiller.id, plass)
-  const netto = k.billetter + k.sponsor - k.lonn
+  const netto = k.billetter + k.sponsor + (k.tv ?? 0) + (k.premier ?? 0) - k.lonn
   const opp = rykkerOpp(k)
   const ned = rykkerNed(k)
   const sperret = k.divisjon < DIVISJONER.length - 1 && !oppfyllerKrav(k, k.divisjon + 1)
@@ -203,6 +210,9 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         </div>
       )}
 
+      {k.cup && <Turneringskort k={k} u={k.cup} turnering="cup" />}
+      {k.europa && <Turneringskort k={k} u={k.europa} turnering="europa" />}
+
       {k.kamper.length > 0 && <Kamprapport kamp={k.kamper[k.kamper.length - 1]} k={k} />}
 
       {k.kamper.length > 0 && (
@@ -216,7 +226,11 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
                   <span>
                     {m.hjemme ? 'Hjemme mot' : 'Borte mot'} {m.motstander}
                   </span>
-                  {m.tilskuere !== undefined && <span className="dempet liten">{tall(m.tilskuere)} tilskuere</span>}
+                  <span className="dempet liten">
+                    {m.turnering && `${m.turnering === 'cup' ? 'Cupen' : 'Europa'}, ${(m.turnering === 'cup' ? CUPRUNDER : EUROPARUNDER)[m.runde]?.toLowerCase()}${m.straffer ? `, straffer (${m.straffer === 'deg' ? 'videre' : 'ute'})` : ''}`}
+                    {m.turnering && m.tilskuere !== undefined && ' · '}
+                    {m.tilskuere !== undefined && `${tall(m.tilskuere)} tilskuere`}
+                  </span>
                 </span>
                 <strong>
                   {m.maalFor}–{m.maalMot}
@@ -359,6 +373,14 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         <div>
           <dt>Sponsor i år</dt>
           <dd className="pluss">{kortKroner(k.sponsor)}</dd>
+        </div>
+        <div>
+          <dt>TV-penger i år</dt>
+          <dd className="pluss">{kortKroner(k.tv ?? 0)}</dd>
+        </div>
+        <div>
+          <dt>Premier i år</dt>
+          <dd className="pluss">{kortKroner(k.premier ?? 0)}</dd>
         </div>
         <div>
           <dt>Lønn i år</dt>
@@ -596,7 +618,7 @@ function Sesongkort({ k }: { k: KlubbT }) {
   const [alle, settAlle] = useState(false)
   const sesonger = [...(k.sesonger ?? [])].reverse()
   const siste = sesonger[0]
-  const netto = siste.billetter + siste.sponsor - siste.lonn
+  const netto = siste.billetter + siste.sponsor + (siste.tv ?? 0) + (siste.premier ?? 0) - siste.lonn
   return (
     <div className="kort">
       <div className="maal-topp">
@@ -640,10 +662,28 @@ function Sesongkort({ k }: { k: KlubbT }) {
           <dt>Lønn</dt>
           <dd className="minus">−{kortKroner(siste.lonn)}</dd>
         </div>
+        {(siste.tv ?? 0) + (siste.premier ?? 0) > 0 && (
+          <div>
+            <dt>TV-penger og premier</dt>
+            <dd className="pluss">{kortKroner((siste.tv ?? 0) + (siste.premier ?? 0))}</dd>
+          </div>
+        )}
         <div>
           <dt>Netto</dt>
           <dd className={netto >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(netto)}</dd>
         </div>
+        {siste.cup && (
+          <div>
+            <dt>Cupen</dt>
+            <dd>{siste.cup}</dd>
+          </div>
+        )}
+        {siste.europa && (
+          <div>
+            <dt>Europa</dt>
+            <dd>{siste.europa}</dd>
+          </div>
+        )}
       </dl>
       <p className="liten">
         <span className={`merke ${siste.utfall === 'opp' ? 'gull' : siste.utfall === 'ned' || siste.utfall === 'nektet' ? 'varsel' : 'info'}`}>{UTFALL[siste.utfall]}</span>{' '}
@@ -684,6 +724,69 @@ function Sesongtall({ p }: { p: Spiller }) {
       {' · '}
       {st.maal} mål · {st.assist} assist · snitt {tall(snitt, 1)}
     </>
+  )
+}
+
+/**
+ * Cupen og Europa (Pakke 73): hvor langt du er, neste motstander og når, og
+ * kampene du har spilt i turneringen i år.
+ */
+function Turneringskort({ k, u, turnering }: { k: KlubbT; u: Utslag; turnering: Turnering }) {
+  const runder = turnering === 'cup' ? CUPRUNDER : EUROPARUNDER
+  const dager = turnering === 'cup' ? CUPDAGER : EUROPADAGER
+  const neste = nesteUtslagskamp(u)
+  const mester = !u.ute && u.lag.length === 1 && !!u.lag[0].deg
+  const dag = dager[u.runde]
+  const spilt = k.kamper.filter((m) => m.turnering === turnering && m.sesong === u.sesong)
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">{turnering === 'cup' ? 'Cupen' : 'Europa'}</h2>
+        <span className="dempet liten">{mester ? naaddTekst(u, turnering) : u.ute ? `Ute i ${runder[Math.min(u.naadd, runder.length - 1)].toLowerCase()}` : `${runder[u.runde]} · dag ${dag} av ${RUNDER_PER_SESONG}`}</span>
+      </div>
+      {mester ? (
+        <p className="liten">
+          <span className="merke gull">{naaddTekst(u, turnering)}</span> Pokalen står i skapet
+          {turnering === 'cup' && ' — og kr 40 mill i kassa'}.
+        </p>
+      ) : u.ute ? (
+        <p className="dempet liten">
+          {turnering === 'cup' ? 'Cupen er over for i år. Ny trekning neste sesong.' : 'Europa-eventyret er over for denne gang. Et nytt seriegull gir en ny sjanse.'}
+        </p>
+      ) : neste ? (
+        <p className="liten">
+          {runder[u.runde]} mot <strong>{neste.navn}</strong> (styrke {tall(neste.styrke)}) på dag {dag}.
+          {turnering === 'cup' && u.runde === 0 ? ' De fjorten beste står over første runde.' : ''}
+        </p>
+      ) : (
+        <p className="liten">
+          {turnering === 'cup' && u.runde === 0 ? 'Laget er seedet og står over første runde.' : `${runder[u.runde]} på dag ${dag}.`}
+        </p>
+      )}
+      {spilt.length > 0 && (
+        <ul className="kampliste">
+          {spilt.map((m) => (
+            <li key={m.runde}>
+              <span className={`brikke resultat r${m.straffer ? (m.straffer === 'deg' ? 'S' : 'T') : RESULTAT(m)}`}>{m.straffer ? (m.straffer === 'deg' ? 'S' : 'T') : RESULTAT(m)}</span>
+              <span className="spiller-navn">
+                <span>
+                  {runder[m.runde]} {m.hjemme ? 'hjemme mot' : 'borte mot'} {m.motstander}
+                </span>
+                {m.straffer && <span className="dempet liten">Avgjort på straffer</span>}
+              </span>
+              <strong>
+                {m.maalFor}–{m.maalMot}
+              </strong>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="dempet liten">
+        {turnering === 'cup'
+          ? `Alle femti lagene er med. Hver runde du vinner, gir ${kortKroner(Math.round(tvpenger(k) * 0.02))}; cupmesteren får kr 40 mill og et trofé.`
+          : 'Åtte lag, tre runder: kr 10, 20 og 40 mill for hver runde du vinner, og et trofé som gir mer status enn de andre.'}
+      </p>
+    </div>
   )
 }
 

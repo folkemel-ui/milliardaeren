@@ -126,6 +126,10 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'opprykk', navn: 'Opprykk', beskrivelse: 'Rykk opp en divisjon', klart: (s) => (s.klubb?.opprykk ?? 0) > 0 },
   { id: 'seriemester', navn: 'Seriemester', beskrivelse: 'Vinn en serie', klart: (s) => (s.trofeer?.length ?? 0) > 0 },
   { id: 'eliteserie-gull', navn: 'Gull i Eliteserien', beskrivelse: 'Vinn Eliteserien', klart: (s) => (s.trofeer ?? []).some((t) => t.navn.includes('Eliteserien')) },
+  // Pakke 73: cupen og Europa.
+  { id: 'cupmester', navn: 'Cupmester', beskrivelse: 'Vinn cupen', klart: (s) => (s.trofeer ?? []).some((t) => t.navn === 'Cupmester') },
+  { id: 'europa', navn: 'Ut i Europa', beskrivelse: 'Spill en kamp i Europa', klart: (s) => !!s.klubb?.europa && (s.klubb.europa.runde > 0 || s.klubb.europa.ute) },
+  { id: 'europamester', navn: 'Europamester', beskrivelse: 'Vinn Europa', klart: (s) => (s.trofeer ?? []).some((t) => t.navn === 'Europamester') },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
   { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
   // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.

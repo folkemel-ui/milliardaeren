@@ -749,6 +749,26 @@ export interface Kamp {
   maal?: Maalhendelse[]
   vurderinger?: Spillervurdering[]
   beste?: number
+  /** Cupen eller Europa (Pakke 73); seriekamper har ingen. `runde` er da runden i turneringen. */
+  turnering?: Turnering
+  /** Avgjort på straffer: hvem som gikk videre. */
+  straffer?: 'deg' | 'dem'
+}
+
+export type Turnering = 'cup' | 'europa'
+
+/** En utslagsturnering (Pakke 73): lagene som er igjen, neste runde, og din egen terning. */
+export interface Utslag {
+  sesong: number
+  /** Neste runde som skal spilles. */
+  runde: number
+  /** Lagene som er igjen; ditt eget som { navn, styrke: 0, deg: true }. */
+  lag: (Motlag & { deg?: boolean })[]
+  /** Du er slått ut — eller har vunnet (da er `lag` bare deg). */
+  ute: boolean
+  /** Runden du gikk ut i, eller antall runder når du vant. */
+  naadd: number
+  frø: number
 }
 
 /** En spillers tall denne sesongen og gjennom karrieren (Pakke 72). */
@@ -773,6 +793,12 @@ export interface Sesongoppsummering {
   billetter: number
   sponsor: number
   lonn: number
+  /** TV-penger og premier (Pakke 73). Mangler i oppsummeringer fra Pakke 72. */
+  tv?: number
+  premier?: number
+  /** Hvor langt det gikk i cupen og i Europa: «Kvartfinale», «Cupmester». */
+  cup?: string
+  europa?: string
   /** Hva som skjedde: opp, ned, nektet opprykk eller ingenting. */
   utfall: 'opp' | 'ned' | 'nektet' | 'samme'
   /** Divisjonen neste sesong spilles i. */
@@ -804,6 +830,12 @@ export interface Klubb {
   toppscorere?: Record<string, number>
   /** Sesongene som var, nyeste sist, høyst 20 (Pakke 72). */
   sesonger?: Sesongoppsummering[]
+  /** Cupen denne sesongen og Europa, når du er med (Pakke 73). */
+  cup?: Utslag
+  europa?: Utslag
+  /** TV-penger og premier denne sesongen (Pakke 73). Mangler i gamle lagringer. */
+  tv?: number
+  premier?: number
   /** Klubbens egen terning, så en klubb ikke endrer resten av spillet. */
   frø: number
   nesteSpillerId: number
