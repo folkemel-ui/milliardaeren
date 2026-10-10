@@ -156,6 +156,14 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
 - **Folke draws on screenshots of the browser pane** (a red ring around the problem) and
   asks "can you find more?". Take that as a request for a full sense check, not just
   the one fix; see §5 *Does it make sense?*.
+- **Folke also sends screenshots from the phone** (the live site, iOS, often the light
+  theme) with "can you fix, please?". They may name two things in one go, one of them in
+  the other track's files (the bonds colour): fix both when asked, keep the other
+  track's change to the lines it needs and name the files in the commit. When a remark
+  can be read two ways ("Eiendom also doesn't show up": the broken map, or the row left
+  out of the portfolio on purpose), fix what is clearly broken and offer the other in
+  one line instead of guessing. **Commit times are not push times**: to know what was
+  live when the phone broke, the order of the pushes matters, not `%ad`.
 - **After each pack, Folke asks what you learned.** Update this file before the pack
   commit, then re-read it once for anything missing. That's cheaper than a second round.
 - Report each item as what it looks like now. Say plainly what's still mixed or still
@@ -804,7 +812,9 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   through Bash. In G11 it went further: `node - <<'EOF'` with `\\d` in a template string
   wrote a bare `d` (`/(d+)–(d+)/`); tsc can't see that, only a test can. Write scripts with regexes using the Write tool. That includes the
   JSON patch files for `fiks.mjs`: in G6 a heredoc JSON with `\.\d` in a test regex
-  failed to parse. Anything with a backslash goes through Write or Edit.
+  failed to parse. Anything with a backslash goes through Write or Edit. It happened
+  twice more after G12 (a `[\w-]` in a JSON heredoc, a `\(` in `node -e`): the failed
+  parse wrote nothing, but each cost a round. The rule has no exceptions.
 - **An error screen during edits** ("Noe gikk galt", e.g. "reading 'x'") is usually HMR
   catching a half-applied multi-file change. Reload before you debug.
 - **Gallery maps run at midnight**: `?galleri` builds new games (`sek` 0), so the maps

@@ -307,6 +307,11 @@ session; delete what stops being true.
   `startApp` in `klikk.ts` waits for parts still loading before `vi.resetModules()`;
   without that, a click test that ends mid-load made the *next* test hang (Pack 65's
   «Verden viser bare eiendom ute» timed out after G12 until this was added).
+  Every release renames the parts, so a phone that kept the game open across a deploy
+  asked for files that were gone; when a part fails, `vedBehov.ts` now reloads the page if
+  `index.html` names a new start script. **Reports from Folke's phone come from the live
+  site, often a tab opened before your last push**: first load the live site fresh in the
+  browser pane — if it works there, suspect the stale tab, not the code.
 - **The full frame (G13).** Drawings in `FULL_RAMME` (the four street businesses so far)
   have no vignette and are 176 × 96 in the detail scene (x −40 to 136). A new business,
   property or vehicle drawn by the game track can stay out of the list (it then looks as
@@ -430,6 +435,11 @@ session; delete what stops being true.
   with `bokforGevinst`, `KLASSENAVN` and `TIL_UNDERFANE` (Investeringer.tsx), and two tests
   that list the classes by hand (portefolje, migrering). Old saves miss the class in
   `dagensFlyt`/`forrigeDag.verdier`: both are read with `?? 0`, so no migration.
+  **And a colour**: `--klasse-<id>` in both theme blocks of `grunnlag.css` plus a
+  `.fordeling-del.<id>, .klasse-prikk.<id>` rule in `investeringer.css`. Bonds got none in
+  Pack 53, so their dot and bar segment were transparent — unseen on the dark theme for
+  weeks, found by Folke on the light one (10 October). `grafikkG12.test.ts` checks bonds;
+  a new class needs the same.
   Coupons count as dividends (`totaltUtbytte`) — not savings interest, because the
   savings account's cost price is computed from `totaltSparerente`.
 - **Business income today = `dagensFaktor(s, type)`**: the calendar (Pack 49) times
