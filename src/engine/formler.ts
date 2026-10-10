@@ -233,10 +233,13 @@ export function papirverdi(s: Spilltilstand, klasse?: 'aksje' | 'krypto'): numbe
 
 /** Alt du eier, før gjeld. */
 export function eiendeler(s: Spilltilstand): number {
+  // Bedriftene summert i en vanlig løkke, i samme rekkefølge som før (Pakke 64): regnes hvert sekund.
+  let bedrifter = 0
+  for (let i = 0; i < s.bedrifter.length; i++) bedrifter += bedriftsverdi(s.bedrifter[i])
   return (
     s.kontanter +
     s.sparing +
-    s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) +
+    bedrifter +
     papirverdi(s) +
     fondverdi(s) +
     eiendomsverdi(s) +

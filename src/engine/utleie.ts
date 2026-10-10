@@ -35,16 +35,23 @@ export const FORVALTER_ANDEL = 0.05
 /** … men aldri under dette. */
 export const FORVALTER_MINSTEPRIS = 100_000
 
-const GRUNNLEDIGHET = new Map<string, number>()
+let ledighetUke = Number.NaN
+const LEDIGHET_I_UKA = new Map<By, number>()
 
-/** Ledigheten i byen denne uka uten forvalter. Husket, for leien spør hvert sekund. */
+/**
+ * Ledigheten i byen denne uka uten forvalter. Husket, for leien spør hvert
+ * sekund — per by for uka som gjelder, så sekundet slipper å bygge en
+ * tekstnøkkel for hver by (Pakke 64). Samme regnestykke som før.
+ */
 function grunnledighet(by: By, uke: number): number {
-  const nøkkel = `${by}|${uke}`
-  let l = GRUNNLEDIGHET.get(nøkkel)
+  if (uke !== ledighetUke) {
+    ledighetUke = uke
+    LEDIGHET_I_UKA.clear()
+  }
+  let l = LEDIGHET_I_UKA.get(by)
   if (l === undefined) {
-    if (GRUNNLEDIGHET.size > 500) GRUNNLEDIGHET.clear()
-    l = new Hashkilde(hashTekst(`ledighet:${nøkkel}`)).neste() * LEDIGHET_MAKS
-    GRUNNLEDIGHET.set(nøkkel, l)
+    l = new Hashkilde(hashTekst(`ledighet:${by}|${uke}`)).neste() * LEDIGHET_MAKS
+    LEDIGHET_I_UKA.set(by, l)
   }
   return l
 }

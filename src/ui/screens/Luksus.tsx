@@ -204,6 +204,9 @@ export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: L
   )
 }
 
+/** Nærbildet på en plass i lageret. Fast, så Illustrasjon (memo) ikke tegnes på nytt hvert sekund (Pakke 64). */
+const NAER_PLASS = [86, 74] as const
+
 const LAGERIKON: Record<LagerId, Ikonnavn> = { garasje: 'garasje', havn: 'anker', hangar: 'hangar' }
 
 type Lagervalg = { slag: 'eid'; id: LuksusId } | { slag: 'ledig' } | null
@@ -238,7 +241,7 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
       <div className="lagerscene" role="list" aria-label={l.navn} data-ingen-sveip>
         {her.map((id) => (
           <Plass key={id} lager={lager} navn={LUKSUS[id].navn} under={`+${LUKSUS[id].status} status`} valgt={valgt?.slag === 'eid' && valgt.id === id} trykk={() => trykk({ slag: 'eid', id })}>
-            <Illustrasjon id={id} størrelse={64} utklipp naerbilde={[86, 74]} />
+            <Illustrasjon id={id} størrelse={64} utklipp naerbilde={NAER_PLASS} />
           </Plass>
         ))}
         {Array.from({ length: ledige }, (_, i) => (
@@ -253,7 +256,7 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
           >
             {neste && (
               <span className="plass-skygge">
-                <Illustrasjon id={neste} størrelse={64} utklipp naerbilde={[86, 74]} />
+                <Illustrasjon id={neste} størrelse={64} utklipp naerbilde={NAER_PLASS} />
               </span>
             )}
           </Plass>

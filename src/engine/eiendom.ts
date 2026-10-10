@@ -227,7 +227,10 @@ const BYGG_I = new Map<By, EiendomId[]>()
  */
 export function eierHeleByen(s: Spilltilstand, by: By): boolean {
   const bygg = byggI(by)
-  return bygg.length > 0 && bygg.every((id) => (s.eiendommer[id] ?? 0) >= EIENDOMSTYPER[id].maksAntall)
+  if (bygg.length === 0) return false
+  // En vanlig løkke: dette spørres for hver by hvert sekund (Pakke 64).
+  for (let i = 0; i < bygg.length; i++) if ((s.eiendommer[bygg[i]] ?? 0) < EIENDOMSTYPER[bygg[i]].maksAntall) return false
+  return true
 }
 
 /** Hvor mange enheter du eier i en by, av hvor mange som finnes. */

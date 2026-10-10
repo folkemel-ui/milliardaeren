@@ -81,6 +81,9 @@ const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Investeringsdel> =
   sparing: 'bank',
 }
 
+/** Nærbildet i rivalenes bedriftsliste. Fast, så Illustrasjon (memo) ikke tegnes på nytt hvert sekund (Pakke 64). */
+const NAER_RIVAL = [32, 32] as const
+
 const RISIKO_TEKST = { lav: 'Lav risiko', middels: 'Middels risiko', høy: 'Høy risiko' } as const
 
 /** Endring over kurshistorikken (to timer), som andel. */
@@ -830,7 +833,7 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
             return (
               <li key={rb.type}>
                 <div className="rivalbedrift-topp">
-                  <Illustrasjon id={rb.type} størrelse={32} naerbilde={[32, 32]} />
+                  <Illustrasjon id={rb.type} størrelse={32} naerbilde={NAER_RIVAL} />
                   <div>
                     <strong>{BEDRIFTSTYPER[rb.type].navn}</strong>
                     <span className="dempet liten">

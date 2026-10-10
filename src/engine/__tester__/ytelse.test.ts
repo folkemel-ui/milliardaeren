@@ -14,6 +14,10 @@
  * Testen måler CPU-tiden prosessen bruker, fire simuleringer om gangen og det
  * beste av fem forsøk, så en travel maskin (en annen økt, andre tester) ikke
  * feller den. Med BENK=1 skrives tallene ut.
+ *
+ * Hvert system har også sitt eget budsjett (Pakke 64): sekundet måles i deler
+ * (`maalDeler` i simulering.ts) på det tyngste spillet, og hver del har en grense.
+ * Vokser noe, sier testen hvilket system det er — og en ny del uten budsjett feiler.
  */
 
 import { execFileSync } from 'node:child_process'
@@ -22,12 +26,13 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { build } from 'esbuild'
 import { describe, expect, it } from 'vitest'
+import { BUDSJETT } from './budsjett'
 
 const MOTOR = resolve(__dirname, '..').replace(/\\/g, '/')
 
 /** Programmet som måles: begge spillene, to timer borte. Skriver JSON. */
 const PROGRAM = `
-import { simuler } from '${MOTOR}/simulering'
+import { simuler, maalDeler, type Delmaaler } from '${MOTOR}/simulering'
 import { BORTE_TAK_SEK } from '${MOTOR}/innhold'
 import { nyttSpill } from '${MOTOR}/start'
 import { fulltSpill } from '${MOTOR}/__tester__/hjelp'
@@ -55,12 +60,25 @@ const maal = (s: ReturnType<typeof nyttSpill>) => {
   return Math.round(ms)
 }
 const nytt = maal(nyttSpill())
-const fullt = maal(fulltSpill())
-console.log(JSON.stringify({ nytt, fullt }))
+const tyngst = fulltSpill()
+const fullt = maal(tyngst)
+// Tiden per del av sekundet: den runden der summen var minst, av fem.
+let deler: Delmaaler = {}
+let minst = Infinity
+for (let i = 0; i < 5; i++) {
+  const m: Delmaaler = {}
+  maalDeler(m)
+  simuler(tyngst, BORTE_TAK_SEK, true)
+  maalDeler(null)
+  const sum = Object.values(m).reduce((a, b) => a + b, 0)
+  if (sum < minst) { minst = sum; deler = m }
+}
+for (const k of Object.keys(deler)) deler[k] = Math.round(deler[k])
+console.log(JSON.stringify({ nytt, fullt, deler }))
 `
 
 /** Bygger og kjører målingen. */
-async function maalBygget(): Promise<{ nytt: number; fullt: number }> {
+async function maalBygget(): Promise<{ nytt: number; fullt: number; deler: Record<string, number> }> {
   const mappe = mkdtempSync(join(tmpdir(), 'milliardaer-ytelse-'))
   try {
     const inn = join(mappe, 'maal.ts')
@@ -76,12 +94,15 @@ async function maalBygget(): Promise<{ nytt: number; fullt: number }> {
 describe('ytelse, målt på bygget motor', () => {
   it('to timer borte: et nytt spill på høyst 100 ms, det tyngste på høyst 400 ms', { timeout: 120_000 }, async () => {
     const ms = await maalBygget()
-    if (process.env.BENK) console.log(`to timer borte, bygget: nytt spill ${ms.nytt} ms, fullt spill ${ms.fullt} ms CPU`)
+    if (process.env.BENK) console.log(`to timer borte, bygget: nytt spill ${ms.nytt} ms, fullt spill ${ms.fullt} ms CPU`, ms.deler)
     // På GitHub (CI) kjører testene på delte maskiner med ukjent fart før hver
     // publisering. Der får grensene dobbelt slakk, så en treg maskin ikke stopper
     // en publisering; telefonbudsjettet sjekkes her, der det ble målt.
     const slakk = process.env.CI ? 2 : 1
     expect(ms.nytt).toBeLessThanOrEqual(100 * slakk)
     expect(ms.fullt).toBeLessThanOrEqual(400 * slakk)
+    // Hvert system innenfor sitt budsjett, og ingen del uten budsjett.
+    expect(Object.keys(ms.deler).sort()).toEqual(Object.keys(BUDSJETT).sort())
+    for (const [del, grense] of Object.entries(BUDSJETT)) expect(ms.deler[del], `${del}: ${ms.deler[del]} ms`).toBeLessThanOrEqual(grense * slakk)
   })
 })

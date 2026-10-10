@@ -4,7 +4,7 @@ Motoren i `src/engine` er ren og seedet: samme lagring og samme antall sekunder 
 
 ## Grunnreglene
 
-- **Ingen `Math.random` eller `Date.now` i `src/engine`.** Klokka bor i `state/lager.ts`, som gir motoren et antall sekunder. Konfetti og sveip i UI-et kan bruke `Math.random`; motoren kan ikke.
+- **Ingen `Math.random` eller `Date.now` i `src/engine`.** Klokka bor i `state/lager.ts`, som gir motoren et antall sekunder. Konfetti og sveip i UI-et kan bruke `Math.random`; motoren kan ikke. Eneste klokke i motoren: `performance.now` i `simulering.ts`, som bare leses når ytelsestesten slår på delmålingen (`maalDeler`, Pakke 64) — den måler tiden og styrer ingenting.
 - **Tiden går i hele sekunder** (`simulering.ts`). `simuler(s, n)` er det samme som `n` kall à ett sekund — gullmesteren sjekker det.
 - **Datoer kommer fra dagnummeret**, aldri fra klokka (`kalender.ts`). Én spilldag er 300 sekunder.
 - **Handlinger er rene funksjoner** (`handlinger.ts`): tilstand inn, ny tilstand eller feil ut. De trekker aldri fra terningen.

@@ -22,6 +22,26 @@ import { nyhetsfaktor, trenddrift } from './bransjer'
 import { kupongPerSek } from './obligasjoner'
 import type { PapirId, Spilltilstand } from './types'
 
+/**
+ * Tiden hver del av sekundet bruker, i millisekunder, summert (Pakke 64).
+ * Ytelsestesten slår den på for å gi hvert system sitt eget budsjett. Av er den
+ * null, og da koster den én sjekk per del — tallene i spillet blir de samme
+ * uansett, for klokka leses bare, den styrer ingenting.
+ */
+export type Delmaaler = Record<string, number>
+let maaler: Delmaaler | null = null
+
+/** Slår delmålingen på (et objekt å summere i) eller av (null). */
+export function maalDeler(m: Delmaaler | null): void {
+  maaler = m
+}
+
+function runde(m: Delmaaler, del: string, fra: number): number {
+  const naa = performance.now()
+  m[del] = (m[del] ?? 0) + naa - fra
+  return naa
+}
+
 /** Flere punkter enn dette, og historikken tynnes ut til halvparten. */
 export const MAKS_HISTORIKKPUNKTER = 240
 
@@ -44,6 +64,8 @@ export function simuler(s: Spilltilstand, antall = 1, borte = false): Spilltilst
 
 /** Ett sekund, på en tilstand simuleringen selv eier. */
 function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
+  const m = maaler
+  let t = m ? performance.now() : 0
   // Det samme som inntektPerSek(s, borte), men hver bedrift og statusen regnes
   // bare én gang: tallene trengs både til kontantene og til regnskapet under.
   const faktor = statusfaktor(s)
@@ -67,6 +89,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
       if (b.inntektHistorikk.length > MAKS_INNTEKT_HISTORIKK) b.inntektHistorikk.shift()
     }
   }
+  if (m) t = runde(m, 'inntekt', t)
   // Sparerenten legges på kontoen, så den renter seg selv.
   const sparerente = sparerentePerSek(s)
   s.sparing += sparerente
@@ -81,34 +104,43 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
     s.kontanter += kupong
     s.totaltUtbytte += kupong
   }
+  if (m) t = runde(m, 'sparing og utbytte', t)
   // Leien kommer uansett — eiendom trenger ingen leder.
   const leie = leiePerSek(s)
   s.kontanter += leie
   s.totaltLeie += leie
+  if (m) t = runde(m, 'leie', t)
   dekkUnderskudd(s)
   betalRente(s)
   s.sek += 1
+  if (m) t = runde(m, 'bank', t)
   // Oppussing som er ferdig nå, gir ny standard fra neste sekund.
   sjekkOppussing(s)
+  if (m) t = runde(m, 'oppussing', t)
 
   if (s.sek % MARKED_TIKK_SEK === 0) {
     markedstikk(s.marked, terning, erHelg(s.sek), { ...konjunkturdrift(s), papirer: trenddrift(s) })
     rivaltikk(s, terning, MARKED_TIKK_SEK / 3600)
     sjekkOrdre(s)
   }
+  if (m) t = runde(m, 'marked', t)
   // Utbytte hver morgen børsen er åpen.
   if (erDagsskifte(s.sek) && !erHelg(s.sek)) betalUtbytte(s)
   sjekkMargin(s)
+  if (m) t = runde(m, 'utbytte og margin', t)
 
   const formue = nettoformue(s)
   if (formue > s.hoyesteFormue) s.hoyesteFormue = formue
   if (s.sek % s.historikk.intervall === 0) loggFormue(s, formue)
+  if (m) t = runde(m, 'formue', t)
   sjekkPrestasjoner(s)
+  if (m) t = runde(m, 'prestasjoner', t)
   kotikk(s, borte)
   if (erDagsskifte(s.sek)) {
     registrerDagslutt(s.marked)
     gisUtAvis(s, terning)
   }
+  if (m) runde(m, 'dagsskifte og kø', t)
 }
 
 function betalUtbytte(s: Spilltilstand): void {
