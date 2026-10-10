@@ -15,8 +15,32 @@ session; delete what stops being true.
 - **Lists first, then packs.** Folke asks for a numbered list ("what could be improved?",
   "what doesn't make sense gameplay-wise?", "graphic upgrades, if any?"), answers with the
   numbers to keep ("Add 1, 3, 5 …"), and asks to fit them into packs. Never add an idea to
-  `Ideer.md` that wasn't picked. Unpicked ideas stay in chat; picked ones go into a section,
-  numbered, and into the pack plan when asked.
+  `Ideer.md` that wasn't picked. Picked ones go into a section, numbered, and into the pack
+  plan when asked. **Since 11 October Folke wants the unpicked ones kept too:** each list's
+  leftovers go under *Parked* as their own short list («Not picked from …», one line each,
+  with the key number), and the older declined rounds are recorded there by name. Later
+  Folke asks to "pick from the parked and declined lists" — then go through every entry,
+  grep for the ones that already exist (selling businesses, the away screen, per-business
+  history and the tab dot were all in *Parked* but already in the game), say which you
+  left out and why, and move picked ones up with no copy left behind.
+- **Folke picks a subset from lists, but the recommended option on design questions.** From
+  the 18-item review Folke took 15, from the 31-item club list 10, from the 18 revisited
+  parked ideas 5 — never just the ones I recommended. So a list should hold every
+  defensible item with its real number, not only the favourites; the recommendation at the
+  end is a help, not a filter.
+- **"Like a football manager game"** (the club, 11 October): start the list with what the
+  club *is* today in numbers (two numbers per player, best-eleven average, one decision per
+  match, a final score), and say plainly what can't work — the club's money can never
+  matter late (a full Eliteserien season ≈ 14 s of business income at 100 mrd), so it
+  must matter through play, goals and glory. Group the list by area (squad, transfers,
+  matches, running the club, art and graphics) and number it straight through.
+- **Grouping into packs** ("reorganize the packs"): group by the files and the rule they
+  touch, so the golden master moves once and the save version bumps once per area (all
+  business prices in one pack; everything that changes what a player is in one pack).
+  Put dependent packs in order (positions before the match report before cups). A pack the
+  *other* track must draw goes at the end of its plan with a note on when it fits, so its
+  numbering and its «Next up» don't shift under the other session. Count the items into
+  the packs before reporting (26, not the 27 I first said).
 - **Folke thinks in versions.** Pack 38 was "v0.5"; Packs 39–43 were the road to v1.0,
   and the game shipped as 1.0.0 with Pack 43. A version goal gets its own section in
   `Ideer.md` while it's being built, and the section goes when it's done. When a picked
@@ -188,7 +212,12 @@ session; delete what stops being true.
   Packs 55–60: collect `plan(file, [[from, to], …])` calls, loop once to throw on any
   missing `from`, and only then write. A stale anchor (an import line changed two packs
   ago) then costs nothing instead of leaving half a patch behind. Use `t.replace(from, () => to)`
-  so `$` in the replacement isn't read as a pattern.
+  so `$` in the replacement isn't read as a pattern. The check runs on the *original* text,
+  so a step whose `from` is created by an earlier step fails it (it did, harmlessly, for
+  the pack plan on 11 October): fold dependent steps into one replacement.
+- **Don't fix a scratch script with `node -e` from Bash.** Nested quotes and `\n` escapes
+  inside a Bash string inside JS broke twice in a row; the Edit tool on the script file
+  fixed it in one go.
 - **Never sed backticks or `${`.** A `sed 's/\\`/`/g'` meant to unescape a test file put a
   backtick at the start of every line. And when you write a `.ts` file directly with the
   Write tool, don't carry over the `\`` and `\${` escapes from a JS patch script.
