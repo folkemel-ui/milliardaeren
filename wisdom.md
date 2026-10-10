@@ -324,6 +324,20 @@ session; delete what stops being true.
   exact, so any geometry difference is real: it was the font, whose relative `url()` broke
   when the file moved. Await `document.fonts.ready`. 36 screens took ~5 min in chunks of
   ≤ 40 s per call (the tool gives up at 45 s); the gallery's 68 000 elements need 4 chunks.
+- **Counting touch targets (Pack 74).** Run in the page at 375 × 812, per screen and part: every
+  `button, [role=tab], a[href], input, select` that is visible; its target is its own rect, widened
+  by an absolute `::after` if it has one (`getComputedStyle(el, '::after')`: `top`/`bottom`/`left`/`right`
+  are the insets, so height = rect − top − bottom). Count the ones under 44 × 44 and group by
+  class and size. Sweep **every** screen and part (12 here): a first pass over six found three
+  classes, the full sweep found a fourth (a text link in Innstillinger). The same script with
+  `fontSize < 12` on leaf nodes found the 11 px descriptions; group by class to see what they
+  are before you decide what to enlarge. Layout can't be tested in happy-dom (no layout), so the
+  tests guard the CSS rules and this script is the real check.
+- **CSS-reading tests cannot share a file with a happy-dom click test.** `alleStiler()` builds a
+  `file:` URL from `import.meta.url`, which happy-dom replaces with its own origin («The URL
+  must be of scheme file»). Pack 74 split into `pakke74.test.ts` (node: CSS rules, pure
+  functions) and `pakke74b.test.ts` (happy-dom, whole app, in `TUNGE`). For scroll in a click test,
+  spy on `window.scrollTo` and define `scrollY` with `Object.defineProperty`.
 - **Measure React render cost in a production build, not in dev.** The Profiler in dev mode
   read 161 ms for Selskaper's per-second redraw; production reads 5–10× less. For real
   numbers: a temporary `vite.profilering.config.ts` that aliases `react-dom/client` to

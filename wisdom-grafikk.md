@@ -6,7 +6,7 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12–G15 (10–11 October 2026), G16 (11 October 2026). G17–G23 are planned in
+2026), G12–G15 (10–11 October 2026), G16 and Pack 74 (11 October 2026). G17–G23 are planned in
 `Ideer.md`: the full frame for properties and luxury in groups (G17–G21), the seasons
 (G22) and the club in pictures (G23).
 
@@ -1145,7 +1145,39 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   bank's steps are mostly people and cars (the buildings have little to add); the steps
   have not been looked at in the light theme (the sky follows the theme, the subject doesn't).
 
-## 7. Notes for later (G1–G16 done; G17–G23 planned in `Ideer.md`)
+## 6e. A game-track pack from the graphics session (Pack 74)
+
+- **It happens when Folke asks.** «Start on Pack 74» went to this session although the packs
+  are the game track's: the work was CSS and `App.tsx`, no art, and the game session was idle
+  (`git -C "../New folder (3)" status` clean, same HEAD as master). Check that first, build in
+  this folder, and list the game-track files you touched in the commit message (here
+  `App.tsx`, `deler.ts`, eight stylesheets, `vite.config.ts`). The delivery path is the same
+  `lever.mjs`; the commit is `Pakke 74: …`, not `Grafikkpakke`.
+- **All four recommendations were taken again** (landscape sidebar, scroll per tab for the
+  visit, real 44 px on the main buttons, 13 px for descriptions and slot names only), with the
+  question tool this time and the numbers in each option (331 vs 287 vs 249–311 px of content
+  height; «each card grows 4–8 px»). The sizes in the options are what made them one-click.
+- **Do the sweep, then write the number.** The first measurement after the CSS change said
+  «1–2 per screen» (a 40 px profile button, a 19 px toast close, the net-worth rows at 34–40,
+  all missed in the first pass); the numbers went into `wisdom.md` only after the second
+  and third sweeps said 0. Re-measure after the last CSS edit, not after the first.
+- **Decisions that came up while building, worth knowing:**
+  - An open detail page stores 0 as the tab's scroll: the list's own position lives in
+    `overgang.ts` and is private; storing the detail page's scroll would put you halfway down
+    the list.
+  - The tab you are already in, when tapped, goes to the top (it did before; keep it).
+  - A part chosen from outside (`gåTil('klubb')`, the tax badge) changes the part key, so it
+    starts at the top without any special case — that is why the memory is keyed on the part.
+  - The city chip in Eiendom is a `useState` that dies with the tab, so the key reads it from
+    the DOM; making it a remembered part would change behaviour (the filter would stick across
+    visits) and wasn't asked for.
+  - `--meny-høyde: 0px` in the landscape block moves the content's bottom padding and the
+    toasts for free, because both are written in terms of it.
+- **Left for Pack 75 and later:** the top of Bedrifter (title, ×1 row, date, chips, sort) is
+  still about 190 px before the first card, in landscape too; the garage captions and the badges
+  are still 11 px by choice; the light theme was not looked at for any of this.
+
+## 7. Notes for later (G1–G16 done; G17–G23 planned in `Ideer.md`; Pack 74 done)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
