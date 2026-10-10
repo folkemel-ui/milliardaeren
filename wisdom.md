@@ -215,6 +215,11 @@ session; delete what stops being true.
   so `$` in the replacement isn't read as a pattern. The check runs on the *original* text,
   so a step whose `from` is created by an earlier step fails it (it did, harmlessly, for
   the pack plan on 11 October): fold dependent steps into one replacement.
+- **A quoted heredoc is not safe for a script with regexes either** (Pack 77): `\\s`
+  inside a template literal in the script came out as `\s`, which a template reads as a
+  plain `s`, so the `from` never matched; fixing it with `sed` made it worse. Write any
+  patch script that holds a regex or a backslash with the Write tool, or skip the script
+  and rewrite a short test file whole.
 - **Don't fix a scratch script with `node -e` from Bash.** Nested quotes and `\n` escapes
   inside a Bash string inside JS broke twice in a row; the Edit tool on the script file
   fixed it in one go.
@@ -1027,7 +1032,22 @@ session; delete what stops being true.
   area becomes a part in the tab whose question it answers; when it outgrows its part it
   gets a detail page (a layer with back), never a fifth part. The rule is in the header of
   `ui/deler.ts`, and `ui/__tester__/pakke66.test.ts` checks the counts. The club stays in
-  Luksus → Klubb; the stadium is a card right under the club's top card.
+  Luksus → Klubb.
+- **The club is a hub (Pack 77)**: the Klubb part shows the top, the next match, the form
+  chips, five table rows and four rows to pages (`ui/klubbsider.ts`: Troppen og marked,
+  Kamper og tabell, Anlegg og økonomi, Sesongene). A page is a small shared store like
+  `detaljvisning.ts`; `Luksus` renders `Klubbdetalj` in place of the screen and calls
+  `useTilbake`, the page uses `useVoksUt` (scroll to top, back to where you were) and
+  has class `detalj`, so `rullehusk` stores 0. **A new club card goes on a page, not on
+  the hub**; give the hub row a one-line preview instead. Selling the club closes the
+  page itself (`aapneKlubbside(null)`), or the store would reopen it on the next buy.
+  Click tests reach a page with `a.knapp('Anlegg og økonomi', rot.querySelector('.klubbsider'))`.
+- **A fresh 4. divisjon club loses its first cup round every time** (five seeds of five):
+  a test that needs the cup running sets the squad to `styrke = angrep = forsvar = 95`
+  before simulating day 1.
+- **Sweep detail pages for touch targets too.** Pack 74's sweep covered tabs and parts;
+  the shared `.tilbake` («‹ Klubb», «‹ Luksus» …) was 36 px on every detail page until
+  Pack 77 found it. Open each kind of page in the sweep.
 - **Parts (Pack 61)**: every set of parts is a `lagDelvalg(key, parts)` in `ui/deler.ts`
   (remembered in localStorage, first part by default, settable from outside). A new set
   of parts goes there too, not in a `useState`.
