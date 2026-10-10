@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { eierType, erLaastOpp } from '../../engine/formler'
+import { kanVelgeRetning } from '../../engine/ansatte'
 import { Bedriftdetalj } from './Bedriftdetalj'
 import { kjopBedrift } from '../../engine/handlinger'
 import { BEDRIFTSTYPER, STIGEN } from '../../engine/innhold'
@@ -26,6 +27,8 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
   // Kjøpt (standard) eller etter fast inntekt — størst først, lik inntekt i kjøpsrekkefølge.
   const rekkefolge = bedriftsrekkefolge.bruk()
   const bedrifter = rekkefolge === 'inntekt' ? [...s.bedrifter].sort((a, b) => fastInntekt(b) - fastInntekt(a)) : s.bedrifter
+  // Bedriftene som venter på en retning (Pakke 75): én linje øverst i stedet for et merke på hvert kort.
+  const venter = bedrifter.filter(kanVelgeRetning)
   const tilSalgs = STIGEN.filter((t) => !eierType(s, t) && erLaastOpp(s, t))
   const laaste = STIGEN.filter((t) => !erLaastOpp(s, t))
 
@@ -36,10 +39,12 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
 
   return (
     <section className="skjerm">
-      <div className="bedrifter-topp">
-        <h1 className="skjerm-tittel">
-          Dine bedrifter <Forklaring tema="bedrifter" />
-        </h1>
+      <h1 className="skjerm-tittel">
+        Dine bedrifter <Forklaring tema="bedrifter" />
+      </h1>
+      <Dagen s={s} />
+      {/* Pakke 75: ganger og rekkefølge på én rad. */}
+      <div className="bedrifter-kontroller">
         <div className="segment mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
           {MENGDER.map((m) => (
             <button key={m.id} role="radio" aria-checked={mengde === m.id} className={mengde === m.id ? 'aktiv' : ''} onClick={() => velgMengde(m.id)}>
@@ -47,16 +52,22 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
             </button>
           ))}
         </div>
+        {s.bedrifter.length >= 3 && (
+          <div className="segment rekkefolge" role="radiogroup" aria-label="Rekkefølge på bedriftene">
+            {REKKEFOLGER.map((r) => (
+              <button key={r.id} role="radio" aria-checked={rekkefolge === r.id} className={rekkefolge === r.id ? 'aktiv' : ''} onClick={() => bedriftsrekkefolge.sett(r.id)}>
+                {r.navn}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      <Dagen s={s} />
-      {s.bedrifter.length >= 3 && (
-        <div className="segment rekkefolge" role="radiogroup" aria-label="Rekkefølge på bedriftene">
-          {REKKEFOLGER.map((r) => (
-            <button key={r.id} role="radio" aria-checked={rekkefolge === r.id} className={rekkefolge === r.id ? 'aktiv' : ''} onClick={() => bedriftsrekkefolge.sett(r.id)}>
-              {r.navn}
-            </button>
-          ))}
-        </div>
+      {venter.length > 0 && (
+        <button type="button" className="retningslinje" onClick={() => settValgt(venter[0].id)}>
+          <span className="retningsprikk" aria-hidden="true" />
+          {venter.length === 1 ? `${BEDRIFTSTYPER[venter[0].type].navn} venter på retning` : `${venter.length} bedrifter venter på retning`}
+          <span aria-hidden="true"> ›</span>
+        </button>
       )}
       <ul className="kortliste">
         {bedrifter.map((b) => (

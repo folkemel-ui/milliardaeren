@@ -23,6 +23,8 @@ import { Seksjon } from '../komponenter/Seksjon'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Gatebilde } from '../komponenter/Gatebilde'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
+import { EIENDOMSREKKEFOLGER, eiendomsrekkefolge } from '../deler'
+import { sorterEiendom } from '../sortering'
 import { REGIONER, REGIONLISTE, regionEndring } from '../../engine/regioner'
 import { RulleTall } from '../komponenter/RulleTall'
 import { kartdel } from '../deler'
@@ -45,7 +47,12 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
   const [gate, settGate] = useState<By | null>(null)
   // Norge/Verden-bryteren filtrerer lista også (Pakke 65): ute er det som krever fly.
   const iDenneDelen = (id: (typeof EIENDOMSSTIGEN)[number]) => !!EIENDOMSTYPER[id].reise === (kart === 'verden')
-  const synlige = EIENDOMSSTIGEN.filter((id) => iDenneDelen(id) && eiendomSynlig(s, id))
+  // Rekkefølgen huskes, som bedriftenes (Pakke 75).
+  const rekkefolge = eiendomsrekkefolge.bruk()
+  const synlige = sorterEiendom(
+    EIENDOMSSTIGEN.filter((id) => iDenneDelen(id) && eiendomSynlig(s, id)),
+    rekkefolge,
+  )
   const eidHer = synlige.reduce((sum, id) => sum + (s.eiendommer[id] ?? 0), 0)
   const byer = byerMedInnhold(s, kart === 'norge' ? NORSKE_BYER : UTENLANDSBYER)
   const nesteSkjult = EIENDOMSSTIGEN.find((id) => iDenneDelen(id) && !eiendomSynlig(s, id))
@@ -143,6 +150,15 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
         sammendrag={`${eidHer} eid`}
         harInnhold={eidHer > 0}
       >
+      {synlige.length >= 3 && (
+        <div className="segment rekkefolge" role="radiogroup" aria-label="Rekkefølge på eiendommene">
+          {EIENDOMSREKKEFOLGER.map((r) => (
+            <button key={r.id} role="radio" aria-checked={rekkefolge === r.id} className={rekkefolge === r.id ? 'aktiv' : ''} onClick={() => eiendomsrekkefolge.sett(r.id)}>
+              {r.navn}
+            </button>
+          ))}
+        </div>
+      )}
       <ul className="kortliste">
         {synlige.map((id) => (
           <Eiendomskort key={id} s={s} id={id} />

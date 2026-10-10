@@ -62,12 +62,13 @@ export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id:
           </Apneknapp>
         )}
         <div className="bedriftskort-midt">
+          {/* Stedet i tittelen (Pakke 75): «Hybel · Møhlenpris», byen under. */}
           <h2>
-            {t.navn}
+            {t.navn} · {t.sted.split(',')[0]}
             <NyMerke id={id} />
             {st > 0 && <span className={st === 1 ? 'merke info' : 'merke gull'}>{STANDARDER[st].navn}</span>}
           </h2>
-          <span className="dempet">{t.sted}</span>
+          {t.sted.includes(',') && <span className="dempet">{t.sted.split(',').slice(1).join(',').trim()}</span>}
         </div>
         <div className="eiendom-tall">
           {oppussing ? <span className="dempet">Ingen leie</span> : <span className="pluss">{perSek(leieHverPerSek(s, id))}</span>}

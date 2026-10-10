@@ -62,7 +62,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
             <NyMerke id={b.type} />
             {b.leder && <span className="merke kant">Leder</span>}
             {b.retning && <span className="merke kant">{RETNINGER[b.retning].navn}</span>}
-            {kanVelgeRetning(b) && <span className="merke gull">Velg retning</span>}
+            {kanVelgeRetning(b) && <span className="retningsprikk" role="img" aria-label="Venter på retning" title="Venter på retning" />}
           </h2>
           <span className="dempet">
             Nivå {b.nivaa}

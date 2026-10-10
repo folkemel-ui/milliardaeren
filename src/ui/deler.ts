@@ -97,6 +97,15 @@ export const REKKEFOLGER: { id: Bedriftsrekkefolge; navn: string }[] = [
   { id: 'inntekt', navn: 'Inntekt' },
 ]
 
+/** Rekkefølgen på eiendommene (Pakke 75): etter pris (stigen), avkastning eller leie per enhet. */
+export type Eiendomsrekkefolge = 'pris' | 'avkastning' | 'leie'
+
+export const EIENDOMSREKKEFOLGER: { id: Eiendomsrekkefolge; navn: string }[] = [
+  { id: 'pris', navn: 'Pris' },
+  { id: 'avkastning', navn: 'Avkastning' },
+  { id: 'leie', navn: 'Leie' },
+]
+
 export type Borsdel = 'aksje' | 'krypto' | 'fond'
 export type Kartdel = 'norge' | 'verden'
 
@@ -107,9 +116,10 @@ export const luksusdel = lagDelvalg<Luksusdel>('milliardaer.luksusdel', LUKSUSDE
 export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'krypto', 'fond'])
 export const kartdel = lagDelvalg<Kartdel>('milliardaer.eiendomskart', ['norge', 'verden'])
 export const bedriftsrekkefolge = lagDelvalg<Bedriftsrekkefolge>('milliardaer.bedriftsrekkefolge', REKKEFOLGER.map((r) => r.id))
+export const eiendomsrekkefolge = lagDelvalg<Eiendomsrekkefolge>('milliardaer.eiendomsrekkefolge', EIENDOMSREKKEFOLGER.map((r) => r.id))
 
 /** Alle settene, for testen som sjekker at de følger samme regel. */
-export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel, bedriftsrekkefolge }
+export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel, bedriftsrekkefolge, eiendomsrekkefolge }
 
 /**
  * Hvilke deler en fane viser nå, som én nøkkel. Rullingen huskes bare for de

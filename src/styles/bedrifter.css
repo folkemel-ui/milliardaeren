@@ -299,13 +299,13 @@
   flex-wrap: wrap;
 }
 
-/* Dagen i dag (Pakke 49): dato, vær, helligdag, trender og konjunkturen på én linje. */
+/* Dagen i dag (Pakke 49; én linje siden Pakke 75): datoen og «Markedet i dag ›». */
 .dagen {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
 }
 
 .dagen-dato {
@@ -313,6 +313,40 @@
   font-weight: var(--vekt-halvfet);
   color: var(--tekst-dempet);
   margin-right: 4px;
+}
+
+.markedslinje {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+  cursor: pointer;
+}
+
+.markedstall {
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.markedsliste {
+  margin-top: 12px;
+}
+
+/* Ganger og rekkefølge på én rad (Pakke 75). */
+.bedrifter-kontroller {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
 }
 
 .mengdevalg {
@@ -324,15 +358,51 @@
   align-self: flex-start;
 }
 
+/* Én linje for alle som venter på retning (Pakke 75), og en prikk på kortet. */
+.retningslinje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0 0 10px;
+  padding: 0 12px;
+  border: 1px solid var(--gull-mørk);
+  border-radius: 10px;
+  background: var(--flate);
+  color: var(--gull);
+  font: inherit;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+  text-align: left;
+  cursor: pointer;
+}
+
+.retningsprikk {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gull);
+  vertical-align: middle;
+  margin-left: 6px;
+  flex: 0 0 auto;
+}
+
+.retningslinje .retningsprikk {
+  margin-left: 0;
+}
+
 .rekkefolge button {
   min-height: 44px;
-  padding: 0 14px;
+  /* Smalt nok til at ganger og rekkefølge deler én rad på 375 px (Pakke 75). */
+  padding: 0 6px;
   font-size: var(--skrift-2);
 }
 
 .mengdevalg button {
   min-height: 44px;
-  padding: 0 10px;
+  padding: 0 4px;
   font-size: var(--skrift-2);
 }
 
