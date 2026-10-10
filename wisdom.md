@@ -440,7 +440,14 @@ session; delete what stops being true.
   machine). New bot behaviour goes behind `smart` so the golden master can't see it.
   **After Pack 68 (mergers from level 100 at floor 1.0, fixed branch price, Hotell 4 500):
   1 mrd 5 h 11 min, 10 mrd 11 h 46, 100 mrd 23 h 40, 1 000 mrd 37 h 58** (before: 6 h 12,
-  13 h 48, 26 h 43, 42 h 19). Pack 70 is meant to retune the pace per tenfold.
+  13 h 48, 26 h 43, 42 h 19). **After Pack 70 (the smart bot buys status; first upgrades from
+  the hotel up cost more): 1 mrd 5 h 07, 10 mrd 11 h 27, 100 mrd 22 h 13, 1 000 mrd 36 h 15** —
+  6 h 20, 10 h 46 and 14 h 01 per tenfold. With status alone it was 6 h 09, 10 h 10 and 12 h 30
+  (1 000 mrd at 33 h 57); switching status off gave Pack 68's numbers to the minute, so the
+  new milestones changed nothing for the bot (see below). Since Pack 70 the bench bot also buys
+  status: `statuskandidat` in `bot.ts` bundles the cheapest luxury, rooms and landmarks per
+  status point into one candidate that lifts the level, priced with the warehouse expansions
+  it needs; it reaches level 5 at 1 mrd and 9 at 1 000 mrd, like a player would.
 - **The fast bench is the review's pace runner**: `scratchpad/tempo/runner.ts` (session of
   11 October) takes the smart bot to 1 000 mrd in about a minute bundled and prints a
   `TIER` line per tenfold. Swap a constant with `sed`, bundle one copy per variant, run them
@@ -454,6 +461,30 @@ session; delete what stops being true.
   made it *slower* than no branches at all — the bot bought branches for the smallest
   businesses early and either ran away or wasted the money. A gate (branches from level
   50) made the result stable; tune with a rule like that rather than on a knife-edge price.
+- **Milestones after 100 can't pay, whoever plays** (Pack 70): upgrades cost ×1.1 per level
+  while income is linear in the level, so the push from 120 to 150 costs about 117 level-100
+  upgrades — kr 1.4 mrd for +50 % of a saftbod that earns a few thousand a second (payback ~40 h).
+  The smart bot sees the milestone (it buys up to the next one when it can afford it) and still
+  never buys it; the bench moved by zero minutes. They exist for players who push for the sake
+  of it. Anything meant to keep old businesses relevant has to change the cost curve, not add a
+  boost at the top of it.
+- **The late pace is the entry payback and the first upgrades, not the upgrade curve** (Pack 70).
+  Every business from the hotel up pays back in ~30 000 s at purchase, and its first upgrade in
+  ~0.25–0.4 of that; after ~12 levels an upgrade is back at 30 000 s and the bot buys the next
+  business instead. So raising the upgrade growth to 1.12 from the restaurant up changed the
+  bench by minutes, raising the first-upgrade price (the `oppgraderingspris` share, within the
+  rules in `pakke35.test.ts`) moved it by hours, and the 1 → 10 mrd stage stayed at ~6 h in
+  every variant (the gatekjøkken/kiosk doublings at level 100 and the hotel and bank entries).
+  Folke's «steady ~15 h per tenfold» is therefore not reachable with one constant; Pack 70 took
+  the variant that gives the late tenfolds back without slowing the first billion. Greedy cliffs
+  again: removing mergers made 1 → 10 mrd *faster* (the bot spent the moves elsewhere), and a
+  bigger hotel/bank price (0.6/0.7) came out faster than a smaller one (0.5/0.5) at the end.
+- **Measure variants in parallel from copies** (Pack 70): a scratchpad `prov.mjs` copies `src`
+  per variant, replaces one string (throws on 0 or 2 hits), bundles a temporary
+  `__tester__/zz-benk.ts` with esbuild and runs every variant at once; seven variants took
+  ~3 min on a machine the other track was also testing on. Times are game time, so the load
+  doesn't matter. The runner prints status level, luxury, rooms and landmarks per tenfold —
+  the Vitest bench prints only businesses.
 - **A greedy one-level bot never pushes to a milestone**: the step from 126 to 127 is
   worth almost nothing, so extra doublings at 150/200 changed nothing in the bench until
   the bot could see them. Check that the bot *can* use a change before trusting a
@@ -799,6 +830,18 @@ session; delete what stops being true.
   of `git stash` (Pack 39's daily settlement cost ~7 %, which is fine).
 
 ## 6. Conventions that now exist
+
+- **Hidden achievements (Pack 70)**: `skjult: true` on a `Prestasjon`; `synligePrestasjoner(s)`
+  gives the list the Profile shows (open ones plus hidden ones earned), with a line counting the
+  hidden ones still waiting; the toast says «Skjult prestasjon». A hidden one should depend on
+  what the player does, not on the clock — a game day is 300 s, so «at night» happens every five
+  minutes. «Kontrær» is stamped in `kjopPapir` (`kontraerKjop`, optional field, no version
+  bump) when the price is ≤ 80 % of the two-hour high; `fulltSpill()` earns it at once, since
+  it buys 1 000 of every paper, so test it on a fresh game.
+- **The goal strip after the last amount (Pack 70)**: `nesteMaal` falls back to the
+  achievements left (`art: 'prestasjon'`, `visning` «37 / 53» in place of the amount) and is
+  null only when every achievement is earned. The late goals in `alleMaal` (landmarks, the
+  long-range jet, New York) use base prices; the strip is static per game.
 
 - **No emoji anywhere** (`ikoner.test.ts`). Use `<Ikon navn="…" />` from `Ikoner.tsx`.
 - **Type scale**: six sizes `--skrift-1…6` (11/13/15/18/22/34 px) and four weights
