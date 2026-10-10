@@ -89,9 +89,9 @@ export const maal = (avstand: Avstand, hva: keyof typeof MAAL) => MAAL[hva] * ME
  * tegning alle sammen, rundt 50 skjulte elementer, og på Luksus var nesten
  * halvparten av siden slike.
  */
-type Lerretinfo = { id: string; brukt: Set<string> }
+type Lerretinfo = { id: string; brukt: Set<string>; x: number; b: number }
 
-const Ider = createContext<Lerretinfo>({ id: 't', brukt: new Set() })
+const Ider = createContext<Lerretinfo>({ id: 't', brukt: new Set(), x: 0, b: 96 })
 
 /**
  * Utklipp: tegningen uten himmel, bakke og bakgrunn — bare motivet med
@@ -115,6 +115,24 @@ export const Naerbilde = createContext<{ boks: readonly [number, number, number,
  * og galleriet står alltid midt på dagen, og slipper det ekstra natt-laget.
  */
 export const IScenen = createContext(false)
+
+/**
+ * Full ramme (G13): tegningen fyller rammen helt ut, uten vignett — himmelen,
+ * bakken og bakgrunnen går til kantene i stedet for å blekne ut. Settes av
+ * `Illustrasjon` for tegningene i `FULL_RAMME`. På firkantede steder (kortet,
+ * kjøpsøyeblikket, Avisa) er det midten av tegningen, kant i kant.
+ */
+export const Fullramme = createContext(false)
+
+/**
+ * Bred ramme (G13): stedet viser tegningen i bredformat, 176 × 96 (11:6), med
+ * den gamle firkanten midt i (x 0–96) og 40 enheter nytt på hver side. Bare
+ * scenen og galleriet; bare tegninger med full ramme blir brede.
+ */
+export const Bredt = createContext(false)
+
+/** Den brede rammen i lerretets enheter: x fra −40 til 136. */
+export const BRED = { x: -40, b: 176 } as const
 
 /**
  * Farger som lyser om natta: vinduslyset og lampene. Natt-laget i scenen viser
@@ -142,7 +160,7 @@ export const NATTHIMMEL = ['#0c1220', '#2a3046'] as const
 export const NATTFARGE = '#25324f'
 
 /** Én definisjon etter navn. `tema` gjelder bare himmelen. */
-function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactNode {
+function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL, x0 = 0, b = 96): ReactNode {
   const maske = (gradient: string) => (
     <mask id={`${id}${navn}`}>
       <rect x="0" y="0" width="96" height="96" fill={`url(#${id}${gradient})`} />
@@ -175,7 +193,7 @@ function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactN
     // lar gjennomsiktigheten være som den er (disen bak blir like mørk).
     case 'natt':
       return (
-        <filter id={`${id}natt`} filterUnits="userSpaceOnUse" x="0" y="0" width="96" height="96" colorInterpolationFilters="sRGB">
+        <filter id={`${id}natt`} filterUnits="userSpaceOnUse" x={x0} y="0" width={b} height="96" colorInterpolationFilters="sRGB">
           <feFlood style={{ floodColor: `color-mix(in srgb, #ffffff, ${NATTFARGE} calc(var(--natt, 0) * 82%))` }} result="f" />
           <feComposite in="f" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" />
         </filter>
@@ -183,7 +201,7 @@ function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactN
     // Lysene om natta får en myk glorie.
     case 'glod':
       return (
-        <filter id={`${id}glod`} filterUnits="userSpaceOnUse" x="0" y="0" width="96" height="96" colorInterpolationFilters="sRGB">
+        <filter id={`${id}glod`} filterUnits="userSpaceOnUse" x={x0} y="0" width={b} height="96" colorInterpolationFilters="sRGB">
           <feGaussianBlur in="SourceGraphic" stdDeviation="1.3" result="b" />
           <feMerge>
             <feMergeNode in="b" />
@@ -307,14 +325,14 @@ function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL): ReactN
  * peke fram i dokumentet, så rekkefølgen i SVG-en spiller ingen rolle.
  */
 function Definisjoner({ tema }: { tema: keyof typeof HIMMEL }) {
-  const { id, brukt } = useContext(Ider)
+  const { id, brukt, x, b } = useContext(Ider)
   const alle = new Set(brukt)
   for (const navn of brukt) if (TRENGER[navn]) alle.add(TRENGER[navn])
   if (alle.size === 0) return null
   return (
     <defs>
       {[...alle].sort().map((navn) => (
-        <Fragment key={navn}>{definisjon(id, navn, tema)}</Fragment>
+        <Fragment key={navn}>{definisjon(id, navn, tema, x, b)}</Fragment>
       ))}
     </defs>
   )
@@ -330,26 +348,32 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
   const id = 't' + useId().replace(/[^a-zA-Z0-9]/g, '')
   if (useContext(Utklipp)) himmel = 'ingen'
   const naer = useContext(Naerbilde)
+  // Full ramme (G13): ingen vignett, og bredformat der stedet ber om det.
+  const full = useContext(Fullramme)
+  const bredt = useContext(Bredt)
+  const bred = full && bredt && !naer
+  const [x0, b] = bred ? [BRED.x, BRED.b] : [0, 96]
   const tema = himmel === 'inne' ? 'inne' : 'dag'
   // Natt bare ute og bare i scenen: bilene og klokkene står inne, i lyset sitt.
   const natt = useContext(IScenen) && himmel === 'dag'
   const h = natt ? 'hn' : 'h'
   // Nytt for hver tegning av lerretet; barna fyller det mens de tegnes.
-  const info: Lerretinfo = { id, brukt: new Set() }
-  if (himmel !== 'ingen') info.brukt.add(h).add('vm')
+  const info: Lerretinfo = { id, brukt: new Set(), x: x0, b }
+  if (himmel !== 'ingen') info.brukt.add(h)
+  if (himmel !== 'ingen' && !full) info.brukt.add('vm')
   if (himmel === 'inne') info.brukt.add('l')
   if (natt) info.brukt.add('natt').add('glod')
   return (
     <svg
       className="illustrasjon lerret"
-      width={naer ? naer.bredde : størrelse}
+      width={naer ? naer.bredde : bred ? r2((størrelse * b) / 96) : størrelse}
       height={naer ? naer.hoyde : størrelse}
-      viewBox={naer ? naer.boks.join(' ') : '0 0 96 96'}
+      viewBox={naer ? naer.boks.join(' ') : `${x0} 0 ${b} 96`}
       aria-hidden="true"
     >
-      {himmel !== 'ingen' && <rect x="0" y="0" width="96" height="96" fill={`url(#${id}${h})`} mask={`url(#${id}vm)`} />}
+      {himmel !== 'ingen' && <rect x={x0} y="0" width={b} height="96" fill={`url(#${id}${h})`} mask={full ? undefined : `url(#${id}vm)`} className={full ? 'lerret-himmel' : undefined} />}
       {himmel === 'inne' && <ellipse cx="48" cy="62" rx="44" ry="30" fill={`url(#${id}l)`} />}
-      {natt && <Stjerner id={id} />}
+      {natt && <Stjerner id={id} full={full} />}
       <Ider.Provider value={info}>
         {natt ? (
           <>
@@ -385,10 +409,12 @@ const STJERNER: [number, number, number][] = [
   [7, 26, 0.3],
 ]
 
-function Stjerner({ id }: { id: string }) {
+function Stjerner({ id, full }: { id: string; full: boolean }) {
+  // I full ramme står stjernene over hele himmelen, uten vignett: mønsteret gjentas til sidene.
+  const stjerner = full ? [-88, 0, 88].flatMap((dx) => STJERNER.map(([x, y, r]) => [x + dx, y, r] as const)) : STJERNER
   return (
-    <g className="stjerner" mask={`url(#${id}vm)`}>
-      {STJERNER.map(([x, y, r]) => (
+    <g className="stjerner" mask={full ? undefined : `url(#${id}vm)`}>
+      {stjerner.map(([x, y, r]) => (
         <circle key={x} cx={x} cy={y} r={r} fill="#f1ece0" />
       ))}
     </g>
@@ -524,7 +550,10 @@ export function Dis({ children }: { children: ReactNode }) {
  */
 export function Kantfade({ children }: { children: ReactNode }) {
   const u = useUrl()
+  const full = useContext(Fullramme)
   if (useContext(Utklipp)) return null
+  // Full ramme (G13): bakgrunnen går til kanten — tegningen må selv nå dit.
+  if (full) return <g className="lerret-bakgrunn">{children}</g>
   return <g mask={u('km')}>{children}</g>
 }
 
@@ -534,7 +563,9 @@ export function Kantfade({ children }: { children: ReactNode }) {
  */
 export function Bunnfade({ children }: { children: ReactNode }) {
   const u = useUrl()
+  const full = useContext(Fullramme)
   if (useContext(Utklipp)) return null
+  if (full) return <g className="lerret-bakgrunn">{children}</g>
   return (
     <g mask={u('km')}>
       <g mask={u('nm')}>{children}</g>
@@ -553,35 +584,53 @@ export const HORISONT = 56
  * Bakken, tilpasset motivet: fortau for forretninger, gress for hus, kai og
  * sjø for båter, blankt gulv for biler, snø i fjellet, åpent hav helt ut til
  * horisonten for det som ligger til havs, og asfalt for flyplassen. Den
- * blekner ut mot sidene, så tegningen ikke står på en grå strek.
+ * blekner ut mot sidene, så tegningen ikke står på en grå strek — unntatt i en
+ * tegning med full ramme (G13), der den går helt ut til kantene av den brede
+ * rammen.
  */
 export function Bakke({ type }: { type: Bakketype }) {
   const u = useUrl()
   const utklipp = useContext(Utklipp)
+  const full = useContext(Fullramme)
   const g = GRUNNLINJE
   if (utklipp) return null
+  const x0 = full ? BRED.x : 0
+  const w = full ? BRED.b : 96
+  const x1 = x0 + w
+  /** En jevn rad (`xs` med steg `steg`), forlenget ut til kantene i full ramme. */
+  const utvid = (xs: number[], steg: number) => {
+    if (!full) return xs
+    const før: number[] = []
+    for (let x = xs[0] - steg; x > x0 - steg; x -= steg) før.unshift(r2(x))
+    const etter: number[] = []
+    for (let x = xs[xs.length - 1] + steg; x < x1 + steg; x += steg) etter.push(r2(x))
+    return [...før, ...xs, ...etter]
+  }
+  /** Et uregelmessig mønster over 96 enheter, gjentatt til hver side i full ramme. */
+  const gjenta = <T extends readonly number[]>(xs: T[]): T[] =>
+    full ? ([-96, 0, 96].flatMap((dx) => xs.map((p) => [p[0] + dx, ...p.slice(1)] as unknown as T)).filter((p) => p[0] > x0 - 10 && p[0] < x1) as T[]) : xs
   let innhold: ReactNode
   switch (type) {
     case 'fortau':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="28" fill={S.stein.lys} />
-          {[-24, -8, 8, 24, 40, 56, 72, 88, 104].map((x) => (
+          <rect x={x0} y={g - 16} width={w} height="28" fill={S.stein.lys} />
+          {utvid([-24, -8, 8, 24, 40, 56, 72, 88, 104], 16).map((x) => (
             <line key={x} x1={x} y1={g + 6} x2={r2(x + 6.6)} y2={g - 16} stroke={S.stein.flate} strokeWidth="0.5" />
           ))}
           {[g - 9, g - 2].map((y) => (
-            <line key={y} x1="0" y1={y} x2="96" y2={y} stroke={S.stein.flate} strokeWidth="0.5" />
+            <line key={y} x1={x0} y1={y} x2={x1} y2={y} stroke={S.stein.flate} strokeWidth="0.5" />
           ))}
-          <rect x="0" y={g + 6} width="96" height="1" fill={S.hvit.flate} />
+          <rect x={x0} y={g + 6} width={w} height="1" fill={S.hvit.flate} />
         </>
       )
       break
     case 'gress':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="26" fill={S.gress.flate} />
-          <rect x="0" y={g - 16} width="96" height="8" fill={S.gress.skygge} opacity="0.45" />
-          {[8, 21, 33, 58, 77, 89].map((x, i) => (
+          <rect x={x0} y={g - 16} width={w} height={full ? 28 : 26} fill={S.gress.flate} />
+          <rect x={x0} y={g - 16} width={w} height="8" fill={S.gress.skygge} opacity="0.45" />
+          {gjenta([8, 21, 33, 58, 77, 89].map((x, i) => [x, i] as const)).map(([x, i]) => (
             <path key={x} d={`M${x} ${g + 3 + (i % 3)} l1 -2.6 l1 2.6 l1 -2 l0.8 2`} fill="none" stroke={S.gress.lys} strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round" />
           ))}
         </>
@@ -590,18 +639,18 @@ export function Bakke({ type }: { type: Bakketype }) {
     case 'sno':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="26" fill={S.sno.flate} />
-          <rect x="0" y={g - 16} width="96" height="7" fill={S.sno.skygge} opacity="0.5" />
+          <rect x={x0} y={g - 16} width={w} height={full ? 28 : 26} fill={S.sno.flate} />
+          <rect x={x0} y={g - 16} width={w} height="7" fill={S.sno.skygge} opacity="0.5" />
         </>
       )
       break
     case 'gulv':
       innhold = (
         <>
-          <rect x="0" y={g - 12} width="96" height="22" fill={S.mork.flate} />
-          <rect x="0" y={g - 12} width="96" height="22" fill={u('d')} />
-          <rect x="0" y={g - 12.6} width="96" height="0.8" fill={S.metall.skygge} />
-          {[-20, 10, 40, 70, 100].map((x) => (
+          <rect x={x0} y={g - 12} width={w} height={full ? 24 : 22} fill={S.mork.flate} />
+          <rect x={x0} y={g - 12} width={w} height={full ? 24 : 22} fill={u('d')} />
+          <rect x={x0} y={g - 12.6} width={w} height="0.8" fill={S.metall.skygge} />
+          {utvid([-20, 10, 40, 70, 100], 30).map((x) => (
             <line key={x} x1={x} y1={g + 10} x2={x + 22} y2={g - 12} stroke={S.mork.lys} strokeWidth="0.4" />
           ))}
         </>
@@ -610,22 +659,22 @@ export function Bakke({ type }: { type: Bakketype }) {
     case 'kai':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="28" fill={S.sjo.flate} />
-          <rect x="0" y={g - 16} width="96" height="28" fill={u('d')} />
+          <rect x={x0} y={g - 16} width={w} height="28" fill={S.sjo.flate} />
+          <rect x={x0} y={g - 16} width={w} height="28" fill={u('d')} />
           <polyline className="anim-boelge" points={`40,${g + 4} 44,${g + 2.8} 48,${g + 4}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.8" strokeLinecap="round" />
           <polyline className="anim-boelge sen" points={`70,${g + 8} 74,${g + 6.8} 78,${g + 8}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.8" strokeLinecap="round" />
           <polyline className="anim-boelge" points={`82,${g - 4} 85,${g - 5} 88,${g - 4}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.6" strokeLinecap="round" />
           {/* Kaia: steinkant med en planke på toppen og en pullert. */}
-          <polygon points={pkt([0, g - 4], [26, g - 4], inn(26, g - 4, 20), [0, g - 10])} fill={S.stein.lys} />
-          <rect x="0" y={g - 4} width="26" height="14" fill={S.stein.flate} />
+          <polygon points={pkt([x0, g - 4], [26, g - 4], inn(26, g - 4, 20), [x0, g - 10])} fill={S.stein.lys} />
+          <rect x={x0} y={g - 4} width={26 - x0} height="14" fill={S.stein.flate} />
           {[g, g + 4.5].map((y) => (
-            <line key={y} x1="0" y1={y} x2="26" y2={y} stroke={S.stein.skygge} strokeWidth="0.6" />
+            <line key={y} x1={x0} y1={y} x2="26" y2={y} stroke={S.stein.skygge} strokeWidth="0.6" />
           ))}
-          {[6, 15, 22].map((x, i) => (
+          {(full ? [-33, -24, -15, -6, 6, 15, 22] : [6, 15, 22]).map((x, i) => (
             <line key={x} x1={x - (i % 2) * 3} y1={g - 4 + (i % 2) * 4.5} x2={x - (i % 2) * 3} y2={g + (i % 2) * 4.5} stroke={S.stein.skygge} strokeWidth="0.6" />
           ))}
           <polygon points={pkt([26, g - 4], inn(26, g - 4, 20), inn(26, g + 10, 20), [26, g + 10])} fill={S.stein.skygge} />
-          <rect x="0" y={g - 5.4} width="26.4" height="1.6" fill={S.treverk.flate} />
+          <rect x={x0} y={g - 5.4} width={26.4 - x0} height="1.6" fill={S.treverk.flate} />
           <rect x="16" y={g - 9.5} width="3" height="4.4" rx="1" fill={S.mork.lys} />
           <rect x="15.4" y={g - 10.2} width="4.2" height="1.4" rx="0.7" fill={S.mork.flate} />
         </>
@@ -634,21 +683,22 @@ export function Bakke({ type }: { type: Bakketype }) {
     case 'hav':
       innhold = (
         <>
-          <rect x="0" y={HORISONT} width="96" height={96 - HORISONT} fill={S.sjo.flate} />
-          <rect x="0" y={HORISONT} width="96" height={96 - HORISONT} fill={u('d')} />
-          <rect x="0" y={HORISONT} width="96" height="3" fill={S.sjo.lys} opacity="0.55" />
-          {[
+          <rect x={x0} y={HORISONT} width={w} height={96 - HORISONT} fill={S.sjo.flate} />
+          <rect x={x0} y={HORISONT} width={w} height={96 - HORISONT} fill={u('d')} />
+          <rect x={x0} y={HORISONT} width={w} height="3" fill={S.sjo.lys} opacity="0.55" />
+          {gjenta([
             [12, 64, 0.5],
             [70, 62, 0.5],
             [30, 72, 0.7],
             [80, 76, 0.7],
             [8, 86, 0.9],
             [52, 91, 0.9],
-          ].map(([x, y, w], i) => (
-            <polyline key={i} className={i % 2 ? 'anim-boelge sen' : 'anim-boelge'} points={`${x},${y} ${x + 4 * w},${y - 1.2 * w} ${x + 8 * w},${y}`} fill="none" stroke={S.sjo.lys} strokeWidth={w} strokeLinecap="round" />
+          ]).map(([x, y, b], i) => (
+            <polyline key={i} className={i % 2 ? 'anim-boelge sen' : 'anim-boelge'} points={`${x},${y} ${x + 4 * b},${y - 1.2 * b} ${x + 8 * b},${y}`} fill="none" stroke={S.sjo.lys} strokeWidth={b} strokeLinecap="round" />
           ))}
         </>
       )
+      if (full) return <g className="lerret-bakke">{innhold}</g>
       return (
         <g mask={u('km')}>
           <g mask={u('nm')}>{innhold}</g>
@@ -658,9 +708,9 @@ export function Bakke({ type }: { type: Bakketype }) {
     case 'brostein':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="28" fill={S.stein.flate} />
+          <rect x={x0} y={g - 16} width={w} height="28" fill={S.stein.flate} />
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <line key={i} x1="-4" y1={r2(g - 13.6 + i * 4.4)} x2="100" y2={r2(g - 13.6 + i * 4.4)} stroke={S.stein.lys} strokeWidth={r2(1.3 + i * 0.25)} strokeDasharray={`${r2(2.2 + i * 0.4)} ${r2(1.4 + i * 0.2)}`} strokeDashoffset={i % 2 ? 1.8 : 0} strokeLinecap="round" opacity="0.7" />
+            <line key={i} x1={x0 - 4} y1={r2(g - 13.6 + i * 4.4)} x2={x1 + 4} y2={r2(g - 13.6 + i * 4.4)} stroke={S.stein.lys} strokeWidth={r2(1.3 + i * 0.25)} strokeDasharray={`${r2(2.2 + i * 0.4)} ${r2(1.4 + i * 0.2)}`} strokeDashoffset={i % 2 ? 1.8 : 0} strokeLinecap="round" opacity="0.7" />
           ))}
         </>
       )
@@ -669,12 +719,12 @@ export function Bakke({ type }: { type: Bakketype }) {
     case 'promenade':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="5" fill={S.puss.lys} />
-          <rect x="0" y={g - 11} width="96" height="23" fill={S.treverk.lys} />
+          <rect x={x0} y={g - 16} width={w} height="5" fill={S.puss.lys} />
+          <rect x={x0} y={g - 11} width={w} height="23" fill={S.treverk.lys} />
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <line key={i} x1="0" y1={r2(g - 8 + i * 3.4)} x2="96" y2={r2(g - 8 + i * 3.4)} stroke={S.treverk.flate} strokeWidth="0.4" />
+            <line key={i} x1={x0} y1={r2(g - 8 + i * 3.4)} x2={x1} y2={r2(g - 8 + i * 3.4)} stroke={S.treverk.flate} strokeWidth="0.4" />
           ))}
-          {[[14, 0], [46, 1], [78, 2], [30, 3], [62, 4], [8, 5], [88, 5]].map(([x, i]) => (
+          {gjenta([[14, 0], [46, 1], [78, 2], [30, 3], [62, 4], [8, 5], [88, 5]]).map(([x, i]) => (
             <line key={`${x}-${i}`} x1={x} y1={r2(g - 8 + i * 3.4)} x2={x} y2={r2(g - 4.6 + i * 3.4)} stroke={S.treverk.flate} strokeWidth="0.4" />
           ))}
         </>
@@ -683,16 +733,17 @@ export function Bakke({ type }: { type: Bakketype }) {
     case 'asfalt':
       innhold = (
         <>
-          <rect x="0" y={g - 16} width="96" height="28" fill={S.mork.lys} />
-          <rect x="0" y={g - 16} width="96" height="6" fill={S.mork.flate} opacity="0.5" />
-          <path d={`M-4 ${g + 6} Q40 ${g - 2} 100 ${g - 6}`} fill="none" stroke={S.oker.flate} strokeWidth="0.7" />
-          {[6, 22, 38, 54, 70, 86].map((x) => (
+          <rect x={x0} y={g - 16} width={w} height="28" fill={S.mork.lys} />
+          <rect x={x0} y={g - 16} width={w} height="6" fill={S.mork.flate} opacity="0.5" />
+          <path d={full ? `M${x0 - 4} ${g + 7} Q48 ${g - 2} ${x1 + 4} ${g - 7}` : `M-4 ${g + 6} Q40 ${g - 2} 100 ${g - 6}`} fill="none" stroke={S.oker.flate} strokeWidth="0.7" />
+          {utvid([6, 22, 38, 54, 70, 86], 16).map((x) => (
             <rect key={x} x={x} y={g + 8} width="8" height="0.8" fill={S.hvit.flate} opacity="0.7" />
           ))}
         </>
       )
       break
   }
+  if (full) return <g className="lerret-bakke">{innhold}</g>
   return <g mask={u('bm')}>{innhold}</g>
 }
 

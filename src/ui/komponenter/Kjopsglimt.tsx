@@ -3,7 +3,7 @@ import type { MaleriId } from '../../engine/types'
 import type { Kjopsart } from '../hendelsesstrom'
 import { useNy } from '../nymerker'
 import { avsluttKjop, useKjop, type Kjopsglimt as Glimt } from '../varsler'
-import { Illustrasjon } from './Illustrasjoner'
+import { FULL_RAMME, Illustrasjon } from './Illustrasjoner'
 import { Klubbvaapen } from './Klubbvaapen'
 import { Maleribilde } from './Malerier'
 import { StartupLogo } from './StartupLogo'
@@ -32,7 +32,8 @@ function Kjopsbilde({ k }: { k: Glimt }) {
   if (k.art === 'maleri') return <Maleribilde id={k.id as MaleriId} størrelse={132} />
   if (k.art === 'klubb') return <Klubbvaapen navn={k.id} størrelse={124} />
   if (k.art === 'startup') return <StartupLogo navn={k.id} størrelse={104} />
-  return <Illustrasjon id={k.id} størrelse={132} />
+  // En tegning med full ramme (G13) fyller hele flisa (176 px minus kanten), uten luft rundt.
+  return <Illustrasjon id={k.id} størrelse={FULL_RAMME.includes(k.id) ? 174 : 132} />
 }
 
 /** Så lenge øyeblikket står. Kort nok til at du aldri venter på det; en fusjon får litt lenger. */

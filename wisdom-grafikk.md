@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026) and G12 (10 October 2026). G13–G22 are planned in `Ideer.md`: the full frame in
-groups (G13–G15 businesses, G16 Scenes that grow, G17–G21 properties and luxury), then
-the seasons (G22).
+2026), G12 and G13 (10 October 2026). G14–G22 are planned in `Ideer.md`: the full frame
+in groups (G14–G15 businesses, G16 Scenes that grow, G17–G21 properties and luxury),
+then the seasons (G22).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -108,6 +108,15 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   24, wordmarks 12 … gzipped) and a recommendation per item. Folke answered "Add 1-6", so
   the one marked *not recommended* (the wordmarks, since Avisa can open at start) stayed
   out. Measure the bundle per module *before* proposing, so every item carries a number.
+  For G13 Folke took all three recommendations: a fixed 11:6 frame, the place continuing
+  out to the sides (named per stage for each business), and a close-up out to the tile's
+  corners. Measuring the scene box at three widths first (phone 314 × 172, tablet 417,
+  desktop 937 — 1.8, 2.4 and 5.4 : 1) is what made the frame question answerable: no
+  single drawing can fill 5.4 : 1, so the box had to take the drawing's shape.
+- **"Too empty" means the place, not the subject.** Folke circled the Saftbod's vignette
+  and said the scene was too empty. The fix that worked was more of the *place* at every
+  stage (neighbours, the sea, café tables, a town in the haze), never a bigger stand: the
+  scale rule still holds.
 - **Count before you quote.** `Ideer.md` said 39 of 68 drawings never moved; the real
   count was 35 (plus the bank below 100 and the street kitchen's first stage). Worse,
   that count was made with every improvement bought: the lemonade stand, the kiosk and
@@ -894,7 +903,55 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
 - **`cd` in a Bash call moves the session's directory** for the next calls too; use
   absolute paths or `git -C`.
 
-## 7. Notes for later (G1–G12 done; G13–G22 planned in `Ideer.md`)
+## 6c. The full frame (G13)
+
+- **How it works**: `FULL_RAMME` (Illustrasjoner) lists the drawings switched over, and
+  `Illustrasjon` sets the `Fullramme` context for them. In `Tegnestil`, a full-frame
+  drawing has no vignette anywhere: the sky has no `vm` mask, `Bakke` runs edge to edge
+  with no `bm`/`km`/`nm` mask (and reaches y 96 — `gress`, `sno` and `gulv` stopped
+  2 units short, which showed as a pale strip), and `Kantfade`/`Bunnfade` are plain
+  groups. Where the place says so (`Bredt`: only `Scene` and the gallery's big picture),
+  the canvas is **176 × 96, x from −40 to 136**, with the old 96 square untouched in the
+  middle — so a drawing only gains sides; nothing inside moves. The night filters and
+  the stars follow the wide frame (`Lerretinfo` carries `x` and `b`). On square places
+  (tile, buy moment, Avisa) the same drawing is the middle 96, edge to edge.
+- **A full-frame drawing must reach the edges itself.** Everything that used to fade out
+  (hedges, fences, railings, the sea, a stadium stand, a brick wall) ends hard at x 0
+  and 96 in the wide frame. Extend every such shape to −40 and 136 — a list of x values
+  needs its new entries at both ends — and then fill the 40 units on each side with
+  more of the place. Look at all four stages with f = 0 and f = 3 on a contact sheet
+  first; the hard ends are obvious there.
+- **The scene box takes the drawing's shape**: `.scene.full` is `aspect-ratio: 11 / 6`,
+  as wide as the card up to 560 px (314 × 171 on a phone, as tall as before).
+- **The tile is a close-up out to the corners**: `BedriftIkon` gives a full-frame
+  business class `fylt`, size 52 (68 `stor`) and its crop, with `overflow: hidden` in
+  the tile's rounded corners. **A crop measured at stage 0 cuts the later stages**: the
+  Saftbod's SAFT sign touched the top, the Gatekjøkken lost its roof and burger sign. A
+  per-stage crop (`TRINNUTSNITT`) fixed it; check every stage's tile at 2.6× zoom.
+- **A silhouette of a full-frame drawing was a black square** (`brightness(0)` on sky
+  and ground too). Full-frame sky, ground and background now carry `lerret-himmel`,
+  `lerret-bakke` and `lerret-bakgrunn`, and `.silhuett .bedrift-ikon.fylt` hides them.
+  Matters from G15, when locked big businesses join.
+- **The buy moment** gives a full-frame drawing the whole tile (174 px of 176).
+- **New helpers in the start file** (they must live there; a helper in a lazy part
+  can't be used by a business): `Byrekke` (a hazy row of town houses at far distance,
+  windows lit at night; `start` shifts the pattern), `Bil` (the Pølsebod's taxi as a
+  side-view car, `taxi` for the roof light), `Busskur`, `Kafebord` (near distance) and
+  `Sykkel`, moved back from the property part and imported there.
+- **The contact-sheet helper must import the newest module URL**: after an edit HMR
+  loads `BedriftIkon.tsx?t=…`; take `.filter(…).at(-1)` of the resource list, or the
+  sheet shows the old code. React DOM's client module needs `.default` (`createRoot`
+  wasn't on the namespace).
+- **A buy moment lasts 1.8 s**: call `visKjop`, pause its animations and take the
+  screenshot in the *same* `browser_batch`; a separate call saw an empty screen.
+- **`useContext` behind `&&` breaks the rules of hooks** and `tsc` doesn't say so
+  (`full && useContext(Bredt)`). Read every context first, then combine.
+- **`sed -i` turned `Illustrasjoner.tsx` into LF again** (a one-word import change).
+  Use `fiks.mjs` for every edit to the drawing files, even one word; restore CRLF with
+  a node one-liner if it happens. And `node -e` through Bash ate the backslashes of a
+  test regex once more — test regexes go through the Edit tool.
+
+## 7. Notes for later (G1–G13 done; G14–G22 planned in `Ideer.md`)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -904,6 +961,12 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
+- **Next groups for the full frame (G14–G21)**: add the ids to `FULL_RAMME`, extend
+  everything that ends at 0 and 96, fill the sides, and give the tile a per-stage crop
+  where the subject grows. Properties and luxury live in the lazy parts, so their helpers
+  for the sides go there (or in the start file if a business needs them too). Cars use
+  `Speiling`, `Lakksveip` and the `rm` mask, which are still 96 wide: widen them with the
+  cars (G20).
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings and steps grow the start script,
   which is at 238 of 250 kB gzipped after G12 (`startskript.test.ts`): G16's upgrade steps

@@ -3,7 +3,7 @@ import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
 import { JORD } from '../../engine/jord'
 import { LANDEMERKER } from '../../engine/landemerker'
 import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NAERBILDER, type Trinn } from '../komponenter/Illustrasjoner'
-import { Bakke, GRUNNLINJE, Kloss, Lerret, maal, METER, Person, S, Slagskygge, type Avstand, type Bakketype } from '../komponenter/Tegnestil'
+import { Bakke, Bredt, GRUNNLINJE, Kloss, Lerret, maal, METER, Person, S, Slagskygge, type Avstand, type Bakketype } from '../komponenter/Tegnestil'
 import { PAPIRER } from '../../engine/marked'
 import { PAPIRLOGOER, Papirlogo } from '../komponenter/Papirlogo'
 import { RIVALPORTRETTER, Rivalportrett } from '../komponenter/Rivalportrett'
@@ -146,7 +146,10 @@ export function Galleri() {
         {ILLUSTRASJONSIDER.map((id) => (
           <figure key={id} className="galleri-kort">
             <div className="galleri-stor">
-              <Illustrasjon id={id} størrelse={240} />
+              {/* Tegningene med full ramme vises brede, som i scenen (G13). */}
+              <Bredt.Provider value={true}>
+                <Illustrasjon id={id} størrelse={240} />
+              </Bredt.Provider>
             </div>
             <div className="galleri-små">
               <span className="galleri-mork">

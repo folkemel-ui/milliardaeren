@@ -1,7 +1,7 @@
 import { memo, type ReactNode } from 'react'
 import { aapneTing, type Ting } from '../detaljvisning'
-import { Illustrasjon, trinnFor } from './Illustrasjoner'
-import { IScenen } from './Tegnestil'
+import { FULL_RAMME, Illustrasjon, trinnFor } from './Illustrasjoner'
+import { Bredt, IScenen } from './Tegnestil'
 
 /**
  * Bildet på kortet for noe du kan eie, som en knapp: den åpner detaljsiden
@@ -31,6 +31,18 @@ export function Apneknapp({ ting, navn, children }: { ting: Ting; navn: string; 
  */
 const NAER_PAA_KORTET = new Set(['saftbod', 'polsebod'])
 
+/**
+ * Tegningene med full ramme (G13) fyller hele flisa: nærbildet går helt ut i de
+ * runde hjørnene (52 px, 68 px stor), uten den runde masken og uten luft rundt.
+ */
+const fyllerFlisa = (type: string) => FULL_RAMME.includes(type)
+
+// Faste mål, så memo-tegningen ikke får en ny liste hvert sekund (Pakke 64).
+const NAER = [44, 44] as const
+const NAER_STOR = [60, 60] as const
+const FLIS = [52, 52] as const
+const FLIS_STOR = [68, 68] as const
+
 export const BedriftIkon = memo(function BedriftIkon({
   type,
   dempet = false,
@@ -44,6 +56,14 @@ export const BedriftIkon = memo(function BedriftIkon({
   forbedringer?: number
   stor?: boolean
 }) {
+  if (fyllerFlisa(type)) {
+    const px = stor ? 68 : 52
+    return (
+      <div className={`bedrift-ikon fylt${stor ? ' stor' : ''}${dempet ? ' dempet-ikon' : ''}`} aria-hidden="true">
+        <Illustrasjon id={type} størrelse={px} trinn={trinnFor(nivaa)} forbedringer={forbedringer} naerbilde={stor ? FLIS_STOR : FLIS} />
+      </div>
+    )
+  }
   return (
     <div className={`bedrift-ikon${stor ? ' stor' : ''}${dempet ? ' dempet-ikon' : ''}${NAER_PAA_KORTET.has(type) ? ' naer' : ''}`} aria-hidden="true">
       <Illustrasjon
@@ -51,7 +71,7 @@ export const BedriftIkon = memo(function BedriftIkon({
         størrelse={stor ? 60 : 44}
         trinn={trinnFor(nivaa)}
         forbedringer={forbedringer}
-        naerbilde={NAER_PAA_KORTET.has(type) ? [stor ? 60 : 44, stor ? 60 : 44] : undefined}
+        naerbilde={NAER_PAA_KORTET.has(type) ? (stor ? NAER_STOR : NAER) : undefined}
       />
     </div>
   )
@@ -64,10 +84,14 @@ export const BedriftIkon = memo(function BedriftIkon({
  * rundt seg, så de fyller hele scenens høyde.
  */
 export const Scene = memo(function Scene({ type, nivaa, forbedringer = 0 }: { type: string; nivaa?: number; forbedringer?: number }) {
+  // Full ramme (G13): scenen får tegningens form, 11:6, og tegningen fyller den helt.
+  const full = FULL_RAMME.includes(type)
   return (
-    <div className="scene" aria-hidden="true">
+    <div className={full ? 'scene full' : 'scene'} aria-hidden="true">
       <IScenen.Provider value={true}>
-        <Illustrasjon id={type} størrelse={172} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
+        <Bredt.Provider value={true}>
+          <Illustrasjon id={type} størrelse={172} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
+        </Bredt.Provider>
       </IScenen.Provider>
     </div>
   )

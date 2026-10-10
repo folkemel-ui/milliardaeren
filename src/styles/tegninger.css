@@ -221,6 +221,39 @@
   background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--gull) 9%, var(--flate-2)), var(--flate-2) 70%);
 }
 
+/* Full ramme (G13): scenen har tegningens form, 11:6, og tegningen fyller den
+   helt ut. Den er like bred som kortet, men ikke over 560 px. */
+.scene.full {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  aspect-ratio: 11 / 6;
+  margin-inline: auto;
+  overflow: hidden;
+}
+
+.scene.full > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Flisa fylles helt (G13): nærbildet går ut i de runde hjørnene. */
+.bedrift-ikon.fylt {
+  overflow: hidden;
+}
+
+.bedrift-ikon.fylt svg {
+  display: block;
+}
+
+/* En silhuett (låst bedrift langt frem) er bare motivet: uten himmel, bakke og
+   bakgrunn, som ellers ville blitt en svart firkant i full ramme. */
+.silhuett .bedrift-ikon.fylt :is(.lerret-himmel, .lerret-bakke, .lerret-bakgrunn) {
+  display: none;
+}
+
 .dempet-ikon {
   filter: grayscale(1);
   opacity: 0.45;
@@ -254,6 +287,13 @@
   background: var(--flate-2);
   border-radius: 10px;
   line-height: 0;
+  overflow: hidden;
+}
+
+/* En bred tegning (full ramme, G13) krymper til kortet. */
+.galleri-stor > svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .galleri-små {

@@ -8,7 +8,7 @@
 
 import { useContext, type ReactNode } from 'react'
 import { r2, Blinklys, IScenen, tennesOmNatta, Bakke, Bunnfade, Dis, GRUNNLINJE, HORISONT, Kantfade, Kloss, Lampe, Lerret, Person as Figur, S, Saltak, Slagskygge, Glans, Tre, Vindusrad, inn, maal, pkt, type Materiale } from '../Tegnestil'
-import { Passasjerfly, type P, type Tegning } from '../Illustrasjoner'
+import { Passasjerfly, Sykkel, type P, type Tegning } from '../Illustrasjoner'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -71,17 +71,6 @@ function Gavlhus({ x, y = GRUNNLINJE, b, h, gavl, d, m, tak, children }: { x: nu
       <polygon points={pkt(v, t, hy)} fill={m.flate} />
       <polyline points={pkt([x - 0.6, y - h + 0.4], t, [x + b + 0.6, y - h + 0.4])} fill="none" stroke={tak.flate} strokeWidth="1" strokeLinejoin="round" />
       {children}
-    </g>
-  )
-}
-
-/** En sykkel på gateavstand. */
-function Sykkel({ x, y = GRUNNLINJE, farge = S.vin.flate }: { x: number; y?: number; farge?: string }) {
-  return (
-    <g>
-      <circle cx={x} cy={y - 3.4} r="3.4" fill="none" stroke={S.mork.flate} strokeWidth="0.7" />
-      <circle cx={x + 10.6} cy={y - 3.4} r="3.4" fill="none" stroke={S.mork.flate} strokeWidth="0.7" />
-      <path d={`M${x} ${y - 3.4} L${x + 4} ${y - 9} L${x + 9} ${y - 9} L${x + 10.6} ${y - 3.4} M${x + 4} ${y - 9} L${x + 5.6} ${y - 3.4} L${x + 9} ${y - 9} M${x + 3.4} ${y - 10.4} h2 M${x + 9} ${y - 9} l-0.6 -2 h2`} fill="none" stroke={farge} strokeWidth="0.8" strokeLinejoin="round" />
     </g>
   )
 }

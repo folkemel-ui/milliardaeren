@@ -307,6 +307,11 @@ session; delete what stops being true.
   `startApp` in `klikk.ts` waits for parts still loading before `vi.resetModules()`;
   without that, a click test that ends mid-load made the *next* test hang (Pack 65's
   «Verden viser bare eiendom ute» timed out after G12 until this was added).
+- **The full frame (G13).** Drawings in `FULL_RAMME` (the four street businesses so far)
+  have no vignette and are 176 × 96 in the detail scene (x −40 to 136). A new business,
+  property or vehicle drawn by the game track can stay out of the list (it then looks as
+  before); if it goes in, it must reach the frame's edges itself — see `wisdom-grafikk.md`
+  §6c.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:
