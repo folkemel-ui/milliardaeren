@@ -48,8 +48,10 @@ export function vedBehov<T>(navn: string, hent: () => Promise<T>): Del<T> {
         },
         (feil: unknown) => {
           // Uten nett, eller en ny utgivelse har fjernet den gamle biten: prøv igjen
-          // neste gang noe viser delen. Til da står den tomme flaten.
+          // neste gang noe viser delen. Til da står den tomme flaten — men er det en
+          // ny utgivelse, lastes siden på nytt, så delene finnes igjen.
           løfte = undefined
+          lastNyUtgave()
           throw feil
         },
       )
@@ -72,6 +74,43 @@ export function vedBehov<T>(navn: string, hent: () => Promise<T>): Del<T> {
 }
 
 const ingen = () => () => {}
+
+/** Når siden sist ble lastet på nytt for en ny utgivelse (sessionStorage). */
+const NY_UTGAVE = 'milliardaer.ny-utgave'
+
+/**
+ * En del som ikke kommer, betyr nesten alltid at en ny utgivelse er lagt ut
+ * mens spillet sto åpent: hver utgivelse gir delene nye navn, og GitHub Pages
+ * har bare den nyeste. Telefonen holder appen i minnet i timevis, og bitene den
+ * spør etter, finnes ikke lenger. Da sjekker vi om index.html peker på et annet
+ * startskript enn det som kjører, og laster i så fall siden på nytt (spillet
+ * lagres på vei ut). Bare i bygget, og høyst én gang hvert halve minutt, så en
+ * side uten nett aldri går i ring.
+ */
+function lastNyUtgave(): void {
+  if (!import.meta.env.PROD || typeof document === 'undefined') return
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(NY_UTGAVE) ?? 0) < 30_000) return
+  } catch {
+    return
+  }
+  const kjorer = [...document.scripts].map((s) => s.src).find((src) => /\/assets\/index-[\w-]+\.js$/.test(src))
+  if (!kjorer) return
+  // Med en egen søkestreng: service workeren svarer skallet («./») fra hurtiglageret.
+  fetch(`./index.html?utgave=${Date.now()}`, { cache: 'no-store' })
+    .then((svar) => (svar.ok ? svar.text() : ''))
+    .then((html) => {
+      const nytt = html.match(/assets\/index-[\w-]+\.js/)?.[0]
+      if (!nytt || kjorer.endsWith(nytt)) return
+      try {
+        sessionStorage.setItem(NY_UTGAVE, String(Date.now()))
+      } catch {
+        return
+      }
+      location.reload()
+    })
+    .catch(() => {})
+}
 
 /**
  * Verdien til en del, og en ny tegning når den kommer. Henter delen om den

@@ -101,6 +101,7 @@
   --klasse-rival: #db2777;
   --klasse-startup: #ea580c;
   --klasse-fond: #0d9488;
+  --klasse-obligasjon: #64748b;
   /* Himmelen bak tegningene i den nye stilen (Tegnestil.tsx): lys på lys bunn. */
   --himmel-dag-topp: #aebfcb;
   --himmel-dag-horisont: #efe3cb;
@@ -773,6 +774,7 @@ button.merke {
   --klasse-rival: #f472b6;
   --klasse-startup: #fb923c;
   --klasse-fond: #2dd4bf;
+  --klasse-obligasjon: #94a3b8;
 }
 
 .bred {

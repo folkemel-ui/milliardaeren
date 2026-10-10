@@ -206,6 +206,12 @@
   background: var(--klasse-fond);
 }
 
+/* Obligasjonene manglet farge og ble usynlige på lys bunn: stålgrå, rolig som papirene selv. */
+.fordeling-del.obligasjon,
+.klasse-prikk.obligasjon {
+  background: var(--klasse-obligasjon);
+}
+
 .oversikt {
   display: flex;
   flex-direction: column;

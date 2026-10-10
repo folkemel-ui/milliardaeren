@@ -105,4 +105,24 @@ describe('en lettere start (G12)', () => {
   it('omslaget kjenner verdenskartets mål uten å laste kartdataene', () => {
     expect([VERDEN_BREDDE, VERDEN_HOYDE]).toEqual([BREDDE, HOYDE])
   })
+
+  it('en del som ikke kommer etter en ny utgivelse, laster siden på nytt — én gang', () => {
+    // Verdenskartet ble stående tomt på telefonen: appen hadde stått åpen over en
+    // utgivelse, og bitene den spurte etter, fantes ikke lenger.
+    const kilde = readFileSync(join(SRC, 'ui/vedBehov.ts'), 'utf8')
+    const feil = kilde.slice(kilde.indexOf('(feil: unknown) => {'), kilde.indexOf('throw feil'))
+    expect(feil).toContain('lastNyUtgave()')
+    // Forbi service workerens skall-lager, høyst hvert halve minutt, bare i bygget.
+    expect(kilde).toMatch(/fetch\(`\.\/index\.html\?utgave=\$\{Date\.now\(\)\}`/)
+    expect(kilde).toContain('< 30_000')
+    expect(kilde).toContain('import.meta.env.PROD')
+  })
+})
+
+describe('obligasjonene i porteføljen', () => {
+  it('har en egen farge i begge temaer, så prikken og stripa synes på lys bunn', () => {
+    const css = ['grunnlag.css', 'investeringer.css'].map((f) => readFileSync(join(SRC, 'styles', f), 'utf8')).join('\n')
+    expect(css.match(/--klasse-obligasjon: #[0-9a-f]{6};/g)?.length).toBe(2)
+    expect(css).toMatch(/\.fordeling-del\.obligasjon,\s*\.klasse-prikk\.obligasjon \{\s*background: var\(--klasse-obligasjon\);/)
+  })
 })

@@ -873,6 +873,20 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   in G12, so the cap went from 20 to 40; `forvarm` fetches every part within seconds of
   start, so an open tab has usually fetched them all before a new release removes them —
   and if a fetch fails, the loader forgets it and tries again the next time it's shown.
+- **A page open across a deploy loses its parts** (found on Folke's phone 25 minutes after
+  G12 went live: the world map stood empty, just the sea). Every release renames every
+  chunk — they import the start script by its hashed name — and GitHub Pages keeps only
+  the newest, so an app held in memory asks for files that are gone (iOS pauses a closed
+  app's timers, so `forvarm` hadn't fetched them yet). A fresh load of the live site
+  worked, which is what pointed to it. Fix: when a part fails, `lastNyUtgave()` in
+  `vedBehov.ts` fetches `index.html` and reloads if it names another start script. Two
+  traps: `fetch('./')` is answered by the service worker's shell cache (cache first), so
+  it asks for `./index.html?utgave=<time>`; and it reloads at most once per 30 s
+  (sessionStorage), so a page without net never loops. Proved with a test build in
+  `public/g12bygg/`: a copy of the start script under a new name, `index.html` pointed at
+  it and the world map's chunk renamed away — one reload, then none. The Vite dev server
+  answers a missing chunk with `index.html` (200, text/html), and the import fails on the
+  MIME type; that's a fine stand-in for GitHub's 404.
 - **Rollup names a shared chunk after one of its modules**: the map data, `verdenskartet.ts`
   and `Kartmerke.tsx` became `Kartmerke-….js` (26 kB gzipped). Harmless.
 - **Measure per module** with a scratchpad Vite config whose plugin logs
