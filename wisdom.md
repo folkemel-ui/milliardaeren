@@ -74,7 +74,7 @@ session; delete what stops being true.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–65.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–66.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -192,6 +192,8 @@ session; delete what stops being true.
 - **To read Vitest's «Unhandled Error»**, write the run to a scratchpad log and strip the
   colour codes (`sed 's/\x1b\[[0-9;]*m//g'`) before grepping — grep on the coloured output
   found nothing and cost two extra runs of the suite.
+- **There is no Python on this machine** (`python` opens the Microsoft Store stub and does
+  nothing). Write edit scripts in Node.
 - **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
 
 ## 4. Dev server and browser pane
@@ -506,8 +508,8 @@ session; delete what stops being true.
   a new kind of thing appears (Pack 56 added a bond).
 - **A game day is 300 s** (`DAG_SEK`), not 86 400. "Two days" of simulated play is 576
   game days.
-- **Save versions** (now 22 — 21 for the bonds' anchor in Pack 56, 22 for the currency
-  anchor in Pack 59): write the migration before bumping `SPILLVERSJON`; never
+- **Save versions** (now 23 — 21 for the bonds' anchor in Pack 56, 22 for the currency
+  anchor in Pack 59, 23 for the club's stadium and league in Pack 66): write the migration before bumping `SPILLVERSJON`; never
   skip a step. A migration that changes how something is *priced* must keep today's
   value exactly: Pack 56 gave each bond post an `anker` that reproduces its old price,
   Pack 59 anchored every currency where the save was (`valutaanker`), and both have a
@@ -592,6 +594,26 @@ session; delete what stops being true.
   Rewriting `reduce`/`every` as plain loops changed nothing measurable; V8 already does it.
   The exact path left little: ~9 % (406 → ~370 ms). Ticking rent, net worth or achievements
   less often would cut far more, but moves the golden master — Folke chose exact for now.
+- **The club (Pack 66)** keeps the whole league: `k.lag` is your division with the table
+  (you at index 0), `k.serier[d]` the other four divisions as name + strength (your own
+  entry empty). Only your division plays match by match; at season end `skiftSerier`
+  moves two up and two down everywhere, ranking the other divisions by strength plus
+  ±10 luck, and replaces the two that drop out of 4. divisjon with new names — never the
+  ones that just left (a test that counted who stayed caught that). Promotion needs the
+  stadium requirement for the division above (`oppfyllerKrav`); a blocked top-two finish
+  sends the next team up. What the stadium cost counts in `klubbverdi` and `kostpris`, so
+  building moves money only. The bot never buys a club, so the golden master and the
+  bench can't see any of it.
+- **Old migration steps must not call engine functions whose input grows later.** The 17 → 18
+  step valued the club with `klubbverdi`; once Pack 66 made it read `k.stadion`, every save
+  from versions 13–17 failed to load (the stadium only arrives in step 22 → 23). Write the
+  formula as it was in the step itself. `gamle-lagringer.test.ts` is what catches this.
+- **A migration that needs dice uses its own**: Pack 66 drew the other divisions for old
+  clubs with `new Terning(hashTekst(name + season))`, so the club's own `frø` — and its
+  future matches — stayed exactly as they were.
+- **A test that plays to just before an event must not predict the event from that
+  moment** when one more round can change it: the top three after eight rounds weren't
+  the top three after nine. Check the outcome afterwards (who is now in the division above).
 - **Slow tests are slow on their own**: `formue.test.ts` takes ~19 s alone and ~33 s in
   the full suite. Before blaming your change for a slowdown, time it alone on both sides
   of `git stash` (Pack 39's daily settlement cost ~7 %, which is fine).
@@ -714,6 +736,11 @@ session; delete what stops being true.
   can press back with `history.back()` (`pakke61.test.ts`). In the browser pane,
   one back too many leaves the game for the page you came from (`/ikon.svg`) — that's
   correct, not a bug.
+- **Where new areas go (Pack 66)**: five tabs, never six; at most four parts in a tab; a new
+  area becomes a part in the tab whose question it answers; when it outgrows its part it
+  gets a detail page (a layer with back), never a fifth part. The rule is in the header of
+  `ui/deler.ts`, and `ui/__tester__/pakke66.test.ts` checks the counts. The club stays in
+  Luksus → Klubb; the stadium is a card right under the club's top card.
 - **Parts (Pack 61)**: every set of parts is a `lagDelvalg(key, parts)` in `ui/deler.ts`
   (remembered in localStorage, first part by default, settable from outside). A new set
   of parts goes there too, not in a `useState`.
