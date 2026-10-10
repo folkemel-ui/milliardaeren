@@ -406,6 +406,21 @@ session; delete what stops being true.
   wrap to two lines; badges and captions stay 11. Measured before → after at 375 px: controls under
   44 px per screen 17/32/28 (Bedrifter/Eiendom/Bank) → 0, on all twelve screens and parts. `pakke74.test.ts` and `pakke74b.test.ts`
   (heavy group) guard it; a new button should use `.knapp`/`.segment` or get an `::after`.
+- **Two segments on one phone row (Pack 75).** A `.segment` is a grid with equal columns,
+  so its width is (widest label + 2 × padding) × buttons: ×1/×10/×100/Maks at padding 10 was
+  238 px and Kjøpt/Inntekt at 14 was 157 — 403 on a 343 px row, so they wrapped. Padding 4
+  and 6 gave 190 + 125 and one row (`.bedrifter-kontroller`); the 44 px is height, the
+  narrowest button is 42 wide as it was. Measure the two `getBoundingClientRect` widths
+  before trusting a screenshot of the row: the pane's screenshot was stale twice.
+- **«Markedet i dag» counts what is special, and that is almost every day** (Pack 75): a hot
+  or cold trade most weeks and a cycle that is rarely «normal» give a count on ~100 of 120
+  days, so the badge is a number, not a rare alarm. `ui/markedet.ts` is the pure list; the
+  sheet (`Markedsark` in `Dagen.tsx`) reuses the `avis-bakgrunn`/`velkomst` dialog with
+  `useFokusfelle`, like «Nytt i».
+- **A sort key must come from the catalogue** (Pack 75, as Pack 65): the property list sorts on
+  `EIENDOMSTYPER` price and yield (`sorterEiendom`), never on `leieHverPerSek`, which moves with
+  weather, vacancy and the index. The choice is a `lagDelvalg` (`eiendomsrekkefolge`) and sits
+  in `ALLE_DELVALG`.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:
