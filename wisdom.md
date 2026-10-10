@@ -673,8 +673,9 @@ session; delete what stops being true.
   a new kind of thing appears (Pack 56 added a bond).
 - **A game day is 300 s** (`DAG_SEK`), not 86 400. "Two days" of simulated play is 576
   game days.
-- **Save versions** (now 23 — 21 for the bonds' anchor in Pack 56, 22 for the currency
-  anchor in Pack 59, 23 for the club's stadium and league in Pack 66): write the migration before bumping `SPILLVERSJON`; never
+- **Save versions** (now 25 — 21 for the bonds' anchor in Pack 56, 22 for the currency
+  anchor in Pack 59, 23 for the club's stadium and league in Pack 66, 24 for the art value
+  in Pack 67, 25 for positions, attack/defence, formation and academy in Pack 71): write the migration before bumping `SPILLVERSJON`; never
   skip a step. A migration that changes how something is *priced* must keep today's
   value exactly: Pack 56 gave each bond post an `anker` that reproduces its old price,
   Pack 59 anchored every currency where the save was (`valutaanker`), and both have a
@@ -790,6 +791,26 @@ session; delete what stops being true.
   sends the next team up. What the stadium cost counts in `klubbverdi` and `kostpris`, so
   building moves money only. The bot never buys a club, so the golden master and the
   bench can't see any of it.
+- **The squad (Pack 71).** A player is `posisjon`, `angrep`, `forsvar` and a stored
+  `styrke` (the overall, `styrkeAv` = attack and defence weighted by position; it is
+  recomputed only when attack or defence change, so a migrated player keeps the exact
+  value the old save had — `gamle-lagringer.test.ts` checks net worth to the krone). The
+  eleven come from `startellever(k)`: slot by slot (keeper first) the best player left by
+  `styrke × plassfaktor` (1 in position, 0.7 out, 0.4 for an outfielder in goal). Never
+  set `p.styrke` alone in a test fixture — the match reads `lagprofil`, which reads attack
+  and defence; the Pack 12/66 fixtures became `p.styrke = p.angrep = p.forsvar = N`.
+  `forventetMaal` takes a number (attack = defence) or a `Lagprofil`; opponents are still
+  one number. Juniors carry `potensial`; `potensialspenn` shows a 14-wide window placed by
+  a hash. New club fields: `formasjon`, `akademi` (`investert` counts in `klubbverdi`).
+- **Tune tactics on exact odds, not samples** (Pack 71). Expected points per tactic for
+  strength gaps −30..30, home and away, from the truncated Poisson (≤ 9 goals like the
+  engine) — a 30-line script, no dice. A grid search over the four factors gave 54/58
+  «right» gaps at 0.55/0.6 and 1.15/1.2; the review's 0.7/0.75 and 1.3/1.4 gave 52 and were
+  kept for being readable. The home advantage shifts the bands by about six strength
+  points, so «Balansert is best when even» means −8..+2 at home and 0..+8 away.
+- **`hashTekst` is signed.** `hashTekst(x) % n` can be negative and index nothing (the
+  market players' positions came out undefined in the first run of the migration). Use
+  `(hashTekst(x) >>> 0) % n`.
 - **Old migration steps must not call engine functions whose input grows later.** The 17 → 18
   step valued the club with `klubbverdi`; once Pack 66 made it read `k.stadion`, every save
   from versions 13–17 failed to load (the stadium only arrives in step 22 → 23). Write the
