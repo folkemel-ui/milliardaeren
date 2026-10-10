@@ -513,6 +513,14 @@ session; delete what stops being true.
   session ran its full suite in its own folder while ours ran, and «Timeout calling
   onTaskUpdate» returned. Before blaming a change, list the Node processes
   (`Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`) and rerun on a quiet machine.
+  **Proved on purpose in G17** (11 October 2026): five runs in a row failed while the other track
+  was testing or compiling — on the commit *before* G17 too — and three full runs on a quiet
+  machine passed (88 files, 1 026 tests, ~2 min); two full runs started at the same moment both
+  failed. The tell-tale is `Test Files 73 passed (73)` instead of 88: the error aborts the run when
+  the fast group ends, so the heavy group and the speed test never ran. The count says whether the
+  run was complete; a green 73 is not a pass. Wait for the other track's `vitest` to leave the
+  process list (a background loop on `Get-CimInstance … | Where-Object CommandLine -match
+  'vitest'`), then run `lever.mjs`; the tests themselves are fine.
 - **An animated page in the browser pane brings it back too** (G14): a contact sheet of
   animated scenes left open made «Timeout calling onTaskUpdate» fail `lever.mjs` three
   times running; closing it and stopping the dev server gave a clean run at once. Leave
