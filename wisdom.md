@@ -575,6 +575,13 @@ session; delete what stops being true.
   run was complete; a green 73 is not a pass. Wait for the other track's `vitest` to leave the
   process list (a background loop on `Get-CimInstance … | Where-Object CommandLine -match
   'vitest'`), then run `lever.mjs`; the tests themselves are fine.
+- **Too many heavy files at once bring it back too** (Pack 78): with 16 files in `TUNGE` on
+  this 8-core machine, every full run on a quiet machine ended with the error and 94 of 95
+  files (the speed test never ran); 15 heavy files passed, whichever one was left out, and
+  no single test was long, so splitting `simuler` into chunks did not help. The fix is
+  `maxWorkers: 4` at the root of `test` in `vite.config.ts` (full run ~120 → ~141 s).
+  Vitest 3.2 ignores `maxWorkers` and `poolOptions` set inside one project; only the root
+  setting or the `--maxWorkers` flag works.
 - **An animated page in the browser pane brings it back too** (G14): a contact sheet of
   animated scenes left open made «Timeout calling onTaskUpdate» fail `lever.mjs` three
   times running; closing it and stopping the dev server gave a clean run at once. Leave

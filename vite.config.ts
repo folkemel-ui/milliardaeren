@@ -32,6 +32,13 @@ const TUNGE = [
   '**/ui/__tester__/pakke78.test.ts',
 ]
 
+/**
+ * Høyst fire arbeidere (Pakke 78). Med seksten tunge filer på åtte kjerner sultet
+ * hovedprosessen igjen («Timeout calling onTaskUpdate»), og ytelsestesten ble aldri
+ * kjørt; femten gikk. Vitest 3.2 bryr seg ikke om grensen per gruppe, så den gjelder alle.
+ */
+const ARBEIDERE = 4
+
 export default defineConfig({
   plugins: [react()],
   // Relativ base: bygget fungerer både på rot og i en undermappe.
@@ -41,6 +48,7 @@ export default defineConfig({
     // Flere tester simulerer et helt døgn (et par sekunder hver); med alle filene
     // i parallell er standardgrensen på 5 s for knapp.
     testTimeout: 20_000,
+    maxWorkers: ARBEIDERE,
     // Tre grupper som kjører etter hverandre: de raske i parallell først, så de
     // tunge, og til slutt ytelsestesten alene. I samme gruppe feilet den ofte på en
     // travel maskin.
