@@ -458,13 +458,19 @@
   border-radius: 10px;
 }
 
+/* Navnet på plassen er 13 px og brytes over to linjer, så «Brukt stasjonsvogn» ikke kuttes (Pakke 74). */
 .plass-navn {
   margin-top: 6px;
   max-width: 92px;
+  min-height: 2.5em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--skrift-1);
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  font-size: var(--skrift-2);
   font-weight: var(--vekt-halvfet);
 }
 

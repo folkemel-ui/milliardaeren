@@ -655,7 +655,7 @@ button.merke {
 }
 
 .knapp-liten {
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 12px;
   font-size: var(--skrift-2);
 }
@@ -723,7 +723,7 @@ button.merke {
 }
 
 .segment button {
-  min-height: 36px;
+  min-height: 44px;
   border-radius: 9px;
   font-size: var(--skrift-3);
   font-weight: var(--vekt-halvfet);
@@ -892,9 +892,10 @@ button.merke {
 
 .seksjon-hode {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   width: 100%;
+  min-height: 44px;
   padding: 4px 0;
   text-align: left;
 }
@@ -1093,6 +1094,7 @@ button.merke {
 }
 
 .forklaring-knapp {
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 18px;
@@ -1108,6 +1110,13 @@ button.merke {
   line-height: 1;
   letter-spacing: 0;
   cursor: pointer;
+}
+
+/* Trykkflata er 44 × 44 px (Pakke 74), selv om knappen ser ut som 18. */
+.forklaring-knapp::after {
+  content: '';
+  position: absolute;
+  inset: -13px;
 }
 
 .forklaring-knapp[aria-expanded='true'],
@@ -1176,6 +1185,7 @@ button.merke {
 
 /* En knapp som ser ut som en lenke. */
 .lenkeknapp {
+  position: relative;
   padding: 0;
   background: none;
   border: 0;
@@ -1184,6 +1194,13 @@ button.merke {
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
+}
+
+/* Trykkflata er 44 px høy (Pakke 74), selv om lenken står i en tekstlinje. */
+.lenkeknapp::after {
+  content: '';
+  position: absolute;
+  inset: -13px -4px;
 }
 
 @keyframes forste-bilde {

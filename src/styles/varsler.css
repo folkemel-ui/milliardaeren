@@ -196,10 +196,18 @@
 }
 
 .varsel-lukk {
+  position: relative;
   align-self: flex-start;
   color: var(--tekst-dempet);
   font-size: var(--skrift-2);
   padding: 2px 4px;
+}
+
+/* Trykkflata er minst 44 px (Pakke 74). */
+.varsel-lukk::after {
+  content: '';
+  position: absolute;
+  inset: -11px -12px;
 }
 
 .feiring {

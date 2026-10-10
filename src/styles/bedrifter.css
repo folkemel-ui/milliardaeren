@@ -228,6 +228,7 @@
 
 .forbedring-knapp {
   display: flex;
+  min-height: 44px;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
@@ -324,13 +325,13 @@
 }
 
 .rekkefolge button {
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 14px;
   font-size: var(--skrift-2);
 }
 
 .mengdevalg button {
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 10px;
   font-size: var(--skrift-2);
 }

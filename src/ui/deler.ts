@@ -111,5 +111,28 @@ export const bedriftsrekkefolge = lagDelvalg<Bedriftsrekkefolge>('milliardaer.be
 /** Alle settene, for testen som sjekker at de følger samme regel. */
 export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel, bedriftsrekkefolge }
 
+/**
+ * Hvilke deler en fane viser nå, som én nøkkel. Rullingen huskes bare for de
+ * samme delene (Pakke 74): en annen del, eller en annen by i Eiendom, starter
+ * øverst. Byvalget er en useState i skjermen og forsvinner med fanen, så det
+ * leses fra knappen som er valgt.
+ */
+export function delnokkel(fane: string): string {
+  switch (fane) {
+    case 'bedrifter':
+      return bedriftsrekkefolge.les()
+    case 'investeringer':
+      return `${investeringsdel.les()}/${borsdel.les()}`
+    case 'eiendom':
+      return `${kartdel.les()}/${(typeof document === 'undefined' ? '' : (document.querySelector('.byvalg button.aktiv')?.textContent?.trim() ?? ''))}`
+    case 'luksus':
+      return luksusdel.les()
+    case 'profil':
+      return profildel.les()
+    default:
+      return ''
+  }
+}
+
 export const settProfildel = profildel.sett
 export const useProfildel = profildel.bruk

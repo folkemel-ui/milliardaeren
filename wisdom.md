@@ -364,6 +364,22 @@ session; delete what stops being true.
   step in `engine/hjemmene.ts` needs its state drawn in `Hjemtegninger.tsx`; a new business
   needs a `Steg` in `Trinnsteg.tsx` (`grafikkG16.test.ts` fails otherwise). Details in
   `wisdom-grafikk.md` §6d.
+- **Fits the phone (Pack 74).** Four rules now hold on every screen. (1) A phone on its side
+  (`orientation: landscape`, `max-height: 500px`, `max-width: 1023px`, last in `bred.css`) gets the
+  sidebar layout: one top line (53 px), a 92 px column of tabs, two columns of cards;
+  `--meny-høyde` is 0 there, which also moves the padding and the toasts. (2) `ui/rullehusk.ts`
+  remembers the scroll position per tab for the visit; `delnokkel(fane)` in `deler.ts` says which
+  part the tab shows (and, for Eiendom, which city chip is on, read from the DOM because it is a
+  `useState`), and a different part starts at the top; an open detail page stores 0. Tapping the tab you
+  are in scrolls to the top. (3) Every control has a 44 × 44 px target: real `min-height: 44px` on
+  `.knapp*`, `.segment button`, `.mengdevalg`, `.seksjon-hode`, `.forbedring-knapp`,
+  `.formuerad-knapp`; an invisible `::after` (`inset: -13px` on the 18 px «?», and so on) on the small
+  ones. An `::after` is clipped by an `overflow` ancestor — `.byvalg` (the city chips, `overflow-x:
+  auto`) got padding for it — and it must not overlap a neighbour (the ×1/×10/×100 row has real
+  height). (4) Text you read is 13 px (`--skrift-2`): achievement descriptions and the slot names, which
+  wrap to two lines; badges and captions stay 11. Measured before → after at 375 px: controls under
+  44 px per screen 17/32/28 (Bedrifter/Eiendom/Bank) → 0, on all twelve screens and parts. `pakke74.test.ts` and `pakke74b.test.ts`
+  (heavy group) guard it; a new button should use `.knapp`/`.segment` or get an `::after`.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:

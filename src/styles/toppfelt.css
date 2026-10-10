@@ -102,6 +102,17 @@
   padding: 0 6px;
 }
 
+/* Trykkflata er minst 44 px høy (Pakke 74), selv om knappene ser ut som 28. */
+.avisknapp::after {
+  content: '';
+  position: absolute;
+  inset: -8px -2px;
+}
+
+.hendelsesknapp::after {
+  inset: -8px -7px;
+}
+
 .ulest-prikk {
   position: absolute;
   top: 2px;
@@ -124,6 +135,12 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.toppfelt-profil::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
 }
 
 .toppfelt-profil {

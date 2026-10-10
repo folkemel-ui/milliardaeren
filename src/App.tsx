@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Avis } from './ui/komponenter/Avis'
 import { aktivVelkomst, lukkVelkomst, spillnummer, startSpillokke, useAvbrudd, useSpill, useVelkomst } from './state/lager'
 import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
@@ -26,7 +26,8 @@ import { lyttEtterKorttrykk } from './ui/overgang'
 import { lyttEtterTilbake, useTilbake } from './ui/tilbake'
 import { Hendelseslogg } from './ui/komponenter/Hendelseslogg'
 import type { Mål } from './ui/varsler'
-import { luksusdel } from './ui/deler'
+import { delnokkel, luksusdel } from './ui/deler'
+import { hentRulling, huskRulling } from './ui/rullehusk'
 
 const FANENOKKEL = 'milliardaer.fane'
 const GYLDIGE: Fane[] = ['bedrifter', 'investeringer', 'eiendom', 'luksus', 'profil']
@@ -170,8 +171,11 @@ export default function App() {
     const fra = FANER.findIndex((x) => x.id === fane)
     const til = FANER.findIndex((x) => x.id === f)
     settRetning(til > fra ? 'hoyre' : til < fra ? 'venstre' : 'ingen')
+    // Pakke 74: du kommer tilbake dit du var i fanen. Står en detaljside åpen, huskes lista øverst;
+    // et trykk på fanen du er i, ruller til toppen.
+    if (f === fane) window.scrollTo({ top: 0 })
+    else huskRulling(fane, document.querySelector('.innhold .detalj') ? 0 : window.scrollY, delnokkel(fane))
     settFane(f)
-    window.scrollTo({ top: 0 })
     try {
       localStorage.setItem(FANENOKKEL, f)
     } catch {
@@ -181,6 +185,10 @@ export default function App() {
 
   // En annen fane enn Bedrifter er et steg i historikken: tilbake går hjem, og fra Bedrifter ut av spillet.
   useTilbake(fane !== 'bedrifter', () => velg('bedrifter'))
+  // Fanen åpner der du sist var i den — øverst første gang, og når delen er en annen.
+  useLayoutEffect(() => {
+    window.scrollTo({ top: hentRulling(fane, delnokkel(fane)) })
+  }, [fane])
   const gåTil = (m: Mål) => {
     if (m === 'hendelser') return settLoggÅpen(true)
     if (m === 'klubb') {
