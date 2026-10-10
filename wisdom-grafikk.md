@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12 and G13 (10 October 2026). G14–G22 are planned in `Ideer.md`: the full frame
-in groups (G14–G15 businesses, G16 Scenes that grow, G17–G21 properties and luxury),
-then the seasons (G22).
+2026), G12, G13 and G14 (10 October 2026). G15–G22 are planned in `Ideer.md`: the full
+frame in groups (G15 the big businesses, G16 Scenes that grow, G17–G21 properties and
+luxury), then the seasons (G22).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -117,6 +117,11 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   and said the scene was too empty. The fix that worked was more of the *place* at every
   stage (neighbours, the sea, café tables, a town in the haze), never a bigger stand: the
   scale rule still holds.
+  For G14 Folke took all three recommendations again: shops in the same row for the café
+  and the bistro (a bookshop and a flower shop; a wine bar and a small gallery), the
+  hotel on a square with a fountain and a taxi rank, the bank on an old town square with
+  a statue and two lime trees. Naming the neighbours per business in the option made it
+  a one-click answer.
 - **Count before you quote.** `Ideer.md` said 39 of 68 drawings never moved; the real
   count was 35 (plus the bank below 100 and the street kitchen's first stage). Worse,
   that count was made with every improvement bought: the lemonade stand, the kiosk and
@@ -962,6 +967,32 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   windows lit at night; `start` shifts the pattern), `Bil` (the Pølsebod's taxi as a
   side-view car, `taxi` for the roof light), `Busskur`, `Kafebord` (near distance) and
   `Sykkel`, moved back from the property part and imported there.
+- **A row of town houses (G14)**: `Gatehus` draws a house at street distance (facade,
+  cornice, window rows over the shop, lit at night) with the shopfront as children, and
+  `Butikkvindu` a shop window with frame, sheen and a door to its right. Houses to the
+  *left* of the business are drawn before it, houses to the *right* after it, so each
+  covers its neighbour's side wall as in a real street — insert the right-hand ones
+  after the business's own facade but before its signs (the café's cup sign and
+  pretzel, the bistro's canopy), which hang out over the neighbour. A business that
+  "takes over the shop next door" at 25 gets an empty shop (papered window, a note)
+  there at level 1, so the story reads.
+- **`Bunnskygge` drawn over windows kills them at night.** In the night layer every fill
+  that isn't a light colour turns solid black — the wall shadow's gradient included —
+  so a shadow over the whole facade drawn *after* the windows hid every lit window.
+  Draw it right after the wall, before windows and shopfront. `grafikkG13.test.ts`
+  checks the order in `Gatehus`.
+- **`Byrekke` without haze** (`dis={false}`) gives houses at the subject's own
+  distance (the hotel's square); with haze it's the town far behind.
+- **Tile crops may reach past 96 sideways** now that the sides are drawn (x −40 to 136);
+  only the bottom (96, where the ground ends) is a hard limit. The hotel's crop grows
+  from 64 to 86 units as it goes from 3 to 7 storeys with a flag on the roof.
+- **Close the contact sheet before the full suite.** In G14 `lever.mjs` failed three
+  times in a row on «Timeout calling onTaskUpdate» (all tests passing, one file short —
+  the speed test never ran). Splitting my long drawing tests (G2, G10, G13: one test
+  per drawing, now `it.each`) didn't fix it; closing the pane's sheet of eight animated
+  night scenes and stopping the dev server did, at once. The pane draws an animated
+  sheet continuously and takes the CPU the runner needs. Before `lever.mjs`: close the
+  sheet (navigate away) and stop the preview server; restart it afterwards.
 - **The contact-sheet helper must import the newest module URL**: after an edit HMR
   loads `BedriftIkon.tsx?t=…`; take `.filter(…).at(-1)` of the resource list, or the
   sheet shows the old code. React DOM's client module needs `.default` (`createRoot`
@@ -985,7 +1016,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **Next groups for the full frame (G14–G21)**: add the ids to `FULL_RAMME`, extend
+- **Next groups for the full frame (G15–G21)**: add the ids to `FULL_RAMME`, extend
   everything that ends at 0 and 96, fill the sides, and give the tile a per-stage crop
   where the subject grows. Properties and luxury live in the lazy parts, so their helpers
   for the sides go there (or in the start file if a business needs them too). Cars use

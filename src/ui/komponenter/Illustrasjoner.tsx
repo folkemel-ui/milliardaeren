@@ -118,9 +118,10 @@ function Ord({ tekst, x, y, h, farge, bredde }: { tekst: string; x: number; y: n
  * `y` (fortauets bakkant). Husene står fjernt (8 enheter per etasje, `METER`),
  * to til fire etasjer, med flatt tak eller saltak, og om natta tennes de fleste
  * vinduene. `start` forskyver mønsteret, så to tegninger ikke får samme gate.
- * Gir de små bedriftene på gateavstand en by rundt seg i den brede rammen.
+ * Gir de små bedriftene på gateavstand en by rundt seg i den brede rammen. Med
+ * `dis={false}` står husene på samme avstand som motivet (hotellets torg, G14).
  */
-function Byrekke({ fra = -40, til = 136, y = 68, start = 0 }: { fra?: number; til?: number; y?: number; start?: number }) {
+function Byrekke({ fra = -40, til = 136, y = 68, start = 0, dis = true }: { fra?: number; til?: number; y?: number; start?: number; dis?: boolean }) {
   const FASADER = [S.puss, S.tegl, S.oker, S.hvit, S.faluRod, S.stein, S.petrol]
   const MÅL: [number, number, boolean][] = [
     [14, 3, false],
@@ -137,8 +138,8 @@ function Byrekke({ fra = -40, til = 136, y = 68, start = 0 }: { fra?: number; ti
     hus.push({ x, b, et, saltak, m: FASADER[(i * 3 + 1) % FASADER.length] })
     x += b + (i % 3 === 1 ? 1.6 : 0)
   }
-  return (
-    <Dis>
+  const rekke = (
+    <>
       {hus.map(({ x, b, et, saltak, m }) => {
         const h = et * 8
         const kolonner = Math.max(1, Math.floor((b - 2) / 3.6))
@@ -162,8 +163,9 @@ function Byrekke({ fra = -40, til = 136, y = 68, start = 0 }: { fra?: number; ti
           </g>
         )
       })}
-    </Dis>
+    </>
   )
+  return dis ? <Dis>{rekke}</Dis> : <g>{rekke}</g>
 }
 
 /**
@@ -235,6 +237,47 @@ function Busskur({ x, y = GRUNNLINJE - 4 }: { x: number; y?: number }) {
       <rect x={r2(x - 6)} y={y - 30} width="0.8" height="30" fill={S.metall.skygge} />
       <circle cx={r2(x - 5.6)} cy={y - 31} r="2.8" fill={S.oker.flate} />
       <rect x={r2(x - 7.2)} y={y - 31.6} width="3.2" height="1.2" fill={S.mork.flate} />
+    </g>
+  )
+}
+
+/**
+ * Et hus i en gaterekke på gateavstand (G14): fasaden i `m`, en gesims øverst
+ * og vinduer i etasjene over butikken (de fleste tennes om natta). Butikkfronten
+ * står i `children`, mellom y 52 og grunnlinja. Står husene i rekke, tegnes de
+ * til høyre etter naboen, så sideveggen bak dekkes som i en ekte gate.
+ */
+function Gatehus({ x, b, h, m, d = 18, children }: { x: number; b: number; h: number; m: Materiale; d?: number; children?: ReactNode }) {
+  const topp = GRUNNLINJE - h
+  const etasjer = Math.max(0, Math.floor((52 - topp - 4) / 13))
+  const antall = Math.max(1, Math.floor((b - 6 + 4) / 10))
+  const mellom = antall > 1 ? r2((b - 6 - antall * 6) / (antall - 1)) : 0
+  return (
+    <g>
+      <Kloss x={x} b={b} h={h} d={d} m={m} />
+      {/* Skyggen nederst på veggen før vinduene: tegnet over dem ble den svart i nattlaget og slukket lyset. */}
+      <Bunnskygge x={x} y={topp} b={b} h={h} />
+      <Kloss x={x - 0.6} y={r2(topp + 2.2)} b={b + 1.2} h={2.2} d={d + 1} m={S.hvit} />
+      {Array.from({ length: etasjer }, (_, e) => (
+        <Vindusrad key={e} x={x + 3} y={r2(topp + 5 + e * 13)} antall={antall} b={6} h={8.6} mellom={mellom} karm={S.hvit.lys} />
+      ))}
+      {children}
+    </g>
+  )
+}
+
+/** En butikkfront på gateavstand (G14): et vindu med karm og glans, og en dør til høyre. */
+function Butikkvindu({ x, b, karm = S.treMork.flate, lys = false, children }: { x: number; b: number; karm?: string; lys?: boolean; children?: ReactNode }) {
+  const g = GRUNNLINJE
+  return (
+    <g>
+      <rect x={x} y="59" width={b} height="19" fill={lys ? S.vinduLys.skygge : S.glass.skygge} className={lys ? undefined : 'nattvindu'} />
+      {children}
+      <Glans points={pkt([x, 59], [x + b * 0.35, 59], [x + 2, 78], [x, 78])} />
+      <rect x={x} y="59" width={b} height="19" fill="none" stroke={karm} strokeWidth="0.9" />
+      <rect x={r2(x + b + 2.4)} y={g - 21} width="7.4" height="21" fill={karm} />
+      <rect x={r2(x + b + 3.6)} y={g - 19} width="5" height="9" fill={S.glass.skygge} className="nattvindu" />
+      <circle cx={r2(x + b + 8.6)} cy={g - 9} r="0.5" fill={S.gull.flate} />
     </g>
   )
 }
@@ -1414,6 +1457,35 @@ const kafe: B = (t, f) => {
   return (
     <>
       <Bakke type="fortau" />
+      {/* Naboene til venstre (G14): bokhandelen, og på nivå 1 en tom butikk som kafeen tar over ved 25. */}
+      <Gatehus x={-40} b={48} h={46} m={S.oker}>
+        <rect x="-38" y="52.6" width="44" height="4" fill={S.marine.skygge} />
+        {[-34, -28, -21, -15, -9].map((x, i) => (
+          <rect key={x} x={x} y="54" width={i % 2 ? 3.4 : 4.6} height="1.2" rx="0.6" fill={S.hvit.flate} />
+        ))}
+        <Butikkvindu x={-36} b={30} lys>
+          {/* Bokryggene på to hyller. */}
+          {[61.4, 68.6].map((y) => (
+            <g key={y}>
+              {Array.from({ length: 13 }, (_, i) => (
+                <rect key={i} x={r2(-35 + i * 2.15)} y={r2(y + 0.6 + ((i * 7) % 3) * 0.6)} width="1.6" height={r2(4.6 - ((i * 7) % 3) * 0.6)} fill={[S.vin.flate, S.gran.flate, S.oker.flate, S.marine.flate, S.hvit.flate][i % 5]} />
+              ))}
+              <rect x="-35.4" y={r2(y + 5.4)} width="28.6" height="0.6" fill={S.treMork.flate} />
+            </g>
+          ))}
+        </Butikkvindu>
+      </Gatehus>
+      {t === 0 && (
+        <Gatehus x={8} b={24} h={50} m={S.tegl}>
+          <rect x="10" y="60" width="20" height="20" fill={S.puss.lys} />
+          <rect x="10" y="60" width="20" height="20" fill="none" stroke={S.treMork.flate} strokeWidth="0.9" />
+          {/* Lappen i vinduet: lokalet er ledig. */}
+          <rect x="16.4" y="65" width="7" height="9" fill={S.hvit.lys} />
+          {[0, 1, 2].map((i) => (
+            <rect key={i} x="17.4" y={r2(66.6 + i * 2.2)} width={i === 1 ? 3.4 : 5} height="0.7" fill={S.mork.lys} />
+          ))}
+        </Gatehus>
+      )}
       {/* Nivå 25: butikken ved siden av blir en del av kafeen. */}
       {t >= 1 && (
         <g>
@@ -1474,6 +1546,34 @@ const kafe: B = (t, f) => {
       {markise(34, 30)}
       {t >= 3 && <Plakett x={43} y={35.6} />}
       {t >= 3 && [55.2, 65].map((x) => <Lampe key={x} x={x} y={g - 19} r={1.8} />)}
+      {/* Naboene til høyre (G14): blomsterbutikken med bøtter på fortauet, og et høyere hus. */}
+      <Gatehus x={66} b={36} h={46} m={S.hvit}>
+        <rect x="76" y="52.6" width="24" height="4" fill={S.lov.skygge} />
+        {[79, 84, 89, 94].map((x, i) => (
+          <rect key={x} x={x} y="54" width={i % 2 ? 3 : 4} height="1.2" rx="0.6" fill={S.hvit.lys} />
+        ))}
+        <Butikkvindu x={78} b={14} karm={S.lov.skygge}>
+          {[[80.4, 70], [83.6, 68.6], [86.8, 70.4], [89.6, 69]].map(([x, y], i) => (
+            <g key={x}>
+              <circle cx={x} cy={y} r="2" fill={S.lov.flate} />
+              <circle cx={r2(x + 0.6)} cy={r2(y - 0.8)} r="1.1" fill={[S.vin.lys, S.oker.lys, S.hvit.lys, S.vin.flate][i]} />
+            </g>
+          ))}
+        </Butikkvindu>
+      </Gatehus>
+      {/* Bøttene med blomster utenfor. */}
+      {[79, 84.5, 90].map((x, i) => (
+        <g key={x}>
+          {[0, 1, 2].map((j) => (
+            <circle key={j} cx={r2(x + 0.8 + j * 1.2)} cy={r2(g - 6 - (j % 2))} r="1.3" fill={[S.vin.lys, S.oker.lys, S.hvit.lys][(i + j) % 3]} />
+          ))}
+          <rect x={x} y={g - 5} width="4" height="5" fill={S.metall.flate} />
+          <rect x={r2(x + 2.8)} y={g - 5} width="1.2" height="5" fill={S.metall.skygge} />
+        </g>
+      ))}
+      <Gatehus x={102} b={34} h={58} m={S.faluRod}>
+        <Butikkvindu x={106} b={16} />
+      </Gatehus>
       {/* Skiltet med koppen, som damper. */}
       <rect x="66" y="38.6" width="6" height="0.8" fill={S.mork.flate} />
       <circle cx="71.4" cy="44" r="4" fill={S.gran.flate} stroke={S.hvit.lys} strokeWidth="0.6" />
@@ -1538,6 +1638,31 @@ const restaurant: B = (t, f) => {
   return (
     <>
       <Bakke type="fortau" />
+      {/* Naboene til venstre (G14): et hus, vinbaren, og på nivå 1 et smalt hus der fløyen kommer ved 25. */}
+      <Gatehus x={-40} b={30} h={52} m={S.puss}>
+        <Butikkvindu x={-37} b={14} karm={S.stein.skygge} />
+      </Gatehus>
+      <Gatehus x={-10} b={24} h={50} m={S.treMork}>
+        <rect x="-8" y="52.6" width="20" height="4" fill={S.vin.skygge} />
+        {[-5, 0.4, 5.4].map((x, i) => (
+          <rect key={x} x={x} y="54" width={i % 2 ? 3.4 : 4} height="1.2" rx="0.6" fill={S.gull.lys} />
+        ))}
+        <Butikkvindu x={-8} b={12} karm={S.gull.skygge} lys>
+          {/* Flaskene i vinduet. */}
+          {[-6.4, -3.6, -0.8, 2].map((x, i) => (
+            <g key={x}>
+              <rect x={x} y="70" width="1.8" height="6" rx="0.5" fill={i % 2 ? S.gran.skygge : S.vin.skygge} />
+              <rect x={r2(x + 0.5)} y="68.4" width="0.8" height="1.8" fill={i % 2 ? S.gran.skygge : S.vin.skygge} />
+            </g>
+          ))}
+          <rect x="-7.4" y="76" width="10.8" height="0.8" fill={S.treMork.skygge} />
+        </Butikkvindu>
+      </Gatehus>
+      {!stor && (
+        <Gatehus x={14} b={18} h={46} m={S.oker}>
+          <Butikkvindu x={15.6} b={6} karm={S.treMork.flate} />
+        </Gatehus>
+      )}
       {/* Fløyen med det store buevinduet fra nivå 25. */}
       {stor && (
         <g>
@@ -1610,6 +1735,25 @@ const restaurant: B = (t, f) => {
       <rect x="56.4" y={g - 20} width="5.8" height="10" fill={S.vinduLys.skygge} />
       <circle cx="61.6" cy={g - 9} r="0.6" fill={S.gull.flate} />
       <Bunnskygge x={32} y={51} b={34} h={33} />
+      {/* Naboene til høyre (G14): et lite galleri med et maleri i vinduet, og et høyere hus. */}
+      <Gatehus x={66} b={34} h={46} m={S.hvit}>
+        <rect x="72" y="52.6" width="24" height="4" fill={S.mork.skygge} />
+        {[75, 80, 85, 90].map((x, i) => (
+          <rect key={x} x={x} y="54" width={i % 2 ? 3 : 4.2} height="1.2" rx="0.6" fill={S.hvit.lys} />
+        ))}
+        <Butikkvindu x={74} b={16} karm={S.mork.flate} lys>
+          {/* Maleriet på staffeliet. */}
+          <line x1="80" y1="76.6" x2="81.6" y2="62" stroke={S.treverk.skygge} strokeWidth="0.6" />
+          <line x1="84" y1="76.6" x2="82.4" y2="62" stroke={S.treverk.skygge} strokeWidth="0.6" />
+          <rect x="77" y="62.4" width="10" height="8" fill={S.gull.flate} />
+          <rect x="77.8" y="63.2" width="8.4" height="6.4" fill={S.petrol.lys} />
+          <circle cx="84" cy="65" r="1.1" fill={S.oker.lys} />
+          <path d="M77.8 69.6 L80.6 66.4 L82.6 68.2 L84.4 66.8 L86.2 69.6 Z" fill={S.gran.flate} />
+        </Butikkvindu>
+      </Gatehus>
+      <Gatehus x={100} b={36} h={56} m={S.tegl}>
+        <Butikkvindu x={104} b={18} />
+      </Gatehus>
       {/* Michelin-skiltet over døra. */}
       {f >= 3 && (
         <g>
@@ -1672,7 +1816,26 @@ const hotell: B = (t, f) => {
   const vinduer = Math.floor((b - 2) / 5)
   return (
     <>
+      {/* Torget (G14): byen bak i disen, og husene rundt torget på samme avstand. */}
+      <Kantfade>
+        <Byrekke start={3} />
+      </Kantfade>
       <Bakke type="fortau" />
+      <Byrekke fra={92} til={136} y={g - 2} start={5} dis={false} />
+      {/* Fontenen med to trær og noen på torget. */}
+      <Tre x={-33} y={g - 3} h={24} />
+      <Tre x={-2} y={g - 2} h={20} />
+      <ellipse cx="-17" cy={g + 2.6} rx="9.6" ry="2.6" fill={S.stein.flate} />
+      <ellipse cx="-17" cy={g + 1.8} rx="9.6" ry="2.6" fill={S.stein.lys} />
+      <ellipse cx="-17" cy={g + 1.9} rx="8.2" ry="1.9" fill={S.sjo.lys} />
+      <rect x="-17.6" y={g - 5} width="1.2" height="6.8" fill={S.stein.lys} />
+      <ellipse cx="-17" cy={g - 5} rx="2.6" ry="0.7" fill={S.stein.flate} />
+      {[-1, 1].map((s) => (
+        <path key={s} className="anim-duve" d={`M-17 ${g - 7.4} q${s * 3} -1.6 ${s * 5} ${4.6}`} fill="none" stroke={S.glass.lys} strokeWidth="0.6" strokeLinecap="round" />
+      ))}
+      <rect x="-17.4" y={g - 8.4} width="0.8" height="3.4" fill={S.glass.lys} />
+      <Figur x={-28} y={g + 4} avstand="fjern" klaer={S.gran} />
+      <Figur x={-6} y={g + 5} avstand="fjern" klaer={S.vin} vendt={-1} />
       {/* Konferansepaviljongen i glass til venstre. */}
       {f >= 2 && (
         <g>
@@ -1761,6 +1924,19 @@ const hotell: B = (t, f) => {
         </g>
       )}
       {t >= 3 && <Figur x={x + b / 2 + 4} y={g + 1.6} avstand="fjern" klaer={S.marine} />}
+      {/* Drosjeholdeplassen til høyre (G14): skiltet og to drosjer i kø. */}
+      <rect x="95.4" y={g - 8} width="0.5" height="9" fill={S.metall.skygge} />
+      <rect x="94" y={g - 10.4} width="3.4" height="2.6" rx="0.4" fill={S.oker.lys} />
+      {[100, 114].map((bx) => (
+        <g key={bx}>
+          <rect x={bx} y={g + 0.4} width="11" height="2.4" rx="0.8" fill={S.mork.flate} />
+          <path d={`M${bx + 2} ${g + 0.4} L${bx + 3.4} ${g - 1.6} H${bx + 7.6} L${bx + 9} ${g + 0.4} Z`} fill={S.mork.lys} />
+          <rect x={bx + 4.6} y={g - 2.4} width="1.6" height="0.8" fill={S.oker.lys} />
+          {[bx + 2.6, bx + 8.4].map((cx) => (
+            <circle key={cx} cx={cx} cy={g + 2.8} r="1.1" fill={S.mork.skygge} />
+          ))}
+        </g>
+      ))}
     </>
   )
 }
@@ -1802,7 +1978,20 @@ const bank: B = (t, f) => {
   )
   return (
     <>
-      <Bakke type="fortau" />
+      <Bakke type="brostein" />
+      {/* Det gamle torget (G14): steinhus på hver side, et lindetre ved hvert, og statuen. */}
+      <Gatehus x={-40} b={20} h={52} m={S.stein}>
+        <Butikkvindu x={-38} b={8} karm={S.stein.skygge} />
+      </Gatehus>
+      <Gatehus x={108} b={28} h={56} m={S.stein}>
+        <Butikkvindu x={111} b={12} karm={S.stein.skygge} lys />
+      </Gatehus>
+      <Tre x={-26} y={g - 2} h={44} />
+      <Tre x={100} y={g - 1} h={42} />
+      {/* Statuen: en skikkelse i irret bronse på en sokkel i stein. */}
+      <Kloss x={-9} y={g + 1} b={9} h={14} d={6} m={S.stein} />
+      <Kloss x={-10} y={g - 12.4} b={11} h={1.6} d={7} m={S.stein} />
+      <Figur x={-4.4} y={g - 14} avstand="gate" klaer={S.gran} hud={S.gran} har={S.gran.skygge} ben={S.gran.skygge} />
       {/* Sidefløyene fra nivå 50. */}
       {t >= 2 &&
         [9, 74].map((wx) => (
@@ -2599,7 +2788,7 @@ export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kont
  * er tegnet brede. En tegning her må nå kantene selv: alt som før bleknet ut
  * (bakgrunn, gjerder, rekker av hus), må forlenges til x −40 og 136.
  */
-export const FULL_RAMME: readonly string[] = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk']
+export const FULL_RAMME: readonly string[] = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank']
 
 /** Bedriftene, som har fire vekstrinn. */
 export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
@@ -2653,6 +2842,10 @@ const TRINNUTSNITT: Record<string, readonly (readonly [number, number, number, n
   saftbod: [[12, 22, 64, 64], [12, 18, 68, 68], [12, 18, 68, 68], [12, 18, 68, 68]],
   polsebod: [[24, 38, 50, 50], [22, 34, 56, 56], [22, 34, 56, 56], [22, 34, 56, 56]],
   gatekjokken: [[31, 42, 46, 46], [20, 22, 74, 74], [20, 22, 74, 74], [20, 22, 74, 74]],
+  kafe: [[19, 15, 72, 72], [6, 10, 80, 80], [6, 10, 80, 80], [6, 10, 80, 80]],
+  restaurant: [[22, 18, 68, 68], [10, 14, 76, 76], [10, 14, 76, 76], [10, 14, 76, 76]],
+  hotell: [[26, 22, 64, 64], [22, 10, 76, 76], [18, 4, 82, 82], [18, 0, 86, 86]],
+  bank: [[24, 32, 60, 60], [12, 14, 74, 74], [6, 12, 80, 80], [6, 12, 80, 80]],
 }
 
 /**

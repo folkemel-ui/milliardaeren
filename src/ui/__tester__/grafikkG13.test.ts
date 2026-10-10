@@ -21,21 +21,30 @@ const viewBox = (html: string) => html.match(/<svg[^>]*viewBox="([^"]+)"/)?.[1]
 const VIGNETT = /url\(#[a-z0-9]+(vm|km|nm|bm)\)/i
 
 describe('full ramme for gatebedriftene (G13)', () => {
-  it('gjelder de fire gatebedriftene', () => {
-    expect([...FULL_RAMME]).toEqual(['saftbod', 'polsebod', 'gatekjokken', 'kiosk'])
+  it('gjelder gatebedriftene (G13) og bybedriftene (G14)', () => {
+    expect([...FULL_RAMME]).toEqual(['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank'])
   })
 
-  it('i scenen er de brede, 176 × 96, uten vignett, på hvert trinn med og uten forbedringer', () => {
-    for (const id of FULL_RAMME)
-      for (const n of NIVAA)
-        for (const f of [0, 3]) {
-          const html = scene(id, n, f)
-          expect(html, `${id} ${n} f${f}`).toContain('class="scene full"')
-          expect(viewBox(html), `${id} ${n}`).toBe('-40 0 176 96')
-          expect(html, `${id} ${n} f${f}`).not.toMatch(VIGNETT)
-          // Himmelen dekker hele rammen.
-          expect(html, `${id} ${n}`).toMatch(/<rect x="-40" y="0" width="176" height="96" fill="url\(#[^"]+hn?\)" class="lerret-himmel"/)
-        }
+  it('husene i en gaterekke har skyggen under vinduene, så de lyser om natta (G14)', () => {
+    // Bunnskygge tegnet over vinduene blir en svart flate i nattlaget og slukker lyset.
+    const kilde = readFileSync('src/ui/komponenter/Illustrasjoner.tsx', 'utf8')
+    const gatehus = kilde.slice(kilde.indexOf('function Gatehus('), kilde.indexOf('function Butikkvindu('))
+    expect(gatehus.indexOf('<Bunnskygge')).toBeGreaterThan(0)
+    expect(gatehus.indexOf('<Bunnskygge')).toBeLessThan(gatehus.indexOf('<Vindusrad'))
+    expect(gatehus.indexOf('<Bunnskygge')).toBeLessThan(gatehus.indexOf('{children}'))
+  })
+
+  // Én test per tegning (G14), så ingen enkelt test blokkerer testkjøreren lenge.
+  it.each([...FULL_RAMME])('%s er bred i scenen, 176 × 96, uten vignett, på hvert trinn med og uten forbedringer', (id) => {
+    for (const n of NIVAA)
+      for (const f of [0, 3]) {
+        const html = scene(id, n, f)
+        expect(html, `${id} ${n} f${f}`).toContain('class="scene full"')
+        expect(viewBox(html), `${id} ${n}`).toBe('-40 0 176 96')
+        expect(html, `${id} ${n} f${f}`).not.toMatch(VIGNETT)
+        // Himmelen dekker hele rammen.
+        expect(html, `${id} ${n}`).toMatch(/<rect x="-40" y="0" width="176" height="96" fill="url\(#[^"]+hn?\)" class="lerret-himmel"/)
+      }
   })
 
   it('natta dekker hele den brede rammen', () => {
@@ -62,9 +71,10 @@ describe('full ramme for gatebedriftene (G13)', () => {
         expect(html, `${id} ${n}`).toMatch(new RegExp(`<svg[^>]*width="${px}" height="${px}"`))
         const [x, y, b, h] = viewBox(html)!.split(' ').map(Number)
         expect(b, id).toBe(h)
-        expect(x, `${id} ${n}`).toBeGreaterThanOrEqual(0)
+        // Sidene er tegnet ut til −40 og 136; nederst slutter bakken på 96.
+        expect(x, `${id} ${n}`).toBeGreaterThanOrEqual(-40)
         expect(y + h, `${id} ${n}`).toBeLessThanOrEqual(96)
-        expect(x + b, `${id} ${n}`).toBeLessThanOrEqual(96)
+        expect(x + b, `${id} ${n}`).toBeLessThanOrEqual(136)
         expect(html, id).not.toMatch(VIGNETT)
       }
   })

@@ -39,10 +39,12 @@ afterEach(() => {
 beforeAll(lastAlle)
 
 describe('bevegelse i scenen (G10)', () => {
-  it('hver tegning har noe som beveger seg i scenen, på hvert vekstrinn', () => {
-    const stille: string[] = []
-    for (const id of NY_STIL)
-      for (const [t, f] of varianter(id)) if (!/class="[^"]*anim-/.test(tegn(id, true, t, f))) stille.push(`${id} ${t}/${f}`)
+  // Én test per tegning (G14): alle i én test tok 25 s med de andre tunge testene og
+  // blokkerte testkjøreren så lenge at den ga opp («Timeout calling onTaskUpdate»).
+  it.each(NY_STIL)('%s har noe som beveger seg i scenen, på hvert vekstrinn', (id) => {
+    const stille = varianter(id)
+      .filter(([t, f]) => !/class="[^"]*anim-/.test(tegn(id, true, t, f)))
+      .map(([t, f]) => `${id} ${t}/${f}`)
     expect(stille).toEqual([])
   })
 

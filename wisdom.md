@@ -419,6 +419,10 @@ session; delete what stops being true.
   session ran its full suite in its own folder while ours ran, and «Timeout calling
   onTaskUpdate» returned. Before blaming a change, list the Node processes
   (`Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`) and rerun on a quiet machine.
+- **An animated page in the browser pane brings it back too** (G14): a contact sheet of
+  animated scenes left open made «Timeout calling onTaskUpdate» fail `lever.mjs` three
+  times running; closing it and stopping the dev server gave a clean run at once. Leave
+  the pane on a still page (or `about:blank`) while the full suite runs.
 - **"Timeout calling onTaskUpdate"** (gone since Pack 63; if it comes back, look for a test that
   blocks for many seconds without yielding — the golden master ran 20 s in one call) at the end of a passing run is the runner starving
   under load, not a test failure. It appeared when Pack 59 made the suite ~10 % heavier

@@ -21,11 +21,10 @@ describe('bedriftene i den nye stilen (G2)', () => {
     }
   })
 
-  it('hver forbedring synes på hvert vekstrinn', () => {
-    for (const id of BEDRIFTSTEGNINGER) {
-      for (const t of TRINN) {
-        expect(new Set([0, 1, 2, 3].map((f) => tegn(id, t, f))).size, `${id} trinn ${t}`).toBe(4)
-      }
+  // Én test per bedrift (G14): samlet blokkerte den testkjøreren i 15 s med full ramme.
+  it.each(BEDRIFTSTEGNINGER)('hver forbedring synes på hvert vekstrinn: %s', (id) => {
+    for (const t of TRINN) {
+      expect(new Set([0, 1, 2, 3].map((f) => tegn(id, t, f))).size, `${id} trinn ${t}`).toBe(4)
     }
   })
 
