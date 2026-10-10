@@ -25,6 +25,7 @@ import { kommendeMaal } from '../progresjon'
 import { settBevegelse, settVarsler, useBevegelse, useVarselnivaa } from '../innstillinger'
 import { VERSJON } from '../versjon'
 import { Endringslogg } from '../komponenter/Nyheter'
+import { Maalepanel } from '../komponenter/Maalepanel'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   const trofeer = s.trofeer ?? []
@@ -402,6 +403,7 @@ function Innstillinger() {
   return (
     <>
       <Innstillingskort />
+      <Maalepanel />
 
       <h2 className="seksjon-tittel">Lagringen</h2>
       <FlyttSpillet />

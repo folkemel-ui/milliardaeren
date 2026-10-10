@@ -28,6 +28,7 @@ import { Hendelseslogg } from './ui/komponenter/Hendelseslogg'
 import type { Mål } from './ui/varsler'
 import { delnokkel, luksusdel } from './ui/deler'
 import { hentRulling, huskRulling } from './ui/rullehusk'
+import { maalOppstart, visMaaling } from './state/maaling'
 
 const FANENOKKEL = 'milliardaer.fane'
 const GYLDIGE: Fane[] = ['bedrifter', 'investeringer', 'eiendom', 'luksus', 'profil']
@@ -98,6 +99,12 @@ export default function App() {
   useEffect(lyttEtterNyTrykk, [])
   useEffect(lyttEtterKorttrykk, [])
   useEffect(lyttEtterTilbake, [])
+  // Hvor lang tid det tok fra siden begynte å laste til spillet var tegnet, og om «?maal» står i
+  // adressen — lest ved oppstart, så målepanelet er der selv om du ikke går rett til Innstillinger (Pakke 76).
+  useEffect(() => {
+    maalOppstart(performance.now())
+    visMaaling()
+  }, [])
 
   // Har du valgt at avisen skal åpne seg selv, og en ulest utgave venter ved oppstart, kommer den med én gang.
   useEffect(() => {

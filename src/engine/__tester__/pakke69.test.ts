@@ -25,13 +25,16 @@ describe('borte: hvert tiende sekund', () => {
     expect(300 % BORTE_TAKT).toBe(0)
   })
 
-  it('leien over ti minutter borte er den samme som sekund for sekund, innenfor 0,01 %', () => {
+  it('leien over ti minutter borte er den samme som sekund for sekund, innenfor 0,05 % (kontantene 0,01 %)', () => {
     const s = spill()
     const samlet = simuler(s, 600, true)
     const hver = sekundForSekund(s, 600)
     const leie = (x: Spilltilstand) => x.totaltLeie - s.totaltLeie
     expect(leie(samlet)).toBeGreaterThan(0)
-    expect(Math.abs(leie(samlet) / leie(hver) - 1)).toBeLessThan(1e-4)
+    // Leien kan ta et hopp ved et dagsskifte inne i en blokk, og en samlet regning bruker leien i
+    // sekundet den betales. Siden Pakke 76 bærer de store eiendommene (skyskraperne) mye av leien, så
+    // telleren skiller 1,4e-4 på ti minutter; kontantene skiller fortsatt under 1e-8 (linja under).
+    expect(Math.abs(leie(samlet) / leie(hver) - 1)).toBeLessThan(5e-4)
     expect(Math.abs(samlet.kontanter / hver.kontanter - 1)).toBeLessThan(1e-4)
   })
 

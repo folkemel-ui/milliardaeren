@@ -3206,6 +3206,222 @@ function NewYork({ størrelse = 48 }: P) {
   )
 }
 
+// ─────────────────────────────────────────────── Det sene spillet (Pakke 76)
+
+/** En bil i halv størrelse med midten av hjulene i (x, y), til motiver som står på avstand. */
+function Smaabil({ x, y, farge, taxi = false }: { x: number; y: number; farge: Materiale; taxi?: boolean }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(0.45) translate(-70 -74.6)`}>
+      <Bil x={70} farge={farge} taxi={taxi} />
+    </g>
+  )
+}
+
+/**
+ * Kontortårnet i Canary Wharf: et høyt tårn i stål og glass med pyramidetak og
+ * blinklys, to lavere tårn ved siden av, og Themsen foran med en elvebuss.
+ */
+function CanaryWharf({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  const fot = g - 6
+  return (
+    <Lerret størrelse={størrelse}>
+      <Kantfade>
+        <Dis>
+          {[
+            [2, 8, 30, S.glass],
+            [12, 6, 22, S.stein],
+            [74, 7, 34, S.glass],
+            [84, 9, 26, S.puss],
+          ].map(([x, b, hh, m]) => (
+            <Kloss key={x as number} x={x as number} y={fot} b={b as number} h={hh as number} d={5} m={m as Materiale} />
+          ))}
+        </Dis>
+      </Kantfade>
+      <Bakke type="kai" />
+      <Kantfade>
+        <rect x="0" y={g + 3} width="96" height="13" fill={S.sjo.flate} />
+        <rect x="0" y={g + 2.2} width="96" height="0.8" fill={S.stein.skygge} />
+        <polyline className="anim-boelge" points={`20,${g + 8} 24,${g + 6.8} 28,${g + 8}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.7" strokeLinecap="round" />
+      </Kantfade>
+      {/* Nabotårnene, lavere, i glass. */}
+      <Slagskygge x1={20} x2={36} y={fot} lengde={14} d={6} />
+      <Kloss x={20} y={fot} b={14} h={40} d={6} m={S.glass} />
+      <Vindusrad x={21} y={fot - 36} antall={4} b={2.4} h={3} mellom={0.8} tent={2} />
+      <Vindusrad x={21} y={fot - 24} antall={4} b={2.4} h={3} mellom={0.8} tent={1} start={2} />
+      <Kloss x={60} y={fot} b={14} h={34} d={6} m={S.glass} />
+      <Vindusrad x={61} y={fot - 30} antall={4} b={2.4} h={3} mellom={0.8} tent={1} start={1} />
+      {/* Hovedtårnet med pyramidetaket. */}
+      <Slagskygge x1={36} x2={58} y={fot} lengde={20} d={8} />
+      <Kloss x={37} y={fot} b={20} h={60} d={8} m={S.metall} />
+      {Array.from({ length: 9 }, (_, k) => fot - 56 + k * 6).map((y, k) => (
+        <Vindusrad key={y} x={38.2} y={y} antall={5} b={2.6} h={3.4} mellom={1.05} tent={k % 3 === 1 ? 2 : 0} start={k} tennes={k === 0 ? 4 : undefined} />
+      ))}
+      <polygon points={pkt([37, fot - 60], [47, fot - 70], [57, fot - 60])} fill={S.metall.lys} />
+      <polygon points={pkt([47, fot - 70], [57, fot - 60], inn(57, fot - 60, 8), inn(47, fot - 70, 4))} fill={S.metall.skygge} />
+      <Blinklys x={47} y={fot - 70.6} r={0.8} />
+      <Glans points={`37,${fot - 60} 41,${fot - 60} 39,${fot} 37,${fot}`} />
+      {/* Elvebussen på Themsen og noen på kaia. */}
+      <path d={`M60 ${g + 6} L80 ${g + 6} Q79 ${g + 8.4} 76 ${g + 8.6} L63 ${g + 8.6} Z`} fill={S.hvit.flate} />
+      <rect x="64" y={g + 4.4} width="12" height="1.8" fill={S.marine.flate} />
+      <Figur x={14} y={g + 1} avstand="fjern" klaer={S.marine} />
+      <Figur x={30} y={g + 1.4} avstand="fjern" klaer={S.vin} vendt={-1} />
+    </Lerret>
+  )
+}
+
+/**
+ * Kjøpesenterkjeden: senteret i front med glassinngang og skilt, parkering med
+ * biler, og to av de andre sentrene i kjeden som skilt langt bak.
+ */
+function Kjopesenterkjede({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  return (
+    <Lerret størrelse={størrelse}>
+      <Kantfade>
+        <Dis>
+          {[[4, 60, 22], [70, 62, 20]].map(([x, y, b]) => (
+            <g key={x}>
+              <rect x={x} y={y} width={b} height={g - y} fill={S.puss.flate} />
+              <rect x={x} y={y} width={b} height="2.4" fill={S.oker.flate} />
+            </g>
+          ))}
+        </Dis>
+      </Kantfade>
+      <Bakke type="asfalt" />
+      {/* Hovedsenteret: en lang lav kloss med skiltbånd og glassinngang. */}
+      <Slagskygge x1={10} x2={86} y={g - 8} lengde={16} d={10} />
+      <Kloss x={10} y={g - 8} b={76} h={22} d={10} m={S.puss} />
+      <rect x="10" y={g - 30} width="76" height="4" fill={S.oker.flate} />
+      <rect x="10" y={g - 30} width="76" height="1" fill={S.oker.lys} />
+      <rect x="38" y={g - 29.4} width="20" height="2.8" fill={S.hvit.lys} />
+      {[41, 45, 49, 53].map((x) => (
+        <rect key={x} x={x} y={g - 28.6} width="2.4" height="1.2" fill={S.oker.skygge} />
+      ))}
+      <rect x="38" y={g - 24} width="20" height="16" fill={S.glass.skygge} className="nattvindu" />
+      <rect x="38" y={g - 24} width="7" height="16" fill={S.glass.flate} opacity="0.5" className="nattskjul" />
+      {[43, 48, 53].map((x) => (
+        <rect key={x} x={x} y={g - 24} width="0.6" height="16" fill={S.metall.flate} />
+      ))}
+      <Vindusrad x={13} y={g - 22} antall={4} b={4.4} h={8} mellom={1.6} tent={2} />
+      <Vindusrad x={61} y={g - 22} antall={4} b={4.4} h={8} mellom={1.6} tent={1} start={2} />
+      {/* Flaggstengene foran inngangen. */}
+      {[32, 64].map((x, i) => (
+        <g key={x}>
+          <rect x={x} y={g - 36} width="0.6" height="28" fill={S.metall.flate} />
+          <polygon className="anim-flagg" points={`${x + 0.6},${g - 35.4} ${x + 6},${g - 34.6} ${x + 6},${g - 31} ${x + 0.6},${g - 31.8}`} fill={i ? S.oker.flate : S.vin.flate} />
+        </g>
+      ))}
+      {/* Parkeringen: oppmerking og biler. */}
+      {[14, 26, 64, 76].map((x) => (
+        <rect key={x} x={x} y={g - 6.4} width="0.5" height="5.4" fill={S.hvit.lys} opacity="0.7" />
+      ))}
+      {/* Bilene i halv størrelse: senteret står på avstand, og bilene skal ikke dekke inngangen. */}
+      <Smaabil x={20} y={g - 1} farge={S.marine} />
+      <Smaabil x={78} y={g - 1} farge={S.vin} />
+      <Figur x={50} y={g - 6.6} avstand="fjern" klaer={S.oker} />
+      <Figur x={46} y={g - 6.8} avstand="fjern" klaer={S.gran} vendt={-1} />
+    </Lerret>
+  )
+}
+
+/**
+ * Skyskraperen i Downtown Dubai: en nål i trinn som smalner mot et spir, et
+ * fontenebasseng foran og ørkendis bak.
+ */
+function DowntownDubai({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  const fot = g - 6
+  const trinn = [
+    [36, 24, 22],
+    [39, 18, 20],
+    [42, 12, 18],
+    [44.6, 6.8, 12],
+  ] as const
+  let y = fot
+  return (
+    <Lerret størrelse={størrelse}>
+      <Kantfade>
+        <Dis>
+          <polygon points={pkt([0, 70], [30, 64], [62, 68], [96, 62], [96, 80], [0, 80])} fill={S.oker.lys} />
+          {[[4, 8, 26], [14, 6, 18], [72, 8, 30], [84, 7, 22]].map(([x, b, hh]) => (
+            <Kloss key={x} x={x} y={fot} b={b} h={hh} d={5} m={S.glass} />
+          ))}
+        </Dis>
+      </Kantfade>
+      <Bakke type="promenade" />
+      <Slagskygge x1={36} x2={60} y={fot} lengde={26} d={8} />
+      {trinn.map(([x, b, hh], i) => {
+        const bunn = y
+        y -= hh
+        return (
+          <g key={i}>
+            <Kloss x={x} y={bunn} b={b} h={hh} d={i < 2 ? 6 : 4} m={S.glass} />
+            {Array.from({ length: Math.floor(hh / 5) }, (_, k) => bunn - hh + 2 + k * 5).map((vy, k) => (
+              <rect key={vy} x={r2(x + 1)} y={vy} width={r2(b - 2)} height="0.6" fill={S.metall.lys} opacity={k % 2 ? 0.5 : 0.8} />
+            ))}
+            <Glans points={`${x},${bunn - hh} ${r2(x + b * 0.25)},${bunn - hh} ${r2(x + b * 0.15)},${bunn} ${x},${bunn}`} />
+          </g>
+        )
+      })}
+      <rect x="47.6" y={y - 14} width="0.8" height="14" fill={S.metall.lys} />
+      <Blinklys x={48} y={y - 14.4} r={0.8} />
+      {/* Fontenebassenget foran. */}
+      <ellipse cx="48" cy={g + 4} rx="30" ry="3.4" fill={S.stein.lys} />
+      <ellipse cx="48" cy={g + 4} rx="27" ry="2.6" fill={S.sjo.lys} />
+      {[36, 44, 52, 60].map((x) => (
+        <path key={x} className="anim-damp" d={`M${x} ${g + 3.6} Q${x - 1} ${g - 1} ${x} ${g - 4}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" strokeLinecap="round" />
+      ))}
+      <Figur x={18} y={g + 1} avstand="fjern" klaer={S.hvit} />
+      <Figur x={78} y={g + 1} avstand="fjern" klaer={S.mork} vendt={-1} />
+    </Lerret>
+  )
+}
+
+/**
+ * Skyskraperen på Manhattan: art deco i stein med et avtrappet krontak og spir,
+ * glasstårn rundt, og en gul drosje i gata.
+ */
+function ManhattanSkyskraper({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  const fot = g - 4
+  return (
+    <Lerret størrelse={størrelse}>
+      <Kantfade>
+        <Dis>
+          {[[0, 40, 10], [12, 52, 8], [72, 46, 9], [84, 36, 12]].map(([x, yy, b]) => (
+            <rect key={x} x={x} y={yy} width={b} height={96 - yy} fill={x % 3 ? S.glass.skygge : S.stein.flate} />
+          ))}
+        </Dis>
+      </Kantfade>
+      <Bakke type="asfalt" />
+      {/* Tårnet i stein, med vinduene i bånd. */}
+      <Slagskygge x1={30} x2={62} y={fot} lengde={24} d={10} />
+      <Kloss x={30} y={fot} b={32} h={40} d={10} m={S.stein} />
+      {Array.from({ length: 6 }, (_, k) => fot - 37 + k * 6).map((vy, k) => (
+        <Vindusrad key={vy} x={31.4} y={vy} antall={7} b={2.8} h={3.6} mellom={1.5} tent={k % 2 ? 3 : 1} start={k} tennes={k === 0 ? 5 : undefined} />
+      ))}
+      <Kloss x={34} y={fot - 40} b={24} h={16} d={8} m={S.stein} />
+      <Vindusrad x={35.4} y={fot - 53} antall={5} b={2.8} h={3.6} mellom={1.5} tent={2} />
+      <Kloss x={38} y={fot - 56} b={16} h={10} d={6} m={S.stein} />
+      {/* Krontaket i art deco: buer i stål, trekantvinduer og spiret. */}
+      {[0, 1, 2].map((i) => (
+        <path key={i} d={`M${38 + i * 2} ${fot - 66 + i * 3} Q46 ${fot - 76 + i * 3} ${54 - i * 2} ${fot - 66 + i * 3}`} fill="none" stroke={S.metall.lys} strokeWidth="1.2" />
+      ))}
+      {[41, 44, 47, 50].map((x) => (
+        <polygon key={x} points={pkt([x, fot - 66], [x + 1.2, fot - 69], [x + 2.4, fot - 66])} fill={S.vinduLys.lys} className="nattvindu" />
+      ))}
+      <rect x="45.6" y={fot - 84} width="0.8" height="14" fill={S.metall.lys} />
+      <Blinklys x={46} y={fot - 84.4} r={0.8} />
+      <Glans points={`30,${fot - 40} 34,${fot - 40} 32,${fot} 30,${fot}`} />
+      {/* Gata: en gul drosje og folk på fortauet. */}
+      <Smaabil x={74} y={g + 1} farge={S.oker} taxi />
+      <Figur x={16} y={g} avstand="fjern" klaer={S.mork} />
+      <Figur x={24} y={g + 0.4} avstand="fjern" klaer={S.vin} vendt={-1} />
+    </Lerret>
+  )
+}
+
 // ─────────────────────────────────────────────── Oppslag
 
 /** Eiendomstegningene, etter id. Illustrasjon i Illustrasjoner.tsx slår opp her når delen er lastet. */
@@ -3249,4 +3465,9 @@ export const EIENDOMSTEGNINGER: Record<string, Tegning> = {
   hoppbakken: Hoppbakken,
   borgen: Borgen,
   tarnet: Tarnet,
+  // Pakke 76: det sene spillet.
+  'canary-wharf': CanaryWharf,
+  kjopesenterkjede: Kjopesenterkjede,
+  'downtown-dubai': DowntownDubai,
+  'manhattan-skyskraper': ManhattanSkyskraper,
 }

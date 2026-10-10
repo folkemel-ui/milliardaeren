@@ -96,8 +96,10 @@ describe('hjemmene (G16)', () => {
 
   it('de tre rommenes trinn pakkes i ett tall og kommer ut igjen', () => {
     expect(romkode(0, 0, 0)).toBe(0)
-    expect(romkode(3, 3, 3)).toBe(63)
-    for (let a = 0; a < 4; a++) for (let b = 0; b < 4; b++) for (let c = 0; c < 4; c++) expect(romFraKode(romkode(a, b, c))).toEqual([a, b, c])
+    // Tre biter per rom siden Pakke 76 ga rommene et fjerde trinn.
+    expect(romkode(3, 3, 3)).toBe(219)
+    expect(romkode(4, 4, 4)).toBe(292)
+    for (let a = 0; a < 5; a++) for (let b = 0; b < 5; b++) for (let c = 0; c < 5; c++) expect(romFraKode(romkode(a, b, c))).toEqual([a, b, c])
   })
 
   it('tallene på detaljsiden stemmer med motoren', () => {
@@ -106,7 +108,7 @@ describe('hjemmene (G16)', () => {
     const sum = HJEMLISTE.map((h) => hjemTall(s, h))
     expect(sum.reduce((n, d) => n + d.status, 0)).toBe(hjemstatus(s))
     expect(sum.reduce((n, d) => n + d.brukt, 0)).toBe(hjemkostnad(s))
-    expect(sum.map((d) => d.alle)).toEqual([9, 9, 9])
+    expect(sum.map((d) => d.alle)).toEqual([12, 12, 12])
     expect(romkodeFor(s, 'oslo')).toBe(romkode(2, 1, 3))
   })
 
@@ -115,7 +117,7 @@ describe('hjemmene (G16)', () => {
     const tom = hjemscene(id, 0)
     for (let rom = 0; rom < 3; rom++) {
       let forrige = tom
-      for (let n = 1; n <= 3; n++) {
+      for (let n = 1; n <= 4; n++) {
         const koder = [0, 0, 0]
         koder[rom] = n
         const html = hjemscene(id, romkode(koder[0], koder[1], koder[2]))
@@ -124,14 +126,14 @@ describe('hjemmene (G16)', () => {
       }
     }
     // Hvert rom er sitt eget: et rom endrer ikke de andre (samme tegning to ganger gir samme markup).
-    expect(hjemscene(id, 21)).toBe(hjemscene(id, 21))
+    expect(hjemscene(id, romkode(1, 1, 1))).toBe(hjemscene(id, romkode(1, 1, 1)))
   })
 
   it.each([...HJEMLISTE])('%s: bred i scenen, kant i kant på flisa, uten tekst og uten lange desimaler', async (id) => {
     await lastAlle()
-    const bred = hjemscene(id, 63)
+    const bred = hjemscene(id, romkode(4, 4, 4))
     expect(bred).toContain('viewBox="-40 0 176 96"')
-    const flis = renderToStaticMarkup(createElement(Hjembilde, { id, rom: 63, stor: true }))
+    const flis = renderToStaticMarkup(createElement(Hjembilde, { id, rom: romkode(4, 4, 4), stor: true }))
     expect(flis).toContain('viewBox="0 0 96 96"')
     for (const html of [bred, flis, hjemscene(id, 0)]) {
       expect(html).not.toContain('<text')
@@ -142,12 +144,12 @@ describe('hjemmene (G16)', () => {
   it.each([...HJEMLISTE])('%s: rommene lyser om natta i scenen (nattvindu), og de står mørke når de ikke er innredet', async (id) => {
     await lastAlle()
     const lyst = (html: string) => (html.match(/nattvindu/g) ?? []).length
-    expect(lyst(hjemscene(id, 63))).toBeGreaterThan(lyst(hjemscene(id, 0)))
+    expect(lyst(hjemscene(id, romkode(4, 4, 4)))).toBeGreaterThan(lyst(hjemscene(id, 0)))
   })
 
   it('flisa på kortet får ikke natt-laget (bare scenen)', async () => {
     await lastAlle()
-    const flis = renderToStaticMarkup(createElement(Hjembilde, { id: 'hytta', rom: 63 }))
+    const flis = renderToStaticMarkup(createElement(Hjembilde, { id: 'hytta', rom: romkode(4, 4, 4) }))
     expect(flis).not.toContain('nattlag')
     expect(hjemscene('hytta', 63)).toContain('nattlag')
   })

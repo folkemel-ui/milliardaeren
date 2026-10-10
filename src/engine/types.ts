@@ -180,6 +180,8 @@ export type EiendomId =
   | 'stockholm' | 'kobenhavn' | 'berlin' | 'london' | 'dubai' | 'newyork'
   // Pakke 59: flere land.
   | 'amsterdam' | 'roma' | 'paris'
+  // Pakke 76: eiendom for det sene spillet.
+  | 'canary-wharf' | 'kjopesenterkjede' | 'downtown-dubai' | 'manhattan-skyskraper'
 
 export type NorskBy = 'Bergen' | 'Oslo' | 'Stavanger' | 'Geilo' | 'Trondheim' | 'Lofoten' | 'Hedmarken' | 'Lista' | 'Trysil' | 'Namdalen'
 export type Utenlandsby = 'Stockholm' | 'København' | 'Berlin' | 'London' | 'Marbella' | 'Zermatt' | 'Dubai' | 'New York' | 'Amsterdam' | 'Roma' | 'Paris'

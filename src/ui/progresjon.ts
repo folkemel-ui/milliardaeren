@@ -92,6 +92,8 @@ export function alleMaal(): Maal[] {
   for (const id of LANDEMERKELISTE) maal.push({ belop: LANDEMERKER[id].pris, tekst: LANDEMERKER[id].navn, art: 'annet', fane: 'eiendom' })
   maal.push({ belop: LUKSUS.langdistansejet.pris, tekst: LUKSUS.langdistansejet.navn, art: 'annet', fane: 'luksus' })
   maal.push({ belop: EIENDOMSTYPER.newyork.pris, tekst: 'New York', art: 'annet', fane: 'eiendom' })
+  // Pakke 76: skyskraperen på Manhattan, det dyreste du kan eie.
+  maal.push({ belop: EIENDOMSTYPER['manhattan-skyskraper'].pris, tekst: 'Skyskraper på Manhattan', art: 'annet', fane: 'eiendom' })
   for (const m of MILEPAELER) maal.push({ belop: m.belop, tekst: m.navn, art: 'milepael', fane: 'profil' })
   const rang: Record<Maalart, number> = { fane: 0, bedrift: 1, annet: 2, milepael: 3, prestasjon: 4 }
   return maal.sort((a, b) => a.belop - b.belop || rang[a.art] - rang[b.art])

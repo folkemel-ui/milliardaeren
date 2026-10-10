@@ -1,8 +1,9 @@
 /**
  * Hjemmene (Grafikkpakke G16): Hjemmet på Frogner, Hytta på Geilo og Feriehuset
  * i Marbella, med de tre rommene i hvert, slik de er innredet. Hvert rom har
- * fire stadier: 0 er ikke innredet (rått, med en pære og litt rot), 1–3 er de tre
- * trinnene du kjøper, i samme rekkefølge som i `ROM` (engine/hjemmene.ts).
+ * fem stadier: 0 er ikke innredet (rått, med en pære og litt rot), 1–4 er de fire
+ * trinnene du kjøper, i samme rekkefølge som i `ROM` (engine/hjemmene.ts). Det
+ * fjerde (Pakke 76) legger én ting til i rommet; grafikksporet kan tegne det fyldigere.
  *
  * Hjemmet og Hytta er snitt: veggen mot oss er tatt bort, så du ser inn i
  * rommene. Feriehuset er sett utenfra, med terrassen, bassenget og gjestefløyen.
@@ -206,6 +207,18 @@ function Kjokken({ n }: { n: number }) {
           <rect x="27.2" y="44.8" width="5.2" height="1.2" rx="0.6" fill={S.hvit.lys} />
         </g>
       )}
+      {n >= 4 && (
+        <g>
+          {/* Stjernekokk: et messingskilt med tre stjerner mellom avtrekket og vinskapet, og en kokkelue. */}
+          <rect x="26.8" y="45.4" width="5.2" height="3.6" rx="0.4" fill={S.gull.flate} />
+          <rect x="27.2" y="45.8" width="4.4" height="2.8" rx="0.3" fill={S.gull.skygge} />
+          {[28, 29.4, 30.8].map((x) => (
+            <circle key={x} cx={x} cy="47.2" r="0.45" fill={S.gull.lys} />
+          ))}
+          <ellipse cx="30" cy="44.4" rx="1.4" ry="0.9" fill={S.hvit.lys} />
+          <rect x="29" y="44.8" width="2" height="0.8" fill={S.hvit.lys} />
+        </g>
+      )}
     </g>
   )
 }
@@ -299,20 +312,31 @@ function Stue({ n }: { n: number }) {
           <rect x="55.4" y="61.6" width="5.6" height="1.6" rx="0.5" fill={S.mork.skygge} />
         </g>
       )}
+      {n >= 4 && (
+        <g>
+          {/* Takmaleri og krystall: en forgylt list under taket med krystalldråper. */}
+          <rect x="49" y="40" width="38" height="1.4" fill={S.gull.flate} />
+          <rect x="49" y="41.2" width="38" height="0.4" fill={S.gull.skygge} />
+          {Array.from({ length: 12 }, (_, i) => (
+            <circle key={i} cx={r2(51 + i * 3.1)} cy="42.2" r="0.35" fill={S.hvit.lys} />
+          ))}
+          <circle cx="58" cy="44" r="9" fill={S.vinduLys.lys} opacity="0.08" />
+        </g>
+      )}
     </g>
   )
 }
 
 /** Vinkjelleren (x 9–87, y 68–90): fra bar betong til en samling i verdensklasse. */
 function Vinkjeller({ n }: { n: number }) {
-  const vegg = [S.stein.flate, S.stein.lys, S.tegl.skygge, S.treMork.flate][n]
+  const vegg = [S.stein.flate, S.stein.lys, S.tegl.skygge, S.treMork.flate][Math.min(n, 3)]
   return (
     <g>
       <rect x="9" y="68" width="78" height="22" fill={vegg} className={n > 0 ? 'nattvindu' : undefined} />
-      <rect x="9" y="86.4" width="78" height="3.6" fill={n === 3 ? S.treverk.skygge : S.stein.skygge} />
+      <rect x="9" y="86.4" width="78" height="3.6" fill={n >= 3 ? S.treverk.skygge : S.stein.skygge} />
       {n >= 2 &&
         [0, 1, 2].map((i) => (
-          <path key={i} d={`M${r2(13 + i * 24)} 80 Q${r2(25 + i * 24)} ${68 + 1} ${r2(37 + i * 24)} 80`} fill="none" stroke={n === 3 ? S.treverk.lys : S.tegl.lys} strokeWidth="0.8" />
+          <path key={i} d={`M${r2(13 + i * 24)} 80 Q${r2(25 + i * 24)} ${68 + 1} ${r2(37 + i * 24)} 80`} fill="none" stroke={n >= 3 ? S.treverk.lys : S.tegl.lys} strokeWidth="0.8" />
         ))}
       {n === 0 && (
         <g>
@@ -378,6 +402,21 @@ function Vinkjeller({ n }: { n: number }) {
           <Figur x={70} y={88} avstand="gate" klaer={S.mork} har={S.treMork.skygge} />
           <rect x="68.6" y="79" width="3.2" height="5.6" fill={S.hvit.lys} />
           <Lampe x={38} y={74} r={1.6} />
+        </g>
+      )}
+      {n >= 4 && (
+        <g>
+          {/* Eikefat med årganger fra 1800-tallet, på stokker foran reolen. */}
+          {[17, 25].map((x) => (
+            <g key={x}>
+              <ellipse cx={x} cy="83" rx="3.6" ry="3.4" fill={S.treverk.flate} />
+              <ellipse cx={x} cy="83" rx="2.4" ry="2.3" fill={S.treverk.lys} />
+              <ellipse cx={x} cy="83" rx="3.6" ry="3.4" fill="none" stroke={S.metall.skygge} strokeWidth="0.5" />
+              <circle cx={x} cy="83" r="0.5" fill={S.treMork.flate} />
+            </g>
+          ))}
+          <rect x="12.6" y="86" width="16.8" height="0.8" fill={S.treMork.flate} />
+          <rect x="20.2" y="78" width="1.6" height="1.1" fill={S.gull.lys} />
         </g>
       )}
     </g>
@@ -557,6 +596,19 @@ function Peisestue({ n }: { n: number }) {
           <rect x="3" y="73" width="3" height="3" rx="0.4" fill={S.hvit.lys} />
         </g>
       )}
+      {n >= 4 && (
+        <g>
+          {/* Husvert og vinbar: et lite bord med karaffel og to glass, og verten med serviett. */}
+          <rect x="26.6" y="76.4" width="5.6" height="0.8" fill={S.treMork.flate} />
+          <rect x="29" y="77.2" width="0.8" height="3.8" fill={S.treMork.skygge} />
+          <path d="M27.4 76.4 L27.4 74.4 Q28 73.6 28.6 74.4 L28.6 76.4 Z" fill={S.vin.flate} />
+          {[30.4, 31.6].map((x) => (
+            <path key={x} d={`M${x} 74.8 L${r2(x + 0.8)} 74.8 L${r2(x + 0.5)} 76 L${r2(x + 0.3)} 76 Z`} fill={S.hvit.lys} opacity="0.85" />
+          ))}
+          <Figur x={35} y={81} avstand="gate" klaer={S.mork} har={S.treMork.skygge} vendt={-1} />
+          <rect x="33.2" y="72.6" width="1.4" height="2.4" fill={S.hvit.lys} />
+        </g>
+      )}
     </g>
   )
 }
@@ -623,6 +675,15 @@ function Badstue({ n }: { n: number }) {
           <ellipse cx="64.4" cy="82" rx="8.6" ry="2.2" fill={S.stein.flate} />
           <ellipse cx="64.4" cy="81.4" rx="7.2" ry="1.6" fill={S.petrol.lys} />
           <path className="anim-damp" d="M62 79.6 Q61 77.6 62 75.4 M66 79.6 Q65 77.6 66 75.4" fill="none" stroke={S.hvit.lys} strokeWidth="0.6" strokeLinecap="round" />
+        </g>
+      )}
+      {n >= 4 && (
+        <g>
+          {/* Egen massør i hvitt, og en stabel med håndklær ved kulpen. */}
+          <Figur x={57.4} y={82} avstand="gate" klaer={S.hvit} har={S.mork.flate} vendt={-1} />
+          {[0, 1, 2].map((i) => (
+            <rect key={i} x="70" y={r2(80.8 - i * 1.3)} width="4.4" height="1.2" rx="0.4" fill={i % 2 ? S.petrol.lys : S.hvit.lys} />
+          ))}
         </g>
       )}
     </g>
@@ -703,6 +764,20 @@ function Boblebad({ n }: { n: number }) {
             </g>
           ))}
           <path d="M96 85.4 L106 85.4 L108 87.4 L98 87.4 Z" fill={S.hvit.lys} />
+        </g>
+      )}
+      {n >= 4 && (
+        <g>
+          {/* Champagnebar: en isbøtte med flaske og to glass på dekket. */}
+          <path d="M68.4 83.4 L72.4 83.4 L71.8 86 L69 86 Z" fill={S.metall.lys} />
+          <rect x="69.8" y="80.4" width="1.2" height="3.4" rx="0.4" fill={S.gran.skygge} />
+          <rect x="69.9" y="80.4" width="1" height="0.8" fill={S.gull.flate} />
+          {[73.6, 75].map((x) => (
+            <g key={x}>
+              <path d={`M${x} 83.2 L${r2(x + 0.8)} 83.2 L${r2(x + 0.5)} 84.6 L${r2(x + 0.3)} 84.6 Z`} fill={S.hvit.lys} opacity="0.85" />
+              <rect x={r2(x + 0.35)} y="84.6" width="0.2" height="1" fill={S.hvit.lys} />
+            </g>
+          ))}
         </g>
       )}
     </g>
@@ -872,6 +947,16 @@ function Takterrasse({ n }: { n: number }) {
           <path className="anim-damp" d="M40 33.4 Q38 32.6 37.4 35 M40 33.4 Q42 32.6 42.6 35" fill="none" stroke={S.glass.lys} strokeWidth="0.4" />
         </g>
       )}
+      {n >= 4 && (
+        <g>
+          {/* Utekino: et lerret mellom stolpene i pergolaen, med en film i gang. */}
+          <rect x="13" y="22.6" width="12" height="8" fill={S.mork.flate} />
+          <rect x="13.6" y="23.2" width="10.8" height="6.8" fill={S.hvit.lys} />
+          <polygon points="14.2,29.4 18,25.4 20.6,27.4 22,26.2 23.8,29.4" fill={S.marine.flate} opacity="0.7" />
+          <circle cx="21.6" cy="24.8" r="0.9" fill={S.oker.lys} />
+          <rect x="13.6" y="23.2" width="10.8" height="6.8" fill={S.vinduLys.lys} opacity="0.12" className="nattvindu" />
+        </g>
+      )}
     </g>
   )
 }
@@ -940,6 +1025,21 @@ function Basseng({ n }: { n: number }) {
           <line x1="60" y1="86" x2="60" y2="78" stroke={S.treverk.skygge} strokeWidth="0.5" />
           <path d="M54 78.4 Q60 74 66 78.4 Z" fill={S.vin.flate} />
           <path d="M60 74.6 Q63.4 75.4 66 78.4 L60 78.4 Z" fill={S.vin.skygge} />
+        </g>
+      )}
+      {n >= 4 && (
+        <g>
+          {/* Privat strand og yacht ved brygga: sand ved bassengkanten, og yachten ute på havet. */}
+          <polygon points="34,92 46,92 44,96 30,96" fill={S.oker.lys} />
+          <polygon points="34,92 46,92 45.4,93.2 33.4,93.2" fill={S.hvit.lys} opacity="0.5" />
+          <g>
+            <path d="M96 58.4 L116 58.4 Q114.6 61 111 61.2 L99 61.2 Z" fill={S.hvit.lys} />
+            <rect x="100" y="56" width="10" height="2.4" fill={S.hvit.flate} />
+            <rect x="102" y="54.6" width="5" height="1.4" fill={S.hvit.lys} />
+            <rect x="100.6" y="56.6" width="8.8" height="0.8" fill={S.glass.skygge} />
+            <line x1="104.4" y1="54.6" x2="104.4" y2="51.4" stroke={S.metall.flate} strokeWidth="0.3" />
+            <path d="M112 61.4 q2 0.6 4 0" fill="none" stroke={S.hvit.lys} strokeWidth="0.4" opacity="0.8" />
+          </g>
         </g>
       )}
     </g>
@@ -1029,6 +1129,22 @@ function Gjestefloy({ n }: { n: number }) {
               </g>
             ))}
             <rect x="0" y="92" width="2.2" height="1.4" fill={S.vinduLys.lys} className="nattvindu" />
+          </g>
+        </g>
+      )}
+      {n >= 4 && (
+        <g>
+          {/* Helikopteret som svever inn over gjestefløyen med statsgjestene. */}
+          <g className="anim-svai">
+            <rect x="66" y="18.6" width="20" height="0.5" fill={S.mork.flate} />
+            <rect x="75.6" y="19" width="0.8" height="2" fill={S.mork.flate} />
+            <path d="M70 21 L80 21 Q83 21 83 24 L83 25.4 L70 25.4 Q68 25.4 68 23.2 Z" fill={S.marine.flate} />
+            <path d="M80 21.6 Q82.2 21.8 82.4 24 L79.6 24 Z" fill={S.glass.lys} />
+            <path d="M68 23 L60 22.2 L60 23.4 L68 24.2 Z" fill={S.marine.skygge} />
+            <rect x="59.4" y="20.6" width="0.6" height="4" fill={S.mork.flate} />
+            <line x1="70" y1="27" x2="82" y2="27" stroke={S.mork.flate} strokeWidth="0.5" />
+            <line x1="72" y1="25.4" x2="72" y2="27" stroke={S.mork.flate} strokeWidth="0.4" />
+            <line x1="80" y1="25.4" x2="80" y2="27" stroke={S.mork.flate} strokeWidth="0.4" />
           </g>
         </g>
       )}

@@ -21,6 +21,7 @@ import { pakk, pakkUt } from './overforing'
 import { sjekkTilstand } from './sjekk'
 import { tilLagring } from './lagringsformat'
 import { taIgjen } from './borte'
+import { maalBorte, maalLagring, maalSekund } from './maaling'
 import { VELKOMST_ETTER_SEK } from '../ui/velkomst'
 import { visVarsel } from '../ui/varsler'
 import type { Spilltilstand } from '../engine/types'
@@ -170,7 +171,10 @@ let klokke = Date.now()
 
 function skrivTilDisk(s: Spilltilstand): void {
   try {
-    localStorage.setItem(LAGERNOKKEL, tilLagring(s))
+    const fra = performance.now()
+    const tekst = tilLagring(s)
+    localStorage.setItem(LAGERNOKKEL, tekst)
+    maalLagring(performance.now() - fra, tekst.length)
     localStorage.setItem(SIST_AKTIV_NOKKEL, String(klokke))
   } catch {
     // Full disk eller privat modus — spillet fungerer, det lagres bare ikke.
@@ -227,7 +231,9 @@ export function lukkVelkomst(): void {
 
 /** Regner ut tiden borte, og viser velkomsten etter en lengre pause. */
 function taIgjenBorteTid(s: Spilltilstand, borte: number): Spilltilstand {
+  const fra = performance.now()
   const etter = taIgjen(s, borte)
+  maalBorte(performance.now() - fra, borte)
   klokke = Date.now()
   if (borte >= VELKOMST_ETTER_SEK) {
     velkomst = { borteSek: borte, før: s, etter }
@@ -345,7 +351,11 @@ function steg(): void {
   if (hele <= 0) return
   restMs -= hele * 1000
   try {
-    sett(simuler(tilstand, Math.min(hele, MAKS_SEK_PER_STEG)))
+    const antall = Math.min(hele, MAKS_SEK_PER_STEG)
+    const fra = performance.now()
+    const neste = simuler(tilstand, antall)
+    maalSekund(performance.now() - fra, antall)
+    sett(neste)
   } catch (e) {
     meldFeil(e)
     return

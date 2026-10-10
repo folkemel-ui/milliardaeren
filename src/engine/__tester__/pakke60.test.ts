@@ -26,12 +26,12 @@ function rikt(formue = 1e11): Spilltilstand {
 }
 
 describe('hjemmene', () => {
-  it('tre hjem med tre rom i tre trinn, rundt 200 statuspoeng til sammen', () => {
+  it('tre hjem med tre rom i fire trinn, rundt 370 statuspoeng til sammen (200 før det fjerde trinnet i Pakke 76)', () => {
     expect(HJEMLISTE).toEqual(['oslo', 'hytta', 'feriehuset'])
     for (const h of HJEMLISTE) expect(HJEM[h].rom).toHaveLength(3)
     const total = ROMLISTE.reduce((sum, r) => sum + ROM[r].trinn.reduce((n, t) => n + t.status, 0), 0)
-    expect(total).toBeGreaterThan(180)
-    expect(total).toBeLessThan(240)
+    expect(total).toBeGreaterThan(340)
+    expect(total).toBeLessThan(400)
     // Hvert trinn er dyrere og gir mer enn det forrige.
     for (const r of ROMLISTE) {
       const t = ROM[r].trinn
@@ -57,8 +57,8 @@ describe('hjemmene', () => {
 
   it('trinnene tas i rekkefølge, og et rom kan bli ferdig', () => {
     let s = rikt()
-    for (let i = 0; i < 3; i++) s = ok(innred(s, 'stue'))
-    expect(s.hjem?.stue).toBe(3)
+    for (let i = 0; i < 4; i++) s = ok(innred(s, 'stue'))
+    expect(s.hjem?.stue).toBe(4)
     const u = innred(s, 'stue')
     expect(u.ok ? '' : u.feil).toMatch(/ferdig innredet/)
   })

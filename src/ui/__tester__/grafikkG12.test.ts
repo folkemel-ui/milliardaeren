@@ -64,7 +64,8 @@ describe('en lettere start (G12)', () => {
     expect(Object.keys(EIENDOMSTEGNINGER)).toEqual(EIENDOMSIDER)
     expect(Object.keys(LUKSUSTEGNINGER)).toEqual(LUKSUSIDER)
     expect(new Set(ILLUSTRASJONSIDER).size).toBe(ILLUSTRASJONSIDER.length)
-    expect(ILLUSTRASJONSIDER.length).toBe(71)
+    // 71 til Pakke 76 la til fire eiendommer for det sene spillet.
+    expect(ILLUSTRASJONSIDER.length).toBe(75)
   })
 
   it('før delen er hentet, står et tomt lerret i samme størrelse — etterpå tegningen', async () => {

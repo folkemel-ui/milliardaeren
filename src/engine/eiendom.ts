@@ -29,7 +29,8 @@ import { hjemstatus } from './hjemmene'
 /**
  * Eiendommene gir leie hvert sekund — også mens du er borte, uten leder.
  * Avkastningen faller jevnt med prisen: 30 % i timen for en hybel, rundt
- * 18 % for et kontorbygg og 8 % på Manhattan. Den er trygg og krever
+ * 18 % for et kontorbygg, 8 % i en toppleilighet på Manhattan og 5,5 % for
+ * skyskraperen der (Pakke 76). Den er trygg og krever
  * ingenting av deg, men slår ikke bedriftene når de vokser.
  *
  * Fra Pakke 44 finnes de vanlige byggene i flere byer. Samme bygg har samme
@@ -67,6 +68,12 @@ export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
   dubai: { id: 'dubai', navn: 'Villa på Palmen', sted: 'Palm Jumeirah, Dubai', by: 'Dubai', pris: 4_000_000_000, avkastning: 0.1, maksAntall: 2, statuskrav: 0, reise: 3 },
   oy: { id: 'oy', navn: 'Privat øy', sted: 'Lofoten', by: 'Lofoten', pris: 6_000_000_000, avkastning: 0.05, maksAntall: 1, statuskrav: 5 },
   newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', pris: 12_000_000_000, avkastning: 0.08, maksAntall: 1, statuskrav: 0, reise: 3 },
+  // Pakke 76: det sene spillet. Over 12 mrd var det ingenting å kjøpe; nå går stigen
+  // til 500 mrd, alt før 1 000 mrd-streken, i byer som har valuta og plass på kartet.
+  'canary-wharf': { id: 'canary-wharf', navn: 'Kontortårn i Canary Wharf', sted: 'Canary Wharf, London', by: 'London', pris: 25_000_000_000, avkastning: 0.07, maksAntall: 2, statuskrav: 0, reise: 2 },
+  kjopesenterkjede: { id: 'kjopesenterkjede', navn: 'Kjøpesenterkjede', sted: 'Tolv sentre, hovedkontor i Oslo', by: 'Oslo', pris: 75_000_000_000, avkastning: 0.065, maksAntall: 1, statuskrav: 0 },
+  'downtown-dubai': { id: 'downtown-dubai', navn: 'Skyskraper i Downtown Dubai', sted: 'Downtown, Dubai', by: 'Dubai', pris: 200_000_000_000, avkastning: 0.06, maksAntall: 1, statuskrav: 0, reise: 3 },
+  'manhattan-skyskraper': { id: 'manhattan-skyskraper', navn: 'Skyskraper på Manhattan', sted: 'Midtown, New York', by: 'New York', pris: 500_000_000_000, avkastning: 0.055, maksAntall: 1, statuskrav: 0, reise: 3 },
 }
 
 export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
