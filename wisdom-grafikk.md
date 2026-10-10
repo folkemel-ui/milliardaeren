@@ -179,6 +179,15 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   took the recommended option on all three (every 5th level to level 150, one scene per home
   with its three rooms in it, a buy moment per furnished room) and said so in the report with
   the offer to change.
+- **Put design questions in `AskUserQuestion`, not in the report.** G16's three questions went
+  out as plain text and were never answered ("Start on G16" came back), so the pack began on
+  assumptions. A clickable question with the recommendation first gets an answer; the plain-text
+  version of the same question is read as a status line.
+- **Say what you are doing before every long batch.** G16 began with a long stretch of
+  reading (the three files, the plan, the data) and a survey of 13 businesses × 4 stages with
+  no text in between, and the harness prompted for a status line again and again ("the user
+  hasn't heard from you in a while"). One line before each long stretch — "surveying the
+  businesses so I know where the steps can go" — is enough.
 - **After each pack, Folke asks what you learned.** Update this file before the pack
   commit, then re-read it once for anything missing. That's cheaper than a second round.
 - Report each item as what it looks like now. Say plainly what's still mixed or still
@@ -709,6 +718,15 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   `getAnimations({ subtree: true })` paused at a different `currentTime` (1.0 s: jug
   upright, cup lowered; 2.9 s: pouring, drinking). One look proves both poses and the
   pivot.
+- **Far-distance scenes need one column and a zoom.** A 2 × 2 sheet of 380 px panels is fine for
+  people and queues, but the hotel's cars and the oil field's ships are 3–10 units long: use a
+  single 760 px column (the scene is capped at 560 px) and the `zoom` helper (set the svg's
+  `viewBox` to `'-4 28 108 62'` and its width to 760) before judging a position. In the
+  mobile preset the screenshot is cropped on the right while the page itself is 375 wide:
+  trust `scrollWidth` against `clientWidth`, not the picture.
+- **A step test per business**: render each business at levels
+  start + 5·k and require that markup k differs from markup k − 1. It finds a step that
+  is hidden behind something, and a business that has fewer than ten things to add.
 - **Leave the result in the pane for Folke**: a labelled contact sheet (stage × f = 0/3,
   plus the card pictures) in two columns of 340 px, at the pane's own size (preset
   desktop). Four columns overflowed the pane.
@@ -873,6 +891,17 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
 - Chroma (RGB max − min) is the "muted" measure, not HSL saturation, which calls pale
   colours "saturated". Old toy colours were 0.54–0.60; the new palette stays ≤ 0.48
   except gold (0.50).
+- **Re-read the plan after a rebase before patching it.** `grafikk` was rebased onto a master
+  where the game track had added «G23 The club in pictures», so my patch for the heading
+  «(Packs G16–G22)» found nothing. The patch script threw before writing anything (every `from`
+  checked first), which is why it cost one run; read the section again after any rebase
+  and anchor on what is there, not on what you read an hour ago.
+- **List running Node processes with the PowerShell tool.** In Bash, `$_` in a
+  `powershell -Command "…"` string is expanded by the shell and the command is a parse error.
+  The question to answer first is whether the game track's test run is still going: it
+  starves the runner just as the pane's animated sheet does.
+- **`preview_start` then `navigate`**: the first `navigate` to the new server failed with «denied or
+  failed» while the pane was hidden; the same call a moment later worked.
 
 ## 6b. Loading when needed (G12)
 
@@ -1100,6 +1129,21 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
 - **Shell tip.** A heredoc with a long JSON patch died with «unexpected EOF» again; the Write
   tool for the patch file, `fiks.mjs` to apply it. `sed -i` on `BedriftIkon.tsx` made it LF
   again — restore CRLF with a node one-liner.
+- **Density.** Customers drawn with `Folk` at 8.4 units apart (naer) or 7.4 (gate) read as a
+  crowd; stagger every other one 1.1 down and draw the farthest first (`Ko`). The same figure
+  every 8 units looks like a fence.
+- **The rooms are small on a phone.** The scene is 314 px wide there, so a 38-unit room is 68 px
+  and a sofa is 10 px. A cutaway is limited by its height (96), so the house is 48 % of the
+  frame's width and the rest is street. If Folke finds the rooms too small, the fix is a
+  *wider* building (rooms side by side, cellar at the end) with a tile crop through
+  `Naerbilde`, not a bigger one.
+- **Tests are one `it.each` per business** (0.4–2.4 s each, the whole file 58 tests in 26 s),
+  as G14 did. Test length wasn't what starved the runner in G14, though: the animated pane
+  was. Navigate the pane to `/ikon.svg` and close the tab before `lever.mjs` (done in G16:
+  one clean run, 959 tests).
+- **Not done on purpose.** The homes and the steps are not in `?galleri`; the hotel's and the
+  bank's steps are mostly people and cars (the buildings have little to add); the steps
+  have not been looked at in the light theme (the sky follows the theme, the subject doesn't).
 
 ## 7. Notes for later (G1–G16 done; G17–G23 planned in `Ideer.md`)
 
@@ -1125,6 +1169,17 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   page, and the night layer shows how to change a drawing in CSS without re-rendering
   it. Snow could follow the same pattern (a `--vinter` var and a snow layer), but the
   date changes only once a game day, so re-rendering with a prop is also cheap.
+  **Hytta is snowy all year** (G16); G22 should decide whether Geilo follows the season
+  (green in summer) or stays a winter picture, and the business steps (queues, skiers)
+  should follow the same rule as their stage.
+- **Don't import one part from another.** The step helpers (`Kunde`, `Vimpler`, `Skip`) live
+  in `Trinnsteg.tsx` and would be handy for the sides of G17–G21's drawings; copying 10 lines
+  is cheaper than moving them to the start file (248.7 of 250 kB), unless a business also
+  needs them.
+- **New milestones after level 100** (game track, Pack 70) change which levels are stage 3,
+  not `stegFor`: it counts every fifth level from the stage start and is capped at 150. If a
+  new milestone adds a stage, every array indexed by `t` in `Trinnsteg.tsx` needs a fifth
+  entry and `TRINNUTSNITT` a crop for it.
 - **Shared tests describe the art**: when you redraw something, grep the tests for its
   markup and update the counting, not the intent (`pakke42.test.ts` counted the old
   dot crowd; `pakke43.test.ts` matches the wide-layout selector).
