@@ -72,7 +72,7 @@ session; delete what stops being true.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–65.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -95,6 +95,12 @@ session; delete what stops being true.
   folder). Master is checked out nowhere. Before Pack 63 both sessions shared one folder and
   one index: a commit could take the other track's staged work, a push sent G11 live inside
   Pack 61, and keeping CSS hunks apart took a hand-built index — all gone now.
+- **A dev server outlives the folder it was started in.** After Pack 63 the graphics
+  session's server on port 5186 still ran from the game folder's `node_modules` — started
+  there before the split — so its preview showed the game track's files, uncommitted work
+  included. Each session should check where its server runs (the `node.exe` command line in
+  `Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`), and stop and restart it from
+  its own folder. Don't stop the other session's server; tell Folke.
 - **Delivering**: commit on your branch, run `node scripts/lever.mjs` (fetch, rebase onto
   `origin/master`, `tsc` and every test on the result, then the list of what would go to
   master), report, and on Folke's «push» run `node scripts/lever.mjs --push`. It refuses a
@@ -348,6 +354,9 @@ session; delete what stops being true.
 - **Avisa takes five stories**: where a new kind of story goes in `gisUtAvis` decides
   what it pushes off the front page. The world's market stories sit after the rivals,
   because a merger test caught them pushing out the player's own merger.
+- **A click test must unfold a `Seksjon` first** when the save owns nothing in it — it starts
+  folded, and its cards aren't rendered at all (Pack 65's property test saw 0 cards). Click
+  its `.seksjon-hode` unless it already has the class `åpen`.
 - **Click tests (Pack 52)** use happy-dom (a dev-only package — Folke allowed it for
   test tools only). `src/ui/__tester__/klikk.ts` starts the whole app on a prepared save
   (`vi.resetModules` per test, so the store starts fresh) and clicks like a player;
@@ -609,6 +618,11 @@ session; delete what stops being true.
   (`npm version X --no-git-tag-version`) and adds an entry at the top of `ENDRINGER`. Players
   who've played ≥ 10 minutes then see "Nytt i X" once; brand-new players never do. The full
   log opens from "Hva er nytt" at the bottom of Innstillinger. Ask Folke before bumping.
+- **Sort lists by values that change only when the player acts** (Pack 65). Sorting the
+  businesses by today's income would reorder cards as the weather and the market move, under
+  the player's finger. `ui/sortering.ts` uses steady income instead: no calendar, no news,
+  and branches without the regional index (`fastFilialfaktor`). Status is left out because
+  it scales everyone alike. Ties keep buy order (`Array.sort` is stable).
 - **Settings** live in one card (`Innstillingskort` in Profil.tsx), each a `Valg` row. Browser
   settings (theme, newspaper, notifications, motion) go in localStorage, never the save.
   `ui/innstillinger.ts`: `vises(funn)` decides which toasts show (Alle / Viktige / Av); motion
