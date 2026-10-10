@@ -390,6 +390,14 @@ session; delete what stops being true.
   simple bot**, so the fasit only moves when the engine does. **After Pack 59 (branches):
   1 mrd ≈ 6 h 12 min, 10 mrd ≈ 13 h 47 min** (6 h 36 / 15 h 28 without branches, same
   machine). New bot behaviour goes behind `smart` so the golden master can't see it.
+  **After Pack 68 (mergers from level 100 at floor 1.0, fixed branch price, Hotell 4 500):
+  1 mrd 5 h 11 min, 10 mrd 11 h 46, 100 mrd 23 h 40, 1 000 mrd 37 h 58** (before: 6 h 12,
+  13 h 48, 26 h 43, 42 h 19). Pack 70 is meant to retune the pace per tenfold.
+- **The fast bench is the review's pace runner**: `scratchpad/tempo/runner.ts` (session of
+  11 October) takes the smart bot to 1 000 mrd in about a minute bundled and prints a
+  `TIER` line per tenfold. Swap a constant with `sed`, bundle one copy per variant, run them
+  in parallel (`node a.mjs & node b.mjs & wait`), restore the constant and check `git diff`.
+  Times are game time, so parallel runs don't disturb each other.
 - **Tune on the bench with a plain-Node script**, not Vitest: a temporary
   `src/engine/__tester__/zz-benk.ts` (bot to 1 mrd and 10 mrd, prints the times), bundled
   once per variant with the constant swapped by `sed` and restored from a backup copy.
@@ -691,6 +699,21 @@ session; delete what stops being true.
   The review agents' scratch scripts (`scratchpad/avkastning/`) were reusable as they were.
   (Writing this note with `node -e` inside Bash lost both backticked snippets — Bash ran
   them as commands. Text with backticks goes through the Write or Edit tool.)
+- **A recommended option can break its own premise — measure before building past it**
+  (Pack 68). I recommended a merger floor of 1.0 «if it isn't the cheapest buy»; the
+  golden master then showed +129 % after 4 h, and the bench 1 mrd in 3 h 26 min instead of
+  6 h 12. A merger at 1.0 pays back in twice the business's *average* payback, while the next
+  level's payback grows ×1.1 a level — so it beats upgrading by far early on. I stopped,
+  measured four variants on the bench and asked again with a table of times; Folke picked a
+  gate (mergers only from level 100). A gate worked again, as for branches at level 50.
+- **Find which change moved the golden master by reverting one at a time.** With the old
+  merger floor and everything else new, the fasit matched exactly — so all of the move came
+  from the floor. After the gate, it moved +13 % for a subtler reason: the simple bot used to
+  spend moves on merger bids that were turned down; with the gate it no longer tries, and
+  spends those moves on upgrades. An action that never succeeds can still change the bot.
+- **A rule change can break old tests' fixtures, not their point.** The merger tests in Packs
+  11, 21 and 33 used a kiosk at level 10; the gate made them fail. Lift the fixture to meet
+  the new rule (level 100) and keep what the test checks; test the new rule in its own pack.
 - **A model with a level and a pull-back: say the measured swing, not the noise's.** Art's
   noise alone gives ±11 % around the value; exhibitions (upward jumps) make it ±16 % and
   keep prices ~9 % above the value on average. I told Folke ±11 % before measuring.
