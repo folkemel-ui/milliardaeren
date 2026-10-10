@@ -248,6 +248,18 @@ session; delete what stops being true.
   exact, so any geometry difference is real: it was the font, whose relative `url()` broke
   when the file moved. Await `document.fonts.ready`. 36 screens took ~5 min in chunks of
   ≤ 40 s per call (the tool gives up at 45 s); the gallery's 68 000 elements need 4 chunks.
+- **Measure React render cost in a production build, not in dev.** The Profiler in dev mode
+  read 161 ms for Selskaper's per-second redraw; production reads 5–10× less. For real
+  numbers: a temporary `vite.profilering.config.ts` that aliases `react-dom/client` to
+  `react-dom/profiling` and builds into `public/profbygg/`, so the dev server serves it on
+  the same origin as the test save; wrap `App` in a temporary `<Profiler>` that pushes
+  `actualDuration` to `window.__prof`, separate the one big commit per second from the ~50
+  small ones (rolling numbers), and delete both afterwards (and unregister its service
+  worker). After Pack 64 every screen redraws in ≤ 4.5 ms a second on this PC.
+- **An array or object written in a prop defeats `memo`.** `naerbilde={[32, 32]}` gave
+  `Illustrasjon` new props every second, so every drawing in Selskaper and Samling was
+  rebuilt each second (161 and 72 ms in dev). Hoist such values to a constant;
+  `pakke64.test.ts` fails on the pattern for every memo drawing.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:
@@ -512,11 +524,28 @@ session; delete what stops being true.
   (the long simulations, old saves and full-app click tests, listed in `TUNGE`; Pack 63) and
   `ytelse` — so a plain `npx vitest run` finishes everything else
   before timing. It measures the process's CPU time (`process.cpuUsage`), not wall-clock
-  time. Two hours away costs ~300–430 ms CPU against the 400 ms limit for the heaviest save. If it creeps up,
+  time. Two hours away costs ~370 ms CPU against the 400 ms limit for the heaviest save (Pack 64), with a budget per part. If it creeps up,
   profile from `/ikon.svg` in the browser by timing engine functions 7 200 times each;
   the per-second checks (achievements, net worth, rent) are where the time goes.
   `sjekkPrestasjoner` computes income, status level and foreign cities once per check via
   `Felles`; give a new achievement that needs an expensive value a field there.
+- **Per-system cost (Pack 64)**: `sekund` measures itself when the speed test calls
+  `maalDeler({})` — a `runde(m, 'del', t)` after each part. After Pack 64 the heaviest save,
+  two hours away: formue ~115 ms, leie ~100, prestasjoner ~64 (36 of it the income record's
+  `inntektPerSek`), inntekt ~39, marked ~30, the rest ≤ 12; total ~367 ms of the 400 ms
+  limit. Each part has a line in `__tester__/budsjett.ts` (~40 % over the measurement), and a
+  new part without a line fails. **A new per-second system adds a `runde` and a budget line.**
+- **Trust the stopwatch, not the sampling profiler's callers.** In Pack 64 a `--cpu-prof` run
+  showed `eiendeler` under both `sekund` and `nettoformue`, and I told Folke net worth was
+  computed twice a second. It wasn't: V8 inlines `nettoformue` into `sekund` some of the
+  time, so one call site shows up under two callers. Self time of small helpers is smeared
+  the same way (a day-change function showed 34 ms of "per-second" text formatting).
+  Confirm with `maalDeler` or a direct timing before saying where time goes.
+- **What made the engine faster, exactly**: only removing repeated work with real cost — the
+  vacancy per city and week built a text key and a Map lookup every second (rent 112 → 100 ms).
+  Rewriting `reduce`/`every` as plain loops changed nothing measurable; V8 already does it.
+  The exact path left little: ~9 % (406 → ~370 ms). Ticking rent, net worth or achievements
+  less often would cut far more, but moves the golden master — Folke chose exact for now.
 - **Slow tests are slow on their own**: `formue.test.ts` takes ~19 s alone and ~33 s in
   the full suite. Before blaming your change for a slowdown, time it alone on both sides
   of `git stash` (Pack 39's daily settlement cost ~7 %, which is fine).
