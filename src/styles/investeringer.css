@@ -535,10 +535,11 @@
   margin: 8px 0 0;
 }
 
+/* Aksjer · Krypto · Fond (Pakke 65): tre fliser på en rad, også på telefon. */
 .dashbord {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .flis {
@@ -550,8 +551,14 @@
   min-width: 0;
 }
 
+/* Tre fliser i bredden: tallet må få plass til «kr 2,02 mrd» i en tredjedel av telefonen. */
 .flis .tall-stort {
-  font-size: var(--skrift-5);
+  font-size: var(--skrift-3);
+  white-space: nowrap;
+}
+
+.flis {
+  padding: 10px 8px;
 }
 
 .flis.aktiv {

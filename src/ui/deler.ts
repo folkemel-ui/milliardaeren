@@ -79,18 +79,28 @@ export const LUKSUSDELER: { id: Luksusdel; navn: string }[] = [
   { id: 'klubb', navn: 'Klubb' },
 ]
 
-export type Borsdel = 'aksje' | 'krypto'
+/** Børs: aksjer, krypto — og indeksfondene, som kjøpes som aksjer (Pakke 65). */
+/** Rekkefølgen på bedriftene (Pakke 65): slik du kjøpte dem, eller etter fast inntekt. */
+export type Bedriftsrekkefolge = 'kjopt' | 'inntekt'
+
+export const REKKEFOLGER: { id: Bedriftsrekkefolge; navn: string }[] = [
+  { id: 'kjopt', navn: 'Kjøpt' },
+  { id: 'inntekt', navn: 'Inntekt' },
+]
+
+export type Borsdel = 'aksje' | 'krypto' | 'fond'
 export type Kartdel = 'norge' | 'verden'
 
 // Nøklene fra før Pakke 61 beholdes, så valgene spillerne har gjort, står.
 export const profildel = lagDelvalg<Profildel>('milliardaer.profilfane', PROFILDELER.map((d) => d.id))
 export const investeringsdel = lagDelvalg<Investeringsdel>('milliardaer.investeringsdel', INVESTERINGSDELER.map((d) => d.id))
 export const luksusdel = lagDelvalg<Luksusdel>('milliardaer.luksusdel', LUKSUSDELER.map((d) => d.id))
-export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'krypto'])
+export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'krypto', 'fond'])
 export const kartdel = lagDelvalg<Kartdel>('milliardaer.eiendomskart', ['norge', 'verden'])
+export const bedriftsrekkefolge = lagDelvalg<Bedriftsrekkefolge>('milliardaer.bedriftsrekkefolge', REKKEFOLGER.map((r) => r.id))
 
 /** Alle settene, for testen som sjekker at de følger samme regel. */
-export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel }
+export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel, bedriftsrekkefolge }
 
 export const settProfildel = profildel.sett
 export const useProfildel = profildel.bruk

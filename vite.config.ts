@@ -24,6 +24,7 @@ const TUNGE = [
   '**/klikk.test.ts',
   '**/pakke61.test.ts',
   '**/pakke62.test.ts',
+  '**/pakke65.test.ts',
 ]
 
 export default defineConfig({

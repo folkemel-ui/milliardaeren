@@ -43,9 +43,12 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
   const kart = kartdel.bruk()
   // Byen som vises i gatebildet, eller null.
   const [gate, settGate] = useState<By | null>(null)
-  const synlige = EIENDOMSSTIGEN.filter((id) => eiendomSynlig(s, id))
+  // Norge/Verden-bryteren filtrerer lista også (Pakke 65): ute er det som krever fly.
+  const iDenneDelen = (id: (typeof EIENDOMSSTIGEN)[number]) => !!EIENDOMSTYPER[id].reise === (kart === 'verden')
+  const synlige = EIENDOMSSTIGEN.filter((id) => iDenneDelen(id) && eiendomSynlig(s, id))
+  const eidHer = synlige.reduce((sum, id) => sum + (s.eiendommer[id] ?? 0), 0)
   const byer = byerMedInnhold(s, kart === 'norge' ? NORSKE_BYER : UTENLANDSBYER)
-  const nesteSkjult = EIENDOMSSTIGEN.find((id) => !eiendomSynlig(s, id))
+  const nesteSkjult = EIENDOMSSTIGEN.find((id) => iDenneDelen(id) && !eiendomSynlig(s, id))
   const indeks = s.marked.eiendom
   const lukkGate = useCallback(() => settGate(null), [])
   const indeksEndring = indeks.historikk.length ? indeks.kurs / indeks.historikk[0] - 1 : 0
@@ -123,7 +126,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
             })}
           </ul>
         )}
-        <p className="dempet liten">Leien kommer også mens du er borte — eiendom trenger ingen leder. Velg en by for å se bare den, og hold inne på kartet for gatebildet.</p>
+        <p className="dempet liten">Leien kommer også mens du er borte — eiendom trenger ingen leder. Norge og Verden viser hver sine eiendommer. Velg en by for å se bare den, og hold inne på kartet for gatebildet.</p>
       </div>
 
       {gate && <Gatebilde s={s} by={gate} lukk={lukkGate} />}
@@ -134,11 +137,11 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
         <>
 
       <Seksjon
-        id="eiendom-boliger"
-        tittel="Boliger og bygg"
+        id={kart === 'norge' ? 'eiendom-boliger' : 'eiendom-boliger-ute'}
+        tittel={kart === 'norge' ? 'Boliger og bygg' : 'Boliger og bygg ute'}
         forklaring="eiendom"
-        sammendrag={`${Object.values(s.eiendommer).reduce((a, b) => a + (b ?? 0), 0)} eid`}
-        harInnhold={Object.keys(s.eiendommer).length > 0}
+        sammendrag={`${eidHer} eid`}
+        harInnhold={eidHer > 0}
       >
       <ul className="kortliste">
         {synlige.map((id) => (
@@ -164,8 +167,13 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
       </ul>
       </Seksjon>
 
-      <Jordliste s={s} by={null} />
-      <Landemerkeliste s={s} />
+      {/* Gårder, skog og landemerker finnes bare i Norge. */}
+      {kart === 'norge' && (
+        <>
+          <Jordliste s={s} by={null} />
+          <Landemerkeliste s={s} />
+        </>
+      )}
         </>
       )}
     </section>

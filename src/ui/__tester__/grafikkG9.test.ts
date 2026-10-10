@@ -82,7 +82,7 @@ describe('nærbilder der tegningene er små (G9)', () => {
 
   it('brukes i rivallista og på plassene i lageret', () => {
     // Målene står i en fast konstant (Pakke 64), så Illustrasjon (memo) ikke tegnes på nytt hvert sekund.
-    const inv = kilde('../screens/Investeringer.tsx')
+    const inv = kilde('../screens/investeringer/Selskaper.tsx')
     expect(inv).toContain('const NAER_RIVAL = [32, 32] as const')
     expect(inv).toContain('naerbilde={NAER_RIVAL}')
     const luksus = kilde('../screens/Luksus.tsx')

@@ -12,6 +12,8 @@ import { Seksjon } from '../komponenter/Seksjon'
 import { Dagen } from '../komponenter/Dagen'
 import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
 import { Forklaring } from '../komponenter/Forklaring'
+import { bedriftsrekkefolge, REKKEFOLGER } from '../deler'
+import { fastInntekt } from '../sortering'
 import { useTilbake } from '../tilbake'
 
 export function Bedrifter({ s }: { s: Spilltilstand }) {
@@ -21,6 +23,9 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
     lagreKjopsmengde(m)
     settMengde(m)
   }
+  // Kjøpt (standard) eller etter fast inntekt — størst først, lik inntekt i kjøpsrekkefølge.
+  const rekkefolge = bedriftsrekkefolge.bruk()
+  const bedrifter = rekkefolge === 'inntekt' ? [...s.bedrifter].sort((a, b) => fastInntekt(b) - fastInntekt(a)) : s.bedrifter
   const tilSalgs = STIGEN.filter((t) => !eierType(s, t) && erLaastOpp(s, t))
   const laaste = STIGEN.filter((t) => !erLaastOpp(s, t))
 
@@ -44,8 +49,17 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
         </div>
       </div>
       <Dagen s={s} />
+      {s.bedrifter.length >= 3 && (
+        <div className="segment rekkefolge" role="radiogroup" aria-label="Rekkefølge på bedriftene">
+          {REKKEFOLGER.map((r) => (
+            <button key={r.id} role="radio" aria-checked={rekkefolge === r.id} className={rekkefolge === r.id ? 'aktiv' : ''} onClick={() => bedriftsrekkefolge.sett(r.id)}>
+              {r.navn}
+            </button>
+          ))}
+        </div>
+      )}
       <ul className="kortliste">
-        {s.bedrifter.map((b) => (
+        {bedrifter.map((b) => (
           <Bedriftskort key={b.id} b={b} s={s} mengde={mengde} åpne={() => settValgt(b.id)} />
         ))}
       </ul>

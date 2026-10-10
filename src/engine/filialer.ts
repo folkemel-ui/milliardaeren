@@ -70,6 +70,19 @@ export function filialbidrag(s: Spilltilstand, type: BedriftstypeId, by: NorskBy
   return (FILIALANDEL[nr] ?? 0) * (erHjemme(type, by) ? HJEMME_BONUS : 1) * byfaktor(s, by)
 }
 
+/**
+ * Filialfaktoren uten byens kurs (Pakke 65): bare det filialene gir etter plass og
+ * hjemby. Endrer seg bare når du åpner en filial — til sorteringen av bedriftene,
+ * som ikke skal flytte seg når markedet beveger seg. Spillet selv bruker filialfaktor.
+ */
+export function fastFilialfaktor(b: Bedrift): number {
+  const f = b.filialer
+  if (!f?.length) return 1
+  let sum = 1
+  for (let i = 0; i < f.length; i++) sum += (FILIALANDEL[i] ?? 0) * (erHjemme(b.type, f[i].by) ? HJEMME_BONUS : 1)
+  return sum
+}
+
 /** Bedriftens inntekt (før lønn) ganges med dette. Nøyaktig 1 uten filialer, så ingenting annet flytter seg. */
 export function filialfaktor(s: Spilltilstand, b: Bedrift): number {
   const f = b.filialer

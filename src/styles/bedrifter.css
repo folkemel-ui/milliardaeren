@@ -318,6 +318,17 @@
   flex: 0 0 auto;
 }
 
+/* Kjøpt · Inntekt over bedriftskortene (Pakke 65). */
+.rekkefolge {
+  align-self: flex-start;
+}
+
+.rekkefolge button {
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: var(--skrift-2);
+}
+
 .mengdevalg button {
   min-height: 32px;
   padding: 0 10px;

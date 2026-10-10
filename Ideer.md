@@ -12,15 +12,14 @@ Version 1.0 was reached with Pack 43.
 
 Order across the tracks: Pack 63 is done — each track has its own folder and branch, and the stylesheet is split by owner — so G12 and the game packs can run side by side again.
 
-**Next up: Pack 65 – Shorter lists.** The long lists get shorter and the biggest screen file gets split. (1) **The map switch filters the property list:** Eiendom is 12 screens at phone width, all 29 property types in one list with Norway and abroad mixed; the Norge/Verden switch (remembered since Pack 61) will filter the list too. (2) **Sort businesses by income:** in a late game the lemonade stand is on top and the earners at the bottom of a 4.6-screen list; a remembered choice sorts by income, buy order stays the default. (3) **Funds on the exchange:** index funds are bought like shares, so they move from Bank to Børs; Bank keeps the economy card, savings, bonds and loans. (4) **Smaller screen files:** `Investeringer.tsx` is 1 056 lines with 15 components; since the funds move anyway, it is split into a file per part (Oversikt, Børs, Selskaper, Bank). Questions at the start: filter by Norge/Verden or group by city, where funds sit in Børs (a third tile beside Aksjer and Krypto, or a list under them), and whether the business sort is remembered like the parts.
+**Next up: Pack 66 – A club that matters.** The football club gets a reason to care about it. (1) **A home for new areas** first: a written rule for when something gets its own tab or part — the tab bar holds five, and Investeringer, Luksus and Profil have four parts each — decided before the club grows, since it is the first thing that might want more room than its part in Luksus. (2) **Stadium upgrades:** today the club loses about kr 15 000 a day in 4. divisjon (wages ~68 000 against tickets ~25 000 and sponsor ~28 000) and ticket income is a flat amount per division; spend money on seats, floodlights and a VIP lounge to raise ticket income and the club's value, perhaps with a stadium size each division asks for. (3) **Fixed league teams:** `nySerie` draws nine new opponents every season; keep the same teams instead, with the top going up and teams coming down from above, so names and old foes come back. This needs new fields in the save (a save-version bump and a migration). The graphics track draws the upgrades in `Stadion.tsx` alongside it. Questions at the start: the rule for new areas, the upgrade steps and prices, whether a division can demand a stadium size, and how many teams go up and down.
 
 The work runs in **two tracks, each in its own session**. They are built side by side in the same repo, so they must not step on each other (see *Working side by side* below).
 
-### Game track (Packs 65–66)
+### Game track (Pack 66)
 
-Items from *Room to grow*, *Navigation* and *Football club*, most important first. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. Pack 61 made back go back, gave every set of parts the same memory and put the event log behind a bell in the top bar. Pack 62 split Luksus into Samling · Hjem · Kunst · Klubb and showed the whole net worth, split by kind, on Profil → Meg. Pack 63 gave each track its own folder and branch, split the stylesheet by owner and made the test suite run clean. Pack 64 measured the per-second work: two screens redrew every drawing each second (Selskaper 161 ms, Samling 72 ms in development) because of a new array prop — fixed — and the speed test now has a budget per system. The navigation packs belong here because they change the screens' logic (App, the tab parts).
+Items from *Room to grow* and *Football club*. Commits: `Pakke N: …`. Packs 55–58 fixed the bugs from the code review on 8 October, Pack 59 brought franchises and more countries, and Pack 60 the homes and the Sunday paper's «Uka di» — every picked v10.0 game item is done. Pack 61 made back go back, gave every set of parts the same memory and put the event log behind a bell in the top bar. Pack 62 split Luksus into Samling · Hjem · Kunst · Klubb and showed the whole net worth, split by kind, on Profil → Meg. Pack 63 gave each track its own folder and branch, split the stylesheet by owner and made the test suite run clean. Pack 64 measured the per-second work: two screens redrew every drawing each second (Selskaper 161 ms, Samling 72 ms in development) because of a new array prop — fixed — and the speed test now has a budget per system. Pack 65 made the Norge/Verden switch filter the property list, put the index funds in Børs, let the businesses be sorted by steady income, and split `Investeringer.tsx` and `handlinger.ts` by area. The navigation packs belong here because they change the screens' logic (App, the tab parts).
 
-- **Pack 65 – Shorter lists:** The map switch filters the property list, Sort businesses by income, Funds on the exchange, Smaller screen files. Moving the funds already opens up `Investeringer.tsx`, so it is split into a file per part in the same go.
 - **Pack 66 – A club that matters:** A home for new areas, Stadium upgrades, Fixed league teams. The rule for where new areas go is decided first, since a bigger club is the first thing that might want more than a part in Luksus. The graphics track draws the upgrades in `Stadion.tsx` alongside it, as with *Drawings for the v2.0 content*.
 
 ### Graphics track (Packs G12–G14)
@@ -54,14 +53,6 @@ Loose ends after G1–G7, and what was picked for v10.0.
 3. **Upgrades you can see.** A business drawing changes only at the four growth stages (level 1, 25, 50 and 100) and with its three improvements; the levels in between look the same. Show the steps: more customers, a longer queue, extra tables, a bigger sign — so every few levels can be seen in the detail scene. Picked from the v10.0 list.
 4. **Scenes for the homes.** Pack 60 brought three homes to furnish (Hjemmet in Oslo, Hytta at Geilo, Feriehuset in Marbella), three rooms each in three levels, shown as a list with level dots on the Luksus tab. Give each home a scene in the G1 style where the furnished rooms show as they are bought (kitchen, living room with the art wall, wine cellar; fireplace lounge, sauna, hot tub; terrace, pool, guest wing), and a detail page. Picked with Pack 60 (9 October 2026).
 
-## Navigation
-
-From a review of how the game is organised (9 October 2026), measured at phone width (375 × 812) in a late game that owns everything. Lengths are in screens of 812 px.
-
-1. **The map switch filters the property list.** The Eiendom tab is 12 screens: all 29 property types in one list, Norway and abroad mixed. The Norge/Verden switch changes only the map; the list below it stays the same. Let the switch filter the list too, or group the list by city or country.
-2. **Sort businesses by income.** The cards stand in buy order, so in a late game the lemonade stand is on top and the businesses that earn the most are at the bottom of a 4.6-screen list (13 cards of about 290 px). Add a choice to sort by income; buy order stays the default.
-3. **Funds on the exchange.** Bank holds five things: the economy card, savings, bonds, funds and loans. Index funds are bought like shares, so put them in Børs with stocks and crypto; Bank keeps savings, bonds and loans.
-
 ## Football club
 
 From a look at why the club feels stale (10 October 2026). The club's money hardly matters: in 4. divisjon it loses about kr 15k a day (wages ~68k against tickets ~25k and sponsor ~28k), and the opponents are drawn anew every season, so no league ever feels familiar.
@@ -71,11 +62,10 @@ From a look at why the club feels stale (10 October 2026). The club's money hard
 
 ## Room to grow
 
-From a look at whether the setup holds as the game grows (10 October 2026). The engine's rules, the saves (22 versions, each tested from a real old save) and the tests hold up; these are the places that won't. Measured after Pack 62. In Packs 65–66 and G12.
+From a look at whether the setup holds as the game grows (10 October 2026). The engine's rules, the saves (22 versions, each tested from a real old save) and the tests hold up; these are the places that won't. Measured after Pack 62. In Pack 66 and G12.
 
 1. **A home for new areas.** The tab bar holds five tabs, and Investeringer, Luksus and Profil each have four parts (Profil already needs the squeezed `segment-fem` row). Bigger new areas (your own listed company, more sports) have nowhere obvious to go. Decide the rule before the next one: when something gets its own tab, how many parts a tab may have, and what a sixth place would look like.
 2. **Load drawings and maps when needed.** The game is one 1 MB script (300 kB gzipped) that a phone must parse before the first frame. The drawings (`Illustrasjoner.tsx`, 6 449 lines), the maps and the gallery could load when they are first shown.
-3. **Smaller screen files.** `Investeringer.tsx` is 1 053 lines with 15 components and `handlinger.ts` 964 lines. Split Investeringer into a file per part (Oversikt, Børs, Selskaper, Bank) and the actions by area.
 
 ## Parked (not chosen yet)
 

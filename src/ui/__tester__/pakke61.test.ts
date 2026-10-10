@@ -5,7 +5,7 @@
  * deler husker der du var; hendelsesloggen ligger bak bjella i toppfeltet.
  */
 
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { startApp, type App } from './klikk'
 import { nyttSpill } from '../../engine/start'
@@ -219,7 +219,8 @@ describe('delene husker alle på samme måte', () => {
   })
 
   it('ingen skjerm holder egne delvalg i useState eller egen localStorage-nøkkel', () => {
-    const inv = readFileSync('src/ui/screens/Investeringer.tsx', 'utf8')
+    // Investeringer er delt per del siden Pakke 65: les rammen og alle delene.
+    const inv = ['src/ui/screens/Investeringer.tsx', ...readdirSync('src/ui/screens/investeringer').map((f) => 'src/ui/screens/investeringer/' + f)].map((f) => readFileSync(f, 'utf8')).join('\n')
     expect(inv).not.toContain('useState<Underfane>')
     expect(inv).not.toContain('milliardaer.borsvalg')
     expect(readFileSync('src/ui/screens/Eiendom.tsx', 'utf8')).not.toMatch(/useState<'norge' \| 'verden'>/)
