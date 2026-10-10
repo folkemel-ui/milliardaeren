@@ -8,6 +8,18 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '2.7.0',
+    navn: '2.7',
+    dato: 'Oktober 2026',
+    ingress: 'En klubb du ser på ett blikk, og noe å strekke seg etter helt til slutt.',
+    punkter: [
+      'Klubben på én skjerm: neste kamp, formen, tabellen rundt deg og fire sider bak — troppen og markedet, kamper og tabell, anlegg og økonomi, sesongene.',
+      'Troppen på rader du kan folde ut, markedet med de tre beste kjøpene, og «Ny» på det som har skjedd siden sist.',
+      'Fire eiendommer for det sene spillet, fra et kontortårn i Canary Wharf (25 mrd) til en skyskraper på Manhattan (500 mrd).',
+      'Et fjerde trinn i hvert rom i hjemmene, fra stjernekokk til helikopter.',
+    ],
+  },
+  {
     versjon: '2.6.0',
     navn: '2.6',
     dato: 'Oktober 2026',
