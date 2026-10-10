@@ -29,9 +29,13 @@ export function maalerader(m: Maalinger): [string, string][] {
  */
 export function Maalepanel() {
   const [vis, settVis] = useState(visMaaling)
+  // Skjult lytter panelet ikke på målingene, så ingenting tegnes på nytt hvert sekund.
+  return vis ? <Maalekort skjul={() => settVis(false)} /> : null
+}
+
+function Maalekort({ skjul }: { skjul: () => void }) {
   const m = useMaalinger()
   const [kopiert, settKopiert] = useState(false)
-  if (!vis) return null
   const rader = maalerader(m)
   const kopier = () => {
     const tekst = maalerader(hentMaalinger())
@@ -62,7 +66,7 @@ export function Maalepanel() {
           className="knapp"
           onClick={() => {
             skjulMaaling()
-            settVis(false)
+            skjul()
           }}
         >
           Skjul
