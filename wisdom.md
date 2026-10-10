@@ -683,12 +683,14 @@ session; delete what stops being true.
   the top three after nine. Check the outcome afterwards (who is now in the division above).
 - **Tune a balance number on the engine's own simulation, not on a formula** (Pack 67). The
   startup rounds were first solved on paper for +1 % a day; the engine then returned 0.80×
-  per krone. Two causes: a bug (the new per-round growth was read *after* , so
+  per krone. Two causes: a bug (the new per-round growth was read *after* `st.runde += 1`, so
   every round used the next one's growth) and a wrong model (most money goes into the late,
   short rounds where the room is biggest, so the formula's 1 %/day came out as 30 %/h on
   capital). Calibrate the simulation script on the old code first — it must reproduce the
   known figure (3.20× here) — then try variants and keep the one that hits the target.
-  The review agents' scratch scripts () were reusable as they were.
+  The review agents' scratch scripts (`scratchpad/avkastning/`) were reusable as they were.
+  (Writing this note with `node -e` inside Bash lost both backticked snippets — Bash ran
+  them as commands. Text with backticks goes through the Write or Edit tool.)
 - **A model with a level and a pull-back: say the measured swing, not the noise's.** Art's
   noise alone gives ±11 % around the value; exhibitions (upward jumps) make it ±16 % and
   keep prices ~9 % above the value on average. I told Folke ±11 % before measuring.
