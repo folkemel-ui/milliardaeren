@@ -1,0 +1,100 @@
+/*
+ * bred.css — Bred skjerm (fra 1024 px). Sist, så den vinner over reglene for telefon.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+@media (min-width: 1024px) {
+  :root {
+    --sidemeny: 224px;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidemeny) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'meny topp'
+      'meny maal'
+      'meny innhold';
+    max-width: 1240px;
+  }
+
+  .toppfelt {
+    grid-area: topp;
+  }
+
+  .maalfelt {
+    grid-area: maal;
+  }
+
+  .innhold {
+    grid-area: innhold;
+    padding: 20px 24px 40px;
+  }
+
+  .fanemeny {
+    grid-area: meny;
+    position: sticky;
+    top: 0;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    align-self: start;
+    width: auto;
+    max-width: none;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 12px;
+    border-top: 0;
+    border-right: 1px solid var(--kant);
+  }
+
+  .fanemeny-logo {
+    display: block;
+    padding: 0 8px 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--kant);
+  }
+
+  .fane {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: var(--skrift-3);
+  }
+
+  .fane:hover:not(.laast) {
+    background: color-mix(in srgb, var(--flate-2) 60%, transparent);
+  }
+
+  .fane.aktiv {
+    background: var(--flate-2);
+  }
+
+  /* Kortlistene i to spalter — ikke i vinduene som åpner seg over (gatebildet, valgt plass) eller på en detaljside. */
+  .innhold .kortliste:not(.gate-kort, .lager-valgt, .tingkort) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  /* Varslene står over innholdet, ikke over sidemenyen. */
+  .varsler {
+    left: calc(50% + var(--sidemeny) / 2);
+    bottom: 24px;
+  }
+
+  /* Vinduene (avisa, velkomst) midt på skjermen i stedet for nederst. */
+  .avis-bakgrunn {
+    align-items: center;
+  }
+
+  .avis {
+    border-radius: 18px;
+  }
+}

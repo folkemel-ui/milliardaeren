@@ -1,0 +1,1233 @@
+/*
+ * grunnlag.css — Skrift, fargetokens, grunnlaget, appskallet, kort, seksjoner, knapper, merker, grafer og vinduer som deles av flere skjermer.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonter/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --skrift-1: 11px;
+  --skrift-2: 13px;
+  --skrift-3: 15px;
+  --skrift-4: 18px;
+  --skrift-5: 22px;
+  --skrift-6: 34px;
+  --vekt-normal: 400;
+  --vekt-halvfet: 600;
+  --vekt-fet: 700;
+  --vekt-tung: 800;
+}
+
+:root {
+  color-scheme: dark;
+  --bakgrunn: #0d0c0a;
+  --flate: #181613;
+  --flate-2: #211e1a;
+  /* Natta i scenen (G10); himmelen om natta står i Tegnestil.tsx (NATTHIMMEL). */
+  --scene-natt: #0b0f1a;
+  --scene-natt-styrke: 60%;
+  --kant: #2e2a23;
+  --tekst: #f4efe4;
+  --tekst-dempet: #9d9587;
+  --gull: #d4af37;
+  --gull-lys: #ecd07a;
+  --gull-mørk: #8f7420;
+  --pluss: #5cd68a;
+  --minus: #f27474;
+  --fare: #e05a5a;
+  --varsel: #f0b44c;
+  /* Tekst og ikoner som står på gull. */
+  --paa-gull: #1a1508;
+  /* Kildene i statistikken, i fast rekkefølge. Validert mot flaten for fargeblinde (dataviz-sjekken). */
+  --kilde-1: #3987e5;
+  --kilde-2: #d95926;
+  --kilde-3: #199e70;
+  --kilde-4: #c98500;
+  --kilde-5: #d55181;
+  --kilde-6: #008300;
+  --kilde-7: #9085e9;
+
+  --radius: 14px;
+  --meny-høyde: 64px;
+  --kolonne: 480px;
+
+  /* Kartene (Grafikkpakke G3): et rolig atlas — dempet hav, Norge i varm stein,
+     nabolandene flatt grått, myke fjellskygger. */
+  --kart-hav: #1c2832;
+  --kart-land: #4a443b;
+  --kart-naboland: #2c2b29;
+  --kart-kyst: #6e6659;
+  --kart-grense: #403e3a;
+  --kart-fjell: #221e19;
+  --kart-fjell-lys: #6c6455;
+  --kart-nett: rgb(255 255 255 / 0.05);
+  --kart-havtekst: #6a8394;
+  --kart-landtekst: #7a746a;
+}
+
+/* Lyst «ren finans»-tema: hvitt og lysegrått, mørk tekst, et mørkere gull som
+   holder kontrast på hvitt, og grønt og rødt som leses godt på lys bunn.
+   Settes med data-theme="light" på <html>; valget huskes i nettleseren. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bakgrunn: #f4f5f7;
+  --flate: #ffffff;
+  --flate-2: #eceef2;
+  --kant: #dcdfe5;
+  --tekst: #15171c;
+  --tekst-dempet: #5f6773;
+  --gull: #a67c00;
+  --gull-lys: #c99a0e;
+  --gull-mørk: #7d5d00;
+  --pluss: #13803a;
+  --minus: #c42b2b;
+  --fare: #cf2f2f;
+  --varsel: #b45309;
+  --paa-gull: #ffffff;
+  --kilde-1: #2a78d6;
+  --kilde-2: #eb6834;
+  --kilde-3: #1baf7a;
+  --kilde-4: #eda100;
+  --kilde-5: #e87ba4;
+  --kilde-6: #008300;
+  --kilde-7: #4a3aa7;
+  --klasse-krypto: #7c3aed;
+  --klasse-eiendom: #0284c7;
+  --klasse-rival: #db2777;
+  --klasse-startup: #ea580c;
+  --klasse-fond: #0d9488;
+  /* Himmelen bak tegningene i den nye stilen (Tegnestil.tsx): lys på lys bunn. */
+  --himmel-dag-topp: #aebfcb;
+  --himmel-dag-horisont: #efe3cb;
+  --himmel-inne-topp: #c9c4bc;
+  --himmel-inne-horisont: #e6e1d8;
+  /* Natta i scenen (G10): en blå kveldshimmel, og scenen mørkner nesten helt. */
+  --himmel-natt-topp: #1a2440;
+  --himmel-natt-horisont: #4a5370;
+  --scene-natt: #141a2b;
+  --scene-natt-styrke: 88%;
+  --kart-hav: #cddbe4;
+  --kart-land: #ece4d4;
+  --kart-naboland: #dfddd7;
+  --kart-kyst: #a69c8b;
+  --kart-grense: #c3beb3;
+  --kart-fjell: #b8a98d;
+  --kart-fjell-lys: #faf6ee;
+  --kart-nett: rgb(0 0 0 / 0.06);
+  --kart-havtekst: #6f8a9c;
+  --kart-landtekst: #9a9386;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bakgrunn);
+  color: var(--tekst);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: var(--skrift-3);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gull);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+p,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+.app {
+  max-width: var(--kolonne);
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bakgrunn);
+  /* Det første bildet glir fram over lasteskjermens bakgrunn i stedet for å stå der med ett (G7). */
+  animation: forste-bilde 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app {
+      animation: none;
+    }
+}
+
+@media (min-width: 520px) {
+  .app {
+      border-inline: 1px solid var(--kant);
+    }
+}
+
+.innhold {
+  flex: 1;
+  padding: 16px 16px calc(var(--meny-høyde) + 24px + env(safe-area-inset-bottom));
+}
+
+.etikett {
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tekst-dempet);
+}
+
+.tall-mellom,
+.tall-stort,
+.tall-kjempe,
+.tempo {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tall-mellom {
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
+}
+
+.tall-stort {
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-fet);
+  letter-spacing: -0.01em;
+}
+
+.tall-kjempe {
+  font-size: var(--skrift-6);
+  font-weight: var(--vekt-tung);
+  letter-spacing: -0.02em;
+}
+
+.gull {
+  color: var(--gull);
+}
+
+.pluss {
+  color: var(--pluss);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.dempet {
+  color: var(--tekst-dempet);
+}
+
+.liten {
+  font-size: var(--skrift-2);
+}
+
+.skjerm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skjerm-tittel {
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-fet);
+}
+
+.kort {
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.kort-tomt {
+  border-style: dashed;
+  background: transparent;
+  color: var(--tekst-dempet);
+  text-align: center;
+  font-size: var(--skrift-2);
+}
+
+.kortliste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.seksjon-tittel {
+  margin: 12px 0 0;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tekst-dempet);
+}
+
+/* Et tall på bildet, som «3/8» for eiendom du eier. */
+.bilde-med-brikke {
+  position: relative;
+  flex: none;
+}
+
+/* G7: bildet på kortet for noe du eier er en knapp, og hele kortet åpner detaljsiden. */
+.aapne-bilde {
+  display: block;
+  flex: none;
+  border-radius: 16px;
+}
+
+.aapne-bilde .bilde-med-brikke {
+  display: block;
+}
+
+.kan-aapnes {
+  cursor: pointer;
+  transition:
+    transform 0.1s ease-out,
+    background-color 0.1s ease-out;
+}
+
+/* G8: kortet synker litt mens du holder fingeren på det — men ikke når det er en knapp i kortet du trykker. */
+.kan-aapnes:active:not(:has(button:active, a:active, input:active)) {
+  transform: scale(0.985);
+  background-color: color-mix(in srgb, var(--flate-2) 60%, var(--flate));
+}
+
+.bilde-med-brikke .brikke {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+}
+
+/* Om natta mørkner scenen med himmelen (G10). */
+.detalj .scene {
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    color-mix(in srgb, color-mix(in srgb, var(--gull) 9%, var(--flate-2)), var(--scene-natt) calc(var(--natt, 0) * var(--scene-natt-styrke))),
+    color-mix(in srgb, var(--flate-2), var(--scene-natt) calc(var(--natt, 0) * var(--scene-natt-styrke))) 70%
+  );
+}
+
+.merke {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.merke.gull {
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.merke.kant {
+  border-color: var(--gull-mørk);
+  background: transparent;
+  color: var(--gull);
+}
+
+.merke.ok {
+  background: color-mix(in srgb, var(--pluss) 18%, transparent);
+  color: var(--pluss);
+}
+
+.merke.varsel {
+  background: color-mix(in srgb, var(--varsel) 18%, transparent);
+  color: var(--varsel);
+}
+
+.merke.fare {
+  background: color-mix(in srgb, var(--minus) 20%, transparent);
+  color: var(--minus);
+}
+
+.merke.info {
+  background: color-mix(in srgb, var(--klasse-eiendom) 18%, transparent);
+  color: var(--klasse-eiendom);
+}
+
+/* Et merke som er en knapp, som skattemerket i toppen. */
+button.merke {
+  cursor: pointer;
+}
+
+.merke.ny {
+  animation: ny-inn 0.4s ease-out;
+}
+
+.brikke {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--flate-2);
+  color: var(--tekst);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-tung);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.brikke.gull {
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.milepael {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.milepael-spor {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.milepael-fyll {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gull-mørk), var(--gull));
+  transition: width 0.3s ease-out;
+}
+
+.laas {
+  color: var(--tekst-dempet);
+}
+
+/* Y-aksen får sin egen kolonne, så etikettene aldri ligger oppå linjen. */
+.graf {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'y plott'
+    '. x';
+  column-gap: 8px;
+  margin-top: 10px;
+}
+
+.graf-flate {
+  grid-area: plott;
+  position: relative;
+  min-width: 0;
+}
+
+.graf-merke {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  border: 2px solid var(--flate);
+}
+
+.graf-merke.kjop {
+  background: var(--pluss);
+}
+
+.graf-merke.salg {
+  background: var(--minus);
+}
+
+.graf-forklaring {
+  margin: 6px 0 0;
+}
+
+.graf svg {
+  grid-area: plott;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 140px;
+}
+
+.graf-linje {
+  stroke: var(--gull);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+
+.graf-rutenett {
+  stroke: var(--kant);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Etikettene på rutenettet ligger i samme rute oppå hverandre, så kolonnen
+   blir så bred som den bredeste — og hver flyttes ned til sin strek. */
+.graf-akse-y {
+  grid-area: y;
+  display: grid;
+  height: 140px;
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.graf-akse-y span {
+  grid-area: 1 / 1;
+  position: relative;
+  align-self: start;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+/* Dato eller klokkeslett under hver strek langs bunnen. */
+.graf-akse-x {
+  grid-area: x;
+  position: relative;
+  height: 16px;
+  margin-top: 4px;
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+  font-variant-numeric: tabular-nums;
+}
+
+.graf-akse-x span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.graf-akse-x span.venstre {
+  transform: none;
+}
+
+.graf-akse-x span.hoyre {
+  transform: translateX(-100%);
+}
+
+.graf-strek {
+  stroke: var(--tekst-dempet);
+  stroke-width: 1;
+  opacity: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Verdien ved start og nå, i hver ende av linja. Teksten er tekstfarget; linjefargen står i kanten. */
+.graf-ende {
+  position: absolute;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.graf-ende.start {
+  left: 0;
+  color: var(--tekst-dempet);
+}
+
+.graf-ende.naa {
+  right: 0;
+  color: var(--tekst);
+  background: var(--flate-2);
+  border: 1px solid;
+}
+
+.graf-ende.over {
+  transform: translateY(calc(-100% - 6px));
+}
+
+.graf-ende.under {
+  transform: translateY(6px);
+}
+
+.graf-endepunkt {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  border: 2px solid var(--flate);
+  box-sizing: content-box;
+  pointer-events: none;
+}
+
+.graf-tom {
+  margin-top: 10px;
+  font-size: var(--skrift-2);
+  color: var(--tekst-dempet);
+}
+
+.maal-topp {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.maal-spor {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.maal-fyll {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gull-mørk), var(--gull), var(--gull-lys));
+  transition: width 0.6s ease-out;
+}
+
+.maal-topp + .maal-spor + p {
+  margin-top: 8px;
+}
+
+.knapp {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+  font-weight: var(--vekt-halvfet);
+}
+
+.knapp-gull {
+  background: var(--gull);
+  border-color: var(--gull);
+  color: var(--paa-gull);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: transform 0.08s, background 0.15s;
+}
+
+.knapp-gull:active:not(:disabled) {
+  transform: scale(0.97);
+  background: var(--gull-lys);
+}
+
+.knapp:disabled {
+  background: var(--flate-2);
+  border-color: var(--kant);
+  color: var(--tekst-dempet);
+  cursor: default;
+}
+
+.knapp-liten {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: var(--skrift-2);
+}
+
+.knapp-ikon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+  color: var(--tekst-dempet);
+}
+
+.knapp-sekundær {
+  width: 100%;
+  color: var(--tekst-dempet);
+}
+
+.knapp-fare {
+  background: var(--fare);
+  border-color: var(--fare);
+  color: #fff;
+}
+
+.bekreft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: var(--skrift-3);
+}
+
+.knapperad {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.minus {
+  color: var(--minus);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.advarsel {
+  color: var(--varsel);
+}
+
+.kritisk {
+  color: var(--minus);
+}
+
+.kort-tittel {
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-fet);
+}
+
+.segment {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--flate);
+  border: 1px solid var(--kant);
+}
+
+.segment button {
+  min-height: 36px;
+  border-radius: 9px;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
+  color: var(--tekst-dempet);
+}
+
+.segment button.aktiv {
+  background: var(--flate-2);
+  color: var(--gull);
+  box-shadow: inset 0 0 0 1px var(--kant);
+}
+
+.segment button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.minigraf {
+  width: 60px;
+  height: 24px;
+}
+
+.tilbake {
+  align-self: flex-start;
+  min-height: 36px;
+  color: var(--gull);
+  font-weight: var(--vekt-halvfet);
+}
+
+.detalj-topp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Et papirs side (G4): logoen med ordmerke over navnet. */
+.detalj-topp.papir-topp {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+:root {
+  --klasse-aksje: var(--gull);
+  --klasse-krypto: #a78bfa;
+  --klasse-eiendom: #38bdf8;
+  --klasse-sparing: var(--pluss);
+  --klasse-rival: #f472b6;
+  --klasse-startup: #fb923c;
+  --klasse-fond: #2dd4bf;
+}
+
+.bred {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.milepaeler {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.milepaeler li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--skrift-3);
+  color: var(--tekst-dempet);
+}
+
+.milepaeler li.nådd,
+.milepaeler li.neste {
+  color: var(--tekst);
+}
+
+.milepael-merke {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--flate-2);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+}
+
+.milepaeler li.nådd .milepael-merke {
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.milepaeler li.neste .milepael-merke {
+  box-shadow: inset 0 0 0 2px var(--gull);
+  color: var(--gull);
+}
+
+.avis-bakgrunn {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: rgb(0 0 0 / 0.6);
+}
+
+.segment-fem button {
+  font-size: var(--skrift-2);
+}
+
+.knapp-bud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 48px;
+  padding: 6px 4px;
+  font-size: var(--skrift-2);
+  line-height: 1.2;
+}
+
+.knapp-bud strong {
+  white-space: nowrap;
+  font-size: var(--skrift-2);
+}
+
+.filterbrikke {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gull-mørk);
+  color: var(--gull);
+  font-size: var(--skrift-2);
+}
+
+.knapp-oppussing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: var(--skrift-2);
+  text-align: left;
+}
+
+.knapp-oppussing strong {
+  white-space: nowrap;
+}
+
+.laast-merke {
+  white-space: nowrap;
+}
+
+.seksjon {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seksjon-hode {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.seksjon-hode .seksjon-tittel {
+  margin: 0;
+}
+
+.seksjon-pil {
+  display: inline-block;
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-2);
+  transition: transform 0.15s;
+}
+
+.seksjon.åpen .seksjon-pil {
+  transform: rotate(90deg);
+}
+
+.seksjon-sammendrag {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.seksjon-innhold {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: seksjon-inn 0.18s ease-out;
+}
+
+/* Overskriften for en hel del, uten fold (Pakke 62). */
+.del-hode {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.innhold.gli-hoyre > * {
+  animation: gli-fra-hoyre 0.22s ease-out;
+}
+
+.innhold.gli-venstre > * {
+  animation: gli-fra-venstre 0.22s ease-out;
+}
+
+.skjerm.detalj {
+  animation: gli-fra-hoyre 0.22s ease-out;
+}
+
+.inntekt {
+  display: inline-block;
+}
+
+.inntekt.puls-a,
+.inntekt.puls-gull-a {
+  animation: inntekt-hopp-a 0.5s ease-out;
+}
+
+.inntekt.puls-b,
+.inntekt.puls-gull-b {
+  animation: inntekt-hopp-b 0.5s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+      transition: none !important;
+      animation: none !important;
+    }
+}
+
+.avbrudd-side {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  padding: 16px 0;
+  background: var(--bakgrunn);
+  overflow-y: auto;
+}
+
+.avbrudd-side .velkomst-tittel:focus {
+  outline: none;
+}
+
+.avbrudd-detaljer summary {
+  cursor: pointer;
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-2);
+}
+
+.avbrudd-detaljer p {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+.bekreft-par {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.bekreft-par.bred {
+  width: 100%;
+}
+
+.bekreft-par > button {
+  flex: 1 1 0;
+  padding-inline: 10px;
+  white-space: nowrap;
+}
+
+.bekreft-varsel {
+  flex-basis: 100%;
+}
+
+/* Små knapper i smale kort: «Ja» over «Avbryt», så paret ikke tar mer bredde enn knappen gjorde. */
+.bekreft-par.stablet {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+/* Lese av grafen: sikte, punkt og en boble med verdien. Vannrett dra leser av, loddrett ruller siden. */
+.graf-flate {
+  touch-action: pan-y;
+  cursor: crosshair;
+  outline-offset: 2px;
+}
+
+.graf-sikte {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--tekst-dempet);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.graf-punkt {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  border: 2px solid var(--flate);
+  pointer-events: none;
+}
+
+.graf-boble {
+  position: absolute;
+  top: -6px;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+  font-size: var(--skrift-2);
+  white-space: nowrap;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  z-index: 1;
+}
+
+.graf-boble span {
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+}
+
+.filterrad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tomt {
+  flex: none;
+}
+
+/* Ikoner står på grunnlinjen når de står i tekst, og krymper aldri i en flex-rad. */
+.ikon {
+  flex: none;
+  vertical-align: -0.2em;
+}
+
+.forklaring {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.forklaring-knapp {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--kant);
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-fet);
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.forklaring-knapp[aria-expanded='true'],
+.forklaring-knapp:hover {
+  border-color: var(--gull-mørk);
+  color: var(--gull);
+}
+
+.forklaring-boble {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -8px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(290px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gull-mørk);
+  background: var(--flate);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: var(--tekst);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-normal);
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+
+.forklaring-boble strong {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+}
+
+/* I en sammenleggbar seksjon står «?» ytterst til høyre, så boblen åpner seg mot venstre. */
+.seksjon-hoderad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seksjon-hoderad .seksjon-hode {
+  flex: 1;
+  min-width: 0;
+}
+
+.seksjon-hoderad .forklaring-boble {
+  left: auto;
+  right: -4px;
+}
+
+/* Redusert bevegelse valgt i spillet (Pakke 43): alle animasjoner og overganger
+   stopper, også når systemet ikke ber om det. JS-delen (rullende tall, konfetti,
+   kort som vokser) spør redusertBevegelse() i ui/innstillinger.ts. */
+:root[data-bevegelse='redusert'] *,
+:root[data-bevegelse='redusert'] *::before,
+:root[data-bevegelse='redusert'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* En knapp som ser ut som en lenke. */
+.lenkeknapp {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--gull);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+@keyframes forste-bilde {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ny-inn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes seksjon-inn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes gli-fra-hoyre {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes gli-fra-venstre {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes inntekt-hopp-a {
+  35% {
+    transform: scale(1.25);
+    text-shadow: 0 0 12px var(--pluss);
+  }
+}
+
+@keyframes inntekt-hopp-b {
+  35% {
+    transform: scale(1.25);
+    text-shadow: 0 0 12px var(--pluss);
+  }
+}

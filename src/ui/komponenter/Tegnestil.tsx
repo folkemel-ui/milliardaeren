@@ -49,7 +49,7 @@ export const S = {
 
 /**
  * Himmelen bak motivet, i mørkt tema. Himmelen er bakgrunn, ikke motiv, så
- * den følger temaet: det lyse temaet har egne, lysere farger i styles.css
+ * den følger temaet: det lyse temaet har egne, lysere farger i styles/grunnlag.css
  * (--himmel-dag-topp osv.). Selve motivet har faste farger i begge temaer.
  */
 export const HIMMEL = {
@@ -119,7 +119,7 @@ export const IScenen = createContext(false)
 /**
  * Farger som lyser om natta: vinduslyset og lampene. Natt-laget i scenen viser
  * bare disse (og alt med klassen `nattlys` eller `nattvindu`); resten blir svart.
- * styles.css har de samme fargene — endres paletten, må de følge med.
+ * styles/tegninger.css har de samme fargene — endres paletten, må de følge med.
  */
 export const LYSFARGER = ['#f3dca4', '#e8c98a', '#c9a66a'] as const
 
@@ -135,7 +135,7 @@ function useUrl() {
 /** En maske trenger gradienten sin. */
 const TRENGER: Record<string, string> = { vm: 'v', km: 'k', nm: 'n', bm: 'b', rm: 'r' }
 
-/** Himmelen om natta, i mørkt tema (det lyse har sine i styles.css). */
+/** Himmelen om natta, i mørkt tema (det lyse har sine i styles/grunnlag.css). */
 export const NATTHIMMEL = ['#0c1220', '#2a3046'] as const
 
 /** Fargen motivet dempes mot om natta: mørk blå. */
@@ -356,7 +356,7 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
             {/* Motivet, mørknet etter --natt. */}
             <g filter={`url(#${id}natt)`}>{children}</g>
             {/* Det samme motivet en gang til, der bare lysene har farge
-                (styles.css gjør resten svart) — lagt over med «screen», så
+                (styles/tegninger.css gjør resten svart) — lagt over med «screen», så
                 vinduene lyser gjennom natta. Det som står foran et vindu, er
                 svart her også og skjuler lyset riktig. */}
             <g className="nattlag" filter={`url(#${id}glod)`}>
@@ -372,7 +372,7 @@ export function Lerret({ størrelse, himmel = 'dag', children }: { størrelse: n
   )
 }
 
-/** Stjernene på nattehimmelen: synlige bare når det er mørkt (styles.css). */
+/** Stjernene på nattehimmelen: synlige bare når det er mørkt (styles/tegninger.css). */
 const STJERNER: [number, number, number][] = [
   [12, 12, 0.45],
   [24, 6, 0.35],

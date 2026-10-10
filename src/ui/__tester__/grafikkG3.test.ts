@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -6,8 +5,9 @@ import { BYPLAN, BYLISTE, INNFELT, innfeltpunkt, KYSTRUTA } from '../norgeskarte
 import { NORGE_NORD, NORGE_SOR, NABOLAND_SOR, VERDEN, NORGE_VERDEN, NEW_YORK, DUBAI, type Ring } from '../kartdata'
 import { LAND, NORGE } from '../verdenskartet'
 import { Kartmerke } from '../komponenter/Kartmerke'
+import { alleStiler } from './stiler'
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const css = alleStiler().replace(/\r\n/g, '\n')
 
 /** Ligger punktet inne i ringen? (Partallsregelen, i grader.) */
 function inni([x, y]: [number, number], r: Ring): boolean {

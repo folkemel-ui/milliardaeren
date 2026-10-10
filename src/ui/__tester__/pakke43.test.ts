@@ -6,8 +6,9 @@ import { ENDRINGER, VERSJON, visNyheter } from '../versjon'
 import { lesBevegelse, lesVarsler, redusertBevegelse, settBevegelse, settVarsler, vises } from '../innstillinger'
 import type { Hendelse } from '../../engine/types'
 import type { Nytt } from '../hendelsesstrom'
+import { alleStiler } from './stiler'
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
+const css = alleStiler()
 const pakke = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf8')) as { version: string }
 
 const hendelse = (alvor: Hendelse['alvor']): Nytt => ({ type: 'hendelse', hendelse: { sek: 0, tittel: 'X', tekst: '', alvor } })

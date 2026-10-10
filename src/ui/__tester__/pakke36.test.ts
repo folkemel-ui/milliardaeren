@@ -1,9 +1,9 @@
-import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { drakt, initialer } from '../komponenter/Klubbvaapen'
 import { KLUBBNAVN } from '../../engine/klubb'
+import { alleStiler } from './stiler'
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const css = alleStiler().replace(/\r\n/g, '\n')
 
 /** Selektoren hver deklarasjon står under. */
 function deklarasjoner(egenskap: string): { sel: string; verdi: string }[] {

@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createElement, Fragment } from 'react'
 import { describe, expect, it } from 'vitest'
 import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NY_STIL } from '../komponenter/Illustrasjoner'
 import { HIMMEL, maal, METER, S } from '../komponenter/Tegnestil'
+import { alleStiler } from './stiler'
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const css = alleStiler().replace(/\r\n/g, '\n')
 
 const tegn = (id: string, trinn: 0 | 1 | 2 | 3 = 0, forbedringer = 0) => renderToStaticMarkup(createElement(Illustrasjon, { id, trinn, forbedringer }))
 

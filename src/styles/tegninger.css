@@ -1,0 +1,955 @@
+/*
+ * tegninger.css — Tegningene: lerretet, scenen, natt og lakk, animasjonene, logoer og våpen, stadion, malerier, bildene i Avisa og galleriet.
+ * Eier: grafikksporet. Se «Working side by side» i Ideer.md.
+ */
+
+.bedrift-ikon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--flate-2);
+}
+
+.bedrift-ikon.stor {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+}
+
+/* Et nærbilde på kortet (saftboden) går helt ut i kanten av utsnittet; en myk
+   kant gjør at det blekner ut i flisa som de andre tegningene. */
+.bedrift-ikon.naer svg {
+  mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+}
+
+/* Bevegelse i tegningene (anim-klassene i Illustrasjoner.tsx): bare på scenen
+   i detaljvisningene, sakte og lite — og ingenting når spilleren har bedt om
+   mindre bevegelse. Lengdene er i tegningens egne enheter (48 × 48); på det
+   nye lerretet (96 × 96) dobles de med --utslag. */
+.lerret {
+  --utslag: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scene [class*='anim-'] {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+  .scene .anim-damp {
+      animation: tegning-damp 3.2s ease-in-out infinite;
+    }
+
+  .scene .anim-roeyk {
+      animation: tegning-roeyk 4s ease-in-out infinite;
+    }
+
+  .scene .anim-flagg {
+      transform-origin: left center;
+      animation: tegning-flagg 1.8s ease-in-out infinite;
+    }
+
+  .scene .anim-flamme {
+      transform-origin: center bottom;
+      animation: tegning-flamme 0.8s ease-in-out infinite alternate;
+    }
+
+  .scene .anim-boelge {
+      animation: tegning-boelge 3s ease-in-out infinite;
+    }
+
+  .scene .anim-duve {
+      animation: tegning-duve 4.5s ease-in-out infinite;
+    }
+
+  .scene .anim-hopp {
+      animation: tegning-hopp 3.6s ease-in-out infinite;
+    }
+
+  .scene .anim-glid {
+      animation: tegning-glid 8s ease-in-out infinite;
+    }
+
+  .scene .anim-gondol {
+      animation: tegning-gondol 6s ease-in-out infinite;
+    }
+
+  .scene .sen {
+      animation-delay: -1.6s;
+    }
+
+  /* G10: rotorer, propeller, blinkende lys, trær i vinden, et vindu som
+       tennes, lyset over billakken. Hver tegning har sin egen bevegelse. */
+  .scene .anim-dreie {
+      animation: tegning-dreie var(--omlop, 1s) linear infinite;
+    }
+
+  .scene .anim-propell {
+      animation: tegning-propell 0.16s linear infinite;
+    }
+
+  .scene .anim-rotor {
+      animation: tegning-rotor 0.3s linear infinite;
+    }
+
+  .scene .anim-blink {
+      animation: tegning-blink 1.8s steps(1, end) infinite;
+    }
+
+  .scene .anim-svai {
+      transform-origin: center bottom;
+      animation: tegning-svai 6s ease-in-out infinite;
+    }
+
+  .scene .anim-vindu {
+      animation: tegning-vindu 18s ease-in-out infinite;
+    }
+
+  .scene .anim-sveip {
+      animation: tegning-sveip 7s ease-in-out infinite;
+    }
+
+  /* Viserne dreier om midten av urskiva (satt i tegningen); hvor langt de har
+       kommet, setter tegningen med en negativ forsinkelse. */
+  .scene .anim-viser {
+      animation: tegning-dreie var(--omlop) linear infinite;
+    }
+
+  .scene .anim-viser.tikk {
+      animation-timing-function: steps(60, end);
+    }
+
+  /* Saftboden: kanna vippes og strålen renner, en kunde drikker (to bilder
+       av armen), og en veps sirkler over saften med dirrende vinger. */
+  .scene .anim-skjenk {
+      animation: tegning-skjenk 6s ease-in-out infinite;
+    }
+
+  .scene .anim-strale {
+      animation: tegning-strale 6s linear infinite;
+    }
+
+  .scene .anim-sipp {
+      animation: tegning-sipp 7s linear infinite;
+    }
+
+  .scene .anim-sipp-ned {
+      animation: tegning-sipp-ned 7s linear infinite;
+    }
+
+  .scene .anim-veps {
+      animation: tegning-veps 3.4s ease-in-out infinite;
+    }
+
+  .scene .anim-vinge {
+      transform-origin: center bottom;
+      animation: tegning-vinge 0.08s linear infinite alternate;
+    }
+
+  /* Pølseboden: tanga snur pølsene. */
+  .scene .anim-vend {
+      transform-origin: left center;
+      animation: tegning-vend 2.6s ease-in-out infinite;
+    }
+}
+
+/* Natt i scenen (G10). Siden rundt setter --natt (0–1) etter klokka. Natt-laget
+   er motivet en gang til, der alt unntatt lysene er svart, lagt over med
+   «screen»: bare vinduene og lampene lyser igjennom. Fargene er LYSFARGER i
+   Tegnestil.tsx. Dette er ikke bevegelse, så det gjelder også med mindre
+   bevegelse slått på. */
+.scene .nattlag {
+  opacity: var(--natt, 0);
+  mix-blend-mode: screen;
+}
+
+.scene .stjerner {
+  opacity: calc(var(--natt, 0) * 0.9);
+}
+
+.nattlag [fill]:not([fill='#f3dca4'], [fill='#e8c98a'], [fill='#c9a66a'], .nattvindu, .nattlys, .nattlys *) {
+  fill: #000;
+}
+
+.nattlag [stroke]:not([stroke='#f3dca4'], [stroke='#e8c98a'], [stroke='#c9a66a'], .nattlys, .nattlys *) {
+  stroke: #000;
+}
+
+.nattlag .nattvindu {
+  fill: #e8c98a;
+}
+
+/* Disen (Dis) blander fargene mot en lys grå og ville gjort det svarte grått. */
+.nattlag [filter] {
+  filter: none;
+}
+
+/* Masken til lyset over billakken (Lakksveip): bilen hvit, dekkene ikke. */
+.lakkmaske [fill]:not([fill='none']) {
+  fill: #fff;
+}
+
+.lakkmaske [stroke] {
+  stroke: #fff;
+}
+
+.lakkmaske .ikke-lakk,
+.lakkmaske .ikke-lakk * {
+  fill: #000;
+  stroke: #000;
+}
+
+.nattlag .nattskjul,
+.lerret .bare-natt {
+  display: none;
+}
+
+.nattlag .bare-natt {
+  display: inline;
+}
+
+/* Den store tegningen øverst i en detaljvisning, på en lysere scene. */
+.scene {
+  display: grid;
+  place-items: center;
+  height: 172px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--gull) 9%, var(--flate-2)), var(--flate-2) 70%);
+}
+
+.dempet-ikon {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.galleri {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.galleri-rutenett {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.galleri-kort {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--flate);
+  border: 1px solid var(--kant);
+}
+
+.galleri-stor {
+  background: var(--flate-2);
+  border-radius: 10px;
+  line-height: 0;
+}
+
+.galleri-små {
+  display: flex;
+  gap: 8px;
+}
+
+.galleri-små span {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+}
+
+.galleri-mork {
+  background: #211e1a;
+}
+
+.galleri-trinn {
+  display: flex;
+  gap: 6px;
+}
+
+.galleri-trinn span {
+  display: grid;
+  justify-items: center;
+  padding: 4px 2px 2px;
+  border-radius: 10px;
+}
+
+.galleri-trinn small {
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+}
+
+/* Hvit, som kortene i det lyse temaet — der falmer lyse tegninger først. */
+.galleri-lys {
+  background: #ffffff;
+}
+
+/* Logoene i galleriet (G4): merket stort og ordmerket på mørk og lys bunn. */
+.galleri-ordmerke {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 10px;
+  border-radius: 10px;
+  line-height: 0;
+}
+
+.galleri-kort figcaption {
+  font-weight: var(--vekt-halvfet);
+}
+
+/* Stilarket øverst i galleriet (G1): paletten med tre toner per materiale. */
+.stilark-palett {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.stilark-farge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  font-size: var(--skrift-2);
+}
+
+.stilark-toner {
+  display: flex;
+  height: 28px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.stilark-toner span {
+  flex: 1;
+}
+
+/* Startupens logo: et bransjemerke i egen farge (G4), tegnet i StartupLogo. */
+.startup-logo {
+  display: block;
+  flex: none;
+}
+
+.startup-logo.liten {
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Klubbvåpenet (Klubbvaapen.tsx). Initialene skaleres med våpenet, så
+   størrelsen settes i komponenten — et av få unntak fra skriftskalaen. */
+.klubbvaapen {
+  position: relative;
+  display: inline-block;
+  flex: none;
+}
+
+.klubbvaapen svg {
+  display: block;
+}
+
+.klubbvaapen-tekst {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.kjopsglimt-bilde {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 176px;
+  height: 176px;
+  border-radius: 36px;
+  background: var(--flate-2);
+  border: 1px solid var(--gull-mørk);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  animation: kjopsglimt-vokse 0.55s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+:root[data-theme='light'] .kjopsglimt-bilde {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+/* G11: et maleri henger på galleriveggen, i begge temaer — en svart ramme
+   forsvant på den mørke flisen, og en hvit ville forsvinne på den lyse. */
+.kjopsglimt-bilde.maleri {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 22%, rgb(255 236 200 / 0.24), transparent 75%),
+    linear-gradient(#3f3a33, #2a2622);
+}
+
+.kjopsglimt-bilde.maleri svg {
+  filter: drop-shadow(3px 6px 6px rgb(0 0 0 / 0.5));
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-tekst {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-navn {
+  color: var(--gull);
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.04em;
+}
+
+.logo-under {
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-2);
+}
+
+/* En prestasjon som medalje: ring i graden, mørk skive, ikonet i ringens lyse farge. */
+.merke-medalje {
+  --ring: #b87333;
+  --ring-lys: #e7b07a;
+  --ring-mork: #7f4a1c;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  border: 3px solid var(--ring);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--ring) 30%, var(--flate-2)), var(--flate-2) 70%);
+  box-shadow:
+    inset 0 0 0 1.5px var(--ring-lys),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  color: var(--ring-lys);
+}
+
+.merke-medalje.solv {
+  --ring: #8d949e;
+  --ring-lys: #e5e7eb;
+  --ring-mork: #4b5563;
+}
+
+.merke-medalje.gull {
+  --ring: #b8912a;
+  --ring-lys: #f7e3a1;
+  --ring-mork: #7d5d00;
+}
+
+/* Lyst tema: ikonet i en mørk tone av metallet — den lyse forsvant mot lys bunn (Pakke 42). */
+:root[data-theme='light'] .merke-medalje {
+  color: var(--ring-mork);
+}
+
+.merke-medalje.laast {
+  border: 2px dashed var(--kant);
+  background: transparent;
+  box-shadow: none;
+  color: var(--tekst-dempet);
+}
+
+/* Galleriet: rivalene og logoene (Pakke 41). */
+.galleri-del {
+  margin-top: 32px;
+}
+
+.galleri-logoer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.galleri-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--flate);
+  font-size: var(--skrift-2);
+  text-align: center;
+}
+
+/* Logoer og portretter (Pakke 41). */
+.papirlogo,
+.rivalportrett {
+  display: block;
+  flex: none;
+}
+
+/* En trykt ramme med rasterprikker bak tegningen. */
+.avisbilde {
+  float: right;
+  display: grid;
+  place-items: center;
+  margin: 2px 0 6px 10px;
+  padding: 4px;
+  border: 1px solid #1c1a16;
+  background:
+    radial-gradient(circle, rgb(28 26 22 / 0.16) 0.8px, transparent 1px) 0 0 / 5px 5px,
+    #ebe4d4;
+  color: #1c1a16;
+}
+
+/* Avispapiret er lyst i begge temaer, så tegningene får alltid den lyse himmelen der. */
+.avisbilde {
+  --himmel-dag-topp: #aebfcb;
+  --himmel-dag-horisont: #efe3cb;
+  --himmel-inne-topp: #c9c4bc;
+  --himmel-inne-horisont: #e6e1d8;
+}
+
+.avisbilde.ikon {
+  width: 44px;
+  height: 44px;
+}
+
+.avisbilde.ikon.stor {
+  width: 96px;
+  height: 96px;
+}
+
+.avisbilde.rival {
+  padding: 2px;
+}
+
+/* G11: en kamp viser begge lagenes våpen side om side, hjemmelaget til venstre. */
+.avisbilde.kamp {
+  grid-auto-flow: column;
+  gap: 3px;
+}
+
+.avisbilde.klubb {
+  position: relative;
+}
+
+/* Serien er vunnet: en liten pokal i hjørnet av våpenet, i trykksverte-gull. */
+.avisbilde-pokal {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  display: grid;
+  padding: 2px;
+  border: 1px solid #1c1a16;
+  border-radius: 50%;
+  background: #ebe4d4;
+  color: #7a5a12;
+}
+
+/* En startup som har gått konkurs, trykkes i grått. */
+.avisbilde.konkurs svg {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+/* Hjemmebanen øverst i klubbkortet (Pakke 42). */
+.stadion {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+/* Galleriveggen i Kunst (G6): maleriene på en vegg med lys ovenfra. */
+.kunstvegg {
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+  padding: 22px 16px 12px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse 40% 60% at 50% 0%, rgb(255 236 200 / 0.16), transparent 70%),
+    linear-gradient(#3a352f, #2a2622 78%, #1f1c19 78%, #1f1c19 80%, #2a2622 80%);
+}
+
+.kunstvegg-plass {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.kunstvegg-bilde {
+  display: grid;
+  place-items: center;
+  min-width: 52px;
+  height: 64px;
+  line-height: 0;
+  filter: drop-shadow(2px 4px 4px rgb(0 0 0 / 0.45));
+}
+
+/* Maleriet stort på detaljsiden (G7): samme vegg og messingplate som galleriveggen. */
+.scene.maleriscene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-bottom: 12px;
+  background:
+    radial-gradient(ellipse 45% 70% at 50% 0%, rgb(255 236 200 / 0.18), transparent 70%),
+    linear-gradient(#3a352f, #2a2622 86%, #1f1c19 86%, #1f1c19 88%, #2a2622 88%);
+}
+
+.maleriscene-bilde {
+  line-height: 0;
+  filter: drop-shadow(3px 6px 6px rgb(0 0 0 / 0.5));
+}
+
+.maleriscene-bilde.tom {
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgb(255 255 255 / 0.25);
+  filter: none;
+}
+
+.maleriscene-plate {
+  padding: 1px 8px;
+  background: linear-gradient(#c9a54a, #94782f);
+  color: #1c1a16;
+  font-size: var(--skrift-1);
+  white-space: nowrap;
+}
+
+.maleriscene-plate strong {
+  font-weight: var(--vekt-halvfet);
+}
+
+.kunstvegg-plass.tom .kunstvegg-bilde {
+  width: 72px;
+  border: 1px dashed rgb(255 255 255 / 0.25);
+  filter: none;
+}
+
+.kunstvegg-lapp {
+  padding: 2px 6px;
+  background: #ebe4d4;
+  color: #1c1a16;
+  font-size: var(--skrift-1);
+  line-height: 1.4;
+}
+
+.kunstvegg-plass figcaption {
+  padding: 1px 6px;
+  background: linear-gradient(#c9a54a, #94782f);
+  color: #1c1a16;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  white-space: nowrap;
+}
+
+.galleri-stadion {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.galleri-stadion .galleri-mork,
+.galleri-stadion .galleri-lys {
+  display: block;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+/* Lyst tema (Pakke 42): hvite og kremfargede flater forsvinner på hvitt. En hårfin
+   kant rundt hele bildet holder dem synlige uten å endre fargene. Mørkt tema er urørt.
+   Gjelder maleriene (hvite rammer) og stadion; tegningene på lerretet (.lerret, G1)
+   har en himmel bak og trenger den ikke. */
+:root[data-theme='light'] .illustrasjon:not(.lerret),
+:root[data-theme='light'] .stadion {
+  filter: drop-shadow(0 0 0.6px rgb(0 0 0 / 0.5));
+}
+
+@keyframes tegning-dreie {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tegning-propell {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(-1);
+  }
+}
+
+@keyframes tegning-rotor {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.12);
+  }
+}
+
+@keyframes tegning-skjenk {
+  0%,
+  25%,
+  90%,
+  100% {
+    transform: rotate(-35deg);
+  }
+  40%,
+  75% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tegning-strale {
+  0%,
+  40% {
+    opacity: 0;
+  }
+  44%,
+  72% {
+    opacity: 1;
+  }
+  76%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tegning-sipp {
+  0%,
+  38% {
+    opacity: 0;
+  }
+  41%,
+  78% {
+    opacity: 1;
+  }
+  81%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tegning-sipp-ned {
+  0%,
+  38% {
+    opacity: 1;
+  }
+  41%,
+  78% {
+    opacity: 0;
+  }
+  81%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tegning-veps {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(calc(1.4px * var(--utslag, 1)), calc(-0.8px * var(--utslag, 1)));
+  }
+  50% {
+    transform: translate(calc(0.4px * var(--utslag, 1)), calc(-1.8px * var(--utslag, 1)));
+  }
+  75% {
+    transform: translate(calc(-1.2px * var(--utslag, 1)), calc(-0.7px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-vend {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-18deg);
+  }
+}
+
+@keyframes tegning-vinge {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0.35);
+  }
+}
+
+@keyframes tegning-blink {
+  0% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0.12;
+  }
+}
+
+@keyframes tegning-svai {
+  0%,
+  100% {
+    transform: skewX(0deg);
+  }
+  50% {
+    transform: skewX(-2.2deg);
+  }
+}
+
+@keyframes tegning-vindu {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  50%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tegning-sveip {
+  0% {
+    transform: translateX(calc(-34px * var(--utslag, 1)));
+  }
+  55%,
+  100% {
+    transform: translateX(calc(52px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-damp {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(1px * var(--utslag, 1)));
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(-1.6px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-roeyk {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(calc(0.6px * var(--utslag, 1)), calc(-1.2px * var(--utslag, 1))) scale(1.15);
+  }
+}
+
+@keyframes tegning-flagg {
+  0%,
+  100% {
+    transform: skewY(0deg) scaleX(1);
+  }
+  50% {
+    transform: skewY(10deg) scaleX(0.88);
+  }
+}
+
+@keyframes tegning-flamme {
+  from {
+    transform: scaleY(0.9);
+  }
+  to {
+    transform: scaleY(1.08);
+  }
+}
+
+@keyframes tegning-boelge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(calc(1.4px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-duve {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(calc(0.6px * var(--utslag, 1))) rotate(0.6deg);
+  }
+}
+
+@keyframes tegning-hopp {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(-1.4px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-glid {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(calc(-3px * var(--utslag, 1)));
+  }
+}
+
+@keyframes tegning-gondol {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(calc(1.5px * var(--utslag, 1)), calc(-1.6px * var(--utslag, 1)));
+  }
+}
+
+@keyframes kjopsglimt-vokse {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}

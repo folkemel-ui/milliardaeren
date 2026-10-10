@@ -1,0 +1,587 @@
+/*
+ * varsler.css — Varslene, feiringen, kjøpsøyeblikket, velkomsten, «Nytt i» og hendelsesloggen.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+.hendelser {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hendelse {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--kant);
+}
+
+.hendelse p {
+  grid-column: 1 / -1;
+}
+
+.hendelse-tid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hendelse.advarsel {
+  border-color: var(--varsel);
+  color: inherit;
+}
+
+.hendelse.kritisk {
+  border-color: var(--minus);
+  color: inherit;
+}
+
+.velkomst {
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--gull-mørk);
+  background: var(--flate);
+  color: var(--tekst);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: avis-inn 0.25s ease-out;
+}
+
+.velkomst p {
+  margin: 0;
+}
+
+.velkomst-tittel {
+  margin: 0;
+  font-size: var(--skrift-5);
+  color: var(--gull);
+}
+
+.velkomst-formue {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--flate-2);
+}
+
+.velkomst-tall {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.velkomst-tall div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.velkomst-tall dt {
+  color: var(--tekst-dempet);
+}
+
+.velkomst-tall dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.velkomst-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.velkomst-liste li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: var(--skrift-3);
+}
+
+.velkomst-liste li.velkomst-rapporter {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.varsler {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--meny-høyde) + env(safe-area-inset-bottom) + 10px);
+  transform: translateX(-50%);
+  width: min(var(--kolonne), calc(100% - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.varsel {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--kant);
+  border-left-width: 4px;
+  background: var(--flate);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: var(--skrift-2);
+  animation: varsel-inn 0.25s ease-out;
+}
+
+.varsel.klikkbar {
+  cursor: pointer;
+}
+
+.varsel.varsel-god {
+  border-left-color: var(--gull);
+}
+
+.varsel.varsel-avis {
+  border-left-color: var(--gull);
+}
+
+.varsel.varsel-advarsel {
+  border-left-color: var(--varsel);
+}
+
+.varsel.varsel-kritisk {
+  border-left-color: var(--fare);
+}
+
+.varsel.varsel-feil {
+  border-left-color: var(--tekst-dempet);
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+}
+
+.varsel-ikon {
+  display: grid;
+  flex: none;
+}
+
+.varsel-god .varsel-ikon,
+.varsel-avis .varsel-ikon {
+  color: var(--gull);
+}
+
+.varsel-tekst {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.varsel-tekst span {
+  color: var(--tekst-dempet);
+}
+
+.varsel-lukk {
+  align-self: flex-start;
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-2);
+  padding: 2px 4px;
+}
+
+.feiring {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.feiring-blink {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--gull) 55%, transparent), transparent 65%);
+  animation: feiring-blink 1.4s ease-out forwards;
+}
+
+.feiring-midt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: feiring-tekst var(--feiring-ms, 3s) ease-out forwards;
+}
+
+.feiring-tekst {
+  font-size: clamp(34px, 11vw, 64px);
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.04em;
+  color: var(--gull-lys);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 32px color-mix(in srgb, var(--gull) 60%, transparent);
+}
+
+/* Den lille og millionen: teksten på en mørk flate, mellom to tynne gullstreker,
+   med en glans som går over én gang. Ingen blink. */
+.feiring.liten,
+.feiring.stor {
+  place-items: start center;
+}
+
+.feiring.liten {
+  pointer-events: none;
+}
+
+.feiring.liten .feiring-midt,
+.feiring.stor .feiring-midt {
+  margin-top: 22vh;
+  padding: 10px 26px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.feiring.liten .feiring-tekst {
+  font-size: clamp(22px, 6vw, 30px);
+}
+
+.feiring.stor .feiring-tekst {
+  font-size: clamp(30px, 9vw, 46px);
+}
+
+.feiring.liten .feiring-tekst,
+.feiring.stor .feiring-tekst {
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.08em;
+  text-shadow: none;
+  background: linear-gradient(100deg, var(--gull-lys) 35%, #fffbe8 50%, var(--gull-lys) 65%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: feiring-glans 1.4s ease-out 0.25s forwards;
+}
+
+.feiring-linje {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 6px 0;
+  background: linear-gradient(90deg, transparent, var(--gull), transparent);
+  transform: scaleX(0);
+  animation: feiring-linje 0.7s ease-out 0.1s forwards;
+}
+
+.konfetti.tynn {
+  width: 3px;
+  height: 10px;
+  border-radius: 1px;
+}
+
+/* Milliarden demper resten av spillet, så øyeblikket står for seg selv. */
+.feiring.milliard {
+  background: rgba(0, 0, 0, 0.6);
+  animation: feiring-mork var(--feiring-ms, 5.5s) ease-out forwards;
+}
+
+/* Milliarden: stråler som går rundt, gullmynter og en krone. */
+.feiring-straaler {
+  position: absolute;
+  width: 160vmax;
+  height: 160vmax;
+  background: repeating-conic-gradient(color-mix(in srgb, var(--gull) 22%, transparent) 0deg 8deg, transparent 8deg 22deg);
+  mask-image: radial-gradient(circle, #000 0%, transparent 45%);
+  animation: straaler-rundt 12s linear infinite, straaler-inn 0.8s ease-out;
+}
+
+.feiring.milliard .feiring-tekst {
+  font-size: clamp(38px, 12vw, 76px);
+}
+
+.feiring-krone {
+  display: grid;
+  color: var(--gull-lys);
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.6));
+  animation: krone-ned 0.9s cubic-bezier(0.3, 1.6, 0.5, 1) 0.3s both;
+}
+
+.feiring-under {
+  margin-top: 6px;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-halvfet);
+  color: var(--tekst);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.konfetti.mynt {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* Fusjonen: rivalens bedrift glir inn fra venstre og blir borte i din, som så gir et lite løft. */
+.kjopsglimt.fusjon {
+  animation-duration: 2.6s;
+}
+
+.kjopsglimt.fusjon .kjopsglimt-bilde > svg {
+  animation: fusjon-loft 0.5s ease-out 0.95s;
+}
+
+.kjopsglimt-under {
+  color: var(--gull);
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-fet);
+  opacity: 0;
+  animation: fusjon-under 0.4s ease-out 1s forwards;
+}
+
+.kjopsglimt {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  pointer-events: none;
+  /* En mørk flekk bak, så navnet kan leses oppå kortene. */
+  background: radial-gradient(ellipse 280px 260px at 50% 50%, rgba(0, 0, 0, 0.7), transparent);
+  animation: kjopsglimt-ut 1.8s ease-in forwards;
+}
+
+.kjopsglimt-glod {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--gull) 20%, transparent), transparent 45%);
+  animation: feiring-blink 1.4s ease-out forwards;
+}
+
+/* Et lysskjær som går over bildet én gang. */
+.kjopsglimt-skjaer {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.55) 50%, transparent 60%);
+  transform: translateX(-60%);
+  animation: kjopsglimt-skjaer 0.9s ease-out 0.35s forwards;
+}
+
+.kjopsglimt-overskrift {
+  position: relative;
+  margin-top: 10px;
+  color: var(--gull);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: ny-inn 0.4s ease-out 0.2s both;
+}
+
+.kjopsglimt-navn {
+  position: relative;
+  font-size: var(--skrift-5);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  animation: ny-inn 0.4s ease-out 0.28s both;
+}
+
+/* Lyst tema (G8): mørk tekst trenger en lys flekk bak, ikke en mørk. */
+:root[data-theme='light'] .kjopsglimt {
+  background: radial-gradient(ellipse 280px 260px at 50% 50%, rgba(255, 255, 255, 0.92), transparent);
+}
+
+:root[data-theme='light'] .kjopsglimt-navn {
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.9);
+}
+
+.konfetti {
+  position: absolute;
+  top: -20px;
+  width: 7px;
+  height: 12px;
+  border-radius: 2px;
+  animation-name: konfetti-fall;
+  animation-timing-function: cubic-bezier(0.3, 0.6, 0.5, 1);
+  animation-fill-mode: forwards;
+}
+
+.konfetti.bred {
+  width: 11px;
+  height: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .konfetti,
+    .feiring-blink,
+    .feiring-straaler,
+    .kjopsglimt-skjaer {
+      display: none;
+    }
+}
+
+/* «Nytt i 1.0» og endringsloggen (Pakke 43). */
+.nyheter-versjon {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nyheter-versjon + .nyheter-versjon {
+  padding-top: 14px;
+  border-top: 1px solid var(--kant);
+}
+
+.nyheter-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--skrift-2);
+  line-height: 1.4;
+}
+
+.nyheter-liste li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.nyheter-liste li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gull);
+}
+
+@keyframes varsel-inn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes feiring-glans {
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes feiring-linje {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes feiring-mork {
+  0% {
+    background: rgba(0, 0, 0, 0);
+  }
+  10%,
+  85% {
+    background: rgba(0, 0, 0, 0.6);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes straaler-rundt {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes straaler-inn {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+@keyframes krone-ned {
+  from {
+    opacity: 0;
+    transform: translateY(-60px) rotate(-20deg);
+  }
+}
+
+@keyframes fusjon-loft {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fusjon-under {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kjopsglimt-skjaer {
+  to {
+    transform: translateX(60%);
+  }
+}
+
+@keyframes kjopsglimt-ut {
+  0%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes feiring-blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes feiring-tekst {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  25% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes konfetti-fall {
+  to {
+    transform: translate(var(--drift), 110vh) rotate(var(--rotasjon));
+  }
+}

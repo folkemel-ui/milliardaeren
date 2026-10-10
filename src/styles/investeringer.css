@@ -1,0 +1,676 @@
+/*
+ * investeringer.css — Oversikten, Børs, handel og ordrer, selskaper og rivaler, startups, banken, sparing, obligasjoner, fond og kurstikk.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+.papirliste {
+  gap: 8px;
+}
+
+.papirrad {
+  display: grid;
+  grid-template-columns: auto 1fr 60px auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+}
+
+.papirrad-navn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.papirrad-navn strong {
+  font-size: var(--skrift-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.papirrad-kurs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stemning-spor {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--minus), var(--varsel) 50%, var(--pluss));
+}
+
+.stemning-merke {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--tekst);
+  border: 3px solid var(--bakgrunn);
+  transform: translate(-50%, -50%);
+  transition: left 0.6s ease-out;
+}
+
+.stemning-ender {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.detalj-kurs {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.handel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.felt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.felt input {
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--kant);
+  background: var(--bakgrunn);
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.felt input:focus {
+  outline: 2px solid var(--gull);
+  outline-offset: 0;
+}
+
+.andelsknapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.handel-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--skrift-3);
+}
+
+.handel-sum div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.handel-sum dt {
+  color: var(--tekst-dempet);
+}
+
+.handel-sum dd {
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.feilmelding {
+  color: var(--minus);
+  font-size: var(--skrift-2);
+}
+
+.bank {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bank-rad {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.bank-rad > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.bank-rente {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.belaaning-spor {
+  position: relative;
+  height: 10px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: var(--flate-2);
+}
+
+.belaaning-fyll {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pluss);
+  transition: width 0.4s ease-out;
+}
+
+.belaaning-fyll.advarsel {
+  background: var(--varsel);
+}
+
+.belaaning-fyll.kritisk {
+  background: var(--minus);
+}
+
+.belaaning-strek {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--tekst-dempet);
+}
+
+.belaaning-strek.fare {
+  background: var(--minus);
+}
+
+.fordeling-del.rival,
+.klasse-prikk.rival {
+  background: var(--klasse-rival);
+}
+
+.fordeling-del.startup,
+.klasse-prikk.startup {
+  background: var(--klasse-startup);
+}
+
+.fordeling-del.fond,
+.klasse-prikk.fond {
+  background: var(--klasse-fond);
+}
+
+.oversikt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.oversikt-tall {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.oversikt-tall > div {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--skrift-3);
+}
+
+.fordeling {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  margin-top: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fordeling-del {
+  flex-basis: 0;
+  min-width: 4px;
+}
+
+.fordeling-del.aksje,
+.klasse-prikk.aksje {
+  background: var(--klasse-aksje);
+}
+
+.fordeling-del.krypto,
+.klasse-prikk.krypto {
+  background: var(--klasse-krypto);
+}
+
+.fordeling-del.eiendom,
+.klasse-prikk.eiendom {
+  background: var(--klasse-eiendom);
+}
+
+.fordeling-del.sparing,
+.klasse-prikk.sparing {
+  background: var(--klasse-sparing);
+}
+
+.klasserad {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.klasse-prikk {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.klasserad-navn {
+  display: flex;
+  flex-direction: column;
+}
+
+.papirrad.eid {
+  border-color: var(--gull-mørk);
+}
+
+.sparekonto,
+.obligasjon,
+.forvalter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.obligasjon p,
+.forvalter p,
+.bransje p {
+  margin: 0;
+}
+
+.spare-rad {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stengt {
+  border-color: color-mix(in srgb, var(--varsel) 50%, var(--kant));
+  color: var(--varsel);
+  font-size: var(--skrift-2);
+}
+
+.forbes {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.forbes li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--kant);
+  font-size: var(--skrift-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.forbes li:last-child {
+  border-bottom: 0;
+}
+
+.forbes li.deg {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+}
+
+.forbes-plass {
+  color: var(--tekst-dempet);
+  font-weight: var(--vekt-fet);
+}
+
+.rivalkort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rivalkort.eid {
+  border-color: var(--gull-mørk);
+}
+
+.rival-topp {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rival-topp h2 {
+  font-size: var(--skrift-4);
+}
+
+.rival-andel {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--skrift-2);
+}
+
+.andelsbar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.andelsbar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gull-mørk), var(--gull));
+}
+
+.andelsbar-strek {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: var(--tekst-dempet);
+}
+
+.rival-knapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rival-knapper .knapp {
+  flex: 1;
+}
+
+.rival-knapper > span {
+  align-self: center;
+  flex: 1;
+}
+
+.rivalbedrifter {
+  border-top: 1px solid var(--kant);
+  padding-top: 10px;
+}
+
+.rivalbedrifter summary {
+  cursor: pointer;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-halvfet);
+}
+
+.rivalbedrifter ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rivalbedrifter li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rivalbedrifter li p {
+  margin: 0;
+}
+
+.rivalbedrift-topp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rivalbedrift-topp > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.bud-knapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.startupkort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.startup-besk {
+  margin: 0;
+}
+
+.runder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.runder li {
+  padding: 4px 0;
+  border-radius: 6px;
+  background: var(--flate-2);
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.runder li.ferdig {
+  color: var(--gull);
+}
+
+.runder li.naa {
+  background: var(--gull);
+  color: var(--paa-gull);
+  font-weight: var(--vekt-fet);
+}
+
+.startup-slutt {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.startup-slutt li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--skrift-3);
+}
+
+.fondkort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fondkort.eid {
+  border-color: var(--klasse-fond);
+}
+
+.fondkort h2 {
+  font-size: var(--skrift-4);
+}
+
+.fondkort .minigraf {
+  width: 100%;
+  height: 32px;
+}
+
+.fond-besk {
+  margin: 0;
+}
+
+.rapportkort p {
+  margin: 8px 0 0;
+}
+
+.dashbord {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.flis {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  min-width: 0;
+}
+
+.flis .tall-stort {
+  font-size: var(--skrift-5);
+}
+
+.flis.aktiv {
+  border-color: var(--gull);
+  box-shadow: inset 0 0 0 1px var(--gull);
+}
+
+.rival-melding {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+  color: var(--gull);
+  font-size: var(--skrift-2);
+}
+
+.ordrer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ordrer .segment button {
+  font-size: var(--skrift-2);
+}
+
+.ordre-felt {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ordre-felt input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* «+30 % i dag · Helg» på bedriftskortet. */
+.i-dag {
+  display: block;
+  margin: 6px 0 0;
+}
+
+.tikk {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.tikk-pil {
+  font-size: 0.6em;
+  line-height: 1;
+}
+
+.tikk-pil.opp {
+  color: var(--pluss);
+}
+
+.tikk-pil.ned {
+  color: var(--minus);
+}
+
+.tikk-tall {
+  border-radius: 4px;
+}
+
+.blink-opp {
+  animation: blink-opp 0.6s ease-out;
+}
+
+.blink-ned {
+  animation: blink-ned 0.6s ease-out;
+}
+
+/* «Maks» valgt i handelsboksen: antallet følger kursen til du kjøper. */
+.andelsknapper .knapp.aktiv {
+  border-color: var(--gull);
+  color: var(--gull);
+}
+
+.forbes-navn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Deg på Forbes-lista: en gull medaljong i stedet for et portrett. */
+.forbes-deg {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gull);
+  color: var(--paa-gull);
+}
+
+.rival-topp {
+  align-items: center;
+}
+
+.rival-navn {
+  flex: 1;
+  min-width: 0;
+}
+
+@keyframes blink-opp {
+  from {
+    color: var(--pluss);
+    background: color-mix(in srgb, var(--pluss) 22%, transparent);
+  }
+}
+
+@keyframes blink-ned {
+  from {
+    color: var(--minus);
+    background: color-mix(in srgb, var(--minus) 22%, transparent);
+  }
+}

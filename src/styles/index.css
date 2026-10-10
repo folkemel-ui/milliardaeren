@@ -1,0 +1,17 @@
+/*
+ * Stilarkene, i den rekkefølgen de gjelder (Pakke 63). En regel i en senere fil
+ * vinner over en like spesifikk regel i en tidligere — derfor står bred.css sist.
+ */
+@import './grunnlag.css';
+@import './toppfelt.css';
+@import './bedrifter.css';
+@import './investeringer.css';
+@import './eiendom.css';
+@import './kart.css';
+@import './luksus.css';
+@import './profil.css';
+@import './oppgjor.css';
+@import './avisa.css';
+@import './varsler.css';
+@import './tegninger.css';
+@import './bred.css';

@@ -17,6 +17,7 @@ import { Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
 import { nettoInn, nettoUt, OppgjorBlokk } from '../komponenter/Oppgjor'
 import { Luksuskort } from '../screens/Luksus'
+import { alleStiler } from './stiler'
 
 const SJU = ['kjopesenter', 'naeringsbygg', 'oy', 'fyret', 'hoppbakken', 'borgen', 'tarnet']
 
@@ -101,7 +102,7 @@ describe('detaljsidene (G7)', () => {
   })
 
   it('detaljkortet tar hele bredden i det brede oppsettet', () => {
-    const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
+    const css = alleStiler()
     expect(css).toMatch(/\.kortliste:not\([^)]*\.tingkort[^)]*\)/)
   })
 })
@@ -175,7 +176,7 @@ describe('lasteskjermen (G7)', () => {
   })
 
   it('det første bildet glir fram', () => {
-    const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
+    const css = alleStiler()
     expect(css).toMatch(/\.app \{[^}]*animation: forste-bilde/)
   })
 })

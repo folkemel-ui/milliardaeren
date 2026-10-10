@@ -15,7 +15,7 @@ import { Kartmerke } from './Kartmerke'
  * Norgeskartet (Grafikkpakke G3): et rolig atlas med ekte kystlinjer fra
  * Natural Earth. Havet, Sverige og Danmark i dempede toner, Norge i varm
  * stein med myke fjellskygger, og et innfelt med Nord-Norge og Lofoten
- * nederst til høyre. Fargene følger temaet (--kart-* i styles.css).
+ * nederst til høyre. Fargene følger temaet (--kart-* i styles/grunnlag.css).
  * Geometrien (projeksjon, sider for navnene, merkene) står i norgeskartet.ts,
  * der en test sjekker at ingenting overlapper.
  *

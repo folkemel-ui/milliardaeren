@@ -53,7 +53,7 @@
  *
  * Noen deler har en `anim-`-klasse (damp, røyk, flagg, flamme, bølger …).
  * De beveger seg bare på den store scenen i detaljvisningene, og aldri når
- * spilleren har bedt om mindre bevegelse — se styles.css.
+ * spilleren har bedt om mindre bevegelse — se styles/tegninger.css og styles/grunnlag.css.
  *
  * Historie: til og med G8 sto noen tegninger i den gamle stilen (48 × 48,
  * paletten `F`, én `Grunn`, flate former sett fra siden). G9 tegnet de ti siste

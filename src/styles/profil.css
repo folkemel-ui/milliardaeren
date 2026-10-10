@@ -1,0 +1,436 @@
+/*
+ * profil.css — Profil: formuen, prestasjoner, rekorder, trofeer, regnskap og skatt, statistikk, innstillinger og flytting av spillet.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+.profil-formue {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statistikk {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.statistikk dt {
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tekst-dempet);
+}
+
+.statistikk dd {
+  font-weight: var(--vekt-fet);
+  font-variant-numeric: tabular-nums;
+}
+
+.skattekort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.regninger,
+.ordreliste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.regninger li,
+.ordreliste li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.regninger li > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.regninger li.etterskatt {
+  box-shadow: inset 0 0 0 1px var(--minus);
+}
+
+.offshore {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kant);
+}
+
+.offshore p {
+  margin: 2px 0 0;
+}
+
+.trofeer li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trofeer li > span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.flytt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flytt p {
+  margin: 0;
+}
+
+.flytt-kode {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--kant);
+  background: var(--flate-2);
+  color: var(--tekst);
+  font: 12px/1.4 ui-monospace, monospace;
+  resize: vertical;
+  word-break: break-all;
+}
+
+.flytt-fil {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.flytt-fil input {
+  display: none;
+}
+
+.regnskap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.regnskap-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.regnskap-liste li {
+  border-bottom: 1px solid var(--kant);
+}
+
+.regnskap-liste li:last-child {
+  border-bottom: 0;
+}
+
+.regnskap-rad {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+  width: 100%;
+  padding: 10px 0;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.regnskap-navn {
+  font-weight: var(--vekt-halvfet);
+}
+
+.regnskap .oppgjor {
+  margin-top: 0;
+  padding: 0 0 12px;
+  border-top: 0;
+}
+
+.prestasjoner {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  /* minmax(0, …): et langt ord i en prestasjon skal ikke skyve kolonnen ut av skjermen. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.prestasjon {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--flate-2);
+  opacity: 0.55;
+}
+
+.prestasjon.klart {
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px var(--gull-mørk);
+}
+
+.prestasjon-emoji {
+  grid-row: 1 / 3;
+  align-self: center;
+  display: grid;
+}
+
+.prestasjon-navn {
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+}
+
+.prestasjon.klart .prestasjon-navn {
+  color: var(--gull);
+}
+
+.prestasjon-besk {
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.rekorder {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+
+.rekorder div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--kant);
+  font-size: var(--skrift-3);
+}
+
+.rekorder div:last-child {
+  border-bottom: 0;
+}
+
+.rekorder dt {
+  color: var(--tekst-dempet);
+}
+
+.rekorder dd {
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.profil-nivaa {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+}
+
+/* Hva formuen består av, på Profil → Meg (Pakke 62). */
+.formuerader {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.formuerad-knapp {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto 12px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  border-top: 1px solid var(--kant);
+  text-align: left;
+  color: inherit;
+}
+
+.formuerad.under .formuerad-knapp {
+  min-height: 34px;
+}
+
+.formuerad.under .formuerad-navn {
+  padding-left: 12px;
+  color: var(--tekst-dempet);
+}
+
+.formuerad-verdi {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.formuerad.sum .formuerad-knapp {
+  border-top-color: var(--tekst);
+  font-weight: var(--vekt-fet);
+}
+
+.profil-bunn {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+  opacity: 0.9;
+}
+
+.trofe-ikon {
+  display: grid;
+}
+
+.kildetabell {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.kildetabell th,
+.kildetabell td {
+  padding: 5px 0;
+  text-align: right;
+  font-weight: var(--vekt-normal);
+}
+
+.kildetabell th:first-child {
+  text-align: left;
+}
+
+.kildetabell thead th {
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kildetabell td:last-child {
+  width: 4.5em;
+}
+
+.kildetabell tbody tr + tr {
+  border-top: 1px solid var(--kant);
+}
+
+.kildetabell tfoot {
+  border-top: 1px solid var(--tekst-dempet);
+}
+
+.kildetabell tfoot th,
+.kildetabell tfoot td {
+  font-weight: var(--vekt-halvfet);
+}
+
+.kildetabell .kilde-farge {
+  margin-right: 8px;
+}
+
+.kildesoyler {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.kildesoyler li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 4px;
+}
+
+.kildesoyle {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.kildesoyle i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* Lista over de neste målene på Profil. */
+.kommende-maal {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--skrift-2);
+}
+
+.kommende-maal li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.kommende-maal li + li {
+  border-top: 1px solid var(--kant);
+}
+
+.kommende-maal li > span:last-child {
+  color: var(--gull);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kommende-tittel {
+  margin: 14px 0 0;
+}
+
+/* Innstillingskortet (Pakke 43): ett valg per rad med en strek imellom. */
+.innstillinger {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.innstilling {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.innstilling + .innstilling {
+  padding-top: 14px;
+  border-top: 1px solid var(--kant);
+}
+
+.innstilling p {
+  margin: 0;
+}
+
+.versjonslinje {
+  margin: 8px 0 0;
+  text-align: center;
+}

@@ -14,8 +14,9 @@ import { nattstil } from '../dagognatt'
 import { BEDRIFTSTEGNINGER, Illustrasjon, NY_STIL, type Trinn } from '../komponenter/Illustrasjoner'
 import { IScenen, LYSFARGER, S } from '../komponenter/Tegnestil'
 import { DAG_SEK } from '../../engine/kalender'
+import { alleStiler } from './stiler'
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const css = alleStiler().replace(/\r\n/g, '\n')
 const kilde = readFileSync(new URL('../komponenter/Illustrasjoner.tsx', import.meta.url), 'utf8')
 
 const tegn = (id: string, iScenen: boolean, trinn: Trinn = 0, forbedringer = 0) =>

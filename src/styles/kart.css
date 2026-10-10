@@ -1,0 +1,422 @@
+/*
+ * kart.css — Norgeskartet, verdenskartet, kartmerkene og gatebildet.
+ * Eier: grafikksporet. Se «Working side by side» i Ideer.md.
+ */
+
+.norgeskart {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Kartene (G3): hav, Norge, nabolandene, innsjøene og gradnettet. */
+.kart-land {
+  fill: var(--kart-land);
+  stroke: var(--kart-kyst);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+
+.kart-naboland {
+  fill: var(--kart-naboland);
+  stroke: var(--kart-grense);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+
+.kart-innsjo {
+  fill: var(--kart-hav);
+  stroke: var(--kart-kyst);
+  stroke-width: 0.3;
+}
+
+.kart-nett {
+  stroke: var(--kart-nett);
+  stroke-width: 0.5;
+}
+
+/* Fjellene som myk relieff: lyst mot nordvest, skygge mot sørøst. */
+.kart-fjell {
+  fill: var(--kart-fjell);
+  opacity: 0.5;
+}
+
+.kart-fjell-lys {
+  fill: var(--kart-fjell-lys);
+  opacity: 0.4;
+}
+
+/* Fjellene som myk relieff: lyst mot nordvest, skygge mot sørøst. */
+.kart-fjell {
+  fill: var(--kart-fjell);
+  opacity: 0.5;
+}
+
+.kart-fjell-lys {
+  fill: var(--kart-fjell-lys);
+  opacity: 0.4;
+}
+
+.kart-havnavn {
+  fill: var(--kart-havtekst);
+  font-style: italic;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.kart-landnavn {
+  fill: var(--kart-landtekst);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.3em;
+  pointer-events: none;
+}
+
+.kart-by {
+  cursor: pointer;
+  outline: none;
+}
+
+.kart-treff {
+  fill: transparent;
+}
+
+/* Markørene (G3): en liten prikk, lys når du eier noe der, gull bare når du eier hele byen. */
+.kart-prikk {
+  fill: var(--flate);
+  stroke: var(--tekst-dempet);
+  stroke-width: 1.1;
+}
+
+.kart-by.eid .kart-prikk {
+  fill: var(--tekst);
+  stroke: var(--flate);
+  stroke-width: 1;
+}
+
+.kart-by.hel .kart-prikk {
+  fill: var(--gull);
+}
+
+.kart-valgt {
+  fill: none;
+  stroke: var(--tekst);
+  stroke-width: 1.2;
+}
+
+.kart-by:focus-visible .kart-prikk {
+  stroke: var(--tekst);
+  stroke-width: 2;
+}
+
+/* Antallet i et lite merke ved prikken. */
+.kart-merke rect {
+  fill: var(--flate);
+  stroke: var(--kart-kyst);
+  stroke-width: 0.5;
+}
+
+.kart-by.hel .kart-merke rect {
+  fill: var(--gull);
+  stroke: none;
+}
+
+.kart-merke-krone {
+  fill: var(--paa-gull);
+}
+
+/* Trendpila ved navnet: prisene i regionen siste to timer. */
+.kart-trendpil {
+  pointer-events: none;
+}
+
+.kart-trendpil.opp {
+  fill: var(--pluss);
+}
+
+.kart-trendpil.ned {
+  fill: var(--minus);
+}
+
+/* Stedene med bare jord: en liten, hul prikk til du eier noe der. */
+.kart-by.jord:not(.eid) .kart-prikk {
+  fill: none;
+  stroke-width: 1.2;
+}
+
+/* Innfeltet med Nord-Norge: en tynn ramme rundt. */
+.kart-innfelt-ramme {
+  fill: none;
+  stroke: var(--kant);
+  stroke-width: 1;
+}
+
+.kart-antall {
+  fill: var(--tekst);
+  font-size: 6.8px;
+  font-weight: var(--vekt-tung);
+  pointer-events: none;
+}
+
+.kart-by.hel .kart-antall {
+  fill: var(--paa-gull);
+}
+
+/* Navnene får en myk kant i flatefargen, så de leses over både land og hav. */
+.kart-navn {
+  fill: var(--tekst-dempet);
+  font-size: 10px;
+  font-weight: var(--vekt-halvfet);
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--flate) 60%, transparent);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.kart-by.eid .kart-navn,
+.kart-by.valgt .kart-navn {
+  fill: var(--tekst);
+}
+
+.verdenskart-ramme {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.verdenskart-ramme figcaption {
+  text-align: center;
+}
+
+.verdenskart {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.kart-rute {
+  fill: none;
+  stroke: var(--gull-mørk);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+
+.kart-rute.stengt {
+  stroke: var(--kant);
+}
+
+.kart-by.stengt .kart-prikk {
+  fill: var(--flate-2);
+  stroke: var(--kant);
+}
+
+.kart-by.hjem {
+  cursor: default;
+}
+
+.kart-leie {
+  fill: var(--pluss);
+  font-size: 7.5px;
+  font-weight: var(--vekt-fet);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.gatebilde {
+  width: min(460px, calc(100% - 32px));
+}
+
+/* Gata: husene står på en vei langs bunnen. */
+/* Gata: byggene står på rad på en vei med stiplet midtlinje, og gata ruller sidelengs når den blir lang. */
+.gate {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 6px 4px 20px;
+  background:
+    repeating-linear-gradient(90deg, var(--gull-mørk) 0 10px, transparent 10px 20px) left 0 bottom 7px / 100% 2px no-repeat,
+    linear-gradient(var(--kant), var(--kant)) left 0 bottom 0 / 100% 16px no-repeat;
+  border-radius: 10px 10px 4px 4px;
+  scrollbar-width: thin;
+}
+
+/* Mer av gata utenfor kanten (G8): den kanten blekner, så du ser at du kan rulle. */
+.gate.mer-hoyre {
+  mask-image: linear-gradient(90deg, #000 82%, transparent);
+}
+
+.gate.mer-venstre {
+  mask-image: linear-gradient(90deg, transparent, #000 18%);
+}
+
+.gate.mer-venstre.mer-hoyre {
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.hus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 96px;
+  padding: 6px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.hus:hover {
+  background: color-mix(in srgb, var(--tekst) 4%, transparent);
+}
+
+.hus.valgt {
+  border-color: var(--gull);
+  background: color-mix(in srgb, var(--gull) 8%, transparent);
+}
+
+.hus-bilde {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  height: 76px;
+}
+
+/* Hvor mange av typen du eier. */
+.hus-antall {
+  position: absolute;
+  top: 0;
+  right: -6px;
+}
+
+.hus-navn {
+  max-width: 92px;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  line-height: 1.2;
+}
+
+.hus-under {
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+}
+
+/* Oppusset: grønn linje under. Luksus: gull, med et gullskjær rundt bygget. */
+.hus.s1 .hus-under {
+  color: var(--pluss);
+}
+
+.hus.s2 .hus-under {
+  color: var(--gull);
+}
+
+.hus.s2 .hus-bilde > svg {
+  filter: drop-shadow(0 0 6px rgb(212 175 55 / 0.55));
+}
+
+/* Stillas mens håndverkerne holder på: bygget er blekt, med en kran i hjørnet. */
+.hus.stillas .hus-bilde > svg {
+  opacity: 0.5;
+}
+
+.hus-stillas {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  color: var(--gull);
+}
+
+.hus.stillas .hus-under {
+  color: var(--gull);
+}
+
+/* En ledig tomt: stiplet ramme med pluss. */
+.hus.ledig .hus-bilde {
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-top: 12px;
+  border: 1.5px dashed var(--kant);
+  border-radius: 8px;
+}
+
+.hus-pluss {
+  color: var(--tekst-dempet);
+  font-size: 26px;
+  line-height: 1;
+}
+
+/* Jord og landemerker i utkanten: dempet til du eier dem. */
+.hus.utkant .hus-bilde > svg {
+  opacity: 0.6;
+}
+
+.hus.utkant.din .hus-bilde > svg {
+  opacity: 1;
+}
+
+.gate-kort {
+  margin-top: 4px;
+}
+
+/* Havet bak landet, på begge kartene. */
+.kart-hav {
+  fill: var(--kart-hav);
+}
+
+.kart-ramme {
+  position: relative;
+}
+
+.norgeskart-ramme {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Dag og natt: landet og havet mørkner etter klokka i spillet (--natt 0–1). */
+.kart-natt .kart-land {
+  fill: color-mix(in srgb, var(--kart-land), #0a1024 calc(var(--natt, 0) * 45%));
+}
+
+.kart-natt .kart-naboland {
+  fill: color-mix(in srgb, var(--kart-naboland), #0a1024 calc(var(--natt, 0) * 45%));
+}
+
+.kart-natt .kart-hav,
+.kart-natt .kart-innsjo {
+  fill: color-mix(in srgb, var(--kart-hav), #050814 calc(var(--natt, 0) * 45%));
+}
+
+.kart-lys,
+.reisende {
+  pointer-events: none;
+}
+
+/* En ring som brer seg ut fra byen når du kjøper noe der. */
+.kart-puls {
+  fill: none;
+  stroke: var(--gull);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kart-puls 1.2s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes kart-puls {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}

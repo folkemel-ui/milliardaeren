@@ -1,0 +1,293 @@
+/*
+ * avisa.css — Avisa: hodet, sakene, børslinja og «Uka di».
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+.avis {
+  width: 100%;
+  max-width: var(--kolonne);
+  max-height: 92dvh;
+  overflow-y: auto;
+  padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
+  border-radius: 18px 18px 0 0;
+  background: #f4efe3;
+  color: #1c1a16;
+  font-family: Georgia, 'Times New Roman', serif;
+  animation: avis-inn 0.25s ease-out;
+}
+
+.avis-hode {
+  position: relative;
+  text-align: center;
+  padding-bottom: 6px;
+  border-bottom: 3px double #1c1a16;
+}
+
+/* Nummer, dato og pris over avisnavnet, som på en ekte forside. */
+.avis-topplinje {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 40px 6px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #1c1a16;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5a5448;
+}
+
+.avis-lukk {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  width: 36px;
+  height: 36px;
+  color: #1c1a16;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-4);
+}
+
+.avis-navn {
+  font-size: var(--skrift-6);
+  font-weight: var(--vekt-tung);
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.avis-under {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #1c1a16;
+  font-size: var(--skrift-2);
+  font-style: italic;
+  color: #5a5448;
+}
+
+.avis-tom {
+  margin-top: 16px;
+  text-align: center;
+  font-style: italic;
+}
+
+.utgave {
+  padding: 14px 0;
+  border-bottom: 1px solid #cfc6b3;
+}
+
+.utgave:last-child {
+  border-bottom: 0;
+}
+
+.hovedsak h2 {
+  font-size: var(--skrift-5);
+  line-height: 1.15;
+}
+
+.sak p {
+  margin-top: 4px;
+  font-size: var(--skrift-3);
+  line-height: 1.45;
+  color: #3b372f;
+}
+
+.hovedsak p {
+  font-size: var(--skrift-3);
+}
+
+/* De andre sakene i to spalter med en strek imellom, som i en avis. */
+.saker {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #cfc6b3;
+  columns: 2;
+  column-gap: 18px;
+  column-rule: 1px solid #cfc6b3;
+}
+
+.saker .sak {
+  break-inside: avoid;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 340px) {
+  .saker {
+      columns: 1;
+    }
+}
+
+.sak h3 {
+  margin: 0;
+  font-size: var(--skrift-4);
+  line-height: 1.25;
+}
+
+.sak.deg h2,
+.sak.deg h3,
+.overskrifter .deg {
+  color: #8a1f11;
+}
+
+.avis-tidligere {
+  margin: 18px 0 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5a5448;
+}
+
+.utgave-dato {
+  margin: 0 0 6px;
+  font-size: var(--skrift-2);
+  font-style: italic;
+  font-weight: var(--vekt-normal);
+  color: #5a5448;
+}
+
+.overskrifter {
+  margin: 0;
+  padding-left: 18px;
+  font-size: var(--skrift-3);
+  line-height: 1.5;
+}
+
+.avis .oppgjor {
+  --oppgjor-kant: #cfc6b3;
+  padding: 12px;
+  border: 2px solid #1c1a16;
+  background: #ebe4d3;
+}
+
+.avis .oppgjor .pluss {
+  color: #1d7a3e;
+}
+
+.avis .oppgjor .minus {
+  color: #a3241a;
+}
+
+.avis .oppgjor {
+  --oppgjor-inn: #1d7a3e;
+  --oppgjor-ut: #a3241a;
+  --oppgjor-for: #a99d87;
+  --oppgjor-etter: #94782f;
+}
+
+/* «Uka di» i søndagsavisa (Pakke 60). */
+.uka-di-tittel {
+  margin: 14px 0 6px;
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-fet);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tekst-dempet);
+}
+
+.uka-di-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--skrift-2);
+}
+
+.uka-di-liste li {
+  display: grid;
+  grid-template-columns: 2.2em 1fr auto;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--kant);
+}
+
+.uka-di-liste li.deg {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+}
+
+.uka-di-plass {
+  color: var(--tekst-dempet);
+  font-variant-numeric: tabular-nums;
+}
+
+.utgave-oppgjor {
+  margin-top: 6px;
+  font-size: var(--skrift-2);
+  font-style: italic;
+}
+
+/* Vinduene tar selv imot fokus når de åpnes (useFokusfelle); knappene inni har egen ring. */
+.avis:focus,
+.velkomst:focus {
+  outline: none;
+}
+
+.borslinje {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px solid #1c1a16;
+  list-style: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-1);
+  font-variant-numeric: tabular-nums;
+  color: #1c1a16;
+}
+
+.borslinje-tittel {
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.borslinje .opp {
+  color: #2f6b3a;
+}
+
+.borslinje .ned {
+  color: #8a1f11;
+}
+
+.sak-seksjon {
+  display: block;
+  margin-bottom: 2px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-fet);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a1f11;
+}
+
+.overskrifter .sak-seksjon {
+  display: inline;
+  margin-right: 4px;
+  color: #5a5448;
+}
+
+/* Hovedsaken: stor forbokstav. */
+.forbokstav p::first-letter {
+  float: left;
+  margin: 3px 6px 0 0;
+  font-size: var(--skrift-6);
+  font-weight: var(--vekt-fet);
+  line-height: 0.85;
+}
+
+.hovedsak::after,
+.saker .sak::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+@keyframes avis-inn {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}

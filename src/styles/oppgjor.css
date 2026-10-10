@@ -1,0 +1,147 @@
+/*
+ * oppgjor.css — Oppgjørene (uke, måned, år) med stolper.
+ * Eier: grafikksporet. Se «Working side by side» i Ideer.md.
+ */
+
+.oppgjor {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--oppgjor-kant, var(--kant));
+}
+
+.oppgjor-tittel {
+  margin: 0;
+  font-size: var(--skrift-4);
+}
+
+.oppgjor-periode {
+  margin-top: 2px;
+  font-size: var(--skrift-2);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.oppgjor-tall {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-2);
+}
+
+.oppgjor-tall div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.oppgjor-tall .sum {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--oppgjor-kant, var(--kant));
+  font-weight: var(--vekt-fet);
+}
+
+.oppgjor-tall dd {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* G7: oppgjøret som en årsrapport. Stolpene går fra én nullinje — inn til høyre, ut til venstre —
+   og formuen før og etter står som to stolper. Avisa har egne, mørkere farger på papiret. */
+.oppgjor {
+  --oppgjor-inn: var(--pluss);
+  --oppgjor-ut: var(--minus);
+  --oppgjor-for: var(--tekst-dempet);
+  --oppgjor-etter: var(--gull);
+}
+
+.oppgjor-tall .med-stolpe {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.oppgjor-tall .med-stolpe dd {
+  display: contents;
+}
+
+.oppgjor-stolpe {
+  position: relative;
+  display: block;
+  flex-basis: 100%;
+  height: 6px;
+}
+
+.oppgjor-stolpe::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--null, 0%);
+  width: 1px;
+  background: var(--oppgjor-kant, var(--kant));
+}
+
+.oppgjor-stolpe > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.oppgjor-stolpe .inn,
+.oppgjor-stolpe .for,
+.oppgjor-stolpe .etter {
+  border-radius: 0 3px 3px 0;
+}
+
+.oppgjor-stolpe .inn {
+  background: var(--oppgjor-inn);
+}
+
+.oppgjor-stolpe .ut {
+  border-radius: 3px 0 0 3px;
+  background: var(--oppgjor-ut);
+}
+
+.oppgjor-stolpe .for {
+  background: var(--oppgjor-for);
+}
+
+.oppgjor-stolpe .etter {
+  background: var(--oppgjor-etter);
+}
+
+.oppgjor-formue {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 10px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.oppgjor-formue dd {
+  text-align: right;
+}
+
+.oppgjor-formue .oppgjor-stolpe {
+  height: 10px;
+}
+
+.oppgjor-formue .oppgjor-stolpe > span {
+  left: 0;
+}
+
+.oppgjor-formue .oppgjor-endring {
+  grid-column: 2 / -1;
+  font-weight: var(--vekt-fet);
+}
+
+.oppgjor-merknad {
+  margin-top: 6px;
+  font-size: var(--skrift-2);
+  line-height: 1.4;
+}

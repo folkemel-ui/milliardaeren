@@ -4,7 +4,6 @@
  * endelig ble sjekket i det lyse temaet.
  */
 
-import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -12,8 +11,9 @@ import { nyttSpill } from '../../engine/start'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
 import { Illustrasjon, NY_STIL } from '../komponenter/Illustrasjoner'
 import { Toppfelt } from '../komponenter/Toppfelt'
+import { alleStiler } from './stiler'
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const css = alleStiler().replace(/\r\n/g, '\n')
 const tegn = (id: string, utklipp = false) => renderToStaticMarkup(createElement(Illustrasjon, { id, størrelse: 96, utklipp }))
 
 /** Id-ene en tegning definerer, og id-ene den peker til med url(#…). */

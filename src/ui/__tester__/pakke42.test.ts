@@ -1,6 +1,5 @@
 /** Pakke 42: stadion som vokser, lagrene som scener og tegningene i det lyse temaet. */
 
-import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -9,6 +8,7 @@ import { Stadion, STADIONTRINN } from '../komponenter/Stadion'
 import { drakt } from '../komponenter/Klubbvaapen'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { Maleribilde } from '../komponenter/Malerier'
+import { alleStiler } from './stiler'
 
 const tegn = (divisjon: number, navn = KLUBBNAVN[0]) => renderToStaticMarkup(createElement(Stadion, { divisjon, navn }))
 
@@ -42,7 +42,7 @@ describe('stadion', () => {
 })
 
 describe('det lyse temaet', () => {
-  const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
+  const css = alleStiler()
 
   it('tegningene har en klasse, og får en hårfin kant bare i det lyse temaet', () => {
     // Maleriene har klassen og får kanten (hvite rammer); tegningene på lerretet har himmel og slipper.

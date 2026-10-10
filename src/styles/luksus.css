@@ -1,0 +1,552 @@
+/*
+ * luksus.css — Statusen, luksuskortene, lagrene (garasje, havn, hangar) og klubben.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+.luksuskort > .bedrift-ikon,
+.luksuskort > .aapne-bilde {
+  grid-row: span 2;
+}
+
+/* På detaljsiden står scenen over hele kortet, med navnet til venstre og knappen til høyre under. */
+.luksuskort > .scene {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.luksuskort.i-detalj > :last-child {
+  justify-self: end;
+}
+
+.luksuskort > :last-child {
+  justify-self: start;
+}
+
+.klubbkort {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+}
+
+.klubbkort.eid {
+  border-color: var(--gull-mørk);
+}
+
+.klubbkort:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.klubb-emoji {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--flate-2);
+  font-size: 24px;
+}
+
+.klubbtopp-navn,
+.klubbvalgt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.klubbvalgt {
+  margin: 12px 0 4px;
+  font-size: var(--skrift-4);
+}
+
+.tabell-lag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kampoppsett .klubbvaapen {
+  align-self: center;
+  margin-bottom: 4px;
+}
+
+.klubbkort-midt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.klubbkjop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.klubbkjop p {
+  margin: 0;
+}
+
+.navnevalg {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.navnevalg button {
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--kant);
+  background: var(--flate-2);
+  font-weight: var(--vekt-halvfet);
+}
+
+.navnevalg button.aktiv {
+  border-color: var(--gull);
+  color: var(--gull);
+}
+
+.klubbtopp {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.klubbtall {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.klubbtall > div {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.kampoppsett {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.kampoppsett > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.kamp-mot {
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-2);
+}
+
+.kamp-forventet {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.kampliste,
+.spillerliste,
+.trofeer {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kampliste li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--skrift-3);
+}
+
+.resultat {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.resultat.rS {
+  background: #16a34a;
+}
+
+.resultat.rU {
+  background: #6b7280;
+}
+
+.resultat.rT {
+  background: #dc2626;
+}
+
+.tabell {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kolonnenavnene er etiketter, som .etikett. */
+.tabell th {
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: right;
+  white-space: nowrap;
+  padding: 4px 6px;
+}
+
+.tabell td {
+  text-align: right;
+  padding: 6px;
+  border-top: 1px solid var(--kant);
+}
+
+.tabell th:nth-child(2),
+.tabell td:nth-child(2) {
+  text-align: left;
+  width: 100%;
+}
+
+.tabell th:first-child,
+.tabell td:first-child {
+  text-align: left;
+  border-left: 3px solid transparent;
+}
+
+.tabell tr.opp td:first-child {
+  border-left-color: var(--pluss);
+}
+
+.tabell tr.ned td:first-child {
+  border-left-color: var(--minus);
+}
+
+.tabell tr.deg td {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+}
+
+.spillerliste li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.spillerliste li:not(.start) .spiller-styrke {
+  opacity: 0.7;
+}
+
+.spiller-navn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.spiller-styrke {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: conic-gradient(var(--gull) var(--andel), var(--flate-2) 0);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-tung);
+  position: relative;
+  isolation: isolate;
+}
+
+.spiller-styrke::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--flate);
+  z-index: -1;
+}
+
+.spiller-knapp {
+  width: 96px;
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-topp {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-topp > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-merke {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--gull-lys), var(--gull) 55%, var(--gull-mørk));
+  color: var(--paa-gull);
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-tung);
+}
+
+.status-navn {
+  font-size: var(--skrift-4);
+}
+
+.status-poeng {
+  align-self: start;
+}
+
+.status-fordeler {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-fordeler div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status-fordeler dt {
+  color: var(--tekst-dempet);
+}
+
+.status-fordeler dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.lagerkort {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lager-emoji {
+  display: grid;
+  color: var(--gull);
+}
+
+.lagerkort strong {
+  font-size: var(--skrift-3);
+}
+
+.lagerliste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lagerkort-topp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lagerkort-topp .dempet {
+  margin-left: auto;
+}
+
+/* Lagrene som scener (Pakke 42): vegg og gulv i garasjen, sjø og brygge i havna,
+   hangarvegg og oppstillingsplass i hangaren. Bakgrunnen er en del av tegningen,
+   så fargene er faste og like i begge temaene. */
+.lagerscene {
+  display: flex;
+  margin-top: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.plass-hylle {
+  flex: none;
+  scroll-snap-align: start;
+}
+
+/* Bygg-plassen fyller resten av raden, så scenen går kant i kant i kortet. */
+.plass-hylle:last-child {
+  flex: 1 0 auto;
+}
+
+.plass-hylle:last-child .plass {
+  width: 100%;
+  min-width: 96px;
+}
+
+.plass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 96px;
+  padding: 0 0 4px;
+  background: none;
+  border: 0;
+  color: var(--tekst);
+  font: inherit;
+  text-align: center;
+}
+
+.plass-bilde {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  height: 84px;
+  padding-bottom: 2px;
+}
+
+.plass-hylle:first-child .plass-bilde {
+  border-radius: 10px 0 0 10px;
+}
+
+.plass-hylle:last-child .plass-bilde {
+  border-radius: 0 10px 10px 0;
+}
+
+.plass-hylle:only-child .plass-bilde {
+  border-radius: 10px;
+}
+
+.plass-navn {
+  margin-top: 6px;
+  max-width: 92px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+}
+
+.plass-under {
+  max-width: 92px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--skrift-1);
+  color: var(--tekst-dempet);
+}
+
+/* Garasjen: mørk vegg, betonggulv og hvite streker mellom båsene. */
+.plass.garasje .plass-bilde {
+  background: linear-gradient(to bottom, #3a3632 0 64%, #6f6a64 64% 100%);
+}
+
+.plass.garasje .plass-bilde::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  height: 36%;
+  background: #f8f6f1;
+  opacity: 0.6;
+}
+
+/* Havna: himmel, sjø og en pæl mellom hver båtplass. */
+.plass.havn .plass-bilde {
+  background: linear-gradient(to bottom, #8cc4ea 0 56%, #2f7fbf 56% 100%);
+}
+
+.plass.havn .plass-bilde::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  bottom: 0;
+  width: 4px;
+  height: 58%;
+  border-radius: 2px 2px 0 0;
+  background: #7a5230;
+}
+
+/* Hangaren: bølgeblikk på veggen og en gul linje på gulvet. */
+.plass.hangar .plass-bilde {
+  background:
+    repeating-linear-gradient(to right, transparent 0 10px, rgb(0 0 0 / 0.14) 10px 11px) top / 100% 62% no-repeat,
+    linear-gradient(to bottom, #6b7280 0 62%, #9ca3af 62% 100%);
+}
+
+.plass.hangar .plass-bilde::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  height: 2px;
+  background: repeating-linear-gradient(to right, #f4d35e 0 8px, transparent 8px 14px);
+}
+
+/* En ledig plass: stiplet ramme og en skygge av det neste du kan kjøpe. */
+.plass.ledig .plass-bilde::before {
+  content: '';
+  position: absolute;
+  inset: 8px 8px 4px;
+  border: 1px dashed rgb(255 255 255 / 0.6);
+  border-radius: 6px;
+}
+
+.plass-skygge {
+  display: grid;
+  filter: brightness(0);
+  opacity: 0.3;
+}
+
+.plass.ny .plass-bilde {
+  place-items: center;
+}
+
+.plass-pluss {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px dashed #ecd07a;
+  color: #ecd07a;
+  font-size: var(--skrift-5);
+  font-weight: var(--vekt-fet);
+}
+
+.plass.ny:disabled {
+  opacity: 0.5;
+}
+
+.plass.valgt .plass-bilde {
+  outline: 2px solid var(--gull);
+  outline-offset: -2px;
+}
+
+.lager-valgt {
+  margin-top: 10px;
+}
+
+.klubb-emoji,
+.trofe-ikon {
+  color: var(--gull);
+}

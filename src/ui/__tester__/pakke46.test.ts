@@ -1,6 +1,5 @@
 /** Pakke 46: et levende kart — dag og natt, bevegelse som respekterer redusert bevegelse. */
 
-import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -8,6 +7,7 @@ import { DAG_SEK } from '../../engine/kalender'
 import { dognet, morke, time } from '../dagognatt'
 import { Flysymbol, Reisende } from '../komponenter/Bevegelse'
 import { settBevegelse } from '../innstillinger'
+import { alleStiler } from './stiler'
 
 /** Sekundet for et klokkeslett på en gitt dag. */
 const kl = (timer: number, dag = 3) => dag * DAG_SEK + (timer / 24) * DAG_SEK
@@ -48,7 +48,7 @@ describe('bevegelse', () => {
   })
 
   it('ringen ved kjøp er en CSS-animasjon, så redusert bevegelse stopper den også', () => {
-    const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8')
+    const css = alleStiler()
     expect(css).toMatch(/\.kart-puls \{[^}]*animation: kart-puls/)
     expect(css).toMatch(/\.kart-natt \.kart-land \{[^}]*var\(--natt/)
   })

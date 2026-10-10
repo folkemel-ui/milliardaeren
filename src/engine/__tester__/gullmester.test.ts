@@ -39,8 +39,16 @@ function fingeravtrykk(s: Spilltilstand) {
 }
 
 describe('golden master', () => {
-  it(`boten spiller ${SEKUNDER} sekunder og treffer fasiten eksakt`, { timeout: 60_000 }, () => {
-    const avtrykk = fingeravtrykk(botSpill(nyttSpill(), SEKUNDER))
+  it(`boten spiller ${SEKUNDER} sekunder og treffer fasiten eksakt`, { timeout: 60_000 }, async () => {
+    // Én time om gangen, med en pause imellom (Pakke 63): ett kall på 20 s uten
+    // pause får testkjøreren til å gi opp å vente på svar. Boten tar et trekk hvert
+    // femte sekund, og 3600 går opp i fem, så spillet blir nøyaktig det samme.
+    let s = nyttSpill()
+    for (let t = 0; t < SEKUNDER; t += 3600) {
+      s = botSpill(s, Math.min(3600, SEKUNDER - t))
+      await new Promise((r) => setTimeout(r, 0))
+    }
+    const avtrykk = fingeravtrykk(s)
 
     if (process.env.OPPDATER_FASIT) {
       writeFileSync(FASIT_STI, JSON.stringify(avtrykk, null, 2) + '\n')

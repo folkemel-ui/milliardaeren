@@ -6,7 +6,7 @@ import { Galleri } from './ui/screens/Galleri'
 import { registrerServiceWorker } from './pwa'
 import { brukTema, lesTema } from './ui/tema'
 import { brukBevegelse } from './ui/innstillinger'
-import './styles.css'
+import './styles/index.css'
 
 // Temaet settes før første tegning, så et lyst valg ikke blinker mørkt først.
 brukTema(lesTema())

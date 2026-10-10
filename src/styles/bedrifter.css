@@ -1,0 +1,605 @@
+/*
+ * bedrifter.css — Bedriftskortene, kjøpsmengden, dagen, forbedringer, ansatte, retning og hendene (selge selv, kø).
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+/* Luksus: bildet til venstre over to rader, knappen under navnet — så lange navn får plass. */
+.kjopskort.luksuskort {
+  grid-template-columns: auto 1fr;
+  row-gap: 8px;
+}
+
+.kjopskort.luksuskort.i-detalj {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.bedriftskort {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bedriftskort-topp,
+.kjopskort {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.bedriftskort-midt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bedriftskort-midt h1,
+.bedriftskort-midt h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-fet);
+}
+
+.bedriftskort-midt .dempet {
+  font-size: var(--skrift-2);
+}
+
+.kjopskort .milepael-spor {
+  margin-top: 6px;
+}
+
+.bedriftskort-knapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.kjopskort.laast {
+  border-style: dashed;
+  background: transparent;
+}
+
+.personale {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--kant);
+}
+
+.personale-rad {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.personale-rad h3 {
+  margin: 0 0 2px;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-fet);
+}
+
+.personale-rad p {
+  margin: 0;
+}
+
+.personale-knapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* De ansatte med navn og nivå, og valget mellom nivåene (Pakke 48). */
+.personale-tittel {
+  margin: 0 0 2px;
+  font-size: var(--skrift-3);
+  font-weight: var(--vekt-fet);
+}
+
+.personale p {
+  margin: 0;
+}
+
+.stab {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stab-rad {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'navn knapp' 'tall knapp';
+  align-items: center;
+  column-gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--kant);
+}
+
+.stab-rad:first-child {
+  border-top: 0;
+}
+
+.stab-navn {
+  grid-area: navn;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-weight: var(--vekt-halvfet);
+}
+
+.stab-tall {
+  grid-area: tall;
+}
+
+.stab-rad .knapp {
+  grid-area: knapp;
+}
+
+.ansett-valg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.retning-valg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Én rad per nivå: navn og tall til venstre, kjøpsknappen til høyre — tre kolonner ble for trangt på mobil. */
+.ansett-grad {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'navn knapp' 'tall knapp' 'gir knapp';
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.ansett-grad > strong {
+  grid-area: navn;
+}
+
+.ansett-grad > .dempet:not(.laast-merke) {
+  grid-area: tall;
+}
+
+.ansett-grad > .pluss,
+.ansett-grad > .minus,
+.ansett-grad > .laast-merke {
+  grid-area: gir;
+}
+
+.ansett-grad > .knapp {
+  grid-area: knapp;
+  white-space: nowrap;
+}
+
+.retning-alternativ {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--flate-2);
+}
+
+.retning-alternativ .knapp {
+  margin-top: auto;
+}
+
+.ansett-grad.laast,
+.retning-alternativ.laast {
+  opacity: 0.6;
+}
+
+.retning p {
+  margin: 0;
+}
+
+/* Aksjen og bransjen hører sammen (Pakke 53): et lite kort på begge sider. */
+.bransje {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bransje-aksje {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.forbedring-knapp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--gull);
+  background: color-mix(in srgb, var(--gull) 10%, transparent);
+  color: var(--tekst);
+  font-size: var(--skrift-2);
+  text-align: left;
+}
+
+.forbedring-knapp > span:last-child {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+  white-space: nowrap;
+}
+
+.forbedring-knapp:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.forbedringer {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.forbedringer li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.forbedringer li p {
+  margin: 2px 0 0;
+}
+
+.forbedringer li.kjøpt strong {
+  color: var(--gull);
+}
+
+.kjopskort.eid {
+  border-color: var(--gull-mørk);
+}
+
+/* En låst bedrift langt frem: bare omrisset, så sluttspillet blir en overraskelse. */
+.silhuett .bedrift-ikon svg {
+  filter: brightness(0);
+  opacity: 0.5;
+}
+
+.kjopskort.skjult h2 {
+  letter-spacing: 0.15em;
+  color: var(--tekst-dempet);
+}
+
+.bedrifter-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Dagen i dag (Pakke 49): dato, vær, helligdag, trender og konjunkturen på én linje. */
+.dagen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.dagen-dato {
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+  color: var(--tekst-dempet);
+  margin-right: 4px;
+}
+
+.mengdevalg {
+  flex: 0 0 auto;
+}
+
+.mengdevalg button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: var(--skrift-2);
+}
+
+.fusjon-inn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  filter: grayscale(0.6);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: fusjon-inn 0.9s ease-in 0.1s;
+}
+
+/* Pulsen: to like animasjoner med ulike navn, så den starter på nytt hver gang klassen byttes. */
+.bedriftskort.puls-a {
+  animation: kort-puls-a 0.45s ease-out;
+}
+
+.bedriftskort.puls-b {
+  animation: kort-puls-b 0.45s ease-out;
+}
+
+.bedriftskort.puls-gull-a {
+  animation: kort-gull-a 0.9s ease-out;
+}
+
+.bedriftskort.puls-gull-b {
+  animation: kort-gull-b 0.9s ease-out;
+}
+
+.bedriftskort {
+  position: relative;
+}
+
+/* Knapper du holder inne: ingen tekstmarkering eller meny ved langt trykk. */
+.hold-knapp,
+.kopp-knapp,
+.ko-knapp {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.hender {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kopp-knapp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.kopp-knapp strong,
+.ko-knapp > strong {
+  white-space: nowrap;
+}
+
+.kopp-knapp strong {
+  color: var(--pluss);
+}
+
+.kopp-knapp:active {
+  transform: scale(0.97);
+}
+
+.ko-knapp {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--gull);
+  background: var(--flate-2);
+  color: var(--tekst);
+  font-weight: var(--vekt-halvfet);
+  animation: ko-puls 1s ease-in-out infinite alternate;
+}
+
+.ko-knapp > strong {
+  color: var(--pluss);
+}
+
+/* Tiden som er igjen før kundene går. */
+.ko-tid {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--gull);
+  transition: width 1s linear;
+}
+
+.flytetall-lag {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+.flytetall {
+  position: absolute;
+  right: 18px;
+  bottom: 56px;
+  color: var(--pluss);
+  font-weight: var(--vekt-fet);
+  font-variant-numeric: tabular-nums;
+  animation: flytetall 0.9s ease-out forwards;
+}
+
+.stabel-flate {
+  height: 140px;
+}
+
+.stabel-linje,
+.stabel-null {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--kant);
+  pointer-events: none;
+}
+
+.stabel-null {
+  border-top: 1px solid var(--tekst-dempet);
+  opacity: 0.6;
+}
+
+.stabel-kolonne {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* Søylen er smalere enn plassen sin, så det blir luft mellom periodene. */
+.stabel-del {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  min-height: 1px;
+  /* 2 px flate mellom delene i en stabel. */
+  box-shadow: 0 0 0 1px var(--flate);
+}
+
+.stabel-del.topp {
+  border-radius: 4px 4px 0 0;
+}
+
+.stabel-del.bunn {
+  border-radius: 0 0 4px 4px;
+}
+
+/* Perioden som pågår, er ikke ferdig: lysere, med striper. */
+.stabel-kolonne.paagaar .stabel-del {
+  opacity: 0.55;
+  background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgba(255, 255, 255, 0.25) 3px 5px);
+}
+
+.stabel-kolonne.valgt::before {
+  content: '';
+  position: absolute;
+  inset: 0 4%;
+  border-radius: 6px;
+  background: var(--tekst);
+  opacity: 0.07;
+}
+
+.stabel-boble {
+  /* Inne i grafen, ikke over den: toppfeltet ville skjult den. */
+  top: 4px;
+  transform: translateX(-50%);
+  align-items: stretch;
+  gap: 2px;
+  min-width: 190px;
+}
+
+.stabel-boble strong {
+  text-align: center;
+}
+
+.stabel-boble .stabel-boble-rad {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+}
+
+.stabel-boble-rad i,
+.kilde-farge {
+  display: inline-block;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.stabel-boble-rad b {
+  margin-left: auto;
+  padding-left: 10px;
+  color: var(--tekst);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.stabel-boble .stabel-boble-rad.sum {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: 1px solid var(--kant);
+}
+
+@keyframes fusjon-inn {
+  from {
+    opacity: 0.95;
+    transform: translate(-190%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+}
+
+@keyframes kort-puls-a {
+  40% {
+    transform: scale(1.015);
+    border-color: var(--pluss);
+  }
+}
+
+@keyframes kort-puls-b {
+  40% {
+    transform: scale(1.015);
+    border-color: var(--pluss);
+  }
+}
+
+@keyframes kort-gull-a {
+  30% {
+    transform: scale(1.03);
+    border-color: var(--gull);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--gull) 45%, transparent);
+  }
+}
+
+@keyframes kort-gull-b {
+  30% {
+    transform: scale(1.03);
+    border-color: var(--gull);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--gull) 45%, transparent);
+  }
+}
+
+@keyframes ko-puls {
+  from {
+    box-shadow: 0 0 0 0 rgb(212 175 55 / 0);
+  }
+  to {
+    box-shadow: 0 0 0 4px rgb(212 175 55 / 0.25);
+  }
+}
+
+@keyframes flytetall {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}

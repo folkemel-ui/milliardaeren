@@ -1,0 +1,302 @@
+/*
+ * toppfelt.css — Toppfeltet, datolinja, målstripa og fanemenyen.
+ * Eier: spillsporet. Se «Working side by side» i Ideer.md.
+ */
+
+.toppfelt {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 8px;
+  background: color-mix(in srgb, var(--bakgrunn) 88%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Gylnere kant for hvert statusnivå: grå ved Ukjent, helt gull ved Udødelig. */
+  border-bottom: 1px solid color-mix(in srgb, var(--gull) calc(var(--status-styrke, 0) * 100%), var(--kant));
+}
+
+/* Nettoformuen i toppfeltet, etter formuetrinn (Toppfelt.tsx). */
+.formue-trinn-0 {
+  color: var(--tekst);
+}
+
+.formue-trinn-1 {
+  color: var(--gull);
+}
+
+.formue-trinn-2,
+.formue-trinn-3 {
+  background: linear-gradient(180deg, var(--gull-lys), var(--gull) 55%, var(--gull-mørk));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.formue-trinn-3 {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gull) 45%, transparent));
+}
+
+.toppfelt-tittel {
+  color: var(--gull);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* En rød prikk på en fane som har noe å vise, som ubetalt skatt under Regnskap. */
+.fane-prikk {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--minus);
+  vertical-align: 0.15em;
+}
+
+.toppfelt-rad {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.datolinje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--kant);
+  font-size: var(--skrift-2);
+}
+
+.dato {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.avisknapp {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: var(--gull);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+}
+
+/* Bjella for hendelsesloggen (Pakke 61): bare ikonet, så datolinja får plass. */
+.hendelsesknapp {
+  padding: 0 6px;
+}
+
+.ulest-prikk {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--minus);
+  box-shadow: 0 0 0 2px var(--bakgrunn);
+}
+
+.toppfelt-kontanter {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.toppfelt-formue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.toppfelt-profil {
+  position: relative;
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gull-mørk);
+  color: var(--gull);
+  background: var(--flate);
+}
+
+.tempo {
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+  color: var(--pluss);
+}
+
+.fanemeny {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 100%;
+  max-width: var(--kolonne);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(in srgb, var(--flate) 94%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--kant);
+}
+
+.fane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: var(--meny-høyde);
+  color: var(--tekst-dempet);
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+  transition: color 0.15s;
+}
+
+.fane.aktiv {
+  color: var(--gull);
+}
+
+.fane > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tempo.negativ {
+  color: var(--minus);
+}
+
+.fane-ikon {
+  position: relative;
+  display: inline-flex;
+}
+
+/* En låst fane er grå, med en liten hengelås i hjørnet av ikonet. */
+.fane.laast {
+  opacity: 0.45;
+}
+
+.fane-laas {
+  position: absolute;
+  right: -7px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--flate-2);
+  border: 1px solid var(--kant);
+  color: var(--tekst);
+}
+
+/* En fane som nettopp har åpnet: gull prikk til du har vært innom. */
+.fane-ny {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gull);
+  box-shadow: 0 0 0 2px var(--flate);
+}
+
+/* Neste mål rett under toppfeltet: tekst til venstre, beløpet til høyre, et tynt spor under.
+   Feltet står utenfor det faste toppfeltet (G8), så det glir bort under datolinja når du ruller. */
+.maalfelt {
+  padding: 8px 16px 9px;
+  border-bottom: 1px solid var(--kant);
+  background: var(--bakgrunn);
+}
+
+.maalstripe {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 10px;
+  row-gap: 4px;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-2);
+  text-align: left;
+}
+
+button.maalstripe {
+  cursor: pointer;
+}
+
+.maalstripe .etikett {
+  margin-right: 4px;
+}
+
+.maalstripe-tekst {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.maalstripe-tekst strong {
+  font-weight: var(--vekt-halvfet);
+}
+
+.maalstripe-belop {
+  color: var(--gull);
+  font-weight: var(--vekt-halvfet);
+  font-variant-numeric: tabular-nums;
+}
+
+.maalstripe-spor {
+  grid-column: 1 / -1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--flate-2);
+  overflow: hidden;
+}
+
+.maalstripe-spor span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--gull);
+  transition: width 0.6s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maalstripe-spor span {
+      transition: none;
+    }
+}
+
+.fanemeny-logo {
+  display: none;
+}
