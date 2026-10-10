@@ -103,6 +103,12 @@ session; delete what stops being true.
   included. Each session should check where its server runs (the `node.exe` command line in
   `Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`), and stop and restart it from
   its own folder. Don't stop the other session's server; tell Folke.
+- **Run `lever.mjs` before the report, not after.** In Pack 66 the graphics track had pushed
+  G12 while the pack was being built; the rebase stopped on `Ideer.md` (both tracks removed
+  items from the same section, which then had to go) and `vite.config.ts` (both added a
+  heavy test). Finding that before reporting meant the report could say «tested on top of
+  master». After a conflict in `Ideer.md`, reread your «Next up» — it may talk about the
+  other track's pack as if it were still to come.
 - **Delivering**: commit on your branch, run `node scripts/lever.mjs` (fetch, rebase onto
   `origin/master`, `tsc` and every test on the result, then the list of what would go to
   master), report, and on Folke's «push» run `node scripts/lever.mjs --push`. It refuses a
@@ -308,6 +314,10 @@ session; delete what stops being true.
 - **Grep `src/styles/` for a class name before using it.** The stylesheets hold ~6 600 lines
   and short Norwegian names are often taken: `.statistikk` was already the three-column
   play-time card, and the new statistics card rendered squeezed into one column.
+  It works the other way too: a bare class selector for a component (`.varsel`, the toast)
+  also styled the badge modifier `.merke.varsel`, so «Børsen stengt» had toast padding and a
+  shadow for weeks (found in Pack 66). Scope component rules to their container
+  (`.varsler > .varsel`), and look at a new badge's computed height (20 px) once.
 
 ## 5. The engine: rules that must hold
 
