@@ -806,3 +806,134 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ── En klubb du kan skumme (Pakke 78) ──────────────────────────────────── */
+
+/* Troppen: én rad på 48 px, et trykk folder ut resten. */
+.troppgruppe {
+  margin: 12px 0 0;
+}
+
+.spillerliste.tropp {
+  margin-top: 4px;
+  gap: 0;
+}
+
+.spillerliste.tropp li {
+  display: block;
+  border-top: 1px solid var(--kant);
+}
+
+.spillerrad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  text-align: left;
+}
+
+.spillerrad .spiller-styrke {
+  width: 30px;
+  height: 30px;
+}
+
+.spillerrad-navn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--vekt-halvfet);
+}
+
+.spillerrad-tall {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spillerdetalj {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 0 10px 40px;
+}
+
+/* Markedet: prisen som et tall, kjøpet som én knapp. */
+.spillerliste.marked li {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.spillerliste.marked .spiller-navn strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spiller-navn .merke,
+.kort-tittel .merke {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.radpris {
+  font-size: var(--skrift-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.byggkort .stadionliste li {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.byggkort .bygd {
+  grid-column: 2 / -1;
+  justify-self: end;
+}
+
+/* Kampene som brikker du kan trykke på. */
+.formrekke.valgbar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.formrekke.valgbar .brikke {
+  position: relative;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+}
+
+/* 36 + 4 + 4 = 44 px å treffe, og mellomrommet på 8 px gjør at naboene ikke overlapper. */
+.formrekke.valgbar .brikke::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.formrekke.valgbar .brikke.valgt {
+  outline: 2px solid var(--gull);
+  outline-offset: 2px;
+}
+
+.formliste p {
+  margin: 0;
+}
+
+.turneringsbrikker {
+  align-items: center;
+  margin: 8px 0 0;
+}
+
+/* Strekene for opp- og nedrykk i tabellen. */
+.tabell tr.strek-opp td {
+  border-top: 2px solid var(--pluss);
+}
+
+.tabell tr.strek-ned td {
+  border-top: 2px solid var(--minus);
+}
+
+.tabell-ny {
+  margin-left: 2px;
+}

@@ -44,8 +44,11 @@ const passer = (el: Element, tekst: string | RegExp) => {
   return typeof tekst === 'string' ? navn.includes(tekst) : tekst.test(navn)
 }
 
-/** Starter appen med en lagring. Uten lagring starter et nytt spill. */
-export async function startApp(spill?: Spilltilstand): Promise<App> {
+/**
+ * Starter appen med en lagring. Uten lagring starter et nytt spill. `ekstra` er
+ * nøkler i nettleseren som skal overleve at alt annet tømmes (Pakke 78: klubbens merker).
+ */
+export async function startApp(spill?: Spilltilstand, ekstra: Record<string, string> = {}): Promise<App> {
   // En del som forrige test begynte å hente (G12, ui/vedBehov.ts), må bli ferdig før
   // modulene nullstilles — ellers stopper modullasteren, og denne testen henger.
   await (await import('../vedBehov')).ventPaaHenting()
@@ -56,6 +59,7 @@ export async function startApp(spill?: Spilltilstand): Promise<App> {
   localStorage.setItem('milliardaer.sistAktiv', String(Date.now()))
   // Ingen «Nytt i versjonen»-vindu midt i testen.
   localStorage.setItem('milliardaer.versjon', VERSJON)
+  for (const [nokkel, verdi] of Object.entries(ekstra)) localStorage.setItem(nokkel, verdi)
 
   const { default: App } = await import('../../App')
   const lager = await import('../../state/lager')

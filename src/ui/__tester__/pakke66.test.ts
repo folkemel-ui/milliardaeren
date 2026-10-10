@@ -49,15 +49,15 @@ describe('plass til nye områder', () => {
 })
 
 describe('stadionkortet', () => {
-  it('står øverst i Anlegg og økonomi, med plasser, publikum og billettpris, og Bygg-kortet med kravet under', async () => {
+  it('står i Anlegg og økonomi under Bygg-kortet (det du kan gjøre først, Pakke 78), med plasser, publikum og billettpris', async () => {
     app = await tilKlubben(medKlubb())
     const kort = stadionkort(app)
     expect(kort).toBeDefined()
-    expect(app.rot.querySelector('.klubbdetalj h1')!.nextElementSibling).toBe(kort)
     expect(kort.textContent).toContain(STADIONTRINN[0].navn)
     expect(kort.textContent).toMatch(/Plasser\s*700/)
     const bygg = byggkort(app)
-    expect(kort.nextElementSibling).toBe(bygg)
+    expect(app.rot.querySelector('.klubbdetalj h1')!.nextElementSibling).toBe(bygg)
+    expect(bygg.nextElementSibling).toBe(kort)
     expect(bygg.textContent).toContain('3. divisjon krever')
     expect(bygg.querySelector('.merke.ok')!.textContent).toBe('Holder')
     // Tre utbygginger og akademiet, hver med en knapp.
