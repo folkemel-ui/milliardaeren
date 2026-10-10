@@ -27,6 +27,8 @@ export interface Del<T> {
 }
 
 const ALLE: Del<unknown>[] = []
+/** Hentinger som ikke er ferdige ennå (se `ventPaaHenting`). */
+const UNDERVEIS = new Set<Promise<unknown>>()
 
 /** En del som hentes med `hent` (en dynamisk `import()`) første gang den trengs. */
 export function vedBehov<T>(navn: string, hent: () => Promise<T>): Del<T> {
@@ -36,8 +38,9 @@ export function vedBehov<T>(navn: string, hent: () => Promise<T>): Del<T> {
   const del: Del<T> = {
     navn,
     verdi: () => verdi,
-    last: () =>
-      (løfte ??= hent().then(
+    last: () => {
+      if (løfte) return løfte
+      løfte = hent().then(
         (v) => {
           verdi = v
           for (const l of lyttere) l()
@@ -49,7 +52,15 @@ export function vedBehov<T>(navn: string, hent: () => Promise<T>): Del<T> {
           løfte = undefined
           throw feil
         },
-      )),
+      )
+      const denne = løfte
+      UNDERVEIS.add(denne)
+      denne.then(
+        () => UNDERVEIS.delete(denne),
+        () => UNDERVEIS.delete(denne),
+      )
+      return denne
+    },
     abonner: (lytter) => {
       lyttere.add(lytter)
       if (verdi === undefined) del.last().catch(() => {})
@@ -75,6 +86,15 @@ export function useDel<T>(del: Del<T> | null): T | undefined {
 /** Alle delene som er laget så langt. */
 export function alleDeler(): readonly Del<unknown>[] {
   return ALLE
+}
+
+/**
+ * Venter til hentinger som er i gang, er ferdige (eller feilet). Klikktestene kaller
+ * den før `vi.resetModules()`: nullstilles modulene midt i en henting, stopper
+ * Vitests modullaster, og neste test henger til tidsavbruddet.
+ */
+export async function ventPaaHenting(): Promise<void> {
+  while (UNDERVEIS.size) await Promise.allSettled([...UNDERVEIS])
 }
 
 /** Henter alle delene, én etter én. Galleriet og testene venter på dette. */

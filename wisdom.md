@@ -288,6 +288,9 @@ session; delete what stops being true.
   a property or luxury drawing or a map must `await lastAlle()` first, or it sees the
   empty placeholder. `startskript.test.ts` (in the heavy group) fails if the start-up
   script passes 250 kB gzipped (238 after G12): put a big new thing in a part instead.
+  `startApp` in `klikk.ts` waits for parts still loading before `vi.resetModules()`;
+  without that, a click test that ends mid-load made the *next* test hang (Pack 65's
+  «Verden viser bare eiendom ute» timed out after G12 until this was added).
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:

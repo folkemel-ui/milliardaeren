@@ -46,6 +46,9 @@ const passer = (el: Element, tekst: string | RegExp) => {
 
 /** Starter appen med en lagring. Uten lagring starter et nytt spill. */
 export async function startApp(spill?: Spilltilstand): Promise<App> {
+  // En del som forrige test begynte å hente (G12, ui/vedBehov.ts), må bli ferdig før
+  // modulene nullstilles — ellers stopper modullasteren, og denne testen henger.
+  await (await import('../vedBehov')).ventPaaHenting()
   vi.resetModules()
   localStorage.clear()
   if (spill) localStorage.setItem('milliardaer.lagring', JSON.stringify(spill))

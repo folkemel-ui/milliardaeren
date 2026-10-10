@@ -872,6 +872,14 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   script at ~50 ms, parts at ~1 s on idle; opening on Eiendom fetched its two parts at
   ~120 ms). Afterwards unregister the service worker (scope `/g12bygg/`), clear
   `caches`, and delete the folder.
+- **`vi.resetModules()` during a pending `import()` hangs the next import.** After the
+  rebase onto Pack 65, its second Eiendom click test timed out (20 s, and 60 s with a
+  longer limit) while it passed alone in 4.7 s. Step logs showed the hang inside
+  `startApp`: the first test ended right after unfolding the property list, the property
+  part was still loading, and the next `startApp` reset the modules and imported `App`,
+  which never resolved. `startApp` in `klikk.ts` now awaits `ventPaaHenting()` (from the
+  previous test's `vedBehov` instance) before `vi.resetModules()`. A test that passes
+  alone and hangs after another is this; log each step with `Date.now()` to find it.
 - **`cd` in a Bash call moves the session's directory** for the next calls too; use
   absolute paths or `git -C`.
 
