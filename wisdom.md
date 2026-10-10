@@ -802,6 +802,16 @@ session; delete what stops being true.
   `forventetMaal` takes a number (attack = defence) or a `Lagprofil`; opponents are still
   one number. Juniors carry `potensial`; `potensialspenn` shows a 14-wide window placed by
   a hash. New club fields: `formasjon`, `akademi` (`investert` counts in `klubbverdi`).
+- **Details after the dice (Pack 72).** The match report (minutes, scorers, assists, ratings,
+  man of the match) is drawn *after* the goal counts with its own `Terning` seeded from
+  `hashTekst(club:season:round:rapport)`, so the table, `k.frø` and every old test stand,
+  and the same match reads the same every time (`pakke72.test.ts` plays a season twice).
+  Anything cosmetic that needs dice should follow this pattern rather than take numbers from
+  the club's die. Statistics live on the player (`sesong`, `karriere`, optional) and are
+  reset per season in `sesongslutt`; the opponents' scorers are a name → goals map on the
+  club (`toppscorere`), cleared with the season. Names repeat in a squad (two lists of ~24),
+  so match a player by id, not name — a test that looked a player up by name found the wrong
+  one.
 - **Tune tactics on exact odds, not samples** (Pack 71). Expected points per tactic for
   strength gaps −30..30, home and away, from the truncated Poisson (≤ 9 goals like the
   engine) — a 30-line script, no dice. A grid search over the four factors gave 54/58
