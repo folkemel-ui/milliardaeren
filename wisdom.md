@@ -802,6 +802,21 @@ session; delete what stops being true.
   `forventetMaal` takes a number (attack = defence) or a `Lagprofil`; opponents are still
   one number. Juniors carry `potensial`; `potensialspenn` shows a 14-wide window placed by
   a hash. New club fields: `formasjon`, `akademi` (`investert` counts in `klubbverdi`).
+- **A second competition beside the league (Pack 73).** The league plays every game day with
+  no rest days, nine days a season, so «a round a week» would have stretched the cup over
+  five seasons — the cup runs on fixed days inside the season (`CUPDAGER`), Europe on the
+  even days, both as extra matches in `klubbVedDagsskifte` after the league round and before
+  the wages. Each tournament is an `Utslag` with its own die (`frø` kept on it, seeded from
+  club:season:cup), so the league's die and every old test stand; the other 48 matches of a
+  round are decided by strength on that die, yours by `spillUtslagskamp` (same formula and
+  report as a league match, draws on penalties — `straffer: 'deg' | 'dem'`). The 14 seeds sit
+  at the *end* of the list so round one plays the first 36 straight off; `nesteUtslagskamp`
+  knows that. A knocked-out club's tournament keeps playing to the end, so `naadd` (the round
+  reached) is what the summary reads, not `runde`. A tournament match goes into `k.kamper`
+  with `turnering`, so tests that count matches or trophies must filter (Pack 12's did not).
+  Money: `inntekt(s, k, 'tv' | 'premier', …)` adds to cash, `totaltKlubb` and the club's
+  season counter in one place; TV money is paid with the sponsor at season start, so a test
+  that expects «buying the club adds only the sponsor» now adds TV too.
 - **Details after the dice (Pack 72).** The match report (minutes, scorers, assists, ratings,
   man of the match) is drawn *after* the goal counts with its own `Terning` seeded from
   `hashTekst(club:season:round:rapport)`, so the table, `k.frø` and every old test stand,
