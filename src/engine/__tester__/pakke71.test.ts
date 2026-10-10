@@ -220,7 +220,7 @@ describe('lagringsversjon 24 → 25', () => {
   it('spillerne får posisjon, angrep og forsvar; styrken og klubbverdien står til kronen', () => {
     expect(SPILLVERSJON).toBe(25)
     const s = medKlubb()
-    const gammel = structuredClone(s.klubb!) as Record<string, unknown>
+    const gammel = structuredClone(s.klubb!) as unknown as Record<string, unknown>
     delete gammel.formasjon
     delete gammel.akademi
     for (const p of [...(gammel.spillere as Spiller[]), ...(gammel.marked as Spiller[])]) {
