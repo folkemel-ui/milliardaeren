@@ -1042,6 +1042,15 @@ session; delete what stops being true.
   the hub**; give the hub row a one-line preview instead. Selling the club closes the
   page itself (`aapneKlubbside(null)`), or the store would reopen it on the next buy.
   Click tests reach a page with `a.knapp('Anlegg og økonomi', rot.querySelector('.klubbsider'))`.
+- **«Ny» in the club is one mark per page (Pack 78)**, `ui/klubbsett.ts`: per club name, the
+  market ids, the last match key and the last season as they were when you last opened
+  Troppen og marked, Kamper og tabell and Sesongene. A club never seen before takes what it
+  shows now as its baseline (`startMerker`), so it doesn't open with «Ny» everywhere. The
+  market is replaced every game day, so «6 nye» on the hub is normal, not a bug. The page
+  snapshots the old marks when it opens (`useState`) so its «Ny» tags stay while you are
+  there, and writes the new ones on open and on close. `startApp` in `klikk.ts` clears
+  localStorage, so a test that needs marks across two app starts passes them in its new
+  second argument (`startApp(s, { 'milliardaer.klubbSett': … })`).
 - **A fresh 4. divisjon club loses its first cup round every time** (five seeds of five):
   a test that needs the cup running sets the squad to `styrke = angrep = forsvar = 95`
   before simulating day 1.
