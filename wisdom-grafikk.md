@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12, G13 and G14 (10 October 2026). G15–G22 are planned in `Ideer.md`: the full
-frame in groups (G15 the big businesses, G16 Scenes that grow, G17–G21 properties and
-luxury), then the seasons (G22).
+2026), G12–G15 (10–11 October 2026). G16–G22 are planned in `Ideer.md`: Scenes that
+grow (G16), the full frame for properties and luxury in groups (G17–G21), then the
+seasons (G22).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -122,6 +122,10 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   hotel on a square with a fountain and a taxi rank, the bank on an old town square with
   a statue and two lime trees. Naming the neighbours per business in the option made it
   a one-click answer.
+  For G15 Folke took all three again: each sea business as it really is (open sea with a
+  second rig and a standby vessel; a container port with a breakwater and a lighthouse;
+  a fjord with mountains and a boathouse), a village at the foot of the ski hill, and
+  more airport (planes at the gates, a fuel truck, a hangar, a windsock, runway lights).
 - **Count before you quote.** `Ideer.md` said 39 of 68 drawings never moved; the real
   count was 35 (plus the bank below 100 and the street kitchen's first stage). Worse,
   that count was made with every improvement bought: the lemonade stand, the kiosk and
@@ -983,6 +987,22 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   checks the order in `Gatehus`.
 - **`Byrekke` without haze** (`dis={false}`) gives houses at the subject's own
   distance (the hotel's square); with haze it's the town far behind.
+- **A silhouette shows only what isn't background (G15).** Locked big businesses are
+  silhouettes, and `.silhuett .bedrift-ikon.fylt` hides sky, ground and everything in
+  `Kantfade` (`lerret-bakgrunn`). The ski centre's mountain sat in `Kantfade`, so its
+  silhouette was just the lodge and a lift; the mountain is the subject and now stands in
+  a plain group (tested). Check every business's silhouette when it changes: render
+  `<div class="silhuett"><BedriftIkon … dempet/></div>` on the sheet.
+- **The tile crop of a far-away business must show the place, not a detail**: the fish
+  farm's `[44, 52, 40, 40]` was two pens on water; 54–66 units with the mountains and
+  the feed barge read as a fjord farm. The level-100 crop must hold the plaque, wherever
+  the drawing put it (the oil field's sits far left, at x 6).
+- **The start script fills up with business art**: 238 kB after G12, 247 after G15 (of
+  the 250 budget in `startskript.test.ts`), because all 13 business drawings and their
+  new sides load at start. Measure it (`npx vite build` into the temp folder) at the
+  end of every pack that grows a business drawing; G16's steps can't go there.
+- **Keep the sheet helper in `localStorage`** (`arkSc`), not `sessionStorage`: the
+  pane opened a new tab after the dev server restarted, and the session copy was gone.
 - **Tile crops may reach past 96 sideways** now that the sides are drawn (x −40 to 136);
   only the bottom (96, where the ground ends) is a hard limit. The hotel's crop grows
   from 64 to 86 units as it goes from 3 to 7 storeys with a flag on the roof.
@@ -992,7 +1012,10 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   per drawing, now `it.each`) didn't fix it; closing the pane's sheet of eight animated
   night scenes and stopping the dev server did, at once. The pane draws an animated
   sheet continuously and takes the CPU the runner needs. Before `lever.mjs`: close the
-  sheet (navigate away) and stop the preview server; restart it afterwards.
+  sheet (navigate away) and stop the preview server; restart it afterwards. **Stopping
+  the server is not enough** (G15): the page keeps animating without it, and
+  `navigate` refuses `about:blank`. Close the tab with `tabs_close` — the check failed
+  with the tab open and passed straight after closing it.
 - **The contact-sheet helper must import the newest module URL**: after an edit HMR
   loads `BedriftIkon.tsx?t=…`; take `.filter(…).at(-1)` of the resource list, or the
   sheet shows the old code. React DOM's client module needs `.default` (`createRoot`
@@ -1016,7 +1039,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **Next groups for the full frame (G15–G21)**: add the ids to `FULL_RAMME`, extend
+- **Next groups for the full frame (G17–G21)**: add the ids to `FULL_RAMME`, extend
   everything that ends at 0 and 96, fill the sides, and give the tile a per-stage crop
   where the subject grows. Properties and luxury live in the lazy parts, so their helpers
   for the sides go there (or in the start file if a business needs them too). Cars use

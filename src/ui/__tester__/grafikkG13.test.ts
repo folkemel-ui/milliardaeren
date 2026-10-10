@@ -21,8 +21,17 @@ const viewBox = (html: string) => html.match(/<svg[^>]*viewBox="([^"]+)"/)?.[1]
 const VIGNETT = /url\(#[a-z0-9]+(vm|km|nm|bm)\)/i
 
 describe('full ramme for gatebedriftene (G13)', () => {
-  it('gjelder gatebedriftene (G13) og bybedriftene (G14)', () => {
-    expect([...FULL_RAMME]).toEqual(['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank'])
+  it('gjelder alle bedriftene etter G15: gate (G13), by (G14) og de store (G15)', () => {
+    expect([...FULL_RAMME]).toEqual(['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter'])
+    expect(BEDRIFTSTEGNINGER.every((id) => FULL_RAMME.includes(id))).toBe(true)
+  })
+
+  it('fjellet er motivet i skisenteret, ikke bakgrunn, så silhuetten viser det (G15)', () => {
+    const html = renderToStaticMarkup(createElement(BedriftIkon, { type: 'skisenter', nivaa: 25 }))
+    // Fjellet (snøflaten fra kant til kant) står i en vanlig gruppe, ikke i lerret-bakgrunn
+    // som silhuetten skjuler; nabotoppene i disen er bakgrunn.
+    expect(html).toContain('<g><polygon points="-40,76 -20,70 0,74')
+    expect(html).not.toContain('<g class="lerret-bakgrunn"><polygon points="-40,76 -20,70 0,74')
   })
 
   it('husene i en gaterekke har skyggen under vinduene, så de lyser om natta (G14)', () => {

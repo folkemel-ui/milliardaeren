@@ -2145,6 +2145,24 @@ const oljeselskap: B = (t, f) => {
   return (
     <>
       <Bakke type="hav" />
+      {/* Ute på feltet (G15): en rigg til og en tankbåt ved horisonten, og beredskapsfartøyet som alltid ligger klar. */}
+      <Dis>
+        <rect x="-31" y={HORISONT - 7} width="11" height="2.2" fill={S.oker.flate} />
+        {[-30, -22].map((lx) => (
+          <rect key={lx} x={lx} y={HORISONT - 4.8} width="0.9" height="5" fill={S.metall.skygge} />
+        ))}
+        <polygon points={`-28,${HORISONT - 7} -25,${HORISONT - 7} -26.5,${HORISONT - 16}`} fill="none" stroke={S.metall.flate} strokeWidth="0.5" />
+        <path d={`M104 ${HORISONT + 2} L130 ${HORISONT + 2} L132 ${HORISONT - 1} L104 ${HORISONT - 1} Z`} fill={S.marine.skygge} />
+        <rect x="108" y={HORISONT - 2.4} width="16" height="1.4" fill={S.vin.flate} />
+        <rect x="125" y={HORISONT - 5} width="4" height="4" fill={S.hvit.flate} />
+      </Dis>
+      <g className="anim-duve sen">
+        <path d={`M104 ${g + 7} L126 ${g + 7} L128.6 ${g + 3.6} L104 ${g + 3.6} Z`} fill={S.oker.flate} />
+        <rect x="105" y={g - 1.6} width="7" height="5.2" fill={S.hvit.flate} />
+        <rect x="106" y={g - 0.6} width="5" height="1.4" fill={S.glass.skygge} />
+        <rect x="113" y={g + 2.2} width="13" height="1.4" fill={S.oker.skygge} />
+        <rect x="108.2" y={g - 4} width="0.6" height="2.4" fill={S.mork.flate} />
+      </g>
       {/* Nytt felt ute ved horisonten. */}
       {f >= 3 && (
         <Dis>
@@ -2252,6 +2270,31 @@ const rederi: B = (t, f) => {
           <rect x="11" y={HORISONT - 5} width="4" height="4" fill={S.hvit.flate} />
         </Dis>
       )}
+      {/* Containerhavna fortsetter til venstre (G15): kaia, stablene og en kran til. */}
+      <polygon points={`-40,${g - 6} 0,${g - 6} 0,${g - 12} -40,${g - 12}`} fill={S.stein.lys} />
+      <rect x="-40" y={g - 6} width="40" height="16" fill={S.stein.flate} />
+      <rect x="-40" y={g - 6.6} width="40" height="1" fill={S.oker.flate} />
+      <rect x="-1.4" y={g - 12} width="1.4" height="22" fill={S.stein.skygge} />
+      {[0, 1, 2].map((r) =>
+        [0, 1, 2, 3, 4].map((k) =>
+          r + (k % 3) < 4 ? <Kloss key={`${r}-${k}`} x={-38 + k * 6.4} y={g - 7 - r * 3.4} b={6} h={3.2} d={4} m={farger[(r * 2 + k + 1) % farger.length]} /> : null,
+        ),
+      )}
+      {[-16, -7].map((kx) => (
+        <rect key={kx} x={kx} y={g - 36} width="1.4" height="29" fill={S.oker.skygge} />
+      ))}
+      <rect x="-19" y={g - 38} width="24" height="2.4" fill={S.oker.flate} />
+      <rect x="-18" y={g - 36} width="7" height="3" fill={S.oker.flate} />
+      {/* Moloen med et lite fyr ved innløpet. */}
+      <polygon points={`98,${g + 4} 99,${g - 1} 104,${g - 3} 111,${g - 2.4} 119,${g - 3.4} 127,${g - 2.6} 136,${g - 3.2} 136,${g + 4}`} fill={S.stein.flate} />
+      <polygon points={`99,${g - 1} 104,${g - 3} 111,${g - 2.4} 119,${g - 3.4} 127,${g - 2.6} 136,${g - 3.2} 136,${g - 1.8} 99,${g + 0.2}`} fill={S.stein.lys} />
+      <polyline className="anim-boelge" points={`98,${g + 5} 102,${g + 3.8} 106,${g + 5}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.6" strokeLinecap="round" />
+      <rect x="126.4" y={g - 16} width="3.2" height="13.6" fill={S.hvit.lys} />
+      {[g - 13, g - 7.6].map((by) => (
+        <rect key={by} x="126.4" y={by} width="3.2" height="2.4" fill={S.vin.flate} />
+      ))}
+      <rect x="126.8" y={g - 19} width="2.4" height="3" fill={S.vinduLys.lys} />
+      <polygon points={`126.2,${g - 19} 129.8,${g - 19} 128,${g - 21}`} fill={S.vin.skygge} />
       {/* Containerhavna: kai, stabler og portalkran. */}
       {f >= 2 && (
         <g>
@@ -2374,15 +2417,29 @@ const fiskeoppdrett: B = (t, f) => {
     <>
       <Kantfade>
         <Dis>
-          <polygon points={`0,${HORISONT + 1} 10,40 22,48 34,30 48,44 60,36 74,48 86,38 96,44 96,${HORISONT + 1}`} fill={S.fjell.flate} />
+          <polygon points={`-40,${HORISONT + 1} -40,46 -28,36 -16,46 -6,41 0,43 10,40 22,48 34,30 48,44 60,36 74,48 86,38 96,44 108,33 120,45 130,39 136,42 136,${HORISONT + 1}`} fill={S.fjell.flate} />
+          <polygon points={`-28,36 -16,46 -22,${HORISONT} -30,${HORISONT}`} fill={S.fjell.skygge} />
+          <polygon points={`108,33 120,45 114,${HORISONT} 106,${HORISONT}`} fill={S.fjell.skygge} />
+          <polygon points="-30.6,39.2 -28,36 -25.2,39.4 -27,38.6 -28.4,40 -29.6,38.8" fill={S.sno.lys} />
+          <polygon points="105.6,36.4 108,33 111,36.6 109.2,36 108,37.4 106.8,36" fill={S.sno.lys} />
           <polygon points={`34,30 48,44 38,${HORISONT} 30,${HORISONT}`} fill={S.fjell.skygge} />
-          <polygon points={`86,38 96,44 96,${HORISONT} 84,${HORISONT}`} fill={S.fjell.skygge} />
+          <polygon points={`86,38 96,44 94,${HORISONT} 84,${HORISONT}`} fill={S.fjell.skygge} />
           <polygon points="30.4,35.6 34,30 38.6,35 36,34 34,36.4 32.4,34.6" fill={S.sno.lys} />
           <polygon points="57,40 60,36 63.6,39.8 61.6,39 59.6,41 58.4,39.6" fill={S.sno.lys} />
-          <polygon points={`0,${HORISONT + 1} 0,50 12,52 24,54 40,53 56,54 74,52 96,51 96,${HORISONT + 1}`} fill={S.gran.flate} />
+          <polygon points={`-40,${HORISONT + 1} -40,52 -24,51 -10,53 0,50 12,52 24,54 40,53 56,54 74,52 96,51 112,53 126,51 136,52 136,${HORISONT + 1}`} fill={S.gran.flate} />
         </Dis>
       </Kantfade>
       <Bakke type="hav" />
+      {/* Land til venstre (G15): naustet og en båt ved land. */}
+      <path d={`M-40 ${g - 16} Q-20 ${g - 18} 0 ${g - 14} Q5 ${g} -2 ${g + 6} Q-20 ${g + 8} -40 ${g + 7} Z`} fill={S.stein.flate} />
+      <path d={`M-40 ${g - 16} Q-20 ${g - 18} 0 ${g - 14} L0.6 ${g - 11} Q-20 ${g - 15} -40 ${g - 13} Z`} fill={S.stein.lys} />
+      <Kloss x={-33} y={g - 8} b={12} h={8} d={7} m={S.faluRod} />
+      <Saltak x={-33} y={g - 16} b={12} d={7} h={5} m={S.skifer} gavl={S.faluRod} />
+      <rect x="-30" y={g - 13} width="6" height="5" fill={S.treMork.skygge} />
+      <g className="anim-duve">
+        <path d={`M-30 ${g + 11} L-16 ${g + 11} L-14.4 ${g + 8.4} L-30.6 ${g + 8.4} Z`} fill={S.hvit.flate} />
+        <rect x="-26" y={g + 6} width="4" height="2.6" fill={S.hvit.lys} />
+      </g>
       {/* Havmerda langt ute. */}
       {f >= 2 && (
         <Dis>
@@ -2512,6 +2569,31 @@ const flyselskap: B = (t, f) => {
   return (
     <>
       <Bakke type="asfalt" />
+      {/* Flyplassen fortsetter (G15): to fly ved gatene i disen til venstre, tankbilen, hangaren og vindposen til høyre. */}
+      <Dis>
+        <Passasjerfly x={-66} gy={g - 13} L={34} slag="jet" hale={S.marine.flate} />
+        <Passasjerfly x={-32} gy={g - 12} L={34} slag="jet" hale={hale} />
+      </Dis>
+      {Array.from({ length: 22 }, (_, i) => -38 + i * 8).map((lx) => (
+        <circle key={lx} cx={lx} cy={g + 11} r="0.5" fill={S.vinduLys.lys} />
+      ))}
+      <Kloss x={104} y={g - 8} b={32} h={22} d={10} m={S.metall} />
+      <path d={`M104 ${g - 30} Q120 ${g - 38} 136 ${g - 30} Z`} fill={S.metall.lys} />
+      <rect x="109" y={g - 26} width="22" height="18" fill={S.mork.flate} />
+      {[109, 114.5, 120, 125.5, 131].map((dx) => (
+        <rect key={dx} x={dx} y={g - 26} width="0.5" height="18" fill={S.metall.skygge} />
+      ))}
+      <rect x="98" y={g - 14} width="0.5" height="14" fill={S.metall.skygge} />
+      <polygon className="anim-flagg" points={`98.5,${g - 14} 104,${g - 13.2} 104,${g - 11.8} 98.5,${g - 11}`} fill={S.oker.lys} />
+      <rect x="100.6" y={g - 13.6} width="1.2" height="2.4" fill={S.hvit.lys} />
+      <g>
+        <rect x="-13" y={g + 2.4} width="9" height="4" rx="1.8" fill={S.hvit.flate} />
+        <rect x="-4" y={g + 1.6} width="4.4" height="4.8" fill={S.vin.flate} />
+        <rect x="-3.2" y={g + 2.2} width="2.4" height="1.6" fill={S.glass.skygge} />
+        {[-11, -6, -1.6].map((cx) => (
+          <circle key={cx} cx={cx} cy={g + 6.6} r="1" fill={S.mork.skygge} />
+        ))}
+      </g>
       {/* Et fly på vei opp mot Asia. */}
       {f >= 3 && (
         <g>
@@ -2605,22 +2687,32 @@ const skisenter: B = (t, f) => {
   const g = GRUNNLINJE
   const stor = t >= 1
   const fjell = stor
-    ? `0,${g - 10} 14,${g - 30} 26,${g - 40} 40,${g - 64} 50,${g - 56} 60,${g - 66} 76,${g - 40} 96,${g - 22} 96,${g - 6} 0,${g - 6}`
-    : `0,${g - 10} 20,${g - 24} 36,${g - 36} 48,${g - 40} 60,${g - 34} 80,${g - 20} 96,${g - 12} 96,${g - 6} 0,${g - 6}`
+    ? `-40,${g - 8} -20,${g - 14} 0,${g - 10} 14,${g - 30} 26,${g - 40} 40,${g - 64} 50,${g - 56} 60,${g - 66} 76,${g - 40} 96,${g - 22} 116,${g - 14} 136,${g - 8} 136,${g - 6} -40,${g - 6}`
+    : `-40,${g - 8} -20,${g - 12} 0,${g - 10} 20,${g - 24} 36,${g - 36} 48,${g - 40} 60,${g - 34} 80,${g - 20} 96,${g - 12} 116,${g - 10} 136,${g - 7} 136,${g - 6} -40,${g - 6}`
   const topp: [number, number] = stor ? [60, g - 66] : [48, g - 40]
   // Nedfartene, fra toppen og ned mot dalen.
   const nedfarter = stor
     ? [`M40 ${g - 62} Q30 ${g - 40} 26 ${g - 10}`, `M58 ${g - 62} Q50 ${g - 36} 44 ${g - 8}`, `M62 ${g - 60} Q72 ${g - 38} 70 ${g - 10}`]
     : [`M46 ${g - 38} Q38 ${g - 24} 32 ${g - 8}`]
   const skog = stor
-    ? [[6, g - 14], [12, g - 20], [18, g - 16], [34, g - 24], [38, g - 18], [52, g - 30], [56, g - 22], [60, g - 16], [78, g - 28], [84, g - 20], [90, g - 16], [8, g - 9], [20, g - 26]]
-    : [[10, g - 14], [16, g - 18], [24, g - 22], [52, g - 30], [58, g - 24], [66, g - 22], [74, g - 18], [84, g - 14]]
+    ? [[-34, g - 10], [-26, g - 13], [-10, g - 11], [104, g - 17], [112, g - 14], [126, g - 10], [6, g - 14], [12, g - 20], [18, g - 16], [34, g - 24], [38, g - 18], [52, g - 30], [56, g - 22], [60, g - 16], [78, g - 28], [84, g - 20], [90, g - 16], [8, g - 9], [20, g - 26]]
+    : [[-34, g - 10], [-24, g - 12], [-10, g - 11], [104, g - 12], [114, g - 11], [126, g - 9], [10, g - 14], [16, g - 18], [24, g - 22], [52, g - 30], [58, g - 24], [66, g - 22], [74, g - 18], [84, g - 14]]
   return (
     <>
-      {/* Fjellet: snø, fjellvegg på skyggesiden, skog og nedfarter. */}
+      {/* Nabotoppene i disen (G15). */}
       <Kantfade>
+        <Dis>
+          <polygon points={`-40,${g - 8} -40,${g - 30} -22,${g - 50} -6,${g - 34} 6,${g - 24} 6,${g - 8}`} fill={S.sno.flate} stroke={S.fjell.lys} strokeWidth="0.6" strokeLinejoin="round" />
+          <polygon points={`-22,${g - 50} -6,${g - 34} 6,${g - 24} 6,${g - 8} -12,${g - 8}`} fill={S.fjell.flate} opacity="0.5" />
+          <polygon points={`92,${g - 8} 104,${g - 30} 120,${g - 48} 136,${g - 32} 136,${g - 8}`} fill={S.sno.flate} stroke={S.fjell.lys} strokeWidth="0.6" strokeLinejoin="round" />
+          <polygon points={`120,${g - 48} 136,${g - 32} 136,${g - 8} 124,${g - 8}`} fill={S.fjell.flate} opacity="0.5" />
+        </Dis>
+      </Kantfade>
+      {/* Fjellet: snø, fjellvegg på skyggesiden, skog og nedfarter. Fjellet er motivet, så
+          det står ikke i bakgrunnen (G15): silhuetten av et låst skisenter viser det. */}
+      <g>
         <polygon points={fjell} fill={S.sno.flate} stroke={S.fjell.lys} strokeWidth="0.6" strokeLinejoin="round" />
-        <polygon points={stor ? `60,${g - 66} 76,${g - 40} 96,${g - 22} 96,${g - 6} 72,${g - 6} 66,${g - 34}` : `48,${g - 40} 60,${g - 34} 80,${g - 20} 96,${g - 12} 96,${g - 6} 62,${g - 6}`} fill={S.sno.skygge} />
+        <polygon points={stor ? `60,${g - 66} 76,${g - 40} 96,${g - 22} 116,${g - 14} 136,${g - 8} 136,${g - 6} 72,${g - 6} 66,${g - 34}` : `48,${g - 40} 60,${g - 34} 80,${g - 20} 96,${g - 12} 116,${g - 10} 136,${g - 7} 136,${g - 6} 62,${g - 6}`} fill={S.sno.skygge} />
         {stor && <polygon points={`40,${g - 64} 50,${g - 56} 46,${g - 48} 42,${g - 52}`} fill={S.fjell.skygge} />}
         {stor && <polygon points={`60,${g - 66} 68,${g - 54} 64,${g - 50}`} fill={S.fjell.flate} />}
         {nedfarter.map((d, i) => (
@@ -2629,8 +2721,25 @@ const skisenter: B = (t, f) => {
         {skog.map(([sx, sy], i) => (
           <Tre key={i} x={sx} y={sy} h={stor ? 7 : 6} slag="gran" />
         ))}
-      </Kantfade>
+      </g>
       <Bakke type="sno" />
+      {/* Landsbyen ved foten (G15): hytter til venstre, et lite hotell og parkeringen med bussen til høyre. */}
+      {[[-37, S.treverk], [-27, S.faluRod], [-17, S.treverk]].map(([hx, m], i) => (
+        <g key={i}>
+          <Kloss x={hx as number} y={g - 2 + (i % 2)} b={8} h={5} d={6} m={m as Materiale} />
+          <Saltak x={hx as number} y={g - 7 + (i % 2)} b={8} d={6} h={3.6} m={S.skifer} gavl={m as Materiale} />
+          <Vindusrad x={(hx as number) + 1.6} y={g - 5.6 + (i % 2)} antall={2} b={1.8} h={1.8} mellom={1.4} tent={i % 2 ? 1 : 2} />
+        </g>
+      ))}
+      <Kloss x={106} y={g - 1} b={18} h={11} d={8} m={S.treverk} />
+      <Vindusrad x={107.6} y={g - 9.4} antall={5} b={2.2} h={2.4} mellom={1.2} tent={2} />
+      <Vindusrad x={107.6} y={g - 5} antall={5} b={2.2} h={2.4} mellom={1.2} tent={2} start={1} />
+      <Saltak x={106} y={g - 12} b={18} d={8} h={6} m={S.skifer} gavl={S.treverk} />
+      <rect x="110" y={g + 2.6} width="22" height="4.6" rx="1" fill={S.vin.flate} />
+      <rect x="111" y={g + 3.4} width="20" height="1.6" fill={S.glass.skygge} />
+      {[113, 128].map((cx) => (
+        <circle key={cx} cx={cx} cy={g + 7.4} r="1.1" fill={S.mork.skygge} />
+      ))}
       {/* Lysløypa ved nivå 100. */}
       {t >= 3 &&
         [[30, g - 34], [27.6, g - 24], [26.4, g - 14]].map(([lx, ly]) => (
@@ -2788,7 +2897,7 @@ export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kont
  * er tegnet brede. En tegning her må nå kantene selv: alt som før bleknet ut
  * (bakgrunn, gjerder, rekker av hus), må forlenges til x −40 og 136.
  */
-export const FULL_RAMME: readonly string[] = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank']
+export const FULL_RAMME: readonly string[] = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
 
 /** Bedriftene, som har fire vekstrinn. */
 export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
@@ -2846,6 +2955,11 @@ const TRINNUTSNITT: Record<string, readonly (readonly [number, number, number, n
   restaurant: [[22, 18, 68, 68], [10, 14, 76, 76], [10, 14, 76, 76], [10, 14, 76, 76]],
   hotell: [[26, 22, 64, 64], [22, 10, 76, 76], [18, 4, 82, 82], [18, 0, 86, 86]],
   bank: [[24, 32, 60, 60], [12, 14, 74, 74], [6, 12, 80, 80], [6, 12, 80, 80]],
+  oljeselskap: [[26, 26, 60, 60], [20, 20, 70, 70], [20, 20, 70, 70], [2, 14, 82, 82]],
+  rederi: [[30, 36, 58, 58], [28, 32, 62, 62], [26, 30, 64, 64], [24, 24, 70, 70]],
+  fiskeoppdrett: [[28, 40, 54, 54], [32, 36, 60, 60], [30, 34, 62, 62], [30, 30, 66, 66]],
+  flyselskap: [[10, 16, 80, 80], [10, 16, 80, 80], [10, 16, 80, 80], [2, 10, 86, 86]],
+  skisenter: [[14, 24, 68, 68], [6, 12, 80, 80], [6, 12, 80, 80], [0, 8, 86, 86]],
 }
 
 /**
