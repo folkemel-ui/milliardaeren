@@ -667,6 +667,26 @@ session; delete what stops being true.
   `inntektPerSek`), inntekt ~39, marked ~30, the rest ≤ 12; total ~367 ms of the 400 ms
   limit. Each part has a line in `__tester__/budsjett.ts` (~40 % over the measurement), and a
   new part without a line fails. **A new per-second system adds a `runde` and a budget line.**
+- **Time away ticks every 10 s for rent, net worth and achievements (Pack 69).** `simuler`
+  passes `sekund` a `leieSek`: 1 in live play (bit-for-bit as before, so the golden master
+  and the bench don't move), and while away 0 for nine seconds and the block's count on the
+  tenth — blocks sit on whole tens of game time (`(n.sek + 1) % BORTE_TAKT`), so they line up
+  with day changes and the net-worth log, and the last second of a call pays what is left.
+  After it, two hours away on the heaviest save: formue ~17 ms, leie ~15, prestasjoner ~9,
+  inntekt ~38, marked ~26 — ~125 ms total (a fresh game ~50). A new per-second system that
+  only needs to be roughly on time while away can follow `leieSek > 0`. Rent can step
+  (+0.23 % between two seconds when a rate or vacancy changes), so a lump differs from
+  second-by-second by up to ~0.2 % over a few seconds but 1e-5 over ten minutes — test the
+  long window for equality and the short one only for «nothing lost».
+- **The speed test also guards a live second** (`LEVENDE_SEKUND_MS` in `budsjett.ts`):
+  `simuler(s, 1)` on the heaviest save, ~3.7 ms, almost all `structuredClone` (Folke chose to
+  keep the copy: removing it touches how every screen redraws). I first set the limit from
+  the review agent's 1.7 ms, measured on a lighter save, and it failed — measure on the exact
+  save the test uses before writing a limit.
+- **Saving (Pack 69)**: every 15 s while playing, in `requestIdleCallback` (2 s deadline)
+  where it exists — Safari has none, so it saves at once there; `stoppSpillokke` cancels a
+  pending one. Hiding the page and actions still save as before. To watch it in the pane,
+  wrap `Storage.prototype.setItem` and log the times of `milliardaer.lagring` writes.
 - **Trust the stopwatch, not the sampling profiler's callers.** In Pack 64 a `--cpu-prof` run
   showed `eiendeler` under both `sekund` and `nettoformue`, and I told Folke net worth was
   computed twice a second. It wasn't: V8 inlines `nettoformue` into `sekund` some of the
