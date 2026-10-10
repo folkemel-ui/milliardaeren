@@ -113,7 +113,7 @@ describe('gevinst ved salg', () => {
 
   it('et fiendtlig oppkjøp gir ikke et falskt tap når restselskapet selges', () => {
     let s = rik()
-    s.bedrifter.push(bedrift('kiosk', { id: 'b9', nivaa: 10, investert: 100_000 }))
+    s.bedrifter.push(bedrift('kiosk', { id: 'b9', nivaa: 100, investert: 100_000 }))
     s.rivaler[0].formue = 5e8
     const kontanterFør = s.kontanter
     const investert = (x: Spilltilstand) => x.bedrifter.reduce((sum, b) => sum + b.investert, 0)

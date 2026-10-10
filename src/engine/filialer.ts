@@ -3,14 +3,17 @@
  * én per by. Hver filial legger en andel av bedriftens inntekt til: den første
  * mest, de neste mindre (en fallende avkastning). Kopier av bedrifter ble tatt
  * bort i Pakke 2 fordi de sprengte økonomien — en filial er derfor en del av
- * bedriften, ikke en ny: den deler nivå, ansatte, leder og fusjoner, og prisen
- * følger det du har investert i bedriften, så den vokser med den.
+ * bedriften, ikke en ny: den deler nivå, ansatte, leder og fusjoner. Prisen
+ * står fast per bransje (Pakke 68): før fulgte den det du hadde investert den
+ * dagen, så en filial åpnet ved nivå 100 kostet ×118 av en ved nivå 50.
  *
  * Byen betyr noe: hver bransje har en hjemregion der en filial tjener 25 % mer,
  * og regionens eiendomsindeks (regioner.ts) drar inntekten litt opp eller ned —
  * rundt ±6 %. Ingen terning: indeksen går som før.
  */
 
+import { verdiVedNivaa } from './fusjon'
+import { BEDRIFTSTYPER } from './innhold'
 import { byfaktor, regionFor } from './regioner'
 import type { Bedrift, BedriftstypeId, NorskBy, Region, Spilltilstand } from './types'
 
@@ -48,8 +51,9 @@ export const HJEMREGION: Record<BedriftstypeId, Region> = {
 }
 
 /**
- * En filial koster så mange ganger andelen av det du har investert i
- * bedriften. Satt på balansebenken (Pakke 59) sammen med nivåkravet: uten
+ * En filial koster så mange ganger andelen av det det koster å bygge bransjen
+ * opp til nivå 50 (før Pakke 68: av det du hadde investert). Satt på
+ * balansebenken (Pakke 59) sammen med nivåkravet: uten
  * filialer 1 mrd på 6 t 36 min og 10 mrd på 15 t 28 min, med dem 6 t 12 min og
  * 13 t 47 min. Billigere (×2,5) eller uten nivåkrav ga 8–13 % raskere milliard
  * og 13–17 % raskere ti milliarder; boten kjøpte filialer til de små bedriftene
@@ -96,7 +100,7 @@ export function filialfaktor(s: Spilltilstand, b: Bedrift): number {
 export function filialpris(b: Bedrift): number | null {
   const nr = filialer(b).length
   if (nr >= MAKS_FILIALER || b.nivaa < FILIAL_FRA_NIVAA) return null
-  return Math.round(FILIALPRIS * FILIALANDEL[nr] * b.investert)
+  return Math.round(FILIALPRIS * FILIALANDEL[nr] * verdiVedNivaa(BEDRIFTSTYPER[b.type], FILIAL_FRA_NIVAA))
 }
 
 /** Byene bedriften ennå ikke har filial i. */

@@ -6,7 +6,7 @@
 
 import { MEGLERHONORAR, BYEIER_BONUS } from '../engine/eiendom'
 import { FOND_GEBYR } from '../engine/fond'
-import { FUSJONSFAKTOR } from '../engine/fusjon'
+import { FUSJON_FRA_NIVAA, FUSJONSFAKTOR } from '../engine/fusjon'
 import { GRADER, RETNING_NIVAA, RETNINGER } from '../engine/ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from '../engine/verden'
 import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
@@ -117,7 +117,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Fire rivaler bygger formue på egen hånd, og Forbes-lista viser hvem som leder. Hver eier et holdingselskap du kan kjøpe deg inn i, ' +
       `${pst(BLOKK)} om gangen — og hver blokk koster ${pst(BLOKKPREMIE)} mer enn den forrige. Eierandelene gir utbytte, og fra 50 % kan du ` +
       `kjøpe resten med ${pst(OPPKJOPSPREMIE)} premie. Rivalene eier også bedrifter i dine bransjer: kjøper du en, slås den sammen med din og ` +
-      `ganger inntekten med ${tall(FUSJONSFAKTOR, 1)}.`,
+      `ganger inntekten med ${tall(FUSJONSFAKTOR, 1)}. Din bedrift må ha nådd nivå ${FUSJON_FRA_NIVAA}, og en fusjon koster minst det den er verdt — et oppkjøp minst det fusjonene det gir, ville kostet.`,
   },
   startups: {
     tittel: 'Startups',

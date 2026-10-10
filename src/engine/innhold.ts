@@ -45,7 +45,8 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   },
   hotell: {
     id: 'hotell', navn: 'Hotell',
-    pris: 135_000_000, grunninntekt: 3_600, oppgraderingspris: 33_750_000, vekst: 1.1, laasesOppVed: 170_000_000,
+    // 4 500 fra Pakke 68: med 3 600 tjente hotellet seg inn på 37 500 s mot naboenes ~30 000, og boten kjøpte det ikke før time 58.
+    pris: 135_000_000, grunninntekt: 4_500, oppgraderingspris: 33_750_000, vekst: 1.1, laasesOppVed: 170_000_000,
   },
   bank: {
     id: 'bank', navn: 'Bank',

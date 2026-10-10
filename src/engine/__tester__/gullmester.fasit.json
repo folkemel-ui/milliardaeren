@@ -1,17 +1,17 @@
 {
   "sek": 14400,
-  "frø": 879657080,
-  "kontanter": 1386481.63,
-  "totaltTjent": 116804439.35,
-  "nettoformue": 100100491.63,
-  "hoyesteFormue": 100100491.63,
-  "inntektPerSek": 22808.63,
+  "frø": 759350986,
+  "kontanter": 5582173.92,
+  "totaltTjent": 130054207.89,
+  "nettoformue": 113257552.92,
+  "hoyesteFormue": 113257552.92,
+  "inntektPerSek": 26169.21,
   "bedrifter": [
-    "saftbod nivå 92, 4 ansatte",
-    "polsebod nivå 71, 3 ansatte",
-    "gatekjokken nivå 66, 3 ansatte",
-    "kiosk nivå 43, 1 ansatte",
-    "kafe nivå 33, 1 ansatte"
+    "saftbod nivå 78, 3 ansatte",
+    "polsebod nivå 69, 3 ansatte",
+    "gatekjokken nivå 64, 3 ansatte",
+    "kiosk nivå 58, 2 ansatte",
+    "kafe nivå 37, 1 ansatte"
   ],
   "historikkIntervall": 80,
   "historikkPunkter": 181

@@ -11,7 +11,7 @@
 import { BEDRIFTSTYPER, STIGEN } from './innhold'
 import { dagnummer } from './kalender'
 import { hashTekst, tilfeldig } from './rng'
-import { SELSKAPSANDEL } from './rivaler'
+import { oppkjopspris, SELSKAPSANDEL } from './rivaler'
 import type { Bedrift, BedriftstypeId, Bedriftstype, Rival, Spilltilstand } from './types'
 
 /** Hver fusjon ganger bedriftens inntekt med dette. */
@@ -23,9 +23,20 @@ const BEDRIFTSANDEL = 0.1
 const MAKS_NIVAA = 150
 /**
  * Prisantydningen er aldri under så mange ganger det du selv har investert i
- * bransjen — ellers ville en fusjon vært det billigste kjøpet i spillet.
+ * bransjen — ellers ville en fusjon vært det billigste kjøpet i spillet. Med
+ * 1,5 tjente en fusjon seg inn på tre ganger bedriftens egen tid, og boten
+ * fusjonerte aldri; med 1 (Pakke 68) er det to ganger — men bare fra nivå 100.
  */
-export const PRIS_MOT_DIN = 1.5
+export const PRIS_MOT_DIN = 1
+/**
+ * Din bedrift må ha nådd så langt før den kan slås sammen med en rivals, ved bud
+ * eller ved oppkjøp (Pakke 68). Uten porten ble fusjonene det billigste kjøpet
+ * tidlig: smart bot 1 mrd på 3 t 26 min mot 6 t 12 min. Med porten: 5 t 11 min.
+ */
+export const FUSJON_FRA_NIVAA = 100
+
+/** Kan bedriften din slås sammen med en rivals? */
+export const kanSlaasSammen = (din: Bedrift | undefined): din is Bedrift => !!din && din.nivaa >= FUSJON_FRA_NIVAA
 /** Budene du kan gi, som andel av prisantydningen. */
 export const BUD = [
   { id: 'lavt', navn: 'Lavt', faktor: 0.9 },
@@ -127,30 +138,55 @@ export function utforFusjon(n: Spilltilstand, rivalId: string, type: Bedriftstyp
 
 /**
  * Et fiendtlig oppkjøp tar med seg alle bedriftene rivalen eier: de som er i
- * bransjer du selv har, slås sammen med dine. Som ved en vanlig fusjon
+ * bransjer du selv har på nivå FUSJON_FRA_NIVAA eller mer, slås sammen med dine;
+ * de andre blir i selskapet du nå eier. Som ved en vanlig fusjon
  * forlater bedriften rivalen, så selskapet krymper — og verdien flyttes fra
  * andelen din over i din egen bedrift, så nettoformuen står stille. Selger du
  * andelen igjen, får du bare betalt for det som er igjen. Muterer — kalles
  * når du eier hele selskapet, før rivalen merkes som overtatt.
  */
-export function fusjonerVedOppkjop(n: Spilltilstand, r: Rival): BedriftstypeId[] {
+export function fusjonerVedOppkjop(n: Spilltilstand, r: Rival, ekstra = 0): BedriftstypeId[] {
   const fusjonert: BedriftstypeId[] = []
+  // Det som er betalt over selskapets pris, går inn i bedriftene som slås sammen — som ved et bud.
+  const gulv = oppkjopsgulv(n, r)
   for (const rb of rivalbedrifter(r)) {
     const din = n.bedrifter.find((b) => b.type === rb.type)
-    if (!din) continue
+    if (!kanSlaasSammen(din)) continue
     din.fusjoner = (din.fusjoner ?? 0) + 1
     const verdiFør = r.formue * SELSKAPSANDEL
     const andel = Math.min(0.5, rb.verdi / r.formue)
     r.formue *= 1 - andel
     r.tak *= 1 - andel
     const flyttet = (verdiFør - r.formue * SELSKAPSANDEL) * r.andel
-    din.investert += flyttet
+    din.investert += flyttet + (gulv > 0 ? (ekstra * din.investert * PRIS_MOT_DIN) / gulv : 0)
     r.kostpris = Math.max(0, r.kostpris - flyttet)
     r.solgt = [...(r.solgt ?? []), rb.type]
     fusjonert.push(rb.type)
   }
   r.bud = {}
   return fusjonert
+}
+
+/**
+ * Fusjonsgulvet ved et fiendtlig oppkjøp (Pakke 68): for hver bedrift rivalen
+ * eier i en bransje du har, det en fusjon ved bud minst ville kostet.
+ */
+export function oppkjopsgulv(s: Spilltilstand, r: Rival): number {
+  let sum = 0
+  for (const rb of rivalbedrifter(r)) {
+    const din = s.bedrifter.find((b) => b.type === rb.type)
+    if (kanSlaasSammen(din)) sum += din.investert * PRIS_MOT_DIN
+  }
+  return Math.round(sum)
+}
+
+/**
+ * Hva et fiendtlig oppkjøp koster: resten av selskapet med premie, men aldri
+ * under fusjonsgulvet — ellers ble oppkjøpet en snarvei forbi budene (to
+ * oppkjøp ved kr 10 mill kostet kr 0,79 mill og doblet bedriftsinntekten).
+ */
+export function fulltOppkjop(s: Spilltilstand, r: Rival): number {
+  return Math.max(oppkjopspris(r), oppkjopsgulv(s, r))
 }
 
 /** Alle fusjonene som er gjort, som «rivalId:bransje» — til avisens dagsbilde. */

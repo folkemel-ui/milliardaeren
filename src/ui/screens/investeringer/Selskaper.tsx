@@ -7,8 +7,8 @@ import { useState } from 'react'
 import { Bekreftknapp } from '../../komponenter/Bekreftknapp'
 import { nettoformue } from '../../../engine/formler'
 import { byPaaBedrift, godtaMotbud, investerIStartup, kjopRivalblokk, overtaRival, selgRivalandel } from '../../../engine/handlinger'
-import { BLOKK, blokkpris, forbesliste, oppkjopspris, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../../engine/rivaler'
-import { BUD, type BudId, dagensForhandling, FORMER, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../../../engine/fusjon'
+import { BLOKK, blokkpris, forbesliste, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../../engine/rivaler'
+import { BUD, type BudId, dagensForhandling, FORMER, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, fulltOppkjop, prisantydning, rivalbedrifter } from '../../../engine/fusjon'
 import { BEDRIFTSTYPER } from '../../../engine/innhold'
 import type { BedriftstypeId, Rival, Spilltilstand } from '../../../engine/types'
 import { utfor } from '../../../state/lager'
@@ -150,11 +150,12 @@ export function Rivaler({ s }: { s: Spilltilstand }) {
 
       <p className="dempet liten">
         Kjøp deg inn i rivalenes holdingselskaper i blokker på {tall(BLOKK * 100)} %. Andelene gir {tall(RIVALUTBYTTE * 100)} %
-        utbytte per time. Med halvparten kan du ta resten med et fiendtlig oppkjøp — da får du bedriftene deres med på kjøpet.
+        utbytte per time. Med halvparten kan du ta resten med et fiendtlig oppkjøp — da får du bedriftene deres med på kjøpet,
+        men aldri billigere enn fusjonene ville kostet hver for seg.
       </p>
       <p className="dempet liten">
         Du kan også by på bedriftene rivalene eier. Kjøper du en, slås den sammen med din egen i samme bransje, og inntekten
-        ganges med {tall(FUSJONSFAKTOR, 1)}. Ett bud per bedrift per dag.
+        ganges med {tall(FUSJONSFAKTOR, 1)}. Din bedrift må ha nådd nivå {FUSJON_FRA_NIVAA}. Ett bud per bedrift per dag.
       </p>
 
       <ul className="kortliste">
@@ -162,7 +163,7 @@ export function Rivaler({ s }: { s: Spilltilstand }) {
           const verdi = selskapsverdi(r)
           const min = r.andel * verdi
           const bp = blokkpris(r)
-          const op = oppkjopspris(r)
+          const op = fulltOppkjop(s, r)
           return (
             <li key={r.id} className={r.overtatt ? 'kort rivalkort eid' : 'kort rivalkort'}>
               <div className="rival-topp">
@@ -267,6 +268,10 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
                 </div>
                 {!din ? (
                   <p className="dempet liten">Du må eie {FORMER[rb.type].en} selv for å slå dem sammen.</p>
+                ) : din.nivaa < FUSJON_FRA_NIVAA ? (
+                  <p className="dempet liten">
+                    Fusjoner åpner når {FORMER[rb.type].den} din når nivå {FUSJON_FRA_NIVAA} — nå nivå {din.nivaa}.
+                  </p>
                 ) : f?.motbud ? (
                   <div className="rival-knapper">
                     <span className="liten">

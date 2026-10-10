@@ -14,6 +14,8 @@ import { VALUTA_FOR, valutafaktor, valutalogg, VALUTALISTE } from '../valuta'
 import { sjekkPrestasjoner } from '../prestasjoner'
 import { DAG_SEK } from '../kalender'
 import { MIGRERINGER } from '../../state/migrering'
+import { verdiVedNivaa } from '../fusjon'
+import { BEDRIFTSTYPER } from '../innhold'
 import { nyttSpill } from '../start'
 import type { Bedrift, Spilltilstand } from '../types'
 
@@ -33,11 +35,12 @@ function medSaftbod(nivaa = FILIAL_FRA_NIVAA): Spilltilstand {
 }
 
 describe('filialer', () => {
-  it('åpner fra nivå 50, koster en andel av det som er investert, og går inn i verdien', () => {
+  // Prisen står fast per bransje fra Pakke 68: en andel av det det koster å bygge bransjen opp til nivå 50.
+  it('åpner fra nivå 50, koster en fast andel per bransje, og går inn i verdien', () => {
     expect(aapneFilial(medSaftbod(49), 'b0', 'Oslo').ok).toBe(false)
     const s = medSaftbod()
     const id = s.bedrifter[0].id
-    expect(filialpris(s.bedrifter[0])).toBe(Math.round(FILIALPRIS * FILIALANDEL[0] * 1_000_000))
+    expect(filialpris(s.bedrifter[0])).toBe(Math.round(FILIALPRIS * FILIALANDEL[0] * verdiVedNivaa(BEDRIFTSTYPER.saftbod, FILIAL_FRA_NIVAA)))
     const n = ok(aapneFilial(s, id, 'Oslo'))
     expect(s.kontanter - n.kontanter).toBe(filialpris(s.bedrifter[0]))
     expect(n.bedrifter[0].investert).toBe(1_000_000 + filialpris(s.bedrifter[0])!)

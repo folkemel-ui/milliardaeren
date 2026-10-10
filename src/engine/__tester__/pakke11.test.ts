@@ -36,7 +36,7 @@ function oppsett(): Spilltilstand {
   const s = nyttSpill()
   s.kontanter = 1e9
   s.hoyesteFormue = 1e9
-  s.bedrifter.push(bedrift('kiosk', { id: 'b9', nivaa: 10, investert: 100_000 }))
+  s.bedrifter.push(bedrift('kiosk', { id: 'b9', nivaa: 100, investert: 100_000 }))
   s.rivaler[0].formue = 5e6
   return s
 }
@@ -157,6 +157,8 @@ describe('bud og fusjon', () => {
 
   it('et fiendtlig oppkjøp slår sammen bedriftene i bransjer du eier', () => {
     let s = oppsett()
+    // Fra Pakke 68 slås bare bedrifter på nivå 100 eller mer sammen.
+    s.bedrifter.find((b) => b.type === 'saftbod')!.nivaa = 100
     const id = s.rivaler[0].id
     for (let i = 0; i < 5; i++) s = ok(kjopRivalblokk(s, id))
     s = ok(overtaRival(s, id))

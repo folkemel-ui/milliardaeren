@@ -9,7 +9,7 @@ import { utforRivalsalg } from '../handel'
 import { BLOKK, blokkpris, oppkjopspris } from '../rivaler'
 import { dagnummer } from '../kalender'
 import { leggTilHendelse } from '../bank'
-import { BUD, type BudId, dagensForhandling, FORMER, FUSJONSFAKTOR, fusjonerVedOppkjop, MOTBUD_VED, prisantydning, rivalbedrifter, type Rivalbedrift, rivalensPris, utforFusjon } from '../fusjon'
+import { BUD, type BudId, dagensForhandling, FORMER, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, fulltOppkjop, fusjonerVedOppkjop, MOTBUD_VED, prisantydning, rivalbedrifter, type Rivalbedrift, rivalensPris, utforFusjon } from '../fusjon'
 import { flyt } from '../portefolje'
 import { ledigIRunde } from '../startups'
 import type { BedriftstypeId, Spilltilstand } from '../types'
@@ -42,14 +42,16 @@ export function overtaRival(s: Spilltilstand, id: string): Utfall {
   if (!r) return feil('Fant ikke rivalen.')
   if (r.overtatt) return feil('Du eier allerede hele selskapet.')
   if (r.andel < 0.5 - 1e-9) return feil('Du må eie minst 50 % før du kan kjøpe resten.')
-  const pris = oppkjopspris(r)
+  const pris = fulltOppkjop(s, r)
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   const nr = finnRival(n, id)!
+  // Selskapet koster sin pris; det som betales over, er fusjonsgulvet og går inn i bedriftene.
+  const selskapet = oppkjopspris(nr)
   n.kontanter -= pris
   nr.andel = 1
-  nr.kostpris += pris
-  const fusjonert = fusjonerVedOppkjop(n, nr)
+  nr.kostpris += selskapet
+  const fusjonert = fusjonerVedOppkjop(n, nr, pris - selskapet)
   nr.overtatt = true
   flyt(n, 'rival', pris)
   if (fusjonert.length) {
@@ -73,6 +75,7 @@ function kanFusjonere(s: Spilltilstand, rivalId: string, type: BedriftstypeId): 
   const rb = rivalbedrifter(r).find((x) => x.type === type)
   if (!rb) return `${r.navn} eier ikke ${FORMER[type]?.en ?? 'en slik bedrift'}.`
   if (!eierType(s, type)) return `Du må eie ${FORMER[type].en} selv for å slå dem sammen.`
+  if (s.bedrifter.find((b) => b.type === type)!.nivaa < FUSJON_FRA_NIVAA) return `Fusjoner åpner når ${FORMER[type].den} din har nådd nivå ${FUSJON_FRA_NIVAA}.`
   return rb
 }
 

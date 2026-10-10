@@ -92,7 +92,7 @@ describe('fiendtlig oppkjøp', () => {
   function oppsett(): Spilltilstand {
     let s = nyttSpill()
     s = { ...s, kontanter: 1e12, hoyesteFormue: 1e12 }
-    s.bedrifter.push(bedrift('kiosk', { id: 'b2', nivaa: 10, investert: 100_000 }))
+    s.bedrifter.push(bedrift('kiosk', { id: 'b2', nivaa: 100, investert: 100_000 }))
     s.rivaler[0].formue = 5e7
     s.rivaler[0].tak = 1e9
     const id = s.rivaler[0].id

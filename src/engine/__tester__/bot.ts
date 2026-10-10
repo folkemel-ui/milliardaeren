@@ -6,7 +6,7 @@
 
 import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, velgRetning, type Utfall } from '../handlinger'
 import { besteFilialby, filialbidrag, filialer, filialfaktor, filialpris } from '../filialer'
-import { BUD, dagensForhandling, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
+import { BUD, dagensForhandling, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
@@ -79,7 +79,7 @@ function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
     for (const rb of rivalbedrifter(r)) {
       const din = s.bedrifter.find((b) => b.type === rb.type)
       const f = dagensForhandling(s, r, rb.type)
-      if (!din || (f && f.motbud === null)) continue
+      if (!din || din.nivaa < FUSJON_FRA_NIVAA || (f && f.motbud === null)) continue
       liste.push({
         pris: f?.motbud ?? Math.round(prisantydning(s, rb) * sjenerost),
         gevinst: bedriftInntektPerSek(din) * (FUSJONSFAKTOR - 1),
