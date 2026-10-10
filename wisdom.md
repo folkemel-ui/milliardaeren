@@ -681,6 +681,17 @@ session; delete what stops being true.
 - **A test that plays to just before an event must not predict the event from that
   moment** when one more round can change it: the top three after eight rounds weren't
   the top three after nine. Check the outcome afterwards (who is now in the division above).
+- **Tune a balance number on the engine's own simulation, not on a formula** (Pack 67). The
+  startup rounds were first solved on paper for +1 % a day; the engine then returned 0.80×
+  per krone. Two causes: a bug (the new per-round growth was read *after* , so
+  every round used the next one's growth) and a wrong model (most money goes into the late,
+  short rounds where the room is biggest, so the formula's 1 %/day came out as 30 %/h on
+  capital). Calibrate the simulation script on the old code first — it must reproduce the
+  known figure (3.20× here) — then try variants and keep the one that hits the target.
+  The review agents' scratch scripts () were reusable as they were.
+- **A model with a level and a pull-back: say the measured swing, not the noise's.** Art's
+  noise alone gives ±11 % around the value; exhibitions (upward jumps) make it ±16 % and
+  keep prices ~9 % above the value on average. I told Folke ±11 % before measuring.
 - **Slow tests are slow on their own**: `formue.test.ts` takes ~19 s alone and ~33 s in
   the full suite. Before blaming your change for a slowdown, time it alone on both sides
   of `git stash` (Pack 39's daily settlement cost ~7 %, which is fine).
