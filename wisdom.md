@@ -2,7 +2,8 @@
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
-(the bug review and the last v10.0 game items, 8–9 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
+(last: Packs 77–78, the club page, 10–11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -107,7 +108,16 @@ session; delete what stops being true.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–66.**
+- **"Add the next pack" / "start the next pack" means build it** when the pack already sits in
+  the plan (after Pack 77, Folke wrote «Add the next pack» and wanted Pack 78 built). Say in one
+  line how you read it, then ask the pack's design questions as usual; the question round is
+  also the chance for Folke to say otherwise.
+- **A pack the size of a list section is fine as two packs on the same files.** The club page
+  (19 items) became Pack 77 (the structure: a hub and four pages) and Pack 78 (the lists inside
+  them). Building the structure first meant the second pack's measurements were per page, and
+  an item the first pack had half-done (the form chips, the table around you) was rewritten in
+  `Ideer.md` to say what was left, not removed or left as it was.
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–78.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -252,7 +262,9 @@ session; delete what stops being true.
   `milliardaer-grafikk` on **5186** for the graphics track (the two tracks run at the
   same time, so each has its own port and save). In Packs 55–60 another chat held 5184
   (`preview_start` refuses a server another chat started); `milliardaer-test2` on 5182
-  was free. Its storage was usually wiped between starts — expect to rebuild the save.
+  was free, and still was in Packs 77–78 (5184 was again another chat's). Its storage was
+  usually wiped between starts — expect to rebuild the save. Stop your server (`preview_stop`)
+  before `lever.mjs`, and reset the viewport.
 - **Test saves are not durable** (5184, 5182 …). On 1 October the pane's storage for that origin
   was wiped when the test server restarted (not by game code — nothing in `src` clears
   storage). Rebuild a rich test game when needed: open `/ikon.svg` (the game isn't
@@ -333,8 +345,10 @@ session; delete what stops being true.
   `button, [role=tab], a[href], input, select` that is visible; its target is its own rect, widened
   by an absolute `::after` if it has one (`getComputedStyle(el, '::after')`: `top`/`bottom`/`left`/`right`
   are the insets, so height = rect − top − bottom). Count the ones under 44 × 44 and group by
-  class and size. Sweep **every** screen and part (12 here): a first pass over six found three
-  classes, the full sweep found a fourth (a text link in Innstillinger). The same script with
+  class and size. Sweep **every** screen and part (12 here) **and every kind of detail page**:
+  a first pass over six found three classes, the full sweep found a fourth (a text link in
+  Innstillinger), and Pack 77 found the shared `.tilbake` at 36 px on all detail pages, which the
+  Pack 74 sweep never opened. The same script with
   `fontSize < 12` on leaf nodes found the 11 px descriptions; group by class to see what they
   are before you decide what to enlarge. Layout can't be tested in happy-dom (no layout), so the
   tests guard the CSS rules and this script is the real check.
@@ -586,8 +600,9 @@ session; delete what stops being true.
   animated scenes left open made «Timeout calling onTaskUpdate» fail `lever.mjs` three
   times running; closing it and stopping the dev server gave a clean run at once. Leave
   the pane on a still page (or `about:blank`) while the full suite runs.
-- **"Timeout calling onTaskUpdate"** (gone since Pack 63; if it comes back, look for a test that
-  blocks for many seconds without yielding — the golden master ran 20 s in one call) at the end of a passing run is the runner starving
+- **"Timeout calling onTaskUpdate"** (since Pack 78 held off by `maxWorkers: 4`, see above; before
+  that, look for a test that blocks for many seconds without yielding — the golden master ran 20 s
+  in one call) at the end of a passing run is the runner starving
   under load, not a test failure. It appeared when Pack 59 made the suite ~10 % heavier
   and the machine was busy, never when the heavy files ran alone. Long synchronous tests
   should yield (`await new Promise((r) => setTimeout(r, 0))` between chunks, like the
@@ -1061,9 +1076,6 @@ session; delete what stops being true.
 - **A fresh 4. divisjon club loses its first cup round every time** (five seeds of five):
   a test that needs the cup running sets the squad to `styrke = angrep = forsvar = 95`
   before simulating day 1.
-- **Sweep detail pages for touch targets too.** Pack 74's sweep covered tabs and parts;
-  the shared `.tilbake` («‹ Klubb», «‹ Luksus» …) was 36 px on every detail page until
-  Pack 77 found it. Open each kind of page in the sweep.
 - **Parts (Pack 61)**: every set of parts is a `lagDelvalg(key, parts)` in `ui/deler.ts`
   (remembered in localStorage, first part by default, settable from outside). A new set
   of parts goes there too, not in a `useState`.
