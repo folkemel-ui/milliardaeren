@@ -58,11 +58,22 @@ describe('lagringen', () => {
     expect(tung).toBeLessThan((JSON.stringify(SENT).length / 1024) * 0.85)
   })
 
-  it('vokser ikke uten tak: når historikkene er fulle, gir tretti spilldager til nesten ingenting', { timeout: 60_000 }, () => {
-    // Historikkene fylles opp de første rundt 120 spilldagene (målt: 137 kB
-    // på dag 32, 178 kB på dag 122, 176 kB på dag 152). Etter det står lagringen.
-    const fyllt = simuler(SENT, 120 * DAG_SEK)
-    const senere = simuler(fyllt, 30 * DAG_SEK)
+  it('vokser ikke uten tak: når historikkene er fulle, gir tretti spilldager til nesten ingenting', { timeout: 60_000 }, async () => {
+    // Historikkene fylles opp de første rundt 120 spilldagene (målt etter Pakke 52:
+    // 137 kB på dag 32, 178 kB på dag 122; etter Pakke 66, med hele ligaen: 192 kB på
+    // dag 122, 197 kB på dag 365). Etter det står lagringen.
+    // Én spilldag om gangen med en pause imellom (Pakke 69): ett kall på 13–14 s sultet
+    // testløperen («Timeout calling onTaskUpdate»). simuler(s, n) er n enkeltsekunder,
+    // så resultatet er det samme.
+    const fram = async (s: typeof SENT, dager: number) => {
+      for (let d = 0; d < dager; d++) {
+        s = simuler(s, DAG_SEK)
+        await new Promise((r) => setTimeout(r, 0))
+      }
+      return s
+    }
+    const fyllt = await fram(SENT, 120)
+    const senere = await fram(fyllt, 30)
     expect(tilLagring(senere).length).toBeLessThan(tilLagring(fyllt).length * 1.03)
     expect(tilLagring(senere).length / 1024).toBeLessThan(300)
   })

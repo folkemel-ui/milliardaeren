@@ -6,6 +6,7 @@
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
+import { act } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { startApp, type App } from './klikk'
 import { nyttSpill } from '../../engine/start'
@@ -21,10 +22,13 @@ afterEach(() => {
 
 const dybde = () => (history.state as { milliardaer?: number } | null)?.milliardaer ?? 0
 
-/** Som telefonens tilbakeknapp: ett steg tilbake i historikken. */
+/** Som telefonens tilbakeknapp: ett steg tilbake i historikken — inne i act, så React ikke advarer (Pakke 69). */
 async function tilbake(a: App) {
-  history.back()
-  await a.vent(30)
+  await act(async () => {
+    history.back()
+    await new Promise((r) => setTimeout(r, 30))
+  })
+  await a.vent(0)
 }
 
 function rikt(): Spilltilstand {

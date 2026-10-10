@@ -40,7 +40,14 @@ const EIERNOKKEL = 'milliardaer.eier'
 
 /** Lengre pauser enn dette (f.eks. en nettleser som har strupet fanen) teller ikke. */
 const MAKS_SEK_PER_STEG = 5
-const LAGRE_HVERT_MS = 5_000
+/**
+ * Spillet lagres så ofte mens du spiller (Pakke 69: før hvert 5. sekund — en
+ * lagring koster ~7,5 ms her og ~37 ms på en treg telefon, to tapte bilder).
+ * Å skjule eller lukke appen lagrer med en gang, og en handling etter et sekund.
+ */
+const LAGRE_HVERT_MS = 15_000
+/** Hvor lenge en lagring kan vente på et ledig øyeblikk før den tas likevel. */
+const LEDIG_FRIST_MS = 2_000
 
 const faneId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
@@ -346,8 +353,27 @@ function steg(): void {
   klokke = Date.now()
   if (naa - sistLagret >= LAGRE_HVERT_MS) {
     sistLagret = naa
-    lagre()
+    lagreNaarLedig()
   }
+}
+
+let ventendeLedig: number | null = null
+
+/**
+ * Lagrer i et ledig øyeblikk mellom bildene der nettleseren gir beskjed om det
+ * (Chrome, Firefox), ellers med en gang (Safari har ikke requestIdleCallback).
+ */
+function lagreNaarLedig(): void {
+  const ledig = (window as { requestIdleCallback?: (f: () => void, o: { timeout: number }) => number }).requestIdleCallback
+  if (!ledig) {
+    lagre()
+    return
+  }
+  if (ventendeLedig !== null) return
+  ventendeLedig = ledig(() => {
+    ventendeLedig = null
+    lagre()
+  }, { timeout: LEDIG_FRIST_MS })
 }
 
 function vedSynlighet(): void {
@@ -405,6 +431,8 @@ export function stoppSpillokke(): void {
   klokkeslag = null
   if (ventendeLagring) clearTimeout(ventendeLagring)
   ventendeLagring = null
+  if (ventendeLedig !== null) (window as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback?.(ventendeLedig)
+  ventendeLedig = null
   document.removeEventListener('visibilitychange', vedSynlighet)
   window.removeEventListener('pagehide', lagre)
   window.removeEventListener('storage', vedLagring)

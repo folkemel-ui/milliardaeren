@@ -26,7 +26,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { build } from 'esbuild'
 import { describe, expect, it } from 'vitest'
-import { BUDSJETT } from './budsjett'
+import { BUDSJETT, LEVENDE_SEKUND_MS } from './budsjett'
 
 const MOTOR = resolve(__dirname, '..').replace(/\\/g, '/')
 
@@ -74,11 +74,19 @@ for (let i = 0; i < 5; i++) {
   if (sum < minst) { minst = sum; deler = m }
 }
 for (const k of Object.keys(deler)) deler[k] = Math.round(deler[k])
-console.log(JSON.stringify({ nytt, fullt, deler }))
+// Et sekund mens du spiller (Pakke 69): kopien av hele spillet og ett sekund, på det tyngste spillet.
+let levende = simuler(tyngst, BORTE_TAK_SEK, true)
+let sekund = Infinity
+for (let i = 0; i < 5; i++) {
+  sekund = Math.min(sekund, cpu(() => {
+    for (let r = 0; r < 200; r++) levende = simuler(levende, 1)
+  }) / 200)
+}
+console.log(JSON.stringify({ nytt, fullt, deler, sekund: Math.round(sekund * 100) / 100 }))
 `
 
 /** Bygger og kjører målingen. */
-async function maalBygget(): Promise<{ nytt: number; fullt: number; deler: Record<string, number> }> {
+async function maalBygget(): Promise<{ nytt: number; fullt: number; deler: Record<string, number>; sekund: number }> {
   const mappe = mkdtempSync(join(tmpdir(), 'milliardaer-ytelse-'))
   try {
     const inn = join(mappe, 'maal.ts')
@@ -94,7 +102,7 @@ async function maalBygget(): Promise<{ nytt: number; fullt: number; deler: Recor
 describe('ytelse, målt på bygget motor', () => {
   it('to timer borte: et nytt spill på høyst 100 ms, det tyngste på høyst 400 ms', { timeout: 120_000 }, async () => {
     const ms = await maalBygget()
-    if (process.env.BENK) console.log(`to timer borte, bygget: nytt spill ${ms.nytt} ms, fullt spill ${ms.fullt} ms CPU`, ms.deler)
+    if (process.env.BENK) console.log(`to timer borte, bygget: nytt spill ${ms.nytt} ms, fullt spill ${ms.fullt} ms CPU; ett levende sekund ${ms.sekund} ms`, ms.deler)
     // På GitHub (CI) kjører testene på delte maskiner med ukjent fart før hver
     // publisering. Der får grensene dobbelt slakk, så en treg maskin ikke stopper
     // en publisering; telefonbudsjettet sjekkes her, der det ble målt.
@@ -104,5 +112,7 @@ describe('ytelse, målt på bygget motor', () => {
     // Hvert system innenfor sitt budsjett, og ingen del uten budsjett.
     expect(Object.keys(ms.deler).sort()).toEqual(Object.keys(BUDSJETT).sort())
     for (const [del, grense] of Object.entries(BUDSJETT)) expect(ms.deler[del], `${del}: ${ms.deler[del]} ms`).toBeLessThanOrEqual(grense * slakk)
+    // Ett sekund mens du spiller, kopien med (Pakke 69).
+    expect(ms.sekund, `ett levende sekund: ${ms.sekund} ms`).toBeLessThanOrEqual(LEVENDE_SEKUND_MS * slakk)
   })
 })

@@ -50,20 +50,39 @@ export const INNTEKT_HISTORIKK_SEK = 60
 export const MAKS_INNTEKT_HISTORIKK = 120
 
 /**
+ * Mens du er borte, regnes leien, nettoformuen og prestasjonene bare hvert
+ * så mange sekund (Pakke 69): de var to tredeler av tiden det tok å ta igjen
+ * to timer (det tyngste spillet 379 → 117 ms). Blokkene står på hele tiere
+ * i spilltiden, så de faller sammen med dagsskiftene og formueloggen.
+ */
+export const BORTE_TAKT = 10
+
+/**
  * Kjører `antall` sekunder frem. Med `borte` går bare bedriftene med leder —
- * markedet, utbyttet og renten går uansett. Ren funksjon: inndataene røres ikke.
+ * markedet, utbyttet og renten går uansett — og leien betales samlet hvert
+ * BORTE_TAKT. sekund, med resten på det siste. Ren funksjon: inndataene røres ikke.
  */
 export function simuler(s: Spilltilstand, antall = 1, borte = false): Spilltilstand {
   if (antall <= 0) return s
   const n = structuredClone(s)
   const terning = new Terning(n.frø)
-  for (let i = 0; i < antall; i++) sekund(n, terning, borte)
+  let ventende = 0
+  for (let i = 0; i < antall; i++) {
+    ventende++
+    const regn = !borte || (n.sek + 1) % BORTE_TAKT === 0 || i === antall - 1
+    sekund(n, terning, borte, regn ? ventende : 0)
+    if (regn) ventende = 0
+  }
   n.frø = terning.fro
   return n
 }
 
-/** Ett sekund, på en tilstand simuleringen selv eier. */
-function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
+/**
+ * Ett sekund, på en tilstand simuleringen selv eier. `leieSek` er hvor mange
+ * sekunder leie som betales nå (1 når du spiller); 0 betyr at leien, formuen og
+ * prestasjonene venter til blokken er full.
+ */
+function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: number): void {
   const m = maaler
   let t = m ? performance.now() : 0
   // Det samme som inntektPerSek(s, borte), men hver bedrift og statusen regnes
@@ -105,10 +124,12 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
     s.totaltUtbytte += kupong
   }
   if (m) t = runde(m, 'sparing og utbytte', t)
-  // Leien kommer uansett — eiendom trenger ingen leder.
-  const leie = leiePerSek(s)
-  s.kontanter += leie
-  s.totaltLeie += leie
+  // Leien kommer uansett — eiendom trenger ingen leder. Borte kommer den samlet.
+  if (leieSek > 0) {
+    const leie = leiePerSek(s) * leieSek
+    s.kontanter += leie
+    s.totaltLeie += leie
+  }
   if (m) t = runde(m, 'leie', t)
   dekkUnderskudd(s)
   betalRente(s)
@@ -129,11 +150,14 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean): void {
   sjekkMargin(s)
   if (m) t = runde(m, 'utbytte og margin', t)
 
-  const formue = nettoformue(s)
-  if (formue > s.hoyesteFormue) s.hoyesteFormue = formue
-  if (s.sek % s.historikk.intervall === 0) loggFormue(s, formue)
+  const logg = s.sek % s.historikk.intervall === 0
+  if (logg || leieSek > 0) {
+    const formue = nettoformue(s)
+    if (formue > s.hoyesteFormue) s.hoyesteFormue = formue
+    if (logg) loggFormue(s, formue)
+  }
   if (m) t = runde(m, 'formue', t)
-  sjekkPrestasjoner(s)
+  if (leieSek > 0) sjekkPrestasjoner(s)
   if (m) t = runde(m, 'prestasjoner', t)
   kotikk(s, borte)
   if (erDagsskifte(s.sek)) {
