@@ -282,6 +282,11 @@
   width: 96px;
 }
 
+/* Posisjonen foran navnet (Pakke 71). */
+.spiller-pos {
+  margin-right: 2px;
+}
+
 /* Stadion (Pakke 66): utbyggingene som en liste med knapp til høyre. */
 .stadionliste {
   list-style: none;

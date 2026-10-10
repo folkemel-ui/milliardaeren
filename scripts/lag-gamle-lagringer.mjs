@@ -57,6 +57,8 @@ const NESTE_BUMP = {
   22: { fra: 'af93990' },
   // Versjon 23 ble bumpet i Pakke 67; lagringen lages fra commiten før.
   23: { fra: 'd2747dd' },
+  // Versjon 24 ble bumpet i Pakke 71; lagringen lages fra Pakke 70.
+  24: { fra: 'aa563b0' },
 }
 
 const sh = (cmd, cwd = ROT) => execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'inherit'] }).toString()

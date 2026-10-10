@@ -108,7 +108,7 @@ describe('klubben', () => {
   it('etter ni runder: ny sesong, spillerne eldes, og topp to rykker opp', () => {
     const s = medKlubb()
     // Et superlag vinner serien.
-    for (const p of s.klubb!.spillere) p.styrke = 90
+    for (const p of s.klubb!.spillere) p.styrke = p.angrep = p.forsvar = 90
     const alder = s.klubb!.spillere[0].alder
     for (let r = 0; r < RUNDER_PER_SESONG; r++) klubbVedDagsskifte(s)
     const k = s.klubb!
@@ -128,7 +128,7 @@ describe('klubben', () => {
   it('et svakt lag rykker ned, men aldri under 4. divisjon', () => {
     const s = medKlubb()
     s.klubb!.divisjon = 1
-    for (const p of s.klubb!.spillere) p.styrke = 5
+    for (const p of s.klubb!.spillere) p.styrke = p.angrep = p.forsvar = 5
     for (let r = 0; r < RUNDER_PER_SESONG; r++) klubbVedDagsskifte(s)
     expect(s.klubb!.divisjon).toBe(0)
     for (let r = 0; r < RUNDER_PER_SESONG; r++) klubbVedDagsskifte(s)

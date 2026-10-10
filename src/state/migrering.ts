@@ -23,7 +23,7 @@ import { periodestart } from '../engine/oppgjor'
 import { START_RIVALER } from '../engine/rivaler'
 import { lagKunst } from '../engine/kunst'
 import { nyeKvartal } from '../engine/kvartal'
-import { andreSerier, DIVISJONER, troppsverdi } from '../engine/klubb'
+import { andreSerier, DIVISJONER, nyttAkademi, STARTPOSISJONER, troppsverdi } from '../engine/klubb'
 import { hashTekst, Terning } from '../engine/rng'
 import { lederpris } from '../engine/formler'
 import { markedsrente, OBLIGASJONSLISTE } from '../engine/obligasjoner'
@@ -293,6 +293,42 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     const kunst = s.kunst as Raatilstand | undefined
     if (!kunst) return s
     return { ...s, kunst: { ...kunst, verdier: { ...(kunst.kurser as Raatilstand) } } }
+  },
+  /* 24 → 25: spillerne får posisjon, angrep og forsvar; klubben formasjon og
+     akademi (Pakke 71). Troppen fordeles på posisjonene etter styrke, så den
+     kan stille 4-4-2; angrepet og forsvaret deles fra styrken etter posisjonen
+     med en hash av navnet, og styrken står som den var, så klubbverdien er
+     den samme til kronen. Delingen står her som den var i Pakke 71, uavhengig
+     av hva motoren gjør senere. */
+  24: (s) => {
+    const k = s.klubb as (Raatilstand & { spillere: Raatilstand[]; marked: Raatilstand[] }) | null | undefined
+    if (!k) return s
+    const klem = (n: number) => Math.max(1, Math.min(99, Math.round(n)))
+    const del = (p: Raatilstand, posisjon: string): Raatilstand => {
+      const styrke = p.styrke as number
+      const x = ((hashTekst(`${p.id}:${p.navn}:deling`) >>> 0) % 1000) / 1000
+      let angrep: number
+      let forsvar: number
+      if (posisjon === 'keeper') {
+        angrep = klem(styrke - 15 - Math.round(x * 15))
+        forsvar = klem(styrke)
+      } else if (posisjon === 'midtbane') {
+        const e = Math.round(x * 10) - 5
+        angrep = klem(styrke + e)
+        forsvar = klem(styrke - e)
+      } else {
+        const d = 5 + Math.round(x * 10)
+        angrep = klem(posisjon === 'angrep' ? styrke + Math.round(0.25 * d) : styrke - Math.round(0.75 * d))
+        forsvar = klem(posisjon === 'angrep' ? styrke - Math.round(0.75 * d) : styrke + Math.round(0.25 * d))
+      }
+      return { ...p, posisjon, angrep, forsvar }
+    }
+    const vektet = ['keeper', 'forsvar', 'forsvar', 'forsvar', 'midtbane', 'midtbane', 'midtbane', 'angrep', 'angrep']
+    const spillere = [...(k.spillere ?? [])]
+      .sort((a, b) => (b.styrke as number) - (a.styrke as number))
+      .map((p, i) => del(p, STARTPOSISJONER[i % STARTPOSISJONER.length]))
+    const marked = (k.marked ?? []).map((p) => del(p, vektet[(hashTekst(`${p.id}:${p.navn}:posisjon`) >>> 0) % vektet.length]))
+    return { ...s, klubb: { ...k, spillere, marked, formasjon: '4-4-2', akademi: nyttAkademi() } }
   },
 }
 

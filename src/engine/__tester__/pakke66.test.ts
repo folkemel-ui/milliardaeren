@@ -155,7 +155,7 @@ describe('lisenskravet', () => {
     const s = medKlubb()
     const k = s.klubb!
     iDivisjon(k, 1)
-    for (const p of k.spillere) p.styrke = 95
+    for (const p of k.spillere) p.styrke = p.angrep = p.forsvar = 95
     for (let r = 0; r < RUNDER_PER_SESONG - 1; r++) klubbVedDagsskifte(s)
     expect(plassering(k)).toBe(1)
     // Før siste runde: du står først, men de to neste er de som får gå opp.
@@ -176,7 +176,7 @@ describe('lisenskravet', () => {
     let s = medKlubb()
     iDivisjon(s.klubb!, 1)
     s = ok(byggStadion(s, 'tribune'))
-    for (const p of s.klubb!.spillere) p.styrke = 95
+    for (const p of s.klubb!.spillere) p.styrke = p.angrep = p.forsvar = 95
     spillSesong(s)
     expect(s.klubb!.divisjon).toBe(2)
   })
@@ -185,7 +185,7 @@ describe('lisenskravet', () => {
     const s = medKlubb()
     const k = s.klubb!
     iDivisjon(k, 2)
-    for (const p of k.spillere) p.styrke = 95
+    for (const p of k.spillere) p.styrke = p.angrep = p.forsvar = 95
     for (let r = 0; r < STADIONVARSEL_RUNDE; r++) klubbVedDagsskifte(s)
     expect(plassering(k)).toBeLessThanOrEqual(2)
     expect(oppfyllerKrav(k, 3)).toBe(false)
@@ -207,7 +207,7 @@ describe('faste lag', () => {
     // Laget ditt er svakest og blir i 4. divisjon, så de to dårligste motstanderne forsvinner.
     const s = medKlubb()
     const k = s.klubb!
-    for (const p of k.spillere) p.styrke = 1
+    for (const p of k.spillere) p.styrke = p.angrep = p.forsvar = 1
     const før = k.lag.slice(1).map((l) => l.navn)
     const fraOver = k.serier[1].map((m) => m.navn)
     spillSesong(s)
@@ -228,7 +228,7 @@ describe('faste lag', () => {
     const k = s.klubb!
     for (let sesong = 0; sesong < 20; sesong++) {
       // Et lag som er sterkt hver tredje sesong, går opp og ned gjennom ligaen.
-      for (const p of k.spillere) p.styrke = sesong % 3 === 0 ? 95 : 30
+      for (const p of k.spillere) p.styrke = p.angrep = p.forsvar = sesong % 3 === 0 ? 95 : 30
       for (const p of k.spillere) p.alder = 25
       spillSesong(s)
       expect(k.lag).toHaveLength(ANTALL_LAG)

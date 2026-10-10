@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { Bekreftknapp } from '../komponenter/Bekreftknapp'
-import { byggStadion, kjopKlubb, kjopSpiller, selgKlubb, selgSpiller, settTaktikk } from '../../engine/handlinger'
+import { byggAkademi, byggStadion, kjopKlubb, kjopSpiller, selgKlubb, selgSpiller, settFormasjon, settTaktikk } from '../../engine/handlinger'
 import {
+  AKADEMITRINN,
   ANTALL_LAG,
+  FORMASJONSLISTE,
+  JUNIOR_TIL,
+  lagprofil,
+  nesteAkademi,
+  POSISJONER,
+  potensialspenn,
+  startellever,
+  type Lagprofil,
   DIVISJONER,
   divisjonsnavn,
   FLOMLYS,
@@ -40,7 +49,7 @@ import {
   type Stadiondel,
 } from '../../engine/klubb'
 import { tidTilNesteRunde } from '../../engine/startups'
-import type { Kamp, Klubb as KlubbT, Spilltilstand, Taktikk } from '../../engine/types'
+import type { Kamp, Klubb as KlubbT, Posisjon, Spiller, Spilltilstand, Taktikk } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { Ikon } from '../komponenter/Ikoner'
@@ -113,7 +122,10 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
   const [bekreft, settBekreft] = useState(false)
   const verdi = klubbverdi(s)
   const neste = nesteKamp(k)
-  const styrke = lagstyrke(k)
+  const profil = lagprofil(k)
+  // Hvem som starter neste kamp, og på hvilken plass (Pakke 71).
+  const plasser = new Map<number, Posisjon>()
+  for (const { plass, spiller } of startellever(k)) if (spiller) plasser.set(spiller.id, plass)
   const netto = k.billetter + k.sponsor - k.lonn
   const opp = rykkerOpp(k)
   const ned = rykkerNed(k)
@@ -149,8 +161,10 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
             </strong>
           </div>
           <div>
-            <span className="etikett">Lagstyrke</span>
-            <strong>{tall(styrke)}</strong>
+            <span className="etikett">Angrep · forsvar</span>
+            <strong>
+              {tall(profil.angrep)} · {tall(profil.forsvar)}
+            </strong>
           </div>
           <div>
             <span className="etikett">Runde</span>
@@ -166,7 +180,16 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
       {neste && (
         <div className="kort">
           <h2 className="kort-tittel">Neste kamp · om {varighet(tidTilNesteRunde(s))}</h2>
-          <Kampoppsett k={k} styrke={styrke} motstander={neste.motstander.navn} motStyrke={neste.motstander.styrke} hjemme={neste.hjemme} />
+          <Kampoppsett k={k} profil={profil} motstander={neste.motstander.navn} motStyrke={neste.motstander.styrke} hjemme={neste.hjemme} />
+          <h3 className="etikett">Formasjon</h3>
+          <div className="segment" role="radiogroup" aria-label="Formasjon">
+            {FORMASJONSLISTE.map((f) => (
+              <button key={f} role="radio" aria-checked={k.formasjon === f} className={k.formasjon === f ? 'aktiv' : ''} onClick={() => utfor(settFormasjon(s, f))}>
+                {f}
+              </button>
+            ))}
+          </div>
+          <h3 className="etikett">Taktikk</h3>
           <div className="segment" role="radiogroup" aria-label="Taktikk">
             {(Object.keys(TAKTIKKER) as Taktikk[]).map((t) => (
               <button key={t} role="radio" aria-checked={k.taktikk === t} className={k.taktikk === t ? 'aktiv' : ''} onClick={() => utfor(settTaktikk(s, t))}>
@@ -254,14 +277,19 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
           </span>
         </div>
         <ul className="spillerliste">
-          {k.spillere.map((p, i) => (
-            <li key={p.id} className={i < MIN_TROPP ? 'start' : ''}>
+          {k.spillere.map((p) => {
+            const plass = plasser.get(p.id)
+            return (
+            <li key={p.id} className={plass ? 'start' : ''}>
               <Styrke verdi={p.styrke} />
               <span className="spiller-navn">
-                <strong>{p.navn}</strong>
+                <strong>
+                  <Posisjonsmerke p={p} /> {p.navn}
+                </strong>
                 <span className="dempet liten">
-                  {p.alder} år · verdi {kompakt(spillerverdi(p))}
-                  {i >= MIN_TROPP && ' · innbytter'}
+                  {p.alder} år · A {p.angrep} · F {p.forsvar} · verdi {kompakt(spillerverdi(p))}
+                  {plass === undefined ? ' · innbytter' : plass !== p.posisjon ? ` · spiller ${POSISJONER[plass].navn.toLowerCase()}` : ''}
+                  <Potensial p={p} />
                 </span>
               </span>
               <Bekreftknapp
@@ -274,9 +302,15 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
                 <strong>{kompakt(salgspris(p))}</strong>
               </Bekreftknapp>
             </li>
-          ))}
+            )
+          })}
         </ul>
+        <p className="dempet liten">
+          Formasjonen {k.formasjon}: den beste som er igjen tar hver plass. Utenfor sin posisjon teller en spiller 70 %, en utespiller i mål 40 %.
+        </p>
       </div>
+
+      <Akademikort s={s} k={k} />
 
       <div className="kort">
         <div className="maal-topp">
@@ -288,9 +322,11 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
             <li key={p.id}>
               <Styrke verdi={p.styrke} />
               <span className="spiller-navn">
-                <strong>{p.navn}</strong>
+                <strong>
+                  <Posisjonsmerke p={p} /> {p.navn}
+                </strong>
                 <span className="dempet liten">
-                  {p.alder} år · lønn {kompakt(spillerverdi(p) * LONN_ANDEL)}/dag
+                  {p.alder} år · A {p.angrep} · F {p.forsvar} · lønn {kompakt(spillerverdi(p) * LONN_ANDEL)}/dag
                 </span>
               </span>
               <button
@@ -418,21 +454,84 @@ function Stadionkort({ s, k }: { s: Spilltilstand; k: KlubbT }) {
 
 const fortegn = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0')
 
-function Kampoppsett({ k, styrke, motstander, motStyrke, hjemme }: { k: KlubbT; styrke: number; motstander: string; motStyrke: number; hjemme: boolean }) {
-  const [xh, xb] = hjemme ? forventetMaal(styrke, motStyrke, k.taktikk, 'balansert') : forventetMaal(motStyrke, styrke, 'balansert', k.taktikk)
+/**
+ * Akademiet (Pakke 71): trinnet, juniorene som kommer hver sesong, og neste
+ * utbygging. Det du bygger, teller i klubbverdien.
+ */
+function Akademikort({ s, k }: { s: Spilltilstand; k: KlubbT }) {
+  const trinn = AKADEMITRINN[k.akademi.trinn]
+  const neste = nesteAkademi(k)
+  const juniorer = k.spillere.filter((p) => potensialspenn(p))
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Akademiet</h2>
+        <span className="dempet liten">{trinn.navn}</span>
+      </div>
+      <p className="dempet liten">
+        {trinn.juniorer === 0
+          ? 'Uten et akademi kommer ingen spillere opp nedenfra — alle må kjøpes på markedet.'
+          : `Hver sesong kommer ${trinn.juniorer === 1 ? 'én junior' : `${trinn.juniorer} juniorer`} på 16–17 år opp i A-troppen, så lenge det er plass. De vokser raskt til de er ${JUNIOR_TIL}, mot et tak treneren bare aner.`}
+      </p>
+      {juniorer.length > 0 && (
+        <p className="liten">
+          Fra akademiet: {juniorer.map((p) => `${p.navn} (${p.alder})`).join(', ')}.
+        </p>
+      )}
+      <ul className="stadionliste">
+        <li>
+          <span className="spiller-navn">
+            <strong>{neste ? neste.navn : trinn.navn}</strong>
+            <span className="dempet liten">
+              {neste ? `${neste.juniorer} ${neste.juniorer === 1 ? 'junior' : 'juniorer'} per sesong, ${neste.nivaa[0]} til ${neste.nivaa[1]} mot divisjonens nivå` : 'Ferdig bygd'}
+            </span>
+          </span>
+          {neste ? (
+            <button className="knapp knapp-gull knapp-bud spiller-knapp" disabled={s.kontanter < neste.pris} onClick={() => utfor(byggAkademi(s), true)}>
+              <span>Bygg</span>
+              <strong>{kompakt(neste.pris)}</strong>
+            </button>
+          ) : (
+            <span className="merke ok">Bygd</span>
+          )}
+        </li>
+      </ul>
+    </div>
+  )
+}
+
+/** K, F, M eller A foran navnet. */
+function Posisjonsmerke({ p }: { p: Spiller }) {
+  return (
+    <span className="etikett spiller-pos" title={POSISJONER[p.posisjon].navn}>
+      {POSISJONER[p.posisjon].kort}
+    </span>
+  )
+}
+
+/** «kan bli 55–69» for en junior fra akademiet. */
+function Potensial({ p }: { p: Spiller }) {
+  const spenn = potensialspenn(p)
+  return spenn ? <> · kan bli {spenn[0]}–{spenn[1]}</> : null
+}
+
+function Kampoppsett({ k, profil, motstander, motStyrke, hjemme }: { k: KlubbT; profil: Lagprofil; motstander: string; motStyrke: number; hjemme: boolean }) {
+  const [xh, xb] = hjemme ? forventetMaal(profil, motStyrke, k.taktikk, 'balansert') : forventetMaal(motStyrke, profil, 'balansert', k.taktikk)
   const [egne, mot] = hjemme ? [xh, xb] : [xb, xh]
+  const ditt = `angrep ${tall(profil.angrep)} · forsvar ${tall(profil.forsvar)}`
+  const deres = `styrke ${tall(motStyrke)}`
   return (
     <div className="kampoppsett">
       <div>
         <Klubbvaapen navn={hjemme ? k.navn : motstander} størrelse={40} />
         <strong>{hjemme ? k.navn : motstander}</strong>
-        <span className="dempet liten">styrke {tall(hjemme ? styrke : motStyrke)}</span>
+        <span className="dempet liten">{hjemme ? ditt : deres}</span>
       </div>
       <span className="kamp-mot">mot</span>
       <div>
         <Klubbvaapen navn={hjemme ? motstander : k.navn} størrelse={40} />
         <strong>{hjemme ? motstander : k.navn}</strong>
-        <span className="dempet liten">styrke {tall(hjemme ? motStyrke : styrke)}</span>
+        <span className="dempet liten">{hjemme ? deres : ditt}</span>
       </div>
       <p className="dempet liten kamp-forventet">
         {hjemme ? 'Hjemmekamp' : 'Bortekamp'} · forventet {tall(egne, 1)} mål for, {tall(mot, 1)} mot

@@ -5,8 +5,8 @@
  */
 
 import { utforKlubbsalg } from '../handel'
-import { bygg, KLUBB_LAAST_OPP, KLUBBNAVN, kjopspris, klubbTilSalgs, MAKS_TROPP, MIN_TROPP, nesteUtbygging, salgspris, startKlubb, TAKTIKKER, type Stadiondel } from '../klubb'
-import type { Spilltilstand, Taktikk } from '../types'
+import { bygg, byggAkademi as byggAkademiet, FORMASJONER, KLUBB_LAAST_OPP, KLUBBNAVN, kjopspris, klubbTilSalgs, MAKS_TROPP, MIN_TROPP, nesteAkademi, nesteUtbygging, salgspris, startKlubb, TAKTIKKER, type Stadiondel } from '../klubb'
+import type { Formasjon, Spilltilstand, Taktikk } from '../types'
 import { feil, type Utfall } from './felles'
 
 /**
@@ -72,6 +72,28 @@ export function byggStadion(s: Spilltilstand, del: Stadiondel): Utfall {
   if (s.kontanter < neste.pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   bygg(n, n.klubb!, del, neste.pris)
+  return { ok: true, tilstand: n }
+}
+
+/** Velger formasjon (Pakke 71): startelleveren følger den fra neste kamp. */
+export function settFormasjon(s: Spilltilstand, formasjon: Formasjon): Utfall {
+  if (!s.klubb) return feil('Du eier ingen klubb.')
+  if (!FORMASJONER[formasjon]) return feil('Ukjent formasjon.')
+  if (s.klubb.formasjon === formasjon) return feil('Den formasjonen er allerede valgt.')
+  const n = structuredClone(s)
+  n.klubb!.formasjon = formasjon
+  return { ok: true, tilstand: n }
+}
+
+/** Bygger akademiet ett trinn (Pakke 71). */
+export function byggAkademi(s: Spilltilstand): Utfall {
+  const k = s.klubb
+  if (!k) return feil('Du eier ingen klubb.')
+  const neste = nesteAkademi(k)
+  if (!neste) return feil('Akademiet er ferdig bygd.')
+  if (s.kontanter < neste.pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  byggAkademiet(n, n.klubb!, neste.pris)
   return { ok: true, tilstand: n }
 }
 

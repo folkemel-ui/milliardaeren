@@ -653,13 +653,32 @@ export interface Kunstmarked {
 // ─────────────────────────────────────────────── Fotballklubb
 
 export type Taktikk = 'forsvar' | 'balansert' | 'angrep'
+/** Pakke 71: hver spiller har en posisjon, og laget en formasjon. */
+export type Posisjon = 'keeper' | 'forsvar' | 'midtbane' | 'angrep'
+export type Formasjon = '4-4-2' | '4-3-3' | '5-3-2'
 
 export interface Spiller {
   id: number
   navn: string
-  /** 1–99. */
+  /**
+   * 1–99: det spilleren er verdt og koster i lønn — angrep og forsvar veid
+   * etter posisjonen (Pakke 71, `styrkeAv`). Lagret, så en gammel spiller
+   * beholder verdien sin til neste sesong.
+   */
   styrke: number
   alder: number
+  posisjon: Posisjon
+  /** 1–99: angrepet gir målene du scorer, forsvaret målene du slipper inn (Pakke 71). */
+  angrep: number
+  forsvar: number
+  /** Juniorer fra akademiet (Pakke 71): taket de vokser mot til de er 23. Spilleren ser bare et spenn. */
+  potensial?: number
+}
+
+/** Akademiet (Pakke 71): trinnet og det du har satt inn. */
+export interface Akademi {
+  trinn: number
+  investert: number
 }
 
 /** Et lag i serien, med tabellen sin. Lag nummer 0 er alltid ditt. */
@@ -722,6 +741,8 @@ export interface Klubb {
   /** Spillerne som er til salgs i dag. */
   marked: Spiller[]
   taktikk: Taktikk
+  formasjon: Formasjon
+  akademi: Akademi
   /** Klubbens egen terning, så en klubb ikke endrer resten av spillet. */
   frø: number
   nesteSpillerId: number

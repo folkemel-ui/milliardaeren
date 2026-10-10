@@ -165,7 +165,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tittel: 'Fotballklubben',
     tekst:
       `Klubben starter i 4. divisjon og spiller én kamp hver spilldag. En sesong er ${RUNDER_PER_SESONG} runder; de to beste rykker opp og de to dårligste ned. ` +
-      'Laget er så sterkt som snittet av de elleve beste spillerne. Angrep gir flere mål begge veier, forsvar færre. ' +
+      'Hver spiller har en posisjon, et angrep og et forsvar. Du velger formasjon; den beste som er igjen tar hver plass, og utenfor sin posisjon teller en spiller 70 % — en utespiller i mål 40 %. ' +
+      'Lagets angrep gir målene du scorer, forsvaret målene du slipper inn. Forsvar er best når motstanderen er klart sterkere, Balansert i en jevn kamp, Angrep når du er klart sterkere. ' +
+      'Akademiet sender juniorer på 16–17 år opp hver sesong; de vokser raskt til de er 23, mot et tak du bare ser et spenn av. ' +
       'Spillerne koster lønn hver dag, og opprykk og trofeer gir status. ' +
       `Billettene gir publikum ganger billettpris, men stadion tar ikke flere enn det har plass til — fra ${tall(STADIONTRINN[0].plasser)} til ${tall(STADIONTRINN[STADIONTRINN.length - 1].plasser)} plasser. ` +
       `For å rykke opp må stadion holde kravet i divisjonen over: ${tall(STADIONTRINN[STADIONKRAV[4].trinn].plasser)} plasser og flomlys i Eliteserien. Det du bygger, teller i klubbverdien. ` +

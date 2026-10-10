@@ -5,8 +5,12 @@
  * som holder kravet i divisjonen over. Lagene går igjen: alle fem divisjonene
  * står i lagringen, og de andre avgjøres av styrke og flaks (Pakke 66).
  *
- * Laget ditt er så sterkt som snittet av de elleve beste spillerne. Taktikken
- * flytter sjansene: angrep gir flere mål begge veier, forsvar færre.
+ * Hver spiller har en posisjon, et angrep og et forsvar (Pakke 71). Du velger
+ * formasjon; den beste som er igjen tar hver plass, og en spiller utenfor sin
+ * posisjon teller mindre. Lagets angrep gir målene du scorer, forsvaret målene
+ * du slipper inn. Taktikken flytter sjansene: angrep gir flere mål begge veier,
+ * forsvar færre — hver passer sin kamp. Akademiet sender juniorer opp hver
+ * sesong, med et tak de vokser mot.
  *
  * Klubben har sin egen terning, så det å eie en klubb ikke endrer kursene
  * eller noe annet i spillet. Klubben er verdt divisjonens grunnverdi pluss
@@ -17,7 +21,7 @@ import { leggTilHendelse, meldBankenDekket } from './bank'
 import { dagnummer } from './kalender'
 import { hashTekst, Terning } from './rng'
 import { tall } from './tall'
-import type { Kamp, Klubb, Lag, Motlag, Overskrift, Spiller, Spilltilstand, Taktikk } from './types'
+import type { Akademi, Formasjon, Kamp, Klubb, Lag, Motlag, Overskrift, Posisjon, Spiller, Spilltilstand, Taktikk } from './types'
 
 /**
  * `publikum` er hvor mange som vil se en hjemmekamp når laget går midt på
@@ -83,10 +87,211 @@ export const TROFE_STATUS = 3
 const MARKED_ANTALL = 6
 const PENSJONSALDER = 35
 
+/**
+ * Taktikkene (Pakke 71): faktorene er valgt så hver passer sin kamp, regnet
+ * eksakt på Poisson-målene for styrkegap fra −30 til +30. Forsvar gir flest
+ * poeng når du er klart svakere (fra ~10 under hjemme, ~2 under borte),
+ * Balansert i en jevn kamp, Angrep når du er klart sterkere (fra ~4 over
+ * hjemme, ~10 over borte). Før var Forsvar best i hver eneste kamp du ikke
+ * var sterkere i.
+ */
 export const TAKTIKKER: Record<Taktikk, { navn: string; beskrivelse: string; egne: number; mot: number }> = {
-  forsvar: { navn: 'Forsvar', beskrivelse: 'Færre mål begge veier. Trygt mot sterkere lag.', egne: 0.75, mot: 0.65 },
-  balansert: { navn: 'Balansert', beskrivelse: 'Vanlig spill.', egne: 1, mot: 1 },
-  angrep: { navn: 'Angrep', beskrivelse: 'Flere mål begge veier. Bra når du må vinne.', egne: 1.3, mot: 1.35 },
+  forsvar: { navn: 'Forsvar', beskrivelse: 'Færre mål begge veier. Best når motstanderen er klart sterkere.', egne: 0.7, mot: 0.75 },
+  balansert: { navn: 'Balansert', beskrivelse: 'Vanlig spill. Best i en jevn kamp.', egne: 1, mot: 1 },
+  angrep: { navn: 'Angrep', beskrivelse: 'Flere mål begge veier. Best når du er klart sterkere.', egne: 1.3, mot: 1.4 },
+}
+
+// ─────────────────────────────────────────────── Posisjoner og formasjoner (Pakke 71)
+
+/**
+ * Posisjonene, med vekten angrep og forsvar har i spillerens styrke — og i
+ * lagets: en spiss teller mest i angrepet, en stopper i forsvaret, keeperen
+ * bare i forsvaret.
+ */
+export const POSISJONER: Record<Posisjon, { navn: string; kort: string; angrep: number; forsvar: number }> = {
+  keeper: { navn: 'Keeper', kort: 'K', angrep: 0, forsvar: 1 },
+  forsvar: { navn: 'Forsvar', kort: 'F', angrep: 0.25, forsvar: 0.75 },
+  midtbane: { navn: 'Midtbane', kort: 'M', angrep: 0.5, forsvar: 0.5 },
+  angrep: { navn: 'Angrep', kort: 'A', angrep: 0.75, forsvar: 0.25 },
+}
+export const POSISJONSLISTE = Object.keys(POSISJONER) as Posisjon[]
+
+export const FORMASJONER: Record<Formasjon, Record<Posisjon, number>> = {
+  '4-4-2': { keeper: 1, forsvar: 4, midtbane: 4, angrep: 2 },
+  '4-3-3': { keeper: 1, forsvar: 4, midtbane: 3, angrep: 3 },
+  '5-3-2': { keeper: 1, forsvar: 5, midtbane: 3, angrep: 2 },
+}
+export const FORMASJONSLISTE = Object.keys(FORMASJONER) as Formasjon[]
+
+/** En spiller utenfor sin posisjon teller så mye … */
+export const UTE_AV_POSISJON = 0.7
+/** … og en utespiller i mål (eller en keeper på banen) så mye. */
+export const UTEN_KEEPER = 0.4
+/** En tom plass fylles av en junior fra gata med så mye i både angrep og forsvar. */
+export const TOM_PLASS = 20
+
+/** Posisjonene de fjorten første får, så en ny klubb kan stille 4-4-2 — og de atten plassene gamle tropper fordeles på. */
+export const STARTPOSISJONER: Posisjon[] = [
+  'keeper', 'forsvar', 'forsvar', 'midtbane', 'angrep', 'forsvar', 'midtbane', 'angrep', 'forsvar', 'midtbane', 'keeper', 'midtbane', 'angrep', 'forsvar',
+  'midtbane', 'angrep', 'forsvar', 'keeper',
+]
+/** Markedet trekker posisjon herfra: én keeper av ni. */
+const POSISJONSVEKT: Posisjon[] = ['keeper', 'forsvar', 'forsvar', 'forsvar', 'midtbane', 'midtbane', 'midtbane', 'angrep', 'angrep']
+
+const klem = (n: number) => Math.max(1, Math.min(99, Math.round(n)))
+
+/** Styrken: angrep og forsvar veid etter posisjonen. */
+export function styrkeAv(posisjon: Posisjon, angrep: number, forsvar: number): number {
+  const v = POSISJONER[posisjon]
+  return klem(angrep * v.angrep + forsvar * v.forsvar)
+}
+
+/**
+ * Deler en styrke i angrep og forsvar etter posisjonen, så styrken står:
+ * en spiss får angrepet over og forsvaret under, en stopper omvendt, en
+ * midtbanespiller nesten likt, en keeper bare forsvar. `spredning` er 0–1
+ * fra terningen eller en hash.
+ */
+export function delStyrke(styrke: number, posisjon: Posisjon, spredning: number): { angrep: number; forsvar: number } {
+  if (posisjon === 'keeper') return { angrep: klem(styrke - 15 - Math.round(spredning * 15)), forsvar: klem(styrke) }
+  if (posisjon === 'midtbane') {
+    const e = Math.round(spredning * 10) - 5
+    return { angrep: klem(styrke + e), forsvar: klem(styrke - e) }
+  }
+  const d = 5 + Math.round(spredning * 10)
+  return posisjon === 'angrep'
+    ? { angrep: klem(styrke + Math.round(0.25 * d)), forsvar: klem(styrke - Math.round(0.75 * d)) }
+    : { angrep: klem(styrke - Math.round(0.75 * d)), forsvar: klem(styrke + Math.round(0.25 * d)) }
+}
+
+/** Hvor mye en spiller teller på en plass: alt i egen posisjon, mindre utenfor, lite i mål uten keeper. */
+export function plassfaktor(posisjon: Posisjon, plass: Posisjon): number {
+  if (posisjon === plass) return 1
+  if (posisjon === 'keeper' || plass === 'keeper') return UTEN_KEEPER
+  return UTE_AV_POSISJON
+}
+
+export interface Startplass {
+  plass: Posisjon
+  /** null: ingen igjen — en junior fra gata står der. */
+  spiller: Spiller | null
+}
+
+/**
+ * Startelleveren for formasjonen: plass for plass — keeperen først, så
+ * forsvar, midtbane og angrep — tar den beste som er igjen, regnet med
+ * plassfaktoren. Mangler folk, står plassen tom.
+ */
+export function startellever(k: Klubb): Startplass[] {
+  const igjen = [...k.spillere]
+  const ut: Startplass[] = []
+  for (const plass of POSISJONSLISTE) {
+    for (let i = 0; i < FORMASJONER[k.formasjon][plass]; i++) {
+      let beste = -1
+      let verdi = -1
+      for (let j = 0; j < igjen.length; j++) {
+        const v = igjen[j].styrke * plassfaktor(igjen[j].posisjon, plass)
+        if (v > verdi) {
+          verdi = v
+          beste = j
+        }
+      }
+      ut.push({ plass, spiller: beste >= 0 ? igjen.splice(beste, 1)[0] : null })
+    }
+  }
+  return ut
+}
+
+/** Id-ene som starter neste kamp. */
+export function starterIds(k: Klubb): Set<number> {
+  const ids = new Set<number>()
+  for (const s of startellever(k)) if (s.spiller) ids.add(s.spiller.id)
+  return ids
+}
+
+export interface Lagprofil {
+  angrep: number
+  forsvar: number
+}
+
+/** Hvor mye hver plass teller i lagets angrep og forsvar. */
+const LAGVEKT: Record<'angrep' | 'forsvar', Record<Posisjon, number>> = {
+  angrep: { keeper: 0, forsvar: 0.25, midtbane: 0.6, angrep: 1 },
+  forsvar: { keeper: 1, forsvar: 1, midtbane: 0.6, angrep: 0.25 },
+}
+
+/**
+ * Lagets angrep og forsvar: startelleverens angrep og forsvar, veid etter
+ * plassen og ganget med plassfaktoren. Elleve spisser taper i forsvaret, og
+ * et lag uten keeper slipper inn.
+ */
+export function lagprofil(k: Klubb): Lagprofil {
+  const ut = { angrep: 0, forsvar: 0 }
+  for (const side of ['angrep', 'forsvar'] as const) {
+    let sum = 0
+    let vekt = 0
+    for (const { plass, spiller } of startellever(k)) {
+      const w = LAGVEKT[side][plass]
+      sum += w * (spiller ? spiller[side] * plassfaktor(spiller.posisjon, plass) : TOM_PLASS)
+      vekt += w
+    }
+    ut[side] = sum / vekt
+  }
+  return ut
+}
+
+// ─────────────────────────────────────────────── Akademiet (Pakke 71)
+
+/** Trinnene: hvor mange juniorer som kommer opp hver sesong, og hvor gode de er mot divisjonens nivå. */
+export const AKADEMITRINN = [
+  { navn: 'Ingen juniorer', pris: 0, juniorer: 0, nivaa: [0, 0] },
+  { navn: 'Juniorlag', pris: 2_000_000, juniorer: 1, nivaa: [-20, -10] },
+  { navn: 'Akademi', pris: 12_000_000, juniorer: 2, nivaa: [-15, -5] },
+  { navn: 'Talentfabrikk', pris: 60_000_000, juniorer: 3, nivaa: [-10, 0] },
+] as const
+export const JUNIOR_ALDER = [16, 17] as const
+/** En junior kan vokse så mye over det han kommer opp med … */
+export const POTENSIAL_LOFT = [10, 30] as const
+/** … med så mye per sesong til han er 23. */
+export const JUNIOR_VEKST = [2, 6] as const
+export const JUNIOR_TIL = 23
+/** Spennet spilleren får se rundt potensialet. */
+export const POTENSIAL_SPENN = 14
+
+export const nyttAkademi = (): Akademi => ({ trinn: 0, investert: 0 })
+
+export function nesteAkademi(k: Klubb): (typeof AKADEMITRINN)[number] | null {
+  return AKADEMITRINN[k.akademi.trinn + 1] ?? null
+}
+
+/** Bygger akademiet ett trinn. Pengene går inn i klubbverdien og kostprisen. Muterer. */
+export function byggAkademi(s: Spilltilstand, k: Klubb, pris: number): void {
+  s.kontanter -= pris
+  k.akademi.investert += pris
+  k.kostpris = (k.kostpris ?? 0) + pris
+  k.akademi.trinn++
+}
+
+/** «Kan bli 55–69»: et spenn rundt potensialet, forskjøvet etter en hash så taket ikke kan leses av. */
+export function potensialspenn(p: Spiller): [number, number] | null {
+  if (p.potensial === undefined || p.alder > JUNIOR_TIL) return null
+  const skyv = (hashTekst(`${p.id}:${p.navn}:spenn`) >>> 0) % (POTENSIAL_SPENN - 3)
+  const lav = Math.max(1, p.potensial - 2 - skyv)
+  return [lav, Math.min(99, lav + POTENSIAL_SPENN)]
+}
+
+/** Juniorene som kommer opp ved sesongslutt — så lenge det er plass i troppen. */
+function nyeJuniorer(k: Klubb, t: Terning): Spiller[] {
+  const trinn = AKADEMITRINN[k.akademi.trinn]
+  const ut: Spiller[] = []
+  for (let i = 0; i < trinn.juniorer && k.spillere.length + ut.length < MAKS_TROPP; i++) {
+    const styrke = DIVISJONER[k.divisjon].styrke + t.mellom(trinn.nivaa[0], trinn.nivaa[1])
+    const p = nySpiller(k, t, styrke, t.velg(POSISJONSVEKT))
+    p.alder = t.heltall(JUNIOR_ALDER[0], JUNIOR_ALDER[1])
+    p.potensial = klem(p.styrke + t.heltall(POTENSIAL_LOFT[0], POTENSIAL_LOFT[1]))
+    ut.push(p)
+  }
+  return ut
 }
 
 export const KLUBBNAVN = ['Fjordby IL', 'Nordvik BK', 'Havnes FK', 'Solstad IF', 'Granvik IL', 'Elvebakken BK']
@@ -130,7 +335,7 @@ export function troppsverdi(k: Klubb): number {
 /** Divisjonens grunnverdi (navn, supportere, plassen i serien), spillerne og det du har bygd på stadion. */
 export function klubbverdi(s: Spilltilstand): number {
   const k = s.klubb
-  return k ? DIVISJONER[k.divisjon].verdi + troppsverdi(k) + k.stadion.investert : 0
+  return k ? DIVISJONER[k.divisjon].verdi + troppsverdi(k) + k.stadion.investert + (k.akademi?.investert ?? 0) : 0
 }
 
 // ─────────────────────────────────────────────── Stadion
@@ -187,11 +392,10 @@ export function lonnPerDag(k: Klubb): number {
   return Math.round(k.spillere.reduce((sum, p) => sum + spillerverdi(p) * LONN_ANDEL, 0))
 }
 
-/** Snittet av de elleve beste. Mangler du spillere, fyller juniorer på med styrke 20. */
+/** Lagstyrken: snittet av lagets angrep og forsvar (Pakke 71) — det tallet motstanderne har ett av. */
 export function lagstyrke(k: Klubb): number {
-  const beste = k.spillere.map((p) => p.styrke).sort((a, b) => b - a).slice(0, MIN_TROPP)
-  while (beste.length < MIN_TROPP) beste.push(20)
-  return beste.reduce((a, b) => a + b, 0) / MIN_TROPP
+  const { angrep, forsvar } = lagprofil(k)
+  return (angrep + forsvar) / 2
 }
 
 export function klubbstatus(s: Spilltilstand): number {
@@ -353,12 +557,17 @@ export function kravtekst(divisjon: number): string {
 /** «5. divisjon» for lag som kommer opp nedenfra. */
 export const divisjonsnavn = (d: number) => (d < 0 ? '5. divisjon' : DIVISJONER[d].navn)
 
-function nySpiller(k: Klubb, t: Terning, styrke: number): Spiller {
+function nySpiller(k: Klubb, t: Terning, styrke: number, posisjon: Posisjon = t.velg(POSISJONSVEKT)): Spiller {
+  const s = klem(styrke)
+  const { angrep, forsvar } = delStyrke(s, posisjon, t.neste())
   return {
     id: k.nesteSpillerId++,
     navn: `${t.velg(FORNAVN)} ${t.velg(ETTERNAVN)}`,
-    styrke: Math.max(1, Math.min(99, Math.round(styrke))),
+    styrke: s,
     alder: t.heltall(18, 33),
+    posisjon,
+    angrep,
+    forsvar,
   }
 }
 
@@ -378,6 +587,8 @@ export function nyKlubb(navn: string, frø: number): Klubb {
     spillere: [],
     marked: [],
     taktikk: 'balansert',
+    formasjon: '4-4-2',
+    akademi: nyttAkademi(),
     frø,
     nesteSpillerId: 1,
     kamper: [],
@@ -392,7 +603,7 @@ export function nyKlubb(navn: string, frø: number): Klubb {
   }
   const t = new Terning(frø)
   k.lag = forsteSerie(k, t)
-  for (let i = 0; i < 14; i++) k.spillere.push(nySpiller(k, t, DIVISJONER[0].styrke + t.mellom(-6, 4)))
+  for (let i = 0; i < 14; i++) k.spillere.push(nySpiller(k, t, DIVISJONER[0].styrke + t.mellom(-6, 4), STARTPOSISJONER[i]))
   k.spillere.sort((a, b) => b.styrke - a.styrke)
   k.marked = nyttMarked(k, t)
   // Resten av ligaen trekkes til slutt, så troppen og prisen er de samme som før Pakke 66.
@@ -415,12 +626,17 @@ function maal(t: Terning, forventet: number): number {
   return k
 }
 
-/** Forventede mål for hjemme- og bortelaget. */
-export function forventetMaal(hjemme: number, borte: number, th: Taktikk, tb: Taktikk): [number, number] {
-  const diff = (hjemme - borte) / 10
+/**
+ * Forventede mål for hjemme- og bortelaget: hjemmelagets angrep mot
+ * bortelagets forsvar, og omvendt (Pakke 71). Et lag gitt som ett tall har
+ * samme angrep og forsvar — da er regnestykket det samme som før.
+ */
+export function forventetMaal(hjemme: number | Lagprofil, borte: number | Lagprofil, th: Taktikk, tb: Taktikk): [number, number] {
+  const h = typeof hjemme === 'number' ? { angrep: hjemme, forsvar: hjemme } : hjemme
+  const b = typeof borte === 'number' ? { angrep: borte, forsvar: borte } : borte
   return [
-    1.4 * Math.exp(0.35 * diff) * 1.15 * TAKTIKKER[th].egne * TAKTIKKER[tb].mot,
-    1.4 * Math.exp(-0.35 * diff) * 0.9 * TAKTIKKER[tb].egne * TAKTIKKER[th].mot,
+    1.4 * Math.exp((0.35 * (h.angrep - b.forsvar)) / 10) * 1.15 * TAKTIKKER[th].egne * TAKTIKKER[tb].mot,
+    1.4 * Math.exp((0.35 * (b.angrep - h.forsvar)) / 10) * 0.9 * TAKTIKKER[tb].egne * TAKTIKKER[th].mot,
   ]
 }
 
@@ -446,9 +662,10 @@ function betal(s: Spilltilstand, belop: number): void {
 /** Spiller runden og gir din kamp. Muterer. */
 function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
   let din: Kamp | null = null
+  const ditt = lagprofil(k)
   for (const [h, b] of rundensKamper(k.runde)) {
-    const sh = h === 0 ? lagstyrke(k) : k.lag[h].styrke
-    const sb = b === 0 ? lagstyrke(k) : k.lag[b].styrke
+    const sh = h === 0 ? ditt : k.lag[h].styrke
+    const sb = b === 0 ? ditt : k.lag[b].styrke
     const [xh, xb] = forventetMaal(sh, sb, h === 0 ? k.taktikk : 'balansert', b === 0 ? k.taktikk : 'balansert')
     const mh = maal(t, xh)
     const mb = maal(t, xb)
@@ -515,15 +732,26 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
     })
   }
   // Spillerne blir et år eldre: de unge blir bedre, de eldre dårligere, og de eldste legger opp.
+  // En junior fra akademiet vokser raskere, men aldri over taket sitt (Pakke 71).
   const pensjonert: string[] = []
   for (const p of k.spillere) {
     p.alder++
-    const endring = p.alder <= 23 ? t.heltall(1, 4) : p.alder <= 28 ? t.heltall(-1, 2) : p.alder <= 31 ? t.heltall(-3, 0) : t.heltall(-5, -1)
-    p.styrke = Math.max(1, Math.min(99, p.styrke + endring))
+    const junior = p.potensial !== undefined && p.alder <= JUNIOR_TIL
+    let endring = junior ? t.heltall(JUNIOR_VEKST[0], JUNIOR_VEKST[1]) : p.alder <= 23 ? t.heltall(1, 4) : p.alder <= 28 ? t.heltall(-1, 2) : p.alder <= 31 ? t.heltall(-3, 0) : t.heltall(-5, -1)
+    if (junior) endring = Math.min(endring, p.potensial! - p.styrke)
+    p.angrep = klem(p.angrep + endring)
+    p.forsvar = klem(p.forsvar + endring)
+    p.styrke = styrkeAv(p.posisjon, p.angrep, p.forsvar)
     if (p.alder >= PENSJONSALDER) pensjonert.push(p.navn)
   }
   k.spillere = k.spillere.filter((p) => p.alder < PENSJONSALDER).sort((a, b) => b.styrke - a.styrke)
   if (pensjonert.length) saker.push({ type: 'deg', tittel: `${pensjonert[0]} legger opp`, tekst: pensjonert.length > 1 ? `Også ${pensjonert.slice(1).join(' og ')} takker for seg.` : 'En lang karriere er over.' })
+  const juniorer = nyeJuniorer(k, t)
+  if (juniorer.length) {
+    k.spillere = [...k.spillere, ...juniorer].sort((a, b) => b.styrke - a.styrke)
+    const navn = juniorer.map((p) => `${p.navn} (${p.alder})`)
+    saker.push({ type: 'deg', tittel: `${juniorer.length === 1 ? 'Ny junior' : `${juniorer.length} nye juniorer`} fra akademiet`, tekst: `${navn.join(', ')} rykker opp i A-troppen. Treneren ser et tak et stykke over dagens nivå.` })
+  }
 
   k.sesong++
   k.runde = 0
