@@ -1243,6 +1243,20 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   `/ikon.svg` (the game opens on the last tab; click the button whose text is «Eiendom»), and
   `document.getAnimations()` includes infinite ones, so `finish()` on all of them throws — skip it.
 
+- **The Edit tool works on the CRLF files** (G17): multi-line `old_string`s matched in
+  `Eiendomstegninger.tsx`, `Illustrasjoner.tsx` and the tests, and the line endings stayed CRLF
+  (`file` said so before and after). That corrects §6 («multi-line `from` strings don't match the raw
+  file»): use Edit for drawing work, with a long enough `old_string` to be unique, and keep
+  `fiks.mjs` for edits that must be checked in bulk. `sed -i` is still out: a `sed` with escaped
+  braces silently matched nothing on a scratch test.
+- **Remove a worktree's `node_modules` junction first** (`cmd //c rmdir <wt>\node_modules`), as
+  `wisdom.md` §3 says, *then* `git worktree remove`. In G17 I did it in the wrong order for the
+  baseline run; the real `node_modules` survived (checked before running anything else), but the
+  recipe exists because it may not. Check `ls node_modules | head` after any such removal.
+- **A long silent batch brings the «hasn't heard from you» prompt again**: about every third
+  edit-and-look round. One line before each stretch («drawing the sides of the three cabins»,
+  «waiting for the other track's tests») is enough, and it costs nothing.
+
 ## 7. Notes for later (G1–G17 done; G18–G23 planned in `Ideer.md`; Pack 74 done)
 
 - **New content from the game track** gets a drawing in the current style. A new
