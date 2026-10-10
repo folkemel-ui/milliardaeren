@@ -68,7 +68,9 @@ session; delete what stops being true.
   **«Next up»** paragraph: the next pack, what it contains in plain words and with real
   numbers, why it is next, and the questions you will ask when it starts. When a pack is
   done, rewrite that paragraph for the following pack in the same commit, and end the
-  report to Folke with the same description.
+  report to Folke with the same description. Since G12 there is one such paragraph per
+  track («Next up» for the game track, «Next up on the graphics track» below it); each
+  track rewrites only its own.
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
@@ -107,7 +109,13 @@ session; delete what stops being true.
   commit that wasn't tested as it stands (a marker in the worktree's git dir), and GitHub
   refuses the push if the other track got there first — run it again. Show Folke the list
   before pushing; it now holds only your own branch's commits. A rebase conflict will
-  almost always be `Ideer.md`: keep both tracks' edits.
+  almost always be `Ideer.md`: keep both tracks' edits. In G12 the game track pushed twice
+  during one pack (Pack 65, then a wisdom commit), and the rebase stopped on two files:
+  `Ideer.md`, where *both* tracks had removed their own item from the same section (keep
+  neither item, renumber, and fix the section's «In Packs …» line), and `vite.config.ts`,
+  where both had added a line to `TUNGE` (keep both). After `git add` and `git rebase
+  --continue`, run `lever.mjs` again: it may rebase once more onto a newer push, and it
+  must test the final result.
 - **Touching the graphics track's files**: sometimes a game pack must (Pack 59 needed three
   unique drawings in `Illustrasjoner.tsx` and three `BYPLASS` entries plus a new label side
   in `verdenskartet.ts`/`Verdenskart.tsx`). Keep it minimal and list the touched files in

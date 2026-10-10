@@ -121,7 +121,16 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   the *hidden definitions*, but those were only 10–30 % of each page: Luksus went from
   5,200 to 3,700 drawing elements (−29 %), Bedrifter −23 %, Eiendom only −9 %. The
   drawings' own shapes are the bulk (a property drawing is about 190 elements). Say
-  the real result in the report, and why the estimate was off.
+  the real result in the report, and why the estimate was off. In G12 I promised about
+  230 kB gzipped and got 238. The parts that moved out weigh 68 kB gzipped together —
+  close to the estimate — but the start script shrank by only 62: gzip packs one big
+  file better than several small ones that share words. Promise the start script's
+  size with that margin (about a tenth of what moves), not the sum of the parts.
+- **"Can you start on G12 even when the other session is working?"** is a question about
+  collisions, and Folke wants it answered *and* acted on. Check what the other session is
+  doing (`git -C "../New folder (3)" status`), name the overlap (Pack 65 was splitting
+  `Investeringer.tsx` and changing `Eiendom.tsx`, both of which import drawings) and how
+  you avoid it (keep component names and props, so no screen changes). Then start.
 - **Put outside sources in the question.** Fetching Natural Earth was an option in
   the G3 questions, so Folke's answer was the approval. Do the same for any download,
   font or dataset: name the source, the licence and that nothing loads at runtime.
