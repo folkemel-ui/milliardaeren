@@ -282,6 +282,12 @@ session; delete what stops being true.
   `Illustrasjon` new props every second, so every drawing in Selskaper and Samling was
   rebuilt each second (161 and 72 ms in dev). Hoist such values to a constant;
   `pakke64.test.ts` fails on the pattern for every memo drawing.
+- **Parts that load when needed (G12).** The property and luxury drawings, the two maps and
+  the gallery are outside the start-up script (`ui/vedBehov.ts`, `komponenter/ved-behov/`).
+  The components keep their names, so screens use them as before, but a test that renders
+  a property or luxury drawing or a map must `await lastAlle()` first, or it sees the
+  empty placeholder. `startskript.test.ts` (in the heavy group) fails if the start-up
+  script passes 250 kB gzipped (238 after G12): put a big new thing in a part instead.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:

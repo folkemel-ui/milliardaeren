@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { kjopEiendom, kjopJord, kjopLuksus, kjopMaleri } from '../../engine/handlinger'
 import { nyttSpill } from '../../engine/start'
 import type { Oppgjor, Spilltilstand } from '../../engine/types'
@@ -17,6 +17,7 @@ import { Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
 import { nettoInn, nettoUt, OppgjorBlokk } from '../komponenter/Oppgjor'
 import { Luksuskort } from '../screens/Luksus'
+import { lastAlle } from '../vedBehov'
 import { alleStiler } from './stiler'
 
 const SJU = ['kjopesenter', 'naeringsbygg', 'oy', 'fyret', 'hoppbakken', 'borgen', 'tarnet']
@@ -45,6 +46,9 @@ function rik(): Spilltilstand {
   }
   return s
 }
+
+// Eiendoms- og luksustegningene lastes ved behov (G12); testene tegner dem ferdig hentet.
+beforeAll(lastAlle)
 
 describe('de sju norske tegningene (G7)', () => {
   it('er tegnet i den nye stilen på et 96-lerret', () => {

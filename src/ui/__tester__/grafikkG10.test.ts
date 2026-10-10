@@ -8,16 +8,18 @@
 import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { morke } from '../dagognatt'
 import { nattstil } from '../dagognatt'
 import { BEDRIFTSTEGNINGER, Illustrasjon, NY_STIL, type Trinn } from '../komponenter/Illustrasjoner'
 import { IScenen, LYSFARGER, S } from '../komponenter/Tegnestil'
 import { DAG_SEK } from '../../engine/kalender'
+import { lastAlle } from '../vedBehov'
 import { alleStiler } from './stiler'
 
 const css = alleStiler().replace(/\r\n/g, '\n')
-const kilde = readFileSync(new URL('../komponenter/Illustrasjoner.tsx', import.meta.url), 'utf8')
+// Klokkene står i luksusdelen, som lastes ved behov (G12).
+const kilde = readFileSync(new URL('../komponenter/ved-behov/Luksustegninger.tsx', import.meta.url), 'utf8')
 
 const tegn = (id: string, iScenen: boolean, trinn: Trinn = 0, forbedringer = 0) =>
   renderToStaticMarkup(createElement(IScenen.Provider, { value: iScenen }, createElement(Illustrasjon, { id, størrelse: 172, trinn, forbedringer })))
@@ -32,6 +34,9 @@ const varianter = (id: string): [Trinn, number][] =>
 afterEach(() => {
   vi.useRealTimers()
 })
+
+// Eiendoms- og luksustegningene lastes ved behov (G12); testene tegner dem ferdig hentet.
+beforeAll(lastAlle)
 
 describe('bevegelse i scenen (G10)', () => {
   it('hver tegning har noe som beveger seg i scenen, på hvert vekstrinn', () => {

@@ -2,11 +2,15 @@
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createElement } from 'react'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { EIENDOMSTYPER, LUKSUS } from '../../engine/eiendom'
 import { JORD } from '../../engine/jord'
 import { Illustrasjon, ILLUSTRASJONSIDER, NY_STIL } from '../komponenter/Illustrasjoner'
 import { S } from '../komponenter/Tegnestil'
+import { lastAlle } from '../vedBehov'
+
+// Eiendoms- og luksustegningene lastes ved behov (G12); testene tegner dem ferdig hentet.
+beforeAll(lastAlle)
 
 const tegn = (id: string, utklipp = false) => renderToStaticMarkup(createElement(Illustrasjon, { id, størrelse: 96, utklipp }))
 /** Uten id-er, så to tegninger kan sammenlignes på form og farge. */

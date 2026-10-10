@@ -6,11 +6,12 @@
 import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { LAGER_FOR, LUKSUS, LUKSUSLISTE } from '../../engine/eiendom'
 import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NAERBILDER, NY_STIL } from '../komponenter/Illustrasjoner'
 import * as Illustrasjoner from '../komponenter/Illustrasjoner'
 import { S } from '../komponenter/Tegnestil'
+import { lastAlle } from '../vedBehov'
 
 const TI = ['stockholm', 'kobenhavn', 'berlin', 'london', 'newyork', 'dubai', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell']
 const tegn = (id: string, naerbilde?: [number, number], utklipp = false) => renderToStaticMarkup(createElement(Illustrasjon, { id, størrelse: 96, naerbilde, utklipp }))
@@ -26,6 +27,9 @@ function stierErGyldige(svg: string, hva: string) {
     }
   }
 }
+
+// Eiendoms- og luksustegningene lastes ved behov (G12); testene tegner dem ferdig hentet.
+beforeAll(lastAlle)
 
 describe('de ti siste tegningene (G9)', () => {
   it('står i den nye stilen, er alle ulike, med gyldige stier og uten flyttallsrester', () => {
@@ -46,7 +50,7 @@ describe('de ti siste tegningene (G9)', () => {
 
   it('den gamle stilen er borte: ingen F, Svg eller Grunn igjen', () => {
     expect('F' in Illustrasjoner).toBe(false)
-    const fil = kilde('../komponenter/Illustrasjoner.tsx')
+    const fil = ['Illustrasjoner.tsx', 'ved-behov/Eiendomstegninger.tsx', 'ved-behov/Luksustegninger.tsx'].map((f) => kilde('../komponenter/' + f)).join('\n')
     expect(fil).not.toMatch(/function (Svg|Grunn)\(/)
     expect(fil).not.toContain('viewBox="0 0 48 48"')
     expect(kilde('../komponenter/Bevegelse.tsx')).not.toMatch(/\bF\./)

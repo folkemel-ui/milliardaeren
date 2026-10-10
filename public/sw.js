@@ -26,8 +26,10 @@ const LAGER = 'milliardaer-v3'
 
 // Hver utgivelse gir nye hashede filnavn, og de gamle blir liggende. Uten tak
 // vokser hurtiglageret med én bunt per utgivelse i det uendelige. Nøklene
-// kommer i innsettingsrekkefølge, så de eldste ligger først.
-const MAKS_RESSURSER = 20
+// kommer i innsettingsrekkefølge, så de eldste ligger først. Siden G12 er en
+// utgivelse om lag ni filer (startskriptet, stilarket, fonten og delene som lastes
+// ved behov), så taket rommer den nye og et par gamle.
+const MAKS_RESSURSER = 40
 
 // Skallet vi kan navngi på forhånd. Ressursene med hash legges inn etter hvert
 // som de hentes — vi kan ikke vite navnene deres her.

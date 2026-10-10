@@ -1,9 +1,13 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createElement, Fragment } from 'react'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { BEDRIFTSTEGNINGER, Illustrasjon, ILLUSTRASJONSIDER, NY_STIL } from '../komponenter/Illustrasjoner'
 import { HIMMEL, maal, METER, S } from '../komponenter/Tegnestil'
+import { lastAlle } from '../vedBehov'
 import { alleStiler } from './stiler'
+
+// Eiendoms- og luksustegningene lastes ved behov (G12); testene tegner dem ferdig hentet.
+beforeAll(lastAlle)
 
 const css = alleStiler().replace(/\r\n/g, '\n')
 
