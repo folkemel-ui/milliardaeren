@@ -355,7 +355,7 @@ session; delete what stops being true.
   The components keep their names, so screens use them as before, but a test that renders
   a property or luxury drawing or a map must `await lastAlle()` first, or it sees the
   empty placeholder. `startskript.test.ts` (in the heavy group) fails if the start-up
-  script passes 250 kB gzipped (238 after G12): put a big new thing in a part instead.
+  script passes 500 kB gzipped (250 until G17, when Folke doubled it; 249.9 then, 238 after G12): put a big new thing in a part instead.
   `startApp` in `klikk.ts` waits for parts still loading before `vi.resetModules()`;
   without that, a click test that ends mid-load made the *next* test hang (Pack 65's
   «Verden viser bare eiendom ute» timed out after G12 until this was added).
@@ -382,10 +382,11 @@ session; delete what stops being true.
   the rorbu) are in `FULL_RAMME`, wide in the scene and a square crop on the card
   (`FLISUTSNITT` in `Illustrasjoner.tsx`; a business uses `NAERBILDER`/`TRINNUTSNITT`). A drawing
   in `FULL_RAMME` must reach x −40 and 136 itself, and a test that renders one must `await
-  lastAlle()`. **The start script is at 249.9 of 250 kB gzipped** (249.78 at HEAD after Pack 74): a
-  game pack that adds more than 0.1 kB of start code fails `startskript.test.ts`, so put new
-  screens' code in a part (`ui/vedBehov.ts`) or raise `BUDSJETT_GZIP` on purpose, with the reason
-  written there. Details in `wisdom-grafikk.md` §6f.
+  lastAlle()`. **The start script was 249.9 kB gzipped after G17** (249.78 after Pack 74), against a budget of
+  250 that Folke doubled to 500 for the sake of growth (`BUDSJETT_GZIP` in `startskript.test.ts`,
+  with the reason written there). The game can grow, but a phone still reads the whole script
+  before the first screen, so new screens' code that is not on the first screen still belongs in a
+  part (`ui/vedBehov.ts`). Details in `wisdom-grafikk.md` §6f.
 - **Fits the phone (Pack 74).** Four rules now hold on every screen. (1) A phone on its side
   (`orientation: landscape`, `max-height: 500px`, `max-width: 1023px`, last in `bred.css`) gets the
   sidebar layout: one top line (53 px), a 92 px column of tabs, two columns of cards;

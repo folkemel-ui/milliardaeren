@@ -13,8 +13,13 @@ import { fileURLToPath } from 'node:url'
 import { build, type Rollup } from 'vite'
 import { describe, expect, it } from 'vitest'
 
-/** Gzippet startskript, i kB (1 000 byte, som i byggets egen oversikt). */
-const BUDSJETT_GZIP = 250
+/**
+ * Gzippet startskript, i kB (1 000 byte, som i byggets egen oversikt).
+ * Doblet fra 250 til 500 etter G17 (11. oktober 2026), etter ønske fra Folke:
+ * startskriptet sto på 249.9, og spillet må få vokse. Grensen er fortsatt et valg
+ * — hev den igjen med vilje, og skriv hvorfor her.
+ */
+const BUDSJETT_GZIP = 500
 /** Delene som skal ligge utenfor startskriptet og hentes med `import()`. */
 const VED_BEHOV = ['Eiendomstegninger', 'Luksustegninger', 'Norgeskart', 'Verdenskart', 'Galleri']
 

@@ -1125,8 +1125,8 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   URLs and no HMR hash. Delete it before committing. For detail, set the svg's `viewBox` and
   width (`zoom`), and resize the pane by one pixel before each screenshot.
 - **Budget.** The start script was at 248.7 of 250 kB after G16 (the loaders, `stegFor`, the home
-  shell and card), and is at 249.9 after Pack 74 and G17 (§6f). G18–G21 add nothing to it as long
-  as the drawings stay in the parts.
+  shell and card), and at 249.9 after Pack 74 and G17; the budget is now 500 (§6f). G18–G21 add
+  nothing to it as long as the drawings stay in the parts.
 - **Shell tip.** A heredoc with a long JSON patch died with «unexpected EOF» again; the Write
   tool for the patch file, `fiks.mjs` to apply it. `sed -i` on `BedriftIkon.tsx` made it LF
   again — restore CRLF with a node one-liner.
@@ -1228,11 +1228,12 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   the centre drawing before promising a figure.
 - **Look at the light theme once for a batch**: the four most different drawings (hybel, Trysil,
   Bakklandet, Fana) on `#eceef2` read fine; the sky follows the theme, the subject doesn't.
-- **The start script is at 249.9 of 250 kB.** HEAD after Pack 74 measured 249.78 (G16 left 248.7;
-  Pack 74's frame and scroll memory took 1.1), and G17 added 0.11 (the frame list and the crops).
-  G18–G21 can only add start code if they also remove some, or Folke raises the budget on purpose
-  (`BUDSJETT_GZIP` in `startskript.test.ts`, with the reason written there). The game track will
-  meet the same wall: say so in the report.
+- **The start script was at 249.9 of 250 kB, and Folke doubled the budget to 500.** HEAD after Pack
+  74 measured 249.78 (G16 left 248.7; Pack 74's frame and scroll memory took 1.1), and G17 added 0.11
+  (the frame list and the crops). Reported at the end of G17, answered at once with «let us double
+  the budget, the game has to grow» — so `BUDSJETT_GZIP` is 500, with the reason written in the
+  test. It is still a measure of what the phone reads before the first screen: drawings and
+  anything not on the first screen stay in the parts (`ui/vedBehov.ts`).
 - **Contact sheet (the easy one again).** `src/ui/zz-ark.tsx`: `ark(ids, { natt: [0, 1], kol, px, flis,
   lys })` renders `Scene` per id (or the card tile, a dimmed tile, a silhouette and the street tile
   with `flis`), sets `data-theme`, and `style.zoom` on the overlay does the 2× for tiles. Import it
@@ -1260,7 +1261,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   cars (G20).
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings grow the start script, which is at
-  249.9 of 250 kB gzipped after G17 (`startskript.test.ts`); the business steps (§6d) and
+  249.9 kB gzipped after G17, against a budget of 500 (`startskript.test.ts`); the business steps (§6d) and
   the home scenes are parts of their own.
 - **G22 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
@@ -1271,7 +1272,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   should follow the same rule as their stage.
 - **Don't import one part from another.** The step helpers (`Kunde`, `Vimpler`, `Skip`) live
   in `Trinnsteg.tsx` and would be handy for the sides of G18–G21's drawings; copying 10 lines
-  is cheaper than moving them to the start file (249.9 of 250 kB), unless a business also
+  is cheaper than moving them to the start file (249.9 of 500 kB), unless a business also
   needs them.
 - **New milestones after level 100** (game track, Pack 70) change which levels are stage 3,
   not `stegFor`: it counts every fifth level from the stage start and is capped at 150. If a
