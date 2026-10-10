@@ -6,7 +6,14 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack) and G11 (11 October
-2026). G12–G13 are planned in `Ideer.md`.
+2026). G12–G14 are planned in `Ideer.md`.
+
+**Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
+`Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
+there, deliver with `node scripts/lever.mjs` and, when Folke says push, `node scripts/lever.mjs
+--push` — see *Working side by side* in `Ideer.md`. Your stylesheets are
+`src/styles/tegninger.css`, `kart.css` and `oppgjor.css` (`styles.css` is gone); the dev
+server config `milliardaer-grafikk` (port 5186) works the same from the new folder.
 
 ---
 
@@ -15,7 +22,8 @@ the Saftbod and Pølsebod redraws (10 October 2026, outside any pack) and G11 (1
 - **What you own**: the drawings and how they render. That means `Illustrasjoner.tsx`,
   `Tegnestil.tsx`, `BedriftIkon.tsx`, portraits, crests, stadium, logos, the maps and
   their geometry and data (`Kartmerke.tsx`, `kartdata.ts`, `scripts/lag-kartdata.mjs`), the paintings (`Malerier.tsx`), the wordmarks (`ordmerker.ts`, `scripts/lag-ordmerker.mjs`), `Oppgjor.tsx`, the detail pages for things you own (`screens/Tingdetalj.tsx`, `ui/detaljvisning.ts`, G7), the logo files and `Galleri.tsx`. The full list is under
-  *Working side by side* in `Ideer.md`. `styles.css`, the screens and `Ideer.md` are
+  *Working side by side* in `Ideer.md`. Your CSS is `src/styles/tegninger.css`, `kart.css`
+  and `oppgjor.css`; the screens and `Ideer.md` are
   shared: touch only what the pack needs (G1 added two `utklipp` props in `Luksus.tsx`,
   nothing else).
 - **A bug you find in the game track's code gets flagged, not fixed.** In G5 a test

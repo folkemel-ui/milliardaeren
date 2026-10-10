@@ -89,36 +89,24 @@ session; delete what stops being true.
   (a separate small step; check with `grep -n "^## "` afterwards).
 - `ARKITEKTUR.md` (repo root) documents the dice, the hashes, the newspaper's side effect
   and how to add content safely. Update it when randomness or migrations change.
+- **Two folders, two branches** (Pack 63). The game track works in `Desktop\New folder (3)`
+  on branch `spill`, the graphics track in `Desktop\milliardaer-grafikk` on branch `grafikk`
+  (a `git worktree` of the same repo, with its own `node_modules` and its own Claude memory
+  folder). Master is checked out nowhere. Before Pack 63 both sessions shared one folder and
+  one index: a commit could take the other track's staged work, a push sent G11 live inside
+  Pack 61, and keeping CSS hunks apart took a hand-built index — all gone now.
+- **Delivering**: commit on your branch, run `node scripts/lever.mjs` (fetch, rebase onto
+  `origin/master`, `tsc` and every test on the result, then the list of what would go to
+  master), report, and on Folke's «push» run `node scripts/lever.mjs --push`. It refuses a
+  commit that wasn't tested as it stands (a marker in the worktree's git dir), and GitHub
+  refuses the push if the other track got there first — run it again. Show Folke the list
+  before pushing; it now holds only your own branch's commits. A rebase conflict will
+  almost always be `Ideer.md`: keep both tracks' edits.
 - **Touching the graphics track's files**: sometimes a game pack must (Pack 59 needed three
   unique drawings in `Illustrasjoner.tsx` and three `BYPLASS` entries plus a new label side
-  in `verdenskartet.ts`/`Verdenskart.tsx`). Keep it minimal, check `git status` first that
-  the other track has nothing uncommitted there, and list the touched files in the commit
-  message. Art you leave for later becomes an item in the Graphics list (Pack 60's home
-  scenes), not a silent gap.
-
-- **Sharing a file with the other track's uncommitted work** (Pack 61: the graphics
-  session was mid-G11 in `styles.css` and `varsler.ts`). Don't stash — it pulls their
-  work out from under them. Build the index version yourself: take `git show HEAD:<file>`,
-  apply only your own replacements (the same `[from, to]` list as the patch script), write
-  it with `git hash-object -w --no-filters` and `git update-index --cacheinfo
-  100644,<hash>,<path>`. Check `git diff` (index → working tree) shows only their lines,
-  then test exactly what you stage: `git checkout-index -a --prefix=<scratch>/idx/`, link
-  `node_modules` as a junction, run `tsc` and the tests there, and remove the junction
-  before the folder.
-- **The index is shared between the two sessions** (Pack 61 / G11, 10 October). Pack 61
-  was staged when the graphics session staged G11 a minute later, so a plain `git commit`
-  from either would have taken the other's work, and the graphics session's
-  `update-index` overwrote Pack 61's staged copy of three shared files (it put them back
-  before Pack 61 was committed). Before you stage anything, `git diff --cached --name-only`
-  must be empty; if it isn't, the other track is committing — wait until `HEAD` moves.
-  And a push carries the other track's commits too: Pack 61's push took G11 along, so
-  check `git log origin/master` before saying something is or isn't pushed.
-
-- **Look before you push.** The other track commits to the same local `master`. Run
-  `git log --oneline origin/master..master` *before* `git push`, not in the same command:
-  after Pack 61 the push also sent the graphics session's fresh G11 commit live, and Folke
-  heard about it afterwards. If the list holds the other track's commits, name them and
-  ask before pushing.
+  in `verdenskartet.ts`/`Verdenskart.tsx`). Keep it minimal and list the touched files in
+  the commit message. Art you leave for later becomes an item in the Graphics list (Pack
+  60's home scenes), not a silent gap.
 
 ## 3. Tools on this machine
 
@@ -249,11 +237,22 @@ session; delete what stops being true.
   and make a helper throw when the selector finds nothing: in Pack 61 a missed club-card
   selector let two `history.back()` calls walk out of the game to `/ikon.svg`. Likewise
   `[role=dialog]` also matches the map's city card (`.bykort`), not just pop-ups.
+- **Prove a CSS refactor with computed styles** (Pack 63 split 6 622 lines into 13 files).
+  On one fixed save with the game loop stopped (import the store module from the exact URL in
+  `performance.getEntriesByType('resource')` and call `stoppSpillokke()`), notices and Avisa
+  off, reduced motion, `sistAktiv` in the future: for every element on each screen, hash
+  `getComputedStyle` (plus `::before`/`::after`), skipping properties set inline (the
+  cascade can't touch them), with the size-dependent ones (width, margins, x/y, transform …)
+  in a second hash. Key by DOM path, keep the «before» in IndexedDB (localStorage is too
+  small), compare after. Both counts must be 0 — and a frozen save makes even geometry
+  exact, so any geometry difference is real: it was the font, whose relative `url()` broke
+  when the file moved. Await `document.fonts.ready`. 36 screens took ~5 min in chunks of
+  ≤ 40 s per call (the tool gives up at 45 s); the gallery's 68 000 elements need 4 chunks.
 - **Check computed styles, not just class names.** A new rule placed earlier in
-  `styles.css` silently lost to an older rule with the same specificity (`.kjopskort`
+  the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:
   `getComputedStyle(el).animationName`.
-- **Grep `styles.css` for a class name before using it.** `styles.css` is ~4 700 lines
+- **Grep `src/styles/` for a class name before using it.** The stylesheets hold ~6 600 lines
   and short Norwegian names are often taken: `.statistikk` was already the three-column
   play-time card, and the new statistics card rendered squeezed into one column.
 
@@ -340,7 +339,8 @@ session; delete what stops being true.
   currency version cost +120 ms: a template string and `hashTekst` per call, every
   second. Cache per-second values once per second for *all* keys, keep knot values
   until time passes them, and use a `Map` for city → currency.
-- **"Timeout calling onTaskUpdate"** at the end of a passing run is the runner starving
+- **"Timeout calling onTaskUpdate"** (gone since Pack 63; if it comes back, look for a test that
+  blocks for many seconds without yielding — the golden master ran 20 s in one call) at the end of a passing run is the runner starving
   under load, not a test failure. It appeared when Pack 59 made the suite ~10 % heavier
   and the machine was busy, never when the heavy files ran alone. Long synchronous tests
   should yield (`await new Promise((r) => setTimeout(r, 0))` between chunks, like the
@@ -507,8 +507,10 @@ session; delete what stops being true.
   floats — don't regroup sums. The golden master can't see property or stocks (the bot
   owns none), so argue exactness for those by reading, and test helpers against the old
   formula (`pakke47.test.ts`).
-- **`ytelse.test.ts` runs last, alone**: `vite.config.ts` has two test projects, `enhet` and
-  `ytelse`, with `sequence.groupOrder`, so a plain `npx vitest run` finishes everything else
+- **`ytelse.test.ts` runs last, alone**: `vite.config.ts` has three test projects run one
+  after the other with `sequence.groupOrder` — `enhet` (the quick ones, in parallel), `tung`
+  (the long simulations, old saves and full-app click tests, listed in `TUNGE`; Pack 63) and
+  `ytelse` — so a plain `npx vitest run` finishes everything else
   before timing. It measures the process's CPU time (`process.cpuUsage`), not wall-clock
   time. Two hours away costs ~300–430 ms CPU against the 400 ms limit for the heaviest save. If it creeps up,
   profile from `/ikon.svg` in the browser by timing engine functions 7 200 times each;
@@ -524,7 +526,7 @@ session; delete what stops being true.
 - **No emoji anywhere** (`ikoner.test.ts`). Use `<Ikon navn="…" />` from `Ikoner.tsx`.
 - **Type scale**: six sizes `--skrift-1…6` (11/13/15/18/22/34 px) and four weights
   `--vekt-normal/halvfet/fet/tung`. `pakke36.test.ts` fails on any other `font-size` or
-  `font-weight` in `styles.css`, except graphics listed in its `GRAFIKK` array.
+  `font-weight` in the stylesheets, except graphics listed in its `GRAFIKK` array.
 - **Badges**: `.merke` (status word; `gull` new/best, `kant` a role, `ok`, `varsel`,
   `fare`, `info`), `.etikett` (category, grey capitals), `.brikke` (a number). Don't
   invent new pill styles.
