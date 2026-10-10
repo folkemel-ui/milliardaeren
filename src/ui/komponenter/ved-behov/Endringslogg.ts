@@ -8,6 +8,23 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '2.6.0',
+    navn: '2.6',
+    dato: 'Oktober 2026',
+    ingress: 'En klubb du kan styre, hjem som fyller rammen — og et spill som varer lenger.',
+    punkter: [
+      'Troppen: hver spiller har en posisjon, angrep og forsvar, og du velger formasjon. Taktikkene passer nå hver sin kamp.',
+      'Et akademi i tre trinn sender opp juniorer hver sesong, med et tak du bare kan ane.',
+      'Kampdag: hver kamp får målscorere, minutter og karakterer, og sesongen ender med toppscorer, årets spiller og en oppsummering.',
+      'Cupen med alle femti lagene, og Europa for seriemesteren — med TV-penger, premier og et eget regnskap for klubben.',
+      'Milepæler etter nivå 100: på 150, 200 og 250 ganger inntekten seg med 1,5.',
+      'Nye mål etter den siste opplåsingen — landemerkene, langdistansejeten og New York — og fem skjulte prestasjoner.',
+      'De elleve norske boligene og hyttene fyller rammen, og stedet fortsetter ut til sidene.',
+      'Roligere lister: markedet i dag på én linje, én påminnelse om retning, stedet i eiendomstittelen og eiendom som kan sorteres.',
+      'Fra hotellet og opp koster den første oppgraderingen mer, så det sene spillet går litt roligere.',
+    ],
+  },
+  {
     versjon: '2.5.0',
     navn: '2.5',
     dato: 'Oktober 2026',
