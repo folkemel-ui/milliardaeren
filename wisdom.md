@@ -378,6 +378,14 @@ session; delete what stops being true.
   step in `engine/hjemmene.ts` needs its state drawn in `Hjemtegninger.tsx`; a new business
   needs a `Steg` in `Trinnsteg.tsx` (`grafikkG16.test.ts` fails otherwise). Details in
   `wisdom-grafikk.md` §6d.
+- **A full frame for the homes (G17).** The eleven Norwegian homes (hybler, flats, terraces, cabins,
+  the rorbu) are in `FULL_RAMME`, wide in the scene and a square crop on the card
+  (`FLISUTSNITT` in `Illustrasjoner.tsx`; a business uses `NAERBILDER`/`TRINNUTSNITT`). A drawing
+  in `FULL_RAMME` must reach x −40 and 136 itself, and a test that renders one must `await
+  lastAlle()`. **The start script is at 249.9 of 250 kB gzipped** (249.78 at HEAD after Pack 74): a
+  game pack that adds more than 0.1 kB of start code fails `startskript.test.ts`, so put new
+  screens' code in a part (`ui/vedBehov.ts`) or raise `BUDSJETT_GZIP` on purpose, with the reason
+  written there. Details in `wisdom-grafikk.md` §6f.
 - **Fits the phone (Pack 74).** Four rules now hold on every screen. (1) A phone on its side
   (`orientation: landscape`, `max-height: 500px`, `max-width: 1023px`, last in `bred.css`) gets the
   sidebar layout: one top line (53 px), a 92 px column of tabs, two columns of cards;

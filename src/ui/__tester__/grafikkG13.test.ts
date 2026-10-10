@@ -8,9 +8,10 @@
 import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { BedriftIkon, Scene } from '../komponenter/BedriftIkon'
 import { BEDRIFTSTEGNINGER, FULL_RAMME, Illustrasjon, NAERBILDER, type Trinn } from '../komponenter/Illustrasjoner'
+import { lastAlle } from '../vedBehov'
 import { alleStiler } from './stiler'
 
 const NIVAA = [1, 25, 50, 100]
@@ -21,8 +22,13 @@ const viewBox = (html: string) => html.match(/<svg[^>]*viewBox="([^"]+)"/)?.[1]
 const VIGNETT = /url\(#[a-z0-9]+(vm|km|nm|bm)\)/i
 
 describe('full ramme for gatebedriftene (G13)', () => {
+  // Boligene (G17) ligger i en del som hentes når den trengs.
+  beforeAll(async () => {
+    await lastAlle()
+  })
+
   it('gjelder alle bedriftene etter G15: gate (G13), by (G14) og de store (G15)', () => {
-    expect([...FULL_RAMME]).toEqual(['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter'])
+    expect(FULL_RAMME.slice(0, 13)).toEqual(['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter'])
     expect(BEDRIFTSTEGNINGER.every((id) => FULL_RAMME.includes(id))).toBe(true)
   })
 

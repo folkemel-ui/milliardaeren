@@ -2927,7 +2927,12 @@ export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kont
  * er tegnet brede. En tegning her må nå kantene selv: alt som før bleknet ut
  * (bakgrunn, gjerder, rekker av hus), må forlenges til x −40 og 136.
  */
-export const FULL_RAMME: readonly string[] = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
+export const FULL_RAMME: readonly string[] = [
+  // G13–G15: bedriftene.
+  'saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
+  // G17: boligene og hyttene.
+  'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'hytte', 'hytte-trysil', 'hytte-lofoten',
+]
 
 /** Bedriftene, som har fire vekstrinn. */
 export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
@@ -2993,6 +2998,26 @@ const TRINNUTSNITT: Record<string, readonly (readonly [number, number, number, n
 }
 
 /**
+ * Flisene for eiendommene med full ramme (G17): et kvadratisk utsnitt som tar med
+ * bygget og litt hage, hage og vær rundt, ut til hjørnene i flisa (68 px). Boligene
+ * har ikke vekstrinn, så ett utsnitt holder, og de står ikke i `NAERBILDER`:
+ * galleriet og lageret viser nærbilder bare for bedrifter og luksus.
+ */
+export const FLISUTSNITT: Record<string, readonly [number, number, number, number]> = {
+  hybel: [4, 11, 85, 85],
+  'hybel-oslo': [4, 8, 88, 88],
+  'hybel-trondheim': [6, 8, 88, 88],
+  leilighet: [4, 6, 90, 90],
+  'leilighet-bergen': [4, 8, 88, 88],
+  'leilighet-trondheim': [8, 20, 76, 76],
+  rekkehus: [8, 42, 54, 54],
+  'rekkehus-bergen': [8, 42, 54, 54],
+  hytte: [6, 20, 76, 76],
+  'hytte-trysil': [6, 18, 78, 78],
+  'hytte-lofoten': [12, 22, 74, 74],
+}
+
+/**
  * Illustrasjonen for en bedrift, eiendom eller luksusgjenstand, etter id.
  * Bedrifter vokser med `trinn` og viser `forbedringer` (0–3) som detaljer.
  * Med `utklipp` kommer tegningene uten himmel, bakke og bakgrunn, til steder
@@ -3023,7 +3048,7 @@ export const Illustrasjon = memo(function Illustrasjon({
   const hentet = useDel(del)
   if (!del && !BEDRIFTER[id]) return null
   const Tegning: Tegning = del ? (hentet?.[id] ?? TOMT) : BEDRIFTER[id]
-  const boks = naerbilde && (TRINNUTSNITT[id]?.[trinn] ?? NAERBILDER[id])
+  const boks = naerbilde && (TRINNUTSNITT[id]?.[trinn] ?? NAERBILDER[id] ?? FLISUTSNITT[id])
   const skala = boks ? Math.min(naerbilde[0] / boks[2], naerbilde[1] / boks[3]) : 1
   const naer = boks ? { boks, bredde: Math.round(boks[2] * skala), hoyde: Math.round(boks[3] * skala) } : null
   return (

@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12–G15 (10–11 October 2026), G16 and Pack 74 (11 October 2026). G17–G23 are planned in
-`Ideer.md`: the full frame for properties and luxury in groups (G17–G21), the seasons
-(G22) and the club in pictures (G23).
+2026), G12–G15 (10–11 October 2026), G16, Pack 74 and G17 (11 October 2026). G18–G23 are planned in
+`Ideer.md`: the full frame for the rest of the properties and the luxury in groups (G18–G21), the
+seasons (G22) and the club in pictures (G23).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -1124,8 +1124,9 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   grid, `--natt` per cell) imported with `await import('/src/ui/zz-ark.tsx')` needs no resource
   URLs and no HMR hash. Delete it before committing. For detail, set the svg's `viewBox` and
   width (`zoom`), and resize the pane by one pixel before each screenshot.
-- **Budget.** The start script is at 248.7 of 250 kB after G16 (the loaders, `stegFor`, the home
-  shell and card). G17–G21 add nothing to it as long as the drawings stay in the parts.
+- **Budget.** The start script was at 248.7 of 250 kB after G16 (the loaders, `stegFor`, the home
+  shell and card), and is at 249.9 after Pack 74 and G17 (§6f). G18–G21 add nothing to it as long
+  as the drawings stay in the parts.
 - **Shell tip.** A heredoc with a long JSON patch died with «unexpected EOF» again; the Write
   tool for the patch file, `fiks.mjs` to apply it. `sed -i` on `BedriftIkon.tsx` made it LF
   again — restore CRLF with a node one-liner.
@@ -1177,7 +1178,71 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   still about 190 px before the first card, in landscape too; the garage captions and the badges
   are still 11 px by choice; the light theme was not looked at for any of this.
 
-## 7. Notes for later (G1–G16 done; G17–G23 planned in `Ideer.md`; Pack 74 done)
+## 6f. A full frame for the homes (G17)
+
+- **All four recommendations were taken** (the real street per place for the six city homes, the
+  suburb and its landscape for the two terraces, the mountain village and the harbour for the cabins
+  and the rorbu, and a tile that keeps a bit of garden). The options named each place's neighbours
+  from `EIENDOMSTYPER.sted` (Fløyen-side wooden houses, the T-bane track at Blindern, the Gamle
+  Bybro portal and Nidarosdomen at Bakklandet), which is what made them one-click.
+- **How a property joins the full frame.** Its id goes in `FULL_RAMME` (Illustrasjoner); the
+  drawing in `ved-behov/Eiendomstegninger.tsx` is widened by hand. Nothing else switches: the scene
+  (`Scene` → 11:6), the buy moment (174 px), Avisa and the gallery follow the list. A test that
+  renders one must `await lastAlle()` first — G13's loop over `FULL_RAMME` now has a `beforeAll`
+  and compares only the first 13 (the businesses) with its fixed list.
+- **Tile crops for things that are not businesses: `FLISUTSNITT`.** `NAERBILDER` is read by the
+  gallery's close-up (`[86, 74]`, `utklipp`) and by the garage, so putting the homes there would have
+  put 11 extra close-ups in the gallery. `Illustrasjon` now reads
+  `TRINNUTSNITT ?? NAERBILDER ?? FLISUTSNITT`. G18–G21 add their ids to it, one square each
+  (inside x −40…136, y + h ≤ 96). Choosing the box: **a compact building** (a hybel, a cabin) at
+  1.35–1.45 × its width gives the 45–50 px of 68 that was promised; **a low wide row** (the terraces)
+  needs a tight box from y 42, or the tile is half sky (first try [8, 30, 66, 66] was a thin band
+  between two empty halves); **a stepped row** (Nordnes) fills the diagonal of a tall box.
+  Look at every tile at 2× on a sheet; the first boxes were all too generous.
+- **The street view (Gatebilde) shows a drawing at 72 px with no vignette**, so a full-frame home is
+  a hard square on the card. `kart.css` gives `.hus-bilde > svg.lerret` rounded corners; the
+  landmarks and the land (G18) get it for free. Checked in the game at 375 px: three rounded tiles
+  on the road.
+- **Extend by index, not by position.** `Rekkerad` (Madla and Fana) and `Bryggerekka` went from five
+  to seven and nine houses by looping `i` from −2 / −4, with the colours by parity (`i % 2`) so the
+  row alternates as before, and `lys`/`tennes` (lit windows) tied to `i` or, in Nordnes where the
+  houses are an array of positions, to `x === 44` — prepending left houses to an array shifts every
+  index-based rule. A drawing's sides are best planned as *more of the same thing* (more houses at the
+  same step) plus *one new thing per side that tells the place* (a harbour, a bridge and a cathedral,
+  a farm and a fjord, a car park and a lift).
+- **Long decimals come back with negative x.** `x + 2.4` at x = −6 is −3.5999999999999996; `Vindu`
+  now rounds its own x, y, b and h (`r2`), which covers every caller, and the other sums go through
+  `r2` or `pkt`. `grafikkG17.test.ts` fails on 7+ decimals in the whole scene and found six spots,
+  three of them in the old centre drawings (the turf tufts and the Geilo window frames) that had
+  always had them.
+- **New helpers in the part** (not in the start file; they are used only by homes): `Dishus` (a small
+  house in haze, for a hillside town), `Gatelykt` (a lantern that is dark by day and glows at night,
+  `nattvindu`; never `Lampe`, which always burns), `Stakitt`, `Familiebil`, `Carport`, `Trampoline`,
+  `Holdeplass` (all at far distance, 2.5 u/m: a car 11 long, a carport 18), `Fjellhytte`, `Bjork`
+  (the Geilo birch from the centre, scaled and moved) and, in Bryggerekka, Nidarosdomen on a stone
+  quay. `Rekkerad` takes `venstre` and `hoyre` (drawn before/after the row). `Bil` from the start
+  file is used at street distance only (Trysil's car park).
+- **A skier on green grass doesn't make sense.** The option said «a cross-country skier on a trail»
+  for Geilo, but Geilo is a summer meadow (turf roof, birches, snow only on the peaks), so the figure
+  is a hiker with a rucksack and poles on a gravel path, and the report says so. Check the season of
+  the centre drawing before promising a figure.
+- **Look at the light theme once for a batch**: the four most different drawings (hybel, Trysil,
+  Bakklandet, Fana) on `#eceef2` read fine; the sky follows the theme, the subject doesn't.
+- **The start script is at 249.9 of 250 kB.** HEAD after Pack 74 measured 249.78 (G16 left 248.7;
+  Pack 74's frame and scroll memory took 1.1), and G17 added 0.11 (the frame list and the crops).
+  G18–G21 can only add start code if they also remove some, or Folke raises the budget on purpose
+  (`BUDSJETT_GZIP` in `startskript.test.ts`, with the reason written there). The game track will
+  meet the same wall: say so in the report.
+- **Contact sheet (the easy one again).** `src/ui/zz-ark.tsx`: `ark(ids, { natt: [0, 1], kol, px, flis,
+  lys })` renders `Scene` per id (or the card tile, a dimmed tile, a silhouette and the street tile
+  with `flis`), sets `data-theme`, and `style.zoom` on the overlay does the 2× for tiles. Import it
+  once with `await import('/src/ui/zz-ark.tsx')`; after editing the part, **reload** (the lazy part is
+  cached for the page's life, §6d). Delete it before committing. A save for the Eiendom tab:
+  `fulltSpill()` + `simuler(s, 600)` + `kontanter = 5e12` written to `milliardaer.lagring` from
+  `/ikon.svg` (the game opens on the last tab; click the button whose text is «Eiendom»), and
+  `document.getAnimations()` includes infinite ones, so `finish()` on all of them throws — skip it.
+
+## 7. Notes for later (G1–G17 done; G18–G23 planned in `Ideer.md`; Pack 74 done)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -1187,15 +1252,15 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **Next groups for the full frame (G17–G21)**: add the ids to `FULL_RAMME`, extend
-  everything that ends at 0 and 96, fill the sides, and give the tile a per-stage crop
-  where the subject grows. Properties and luxury live in the lazy parts, so their helpers
+- **Next groups for the full frame (G18–G21)**: add the ids to `FULL_RAMME`, extend
+  everything that ends at 0 and 96, fill the sides, and give the tile a crop (`FLISUTSNITT`, one
+  square; a per-stage `TRINNUTSNITT` only where the subject grows, as for the businesses). Properties and luxury live in the lazy parts, so their helpers
   for the sides go there (or in the start file if a business needs them too). Cars use
   `Speiling`, `Lakksveip` and the `rm` mask, which are still 96 wide: widen them with the
   cars (G20).
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings grow the start script, which is at
-  248.7 of 250 kB gzipped after G16 (`startskript.test.ts`); the business steps (§6d) and
+  249.9 of 250 kB gzipped after G17 (`startskript.test.ts`); the business steps (§6d) and
   the home scenes are parts of their own.
 - **G22 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
@@ -1205,8 +1270,8 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   (green in summer) or stays a winter picture, and the business steps (queues, skiers)
   should follow the same rule as their stage.
 - **Don't import one part from another.** The step helpers (`Kunde`, `Vimpler`, `Skip`) live
-  in `Trinnsteg.tsx` and would be handy for the sides of G17–G21's drawings; copying 10 lines
-  is cheaper than moving them to the start file (248.7 of 250 kB), unless a business also
+  in `Trinnsteg.tsx` and would be handy for the sides of G18–G21's drawings; copying 10 lines
+  is cheaper than moving them to the start file (249.9 of 250 kB), unless a business also
   needs them.
 - **New milestones after level 100** (game track, Pack 70) change which levels are stage 3,
   not `stegFor`: it counts every fifth level from the stage start and is capped at 150. If a

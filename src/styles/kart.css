@@ -289,6 +289,12 @@
   height: 76px;
 }
 
+/* En tegning med full ramme (G17) har ingen vignett og står som en liten flis i
+   gata: runde hjørner, så den ikke blir en hard firkant på veien. */
+.hus-bilde > svg.lerret {
+  border-radius: 10px;
+}
+
 /* Hvor mange av typen du eier. */
 .hus-antall {
   position: absolute;
