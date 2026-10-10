@@ -132,7 +132,8 @@
   pointer-events: none;
 }
 
-.varsel {
+/* Bare varslene i stabelen: `.merke.varsel` er et merke, ikke et varsel (Pakke 66). */
+.varsler > .varsel {
   pointer-events: auto;
   display: flex;
   align-items: center;

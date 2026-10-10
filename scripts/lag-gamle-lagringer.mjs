@@ -53,6 +53,8 @@ const NESTE_BUMP = {
   20: { fra: 'c55eb94' },
   // Versjon 21 ble bumpet i Pakke 59; lagringen lages fra Pakke 58.
   21: { fra: '2577e19' },
+  // Versjon 22 ble bumpet i Pakke 66; lagringen lages fra commiten før.
+  22: { fra: 'af93990' },
 }
 
 const sh = (cmd, cwd = ROT) => execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'inherit'] }).toString()
@@ -101,6 +103,7 @@ for (const id of forste(s.kunst?.kurser)) prov('kjopMaleri', id)
 for (const id of forste(M.fond?.FOND)) prov('kjopFond', id, 1_000_000)
 for (const id of forste(s.marked?.kurser, 3)) prov('kjopPapir', id, 50)
 for (const navn of (M.klubb?.KLUBBNAVN ?? []).slice(0, 1)) prov('kjopKlubb', navn)
+prov('byggStadion', 'flomlys')
 if (s.rivaler?.[0]) prov('kjopRivalblokk', s.rivaler[0].id)
 prov('settInn', 1_000_000)
 prov('laan', 100_000)

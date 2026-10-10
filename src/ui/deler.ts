@@ -4,6 +4,15 @@
  * Valget huskes i nettleseren, ikke i lagringen, og kan settes utenfra
  * (skattemerket åpner Regnskap, Oversikt åpner Børs på krypto), så hvert
  * sett er en liten delt tilstand, ikke en useState i skjermen.
+ *
+ * Plass til nye områder (Pakke 66) — regelen før spillet vokser:
+ *   1. Fanelinja har fem faner og får ikke flere (hver er ~75 px på en telefon).
+ *   2. En fane har høyst fire deler (raden med fire får akkurat plass).
+ *   3. Et nytt område blir en del i fanen hvis spørsmål det svarer på: det du
+ *      eier for moro → Luksus, der pengene arbeider → Investeringer.
+ *   4. Vokser et område ut av delen sin, får det en detaljside — et lag med
+ *      tilbake, som en bedrifts side — aldri en femte del eller en sjette fane.
+ * Klubben er en del i Luksus; stadion er et kort i den. pakke66.test.ts passer på tallene.
  */
 
 import { useSyncExternalStore } from 'react'

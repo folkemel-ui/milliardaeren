@@ -26,6 +26,7 @@ const TUNGE = [
   '**/pakke62.test.ts',
   '**/pakke65.test.ts',
   '**/startskript.test.ts',
+  '**/ui/__tester__/pakke66.test.ts',
 ]
 
 export default defineConfig({

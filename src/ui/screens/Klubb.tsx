@@ -1,15 +1,19 @@
 import { useState } from 'react'
 import { Bekreftknapp } from '../komponenter/Bekreftknapp'
-import { kjopKlubb, kjopSpiller, selgKlubb, selgSpiller, settTaktikk } from '../../engine/handlinger'
+import { byggStadion, kjopKlubb, kjopSpiller, selgKlubb, selgSpiller, settTaktikk } from '../../engine/handlinger'
 import {
   ANTALL_LAG,
   DIVISJONER,
+  divisjonsnavn,
+  FLOMLYS,
+  form,
   forventetMaal,
   kjopspris,
   KLUBB_LAAST_OPP,
   KLUBBNAVN,
   KLUBBSALG_HONORAR,
   klubbTilSalgs,
+  kravtekst,
   klubbverdi,
   lagstyrke,
   LONN_ANDEL,
@@ -17,14 +21,23 @@ import {
   MAKS_TROPP,
   MIN_TROPP,
   nesteKamp,
-  OPPRYKK,
+  nesteUtbygging,
+  oppfyllerKrav,
+  plasser,
   plassering,
   poeng,
   RUNDER_PER_SESONG,
+  rykkerNed,
+  rykkerOpp,
   salgspris,
   spillerverdi,
+  sponsorbelop,
+  STADIONTRINN,
   tabell,
   TAKTIKKER,
+  tilskuere,
+  VIP,
+  type Stadiondel,
 } from '../../engine/klubb'
 import { tidTilNesteRunde } from '../../engine/startups'
 import type { Kamp, Klubb as KlubbT, Spilltilstand, Taktikk } from '../../engine/types'
@@ -102,6 +115,10 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
   const neste = nesteKamp(k)
   const styrke = lagstyrke(k)
   const netto = k.billetter + k.sponsor - k.lonn
+  const opp = rykkerOpp(k)
+  const ned = rykkerNed(k)
+  const sperret = k.divisjon < DIVISJONER.length - 1 && !oppfyllerKrav(k, k.divisjon + 1)
+  const nye = k.lag.filter((l) => l.fra !== undefined)
 
   return (
     <>
@@ -144,6 +161,8 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         </div>
       </div>
 
+      <Stadionkort s={s} k={k} />
+
       {neste && (
         <div className="kort">
           <h2 className="kort-tittel">Neste kamp · om {varighet(tidTilNesteRunde(s))}</h2>
@@ -166,8 +185,11 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
             {[...k.kamper].reverse().slice(0, 5).map((m) => (
               <li key={`${m.sesong}-${m.runde}`}>
                 <span className={`brikke resultat r${RESULTAT(m)}`}>{RESULTAT(m)}</span>
-                <span>
-                  {m.hjemme ? 'Hjemme mot' : 'Borte mot'} {m.motstander}
+                <span className="spiller-navn">
+                  <span>
+                    {m.hjemme ? 'Hjemme mot' : 'Borte mot'} {m.motstander}
+                  </span>
+                  {m.tilskuere !== undefined && <span className="dempet liten">{tall(m.tilskuere)} tilskuere</span>}
                 </span>
                 <strong>
                   {m.maalFor}–{m.maalMot}
@@ -193,7 +215,7 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
           <tbody>
             {tabell(k).map((i, plass) => {
               const l = k.lag[i]
-              const sone = plass < OPPRYKK && k.divisjon < DIVISJONER.length - 1 ? 'opp' : plass >= ANTALL_LAG - OPPRYKK && k.divisjon > 0 ? 'ned' : ''
+              const sone = opp.includes(i) ? 'opp' : ned.includes(i) && k.divisjon > 0 ? 'ned' : ''
               return (
                 <tr key={l.navn} className={`${i === 0 ? 'deg' : ''} ${sone}`}>
                   <td>{plass + 1}</td>
@@ -214,9 +236,14 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
           </tbody>
         </table>
         <p className="dempet liten">
-          {k.divisjon < DIVISJONER.length - 1 && `De to beste rykker opp til ${DIVISJONER[k.divisjon + 1].navn}. `}
+          {k.divisjon < DIVISJONER.length - 1 && `De to beste rykker opp til ${DIVISJONER[k.divisjon + 1].navn}${sperret ? ' — men ikke du, før stadion holder kravet' : ''}. `}
           {k.divisjon > 0 && `De to dårligste rykker ned.`}
         </p>
+        {nye.length > 0 && (
+          <p className="dempet liten">
+            Nye i år: {nye.map((l) => `${l.navn} (${l.fra! > k.divisjon ? 'ned' : 'opp'} fra ${divisjonsnavn(l.fra!)})`).join(', ')}.
+          </p>
+        )}
       </div>
 
       <div className="kort">
@@ -316,6 +343,76 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         <p className="dempet liten">Megler og advokater tar {tall(KLUBBSALG_HONORAR * 100)} %. Trofeene beholder du.</p>
       </div>
     </>
+  )
+}
+
+const UTBYGGINGER: { del: Stadiondel; effekt: (k: KlubbT) => string }[] = [
+  { del: 'tribune', effekt: () => 'Plass til flere når laget går godt eller rykker opp' },
+  { del: 'flomlys', effekt: () => `Kveldskamper: ${tall((FLOMLYS.publikum - 1) * 100)} % flere vil komme` },
+  { del: 'vip', effekt: (k) => `Sponsoren betaler ${tall((VIP.sponsor - 1) * 100)} % mer fra neste sesong — ${kortKroner(sponsorbelop({ ...k, stadion: { ...k.stadion, vip: true } }) - sponsorbelop(k))} i ${DIVISJONER[k.divisjon].navn}` },
+]
+
+/**
+ * Stadion (Pakke 66): plassene, publikummet og lisenskravet, og det du kan
+ * bygge. Det du bygger, teller i klubbverdien.
+ */
+function Stadionkort({ s, k }: { s: Spilltilstand; k: KlubbT }) {
+  const div = DIVISJONER[k.divisjon]
+  const forventet = tilskuere(k, form(k))
+  const over = k.divisjon < DIVISJONER.length - 1 ? k.divisjon + 1 : null
+  const holder = over === null || oppfyllerKrav(k, over)
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Stadion</h2>
+        <span className="dempet liten">{STADIONTRINN[k.stadion.trinn].navn}</span>
+      </div>
+      <div className="klubbtall">
+        <div>
+          <span className="etikett">Plasser</span>
+          <strong>{tall(plasser(k))}</strong>
+        </div>
+        <div>
+          <span className="etikett">Publikum</span>
+          <strong>{tall(forventet)}</strong>
+        </div>
+        <div>
+          <span className="etikett">Billett</span>
+          <strong>{kortKroner(div.billettpris)}</strong>
+        </div>
+      </div>
+      <p className="dempet liten">
+        Neste hjemmekamp gir om lag {kortKroner(forventet * div.billettpris)}
+        {forventet >= plasser(k) ? ' — utsolgt, flere ville kommet.' : '.'}
+      </p>
+      {over !== null && (
+        <p className="liten stadionkrav">
+          <span className={`merke ${holder ? 'ok' : 'varsel'}`}>{holder ? 'Holder' : 'Mangler'}</span> {DIVISJONER[over].navn} krever {kravtekst(over)}.
+        </p>
+      )}
+      <ul className="stadionliste">
+        {UTBYGGINGER.map(({ del, effekt }) => {
+          const neste = nesteUtbygging(k, del)
+          const ferdig = del === 'tribune' ? STADIONTRINN[k.stadion.trinn].navn : del === 'flomlys' ? 'Flomlys' : 'VIP-losje'
+          return (
+            <li key={del}>
+              <span className="spiller-navn">
+                <strong>{neste ? (neste.plasser ? `${neste.navn} · ${tall(neste.plasser)} plasser` : neste.navn) : ferdig}</strong>
+                <span className="dempet liten">{neste ? effekt(k) : 'Ferdig bygd'}</span>
+              </span>
+              {neste ? (
+                <button className="knapp knapp-gull knapp-bud spiller-knapp" disabled={s.kontanter < neste.pris} onClick={() => utfor(byggStadion(s, del), true)}>
+                  <span>Bygg</span>
+                  <strong>{kompakt(neste.pris)}</strong>
+                </button>
+              ) : (
+                <span className="merke ok">Bygd</span>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }
 

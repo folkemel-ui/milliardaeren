@@ -20,7 +20,7 @@ import { KURTASJE } from '../engine/marked'
 import { BLOKK, BLOKKPREMIE, OPPKJOPSPREMIE } from '../engine/rivaler'
 import { REVISJONSSJANSE, SKATTETRINN } from '../engine/skatt'
 import { DIN_DEL_AV_RUNDEN, RUNDEANDEL } from '../engine/startups'
-import { RUNDER_PER_SESONG } from '../engine/klubb'
+import { RUNDER_PER_SESONG, STADIONKRAV, STADIONTRINN } from '../engine/klubb'
 import { kortKroner, tall } from './format'
 
 const pst = (andel: number, desimaler = 0) => `${tall(andel * 100, desimaler)} %`
@@ -163,6 +163,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       `Klubben starter i 4. divisjon og spiller én kamp hver spilldag. En sesong er ${RUNDER_PER_SESONG} runder; de to beste rykker opp og de to dårligste ned. ` +
       'Laget er så sterkt som snittet av de elleve beste spillerne. Angrep gir flere mål begge veier, forsvar færre. ' +
-      'Spillerne koster lønn hver dag, og opprykk og trofeer gir status.',
+      'Spillerne koster lønn hver dag, og opprykk og trofeer gir status. ' +
+      `Billettene gir publikum ganger billettpris, men stadion tar ikke flere enn det har plass til — fra ${tall(STADIONTRINN[0].plasser)} til ${tall(STADIONTRINN[STADIONTRINN.length - 1].plasser)} plasser. ` +
+      `For å rykke opp må stadion holde kravet i divisjonen over: ${tall(STADIONTRINN[STADIONKRAV[4].trinn].plasser)} plasser og flomlys i Eliteserien. Det du bygger, teller i klubbverdien. ` +
+      'Lagene går igjen fra sesong til sesong: alle fem divisjonene spiller, og de som rykker opp eller ned, møter du igjen.',
   },
 }

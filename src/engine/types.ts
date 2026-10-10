@@ -666,6 +666,24 @@ export interface Lag {
   tapt: number
   maalFor: number
   maalMot: number
+  /** Divisjonen laget kom fra før sesongen (Pakke 66). Mangler for lag som var der fra før. */
+  fra?: number
+}
+
+/** Et lag i en av de andre divisjonene (Pakke 66): bare navn og styrke — de spiller ikke kamp for kamp. */
+export interface Motlag {
+  navn: string
+  styrke: number
+}
+
+/** Stadion (Pakke 66): tribunetrinn, flomlys og VIP-losje. */
+export interface Stadionstand {
+  /** 0–4, se `STADIONTRINN`. */
+  trinn: number
+  flomlys: boolean
+  vip: boolean
+  /** Det du har betalt for utbyggingen. Teller i klubbverdien, så å bygge bare flytter penger. */
+  investert: number
 }
 
 export interface Kamp {
@@ -675,6 +693,8 @@ export interface Kamp {
   hjemme: boolean
   maalFor: number
   maalMot: number
+  /** Publikum på hjemmekamper (Pakke 66). */
+  tilskuere?: number
 }
 
 export interface Trofe {
@@ -708,6 +728,12 @@ export interface Klubb {
   /** Tellere til prestasjonene. */
   seire: number
   opprykk: number
+  stadion: Stadionstand
+  /**
+   * Lagene i hver divisjon, 0–4 (Pakke 66). Din egen divisjon står tom — de
+   * lagene er i `lag`, med tabellen. Navnene går igjen fra sesong til sesong.
+   */
+  serier: Motlag[][]
 }
 
 // ─────────────────────────────────────────────── Startups

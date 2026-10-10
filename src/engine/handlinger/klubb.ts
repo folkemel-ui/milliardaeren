@@ -5,7 +5,7 @@
  */
 
 import { utforKlubbsalg } from '../handel'
-import { KLUBB_LAAST_OPP, KLUBBNAVN, kjopspris, klubbTilSalgs, MAKS_TROPP, MIN_TROPP, salgspris, startKlubb, TAKTIKKER } from '../klubb'
+import { bygg, KLUBB_LAAST_OPP, KLUBBNAVN, kjopspris, klubbTilSalgs, MAKS_TROPP, MIN_TROPP, nesteUtbygging, salgspris, startKlubb, TAKTIKKER, type Stadiondel } from '../klubb'
 import type { Spilltilstand, Taktikk } from '../types'
 import { feil, type Utfall } from './felles'
 
@@ -59,6 +59,19 @@ export function selgSpiller(s: Spilltilstand, id: number): Utfall {
   n.kontanter += salgspris(p)
   n.klubb!.kostpris = (n.klubb!.kostpris ?? 0) - salgspris(p)
   n.klubb!.spillere = n.klubb!.spillere.filter((x) => x.id !== id)
+  return { ok: true, tilstand: n }
+}
+
+/** Bygger ut stadion (Pakke 66): neste tribunetrinn, flomlys eller VIP-losje. */
+export function byggStadion(s: Spilltilstand, del: Stadiondel): Utfall {
+  const k = s.klubb
+  if (!k) return feil('Du eier ingen klubb.')
+  if (del !== 'tribune' && del !== 'flomlys' && del !== 'vip') return feil('Ukjent utbygging.')
+  const neste = nesteUtbygging(k, del)
+  if (!neste) return feil('Det er allerede bygd.')
+  if (s.kontanter < neste.pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  bygg(n, n.klubb!, del, neste.pris)
   return { ok: true, tilstand: n }
 }
 

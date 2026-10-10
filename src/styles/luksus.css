@@ -282,6 +282,30 @@
   width: 96px;
 }
 
+/* Stadion (Pakke 66): utbyggingene som en liste med knapp til høyre. */
+.stadionliste {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stadionliste li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.stadionkrav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .status {
   display: flex;
   flex-direction: column;

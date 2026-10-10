@@ -36,6 +36,8 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | Kunst | `kunst.frø` | hver dag i `kunstVedDagsskifte` |
 | Klubb | `klubb.frø` (fra en hash av navn og dag) | hver dag i `klubbVedDagsskifte` |
 
+Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når klubben kjøpes, og opp- og nedrykket der ved hver sesongslutt. Klubber fra før Pakke 66 fikk divisjonene sine i migreringen 22 → 23 med en egen terning fra en hash av navn og sesong, så `klubb.frø` sto urørt.
+
 ### 3. Hasher (ingen terning)
 
 `tilfeldig(hashTekst(nøkkel))` gir samme tall for samme nøkkel, uten tilstand. Brukes når svaret skal kunne vises på forhånd eller aldri skal påvirke noe annet:

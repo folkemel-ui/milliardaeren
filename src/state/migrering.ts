@@ -23,12 +23,13 @@ import { periodestart } from '../engine/oppgjor'
 import { START_RIVALER } from '../engine/rivaler'
 import { lagKunst } from '../engine/kunst'
 import { nyeKvartal } from '../engine/kvartal'
-import { klubbverdi } from '../engine/klubb'
+import { andreSerier, DIVISJONER, troppsverdi } from '../engine/klubb'
+import { hashTekst, Terning } from '../engine/rng'
 import { lederpris } from '../engine/formler'
 import { markedsrente, OBLIGASJONSLISTE } from '../engine/obligasjoner'
 import { styringsrente } from '../engine/verden'
 import { valutaankerVed } from '../engine/valuta'
-import type { BedriftstypeId, EiendomId, Spilltilstand } from '../engine/types'
+import type { BedriftstypeId, EiendomId, Klubb, Spilltilstand } from '../engine/types'
 
 export type Raatilstand = Record<string, unknown>
 
@@ -226,7 +227,9 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
       maanedstart: nullstill(s.maanedstart),
       aarstart: nullstill(s.aarstart),
     }
-    if (s.klubb) n.klubb = { ...(s.klubb as Raatilstand), kostpris: klubbverdi(s as unknown as Spilltilstand) }
+    // Verdien slik den var da: divisjonen pluss troppen (stadion kom i Pakke 66).
+    const k = s.klubb as Klubb | null
+    if (k) n.klubb = { ...k, kostpris: DIVISJONER[k.divisjon].verdi + troppsverdi(k) }
     return n
   },
   /* 18 → 19: ledere og ansatte er driftskostnader, ikke verdi i bedriften.
@@ -271,6 +274,18 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
      spillet er nå, så ingen eiendom endrer verdi av oppdateringen. Filialene
      og de nye byene trenger ingen migrering. */
   21: (s) => ({ ...s, valutaanker: valutaankerVed(s.sek as number) }),
+  /* 22 → 23: stadion og faste serier (Pakke 66). Klubben får tribunene
+     divisjonen sin fyller, og flomlys fra 1. divisjon der det er krav, gratis:
+     det teller ikke i klubbverdien, så nettoformuen er uendret, og billettene
+     gir minst det de ga før. De andre divisjonene trekkes med en egen terning
+     fra navnet, så klubbens terning står urørt. Årets tabell beholdes. */
+  22: (s) => {
+    const k = s.klubb as Klubb | null | undefined
+    if (!k) return s
+    const ny: Klubb = { ...k, stadion: { trinn: k.divisjon, flomlys: k.divisjon >= 3, vip: false, investert: 0 }, serier: [] }
+    ny.serier = andreSerier(ny, new Terning(hashTekst(`${k.navn}:serier:${k.sesong}`)))
+    return { ...s, klubb: ny }
+  },
 }
 
 export type MigreringsResultat =
