@@ -2,7 +2,8 @@
 
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { ENDRINGER, VERSJON, visNyheter } from '../versjon'
+import { VERSJON, visNyheter } from '../versjon'
+import { ENDRINGER } from '../komponenter/ved-behov/Endringslogg'
 import { lesBevegelse, lesVarsler, redusertBevegelse, settBevegelse, settVarsler, vises } from '../innstillinger'
 import type { Hendelse } from '../../engine/types'
 import type { Nytt } from '../hendelsesstrom'

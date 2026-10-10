@@ -1,7 +1,11 @@
 import { useRef } from 'react'
 import { useFokusfelle } from './useFokusfelle'
-import { ENDRINGER, type Versjonsoppforing } from '../versjon'
+import type { Versjonsoppforing } from '../versjon'
+import { useDel, vedBehov } from '../vedBehov'
 import { Logo } from './Logo'
+
+/** Loggen er tekst nok til å telle i startskriptet, så den hentes når den skal vises (Pakke 70). */
+const endringslogg = vedBehov('endringslogg', () => import('./ved-behov/Endringslogg').then((m) => m.ENDRINGER))
 
 function Oppforing({ v, tittel }: { v: Versjonsoppforing; tittel: 'h1' | 'h2' }) {
   const T = tittel
@@ -24,6 +28,8 @@ function Oppforing({ v, tittel }: { v: Versjonsoppforing; tittel: 'h1' | 'h2' })
 export function Nyheter({ lukk }: { lukk: () => void }) {
   const boks = useRef<HTMLDivElement>(null)
   useFokusfelle(boks, lukk)
+  const ENDRINGER = useDel(endringslogg)
+  if (!ENDRINGER) return null
   return (
     <div className="avis-bakgrunn" onClick={lukk}>
       <div ref={boks} tabIndex={-1} className="velkomst nyheter" role="dialog" aria-modal="true" aria-label={`Nytt i ${ENDRINGER[0].navn}`} onClick={(e) => e.stopPropagation()}>
@@ -41,6 +47,7 @@ export function Nyheter({ lukk }: { lukk: () => void }) {
 export function Endringslogg({ lukk }: { lukk: () => void }) {
   const boks = useRef<HTMLDivElement>(null)
   useFokusfelle(boks, lukk)
+  const ENDRINGER = useDel(endringslogg) ?? []
   return (
     <div className="avis-bakgrunn" onClick={lukk}>
       <div ref={boks} tabIndex={-1} className="velkomst nyheter" role="dialog" aria-modal="true" aria-labelledby="logg-tittel" onClick={(e) => e.stopPropagation()}>

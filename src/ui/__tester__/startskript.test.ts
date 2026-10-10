@@ -21,7 +21,7 @@ import { describe, expect, it } from 'vitest'
  */
 const BUDSJETT_GZIP = 500
 /** Delene som skal ligge utenfor startskriptet og hentes med `import()`. */
-const VED_BEHOV = ['Eiendomstegninger', 'Luksustegninger', 'Norgeskart', 'Verdenskart', 'Galleri']
+const VED_BEHOV = ['Eiendomstegninger', 'Luksustegninger', 'Norgeskart', 'Verdenskart', 'Galleri', 'Endringslogg']
 
 describe('startskriptet (G12)', () => {
   it(`er under ${BUDSJETT_GZIP} kB gzippet, og delene ved behov er egne biter`, async () => {
@@ -49,7 +49,7 @@ describe('startskriptet (G12)', () => {
     // Ingen av dem er dratt inn i startskriptet likevel.
     const startmoduler = Object.keys(start.modules).map((m) => m.replace(/\\/g, '/'))
     for (const del of VED_BEHOV) {
-      const fil = del === 'Galleri' ? '/screens/Galleri.tsx' : `/ved-behov/${del}.tsx`
+      const fil = del === 'Galleri' ? '/screens/Galleri.tsx' : del === 'Endringslogg' ? '/ved-behov/Endringslogg.ts' : `/ved-behov/${del}.tsx`
       expect(startmoduler.some((m) => m.endsWith(fil)), fil).toBe(false)
     }
   }, 120_000)

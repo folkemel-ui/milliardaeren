@@ -356,6 +356,9 @@ session; delete what stops being true.
   a property or luxury drawing or a map must `await lastAlle()` first, or it sees the
   empty placeholder. `startskript.test.ts` (in the heavy group) fails if the start-up
   script passes 500 kB gzipped (250 until G17, when Folke doubled it; 249.9 then, 238 after G12): put a big new thing in a part instead.
+  Pack 70 hit the old 250 the same evening (250.5 kB: Version 2.5's changelog entry plus
+  the pack) and moved the changelog text to `ved-behov/Endringslogg.ts`, loaded by
+  `Nyheter.tsx` through `vedBehov`/`useDel` — about 1.4 kB less in the start script.
   `startApp` in `klikk.ts` waits for parts still loading before `vi.resetModules()`;
   without that, a click test that ends mid-load made the *next* test hang (Pack 65's
   «Verden viser bare eiendom ute» timed out after G12 until this was added).
