@@ -748,7 +748,7 @@ button.merke {
 
 .tilbake {
   align-self: flex-start;
-  min-height: 36px;
+  min-height: 44px;
   color: var(--gull);
   font-weight: var(--vekt-halvfet);
 }

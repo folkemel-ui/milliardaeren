@@ -25,7 +25,8 @@ import { trykkApner } from '../detaljvisning'
 import { useEffect, useState, type ReactNode } from 'react'
 import { aapneTing, FANE_FOR, useTing } from '../detaljvisning'
 import { Tingdetalj } from './Tingdetalj'
-import { Klubbdel } from './Klubb'
+import { Klubbdel, Klubbdetalj } from './Klubb'
+import { aapneKlubbside, useKlubbside } from '../klubbsider'
 import { Kunst } from '../komponenter/Kunst'
 import { Hjemmene } from '../komponenter/Hjemmene'
 import { Seksjon } from '../komponenter/Seksjon'
@@ -50,11 +51,17 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   useEffect(() => () => aapneTing(null), [])
   const egenTing = ting !== null && FANE_FOR[ting.slag] === 'luksus'
   useTilbake(egenTing, () => aapneTing(null))
+  // Klubbens sider (Pakke 77) står i stedet for skjermen, som tingsidene.
+  const klubbside = useKlubbside()
+  useEffect(() => () => aapneKlubbside(null), [])
+  const klubbAapen = klubbside !== null && del === 'klubb' && !!s.klubb
+  useTilbake(klubbAapen, () => aapneKlubbside(null))
   if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
+  if (klubbAapen) return <Klubbdetalj s={s} k={s.klubb!} side={klubbside} tilbake={() => aapneKlubbside(null)} />
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>
-      <Status s={s} />
+      {del === 'klubb' ? <Statusstripe s={s} /> : <Status s={s} />}
       <div className="segment" role="tablist" aria-label="Luksus">
         {LUKSUSDELER.map((d) => (
           <button key={d.id} role="tab" aria-selected={del === d.id} className={del === d.id ? 'aktiv' : ''} onClick={() => luksusdel.sett(d.id)}>
@@ -112,6 +119,39 @@ function TilSalgs({ s, kategori }: { s: Spilltilstand; kategori: LuksusKategori 
         ))}
       </ul>
     </Seksjon>
+  )
+}
+
+/**
+ * Statusen som én linje på Klubb (Pakke 77): klubbens egen topp skal ikke
+ * starte en skjerm ned. Et trykk viser hele kortet.
+ */
+function Statusstripe({ s }: { s: Spilltilstand }) {
+  const [aapen, settAapen] = useState(false)
+  const nivaa = statusnivaa(s)
+  const poeng = statuspoeng(s)
+  const neste = STATUSNIVAAER[nivaa + 1]
+  const fra = STATUSNIVAAER[nivaa].poeng
+  const andel = neste ? (poeng - fra) / (neste.poeng - fra) : 1
+  return (
+    <>
+      <button className="kort statusstripe" aria-expanded={aapen} onClick={() => settAapen(!aapen)}>
+        <span className="status-merke">{nivaa}</span>
+        <span className="statusstripe-midt">
+          <span className="statusstripe-linje">
+            <strong>{STATUSNIVAAER[nivaa].navn}</strong>
+            <span className="dempet liten">{neste ? `${neste.poeng - poeng} poeng til ${neste.navn}` : 'Høyeste nivå'}</span>
+          </span>
+          <span className="milepael-spor">
+            <span className="milepael-fyll" style={{ width: `${andel * 100}%` }} />
+          </span>
+        </span>
+        <span className={`seksjon-pil${aapen ? ' snudd' : ''}`} aria-hidden="true">
+          ›
+        </span>
+      </button>
+      {aapen && <Status s={s} />}
+    </>
   )
 }
 

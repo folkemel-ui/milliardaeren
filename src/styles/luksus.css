@@ -646,3 +646,163 @@
 .trofe-ikon {
   color: var(--gull);
 }
+
+/* ── Klubben som nav (Pakke 77) ─────────────────────────────────────────── */
+
+/* Statusen som én linje på Klubb; et trykk viser hele kortet. */
+.statusstripe {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  text-align: left;
+}
+
+.statusstripe .status-merke {
+  width: 32px;
+  height: 32px;
+  font-size: var(--skrift-3);
+}
+
+.statusstripe-midt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.statusstripe-linje {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.statusstripe-linje .liten {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusstripe .milepael-spor {
+  display: block;
+}
+
+.statusstripe .milepael-fyll {
+  display: block;
+}
+
+.seksjon-pil.snudd {
+  transform: rotate(90deg);
+}
+
+/* Toppen: stadion som en stripe ved siden av våpenet og navnet. */
+.klubbtopp-rad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.klubbtopp-stadion {
+  flex: 0 0 96px;
+  min-height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.klubbtopp-stadion .stadion {
+  width: 96px;
+  margin: 0;
+}
+
+.klubbtopp .klubbtopp-navn {
+  gap: 8px;
+  min-width: 0;
+}
+
+.klubbtopp-navn > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.klubbtopp-tittel {
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-fet);
+  line-height: 1.2;
+}
+
+/* En lenke i kortets hode: «Kamprapport ›», «Hele tabellen ›». */
+.maal-topp:has(.kort-lenke) {
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.kort-lenke {
+  min-height: 44px;
+  color: var(--gull);
+  font-size: var(--skrift-2);
+  font-weight: var(--vekt-halvfet);
+}
+
+.turneringslinjer {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formrekke {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 8px;
+}
+
+.formrekke .brikke {
+  min-width: 28px;
+  height: 28px;
+}
+
+.formkort p {
+  margin: 0;
+}
+
+/* Radene til klubbens sider. */
+.klubbsider {
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.klubbside-rad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 0;
+  text-align: left;
+}
+
+.klubbside-rad + .klubbside-rad {
+  border-top: 1px solid var(--kant);
+}
+
+.klubbside-tekst {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.klubbside-tekst .liten {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 /**
  * Pakke 66 — en klubb som betyr noe: regelen for nye områder (fem faner, høyst
- * fire deler) og stadionkortet i Klubb-delen, der du bygger ut.
+ * fire deler) og stadionkortet i Klubb-delen, der du bygger ut. Siden Pakke 77
+ * står stadion og utbyggingene på siden Anlegg og økonomi, i ett Bygg-kort.
  */
 
 import { afterEach, describe, expect, it } from 'vitest'
@@ -28,14 +29,17 @@ function medKlubb(): Spilltilstand {
   return u.tilstand
 }
 
-async function tilKlubben(s: Spilltilstand): Promise<App> {
+async function tilKlubben(s: Spilltilstand, side = 'Anlegg og økonomi'): Promise<App> {
   const a = await startApp(s)
   await a.fane('Luksus')
   await a.trykk(a.knapp('Klubb', a.rot.querySelector('[aria-label="Luksus"]')!))
+  await a.trykk(a.knapp(side, a.rot.querySelector('.klubbsider')!))
   return a
 }
 
-const stadionkort = (a: App) => [...a.rot.querySelectorAll('.kort')].find((el) => el.querySelector('.kort-tittel')?.textContent === 'Stadion')!
+const kortMed = (a: App, tittel: string) => [...a.rot.querySelectorAll('.kort')].find((el) => el.querySelector('.kort-tittel')?.textContent === tittel)!
+const stadionkort = (a: App) => kortMed(a, 'Stadion')
+const byggkort = (a: App) => kortMed(a, 'Bygg')
 
 describe('plass til nye områder', () => {
   it('fem faner, og høyst fire deler i en fane', () => {
@@ -45,25 +49,27 @@ describe('plass til nye områder', () => {
 })
 
 describe('stadionkortet', () => {
-  it('står rett under klubbtoppen, med plasser, publikum, billettpris og kravet over', async () => {
+  it('står øverst i Anlegg og økonomi, med plasser, publikum og billettpris, og Bygg-kortet med kravet under', async () => {
     app = await tilKlubben(medKlubb())
     const kort = stadionkort(app)
     expect(kort).toBeDefined()
-    expect(app.rot.querySelector('.klubbtopp')!.nextElementSibling).toBe(kort)
+    expect(app.rot.querySelector('.klubbdetalj h1')!.nextElementSibling).toBe(kort)
     expect(kort.textContent).toContain(STADIONTRINN[0].navn)
     expect(kort.textContent).toMatch(/Plasser\s*700/)
-    expect(kort.textContent).toContain('3. divisjon krever')
-    expect(kort.querySelector('.merke.ok')!.textContent).toBe('Holder')
-    // Tre utbygginger, hver med en knapp.
-    expect(kort.querySelectorAll('.stadionliste li')).toHaveLength(3)
-    expect(app.knapper('Bygg', kort)).toHaveLength(3)
+    const bygg = byggkort(app)
+    expect(kort.nextElementSibling).toBe(bygg)
+    expect(bygg.textContent).toContain('3. divisjon krever')
+    expect(bygg.querySelector('.merke.ok')!.textContent).toBe('Holder')
+    // Tre utbygginger og akademiet, hver med en knapp.
+    expect(bygg.querySelectorAll('.stadionliste li')).toHaveLength(4)
+    expect(app.knapper('Bygg', bygg)).toHaveLength(4)
   })
 
   it('et trykk på Bygg gir neste tribune, og pengene går inn i klubben', async () => {
     const s = medKlubb()
     app = await tilKlubben(s)
     const kontanter = s.kontanter
-    await app.trykk(app.knapp('Bygg', stadionkort(app)))
+    await app.trykk(app.knapp('Bygg', byggkort(app)))
     const etter = app.spill()
     expect(etter.klubb!.stadion.trinn).toBe(1)
     expect(etter.klubb!.stadion.investert).toBe(STADIONTRINN[1].pris)
@@ -75,7 +81,9 @@ describe('stadionkortet', () => {
     const s = medKlubb()
     s.klubb!.divisjon = 2
     app = await tilKlubben(s)
-    expect(stadionkort(app).querySelector('.merke.varsel')!.textContent).toBe('Mangler')
+    expect(byggkort(app).querySelector('.merke.varsel')!.textContent).toBe('Mangler')
+    app.lukk()
+    app = await tilKlubben(s, 'Kamper og tabell')
     expect(app.tekst()).toContain('men ikke du, før stadion holder kravet')
   })
 })
