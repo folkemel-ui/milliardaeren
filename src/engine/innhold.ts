@@ -203,8 +203,12 @@ export const BORTE_TAK_SEK = 2 * 60 * 60
 export const RENTE_PER_TIME = 0.08
 /** Du kan låne til gjelden er så stor andel av alt du eier … */
 export const MAKS_BELAANING = 0.5
-/** … og aldri mer enn så mange timer av inntekten din. */
-export const LAANETAK_TIMER = 2
+/**
+ * … og aldri mer enn så mange timer av inntekten din (1 fra Pakke 67: med 2
+ * lønte det seg alltid å låne til taket). Et lån over taket står; du kan bare
+ * ikke låne mer.
+ */
+export const LAANETAK_TIMER = 1
 /** Over denne andelen selger banken investeringene dine … */
 export const MARGINKRAV = 0.75
 /** … og tar over bedrifter til 50 % av det du investerte, hvis det ikke holder. */

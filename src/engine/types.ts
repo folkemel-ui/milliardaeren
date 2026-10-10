@@ -638,6 +638,8 @@ export interface Kunstverk {
 
 export interface Kunstmarked {
   kurser: Record<MaleriId, number>
+  /** Verdien hvert maleri trekkes mot (Pakke 67). Ankret i prisen da spillet fikk den. */
+  verdier: Record<MaleriId, number>
   eide: Partial<Record<MaleriId, Kunstverk>>
   /** Kunstmarkedets egen terning. */
   frø: number

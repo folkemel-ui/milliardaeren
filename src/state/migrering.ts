@@ -286,6 +286,14 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     ny.serier = andreSerier(ny, new Terning(hashTekst(`${k.navn}:serier:${k.sesong}`)))
     return { ...s, klubb: ny }
   },
+  /* 23 → 24: kunsten får en verdi prisen trekkes mot (Pakke 67). Verdien
+     ankres i dagens pris, så ingen maleri endrer verdi av oppdateringen —
+     det er bare veksten videre som blir roligere. */
+  23: (s) => {
+    const kunst = s.kunst as Raatilstand | undefined
+    if (!kunst) return s
+    return { ...s, kunst: { ...kunst, verdier: { ...(kunst.kurser as Raatilstand) } } }
+  },
 }
 
 export type MigreringsResultat =

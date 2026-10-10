@@ -34,7 +34,10 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | System | Frø | Går fremover |
 |---|---|---|
 | Kunst | `kunst.frø` | hver dag i `kunstVedDagsskifte` |
+
 | Klubb | `klubb.frø` (fra en hash av navn og dag) | hver dag i `klubbVedDagsskifte` |
+
+Kunsten (Pakke 67) trekker like mange tall per dag som før — én sjanse per kunstner, to tall per maleri — så kunstterningen går i samme takt; bare regnestykket er nytt (en verdi per maleri som prisen trekkes mot). Verdiene ble ankret i dagens pris i migreringen 23 → 24.
 
 Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når klubben kjøpes, og opp- og nedrykket der ved hver sesongslutt. Klubber fra før Pakke 66 fikk divisjonene sine i migreringen 22 → 23 med en egen terning fra en hash av navn og sesong, så `klubb.frø` sto urørt.
 

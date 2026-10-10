@@ -111,7 +111,7 @@ export function Bank({ s }: { s: Spilltilstand }) {
             <span className="belaaning-strek fare" style={{ left: `${MARGINKRAV * 100}%` }} />
           </div>
           <p className="dempet liten">
-            Du kan låne til gjelden er {tall(MAKS_BELAANING * 100)} % av alt du eier, og høyst {tall(LAANETAK_TIMER)} timer av
+            Du kan låne til gjelden er {tall(MAKS_BELAANING * 100)} % av alt du eier, og høyst {LAANETAK_TIMER === 1 ? 'én time' : `${tall(LAANETAK_TIMER)} timer`} av
             inntekten din — nå {kortKroner(laanetak(s))}. Over {tall(MARGINKRAV * 100)} %
             selger banken investeringene dine — og holder ikke det, tar den over bedrifter.
           </p>

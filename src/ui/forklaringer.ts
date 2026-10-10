@@ -97,7 +97,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   laan: {
     tittel: 'Lån og marginkrav',
     tekst:
-      `Du kan låne til gjelden er ${pst(MAKS_BELAANING)} av alt du eier — og aldri mer enn ${tall(LAANETAK_TIMER)} timer av inntekten din. ` +
+      `Du kan låne til gjelden er ${pst(MAKS_BELAANING)} av alt du eier — og aldri mer enn ${LAANETAK_TIMER === 1 ? 'én time' : `${tall(LAANETAK_TIMER)} timer`} av inntekten din. ` +
       'Renten trekkes hvert sekund og er høy nok til at et lån bare lønner seg for de beste kjøpene. Jo høyere status, jo lavere rente. ' +
       `Den flytende renten følger styringsrenten: ${FASER.lav.styringsrente} % i lavkonjunktur, ${NORMAL_STYRINGSRENTE} % i normale tider og ${FASER.hoy.styringsrente} % i høykonjunktur. ` +
       `Du kan binde den i ${BINDING_DAGER} dager for ${tall(FAST_PAASLAG, 1)} prosentpoeng ekstra. Sparerenten følger styringsrenten den også. ` +
@@ -124,7 +124,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       `Oppstartsselskaper henter penger i runder, fra pre-seed til serie C. Hver runde varer én spilldag, og du kan ta opptil ${pst(DIN_DEL_AV_RUNDEN)} av den. ` +
       `Ved dagsskiftet går selskapet videre, går konkurs eller blir kjøpt opp, og nye penger i hver runde gjør andelen du hadde fra før, ${pst(RUNDEANDEL)} mindre — det du satte inn i selve runden, vannes ikke ut. ` +
-      'Etter serie C børsnoteres det, og du får betalt. Inntrykket av teamet hjelper, men det lyver av og til.',
+      'Etter serie C børsnoteres det, og du får betalt. Teamet er det som teller: et sterkt team lønner seg i snitt, et svakt taper — men inntrykket lyver av og til.',
   },
   eiendom: {
     tittel: 'Eiendom',
@@ -154,7 +154,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   kunst: {
     tittel: 'Kunst',
     tekst:
-      'Maleriene går opp og ned i verdi hver dag, og hver kunstner har sin egen trend. Av og til åpner en utstilling, og alt kunstneren har laget, stiger. ' +
+      'Hvert maleri har en verdi som følger kunstnerens trend, og prisen svinger rundt den og trekkes tilbake mot den. Av og til åpner en utstilling, og alt kunstneren har laget, stiger — men løftet ebber ut. ' +
       `Auksjonshuset tar ${pst(KJOPSSALAER)} når du kjøper og ${pst(SALGSSALAER)} når du selger. ` +
       'Et maleri gir status — dobbelt så mye på museum, men da kan det ikke selges, og det tar en dag å hente det hjem.',
   },

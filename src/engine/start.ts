@@ -13,7 +13,7 @@ import { nyeKvartal } from './kvartal'
 import type { Dagsbilde, Periodestart, Spilltilstand } from './types'
 
 /** Lagringens skjemaversjon. Bumpes når tilstandens form endres — se migrering.ts. */
-export const SPILLVERSJON = 23
+export const SPILLVERSJON = 24
 
 /** Sekunder mellom punktene i formuehistorikken ved start. */
 export const HISTORIKK_INTERVALL = 10

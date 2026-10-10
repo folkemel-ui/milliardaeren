@@ -1,8 +1,9 @@
 /**
- * Kunst: malerier av oppdiktede norske kunstnere. Prisene går opp og ned hver
- * dag, og hver kunstner har sin egen trend — noen er på vei opp, andre går
- * av moten. Av og til åpner en utstilling, og prisene på alt kunstneren har
- * laget, hopper.
+ * Kunst: malerier av oppdiktede norske kunstnere. Hvert maleri har en verdi
+ * som følger kunstnerens trend — noen er på vei opp, andre går av moten — og
+ * en pris som svinger rundt verdien og trekkes tilbake mot den (Pakke 67).
+ * Av og til åpner en utstilling, og prisene på alt kunstneren har laget,
+ * hopper — men løftet ebber ut på samme måte.
  *
  * Et maleri gir status så lenge du eier det, og dobbelt så mye når det henger
  * på museum. Da kan det ikke selges, og det tar en dag å hente det hjem.
@@ -15,15 +16,16 @@ import type { Kunstmarked, MaleriId, Overskrift, Spilltilstand } from './types'
 
 export interface Kunstner {
   navn: string
-  /** Forventet endring per dag. */
+  /** Hvor mye verdien endrer seg per spilldag (tolv i timen). */
   trend: number
 }
 
+/** Per time: Vik +2 %, Lind +1,2 %, Solheim +0,6 %, Aske −0,6 % — som aksjene, ikke mer. */
 export const KUNSTNERE = {
-  vik: { navn: 'Ragnhild Vik', trend: 0.012 },
-  solheim: { navn: 'Einar Solheim', trend: 0.004 },
-  aske: { navn: 'Tor Aske', trend: -0.004 },
-  lind: { navn: 'Maja Lind', trend: 0.008 },
+  vik: { navn: 'Ragnhild Vik', trend: 0.02 / 12 },
+  solheim: { navn: 'Einar Solheim', trend: 0.006 / 12 },
+  aske: { navn: 'Tor Aske', trend: -0.006 / 12 },
+  lind: { navn: 'Maja Lind', trend: 0.012 / 12 },
 } as const satisfies Record<string, Kunstner>
 
 export type KunstnerId = keyof typeof KUNSTNERE
@@ -58,16 +60,25 @@ export const MALERILISTE = Object.keys(MALERIER) as MaleriId[]
 export const KJOPSSALAER = 0.05
 /** … og når du selger. */
 export const SALGSSALAER = 0.1
-/** Daglig svingning rundt trenden. */
-const SVINGNING = 0.05
+/** Daglig svingning i prisen. */
+export const SVINGNING = 0.05
+/** Avstanden mellom pris og verdi halveres på så mange spilldager (30 minutter). */
+export const HALVERING_DAGER = 6
+/** Så mye av avstanden som står igjen etter en dag. */
+export const TILBAKETREKK = 0.5 ** (1 / HALVERING_DAGER)
 /** Sjansen per kunstner per dag for en utstilling som løfter prisene. */
-const UTSTILLING_SJANSE = 0.04
-const UTSTILLING_LOFT = 0.3
+export const UTSTILLING_SJANSE = 0.04
+export const UTSTILLING_LOFT = 0.3
 
 export function lagKunst(frø: number): Kunstmarked {
   const kurser = {} as Record<MaleriId, number>
   for (const id of MALERILISTE) kurser[id] = MALERIER[id].startpris
-  return { kurser, eide: {}, frø: (frø ^ 0x27d4eb2d) | 0 }
+  return { kurser, verdier: { ...kurser }, eide: {}, frø: (frø ^ 0x27d4eb2d) | 0 }
+}
+
+/** Verdien prisen trekkes mot. Uten verdi (før Pakke 67) er den prisen. */
+export function maleriverdi(s: Spilltilstand, id: MaleriId): number {
+  return s.kunst?.verdier?.[id] ?? maleripris(s, id)
 }
 
 export function maleripris(s: Spilltilstand, id: MaleriId): number {
@@ -113,11 +124,16 @@ export function kunstVedDagsskifte(s: Spilltilstand): Overskrift[] {
       })
     }
   }
+  // Verdien følger trenden; avstanden fra verdien til prisen krymper, svinger og løftes av utstillinger.
+  const verdier = (k.verdier ??= { ...k.kurser })
   for (const id of MALERILISTE) {
     const m = MALERIER[id]
     const u = 1 - t.neste()
     const normal = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * t.neste())
-    k.kurser[id] *= Math.exp(KUNSTNERE[m.kunstner].trend + SVINGNING * normal) * (loft[m.kunstner] ?? 1)
+    const verdi = (verdier[id] ?? k.kurser[id]) * Math.exp(KUNSTNERE[m.kunstner].trend)
+    const avvik = Math.log(k.kurser[id] / verdi) * TILBAKETREKK + SVINGNING * normal + Math.log(loft[m.kunstner] ?? 1)
+    verdier[id] = verdi
+    k.kurser[id] = verdi * Math.exp(avvik)
   }
   for (const id of MALERILISTE) {
     const v = k.eide[id]

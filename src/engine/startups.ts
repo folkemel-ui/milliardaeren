@@ -18,12 +18,19 @@ import type { Terning } from './rng'
 import type { Overskrift, Spilltilstand, Startup, Startupstatus } from './types'
 import { kortKroner } from './tall'
 
+/**
+ * Rundene. Veksten i hver runde er satt etter risikoen (Pakke 67): å sette
+ * inn alt det er plass til i hver runde gir i snitt ×1,02 tilbake, om lag
+ * 14 % i timen på pengene som står inne (før: ×3,2) — et sterkt team (lav
+ * risiko) mye mer, et svakt team tap. Siste runde ender på børsen i stedet
+ * for å vokse.
+ */
 export const RUNDER = [
-  { navn: 'Pre-seed', konkurs: 0.3, oppkjop: 0.03 },
-  { navn: 'Seed', konkurs: 0.25, oppkjop: 0.05 },
-  { navn: 'Serie A', konkurs: 0.2, oppkjop: 0.07 },
-  { navn: 'Serie B', konkurs: 0.15, oppkjop: 0.08 },
-  { navn: 'Serie C', konkurs: 0.12, oppkjop: 0.08 },
+  { navn: 'Pre-seed', konkurs: 0.3, oppkjop: 0.03, vekst: [1.43, 2.08] },
+  { navn: 'Seed', konkurs: 0.25, oppkjop: 0.05, vekst: [1.34, 1.93] },
+  { navn: 'Serie A', konkurs: 0.2, oppkjop: 0.07, vekst: [1.24, 1.8] },
+  { navn: 'Serie B', konkurs: 0.15, oppkjop: 0.08, vekst: [1.0, 1.36] },
+  { navn: 'Serie C', konkurs: 0.12, oppkjop: 0.08, vekst: [1, 1] },
 ] as const
 
 /** Startups dukker opp når du har vært så rik. */
@@ -41,15 +48,12 @@ export const DIN_DEL_AV_RUNDEN = 0.5
 /** Verdien ved start, som andel av den høyeste formuen din — så startups alltid betyr noe. */
 const STARTVERDI_ANDEL = 0.02
 const STARTVERDI_MIN = 2_000_000
-/** Hvor mye verdien ganges med når en runde går bra. */
-const VEKST_MIN = 1.5
-const VEKST_MAKS = 3.2
 /** Et oppkjøp betaler verdien ganget med dette. */
-const OPPKJOP_MIN = 1.3
-const OPPKJOP_MAKS = 2.5
+export const OPPKJOP_MIN = 1.1
+export const OPPKJOP_MAKS = 1.5
 /** Børsnoteringen gir verdien ganget med dette. */
-const BORS_MIN = 1.2
-const BORS_MAKS = 2.5
+export const BORS_MIN = 1.0
+export const BORS_MAKS = 1.22
 
 export const INNTRYKK = ['Uprøvd team', 'Lovende team', 'Erfarent team'] as const
 
@@ -193,8 +197,10 @@ export function startupsVedDagsskifte(s: Spilltilstand, t: Terning): Overskrift[
       // Pengene du satte inn i denne runden, ER de nye pengene — bare andelen
       // du hadde fra før, vannes ut av runden.
       const nyAndel = Math.min(st.andel, st.investertIRunde / st.verdi)
+      // Veksten hører til runden som nettopp ble avgjort.
+      const [lav, hoy] = RUNDER[st.runde].vekst
       st.runde += 1
-      st.verdi = pent(st.verdi * t.mellom(VEKST_MIN, VEKST_MAKS))
+      st.verdi = pent(st.verdi * t.mellom(lav, hoy))
       st.andel = (st.andel - nyAndel) * (1 - RUNDEANDEL) + nyAndel
       st.investertIRunde = 0
     }
