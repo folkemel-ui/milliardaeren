@@ -5,7 +5,7 @@
  * kommer tilbake, og ligger i loggen under Innstillinger.
  */
 
-export const VERSJON = '2.0.0'
+export const VERSJON = '2.5.0'
 
 export interface Versjonsoppforing {
   versjon: string
@@ -18,6 +18,22 @@ export interface Versjonsoppforing {
 }
 
 export const ENDRINGER: Versjonsoppforing[] = [
+  {
+    versjon: '2.5.0',
+    navn: '2.5',
+    dato: 'Oktober 2026',
+    ingress: 'Scener som vokser, hjem du kan se — og et spill som passer på telefonen.',
+    punkter: [
+      'Bedriftene vokser mellom trinnene: for hvert femte nivå kommer det noe nytt i scenen — flere kunder i køen, vimpler, ståbord, båter, fly og skiløpere.',
+      'De tre hjemmene har hver sin scene der rommene står slik du har innredet dem, med egen side og et øyeblikk for hvert rom.',
+      'Telefonen på sida har sidemeny og én topplinje i stedet for halve skjermen; fanene åpner der du var, og knappene er lettere å treffe.',
+      'Kunst som holder: maleriene trekkes tilbake mot en verdi som følger kunstnerens trend, i stedet for å løpe av gårde.',
+      'Startups er et spill: veksten følger risikoen i hver runde, et sterkt team lønner seg og et svakt taper.',
+      'Rettferdigere avtaler: fusjoner kan lønne seg fra nivå 100, oppkjøp av en hel rival har gulv, filialer koster det samme når du åpner dem, og Hotellet tjener seg inn like fort som banken.',
+      'Lånetaket er satt ned fra to timers inntekt til én.',
+      'Lettere på telefonen: tiden du er borte regnes tre ganger så fort på det tyngste spillet, og lagringen skjer sjeldnere og i ro.',
+    ],
+  },
   {
     versjon: '2.0.0',
     navn: '2.0',
