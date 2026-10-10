@@ -64,6 +64,15 @@ session; delete what stops being true.
   `pushState`/`popstate` at all, so the phone's back button leaves the game. Folke
   picked nine of twelve; they became the *Navigation* section and Packs 61–63 on the
   game track (Pack 61 done on 10 October).
+- **"Make a new list for the game track"** (after Pack 66) worked as four background agents,
+  each measuring with its own scratchpad scripts and the smart bot: returns per system at
+  10 mill / 1 mrd / 100 mrd / 1 000 mrd, pace and waits between decisions, dead choices and
+  new money leaks (the six patterns in §5), and the technical side. Give each the list of
+  parked and declined ideas so they don't come back as new. Spot-check the biggest claims in
+  the code before passing them on (art ~35 %/h, startups ×1.85 a round, takeovers without
+  a floor all held). Folke picked 15 of 18 (not the index-fund return, offshore, juniors).
+  An agent reported the suite «red» — it had run the tests while three bot runs loaded the
+  machine; two full runs on a quiet machine the same day passed. Check before repeating it.
 - **Always say what comes next** (asked 10 October). The pack plan in `Ideer.md` has a
   **«Next up»** paragraph: the next pack, what it contains in plain words and with real
   numbers, why it is next, and the questions you will ask when it starts. When a pack is
