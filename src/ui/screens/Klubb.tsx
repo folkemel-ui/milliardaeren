@@ -10,7 +10,9 @@ import {
   nesteAkademi,
   POSISJONER,
   potensialspenn,
+  snittvurdering,
   startellever,
+  toppscorere,
   type Lagprofil,
   DIVISJONER,
   divisjonsnavn,
@@ -49,7 +51,7 @@ import {
   type Stadiondel,
 } from '../../engine/klubb'
 import { tidTilNesteRunde } from '../../engine/startups'
-import type { Kamp, Klubb as KlubbT, Posisjon, Spiller, Spilltilstand, Taktikk } from '../../engine/types'
+import type { Kamp, Klubb as KlubbT, Posisjon, Sesongoppsummering, Spiller, Spilltilstand, Taktikk } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kompakt, kortKroner, tall, varighet } from '../format'
 import { Ikon } from '../komponenter/Ikoner'
@@ -201,6 +203,8 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         </div>
       )}
 
+      {k.kamper.length > 0 && <Kamprapport kamp={k.kamper[k.kamper.length - 1]} k={k} />}
+
       {k.kamper.length > 0 && (
         <div className="kort">
           <h2 className="kort-tittel">Siste kamper</h2>
@@ -269,6 +273,8 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         )}
       </div>
 
+      <Toppscorerkort k={k} />
+
       <div className="kort">
         <div className="maal-topp">
           <h2 className="kort-tittel">Troppen</h2>
@@ -290,6 +296,7 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
                   {p.alder} år · A {p.angrep} · F {p.forsvar} · verdi {kompakt(spillerverdi(p))}
                   {plass === undefined ? ' · innbytter' : plass !== p.posisjon ? ` · spiller ${POSISJONER[plass].navn.toLowerCase()}` : ''}
                   <Potensial p={p} />
+                  <Sesongtall p={p} />
                 </span>
               </span>
               <Bekreftknapp
@@ -311,6 +318,8 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
       </div>
 
       <Akademikort s={s} k={k} />
+
+      {(k.sesonger?.length ?? 0) > 0 && <Sesongkort k={k} />}
 
       <div className="kort">
         <div className="maal-topp">
@@ -497,6 +506,184 @@ function Akademikort({ s, k }: { s: Spilltilstand; k: KlubbT }) {
         </li>
       </ul>
     </div>
+  )
+}
+
+/**
+ * Kamprapporten (Pakke 72) for den siste kampen: målene med minutt, scorer og
+ * assist, banens beste og de elleves vurderinger. Gamle kamper uten rapport
+ * viser bare resultatet i lista under.
+ */
+function Kamprapport({ kamp, k }: { kamp: Kamp; k: KlubbT }) {
+  if (!kamp.maal || !kamp.vurderinger) return null
+  const beste = kamp.vurderinger.find((v) => v.id === kamp.beste)
+  const hjemmelag = kamp.hjemme ? k.navn : kamp.motstander
+  const bortelag = kamp.hjemme ? kamp.motstander : k.navn
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Kamprapport</h2>
+        <span className="dempet liten">
+          runde {kamp.runde + 1} · {kamp.hjemme ? 'hjemme' : 'borte'}
+        </span>
+      </div>
+      <p className="rapport-resultat">
+        <strong>
+          {hjemmelag} {kamp.hjemme ? kamp.maalFor : kamp.maalMot}–{kamp.hjemme ? kamp.maalMot : kamp.maalFor} {bortelag}
+        </strong>
+      </p>
+      {kamp.maal.length > 0 ? (
+        <ul className="rapport-maal">
+          {kamp.maal.map((m, i) => (
+            <li key={i} className={m.mot ? 'mot' : 'egne'}>
+              <span className="rapport-minutt">{m.minutt}'</span>
+              <span>
+                {m.navn}
+                {m.assist && <span className="dempet"> ({m.assist})</span>}
+              </span>
+              <span className="dempet liten">{m.mot ? kamp.motstander : k.navn}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="dempet liten">Ingen mål. En kamp for de tålmodige.</p>
+      )}
+      {beste && (
+        <p className="liten">
+          Banens beste: <strong>{beste.navn}</strong> ({tall(beste.vurdering, 1)})
+        </p>
+      )}
+      <ul className="rapport-vurderinger">
+        {kamp.vurderinger.map((v) => (
+          <li key={v.id} className={v.id === kamp.beste ? 'beste' : ''}>
+            <span className="etikett">{POSISJONER[v.plass].kort}</span>
+            <span>{v.navn}</span>
+            <strong>{tall(v.vurdering, 1)}</strong>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/** Divisjonens toppscorere denne sesongen — dine og motstandernes (Pakke 72). */
+function Toppscorerkort({ k }: { k: KlubbT }) {
+  const liste = toppscorere(k)
+  if (liste.length === 0) return null
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Toppscorere</h2>
+        <span className="dempet liten">{DIVISJONER[k.divisjon].navn} · sesong {k.sesong}</span>
+      </div>
+      <ol className="uka-di-liste">
+        {liste.map((p, i) => (
+          <li key={p.navn} className={p.deg ? 'deg' : ''}>
+            <span className="uka-di-plass">{i + 1}.</span>
+            <span>{p.navn}</span>
+            <span>{p.maal} mål</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+const UTFALL: Record<Sesongoppsummering['utfall'], string> = { opp: 'Opprykk', ned: 'Nedrykk', nektet: 'Nektet opprykk', samme: 'Samme divisjon' }
+
+/** Sesongen som var, og de før (Pakke 72): plassering, prisene, pengene og hva som skjedde. */
+function Sesongkort({ k }: { k: KlubbT }) {
+  const [alle, settAlle] = useState(false)
+  const sesonger = [...(k.sesonger ?? [])].reverse()
+  const siste = sesonger[0]
+  const netto = siste.billetter + siste.sponsor - siste.lonn
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Sesongen som var</h2>
+        <span className="dempet liten">
+          sesong {siste.sesong} · {DIVISJONER[siste.divisjon].navn}
+        </span>
+      </div>
+      <div className="klubbtall">
+        <div>
+          <span className="etikett">Plass</span>
+          <strong>
+            {siste.plass} / {ANTALL_LAG}
+          </strong>
+        </div>
+        <div>
+          <span className="etikett">Poeng</span>
+          <strong>{siste.poeng}</strong>
+        </div>
+        <div>
+          <span className="etikett">Mål</span>
+          <strong>
+            {siste.maalFor}–{siste.maalMot}
+          </strong>
+        </div>
+      </div>
+      <dl className="oppgjor-tall sesong-tall">
+        <div>
+          <dt>Toppscorer</dt>
+          <dd>{siste.toppscorer ? `${siste.toppscorer.navn} · ${siste.toppscorer.maal} mål` : '—'}</dd>
+        </div>
+        <div>
+          <dt>Årets spiller</dt>
+          <dd>{siste.aaretsSpiller ? `${siste.aaretsSpiller.navn} · snitt ${tall(siste.aaretsSpiller.snitt, 1)}` : '—'}</dd>
+        </div>
+        <div>
+          <dt>Billetter og sponsor</dt>
+          <dd className="pluss">{kortKroner(siste.billetter + siste.sponsor)}</dd>
+        </div>
+        <div>
+          <dt>Lønn</dt>
+          <dd className="minus">−{kortKroner(siste.lonn)}</dd>
+        </div>
+        <div>
+          <dt>Netto</dt>
+          <dd className={netto >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(netto)}</dd>
+        </div>
+      </dl>
+      <p className="liten">
+        <span className={`merke ${siste.utfall === 'opp' ? 'gull' : siste.utfall === 'ned' || siste.utfall === 'nektet' ? 'varsel' : 'info'}`}>{UTFALL[siste.utfall]}</span>{' '}
+        {siste.trofe && `${siste.trofe}. `}
+        {siste.neste < DIVISJONER.length - 1 && `${DIVISJONER[siste.neste + 1].navn} krever ${kravtekst(siste.neste + 1)}.`}
+      </p>
+      {sesonger.length > 1 && (
+        <>
+          {alle && (
+            <ul className="sesongliste">
+              {sesonger.slice(1).map((o) => (
+                <li key={o.sesong}>
+                  <span className="dempet liten">Sesong {o.sesong}</span>
+                  <span>
+                    {DIVISJONER[o.divisjon].navn} · nr. {o.plass}
+                  </span>
+                  <span className="dempet liten">{o.trofe ?? UTFALL[o.utfall]}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <button className="knapp liten-knapp" onClick={() => settAlle(!alle)}>
+            {alle ? 'Skjul tidligere sesonger' : `Vis ${sesonger.length - 1} tidligere ${sesonger.length === 2 ? 'sesong' : 'sesonger'}`}
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
+/** «3 mål · 1 assist · snitt 7,1» denne sesongen (Pakke 72). */
+function Sesongtall({ p }: { p: Spiller }) {
+  const st = p.sesong
+  const snitt = snittvurdering(st)
+  if (!st || snitt === null) return null
+  return (
+    <>
+      {' · '}
+      {st.maal} mål · {st.assist} assist · snitt {tall(snitt, 1)}
+    </>
   )
 }
 

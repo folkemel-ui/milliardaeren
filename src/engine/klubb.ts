@@ -21,7 +21,7 @@ import { leggTilHendelse, meldBankenDekket } from './bank'
 import { dagnummer } from './kalender'
 import { hashTekst, Terning } from './rng'
 import { tall } from './tall'
-import type { Akademi, Formasjon, Kamp, Klubb, Lag, Motlag, Overskrift, Posisjon, Spiller, Spilltilstand, Taktikk } from './types'
+import type { Akademi, Formasjon, Kamp, Klubb, Lag, Maalhendelse, Motlag, Overskrift, Posisjon, Sesongoppsummering, Spiller, Spillerstatistikk, Spillervurdering, Spilltilstand, Taktikk } from './types'
 
 /**
  * `publikum` er hvor mange som vil se en hjemmekamp når laget går midt på
@@ -640,6 +640,115 @@ export function forventetMaal(hjemme: number | Lagprofil, borte: number | Lagpro
   ]
 }
 
+// ─────────────────────────────────────────────── Kamprapporten (Pakke 72)
+
+/** Så ofte en plass scorer, alt annet likt: en spiss fire ganger så ofte som en back, keeperen aldri. */
+const SCORERVEKT: Record<Posisjon, number> = { keeper: 0, forsvar: 1, midtbane: 2, angrep: 4 }
+/** Hvor mange sesonger som huskes. */
+export const SESONGER_HUSKET = 20
+/** Årets spiller må ha spilt så mange kamper. */
+export const KAMPER_FOR_PRIS = 5
+
+const tomStatistikk = (): Spillerstatistikk => ({ kamper: 0, maal: 0, assist: 0, sum: 0 })
+
+/** Snittvurderingen, eller null uten kamper. */
+export function snittvurdering(st: Spillerstatistikk | undefined): number | null {
+  return st && st.kamper > 0 ? Math.round((st.sum / st.kamper) * 10) / 10 : null
+}
+
+/** Trekker en spiller blant elleveren, veid etter plass og angrep; `ikke` holdes utenfor (assisten er en annen). */
+function trekkScorer(t: Terning, elleve: { spiller: Spiller; plass: Posisjon }[], ikke?: number): Spiller | null {
+  let sum = 0
+  const vekter = elleve.map(({ spiller, plass }) => {
+    const v = spiller.id === ikke ? 0 : SCORERVEKT[plass] * spiller.angrep
+    sum += v
+    return v
+  })
+  if (sum <= 0) return null
+  let x = t.neste() * sum
+  for (let i = 0; i < elleve.length; i++) {
+    x -= vekter[i]
+    if (x < 0) return elleve[i].spiller
+  }
+  return elleve[elleve.length - 1].spiller
+}
+
+/**
+ * Rapporten for din kamp, trukket ETTER resultatet med en egen terning fra
+ * klubben, sesongen og runden — så tabellen og klubbens terning står som
+ * før Pakke 72, og den samme kampen leser likt hver gang. Hvert mål får et
+ * minutt og en scorer (dine fra startelleveren, veid etter plass og angrep,
+ * med en assist fra en annen; motstanderens et navn fra listene), og hver
+ * av de elleve en vurdering: angrep og midtbane fra hva laget scoret mot
+ * forventningen, forsvar og keeper fra hva det slapp inn, pluss mål og
+ * assist og rent bur. Muterer spillernes statistikk.
+ */
+function kamprapport(k: Klubb, kamp: Kamp, forventetFor: number, forventetMot: number): void {
+  const t = new Terning(hashTekst(`${k.navn}:${kamp.sesong}:${kamp.runde}:rapport`))
+  const elleve = startellever(k).filter((p): p is { plass: Posisjon; spiller: Spiller } => p.spiller !== null)
+  const hendelser: Maalhendelse[] = []
+  const scoret = new Map<number, number>()
+  const assistert = new Map<number, number>()
+  for (let i = 0; i < kamp.maalFor; i++) {
+    const scorer = trekkScorer(t, elleve)
+    const assist = scorer && t.sjanse(0.7) ? trekkScorer(t, elleve, scorer.id) : null
+    hendelser.push({ minutt: t.heltall(1, 90), navn: scorer ? scorer.navn : 'Selvmål', id: scorer?.id, assist: assist?.navn, mot: false })
+    if (scorer) scoret.set(scorer.id, (scoret.get(scorer.id) ?? 0) + 1)
+    if (assist) assistert.set(assist.id, (assistert.get(assist.id) ?? 0) + 1)
+  }
+  for (let i = 0; i < kamp.maalMot; i++) {
+    const navn = t.velg(ETTERNAVN)
+    hendelser.push({ minutt: t.heltall(1, 90), navn, mot: true })
+    const nokkel = `${navn} (${kamp.motstander})`
+    k.toppscorere = { ...(k.toppscorere ?? {}), [nokkel]: ((k.toppscorere ?? {})[nokkel] ?? 0) + 1 }
+  }
+  hendelser.sort((a, b) => a.minutt - b.minutt)
+  kamp.maal = hendelser
+  const vurderinger: Spillervurdering[] = []
+  for (const { spiller, plass } of elleve) {
+    const fremme = plass === 'angrep' ? 1 : plass === 'midtbane' ? 0.5 : 0
+    const basis = 6 + fremme * (kamp.maalFor - forventetFor) * 0.6 + (1 - fremme) * (forventetMot - kamp.maalMot) * 0.6
+    let v = basis + (scoret.get(spiller.id) ?? 0) + 0.5 * (assistert.get(spiller.id) ?? 0) + (fremme === 0 && kamp.maalMot === 0 ? 0.5 : 0) + t.mellom(-0.4, 0.4)
+    v = Math.round(Math.max(4, Math.min(10, v)) * 10) / 10
+    vurderinger.push({ id: spiller.id, navn: spiller.navn, plass, vurdering: v })
+    for (const st of [(spiller.sesong ??= tomStatistikk()), (spiller.karriere ??= tomStatistikk())]) {
+      st.kamper++
+      st.maal += scoret.get(spiller.id) ?? 0
+      st.assist += assistert.get(spiller.id) ?? 0
+      st.sum += v
+    }
+  }
+  kamp.vurderinger = vurderinger
+  kamp.beste = vurderinger.reduce((b, v) => (v.vurdering > b.vurdering ? v : b), vurderinger[0])?.id
+}
+
+/** «Hansen (12), Berg (77)» — dine scorere, til avisa. */
+export function scorertekst(kamp: Kamp): string {
+  const egne = (kamp.maal ?? []).filter((m) => !m.mot)
+  return egne.map((m) => `${m.navn.split(' ').at(-1)} (${m.minutt})`).join(', ')
+}
+
+/** Divisjonens toppscorere denne sesongen: dine spillere og motstandernes, de fem beste. */
+export function toppscorere(k: Klubb, antall = 5): { navn: string; maal: number; deg: boolean }[] {
+  const liste = k.spillere.filter((p) => (p.sesong?.maal ?? 0) > 0).map((p) => ({ navn: p.navn, maal: p.sesong!.maal, deg: true }))
+  for (const [navn, maal] of Object.entries(k.toppscorere ?? {})) liste.push({ navn, maal, deg: false })
+  return liste.sort((a, b) => b.maal - a.maal || a.navn.localeCompare(b.navn)).slice(0, antall)
+}
+
+/** Sesongens toppscorer i troppen og årets spiller (beste snitt med minst KAMPER_FOR_PRIS kamper). */
+export function sesongpriser(k: Klubb): { toppscorer: Sesongoppsummering['toppscorer']; aaretsSpiller: Sesongoppsummering['aaretsSpiller'] } {
+  let toppscorer: Sesongoppsummering['toppscorer'] = null
+  let aaretsSpiller: Sesongoppsummering['aaretsSpiller'] = null
+  for (const p of k.spillere) {
+    const st = p.sesong
+    if (!st) continue
+    if (st.maal > 0 && (!toppscorer || st.maal > toppscorer.maal)) toppscorer = { navn: p.navn, maal: st.maal }
+    const snitt = snittvurdering(st)
+    if (snitt !== null && st.kamper >= KAMPER_FOR_PRIS && (!aaretsSpiller || snitt > aaretsSpiller.snitt)) aaretsSpiller = { navn: p.navn, snitt }
+  }
+  return { toppscorer, aaretsSpiller }
+}
+
 function registrer(l: Lag, egne: number, mot: number): void {
   l.spilt++
   l.maalFor += egne
@@ -674,6 +783,8 @@ function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
     if (h === 0 || b === 0) {
       const hjemme = h === 0
       din = { sesong: k.sesong, runde: k.runde, motstander: k.lag[hjemme ? b : h].navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh }
+      // Rapporten trekkes etter resultatet, med sin egen terning (Pakke 72).
+      kamprapport(k, din, hjemme ? xh : xb, hjemme ? xb : xh)
     }
   }
   k.runde++
@@ -700,14 +811,37 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
   const fra = k.divisjon
   const opp = rykkerOpp(k)
   const sperret = plass <= OPPRYKK && fra < DIVISJONER.length - 1 && !opp.includes(0)
+  // Sesongen som var (Pakke 72): skrives før tabellen byttes ut.
+  const meg = k.lag[0]
+  const priser = sesongpriser(k)
+  const oppsummering: Sesongoppsummering = {
+    sesong: k.sesong,
+    divisjon: fra,
+    plass,
+    poeng: poeng(meg),
+    maalFor: meg.maalFor,
+    maalMot: meg.maalMot,
+    toppscorer: priser.toppscorer,
+    aaretsSpiller: priser.aaretsSpiller,
+    billetter: k.billetter,
+    sponsor: k.sponsor,
+    lonn: k.lonn,
+    utfall: 'samme',
+    neste: fra,
+  }
+  if (priser.aaretsSpiller) saker.push({ type: 'deg', tittel: `${priser.aaretsSpiller.navn} er årets spiller i ${k.navn}`, tekst: `Snitt ${tall(priser.aaretsSpiller.snitt, 1)} over sesongen.${priser.toppscorer ? ` Toppscorer: ${priser.toppscorer.navn} med ${priser.toppscorer.maal} mål.` : ''}` })
   if (plass === 1) {
     const navn = k.divisjon === DIVISJONER.length - 1 ? 'Seriemester i Eliteserien' : `Vinner av ${div.navn}`
+    oppsummering.trofe = navn
     s.trofeer.push({ navn, sesong: k.sesong, klubb: k.navn })
     saker.push({ type: 'deg', tittel: `${k.navn} vinner ${div.navn}!`, tekst: 'Pokalen ble løftet foran fulle tribuner. Eieren spanderte kake på hele byen.' })
     leggTilHendelse(s, { tittel: 'Trofé', tekst: `${k.navn} vant ${div.navn}.`, alvor: 'info' })
   }
   const iSteden = opp.map((i) => k.lag[i].navn).filter((n) => n !== k.navn)
   const kom = skiftSerier(k, t)
+  oppsummering.utfall = k.divisjon > fra ? 'opp' : k.divisjon < fra ? 'ned' : sperret ? 'nektet' : 'samme'
+  oppsummering.neste = k.divisjon
+  k.sesonger = [...(k.sesonger ?? []), oppsummering].slice(-SESONGER_HUSKET)
   if (k.divisjon > fra) {
     k.opprykk++
     saker.push({ type: 'deg', tittel: `OPPRYKK: ${k.navn} til ${DIVISJONER[k.divisjon].navn}`, tekst: `Nummer ${plass} på tabellen holdt. Neste sesong venter tøffere motstand.` })
@@ -758,6 +892,9 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
   k.billetter = 0
   k.lonn = 0
   k.sponsor = 0
+  // Sesongtallene nullstilles; karrieren står (Pakke 72).
+  for (const p of k.spillere) delete p.sesong
+  delete k.toppscorere
   betalSponsor(s, k)
   return saker
 }
@@ -799,10 +936,12 @@ export function klubbVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const saker: Overskrift[] = []
   const kamp = spillRunde(s, k, t)
   const tekst = { seier: 'Tre nye poeng', uavgjort: 'Ett poeng', tap: 'Ingen poeng' }[resultat(kamp)]
+  const scorere = scorertekst(kamp)
+  const beste = kamp.vurderinger?.find((v) => v.id === kamp.beste)
   saker.push({
     type: 'deg',
     tittel: kamp.hjemme ? `${k.navn} ${kamp.maalFor}–${kamp.maalMot} ${kamp.motstander}` : `${kamp.motstander} ${kamp.maalMot}–${kamp.maalFor} ${k.navn}`,
-    tekst: `${tekst} i ${DIVISJONER[k.divisjon].navn}. Laget ligger på ${plassering(k)}. plass.`,
+    tekst: `${tekst} i ${DIVISJONER[k.divisjon].navn}.${scorere ? ` Mål: ${scorere}.` : ''}${beste ? ` Banens beste: ${beste.navn} (${tall(beste.vurdering, 1)}).` : ''} Laget ligger på ${plassering(k)}. plass.`,
   })
   const lonn = lonnPerDag(k)
   betal(s, lonn)

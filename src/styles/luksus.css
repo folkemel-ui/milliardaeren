@@ -287,6 +287,67 @@
   margin-right: 2px;
 }
 
+/* Kamprapporten og sesongen som var (Pakke 72). */
+.rapport-resultat {
+  margin: 8px 0 4px;
+  font-size: var(--skrift-4);
+}
+
+.rapport-maal,
+.rapport-vurderinger,
+.sesongliste {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rapport-maal li,
+.sesongliste li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--skrift-2);
+}
+
+.rapport-maal li.mot {
+  color: var(--tekst-dempet);
+}
+
+.rapport-minutt {
+  min-width: 28px;
+  font-weight: var(--vekt-fet);
+}
+
+.rapport-vurderinger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+}
+
+.rapport-vurderinger li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--skrift-2);
+}
+
+.rapport-vurderinger li.beste strong {
+  color: var(--gull);
+}
+
+.sesong-tall {
+  margin-top: 8px;
+}
+
+.liten-knapp {
+  margin-top: 10px;
+}
+
 /* Stadion (Pakke 66): utbyggingene som en liste med knapp til høyre. */
 .stadionliste {
   list-style: none;

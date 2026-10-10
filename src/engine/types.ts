@@ -673,6 +673,9 @@ export interface Spiller {
   forsvar: number
   /** Juniorer fra akademiet (Pakke 71): taket de vokser mot til de er 23. Spilleren ser bare et spenn. */
   potensial?: number
+  /** Denne sesongen og karrieren (Pakke 72). Mangler til første kamp. */
+  sesong?: Spillerstatistikk
+  karriere?: Spillerstatistikk
 }
 
 /** Akademiet (Pakke 71): trinnet og det du har satt inn. */
@@ -712,6 +715,27 @@ export interface Stadionstand {
   investert: number
 }
 
+/** Et mål i kamprapporten (Pakke 72). */
+export interface Maalhendelse {
+  minutt: number
+  /** Scorerens navn — etternavnet for motstanderens spillere, som ikke finnes. */
+  navn: string
+  /** Din spiller, når målet er ditt. */
+  id?: number
+  assist?: string
+  /** true når motstanderen scoret. */
+  mot: boolean
+}
+
+/** En spillers kamp i rapporten (Pakke 72). */
+export interface Spillervurdering {
+  id: number
+  navn: string
+  plass: Posisjon
+  /** 4,0–10,0. */
+  vurdering: number
+}
+
 export interface Kamp {
   sesong: number
   runde: number
@@ -721,6 +745,39 @@ export interface Kamp {
   maalMot: number
   /** Publikum på hjemmekamper (Pakke 66). */
   tilskuere?: number
+  /** Kamprapporten (Pakke 72): målene i rekkefølge, startelleverens vurderinger og banens beste. Mangler i gamle kamper. */
+  maal?: Maalhendelse[]
+  vurderinger?: Spillervurdering[]
+  beste?: number
+}
+
+/** En spillers tall denne sesongen og gjennom karrieren (Pakke 72). */
+export interface Spillerstatistikk {
+  kamper: number
+  maal: number
+  assist: number
+  /** Summen av vurderingene; snittet er sum / kamper. */
+  sum: number
+}
+
+/** Sesongen som var (Pakke 72), skrevet ved sesongslutt. */
+export interface Sesongoppsummering {
+  sesong: number
+  divisjon: number
+  plass: number
+  poeng: number
+  maalFor: number
+  maalMot: number
+  toppscorer: { navn: string; maal: number } | null
+  aaretsSpiller: { navn: string; snitt: number } | null
+  billetter: number
+  sponsor: number
+  lonn: number
+  /** Hva som skjedde: opp, ned, nektet opprykk eller ingenting. */
+  utfall: 'opp' | 'ned' | 'nektet' | 'samme'
+  /** Divisjonen neste sesong spilles i. */
+  neste: number
+  trofe?: string
 }
 
 export interface Trofe {
@@ -743,6 +800,10 @@ export interface Klubb {
   taktikk: Taktikk
   formasjon: Formasjon
   akademi: Akademi
+  /** Motstandernes scorere denne sesongen, «Berg (Skogly FK)» → mål (Pakke 72). Mangler i gamle lagringer. */
+  toppscorere?: Record<string, number>
+  /** Sesongene som var, nyeste sist, høyst 20 (Pakke 72). */
+  sesonger?: Sesongoppsummering[]
   /** Klubbens egen terning, så en klubb ikke endrer resten av spillet. */
   frø: number
   nesteSpillerId: number
