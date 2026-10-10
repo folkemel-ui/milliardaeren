@@ -1,6 +1,6 @@
 import { memo, type ReactNode } from 'react'
 import { aapneTing, type Ting } from '../detaljvisning'
-import { FULL_RAMME, Illustrasjon, trinnFor } from './Illustrasjoner'
+import { FULL_RAMME, Illustrasjon, stegFor, trinnFor } from './Illustrasjoner'
 import { Bredt, IScenen } from './Tegnestil'
 
 /**
@@ -90,7 +90,7 @@ export const Scene = memo(function Scene({ type, nivaa, forbedringer = 0 }: { ty
     <div className={full ? 'scene full' : 'scene'} aria-hidden="true">
       <IScenen.Provider value={true}>
         <Bredt.Provider value={true}>
-          <Illustrasjon id={type} størrelse={172} trinn={trinnFor(nivaa)} forbedringer={forbedringer} />
+          <Illustrasjon id={type} størrelse={172} trinn={trinnFor(nivaa)} forbedringer={forbedringer} steg={stegFor(nivaa)} />
         </Bredt.Provider>
       </IScenen.Provider>
     </div>

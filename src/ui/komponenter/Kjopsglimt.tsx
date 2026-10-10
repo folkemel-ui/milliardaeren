@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
-import type { MaleriId } from '../../engine/types'
+import { HJEM, ROM, type HjemId } from '../../engine/hjemmene'
+import type { MaleriId, RomId } from '../../engine/types'
 import type { Kjopsart } from '../hendelsesstrom'
 import { useNy } from '../nymerker'
 import { avsluttKjop, useKjop, type Kjopsglimt as Glimt } from '../varsler'
+import { Hjemtegning } from './Hjemscene'
 import { FULL_RAMME, Illustrasjon } from './Illustrasjoner'
 import { Klubbvaapen } from './Klubbvaapen'
 import { Maleribilde } from './Malerier'
@@ -18,6 +20,7 @@ const OVERSKRIFT: Record<Kjopsart, string> = {
   klubb: 'Ny klubb',
   startup: 'Ny eierandel',
   fusjon: 'Fusjon',
+  hjem: 'Innredet',
 }
 
 function overskrift(k: Glimt): string {
@@ -28,7 +31,18 @@ function overskrift(k: Glimt): string {
  * Bildet i kjøpsøyeblikket (G11): tegningen for det meste, maleriet i rammen
  * sin, klubbens våpen og startupens logo.
  */
+/** «hjem:rom:kode» fra `nytt()`: hjemmet, rommet og hvordan hjemmet står (`romkode`). */
+function hjemFraId(id: string): { hjem: HjemId; rom: RomId; kode: number } {
+  const [hjem, rom, kode] = id.split(':')
+  return { hjem: hjem as HjemId, rom: rom as RomId, kode: Number(kode) }
+}
+
 function Kjopsbilde({ k }: { k: Glimt }) {
+  if (k.art === 'hjem') {
+    // Hjemmet slik det ble, i hele flisa: midten av scenen, kant i kant (som en bedrift i full ramme).
+    const { hjem, kode } = hjemFraId(k.id)
+    return <Hjemtegning id={hjem} rom={kode} px={174} />
+  }
   if (k.art === 'maleri') return <Maleribilde id={k.id as MaleriId} størrelse={132} />
   if (k.art === 'klubb') return <Klubbvaapen navn={k.id} størrelse={124} />
   if (k.art === 'startup') return <StartupLogo navn={k.id} størrelse={104} />
@@ -55,6 +69,8 @@ export function Kjopsglimt() {
   }, [k])
 
   if (!k) return null
+  // Et rom sier hvilket hjem det er i, under navnet på trinnet.
+  const under = k.under ?? (k.art === 'hjem' ? `${HJEM[hjemFraId(k.id).hjem].navn} · ${ROM[hjemFraId(k.id).rom].navn}` : undefined)
   return (
     <div key={k.nr} className={k.art === 'fusjon' ? 'kjopsglimt fusjon' : 'kjopsglimt'} role="status">
       <div className="kjopsglimt-glod" aria-hidden="true" />
@@ -70,7 +86,7 @@ export function Kjopsglimt() {
       </div>
       <span className="kjopsglimt-overskrift">{overskrift(k)}</span>
       <strong className="kjopsglimt-navn">{k.navn}</strong>
-      {k.under && <span className="kjopsglimt-under">{k.under}</span>}
+      {under && <span className="kjopsglimt-under">{under}</span>}
     </div>
   )
 }

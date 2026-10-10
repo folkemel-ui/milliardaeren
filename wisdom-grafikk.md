@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12–G15 (10–11 October 2026). G16–G22 are planned in `Ideer.md`: Scenes that
-grow (G16), the full frame for properties and luxury in groups (G17–G21), then the
-seasons (G22).
+2026), G12–G15 (10–11 October 2026), G16 (11 October 2026). G17–G23 are planned in
+`Ideer.md`: the full frame for properties and luxury in groups (G17–G21), the seasons
+(G22) and the club in pictures (G23).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -173,6 +173,12 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   out of the portfolio on purpose), fix what is clearly broken and offer the other in
   one line instead of guessing. **Commit times are not push times**: to know what was
   live when the phone broke, the order of the pushes matters, not `%ad`.
+- **G16: «Start on G16» after the three questions meant "your recommendations".** I had
+  asked step frequency, one scene per home or per room, and a buy moment for the homes in
+  plain text; Folke answered only "Another session is working on pack 68. Start on G16." I
+  took the recommended option on all three (every 5th level to level 150, one scene per home
+  with its three rooms in it, a buy moment per furnished room) and said so in the report with
+  the offer to change.
 - **After each pack, Folke asks what you learned.** Update this file before the pack
   commit, then re-read it once for anything missing. That's cheaper than a second round.
 - Report each item as what it looks like now. Say plainly what's still mixed or still
@@ -1029,7 +1035,73 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   a node one-liner if it happens. And `node -e` through Bash ate the backslashes of a
   test regex once more — test regexes go through the Edit tool.
 
-## 7. Notes for later (G1–G13 done; G14–G22 planned in `Ideer.md`)
+## 6d. Scenes that grow and the homes (G16)
+
+- **The steps are an overlay in a part of their own.** `stegFor(nivaa)` (Illustrasjoner) gives
+  0–10: one step per five levels *inside* a growth stage (stage 0: 0–4, stage 1: 0–4, stage 2:
+  0–9, stage 3: 0–10, capped at level 150). `Scene` passes it as `steg`; `Illustrasjon` hands it
+  to `bedriftNy(id, b)`, which lays `<Trinnsteg>` after the drawing *inside the same Lerret*, so
+  the night layer, haze and the frame treat it like the rest. `Trinnsteg` reads
+  `ved-behov/Trinnsteg.tsx` (`TRINNSTEG`, 19 kB raw, 5 gzipped) only when `IScenen` is true, so
+  cards, lists, Avisa and the buy moment never load or draw it (`grafikkG16.test.ts` checks that
+  `steg` outside the scene changes nothing). Each business is a `Steg = (t, f, k) => node`
+  built with `med(k, [fraSteg, node], …)`; the test requires that **every** k from 1 to the
+  stage's maximum adds something, so each business needs an item at 1…10 (k 5–10 only show at
+  stage 2 and 3).
+- **Where things go.** Foreground ground band (feet at `g + 4…g + 10`, in front of everything
+  drawn), the sky strip at y 9–17 for bunting and string lights (`Vimpler`, `Lyslenke`),
+  the free sea or snow for ships, rigs and skiers. Check every business at levels 24, 49, 99 and
+  150 with f = 3: found in the first look a ski lodge hiding skiers, a bunting junction cutting the café's
+  umbrella, and a moped, a table and a hand-board stacked on the gatekjøkken's bench and
+  bin. A queue that starts at the existing customers' x (saftbod 12, polsebod 24) reads as one
+  crowd; a queue that starts further out reads as a separate group.
+- **Reuse, but round.** `Folk` for every person (`Kunde` picks clothes, hair and height from an
+  index), `Bil` (now exported) scaled by 0.37 for far distance, `Sykkel`, `Passasjerfly` in a
+  `rotate` group for planes in the air. New helpers in the part: `Skip`, `Heli` (the rotor
+  uses `anim-rotor`), `Maker`, `Rigg`, `Merd`, `Skiloper`, `Tankbil`, `Bagasjetog`, `Buss`,
+  `Pengebil`, `Hund`, `Staabord`, `Tavle`, `Moped`. Everything goes through `r2`: the
+  long-decimal test compares with the unchanged drawing, because the old drawings have long
+  decimals the G7 test never looked at (found one: `Passasjerfly`'s landing-gear `x`, now rounded).
+- **The homes are not in `Illustrasjon`.** `ILLUSTRASJONSIDER`/`NY_STIL` are checked as 96
+  squares by G1–G9 tests, and a home needs three room levels. `Hjemscene.tsx` (start file,
+  small) has `Hjemscene` (11:6 scene, IScenen + Bredt), `Hjembilde` (the tile, middle 96)
+  and `Hjemtegning` (the raw drawing, used by the buy moment); the drawings are in
+  `ved-behov/Hjemtegninger.tsx` (`HJEMTEGNINGER`, 45 kB raw, 10 gzipped, its own part, loaded
+  by `forvarm` like the others). The three room levels are packed in one number 0–63
+  (`romkode` in `ui/romkode.ts`), so a memo drawing doesn't get a new array every second.
+  Each room has four states: 0 = bare (a bulb, some junk), 1–3 = the three bought steps in
+  the order of `ROM`.
+- **Cutaways read well and light up well.** Hjemmet (cellar, kitchen, living room) and Hytta
+  (fireplace room, sauna, hot tub) are sections with the front wall removed; Feriehuset is seen
+  from outside. The back wall of a furnished room has `className="nattvindu"`, so at night
+  the room is a warm rectangle with the furniture as black silhouettes (the night layer paints
+  everything not in `LYSFARGER` black) — the house glows without any extra drawing. A scene's
+  main subject is 84–90 units wide so the tile (x 0–96) shows all of it; the sides are street,
+  forest and sea. Keep the three rooms in separate x ranges: the first Feriehuset had the guest
+  wing behind the pool bar and the limousine in the pool.
+- **Wiring.** `Tingslag` has `hjem` (`FANE_FOR.hjem = 'luksus'`), `Tingdetalj` has a case
+  (facts: place, steps, status, spent, counts in net worth), `Hjemkort` (in `Hjemmene.tsx`)
+  is a `li` that works in the list and the page (`iDetalj`); a locked home isn't clickable
+  and is grey. The buy moment: `nytt()` pushes `art: 'hjem'`, `id: 'oslo:stue:21'` (home, room,
+  `romkode` after the purchase), `navn` the step's name; `Kjopsglimt` draws the home at 174 px
+  and works out the line under the name itself (App.tsx passes only art, id and navn).
+- **A lazy part is cached for the page's life.** After editing `Hjemtegninger.tsx` or
+  `Trinnsteg.tsx` the sheet kept the old registry (a home showed an empty canvas) until the page
+  was reloaded — `vedBehov` keeps the first module. Reload, then re-run the helper from
+  `localStorage`.
+- **Contact sheet, the easy way.** The page must be the game (`/`): `/ikon.svg` is an SVG
+  document and React DOM throws on `document.createElement('div').style`. A scratch module
+  (`src/ui/zz-ark.tsx`: `import '../styles/index.css'`, `createRoot`, `Scene` or `Hjemscene` in a
+  grid, `--natt` per cell) imported with `await import('/src/ui/zz-ark.tsx')` needs no resource
+  URLs and no HMR hash. Delete it before committing. For detail, set the svg's `viewBox` and
+  width (`zoom`), and resize the pane by one pixel before each screenshot.
+- **Budget.** The start script is at 248.7 of 250 kB after G16 (the loaders, `stegFor`, the home
+  shell and card). G17–G21 add nothing to it as long as the drawings stay in the parts.
+- **Shell tip.** A heredoc with a long JSON patch died with «unexpected EOF» again; the Write
+  tool for the patch file, `fiks.mjs` to apply it. `sed -i` on `BedriftIkon.tsx` made it LF
+  again — restore CRLF with a node one-liner.
+
+## 7. Notes for later (G1–G16 done; G17–G23 planned in `Ideer.md`)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -1046,9 +1118,9 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   `Speiling`, `Lakksveip` and the `rm` mask, which are still 96 wide: widen them with the
   cars (G20).
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
-  `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings and steps grow the start script,
-  which is at 238 of 250 kB gzipped after G12 (`startskript.test.ts`): G16's upgrade steps
-  may need a part of their own, and the home scenes should be one from the start.
+  `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings grow the start script, which is at
+  248.7 of 250 kB gzipped after G16 (`startskript.test.ts`); the business steps (§6d) and
+  the home scenes are parts of their own.
 - **G22 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
   it. Snow could follow the same pattern (a `--vinter` var and a snow layer), but the
@@ -1064,7 +1136,5 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   (25), the string of lights burning by day (100), and white cup stacks (Folke didn't
   pick "cups you can recognise").
 - **Not done, ask first** (shared files):
-  - The homes (Pack 60) are still bought in silence; give them a buy moment with their
-    scene when G16 draws them.
   - The business cards' own 44 px pictures keep the full scene, except the Saftbod
     (`NAER_PAA_KORTET`, Folke picked it on 10 October); the kiosk is still small there.

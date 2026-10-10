@@ -355,6 +355,15 @@ session; delete what stops being true.
   property or vehicle drawn by the game track can stay out of the list (it then looks as
   before); if it goes in, it must reach the frame's edges itself — see `wisdom-grafikk.md`
   §6c.
+- **Scenes that grow and the homes (G16).** A business scene shows one extra thing for every
+  five levels inside a growth stage (`stegFor` in `Illustrasjoner.tsx`, up to level 150):
+  an overlay from `ved-behov/Trinnsteg.tsx`, drawn only in the detail scene. The three homes
+  have their own scene (`ved-behov/Hjemtegninger.tsx`, shell in `Hjemscene.tsx`), a card that
+  opens a detail page (`Tingslag` `hjem`) and a buy moment per furnished room (`art: 'hjem'` in
+  `nytt()`). Both are parts, so the start script is 248.7 of 250 kB. A new room or a fourth
+  step in `engine/hjemmene.ts` needs its state drawn in `Hjemtegninger.tsx`; a new business
+  needs a `Steg` in `Trinnsteg.tsx` (`grafikkG16.test.ts` fails otherwise). Details in
+  `wisdom-grafikk.md` §6d.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:

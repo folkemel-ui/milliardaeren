@@ -9,7 +9,7 @@
 
 import { useSyncExternalStore, type MouseEvent } from 'react'
 
-export type Tingslag = 'eiendom' | 'jord' | 'landemerke' | 'luksus' | 'maleri'
+export type Tingslag = 'eiendom' | 'jord' | 'landemerke' | 'luksus' | 'maleri' | 'hjem'
 export type Ting = { slag: Tingslag; id: string }
 
 /** Hvilken fane hvert slag hører til. */
@@ -19,6 +19,8 @@ export const FANE_FOR: Record<Tingslag, 'eiendom' | 'luksus'> = {
   landemerke: 'eiendom',
   luksus: 'luksus',
   maleri: 'luksus',
+  // Hjemmene i Luksus → Hjem (G16).
+  hjem: 'luksus',
 }
 
 const lyttere = new Set<() => void>()

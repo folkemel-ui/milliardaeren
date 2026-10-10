@@ -73,6 +73,18 @@ export function trinnFor(nivaa: number | undefined): Trinn {
   return nivaa >= 100 ? 3 : nivaa >= 50 ? 2 : nivaa >= 25 ? 1 : 0
 }
 
+/**
+ * Stegene mellom vekstrinnene (G16): for hvert femte nivå inne i et trinn
+ * kommer det noe nytt i scenen — flere kunder, en lengre kø, flere bord. 0 der
+ * trinnet starter; høyst 4 før nivå 25 og 50, 9 før nivå 100 og 10 derfra, til
+ * nivå 150. Tegningene ligger i `ved-behov/Trinnsteg.tsx` og vises bare i scenen.
+ */
+export function stegFor(nivaa: number | undefined): number {
+  if (!nivaa || nivaa < 1) return 0
+  const start = nivaa >= 100 ? 100 : nivaa >= 50 ? 50 : nivaa >= 25 ? 25 : 0
+  return Math.min(Math.floor(nivaa / 5) - Math.floor(start / 5), 10)
+}
+
 // ─────────────────────────────────────────────── Felles byggeklosser
 
 /** En bedriftstegning: vekstrinnet og hvor mange forbedringer som er kjøpt (0–3). */
@@ -173,7 +185,7 @@ function Byrekke({ fra = -40, til = 136, y = 68, start = 0, dis = true }: { fra?
  * fronten til venstre, 30 enheter lang, med hjulene på `y`. `taxi` gir
  * taklampa.
  */
-function Bil({ x, y = 74.6, farge = S.mork, taxi = false }: { x: number; y?: number; farge?: Materiale; taxi?: boolean }) {
+export function Bil({ x, y = 74.6, farge = S.mork, taxi = false }: { x: number; y?: number; farge?: Materiale; taxi?: boolean }) {
   const dy = r2(y - 74.6)
   return (
     <g transform={x === 70 && dy === 0 ? undefined : `translate(${r2(x - 70)} ${dy})`}>
@@ -2509,7 +2521,7 @@ export function Passasjerfly({ x, gy, L, slag, hale }: { x: number; gy: number; 
       {/* Understellet. */}
       {[0.86, 0.52].map((k) => (
         <g key={k}>
-          <rect x={px(k) - 0.3} y={r(fb)} width="0.6" height={r(w * 0.6)} fill={S.metall.skygge} />
+          <rect x={r(px(k) - 0.3)} y={r(fb)} width="0.6" height={r(w * 0.6)} fill={S.metall.skygge} />
           <circle cx={px(k)} cy={r(gy - w * 0.4)} r={r(w * 0.42)} fill={S.mork.flate} />
         </g>
       ))}
@@ -2833,27 +2845,45 @@ const skisenter: B = (t, f) => {
 
 // ─────────────────────────────────────────────── Oppslag
 
-export type Tegning = (p: P & { trinn: Trinn; forbedringer: number }) => ReactNode
+export type Tegning = (p: P & { trinn: Trinn; forbedringer: number; steg?: number }) => ReactNode
 
-/** En bedrift i den nye stilen: 96 × 96 på et `Lerret`. */
+/**
+ * Stegene (G16) ligger i en egen bit, for startskriptet har ikke plass til dem:
+ * bare scenen i detaljvisningen viser dem, så bitene hentes først da (og i ro
+ * like etter start).
+ */
+const trinnsteg = vedBehov('trinnsteg', () => import('./ved-behov/Trinnsteg').then((m) => m.TRINNSTEG))
+
+function Trinnsteg({ id, trinn, f, steg }: { id: string; trinn: Trinn; f: number; steg: number }) {
+  const iScenen = useContext(IScenen)
+  const hentet = useDel(iScenen ? trinnsteg : null)
+  return <>{hentet?.[id]?.(trinn, f, steg)}</>
+}
+
+/** En bedrift i den nye stilen: 96 × 96 på et `Lerret`, med stegene lagt over i scenen. */
 const bedriftNy =
-  (b: B): Tegning =>
-  ({ størrelse = 48, trinn, forbedringer }) => <Lerret størrelse={størrelse}>{b(trinn, forbedringer)}</Lerret>
+  (id: string, b: B): Tegning =>
+  ({ størrelse = 48, trinn, forbedringer, steg = 0 }) => (
+    <Lerret størrelse={størrelse}>
+      {b(trinn, forbedringer)}
+      {steg > 0 && <Trinnsteg id={id} trinn={trinn} f={forbedringer} steg={steg} />}
+    </Lerret>
+  )
 
 const BEDRIFTER: Record<string, Tegning> = {
-  saftbod: bedriftNy(saftbod),
-  polsebod: bedriftNy(polsebod),
-  gatekjokken: bedriftNy(gatekjokken),
-  kiosk: bedriftNy(kiosk),
-  kafe: bedriftNy(kafe),
-  restaurant: bedriftNy(restaurant),
-  hotell: bedriftNy(hotell),
-  bank: bedriftNy(bank),
-  oljeselskap: bedriftNy(oljeselskap),
-  rederi: bedriftNy(rederi),
-  fiskeoppdrett: bedriftNy(fiskeoppdrett),
-  flyselskap: bedriftNy(flyselskap),
-  skisenter: bedriftNy(skisenter),
+  saftbod: bedriftNy('saftbod', saftbod),
+  polsebod: bedriftNy('polsebod', polsebod),
+  gatekjokken: bedriftNy('gatekjokken', gatekjokken),
+  kiosk: bedriftNy('kiosk', kiosk),
+  kafe: bedriftNy('kafe', kafe),
+  restaurant: bedriftNy('restaurant', restaurant),
+  hotell: bedriftNy('hotell', hotell),
+  bank: bedriftNy('bank', bank),
+  oljeselskap: bedriftNy('oljeselskap', oljeselskap),
+  rederi: bedriftNy('rederi', rederi),
+  fiskeoppdrett: bedriftNy('fiskeoppdrett', fiskeoppdrett),
+  flyselskap: bedriftNy('flyselskap', flyselskap),
+  skisenter: bedriftNy('skisenter', skisenter),
 }
 
 /** Eiendommene, tegnet i ved-behov/Eiendomstegninger.tsx og lastet når de trengs (G12). */
@@ -2978,6 +3008,7 @@ export const Illustrasjon = memo(function Illustrasjon({
   forbedringer = 0,
   utklipp = false,
   naerbilde,
+  steg = 0,
 }: {
   id: string
   størrelse?: number
@@ -2985,6 +3016,8 @@ export const Illustrasjon = memo(function Illustrasjon({
   forbedringer?: number
   utklipp?: boolean
   naerbilde?: readonly [number, number]
+  /** Steget inne i vekstrinnet (`stegFor`), bare i scenen. */
+  steg?: number
 }) {
   const del = DEL_FOR.get(id) ?? null
   const hentet = useDel(del)
@@ -2996,7 +3029,7 @@ export const Illustrasjon = memo(function Illustrasjon({
   return (
     <Fullramme.Provider value={FULL_RAMME.includes(id)}>
       <Utklipp.Provider value={utklipp}>
-        <Naerbilde.Provider value={naer}>{Tegning({ størrelse, trinn, forbedringer })}</Naerbilde.Provider>
+        <Naerbilde.Provider value={naer}>{Tegning({ størrelse, trinn, forbedringer, steg })}</Naerbilde.Provider>
       </Utklipp.Provider>
     </Fullramme.Provider>
   )

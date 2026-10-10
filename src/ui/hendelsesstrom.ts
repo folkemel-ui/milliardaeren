@@ -7,6 +7,8 @@
  */
 
 import { EIENDOMSTYPER, LUKSUS } from '../engine/eiendom'
+import { hjemFor, ROM, ROMLISTE, romtrinn } from '../engine/hjemmene'
+import { romkodeFor } from './romkode'
 import { BEDRIFTSTYPER } from '../engine/innhold'
 import { PRESTASJONER } from '../engine/prestasjoner'
 import { FUSJONSFAKTOR } from '../engine/fusjon'
@@ -25,7 +27,7 @@ import type { Fane } from './komponenter/Fanemeny'
  * rivals bedrift. For klubben er `id` klubbens navn (våpenet tegnes fra
  * det), for en startup selskapets navn (logoen er nøklet på det).
  */
-export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus' | 'jord' | 'landemerke' | 'maleri' | 'klubb' | 'startup' | 'fusjon'
+export type Kjopsart = 'bedrift' | 'eiendom' | 'luksus' | 'jord' | 'landemerke' | 'maleri' | 'klubb' | 'startup' | 'fusjon' | 'hjem'
 
 export type Nytt =
   | { type: 'hendelse'; hendelse: Hendelse }
@@ -121,6 +123,15 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   for (const st of etter.startups ?? []) {
     const fra = før.startups?.find((x) => x.id === st.id)
     if (st.andel > 0 && !(fra && fra.andel > 0)) funn.push({ type: 'kjop', art: 'startup', id: ide(st).navn, navn: ide(st).navn })
+  }
+  // Grafikkpakke G16: et rom som er innredet et trinn til. `id` er hjemmet, rommet og
+  // hvordan hjemmet står nå (`romkode`), så øyeblikket viser hjemmet slik det ble.
+  for (const rom of ROMLISTE) {
+    const til = romtrinn(etter, rom)
+    if (til > romtrinn(før, rom)) {
+      const hjem = hjemFor(rom)
+      funn.push({ type: 'kjop', art: 'hjem', id: `${hjem}:${rom}:${romkodeFor(etter, hjem)}`, navn: ROM[rom].trinn[til - 1].navn })
+    }
   }
   // En fane som har åpnet seg (Pakke 40).
   for (const f of Object.keys(FANE_AAPNER) as Fane[]) {

@@ -5,6 +5,9 @@ import { KUNSTNERE, MALERIER, maleripris } from '../../engine/kunst'
 import { eierDu, LANDEMERKER, landemerkepris } from '../../engine/landemerker'
 import { dagnummer } from '../../engine/kalender'
 import type { EiendomId, JordId, LandemerkeId, LuksusId, MaleriId, Spilltilstand } from '../../engine/types'
+import { HJEM, INNREDNING_VERDI, type HjemId } from '../../engine/hjemmene'
+import { hjemTall } from '../romkode'
+import { Hjemkort } from '../komponenter/Hjemmene'
 import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
@@ -95,6 +98,20 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
       if (eier) fakta.push(['Selges for', kortKroner(restverdi(id as LuksusId))])
       if (eier && lager) fakta.push(['Står i', LAGER[lager].bestemt])
       return [<Luksuskort s={s} id={id as LuksusId} iDetalj />, fakta]
+    }
+    case 'hjem': {
+      const h = HJEM[id as HjemId]
+      const d = hjemTall(s, id as HjemId)
+      const fakta: Fakta = [
+        ['Sted', h.sted],
+        ['Innredet', `${d.trinn} av ${d.alle} trinn`],
+        ['Status fra rommene', `+${d.status}`],
+      ]
+      if (d.brukt > 0) {
+        fakta.push(['Brukt på rommene', kortKroner(d.brukt)])
+        fakta.push(['Teller i formuen', kortKroner(d.brukt * INNREDNING_VERDI)])
+      }
+      return [<Hjemkort s={s} id={id as HjemId} iDetalj />, fakta]
     }
     case 'maleri': {
       const m = MALERIER[id as MaleriId]
