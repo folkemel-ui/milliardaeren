@@ -4,13 +4,18 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, kjopBedrift, kjopForbedring, oppgrader, oppgraderFlere, velgRetning, type Utfall } from '../handlinger'
+import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, innred, kjopBedrift, kjopForbedring, kjopLandemerke, kjopLuksus, oppgrader, oppgraderFlere, utvidLager, velgRetning, type Utfall } from '../handlinger'
+import { brukteplasser, LAGER, LAGER_FOR, LUKSUS, LUKSUSLISTE, START_LAGER, STATUS_INNTEKT, STATUSNIVAAER, statusnivaa, statuspoeng } from '../eiendom'
+import { HJEM, HJEMLISTE, hjemAapent, nesteTrinn } from '../hjemmene'
+import { eierDu, kjopsprisLandemerke, LANDEMERKELISTE, LANDEMERKER } from '../landemerker'
 import { besteFilialby, filialbidrag, filialer, filialfaktor, filialpris } from '../filialer'
 import { BUD, dagensForhandling, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, prisantydning, rivalbedrifter } from '../fusjon'
 import {
   ansettelsespris,
   bedriftInntektPerSek,
   eierType,
+  inntektPerSek,
+  statusfaktor,
   erLaastOpp,
   forbedringspris,
   maksAnsatte,
@@ -22,12 +27,103 @@ import {
 import { BEDRIFTSTYPER, STIGEN } from '../innhold'
 import { simuler } from '../simulering'
 import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt } from '../ansatte'
-import type { Bedrift, Spilltilstand } from '../types'
+import type { Bedrift, LagerId, Spilltilstand } from '../types'
 
 interface Kandidat {
   pris: number
   gevinst: number
   utfor: (s: Spilltilstand) => Utfall
+}
+
+/** Statusnivået så mange poeng gir. */
+function nivaaFor(poeng: number): number {
+  let n = 0
+  for (let i = 0; i < STATUSNIVAAER.length; i++) if (poeng >= STATUSNIVAAER[i].poeng) n = i
+  return n
+}
+
+/** Én ting som gir status: hva den koster (med lagerplassen den trenger), hva den gir, og hvordan den kjøpes. */
+interface Statuskjop {
+  pris: number
+  poeng: number
+  utfor: (s: Spilltilstand) => Utfall
+}
+
+/**
+ * Status som ett kjøp (Pakke 70): det billigste settet av luksus, rom og
+ * landemerker — regnet i kroner per statuspoeng — som løfter statusen minst
+ * ett nivå. Gevinsten er det nivåene gir i inntekt. Kunst og klubb holdes
+ * utenfor: kunsten svinger, og klubben gir status først gjennom trofeer.
+ * Bare den smarte boten ser dette, så gullmesteren står.
+ */
+function statuskandidat(s: Spilltilstand): Kandidat | null {
+  const nivaa = statusnivaa(s)
+  if (nivaa >= STATUSNIVAAER.length - 1) return null
+  const har = statuspoeng(s)
+  const trenger = STATUSNIVAAER[nivaa + 1].poeng - har
+  const valg: Statuskjop[] = []
+  // Hver ny bil, båt og fly utover ledig plass koster en utvidelse til, dyrere for hver.
+  const ledig: Record<LagerId, number> = { garasje: 0, havn: 0, hangar: 0 }
+  const utvidelser: Record<LagerId, number> = { garasje: 0, havn: 0, hangar: 0 }
+  for (const l of Object.keys(ledig) as LagerId[]) ledig[l] = s.lager[l] - brukteplasser(s, l)
+  for (const id of LUKSUSLISTE) {
+    if (s.luksus.includes(id)) continue
+    const g = LUKSUS[id]
+    const lager = LAGER_FOR[g.kategori]
+    let pris = g.pris
+    if (lager && ledig[lager] <= 0) {
+      const kjopt = s.lager[lager] - START_LAGER[lager] + utvidelser[lager]
+      pris += Math.round(LAGER[lager].startpris * LAGER[lager].vekst ** kjopt)
+      utvidelser[lager] += 1
+    } else if (lager) ledig[lager] -= 1
+    valg.push({
+      pris,
+      poeng: g.status,
+      utfor: (t) => {
+        if (lager && brukteplasser(t, lager) >= t.lager[lager]) {
+          const u = utvidLager(t, lager)
+          if (!u.ok) return u
+          t = u.tilstand
+        }
+        return kjopLuksus(t, id)
+      },
+    })
+  }
+  for (const hjem of HJEMLISTE) {
+    if (!hjemAapent(s, hjem)) continue
+    for (const rom of HJEM[hjem].rom) {
+      const trinn = nesteTrinn(s, rom)
+      if (trinn) valg.push({ pris: trinn.pris, poeng: trinn.status, utfor: (t) => innred(t, rom) })
+    }
+  }
+  for (const id of LANDEMERKELISTE) {
+    if (eierDu(s, id)) continue
+    valg.push({ pris: kjopsprisLandemerke(s, id), poeng: LANDEMERKER[id].status, utfor: (t) => kjopLandemerke(t, id) })
+  }
+  valg.sort((a, b) => a.pris / a.poeng - b.pris / b.poeng)
+  const sett: Statuskjop[] = []
+  let poeng = 0
+  let pris = 0
+  for (const v of valg) {
+    if (poeng >= trenger) break
+    sett.push(v)
+    poeng += v.poeng
+    pris += v.pris
+  }
+  if (poeng < trenger) return null
+  const grunn = inntektPerSek(s) / statusfaktor(s)
+  return {
+    pris,
+    gevinst: grunn * STATUS_INNTEKT * (nivaaFor(har + poeng) - nivaa),
+    utfor: (t) => {
+      let u: Utfall = { ok: true, tilstand: t }
+      for (const v of sett) {
+        u = v.utfor(u.tilstand)
+        if (!u.ok) return u
+      }
+      return u
+    },
+  }
 }
 
 function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
@@ -100,6 +196,10 @@ function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
       gevinst: BEDRIFTSTYPER[type].grunninntekt,
       utfor: (t) => kjopBedrift(t, type),
     })
+  }
+  if (smart) {
+    const status = statuskandidat(s)
+    if (status) liste.push(status)
   }
   return liste
 }

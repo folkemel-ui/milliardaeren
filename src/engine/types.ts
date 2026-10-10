@@ -510,6 +510,11 @@ export interface Spilltilstand {
    */
   harLaant?: boolean
   /**
+   * Når du første gang kjøpte en aksje eller mynt minst 20 % under toppen de
+   * siste to timene (Pakke 70, den skjulte prestasjonen «Kontrær»).
+   */
+  kontraerKjop?: number
+  /**
    * Gevinst minus tap på alt som er solgt: papirer, fond, eiendom, jord,
    * landemerker, kunst, rivalandeler, startups og klubben. Skattes med inntekten.
    */

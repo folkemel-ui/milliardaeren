@@ -148,7 +148,7 @@ export default function App() {
         if (f.type === 'hendelse') {
           visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'hendelser' })
         } else if (f.type === 'prestasjon') {
-          visVarsel({ type: 'god', tittel: `Prestasjon: ${f.navn}`, mål: 'profil' })
+          visVarsel({ type: 'god', tittel: `${f.skjult ? 'Skjult prestasjon' : 'Prestasjon'}: ${f.navn}`, mål: 'profil' })
         } else if (f.type === 'fane') {
           visVarsel({ type: 'god', tittel: `Ny fane: ${FANER.find((x) => x.id === f.fane)!.navn}`, tekst: FANE_INNHOLD[f.fane], mål: f.fane })
         }

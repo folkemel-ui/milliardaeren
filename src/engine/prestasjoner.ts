@@ -12,6 +12,12 @@ import { PAPIRER } from './marked'
 import type { PapirId, Spilltilstand } from './types'
 import { FILIALBYER } from './filialer'
 import { ROM, ROMLISTE } from './hjemmene'
+import { STIGEN } from './innhold'
+import { LUKSUSLISTE } from './eiendom'
+import { DAG_SEK } from './kalender'
+
+/** «Kontrær»: et kjøp til høyst så stor andel av toppen de siste to timene. */
+export const KONTRAER_ANDEL = 0.8
 
 /**
  * Verdier flere prestasjoner trenger, regnet ut høyst én gang per sjekk.
@@ -38,6 +44,8 @@ export interface Prestasjon {
   id: string
   navn: string
   beskrivelse: string
+  /** Vises først når den er nådd (Pakke 70): for det spillere finner på selv. */
+  skjult?: true
   klart: (s: Spilltilstand, f: Felles) => boolean
 }
 
@@ -120,7 +128,19 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'eliteserie-gull', navn: 'Gull i Eliteserien', beskrivelse: 'Vinn Eliteserien', klart: (s) => (s.trofeer ?? []).some((t) => t.navn.includes('Eliteserien')) },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
   { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
+  // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.
+  { id: 'gjeldfri', navn: 'Gjeldfri', beskrivelse: 'Betal tilbake hele lånet', skjult: true, klart: (s) => !!s.harLaant && s.gjeld <= 0 },
+  { id: 'kontraer', navn: 'Kontrær', beskrivelse: 'Kjøp en aksje eller mynt minst 20 % under toppen de siste to timene', skjult: true, klart: (s) => s.kontraerKjop !== undefined },
+  // Én bedrift per bransje (kjopBedrift nekter en til), så antallet er antall bransjer.
+  { id: 'hele-stigen', navn: 'Hele stigen', beskrivelse: 'Eie alle tretten bedriftene på én gang', skjult: true, klart: (s) => s.bedrifter.length >= STIGEN.length },
+  { id: 'helt-aar', navn: 'Et helt år', beskrivelse: 'Spill gjennom et helt år i kalenderen', skjult: true, klart: (s) => s.sek >= 365 * DAG_SEK },
+  { id: 'samleren', navn: 'Samleren', beskrivelse: 'Eie alt i samlingen på én gang', skjult: true, klart: (s) => s.luksus.length >= LUKSUSLISTE.length },
 ]
+
+/** Prestasjonene som kan vises: alle åpne, og de skjulte du har nådd. */
+export function synligePrestasjoner(s: Spilltilstand): Prestasjon[] {
+  return PRESTASJONER.filter((p) => !p.skjult || s.prestasjoner[p.id] !== undefined)
+}
 
 /** Stempler nye prestasjoner og oppdaterer rekordene. Muterer — brukes på kopier. */
 export function sjekkPrestasjoner(s: Spilltilstand): string[] {

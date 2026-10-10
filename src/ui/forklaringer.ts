@@ -12,7 +12,7 @@ import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from 
 import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
-import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER } from '../engine/innhold'
+import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
@@ -44,6 +44,9 @@ export type Tema =
 
 const trinn = SKATTETRINN.slice(1)
 
+/** «25, 50 og 100». */
+const og = (liste: number[]) => liste.join(', ').replace(/, (?=[^,]*$)/, ' og ')
+
 export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   obligasjoner: {
     tittel: 'Statsobligasjoner',
@@ -56,7 +59,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   bedrifter: {
     tittel: 'Bedriftene',
     tekst:
-      `Hver oppgradering gir litt mer inntekt, og på nivå ${MILEPAELER.join(', ').replace(/, (?=[^,]*$)/, ' og ')} dobles den. ` +
+      `Hver oppgradering gir litt mer inntekt; på nivå ${og(MILEPAELER.filter((_, i) => MILEPAELFAKTORER[i] === 2))} dobles den, og på nivå ${og(MILEPAELER.filter((_, i) => MILEPAELFAKTORER[i] !== 2))} ganges den med 1,5. ` +
       `En erfaren ansatt gir ${pst(ANSATT_BONUS)} mer, en junior ${pst(GRADER.junior.bonus)} for halv lønn, og fra nivå ${RETNING_NIVAA} en stjerne ${pst(GRADER.stjerne.bonus)} for tredobbel lønn. ` +
       'Lønnen er fast: i en liten bedrift koster de ansatte mer enn de gir. Stjernene er dyre, men gir mest per plass — de lønner seg når plassene er fulle. ' +
       'Kalenderen betyr noe: restauranter og hoteller tjener mest i helgen, bankene og kafeene på hverdager, saftbodene i sola og skisentrene i snøen. ' +

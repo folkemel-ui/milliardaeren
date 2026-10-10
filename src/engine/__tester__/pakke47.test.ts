@@ -59,7 +59,8 @@ describe('sluttspillet etter milliarden', () => {
 
 describe('raskere sekund', () => {
   it('milepæl- og forbedringsfaktoren er de samme som før', () => {
-    for (const nivaa of [1, 24, 25, 49, 50, 99, 100, 300]) expect(milepaelfaktor(nivaa)).toBe(2 ** [25, 50, 100].filter((m) => nivaa >= m).length)
+    // Til og med nivå 149 — fra 150 kom nye milepæler i Pakke 70.
+    for (const nivaa of [1, 24, 25, 49, 50, 99, 100, 149]) expect(milepaelfaktor(nivaa)).toBe(2 ** [25, 50, 100].filter((m) => nivaa >= m).length)
     for (const id of STIGEN) {
       for (let n = 0; n <= 3; n++) {
         const gammel = FORBEDRINGER[id].slice(0, n).reduce((f, x) => f * x.faktor, 1)

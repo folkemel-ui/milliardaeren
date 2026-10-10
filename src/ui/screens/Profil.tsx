@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { nettoformue } from '../../engine/formler'
 import { MAAL } from '../../engine/innhold'
-import { PRESTASJONER } from '../../engine/prestasjoner'
+import { PRESTASJONER, synligePrestasjoner } from '../../engine/prestasjoner'
 import type { Spilltilstand } from '../../engine/types'
 import { startPaaNytt } from '../../state/lager'
 import { formue, kortKroner, kroner, perSek, tall, varighet } from '../format'
@@ -55,29 +55,40 @@ function Trofeskap({ s }: { s: Spilltilstand }) {
 }
 
 function Prestasjonsliste({ s }: { s: Spilltilstand }) {
-  const klart = PRESTASJONER.filter((p) => s.prestasjoner[p.id] !== undefined).length
+  // Pakke 70: de skjulte vises først når de er nådd — men de telles, så du vet at noe venter.
+  const synlige = synligePrestasjoner(s)
+  const klart = synlige.filter((p) => s.prestasjoner[p.id] !== undefined).length
+  const skjulte = PRESTASJONER.length - synlige.length
   return (
     <div className="kort">
       <div className="maal-topp">
         <h2 className="kort-tittel">Prestasjoner</h2>
         <span className="dempet liten">
-          {klart} / {PRESTASJONER.length}
+          {klart} / {synlige.length}
         </span>
       </div>
       <ul className="prestasjoner">
-        {PRESTASJONER.map((p) => {
+        {synlige.map((p) => {
           const når = s.prestasjoner[p.id]
           return (
             <li key={p.id} className={når === undefined ? 'prestasjon' : 'prestasjon klart'} title={p.beskrivelse}>
               <span className="prestasjon-emoji">
                 <Merke id={p.id} klart={når !== undefined} størrelse={38} />
               </span>
-              <span className="prestasjon-navn">{p.navn}</span>
+              <span className="prestasjon-navn">
+                {p.navn}
+                {p.skjult && <span className="etikett prestasjon-skjult">Skjult</span>}
+              </span>
               <span className="prestasjon-besk">{p.beskrivelse}</span>
             </li>
           )
         })}
       </ul>
+      {skjulte > 0 && (
+        <p className="dempet liten prestasjoner-skjulte">
+          {skjulte === 1 ? 'Én skjult prestasjon venter' : `${skjulte} skjulte prestasjoner venter`} på å bli funnet.
+        </p>
+      )}
     </div>
   )
 }

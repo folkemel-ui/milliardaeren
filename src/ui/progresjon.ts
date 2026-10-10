@@ -5,9 +5,11 @@
  */
 
 import { BEDRIFTSTYPER, STIGEN } from '../engine/innhold'
-import { EIENDOM_SYNLIG_VED, EIENDOMSTYPER } from '../engine/eiendom'
+import { EIENDOM_SYNLIG_VED, EIENDOMSTYPER, LUKSUS } from '../engine/eiendom'
 import { STARTUP_LAAST_OPP } from '../engine/startups'
 import { KLUBB_LAAST_OPP } from '../engine/klubb'
+import { LANDEMERKELISTE, LANDEMERKER } from '../engine/landemerker'
+import { PRESTASJONER } from '../engine/prestasjoner'
 import type { Spilltilstand } from '../engine/types'
 import type { Fane } from './komponenter/Fanemeny'
 
@@ -48,7 +50,7 @@ export function faneAapen(s: Spilltilstand, f: Fane): boolean {
   return s.hoyesteFormue >= FANE_AAPNER[f] || eierNoeI(s, f)
 }
 
-export type Maalart = 'fane' | 'bedrift' | 'annet' | 'milepael'
+export type Maalart = 'fane' | 'bedrift' | 'annet' | 'milepael' | 'prestasjon'
 
 export interface Maal {
   belop: number
@@ -86,8 +88,12 @@ export function alleMaal(): Maal[] {
   }
   maal.push({ belop: STARTUP_LAAST_OPP, tekst: 'Oppstartsselskaper', art: 'annet', fane: 'investeringer' })
   maal.push({ belop: KLUBB_LAAST_OPP, tekst: 'Fotballklubb til salgs', art: 'annet', fane: 'luksus' })
+  // Pakke 70: de sene målene spillet alt har — landemerkene, langdistansejeten og New York.
+  for (const id of LANDEMERKELISTE) maal.push({ belop: LANDEMERKER[id].pris, tekst: LANDEMERKER[id].navn, art: 'annet', fane: 'eiendom' })
+  maal.push({ belop: LUKSUS.langdistansejet.pris, tekst: LUKSUS.langdistansejet.navn, art: 'annet', fane: 'luksus' })
+  maal.push({ belop: EIENDOMSTYPER.newyork.pris, tekst: 'New York', art: 'annet', fane: 'eiendom' })
   for (const m of MILEPAELER) maal.push({ belop: m.belop, tekst: m.navn, art: 'milepael', fane: 'profil' })
-  const rang: Record<Maalart, number> = { fane: 0, bedrift: 1, annet: 2, milepael: 3 }
+  const rang: Record<Maalart, number> = { fane: 0, bedrift: 1, annet: 2, milepael: 3, prestasjon: 4 }
   return maal.sort((a, b) => a.belop - b.belop || rang[a.art] - rang[b.art])
 }
 
@@ -99,17 +105,37 @@ export interface Neste {
   maal: Maal[]
   /** Hvor langt du har kommet fra forrige mål, 0–1, på logaritmisk skala. */
   andel: number
+  /** Det som står der beløpet pleier å stå, når målet ikke er et beløp («12 / 53»). */
+  visning?: string
 }
 
-/** Det neste målet over den høyeste formuen din, eller null når alt er nådd. */
+/**
+ * Det neste målet over den høyeste formuen din. Når beløpene er brukt opp
+ * (etter billionen), står prestasjonene du ikke har igjen (Pakke 70); null
+ * først når alt er nådd.
+ */
 export function nesteMaal(s: Spilltilstand): Neste | null {
   const h = s.hoyesteFormue
   const neste = ALLE.find((m) => m.belop > h)
-  if (!neste) return null
+  if (!neste) return prestasjonsmaal(s)
   const forrige = Math.max(1_000, ...ALLE.filter((m) => m.belop <= h).map((m) => m.belop))
   const fra = Math.log10(forrige)
   const andel = Math.min(1, Math.max(0, (Math.log10(Math.max(1, h)) - fra) / (Math.log10(neste.belop) - fra)))
   return { belop: neste.belop, maal: ALLE.filter((m) => m.belop === neste.belop), andel }
+}
+
+/** Prestasjonene som er igjen, som ett mål — også de skjulte teller, uten å røpes. */
+function prestasjonsmaal(s: Spilltilstand): Neste | null {
+  let klart = 0
+  for (const p of PRESTASJONER) if (s.prestasjoner[p.id] !== undefined) klart++
+  const igjen = PRESTASJONER.length - klart
+  if (igjen === 0) return null
+  return {
+    belop: Infinity,
+    maal: [{ belop: Infinity, tekst: igjen === 1 ? 'Én prestasjon igjen' : `${igjen} prestasjoner igjen`, art: 'prestasjon', fane: 'profil' }],
+    andel: klart / PRESTASJONER.length,
+    visning: `${klart} / ${PRESTASJONER.length}`,
+  }
 }
 
 /** De neste `antall` beløpene med mål, til lista på Profil. */

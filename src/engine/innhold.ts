@@ -46,11 +46,11 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   hotell: {
     id: 'hotell', navn: 'Hotell',
     // 4 500 fra Pakke 68: med 3 600 tjente hotellet seg inn på 37 500 s mot naboenes ~30 000, og boten kjøpte det ikke før time 58.
-    pris: 135_000_000, grunninntekt: 4_500, oppgraderingspris: 33_750_000, vekst: 1.1, laasesOppVed: 170_000_000,
+    pris: 135_000_000, grunninntekt: 4_500, oppgraderingspris: 67_500_000, vekst: 1.1, laasesOppVed: 170_000_000,
   },
   bank: {
     id: 'bank', navn: 'Bank',
-    pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 240_000_000, vekst: 1.1, laasesOppVed: 750_000_000,
+    pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 300_000_000, vekst: 1.1, laasesOppVed: 750_000_000,
   },
   oljeselskap: {
     id: 'oljeselskap', navn: 'Oljeselskap',
@@ -63,15 +63,15 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   // som det forrige. Målt med balansebenken: jevnt rundt 15 timer per tiende-steg.
   rederi: {
     id: 'rederi', navn: 'Rederi',
-    pris: 20_000_000_000, grunninntekt: 680_000, oppgraderingspris: 6_500_000_000, vekst: 1.1, laasesOppVed: 25_000_000_000,
+    pris: 20_000_000_000, grunninntekt: 680_000, oppgraderingspris: 8_000_000_000, vekst: 1.1, laasesOppVed: 25_000_000_000,
   },
   fiskeoppdrett: {
     id: 'fiskeoppdrett', navn: 'Fiskeoppdrett',
-    pris: 60_000_000_000, grunninntekt: 2_000_000, oppgraderingspris: 21_000_000_000, vekst: 1.1, laasesOppVed: 75_000_000_000,
+    pris: 60_000_000_000, grunninntekt: 2_000_000, oppgraderingspris: 24_000_000_000, vekst: 1.1, laasesOppVed: 75_000_000_000,
   },
   flyselskap: {
     id: 'flyselskap', navn: 'Flyselskap',
-    pris: 200_000_000_000, grunninntekt: 6_700_000, oppgraderingspris: 75_000_000_000, vekst: 1.1, laasesOppVed: 250_000_000_000,
+    pris: 200_000_000_000, grunninntekt: 6_700_000, oppgraderingspris: 80_000_000_000, vekst: 1.1, laasesOppVed: 250_000_000_000,
   },
   skisenter: {
     id: 'skisenter', navn: 'Skisenter',
@@ -85,8 +85,13 @@ export const STIGEN: BedriftstypeId[] = [
   'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
 ]
 
-/** Nivåene der inntekten dobles. */
-export const MILEPAELER = [25, 50, 100]
+/**
+ * Nivåene der inntekten gjør et hopp: dobles på 25, 50 og 100, og halvannen
+ * gang på 150, 200 og 250 (Pakke 70 — så gamle bedrifter ikke står stille).
+ */
+export const MILEPAELER = [25, 50, 100, 150, 200, 250]
+/** Hva hver milepæl ganger inntekten med, i samme rekkefølge. */
+export const MILEPAELFAKTORER = [2, 2, 2, 1.5, 1.5, 1.5]
 
 // ─────────────────────────────────────────────── Unike forbedringer
 

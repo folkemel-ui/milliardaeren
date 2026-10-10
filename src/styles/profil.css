@@ -202,6 +202,15 @@
   color: var(--gull);
 }
 
+/* En skjult prestasjon du har funnet, får et lite merke etter navnet (Pakke 70). */
+.prestasjon-skjult {
+  margin-left: 6px;
+}
+
+.prestasjoner-skjulte {
+  margin: 10px 0 0;
+}
+
 .prestasjon-besk {
   font-size: var(--skrift-2);
   color: var(--tekst-dempet);

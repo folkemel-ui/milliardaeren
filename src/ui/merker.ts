@@ -58,6 +58,12 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   'eliteserie-gull': { ikon: 'medalje', grad: 'gull' },
   oljebaron: { ikon: 'drape', grad: 'gull' },
   skikonge: { ikon: 'fjell', grad: 'gull' },
+  // Pakke 70: de skjulte.
+  gjeldfri: { ikon: 'bank', grad: 'solv' },
+  kontraer: { ikon: 'graf', grad: 'gull' },
+  'hele-stigen': { ikon: 'bedrift', grad: 'gull' },
+  'helt-aar': { ikon: 'sol', grad: 'solv' },
+  samleren: { ikon: 'diamant', grad: 'gull' },
 }
 
 /** For en prestasjon som mangler i tabellen: en nøytral stjerne i bronse. */

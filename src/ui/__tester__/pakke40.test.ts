@@ -93,7 +93,8 @@ describe('det neste målet', () => {
   it('går videre etter milliarden og slutter når alt er nådd', () => {
     expect(nesteMaal(med(2e9))!.belop).toBeGreaterThan(2e9)
     const sist = Math.max(...alleMaal().map((m) => m.belop))
-    expect(nesteMaal(med(sist))).toBeNull()
+    // Pakke 70: etter siste beløp står prestasjonene igjen; null først når alle er nådd.
+    expect(nesteMaal(med(sist))!.maal[0].art).toBe('prestasjon')
     expect(kommendeMaal(med(sist))).toEqual([])
   })
 

@@ -14,6 +14,7 @@ import {
   MAKS_ANSATTE,
   MAKS_BELAANING,
   MILEPAELER,
+  MILEPAELFAKTORER,
   RENTE_PER_TIME,
   SPARERENTE_PER_TIME,
 } from './innhold'
@@ -43,12 +44,18 @@ import type { Ansattgrad, Bedrift, BedriftstypeId, Beholdning, Forbedring, Papir
 
 // ─────────────────────────────────────────────── Nivåer
 
-/** Inntektsmultiplikatoren fra milepælene: ×2 for hver som er nådd. */
+/** Inntektsmultiplikatoren fra milepælene: ×2 for 25, 50 og 100, ×1,5 for 150, 200 og 250 (Pakke 70). */
 export function milepaelfaktor(nivaa: number): number {
   // Uten filter og nye lister: dette regnes for hver bedrift hvert sekund.
-  let n = 0
-  for (const m of MILEPAELER) if (nivaa >= m) n++
-  return 2 ** n
+  // Til og med nivå 149 er produktet bit for bit det samme som 2 ** n var.
+  let f = 1
+  for (let i = 0; i < MILEPAELER.length; i++) if (nivaa >= MILEPAELER[i]) f *= MILEPAELFAKTORER[i]
+  return f
+}
+
+/** Hva milepælen på `nivaa` ganger inntekten med — 1 når nivået ikke er en milepæl. */
+export function milepaelboost(nivaa: number): number {
+  return MILEPAELFAKTORER[MILEPAELER.indexOf(nivaa)] ?? 1
 }
 
 /** Neste nivå som dobler inntekten, eller null når alle er nådd. */

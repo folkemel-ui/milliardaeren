@@ -133,13 +133,15 @@ function Maalstripe({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void
         <span className="etikett">Neste</span> <strong>{forst.tekst}</strong>
         {resten.length > 0 && <span className="dempet"> · {resten.map((m) => m.tekst).join(' · ')}</span>}
       </span>
-      <span className="maalstripe-belop">{kortKroner(neste.belop)}</span>
+      <span className="maalstripe-belop">{neste.visning ?? kortKroner(neste.belop)}</span>
       <span className="maalstripe-spor" aria-hidden="true">
         <span style={{ width: `${neste.andel * 100}%` }} />
       </span>
     </>
   )
-  const etikett = `Neste mål: ${neste.maal.map((m) => m.tekst).join(', ')} ved ${kortKroner(neste.belop)}. ${Math.round(neste.andel * 100)} % av veien fra forrige mål.`
+  const etikett = neste.visning
+    ? `Neste mål: ${neste.maal.map((m) => m.tekst).join(', ')}. ${neste.visning} nådd.`
+    : `Neste mål: ${neste.maal.map((m) => m.tekst).join(', ')} ved ${kortKroner(neste.belop)}. ${Math.round(neste.andel * 100)} % av veien fra forrige mål.`
   return (
     <div className="maalfelt">
       {mål ? (

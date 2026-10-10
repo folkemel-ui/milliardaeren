@@ -12,6 +12,7 @@ import { flyt } from '../portefolje'
 import { maksPerOrdre, PAPIRER, rundAntall } from '../marked'
 import type { FondId, Ordretype, PapirId, Spilltilstand } from '../types'
 import { tall } from '../tall'
+import { KONTRAER_ANDEL } from '../prestasjoner'
 import { feil, ikkeTall, UGYLDIG, type Utfall } from './felles'
 
 /** Aksjer kan ikke handles i helgen; krypto kan. */
@@ -38,6 +39,9 @@ export function kjopPapir(s: Spilltilstand, id: PapirId, antall: number): Utfall
   const n = structuredClone(s)
   const kostnad = utforKjop(n, id, a)
   n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, kostnad)
+  // Pakke 70: et kjøp minst 20 % under toppen de siste to timene («Kontrær»), målt på kursen før kjøpet.
+  const k = s.marked.kurser[id]
+  if (n.kontraerKjop === undefined && k.historikk.length > 0 && k.kurs <= KONTRAER_ANDEL * Math.max(...k.historikk)) n.kontraerKjop = n.sek
   return { ok: true, tilstand: n }
 }
 

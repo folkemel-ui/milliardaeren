@@ -1,4 +1,4 @@
-import { bedriftInntektIDag, bedriftsverdi, forbedringspris, nesteMilepael, statusfaktor } from '../../engine/formler'
+import { bedriftInntektIDag, bedriftsverdi, forbedringspris, milepaelboost, nesteMilepael, statusfaktor } from '../../engine/formler'
 import { bedriftssalgspris, kjopForbedring, selgBedrift } from '../../engine/handlinger'
 import type { Kjopsmengde } from '../kjopsmengde'
 import { fusjonsfaktor } from '../../engine/fusjon'
@@ -136,7 +136,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
                   {nådd ? '✓' : m}
                 </span>
                 <span>
-                  Nivå {m}: ×2 inntekt
+                  Nivå {m}: ×{String(milepaelboost(m)).replace('.', ',')} inntekt
                   <span className="dempet liten">{nådd ? ' — nådd' : ` — ${m - b.nivaa} nivåer igjen`}</span>
                 </span>
               </li>

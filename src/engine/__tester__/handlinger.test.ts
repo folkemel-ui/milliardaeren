@@ -104,8 +104,9 @@ describe('nivåer og oppgraderinger', () => {
   })
 
   it('dobler inntekten ved nivå 25, 50 og 100', () => {
-    expect([1, 24, 25, 49, 50, 99, 100, 200].map(milepaelfaktor)).toEqual([1, 1, 2, 2, 4, 4, 8, 8])
-    expect([1, 25, 60, 100].map(nesteMilepael)).toEqual([25, 50, 100, null])
+    // Pakke 70: 150, 200 og 250 gir ×1,5 hver.
+    expect([1, 24, 25, 49, 50, 99, 100, 149, 150, 200, 250, 300].map(milepaelfaktor)).toEqual([1, 1, 2, 2, 4, 4, 8, 8, 12, 18, 27, 27])
+    expect([1, 25, 60, 100, 250].map(nesteMilepael)).toEqual([25, 50, 100, 150, null])
     const b = bedrift('saftbod', { nivaa: 24 })
     expect(bedriftInntektPerSek({ ...b, nivaa: 25 })).toBe(50)
     expect(bedriftInntektPerSek(b)).toBe(24)
