@@ -613,8 +613,9 @@ session; delete what stops being true.
   (Statistikk.tsx), and the tax text in `forklaringer.ts`. When an old tellerstand lacks the
   field, count the period from zero (`start.x === undefined ? 0 : …`) — subtracting
   nothing would dump the whole history into one month's tax.
-- **Open question for Folke:** the one-off hiring fee sits in `totaltForbruk` with luxury
-  and is not tax-deductible. Left alone in Pack 39 because changing it moves the golden master.
+- **Hiring fee (closed 11 October 2026):** the one-off hiring fee sits in `totaltForbruk` with
+  luxury and is not tax-deductible. Measured as 0.06 % of the tax paid; Folke chose to leave it,
+  since changing it moves the golden master for nothing.
 - **The day change runs in a fixed order** (`gisUtAvis`): settlements first
   (`dagsskifteOppgjor`, which also writes the daily `dagsoppgjor` for the statistics), then
   tax, club, harvest, landmarks, art. So the club round and Monday's harvest land in the

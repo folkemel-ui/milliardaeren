@@ -1190,6 +1190,6 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   unasked. Left in the Saftbod on purpose: the empty sign band over the shop window
   (25), the string of lights burning by day (100), and white cup stacks (Folke didn't
   pick "cups you can recognise").
-- **Not done, ask first** (shared files):
-  - The business cards' own 44 px pictures keep the full scene, except the Saftbod
-    (`NAER_PAA_KORTET`, Folke picked it on 10 October); the kiosk is still small there.
+- **The business cards' pictures** are close-ups out to the tile's corners for all 13
+  businesses since G13 (`fyllerFlisa` in `BedriftIkon.tsx`; `NAER_PAA_KORTET` has been dead
+  code since then).
