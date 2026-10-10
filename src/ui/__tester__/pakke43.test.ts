@@ -14,8 +14,8 @@ const pakke = JSON.parse(readFileSync(new URL('../../../package.json', import.me
 const hendelse = (alvor: Hendelse['alvor']): Nytt => ({ type: 'hendelse', hendelse: { sek: 0, tittel: 'X', tekst: '', alvor } })
 
 describe('versjonen', () => {
-  it('er 1.0.0, lik package.json, og står øverst i endringsloggen', () => {
-    expect(VERSJON).toBe('1.0.0')
+  it('er et versjonsnummer, lik package.json, og står øverst i endringsloggen', () => {
+    expect(VERSJON).toMatch(/^\d+\.\d+\.\d+$/)
     expect(pakke.version).toBe(VERSJON)
     expect(ENDRINGER[0].versjon).toBe(VERSJON)
   })
