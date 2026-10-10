@@ -1,12 +1,14 @@
 # wisdom-grafikk.md — the graphics track's own notes
 
-For the session in charge of graphics and animation (packs G1–G13, commits
+For the session in charge of graphics and animation (packs G1–G22, commits
 `Grafikkpakke GN: …`). Read it after `Ideer.md` and `wisdom.md`; this file holds what
 only matters when you draw. `wisdom.md` stays the source for how Folke works, the
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026) and G12 (10 October 2026). G13–G14 are planned in `Ideer.md`.
+2026) and G12 (10 October 2026). G13–G22 are planned in `Ideer.md`: the full frame in
+groups (G13–G15 businesses, G16 Scenes that grow, G17–G21 properties and luxury), then
+the seasons (G22).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -892,7 +894,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
 - **`cd` in a Bash call moves the session's directory** for the next calls too; use
   absolute paths or `git -C`.
 
-## 7. Notes for later (G1–G12 done; G13–G14 planned in `Ideer.md`)
+## 7. Notes for later (G1–G12 done; G13–G22 planned in `Ideer.md`)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -904,9 +906,9 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   detail page must set `style={nattstil(s.sek)}`.
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings and steps grow the start script,
-  which is at 238 of 250 kB gzipped after G12 (`startskript.test.ts`): G13's upgrade steps
+  which is at 238 of 250 kB gzipped after G12 (`startskript.test.ts`): G16's upgrade steps
   may need a part of their own, and the home scenes should be one from the start.
-- **G14 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
+- **G22 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
   it. Snow could follow the same pattern (a `--vinter` var and a snow layer), but the
   date changes only once a game day, so re-rendering with a prop is also cheap.
@@ -922,6 +924,6 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   pick "cups you can recognise").
 - **Not done, ask first** (shared files):
   - The homes (Pack 60) are still bought in silence; give them a buy moment with their
-    scene when G13 draws them.
+    scene when G16 draws them.
   - The business cards' own 44 px pictures keep the full scene, except the Saftbod
     (`NAER_PAA_KORTET`, Folke picked it on 10 October); the kiosk is still small there.
