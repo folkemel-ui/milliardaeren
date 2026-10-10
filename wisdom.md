@@ -108,6 +108,18 @@ session; delete what stops being true.
   the commit message. Art you leave for later becomes an item in the Graphics list (Pack
   60's home scenes), not a silent gap.
 
+- **Splitting a big file (Pack 65: `handlinger.ts` 964 lines, `Investeringer.tsx` 1 056)**: cut
+  it into top-level declarations (with their comments) by brace counting, assign each by
+  *name* to a file, keep the original order inside each file, and give every new file the
+  whole old import block. Then remove unused imports by scanning each file's body for the
+  name — not with a `tsc` loop (each pass took over a minute; six passes ran past ten).
+  Mind aliases (`antall as fmtAntall`: test the local name) and names that are also
+  Norwegian words in comments (`tall`, `sum`, `kroner` survive the scan; `tsc` names the
+  few left). Prove the move: strip imports, comments, `export` and whitespace from old and
+  new, and the code must be equal to the character. A barrel (`handlinger.ts` re-exporting
+  `handlinger/*`) keeps every importer unchanged; tests that read a moved file by path need
+  the new path.
+
 ## 3. Tools on this machine
 
 - **Write patch scripts as `.mjs` files with the Write tool** into the scratchpad and run
@@ -199,6 +211,10 @@ session; delete what stops being true.
   screenshot that. `zoom` with a region isn't supported.
 - **Tabs slide in**: a screenshot right after switching tabs shows an empty screen. Wait
   about a second and take it again.
+- **A hidden pane freezes CSS animations** (`document.visibilityState === 'hidden'`): the tab
+  slide stays at its first frame, shifted 24 px, so every page looks 9 px too wide and
+  overflow checks lie — even with reduced motion. Finish them first:
+  `for (const a of document.getAnimations()) a.finish()`, then measure.
 - **First page load after starting the server is slow**; the loading screen shows. Wait
   2–3 s before concluding anything. A welcome-back screen may appear — click «Fortsett».
 - **HMR keeps old module instances.** After edits, the app loads modules as
@@ -351,6 +367,10 @@ session; delete what stops being true.
   currency version cost +120 ms: a template string and `hashTekst` per call, every
   second. Cache per-second values once per second for *all* keys, keep knot values
   until time passes them, and use a `Map` for city → currency.
+- **Both tracks' test suites at once bring the runner error back** (Pack 65): the graphics
+  session ran its full suite in its own folder while ours ran, and «Timeout calling
+  onTaskUpdate» returned. Before blaming a change, list the Node processes
+  (`Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`) and rerun on a quiet machine.
 - **"Timeout calling onTaskUpdate"** (gone since Pack 63; if it comes back, look for a test that
   blocks for many seconds without yielding — the golden master ran 20 s in one call) at the end of a passing run is the runner starving
   under load, not a test failure. It appeared when Pack 59 made the suite ~10 % heavier
