@@ -12,7 +12,7 @@ import { startApp, type App } from './klikk'
 import { nyttSpill } from '../../engine/start'
 import { kjopKlubb } from '../../engine/handlinger'
 import { KLUBBNAVN, MAKS_TROPP, tabell } from '../../engine/klubb'
-import { simuler } from '../../engine/simulering'
+import { simulerMedPauser } from './simulerMedPauser'
 import type { Spilltilstand } from '../../engine/types'
 import { aapenKlubbside } from '../klubbsider'
 
@@ -33,8 +33,8 @@ function medKlubb(fro = 4242): Spilltilstand {
 
 /** En klubb som har spilt en hel sesong og fire runder til. */
 let erfaren: Spilltilstand | null = null
-function medSesong(): Spilltilstand {
-  erfaren ??= simuler(medKlubb(), 2700 + 4 * 300 + 10)
+async function medSesong(): Promise<Spilltilstand> {
+  erfaren ??= await simulerMedPauser(medKlubb(), 2700 + 4 * 300 + 10)
   return structuredClone(erfaren)
 }
 
@@ -58,7 +58,7 @@ const rader = (a: App) => [...a.rot.querySelectorAll('.klubbside-rad')]
 
 describe('klubben som nav', () => {
   it('toppen, neste kamp rett under, formen, tabellen og radene — troppen og markedet står ikke på navet', async () => {
-    app = await tilKlubben(medSesong())
+    app = await tilKlubben(await medSesong())
     const topp = app.rot.querySelector('.klubbtopp')!
     expect(topp.nextElementSibling!.classList.contains('nestekamp')).toBe(true)
     expect(titler(app)).toEqual(expect.arrayContaining(['Formen', 'Tabell']))
@@ -71,7 +71,7 @@ describe('klubben som nav', () => {
   })
 
   it('fire rader med én linje hver: antall spillere, plassen, stadion og nettoen, forrige sesong', async () => {
-    const s = medSesong()
+    const s = await medSesong()
     app = await tilKlubben(s)
     const tekster = rader(app).map((r) => r.textContent!)
     expect(tekster).toHaveLength(4)
@@ -88,7 +88,7 @@ describe('klubben som nav', () => {
   })
 
   it('fem rader av tabellen, med deg — øverst og nederst så nær som det går', async () => {
-    const s = medSesong()
+    const s = await medSesong()
     app = await tilKlubben(s)
     const mini = [...app.rot.querySelectorAll('.tabell')][0]
     const rad = mini.querySelectorAll('tbody tr')
@@ -100,7 +100,7 @@ describe('klubben som nav', () => {
   })
 
   it('formen er de fem siste kampene som S, U og T', async () => {
-    app = await tilKlubben(medSesong())
+    app = await tilKlubben(await medSesong())
     const brikker = [...app.rot.querySelectorAll('.formrekke .brikke')].map((b) => b.textContent)
     expect(brikker).toHaveLength(5)
     for (const b of brikker) expect(['S', 'U', 'T']).toContain(b)
@@ -109,7 +109,7 @@ describe('klubben som nav', () => {
 
 describe('sidene', () => {
   it('hver rad åpner sin side i stedet for skjermen, og tilbake lukker den', async () => {
-    app = await tilKlubben(medSesong())
+    app = await tilKlubben(await medSesong())
     const forventet: Record<string, string[]> = {
       'Troppen og marked': ['Troppen', 'Akademiet', 'Overgangsmarkedet'],
       'Kamper og tabell': ['Kamprapport', 'Siste kamper', 'Tabell', 'Toppscorere'],
@@ -134,7 +134,7 @@ describe('sidene', () => {
   })
 
   it('«Kamprapport ›», «Hele tabellen ›» og stadionstripen åpner sine sider', async () => {
-    app = await tilKlubben(medSesong())
+    app = await tilKlubben(await medSesong())
     await app.trykk(app.knapp(/Kamprapport/, app.rot.querySelector('.formkort')!))
     expect(app.rot.querySelector('.klubbdetalj h1')!.textContent).toBe('Kamper og tabell')
     await tilbake(app)
@@ -148,7 +148,7 @@ describe('sidene', () => {
   })
 
   it('toppscorerne: tre navn, resten bak «Vis alle»', async () => {
-    const s = medSesong()
+    const s = await medSesong()
     app = await tilKlubben(s)
     await app.trykk(app.knapp('Kamper og tabell', app.rot.querySelector('.klubbsider')!))
     const kort = [...app.rot.querySelectorAll('.kort')].find((k) => k.querySelector('.kort-tittel')?.textContent === 'Toppscorere')!
@@ -160,8 +160,8 @@ describe('sidene', () => {
   })
 
   it('sesongene: den siste i sin helhet og de før som rader, uten en knapp å trykke', async () => {
-    let s = medSesong()
-    s = simuler(s, 2700)
+    let s = await medSesong()
+    s = await simulerMedPauser(s, 2700)
     app = await tilKlubben(s)
     await app.trykk(app.knapp('Sesongene', app.rot.querySelector('.klubbsider')!))
     expect(titler(app)).toEqual(['Sesongen som var', 'Tidligere sesonger'])
@@ -192,7 +192,7 @@ describe('cupen i neste kamp', () => {
     for (let fro = 1; fro < 40 && !s; fro++) {
       const start = medKlubb(fro)
       for (const p of start.klubb!.spillere) p.styrke = p.angrep = p.forsvar = 95
-      const t = simuler(start, 300 + 10)
+      const t = await simulerMedPauser(start, 300 + 10)
       if (t.klubb!.cup && !t.klubb!.cup.ute) s = t
     }
     expect(s).not.toBeNull()
