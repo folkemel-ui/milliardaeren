@@ -1073,6 +1073,27 @@ session; delete what stops being true.
   there, and writes the new ones on open and on close. `startApp` in `klikk.ts` clears
   localStorage, so a test that needs marks across two app starts passes them in its new
   second argument (`startApp(s, { 'milliardaer.klubbSett': … })`).
+- **The last stretch (Pack 76).** A new property needs: the `EiendomId` type, an `EIENDOMSTYPER`
+  entry in price order with falling yield (`pakke35.test.ts`), a drawing in
+  `ved-behov/Eiendomstegninger.tsx` added at the *end* of `EIENDOMSTEGNINGER` and of `EIENDOMSIDER`
+  (`grafikkG12.test.ts` compares the two lists in order and counts them, 75 now), and its id in
+  `NY_STIL`. In a city that already has a currency and a `BYPLASS` nothing else is needed.
+  `fulltSpill()` owns every unit, so a big new property moves the tests built on it: the away-tick
+  rent test (`pakke69`) went from 1e-5 to 1.4e-4 because the skyscrapers carry most of the rent and
+  it steps at a day change inside a 10 s block (cash still matched to 1e-8). Find the cause by
+  zeroing one property at a time before widening a tolerance. A scene that stands at a distance
+  needs half-size cars (`Smaabil`): a `Bil` is drawn at street size and covered the mall's entrance.
+- **A fourth room step** meant the room code (`ui/romkode.ts`) needed 3 bits per room instead of 2
+  (`romkode(3,3,3)` was 63, now 219); the saves store step counts, not codes, so nothing migrates.
+  A drawing that picks a colour by step from a list (`[...][n]` in the wine cellar) must clamp `n`,
+  and `n === 3` checks become `n >= 3`.
+- **Numbers from the phone (Pack 76)**: `state/maaling.ts` times the catch-up after time away, each
+  live step, each save and the start-up; the panel (`Maalepanel.tsx`) shows them in Innstillinger
+  when the game was opened with `?maal` (read at start-up in `App`, remembered in localStorage).
+  Keep the *longest* catch-up of the visit: in the browser pane a hidden pane pauses the game, and a
+  21 s catch-up overwrote the two-hour one. A store that only one optional panel listens to may
+  notify every second; in the pane the panel then showed 4.4 ms a live second on the heaviest save
+  in development.
 - **A fresh 4. divisjon club loses its first cup round every time** (five seeds of five):
   a test that needs the cup running sets the squad to `styrke = angrep = forsvar = 95`
   before simulating day 1.
