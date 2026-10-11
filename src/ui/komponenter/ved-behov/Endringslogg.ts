@@ -8,6 +8,19 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '2.10.0',
+    navn: '2.10',
+    dato: 'Oktober 2026',
+    ingress: 'Klubben spilles nå: kampen går direkte, motstanderne har sitt eget spill, og det er mer å vinne.',
+    punkter: [
+      'Kampen spilles direkte gjennom dagen — 90 minutter, mål i sitt minutt og varsel når det smeller. Tabellen og rapporten venter til fløyta.',
+      'Motstanderne har eget angrep og forsvar, og taktikken svarer på dem: Forsvar mot et sterkt angrep, Angrep mot et svakt forsvar.',
+      'Været spiller med: regn og snø gir færre mål, og vinden hjelper det svakeste laget.',
+      'Kvalik ved hver grense: nummer 3 og 4 spiller om opprykk, 7 og 8 for å bli.',
+      'Supercupen åpner sesongen for serie- og cupmesteren, og alle pokalene står i trofeskapet.',
+    ],
+  },
+  {
     versjon: '2.9.0',
     navn: '2.9',
     dato: 'Oktober 2026',
