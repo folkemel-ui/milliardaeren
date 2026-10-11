@@ -50,19 +50,22 @@ describe('stegene mellom vekstrinnene (G16)', () => {
 
   it.each([...BEDRIFTSTEGNINGER])('%s: hvert steg legger noe nytt i scenen, på alle fire trinn', async (id) => {
     await lastAlle()
-    STARTNIVAA.forEach((start, t) => {
+    // En pause mellom tegningene (Pakke 79): hele testen tegner i 3–5 s, og uten pauser
+    // ga testkjøreren opp å vente på svar («Timeout calling onTaskUpdate»).
+    for (const [t, start] of STARTNIVAA.entries()) {
       const antallSteg = [4, 4, 9, 10][t]
       let forrige = scene(id, start)
       for (let k = 1; k <= antallSteg; k++) {
         // Nivået som gir steg k er trinnets start + 5·k (i trinn 0 er det bare 5·k).
         const nivaa = t === 0 ? 5 * k : start + 5 * k
+        await new Promise((r) => setTimeout(r, 0))
         const dette = scene(id, nivaa)
         expect(stegFor(nivaa), `${id} nivå ${nivaa}`).toBe(k)
         expect(dette, `${id} trinn ${t} steg ${k}`).not.toBe(forrige)
         expect(dette.length, `${id} trinn ${t} steg ${k} er ikke mindre enn steget før`).toBeGreaterThanOrEqual(forrige.length)
         forrige = dette
       }
-    })
+    }
   })
 
   it.each([...BEDRIFTSTEGNINGER])('%s: stegene vises bare i scenen, ikke på kort, i lister eller i kjøpsøyeblikket', async (id) => {
