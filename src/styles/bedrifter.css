@@ -53,6 +53,47 @@
   margin-top: 6px;
 }
 
+/* Pakke 84: én rad for en ferdig bedrift og en fullt kjøpt eiendom — bilde, navn, tall eller knapp. */
+.kortrad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+/* En fullt kjøpt eiendom: navnet i mindre skrift, så lange navn holder seg på én–to linjer. */
+.eiendomsrad h2 {
+  font-size: var(--skrift-3);
+}
+
+/* En ferdig bedrift: bildet over to rader, navn og inntekt øverst, oppgraderingen under. */
+.ferdigrad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'bilde navn inntekt' 'bilde knapp knapp';
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+}
+
+.ferdigrad > .bedrift-ikon {
+  grid-area: bilde;
+  align-self: start;
+}
+
+.ferdigrad > h2 {
+  grid-area: navn;
+  margin: 0;
+}
+
+.ferdigrad > .inntekt {
+  grid-area: inntekt;
+}
+
+.ferdigrad > .hold-knapp {
+  grid-area: knapp;
+}
+
 .bedriftskort-knapper {
   display: grid;
   grid-template-columns: 1fr auto;

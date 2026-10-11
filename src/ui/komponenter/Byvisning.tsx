@@ -106,7 +106,7 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
           <h2 className="seksjon-tittel">Boliger og bygg</h2>
           <ul className="kortliste">
             {bygg.map((id) => (
-              <Eiendomskort key={id} s={s} id={id} />
+              <Eiendomskort key={id} s={s} id={id} somRad />
             ))}
           </ul>
         </>

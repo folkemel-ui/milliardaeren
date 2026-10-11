@@ -161,7 +161,7 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
       )}
       <ul className="kortliste">
         {synlige.map((id) => (
-          <Eiendomskort key={id} s={s} id={id} />
+          <Eiendomskort key={id} s={s} id={id} somRad />
         ))}
         {nesteSkjult && (
           <li className="kort kjopskort laast">

@@ -85,9 +85,10 @@ export function Bors({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => voi
   )
 }
 
-function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | 'krypto'; velg: (id: PapirId) => void }) {
+export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | 'krypto'; velg: (id: PapirId) => void }) {
   const ider = klasse === 'aksje' ? AKSJER : KRYPTO
   const eide = ider.filter((id) => s.beholdning[id])
+  const andre = ider.filter((id) => !s.beholdning[id])
 
   return (
     <>
@@ -120,11 +121,14 @@ function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | '
         </ul>
       )}
 
+      {/* Pakke 84: det du eier, står over; her bare resten, så hver står én gang. */}
       <h2 className="seksjon-tittel">
-        {klasse === 'aksje' ? 'Alle aksjer' : 'Alle mynter'} <Forklaring tema={klasse === 'aksje' ? 'aksjer' : 'krypto'} />
+        {eide.length === 0 ? (klasse === 'aksje' ? 'Alle aksjer' : 'Alle mynter') : klasse === 'aksje' ? 'Andre aksjer' : 'Andre mynter'}{' '}
+        <Forklaring tema={klasse === 'aksje' ? 'aksjer' : 'krypto'} />
       </h2>
+      {andre.length === 0 && <p className="dempet liten">Du eier {klasse === 'aksje' ? 'alle aksjene' : 'alle myntene'} på børsen.</p>}
       <ul className="kortliste papirliste">
-        {ider.map((id) => {
+        {andre.map((id) => {
           const p = PAPIRER[id]
           const e = endringTo(s, id)
           return (

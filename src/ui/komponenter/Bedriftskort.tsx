@@ -22,6 +22,7 @@ import {
   ANSATTE_PER_NIVAA,
   BEDRIFTSTYPER,
   BORTE_TAK_SEK,
+  FORBEDRINGER,
   MAKS_ANSATTE,
   milepaelerFor,
 } from '../../engine/innhold'
@@ -33,6 +34,11 @@ import { BedriftIkon } from './BedriftIkon'
 import { usePuls } from './Tikk'
 import { NyMerke } from './Kjopsglimt'
 import { Ikon } from './Ikoner'
+
+/** En ferdig bedrift (Pakke 84): alle forbedringene kjøpt og retningen valgt. Da får den det korte kortet. */
+export function erFerdig(b: Bedrift): boolean {
+  return b.forbedringer >= FORBEDRINGER[b.type].length && b.retning !== undefined
+}
 
 /** Hvor langt bedriften har kommet fra forrige milepæl mot neste (0–1). */
 function milepaelFremdrift(type: BedriftstypeId, nivaa: number, neste: number | null): number {
@@ -55,6 +61,25 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
   // Hvert kjøp i bedriften gir en puls — gull når en milepæl nettopp er nådd.
   const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), milepaelerFor(b.type).includes(b.nivaa))
   const [flytetall, legg] = useFlytetall()
+
+  // Pakke 84: en ferdig bedrift — alle forbedringene kjøpt og retningen valgt — har ikke annet
+  // igjen enn å oppgradere, så kortet blir én rad. Resten står på detaljsiden.
+  if (erFerdig(b)) {
+    return (
+      <li className={`kort bedriftskort bedriftskort-ferdig kan-aapnes ${puls}`} data-ny={b.type} onClick={vedKorttrykk(åpne)}>
+        {/* Bildet over to rader; navnet og inntekten øverst, oppgraderingen under (nivået står på knappen). */}
+        <div className="ferdigrad">
+          <BedriftIkon type={b.type} nivaa={b.nivaa} forbedringer={b.forbedringer} />
+          <h2>
+            {type.navn}
+            <NyMerke id={b.type} />
+          </h2>
+          <span className={`${bedriftInntektIDag(s, b) >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(bedriftInntektIDag(s, b))}</span>
+          <Oppgraderingsknapp s={s} b={b} mengde={mengde} />
+        </div>
+      </li>
+    )
+  }
 
   return (
     <li className={`kort bedriftskort kan-aapnes ${puls}`} data-ny={b.type} onClick={vedKorttrykk(åpne)}>

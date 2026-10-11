@@ -207,6 +207,24 @@
   margin-left: 6px;
 }
 
+/* Pakke 84: den korte lista — framdriften, «Neste» og «Sist». */
+.prestasjoner-spor {
+  margin: 4px 0 12px;
+}
+
+.prestasjoner-del {
+  margin: 4px 0 6px;
+}
+
+/* Etter en overskrift står lista tett; neste overskrift får luft. */
+.prestasjoner-del + .prestasjoner {
+  margin-top: 0;
+}
+
+.prestasjoner + .prestasjoner-del {
+  margin-top: 16px;
+}
+
 .prestasjoner-skjulte {
   margin: 10px 0 0;
 }

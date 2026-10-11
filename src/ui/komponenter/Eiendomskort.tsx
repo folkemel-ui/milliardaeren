@@ -29,8 +29,10 @@ import { trykkApner } from '../detaljvisning'
 /**
  * Kortet for én eiendomstype: leie, standard, og knappene for å kjøpe, selge og pusse opp. Brukes i lista og i gatebildet.
  * Et trykk åpner detaljsiden; der står kortet selv under den store scenen (`iDetalj`).
+ * I listene (`somRad`) blir en fullt kjøpt eiendom én rad — bilde, navn og leie — og
+ * salg og oppussing ligger på detaljsiden (Pakke 84: Eiendom → Norge var 8,4 skjermer).
  */
-export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: EiendomId; iDetalj?: boolean }) {
+export function Eiendomskort({ s, id, iDetalj = false, somRad = false }: { s: Spilltilstand; id: EiendomId; iDetalj?: boolean; somRad?: boolean }) {
   const t = EIENDOMSTYPER[id]
   const eier = s.eiendommer[id] ?? 0
   const pris = eiendomspris(s, id)
@@ -44,6 +46,41 @@ export function Eiendomskort({ s, id, iDetalj = false }: { s: Spilltilstand; id:
   const oppussing = s.oppussing[id]
   const oppussingPris = oppussingspris(s, id)
   const nesteStandard = STANDARDER[st + 1]
+
+  if (somRad && fullt && !iDetalj) {
+    return (
+      <li className="kort bedriftskort eiendomsrad kan-aapnes" data-ny={id} onClick={trykkApner({ slag: 'eiendom', id })}>
+        <div className="kortrad">
+          <Apneknapp ting={{ slag: 'eiendom', id }} navn={t.navn}>
+            <span className="bilde-med-brikke">
+              <BedriftIkon type={id} />
+              <span className="brikke gull" aria-label={`${eier} av ${t.maksAntall} eid`}>
+                {eier}/{t.maksAntall}
+              </span>
+            </span>
+          </Apneknapp>
+          <div className="bedriftskort-midt">
+            <h2>
+              {t.navn}
+              {st > 0 && <span className={st === 1 ? 'merke info' : 'merke gull'}>{STANDARDER[st].navn}</span>}
+            </h2>
+            {/* Stedet under navnet, når navnet ikke alt sier det («Kontorhus i Nyhavn»); «3/3» på bildet sier at alt er kjøpt. */}
+            <span className="dempet liten">
+              {oppussing
+                ? `Pusses opp · ferdig om ${varighet(Math.max(0, oppussing.ferdigSek - s.sek))}`
+                : t.navn.includes(t.sted.split(',')[0])
+                  ? t.sted.split(',').slice(1).join(',').trim() || 'Alle kjøpt'
+                  : t.sted.split(',')[0]}
+            </span>
+          </div>
+          <div className="eiendom-tall">
+            {oppussing ? <span className="dempet">Ingen leie</span> : <span className="pluss">{perSek(leieHverPerSek(s, id) * eier)}</span>}
+            <span className="dempet liten">i alt</span>
+          </div>
+        </div>
+      </li>
+    )
+  }
 
   return (
     <li className={iDetalj ? 'kort bedriftskort' : 'kort bedriftskort kan-aapnes'} data-ny={id} onClick={iDetalj ? undefined : trykkApner({ slag: 'eiendom', id })}>

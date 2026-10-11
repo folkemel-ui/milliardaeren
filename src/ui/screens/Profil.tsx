@@ -55,11 +55,41 @@ function Trofeskap({ s }: { s: Spilltilstand }) {
   )
 }
 
-function Prestasjonsliste({ s }: { s: Spilltilstand }) {
+/** Så mange av de neste og de siste prestasjonene vises før «Se alle» (Pakke 84). */
+const PRESTASJONER_KORT = 3
+
+export function Prestasjonsliste({ s }: { s: Spilltilstand }) {
   // Pakke 70: de skjulte vises først når de er nådd — men de telles, så du vet at noe venter.
   const synlige = synligePrestasjoner(s)
   const klart = synlige.filter((p) => s.prestasjoner[p.id] !== undefined).length
   const skjulte = PRESTASJONER.length - synlige.length
+  // Pakke 84: lista var 2 458 px i et sent spill. Kort: tallet, de neste tre og de siste tre.
+  const [alle, settAlle] = useState(false)
+  const neste = synlige.filter((p) => s.prestasjoner[p.id] === undefined).slice(0, PRESTASJONER_KORT)
+  const siste = synlige
+    .filter((p) => s.prestasjoner[p.id] !== undefined)
+    .sort((a, b) => s.prestasjoner[b.id] - s.prestasjoner[a.id])
+    .slice(0, PRESTASJONER_KORT)
+  const vises = alle ? synlige.length : neste.length + siste.length
+  const liste = (ps: typeof synlige) => (
+    <ul className="prestasjoner">
+      {ps.map((p) => {
+        const når = s.prestasjoner[p.id]
+        return (
+          <li key={p.id} className={når === undefined ? 'prestasjon' : 'prestasjon klart'} title={p.beskrivelse}>
+            <span className="prestasjon-emoji">
+              <Merke id={p.id} klart={når !== undefined} størrelse={38} />
+            </span>
+            <span className="prestasjon-navn">
+              {p.navn}
+              {p.skjult && <span className="etikett prestasjon-skjult">Skjult</span>}
+            </span>
+            <span className="prestasjon-besk">{p.beskrivelse}</span>
+          </li>
+        )
+      })}
+    </ul>
+  )
   return (
     <div className="kort">
       <div className="maal-topp">
@@ -68,23 +98,24 @@ function Prestasjonsliste({ s }: { s: Spilltilstand }) {
           {klart} / {synlige.length}
         </span>
       </div>
-      <ul className="prestasjoner">
-        {synlige.map((p) => {
-          const når = s.prestasjoner[p.id]
-          return (
-            <li key={p.id} className={når === undefined ? 'prestasjon' : 'prestasjon klart'} title={p.beskrivelse}>
-              <span className="prestasjon-emoji">
-                <Merke id={p.id} klart={når !== undefined} størrelse={38} />
-              </span>
-              <span className="prestasjon-navn">
-                {p.navn}
-                {p.skjult && <span className="etikett prestasjon-skjult">Skjult</span>}
-              </span>
-              <span className="prestasjon-besk">{p.beskrivelse}</span>
-            </li>
-          )
-        })}
-      </ul>
+      <div className="milepael-spor prestasjoner-spor" role="img" aria-label={`${klart} av ${synlige.length} prestasjoner`}>
+        <div className="milepael-fyll" style={{ width: `${(klart / Math.max(1, synlige.length)) * 100}%` }} />
+      </div>
+      {alle ? (
+        liste(synlige)
+      ) : (
+        <>
+          {neste.length > 0 && <h3 className="etikett prestasjoner-del">Neste</h3>}
+          {neste.length > 0 && liste(neste)}
+          {siste.length > 0 && <h3 className="etikett prestasjoner-del">Sist</h3>}
+          {siste.length > 0 && liste(siste)}
+        </>
+      )}
+      {synlige.length > vises || alle ? (
+        <button className="knapp knapp-sekundær" onClick={() => settAlle(!alle)}>
+          {alle ? 'Vis færre' : `Se alle ${synlige.length}`}
+        </button>
+      ) : null}
       {skjulte > 0 && (
         <p className="dempet liten prestasjoner-skjulte">
           {skjulte === 1 ? 'Én skjult prestasjon venter' : `${skjulte} skjulte prestasjoner venter`} på å bli funnet.

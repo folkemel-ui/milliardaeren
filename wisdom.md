@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 83, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 84, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,16 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **Measuring page heights (Pack 84)**: a `Seksjon` header carries `aria-expanded`, not the class
+  `åpen` — clicking every `.seksjon-hode` without that check folds the open ones and halves the
+  number. Measure before and after with the same script on the same frozen save (keep a copy in
+  localStorage, e.g. `milliardaer.lagring.p84`, and restore it before each run), and `git stash` to get
+  the «before» from the old code rather than trusting an earlier, differently-folded reading. The
+  city chips (`.byvalg`) scroll sideways by design and always show up in an overflow scan.
+- **A one-row card at 375 px fits a picture, a name and a number, not a button too** (Pack 84): a
+  175 px upgrade button left the name 63 px and «Gatekjøkken» ran under it. Two rows (picture over
+  both, name and income on top, the button under) gave 113 px with no collisions; check collisions
+  with rects (`h2.right > tall.left`), not by eye.
 - **Business income is computed in two places** (Pack 83): `bedriftsfaktor` in `formler.ts` (what the
   cards show) and its own line in `simulering.ts` (what is paid, written out for speed). A rule on the
   day's factor — premium's floor, `dagForBedrift` — must go in both, and a test should compare one
