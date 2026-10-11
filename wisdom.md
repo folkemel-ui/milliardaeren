@@ -606,11 +606,16 @@ session; delete what stops being true.
   `maxWorkers: 4` at the root of `test` in `vite.config.ts` (full run ~120 → ~141 s).
   Vitest 3.2 ignores `maxWorkers` and `poolOptions` set inside one project; only the root
   setting or the `--maxWorkers` flag works.
+  **Since Pack 79 it is 3.** On a slower night (the full run 154 → 177 s) four workers failed three
+  full runs in a row at 96 of 97; three gave 97 of 97 (~213 s). Read the file count before
+  anything else. The fast group can trip it too: `grafikkG16` renders for 3–5 s per test, 13 in a
+  row (71 s); a pause before each render in its loop fixed that group. Tests that draw many scenes
+  in a loop should pause too.
 - **An animated page in the browser pane brings it back too** (G14): a contact sheet of
   animated scenes left open made «Timeout calling onTaskUpdate» fail `lever.mjs` three
   times running; closing it and stopping the dev server gave a clean run at once. Leave
   the pane on a still page (or `about:blank`) while the full suite runs.
-- **"Timeout calling onTaskUpdate"** (since Pack 78 held off by `maxWorkers: 4`, see above; before
+- **"Timeout calling onTaskUpdate"** (held off by `maxWorkers: 3` since Pack 79, see above; before
   that, look for a test that blocks for many seconds without yielding — the golden master ran 20 s
   in one call) at the end of a passing run is the runner starving
   under load, not a test failure. It appeared when Pack 59 made the suite ~10 % heavier
