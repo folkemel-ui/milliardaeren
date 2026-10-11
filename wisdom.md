@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 88, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 89, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -111,7 +111,10 @@ session; delete what stops being true.
 - **"Add the next pack" / "start the next pack" means build it** when the pack already sits in
   the plan (after Pack 77, Folke wrote «Add the next pack» and wanted Pack 78 built). Say in one
   line how you read it, then ask the pack's design questions as usual; the question round is
-  also the chance for Folke to say otherwise.
+  also the chance for Folke to say otherwise. **When the questions were already answered with
+  recommendations in the previous reply** («what is your next task?» → four questions with my
+  picks → «Start next pack», Pack 89), the reply is the go-ahead for those picks: build with them,
+  say so in one line at the start, and don't ask again.
 - **A pack the size of a list section is fine as two packs on the same files.** The club page
   (19 items) became Pack 77 (the structure: a hub and four pages) and Pack 78 (the lists inside
   them). Building the structure first meant the second pack's measurements were per page, and
@@ -379,6 +382,10 @@ session; delete what stops being true.
   `Illustrasjon` new props every second, so every drawing in Selskaper and Samling was
   rebuilt each second (161 and 72 ms in dev). Hoist such values to a constant;
   `pakke64.test.ts` fails on the pattern for every memo drawing.
+- **«Change in the order of Hooks called by Illustrasjon» is old** (seen in Pack 89 on Luksus and
+  Eiendom, which the pack did not touch): `Illustrasjon` calls a drawing as a function, so while
+  its part loads (`TOMT`, no hooks) and after (the real drawing, `useContext`) the hook count
+  differs. Not a pack's bug; it was offered to Folke as a separate task on 11 October 2026.
 - **Parts that load when needed (G12).** The property and luxury drawings, the two maps and
   the gallery are outside the start-up script (`ui/vedBehov.ts`, `komponenter/ved-behov/`).
   The components keep their names, so screens use them as before, but a test that renders
@@ -520,6 +527,23 @@ session; delete what stops being true.
   lists, so edit by the line's name), a close-up in `NAERBILDER` if it stands in a place
   (`grafikkG9`), and the drawing count in `grafikkG12`. Cloning a gallery `<svg>` into an overlay grid
   crops it; one drawing at a time in a fixed 420 px box shows it whole.
+- **A thing that is not a `LuksusId` but stands in Samling (Pack 89, the unique things)** needs:
+  a space (`brukteplasser` counts `unikeI` by `KATEGORI_I`, which now lives in `eiendom.ts`), status
+  (`statuspoeng` adds `unikstatus` last), value (`luksusverdi` adds `unikverdi`, so `eiendeler`,
+  Profil → Meg's Samling row and the margin call follow), a place in the scene (`Lagerkort` lists
+  them after the bought ones; `grafikkG9` counts the `naerbilde={NAER_PLASS}` uses — 3 now), a
+  buy moment (`hendelsesstrom` gives `art: 'luksus'` with the drawing's id) and a step in the
+  margin call. The catalogue sits in `unike.ts`, which imports only types: `eiendom.ts`,
+  `bank.ts` and `handel.ts` all need it, and the auction logic (`auksjon.ts`) imports `bank` and
+  `formler`, so anything those three need must not live in `auksjon.ts` (cycles).
+- **Income that is rent in all but name can go in `totaltLeie`** (Pack 89, charter), as the
+  harvest did with `totaltHost`: the accounts, the tax and the statistics need nothing new. A
+  counter of its own touches nine files (§5, «Every krone in»). Keep a per-thing tally on the
+  thing (`charter[id].tjent`) for its detail page, and add the per-second sum to `bruttoPerSek` and
+  `nettoPerSek` last, so the sums stay bit-for-bit without it. Pay it in the rent block
+  (`leieSek`), so time away pays the same.
+- **Round prices a player reads as a bid** (Pack 89): `rundBud` keeps three significant digits
+  (kr 66,4 mill, not kr 66 393 633), and a test can then compare the price exactly.
 - **New matches get a die of their own** (Pack 87): the playoffs (`${navn}:${sesong}:kvalik`) and the
   Super Cup (`…:supercup`) draw from hashes, so adding them moved none of the club's existing dice — the
   other divisions' strength-and-luck ranking still draws from the club's die in the same order as before.
@@ -658,7 +682,13 @@ session; delete what stops being true.
   initialization") — import it inside the factory.
 - **Avisa takes five stories**: where a new kind of story goes in `gisUtAvis` decides
   what it pushes off the front page. The world's market stories sit after the rivals,
-  because a merger test caught them pushing out the player's own merger.
+  because a merger test caught them pushing out the player's own merger. **It happened again
+  in Pack 89**: I put the auction stories high so «Under hammeren» would be seen, and
+  `pakke11`'s merger test failed the same way (its fixture has 1 mrd, so an auction opens at
+  its first day change). Now your own purchase stands with the `deg` stories and the opening
+  and the rival's purchase right after `omRivalene`; the toast and the event log carry the
+  opening on a busy day. Any test fixture with a lot of cash now gets an auction on its
+  first day change — remember it when a front-page test fails.
 - **A click test must unfold a `Seksjon` first** when the save owns nothing in it — it starts
   folded, and its cards aren't rendered at all (Pack 65's property test saw 0 cards). Click
   its `.seksjon-hode` unless it already has the class `åpen`.
