@@ -890,8 +890,10 @@ export interface Startup {
   investertIRunde: number
   /** Skjult: 0–1. Et godt team går sjeldnere konkurs. */
   kvalitet: number
-  /** Det du får se: et støyete inntrykk av teamet, 0–2. */
+  /** Det du får se: et støyete inntrykk av teamet, 0–2. Blir skarpere for hver runde (Pakke 83). */
   inntrykk: number
+  /** Du har betalt for en gransking og ser det sanne teamet og den sanne risikoen (Pakke 83). */
+  gransket?: boolean
   status: Startupstatus
   startetSek: number
   /** Når selskapet ble avsluttet, og hva du fikk utbetalt. */

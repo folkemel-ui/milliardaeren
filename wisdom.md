@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 82, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 83, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,18 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **Business income is computed in two places** (Pack 83): `bedriftsfaktor` in `formler.ts` (what the
+  cards show) and its own line in `simulering.ts` (what is paid, written out for speed). A rule on the
+  day's factor — premium's floor, `dagForBedrift` — must go in both, and a test should compare one
+  simulated second's `tjent` with `bedriftInntektIDag` on a day where the rule bites.
+- **A system's «one right option» is measured as expected value per phase or per type, not overall**
+  (Pack 83). Premium's «no bad days» is worth +15 % for the saftbod and +0.2 % for oil, so one flat
+  number would have been right for some businesses and wrong for others; measure the calendar per type
+  (`dagensFaktor` over 730 days) before choosing. Managers became a choice by giving each a phase and
+  making a switch cheap (1 % of the city) — a pick-once choice is decided by the average alone.
+- **New startup ideas need logos** (`STARTUPMERKER` in `StartupLogo.tsx`, the graphics track's file):
+  `grafikkG4.test.ts` wants one per idea in a unique colour with contrast ≥ 3 on both dark (#181613)
+  and white. Check colours with a scratch script first (relative luminance ~0.12–0.30 passes both).
 - **The front page holds five stories, and a fresh game's first day fills them** (Pack 82): company
   news, quarterly notices and the week's trends took all five, so a test that bumped a stock and
   looked for the market story on the front page found nothing. Test a story's own function

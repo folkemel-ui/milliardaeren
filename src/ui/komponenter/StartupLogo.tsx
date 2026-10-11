@@ -198,6 +198,168 @@ export const STARTUPMERKER: Record<string, Merke> = {
       </>
     ),
   },
+  // Pakke 83: seksten nye ideer, tegnet av spillsporet i samme stil (enkle merker på 24×24).
+  // Fjordbrygg: et glass med skum.
+  Fjordbrygg: {
+    farge: '#b08a2a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M6 7h11l-1.2 13.2a1.6 1.6 0 0 1-1.6 1.3H8.8a1.6 1.6 0 0 1-1.6-1.3z" />
+        <path fill={lys} d="M5.4 4.6a2.4 2.4 0 0 1 4-1.6 2.6 2.6 0 0 1 4.4.4 2.2 2.2 0 0 1 3.8 1.6V7.6H5.4z" />
+        <path d="M17 10h2a2 2 0 0 1 2 2v2.4a2 2 0 0 1-2 2h-2.4" {...strek(m, 1.6)} />
+      </>
+    ),
+  },
+  // Strømdeling: to hus med et lyn mellom.
+  Strømdeling: {
+    farge: '#c08a1a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M1.5 13l4-4 4 4v8h-8zM14.5 13l4-4 4 4v8h-8z" />
+        <path fill={lys} d="M12.6 4.5L9.8 10.6h2.4l-1 4.4 3.2-6.4H12z" />
+      </>
+    ),
+  },
+  // Torskefarm: en fisk i et kar.
+  Torskefarm: {
+    farge: '#3a7a8a',
+    tegning: (m, lys) => (
+      <>
+        <path d="M3 8v11.5a1.5 1.5 0 0 0 1.5 1.5h15a1.5 1.5 0 0 0 1.5-1.5V8" {...strek(m, 1.8)} />
+        <path fill={m} d="M6.5 14c2-3 6.5-3.4 9-1l2.6-2v6l-2.6-2c-2.5 2.4-7 2-9-1z" />
+        <path d="M5 6.5c2-1.4 4-1.4 6 0s4 1.4 6 0" {...strek(lys, 1.4)} />
+      </>
+    ),
+  },
+  // Lærekassen: en åpen bok.
+  Lærekassen: {
+    farge: '#8a5aa0',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M2 5.5c3.4-1 6.8-.6 9.4 1.2V20c-2.6-1.6-6-2-9.4-1zM22 5.5c-3.4-1-6.8-.6-9.4 1.2V20c2.6-1.6 6-2 9.4-1z" />
+        <path d="M4.4 9c1.8-.3 3.6-.1 5 .5M4.4 12.2c1.8-.3 3.6-.1 5 .5" {...strek(lys, 1.1)} />
+      </>
+    ),
+  },
+  // Hyttehjelp: en skiftenøkkel.
+  Hyttehjelp: {
+    farge: '#7a6a4a',
+    tegning: (m) => <path fill={m} d="M15.6 2.4a5.6 5.6 0 0 0-5.2 7.6l-7.6 7.6a2.2 2.2 0 0 0 3.1 3.1l7.6-7.6a5.6 5.6 0 0 0 7.6-5.2l-3.3 3.3-3.3-.8-.8-3.3z" />,
+  },
+  // Nordlys Reiser: tre bånd av nordlys over en fjelltopp.
+  'Nordlys Reiser': {
+    farge: '#3a9a7a',
+    tegning: (m, lys) => (
+      <>
+        <path d="M2 9c4-4 8 2 12-2s6-1 8-2M2 12.6c4-3.4 8 1.8 12-1.6s6-.8 8-1.6" {...strek(m, 1.8)} />
+        <path fill={lys} d="M1.5 21.5l6-7 3.5 4 3-3 8.5 6z" />
+      </>
+    ),
+  },
+  // Pantbanken: en flaske med et pluss.
+  Pantbanken: {
+    farge: '#4a7a5a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M9.6 1.8h4.8v4.4c2.2 1.2 3.4 3 3.4 5.4v9a1.6 1.6 0 0 1-1.6 1.6H7.8a1.6 1.6 0 0 1-1.6-1.6v-9c0-2.4 1.2-4.2 3.4-5.4z" />
+        <path d="M12 11.6v6M9 14.6h6" {...strek(lys, 1.8)} />
+      </>
+    ),
+  },
+  // Fiskepass: en fisk med en hake.
+  Fiskepass: {
+    farge: '#2a7ab0',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M2 12c3-4.6 9.6-5.4 13.4-1.6L19 7.6v8.8l-3.6-2.8C11.6 17.4 5 16.6 2 12z" />
+        <path d="M14.6 18.6l2.4 2.4 4.6-5" {...strek(m, 1.8)} />
+        <circle cx="6.4" cy="11.2" r="1.1" fill={lys} />
+      </>
+    ),
+  },
+  // Snekkerbot: en hammer.
+  Snekkerbot: {
+    farge: '#9a6a3a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M3.5 6.5l5-4 6.4 4.2-2.2 2.4L10 7.8 8 10z" />
+        <path d="M11.4 9.2l8.8 10.6" {...strek(m, 2.6)} />
+        <path d="M5 5.8l3.4-2.6" {...strek(lys, 1.2)} />
+      </>
+    ),
+  },
+  // Vinterdekk.no: et dekk med mønster.
+  'Vinterdekk.no': {
+    farge: '#6a6a8a',
+    tegning: (m, lys) => (
+      <>
+        <path fillRule="evenodd" fill={m} d="M12 1.8a10.2 10.2 0 1 1 0 20.4 10.2 10.2 0 0 1 0-20.4zM12 7.4a4.6 4.6 0 1 0 0 9.2 4.6 4.6 0 0 0 0-9.2z" />
+        <path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.4 5.4l2.1 2.1M16.5 16.5l2.1 2.1M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1" {...strek(lys, 1.2)} />
+      </>
+    ),
+  },
+  // Klimatak: et tak med et blad.
+  Klimatak: {
+    farge: '#4a8a3a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M1.5 13L12 4l10.5 9h-3v8.5h-15V13z" />
+        <path fill={lys} d="M8.4 18.6c0-4 2.8-6.4 7.2-6.4 0 4-2.6 6.6-7.2 6.4zM8.4 18.6l3.6-3.4" />
+      </>
+    ),
+  },
+  // Rypa Sko: en fjellsko.
+  'Rypa Sko': {
+    farge: '#a05a7a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M5 3.5h6v8.4c3 .8 6.6 1.8 8.8 3.4a2.4 2.4 0 0 1 1 2V19H3.6V5a1.5 1.5 0 0 1 1.4-1.5z" />
+        <path d="M3 21h18.6" {...strek(m, 1.8)} />
+        <path d="M11 13.4l1.6-1.4M13.6 14.2l1.6-1.4" {...strek(lys, 1.2)} />
+      </>
+    ),
+  },
+  // Kodeskolen: kodeklammer.
+  Kodeskolen: {
+    farge: '#3a6ab0',
+    tegning: (m, lys) => (
+      <>
+        <path d="M7.5 6.5L2.5 12l5 5.5M16.5 6.5l5 5.5-5 5.5" {...strek(m, 2.2)} />
+        <path d="M13.4 4.5l-2.8 15" {...strek(lys, 1.8)} />
+      </>
+    ),
+  },
+  // Ventelista: et timeglass.
+  Ventelista: {
+    farge: '#8a7a2a',
+    tegning: (m, lys) => (
+      <>
+        <path d="M5 2.5h14M5 21.5h14M6.5 2.5c0 5 5.5 6.5 5.5 9.5s-5.5 4.5-5.5 9.5M17.5 2.5c0 5-5.5 6.5-5.5 9.5s5.5 4.5 5.5 9.5" {...strek(m, 1.8)} />
+        <path fill={lys} d="M8.6 20c.6-2.4 3.4-3.6 3.4-3.6s2.8 1.2 3.4 3.6z" />
+      </>
+    ),
+  },
+  // Havstrøm: bølger og en pil.
+  Havstrøm: {
+    farge: '#2a8a8a',
+    tegning: (m, lys) => (
+      <>
+        <path d="M1.5 14c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 7 0M1.5 19c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 7 0" {...strek(m, 1.8)} />
+        <path d="M5 7.5h12M14 4.5l3 3-3 3" {...strek(lys, 1.6)} />
+      </>
+    ),
+  },
+  // Barnehagen+: en byggekloss med et pluss.
+  'Barnehagen+': {
+    farge: '#c0507a',
+    tegning: (m, lys) => (
+      <>
+        <path fill={m} d="M3 6.5h13v13H3z" />
+        <path d="M9.5 9.5v7M6 13h7" {...strek(lys, 1.8)} />
+        <path d="M18.5 3.5v6M15.5 6.5h6" {...strek(m, 1.8)} />
+      </>
+    ),
+  },
 }
 
 /** Ukjent navn (skal ikke skje): en enkel gnist. */

@@ -43,7 +43,10 @@ export const RETNINGER: Record<Retning, { navn: string; beskrivelse: string; inn
   // Volum ble målt til +25 % først: da kom milliarden en time tidligere (6 t 17 min mot 7 t 20 min).
   // Med +15 % kommer den på 6 t 33 min for en spiller som velger volum overalt.
   volum: { navn: 'Volum', beskrivelse: 'Flere kunder, lavere marginer, mer i kassa.', inntekt: 1.15, verdi: 1 },
-  premium: { navn: 'Premium', beskrivelse: 'Færre kunder, høyere priser og et navn folk kjenner.', inntekt: 1, verdi: 1.3 },
+  // Pakke 83: premium ga bare verdi og litt status — rundt en tjuendedel av volum. Nå +10 % og
+  // ingen dårlige dager (dagsgulv), så valget avhenger av bransjen: saftboden, hotellet, restauranten,
+  // banken og skisenteret svinger mest og tjener på premium; oljen, rederiet og bodene på volum.
+  premium: { navn: 'Premium', beskrivelse: 'Færre kunder, høyere priser og et navn folk kjenner — ingen dårlige dager.', inntekt: 1.1, verdi: 1.3 },
 }
 
 export const RETNINGSLISTE: Retning[] = ['volum', 'premium']
@@ -58,6 +61,14 @@ export function premiumstatus(s: Spilltilstand): number {
   let sum = 0
   for (const b of s.bedrifter) sum += retningsstatus(b)
   return sum
+}
+
+/**
+ * Dagens faktor (kalenderen og nyhetene) for bedriften: en premiumbedrift har ingen dårlige
+ * dager, så faktoren kan bare løfte den (Pakke 83). Lønnen og filialene påvirkes ikke.
+ */
+export function dagForBedrift(b: Bedrift, dag: number): number {
+  return b.retning === 'premium' && dag < 1 ? 1 : dag
 }
 
 /** Inntekten ganges med dette. */

@@ -1,6 +1,7 @@
 import { byverdi } from '../../engine/eiendom'
-import { ansettForvalter, sigOppForvalter } from '../../engine/handlinger'
-import { forvalter, FORVALTER_ANDEL, FORVALTER_MINSTEPRIS, FORVALTERE, FORVALTERLISTE, forvalterpris, ledighet, uflaksSjanse } from '../../engine/utleie'
+import { ansettForvalter, byttForvalter, sigOppForvalter } from '../../engine/handlinger'
+import { byttepris, forvalter, FORVALTER_ANDEL, FORVALTER_MINSTEPRIS, FORVALTERE, FORVALTERLISTE, forvalterpris, ledighet, UFLAKS_DAGER, uflaksSjanse, ventetLeie } from '../../engine/utleie'
+import { fase, FASER } from '../../engine/verden'
 import type { By, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
@@ -15,6 +16,9 @@ const pst = (n: number) => `${tall(n * 100)} %`
 export function Forvalterkort({ s, by }: { s: Spilltilstand; by: By }) {
   const nå = forvalter(s, by)
   const pris = forvalterpris(byverdi(s, by))
+  const bytte = byttepris(byverdi(s, by))
+  // Hvem gir mest denne uka, i fasen konjunkturen er i (Pakke 83).
+  const best = [...FORVALTERLISTE].sort((a, b) => ventetLeie(s, by, b) - ventetLeie(s, by, a))[0]
   return (
     <div className="kort forvalter">
       <div className="maal-topp">
@@ -31,6 +35,9 @@ export function Forvalterkort({ s, by }: { s: Spilltilstand; by: By }) {
           <dd>{pst(uflaksSjanse(s, by))} i uka</dd>
         </div>
       </dl>
+      <p className="dempet liten">
+        {FASER[fase(s)].navn}: best nå er {FORVALTERE[best].navn.toLowerCase()}. En dårlig leietaker koster {UFLAKS_DAGER === 7 ? 'en ukes' : `${UFLAKS_DAGER} dagers`} leie.
+      </p>
       {nå ? (
         <div className="personale-rad">
           <p className="dempet liten">
@@ -39,6 +46,25 @@ export function Forvalterkort({ s, by }: { s: Spilltilstand; by: By }) {
           <Bekreftknapp className="knapp knapp-liten" ja="Ja, si opp" varsel="Du får ikke pengene tilbake." onJa={() => utfor(sigOppForvalter(s, by))}>
             Si opp
           </Bekreftknapp>
+        </div>
+      ) : null}
+      {nå ? (
+        <div className="retning-valg">
+          {FORVALTERLISTE.map((id) => (
+            <div key={id} className="retning-alternativ">
+              <strong>
+                {FORVALTERE[id].navn} {id === best && <span className="merke gull">Best nå</span>}
+              </strong>
+              <span className="liten">Venter {pst(ventetLeie(s, by, id))} av full leie</span>
+              {id === nå ? (
+                <span className="merke ok">Forvalter nå</span>
+              ) : (
+                <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < bytte} onClick={() => utfor(byttForvalter(s, by, id))}>
+                  Bytt · {kortKroner(bytte)}
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       ) : (
         <>
@@ -52,13 +78,11 @@ export function Forvalterkort({ s, by }: { s: Spilltilstand; by: By }) {
               const f = FORVALTERE[id]
               return (
                 <div key={id} className="retning-alternativ">
-                  <strong>{f.navn}</strong>
+                  <strong>
+                    {f.navn} {id === best && <span className="merke gull">Best nå</span>}
+                  </strong>
                   <span className="dempet liten">{f.beskrivelse}</span>
-                  <span className="liten">
-                    Tomt {pst(f.ledighet - 1)} · uflaks {f.uflaks > 1 ? '+' : ''}
-                    {pst(f.uflaks - 1)} · leie {f.leie >= 1 ? '+' : ''}
-                    {pst(f.leie - 1)}
-                  </span>
+                  <span className="liten">Venter {pst(ventetLeie(s, by, id))} av full leie nå (uten forvalter {pst(ventetLeie(s, by, undefined))})</span>
                   <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(ansettForvalter(s, by, id))}>
                     Ansett · {kortKroner(pris)}
                   </button>

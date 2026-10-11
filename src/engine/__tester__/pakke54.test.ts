@@ -5,11 +5,11 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { dagsbilde, EIENDOMSVAER, vaerPaaDag, type Vaertype } from '../verden'
+import { dagsbilde, EIENDOMSVAER, fase, vaerPaaDag, type Vaertype } from '../verden'
 import { vaer } from '../jord'
 import { dato, DAG_SEK } from '../kalender'
 import { Hashkilde, hashTekst } from '../rng'
-import { FORVALTER_MINSTEPRIS, FORVALTERE, forvalterpris, LEDIGHET_MAKS, leiefaktorBy, ledighet, utleieVedDagsskifte } from '../utleie'
+import { FORVALTER_MINSTEPRIS, FORVALTERE, forvalterpris, LAV_LEDIGHET, LEDIGHET_MAKS, leiefaktorBy, ledighet, UFLAKS_DAGER, utleieVedDagsskifte } from '../utleie'
 import { byverdi, leieHverPerSek, leieIByen } from '../eiendom'
 import { ansettForvalter, kjopEiendom, sigOppForvalter } from '../handlinger'
 import { nyttSpill } from '../start'
@@ -92,13 +92,16 @@ describe('vær på eiendom', () => {
 })
 
 describe('ledighet og forvaltere', () => {
-  it('ledigheten er 0–20 % per by og uke, rundt 10 % i snitt', () => {
+  it('ledigheten er 0–20 % per by og uke, rundt 10 % i snitt — dobbelt i lavkonjunktur (Pakke 83)', () => {
     const s = nyttSpill()
     const verdier: number[] = []
+    const lave: number[] = []
     for (let uke = 0; uke < 200; uke++) {
       s.sek = uke * 7 * DAG_SEK
-      for (const by of ['Bergen', 'Oslo', 'Zermatt'] as By[]) verdier.push(ledighet(s, by))
+      for (const by of ['Bergen', 'Oslo', 'Zermatt'] as By[]) (fase(s) === 'lav' ? lave : verdier).push(ledighet(s, by))
     }
+    expect(lave.length).toBeGreaterThan(0)
+    expect(Math.max(...lave)).toBeLessThan(LEDIGHET_MAKS * LAV_LEDIGHET)
     expect(Math.min(...verdier)).toBeGreaterThanOrEqual(0)
     expect(Math.max(...verdier)).toBeLessThan(LEDIGHET_MAKS)
     const snitt = verdier.reduce((a, b) => a + b, 0) / verdier.length
@@ -129,13 +132,13 @@ describe('ledighet og forvaltere', () => {
     expect(ok(sigOppForvalter(f, 'Bergen')).forvaltere?.Bergen).toBeUndefined()
   })
 
-  it('en dårlig leietaker koster en dags leie i byen, og avisa skriver om det', () => {
+  it('en dårlig leietaker koster en ukes leie i byen (en dag før Pakke 83), og avisa skriver om det', () => {
     const s = iBergen()
     // Finn en mandag der Bergen får en dårlig leietaker uten forvalter.
     const uke = Array.from({ length: 300 }, (_, i) => i + 1).find((u) => new Hashkilde(hashTekst(`leietaker:Bergen|${u}`)).neste() < 0.1)!
     s.sek = uke * 7 * DAG_SEK
     const før = { kontanter: s.kontanter, leie: s.totaltLeie }
-    const forventet = Math.round(leieIByen(s, 'Bergen') * DAG_SEK)
+    const forventet = Math.round(leieIByen(s, 'Bergen') * DAG_SEK * UFLAKS_DAGER)
     const saker = utleieVedDagsskifte(s, [{ by: 'Bergen', sted: 'Nordnes' }], (by) => leieIByen(s, by))
     expect(saker).toHaveLength(1)
     expect(saker[0].tekst).toMatch(/forvalter/)

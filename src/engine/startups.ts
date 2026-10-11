@@ -14,7 +14,7 @@ import { leggTilHendelse } from './bank'
 import { DAG_SEK, dagnummer } from './kalender'
 import { flyt } from './portefolje'
 import { bokforGevinst } from './handel'
-import type { Terning } from './rng'
+import { Hashkilde, hashTekst, type Terning } from './rng'
 import type { Overskrift, Spilltilstand, Startup, Startupstatus } from './types'
 import { kortKroner } from './tall'
 
@@ -43,8 +43,18 @@ const NY_SJANSE = 0.6
 const MAKS_AVSLUTTET = 6
 /** Nye penger i hver runde, som andel av verdien etter runden. Det er også hvor mye andelen din vannes ut. */
 export const RUNDEANDEL = 0.2
-/** Du kan ta høyst så stor del av en runde — resten går til andre investorer. */
-export const DIN_DEL_AV_RUNDEN = 0.5
+/**
+ * Du kan ta så stor del av en runde. Hele runden fra Pakke 83 (før halvparten): du kan
+ * lede runden. Avkastningen per krone er den samme — det er bare mer plass.
+ */
+export const DIN_DEL_AV_RUNDEN = 1
+/** En gransking koster så stor andel av selskapets verdi, og viser det sanne teamet og risikoen. */
+export const GRANSKING_ANDEL = 0.01
+/**
+ * Støyen i inntrykket av teamet, per runde: ±0,25 ved start, og en ny, skarpere lesning
+ * for hver runde selskapet overlever (Pakke 83). Fra en hash, så terningen står.
+ */
+export const INNTRYKK_STOY = [0.25, 0.2, 0.15, 0.1, 0.05]
 /** Verdien ved start, som andel av den høyeste formuen din — så startups alltid betyr noe. */
 const STARTVERDI_ANDEL = 0.02
 const STARTVERDI_MIN = 2_000_000
@@ -79,6 +89,23 @@ export const STARTUP_IDEER: StartupIde[] = [
   { navn: 'Elferja', beskrivelse: 'Elektriske ferjer til fjordene.' },
   { navn: 'Fjellgrip', beskrivelse: 'Klatreutstyr som selger seg selv på sosiale medier.' },
   { navn: 'Kvitre', beskrivelse: 'Et nytt sosialt nettverk — denne gangen blir det annerledes.' },
+  // Pakke 83: seksten til, så de samme ikke kommer igjen hver dag («Hyttebooking» 6 ganger på 144 dager).
+  { navn: 'Fjordbrygg', beskrivelse: 'Alkoholfritt øl brygget på breevann.' },
+  { navn: 'Strømdeling', beskrivelse: 'Naboer selger solstrøm til hverandre.' },
+  { navn: 'Torskefarm', beskrivelse: 'Oppdrett av torsk på land, uten rømming.' },
+  { navn: 'Lærekassen', beskrivelse: 'Leksehjelp med kunstig intelligens, for foreldre som har gitt opp brøk.' },
+  { navn: 'Hyttehjelp', beskrivelse: 'Vaktmestere på abonnement for hytteeiere.' },
+  { navn: 'Nordlys Reiser', beskrivelse: 'Nordlysturer bestilt i appen, med garanti eller pengene tilbake.' },
+  { navn: 'Pantbanken', beskrivelse: 'Panteautomater som betaler i aksjer.' },
+  { navn: 'Fiskepass', beskrivelse: 'Sporing av sjømat fra båt til tallerken.' },
+  { navn: 'Snekkerbot', beskrivelse: 'Robot som setter opp kjøkken mens du er på jobb.' },
+  { navn: 'Vinterdekk.no', beskrivelse: 'Dekkskift hjemme i oppkjørselen.' },
+  { navn: 'Klimatak', beskrivelse: 'Grønne tak på næringsbygg, med strøm som bonus.' },
+  { navn: 'Rypa Sko', beskrivelse: 'Fjellsko av resirkulert fiskenett.' },
+  { navn: 'Kodeskolen', beskrivelse: 'Programmering for pensjonister.' },
+  { navn: 'Ventelista', beskrivelse: 'Kjøper plassen din i køen hos legen, frisøren og bilverkstedet.' },
+  { navn: 'Havstrøm', beskrivelse: 'Kraft fra tidevannet i Saltstraumen.' },
+  { navn: 'Barnehagen+', beskrivelse: 'Barnehageplass på dagen, via app.' },
 ]
 
 export function ide(st: Startup): StartupIde {
@@ -103,6 +130,21 @@ export function startupKostpris(s: Spilltilstand): number {
 export function ledigIRunde(st: Startup): number {
   if (st.status !== 'aktiv') return 0
   return Math.max(0, st.verdi * RUNDEANDEL * DIN_DEL_AV_RUNDEN - st.investertIRunde)
+}
+
+/** Inntrykket av et team med kvalitet `k` lest med støy `stoy` (−1..1 skalert): 0–2. */
+function lesInntrykk(k: number, stoy: number): number {
+  return Math.max(0, Math.min(2, Math.floor((k + stoy) * 3)))
+}
+
+/** Det sanne teamet, som en gransking viser: kvaliteten delt i tre, uten støy. */
+export function sanntInntrykk(st: Startup): number {
+  return lesInntrykk(st.kvalitet, 0)
+}
+
+/** Hva en gransking av selskapet koster nå. */
+export function granskingspris(st: Startup): number {
+  return Math.round(st.verdi * GRANSKING_ANDEL)
 }
 
 /** Sjansen for konkurs i en runde: et svakt team (kvalitet 0) har 40 % høyere risiko, et sterkt 40 % lavere. */
@@ -203,6 +245,10 @@ export function startupsVedDagsskifte(s: Spilltilstand, t: Terning): Overskrift[
       st.verdi = pent(st.verdi * t.mellom(lav, hoy))
       st.andel = (st.andel - nyAndel) * (1 - RUNDEANDEL) + nyAndel
       st.investertIRunde = 0
+      // En ny runde, en ny og skarpere lesning av teamet (Pakke 83) — fra en hash, ikke terningen.
+      const stoy = INNTRYKK_STOY[Math.min(st.runde, INNTRYKK_STOY.length - 1)]
+      const u2 = new Hashkilde(hashTekst(`startup:${st.id}:${st.runde}`)).neste()
+      st.inntrykk = lesInntrykk(st.kvalitet, (u2 * 2 - 1) * stoy)
     }
   }
   if (s.hoyesteFormue >= STARTUP_LAAST_OPP && aktive(s).length < MAKS_AKTIVE && t.sjanse(NY_SJANSE)) {

@@ -314,7 +314,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...jordVedDagsskifte(s),
     ...landemerkerVedDagsskifte(s),
     ...kunstVedDagsskifte(s),
-    // Mandagens leietakere (Pakke 54): en dårlig leietaker koster en dags leie i byen.
+    // Mandagens leietakere (Pakke 54): en dårlig leietaker koster en ukes leie i byen (Pakke 83).
     ...utleieVedDagsskifte(s, byerMedEiendom(s), (by) => leieIByen(s, by)),
   ]
   // Verden (Pakke 49): rentemøtet, ukas trender, helligdagen og været. Fra hasher, ikke terningen.

@@ -11,7 +11,7 @@ import { dagnummer } from '../kalender'
 import { leggTilHendelse } from '../bank'
 import { BUD, type BudId, dagensForhandling, FORMER, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, fulltOppkjop, fusjonerVedOppkjop, MOTBUD_VED, prisantydning, rivalbedrifter, type Rivalbedrift, rivalensPris, utforFusjon } from '../fusjon'
 import { flyt } from '../portefolje'
-import { ledigIRunde } from '../startups'
+import { granskingspris, ledigIRunde } from '../startups'
 import type { BedriftstypeId, Spilltilstand } from '../types'
 import { feil, ikkeTall, UGYLDIG, type Utfall } from './felles'
 
@@ -132,6 +132,24 @@ export function selgRivalandel(s: Spilltilstand, id: string): Utfall {
 }
 
 /** Kjøper deg inn i runden som pågår. Andelen er beløpet delt på verdien etter runden. */
+/**
+ * Granskingen (Pakke 83): betal en prosent av selskapets verdi og se det sanne teamet og
+ * den sanne konkursrisikoen. En avgift, som en ansettelse: den går i forbruket.
+ */
+export function granskStartup(s: Spilltilstand, id: number): Utfall {
+  const st = (s.startups ?? []).find((x) => x.id === id)
+  if (!st) return feil('Fant ikke selskapet.')
+  if (st.status !== 'aktiv') return feil('Selskapet henter ikke penger lenger.')
+  if (st.gransket) return feil('Du har allerede gransket selskapet.')
+  const pris = granskingspris(st)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.totaltForbruk += pris
+  n.startups.find((x) => x.id === id)!.gransket = true
+  return { ok: true, tilstand: n }
+}
+
 export function investerIStartup(s: Spilltilstand, id: number, belop: number): Utfall {
   const st = (s.startups ?? []).find((x) => x.id === id)
   if (!st) return feil('Fant ikke selskapet.')

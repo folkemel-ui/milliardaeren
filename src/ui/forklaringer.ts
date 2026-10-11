@@ -11,7 +11,7 @@ import { GRADER, RETNING_NIVAA, RETNINGER } from '../engine/ansatte'
 import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from '../engine/verden'
 import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
-import { FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
+import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
@@ -65,7 +65,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Lønnen er fast: i en liten bedrift koster de ansatte mer enn de gir, og da står ansettelsen i rødt. Stjernene er dyre, men gir mest per plass — de lønner seg når plassene er fulle. ' +
       'Kalenderen betyr noe: restauranter og hoteller tjener mest i helgen, bankene og kafeene på hverdager, saftbodene i sola og skisentrene i snøen. ' +
       `Hver uke kan én bransje være het (+${pst(TREND)}) og én kald (−${pst(TREND)}). Over tid jevner det seg ut — helligdagene er rene bonuser, som 17. mai for pølsebodene. ` +
-      `På nivå ${RETNING_NIVAA} (${TOPP_FRA_NIVAA} fra hotellet og opp) velger hver bedrift retning for godt: volum gir ${pst(RETNINGER.volum.inntekt - 1)} mer inntekt, premium ${pst(RETNINGER.premium.verdi - 1)} mer verdi og status. ` +
+      `På nivå ${RETNING_NIVAA} (${TOPP_FRA_NIVAA} fra hotellet og opp) velger hver bedrift retning for godt: volum gir ${pst(RETNINGER.volum.inntekt - 1)} mer inntekt; premium ${pst(RETNINGER.premium.inntekt - 1)} mer, ingen dårlige dager og ${pst(RETNINGER.premium.verdi - 1)} mer verdi og status — best der dagene svinger mest. ` +
       'Ansatte og ledere er driftskostnader — de øker ikke det bedriften er verdt. ' +
       `Selger du en bedrift, får du det den er verdt minus ${pst(BEDRIFTSSALG_RABATT)}. ` +
       `Uten leder står bedriften stille når spillet har vært lukket i mer enn ett minutt. Med leder går den videre mens du er borte, i opptil ${tall(BORTE_TAK_SEK / 3600)} timer.`,
@@ -137,8 +137,8 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `Eier du alle enhetene i en by, får du en krone på kartet og +${pst(BYEIER_BONUS)} leie der. ` +
       'Ferieboligene i Marbella og Zermatt har sesong: Spania gir mest om sommeren, Alpene om vinteren, og over et år blir det det samme som en vanlig eiendom. ' +
       'Været betyr noe for hyttene (snø), Lofoten (sol), Zermatt (snø i Alpene) og Marbella (sol i Syden) — i snitt jevner det seg ut. ' +
-      `Noe står alltid tomt: opptil ${pst(LEDIGHET_MAKS)} av leien i en by, ny hver uke, og hver mandag kan en dårlig leietaker koste en dags leie (${pst(UFLAKS_SJANSE)} sjanse). ` +
-      `En forvalter i byen holder det nede — forsiktig, pågående eller lokalkjent — og koster ${pst(FORVALTER_ANDEL)} av det du eier der, én gang. ` +
+      `Noe står alltid tomt: opptil ${pst(LEDIGHET_MAKS)} av leien i en by, ny hver uke — dobbelt så mye i lavkonjunktur — og hver mandag kan en dårlig leietaker koste en ukes leie (${pst(UFLAKS_SJANSE)} sjanse). ` +
+      `En forvalter i byen holder det nede og koster ${pst(FORVALTER_ANDEL)} av det du eier der, én gang. Hver er best i sin fase: forsiktig i lavkonjunktur, lokalkjent i normale tider, pågående i høykonjunktur — og et bytte koster bare ${pst(BYTTE_ANDEL)}. ` +
       'Oppussing gir mer leie for godt, men så lenge håndverkerne holder på, kommer det ingen leie. ' +
       `Selger du, tar megleren ${pst(MEGLERHONORAR)}. Noen eiendommer krever status eller et fly for å komme dit.`,
   },

@@ -9,7 +9,7 @@ import { byverdi, EIENDOM_SYNLIG_VED, forvalterpaaslag, kjopsprisEiendom, EIENDO
 import { DAG_SEK } from '../kalender'
 import { leggTilHendelse } from '../bank'
 import { flyt } from '../portefolje'
-import { FORVALTERE, forvalterpris } from '../utleie'
+import { byttepris, FORVALTERE, forvalterpris } from '../utleie'
 import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from '../jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from '../landemerker'
 import type { EiendomId, JordId, LandemerkeId, Spilltilstand, By, ForvalterId } from '../types'
@@ -147,6 +147,24 @@ export function ansettForvalter(s: Spilltilstand, by: By, id: ForvalterId): Utfa
   const verdi = byverdi(s, by)
   if (verdi <= 0) return feil('Du eier ingen eiendom i byen.')
   const pris = forvalterpris(verdi)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.totaltForbruk += pris
+  n.forvaltere = { ...(n.forvaltere ?? {}), [by]: id }
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Bytter forvalteren i en by (Pakke 83): koster BYTTE_ANDEL av det du eier der, ikke en
+ * ny ansettelse — så det lønner seg å bytte når konjunkturen snur.
+ */
+export function byttForvalter(s: Spilltilstand, by: By, id: ForvalterId): Utfall {
+  if (!FORVALTERE[id]) return feil('Ukjent forvalter.')
+  const naa = s.forvaltere?.[by]
+  if (!naa) return feil('Byen har ingen forvalter å bytte.')
+  if (naa === id) return feil(`${FORVALTERE[id].navn} forvalter allerede ${by}.`)
+  const pris = byttepris(byverdi(s, by))
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   n.kontanter -= pris

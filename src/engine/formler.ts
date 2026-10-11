@@ -33,7 +33,7 @@ import {
 } from './eiendom'
 import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import { fusjonsfaktor } from './fusjon'
-import { GRADER, medNyAnsatt, retningsfaktor, teller, utenAnsatt, verdifaktor } from './ansatte'
+import { dagForBedrift, GRADER, medNyAnsatt, retningsfaktor, teller, utenAnsatt, verdifaktor } from './ansatte'
 import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { nyhetsfaktor } from './bransjer'
 import { filialfaktor } from './filialer'
@@ -168,7 +168,7 @@ export function dagensFaktor(s: Spilltilstand, type: BedriftstypeId): number {
  * nyhetene i bransjen, og filialene (Pakke 59). Uten filialer er det dagensFaktor.
  */
 export function bedriftsfaktor(s: Spilltilstand, b: Bedrift): number {
-  return dagensFaktor(s, b.type) * filialfaktor(s, b)
+  return dagForBedrift(b, dagensFaktor(s, b.type)) * filialfaktor(s, b)
 }
 
 /** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor, filialene og statusbonusen. */

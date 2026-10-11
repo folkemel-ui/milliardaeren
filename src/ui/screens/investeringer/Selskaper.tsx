@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { Bekreftknapp } from '../../komponenter/Bekreftknapp'
 import { nettoformue } from '../../../engine/formler'
-import { byPaaBedrift, godtaMotbud, investerIStartup, kjopRivalblokk, overtaRival, selgRivalandel } from '../../../engine/handlinger'
+import { byPaaBedrift, godtaMotbud, granskStartup, investerIStartup, kjopRivalblokk, overtaRival, selgRivalandel } from '../../../engine/handlinger'
 import { BLOKK, blokkpris, forbesliste, RIVALUTBYTTE, SALGSHONORAR, selskapsverdi } from '../../../engine/rivaler'
 import { BUD, type BudId, dagensForhandling, FORMER, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, fulltOppkjop, prisantydning, rivalbedrifter } from '../../../engine/fusjon'
 import { BEDRIFTSTYPER } from '../../../engine/innhold'
@@ -14,7 +14,7 @@ import type { BedriftstypeId, Rival, Spilltilstand } from '../../../engine/types
 import { utfor } from '../../../state/lager'
 import { endring, fortegnKroner, kortKroner, tall, varighet } from '../../format'
 import { Illustrasjon } from '../../komponenter/Illustrasjoner'
-import { aktive, ide, INNTRYKK, ledigIRunde, RUNDER, STARTUP_LAAST_OPP, tidTilNesteRunde } from '../../../engine/startups'
+import { aktive, granskingspris, ide, INNTRYKK, konkursrisiko, ledigIRunde, RUNDER, sanntInntrykk, STARTUP_LAAST_OPP, tidTilNesteRunde } from '../../../engine/startups'
 import { StartupLogo } from '../../komponenter/StartupLogo'
 import { Ikon } from '../../komponenter/Ikoner'
 import { Rivalportrett } from '../../komponenter/Rivalportrett'
@@ -50,7 +50,13 @@ export function Startups({ s }: { s: Spilltilstand }) {
                   <StartupLogo navn={navn} />
                   <div>
                     <h2>{navn}</h2>
-                    <span className="dempet liten">{INNTRYKK[st.inntrykk]}</span>
+                    {st.gransket ? (
+                      <span className="liten">
+                        {INNTRYKK[sanntInntrykk(st)]} <span className="merke ok">Gransket</span>
+                      </span>
+                    ) : (
+                      <span className="dempet liten">{INNTRYKK[st.inntrykk]}{st.runde > 0 && ' · nytt inntrykk etter runden'}</span>
+                    )}
                   </div>
                 </div>
                 <div className="papirrad-kurs">
@@ -78,8 +84,14 @@ export function Startups({ s }: { s: Spilltilstand }) {
               )}
               <span className="dempet liten">
                 {RUNDER[st.runde].navn} avgjøres om {varighet(tidTilNesteRunde(s))}
-                {ledig <= 0 && ' · du har tatt din del av runden'}
+                {st.gransket && ` · konkursrisiko ${tall(konkursrisiko(st) * 100)} %`}
+                {ledig <= 0 && ' · du har tatt hele runden'}
               </span>
+              {!st.gransket && (
+                <button className="knapp knapp-liten" disabled={s.kontanter < granskingspris(st)} onClick={() => utfor(granskStartup(s, st.id))}>
+                  Gransk teamet · {kortKroner(granskingspris(st))}
+                </button>
+              )}
               {valg.length > 0 && (
                 <div className="bud-knapper">
                   {valg.map((b, i) => (

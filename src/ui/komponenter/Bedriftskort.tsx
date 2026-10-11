@@ -124,6 +124,8 @@ export function IDag({ s, b }: { s: Spilltilstand; b: Bedrift }) {
   const nyhet = nyhetsfaktor(s, b.type)
   const f = d.faktor[b.type] * nyhet
   if (Math.abs(f - 1) < 0.02) return null
+  // Premium har ingen dårlige dager (Pakke 83): dagen kan bare løfte den.
+  if (f < 1 && b.retning === 'premium') return <span className="i-dag liten dempet">Premium · ingen dårlig dag</span>
   const hvorfor = grunner(d, b.type, s.sek)
   if (nyhet !== 1) hvorfor.unshift(nyhet > 1 ? 'God nyhet' : 'Dårlig nyhet')
   return (
@@ -292,6 +294,7 @@ function retningGir(b: Bedrift, id: Retning): string {
   const r = RETNINGER[id]
   const deler: string[] = []
   if (r.inntekt !== 1) deler.push(`+${tall((r.inntekt - 1) * 100)} % inntekt`)
+  if (id === 'premium') deler.push('ingen dårlige dager')
   if (r.verdi !== 1) deler.push(`+${tall((r.verdi - 1) * 100)} % verdi`)
   const status = retningsstatus({ ...b, retning: id })
   if (status > 0) deler.push(`+${status} status`)
