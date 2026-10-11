@@ -7,7 +7,7 @@
  * (Pakke 70; budsjettet i startskript.test.ts).
  */
 
-export const VERSJON = '2.8.0'
+export const VERSJON = '2.9.0'
 
 export interface Versjonsoppforing {
   versjon: string

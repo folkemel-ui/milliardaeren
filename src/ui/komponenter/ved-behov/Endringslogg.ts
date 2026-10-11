@@ -8,6 +8,19 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '2.9.0',
+    navn: '2.9',
+    dato: 'Oktober 2026',
+    ingress: 'Valg som betyr noe, og en avis som skriver om deg.',
+    punkter: [
+      'Premium gir +10 % og ingen dårlige dager — best der dagene svinger mest, som saftboden, hotellet og skisenteret.',
+      'Forvalterne er best i hver sin fase av konjunkturen, og et bytte koster bare 1 %. En dårlig leietaker koster nå en ukes leie.',
+      'Startups: grav i teamet for 1 % av verdien, ta hele runden selv, og se inntrykket bli skarpere for hver runde. Dobbelt så mange gründere.',
+      'Avisa skriver først om aksjene og myntene dine, og om kryptostemningen bare når den snur.',
+      'Det sene spillet på færre skjermer: eid eiendom som rader, ferdige bedrifter på korte kort, prestasjonene i kort og hver aksje bare én gang.',
+    ],
+  },
+  {
     versjon: '2.8.0',
     navn: '2.8',
     dato: 'Oktober 2026',
