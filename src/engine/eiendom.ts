@@ -24,6 +24,7 @@ import { dagsbilde } from './verden'
 import { FORVALTER_ANDEL, forvalter, leiefaktorBy } from './utleie'
 import { hjemstatus } from './hjemmene'
 import { unikeI, unikstatus, unikverdi } from './unike'
+import { racingstatus, racingverdi } from './racing'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -424,7 +425,8 @@ export function restverdi(id: LuksusId): number {
 /** Luksus teller med i formuen til det du ville fått ved salg. */
 export function luksusverdi(s: Spilltilstand): number {
   // De unike tingene fra auksjonene (Pakke 89) står i samlingen og teller med her.
-  return s.luksus.reduce((sum, id) => sum + restverdi(id), 0) + unikverdi(s)
+  // Racingteamet (Pakke 90) står i samlingen med det delene har kostet, som stadion i klubben.
+  return s.luksus.reduce((sum, id) => sum + restverdi(id), 0) + unikverdi(s) + racingverdi(s)
 }
 
 // ─────────────────────────────────────────────── Lager
@@ -538,7 +540,7 @@ export const STATUS_RENTEKUTT = 0.002
 
 /** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s) + racingstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

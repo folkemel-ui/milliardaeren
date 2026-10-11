@@ -27,6 +27,8 @@ import { charterPerSekFor, iSesong, kanLeiesUt } from '../../engine/charter'
 import { dagnummer } from '../../engine/kalender'
 import { mineUnike, UNIKE } from '../../engine/unike'
 import { Auksjonskort, Unikkort } from '../komponenter/Auksjon'
+import { Racingdetalj, Racingrad } from '../komponenter/Racing'
+import { aapneRacing, useRacingside } from '../racingside'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from '../komponenter/BedriftIkon'
@@ -66,7 +68,13 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   useEffect(() => () => aapneKlubbside(null), [])
   const klubbAapen = klubbside !== null && del === 'klubb' && !!s.klubb
   useTilbake(klubbAapen, () => aapneKlubbside(null))
+  // Racingteamets side (Pakke 90), fra raden i Samling.
+  const racing = useRacingside()
+  useEffect(() => () => aapneRacing(false), [])
+  const racingAapen = racing && del === 'samling' && !!s.racing
+  useTilbake(racingAapen, () => aapneRacing(false))
   if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
+  if (racingAapen) return <Racingdetalj s={s} tilbake={() => aapneRacing(false)} />
   if (klubbAapen) return <Klubbdetalj s={s} k={visKlubb(s, s.klubb!)} side={klubbside} tilbake={() => aapneKlubbside(null)} />
   return (
     <section className="skjerm">
@@ -105,6 +113,7 @@ function Samling({ s }: { s: Spilltilstand }) {
         <div key={l} className="lagerliste">
           <Lagerkort s={s} lager={l} />
           <TilSalgs s={s} kategori={KATEGORI_I[l]} />
+          {l === 'garasje' && <Racingrad s={s} />}
         </div>
       ))}
       <Seksjon

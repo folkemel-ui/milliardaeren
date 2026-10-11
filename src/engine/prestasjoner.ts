@@ -142,6 +142,9 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'cupmester', navn: 'Cupmester', beskrivelse: 'Vinn cupen', klart: (s) => synligeTrofeer(s).some((t) => t.navn === 'Cupmester') },
   { id: 'europa', navn: 'Ut i Europa', beskrivelse: 'Spill en kamp i Europa', klart: (s) => (s.klubb?.synlig ? s.klubb.synlig.europa : !!s.klubb?.europa && (s.klubb.europa.runde > 0 || s.klubb.europa.ute)) },
   { id: 'europamester', navn: 'Europamester', beskrivelse: 'Vinn Europa', klart: (s) => synligeTrofeer(s).some((t) => t.navn === 'Europamester') },
+  // Pakke 90: racingteamet.
+  { id: 'grand-prix', navn: 'Grand Prix-vinner', beskrivelse: 'Vinn et løp med racingteamet', klart: (s) => !!s.racing?.lop.some((l) => l.plasser.includes(1)) },
+  { id: 'verdensmester', navn: 'Verdensmester', beskrivelse: 'Vinn førermesterskapet', klart: (s) => !!s.racingtrofeer?.some((t) => t.navn === 'Førermester') },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
   { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
   // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.

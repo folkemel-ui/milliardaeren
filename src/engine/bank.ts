@@ -13,6 +13,7 @@ import {
   utforLandemerkesalg,
   utforLuksussalg,
   utforUniksalg,
+  utforRacingsalg,
   utforMalerisalg,
   utforRivalsalg,
   utforSalg,
@@ -167,6 +168,13 @@ export function sjekkMargin(s: Spilltilstand): void {
     utforUniksalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(unikISetning(id))
+  }
+  // Så racingteamet (Pakke 90).
+  if (s.racing && s.racing.investert > 0 && belaaningsgrad(s) > MARGIN_MAAL) {
+    const navn = s.racing.navn
+    utforRacingsalg(s)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(navn)
   }
   // Så gårder og skoger, den mest verdifulle først.
   for (const id of [...JORDLISTE].filter((x) => s.jord?.[x]).sort((a, b) => landverdi(s, b) + tommerverdi(s, b) - landverdi(s, a) - tommerverdi(s, a))) {

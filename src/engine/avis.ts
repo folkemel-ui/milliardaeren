@@ -30,6 +30,7 @@ import { verdenssaker } from './verden'
 import { utleieVedDagsskifte } from './utleie'
 import { byerMedEiendom, leieIByen } from './eiendom'
 import { auksjonVedDagsskifte } from './auksjon'
+import { racingVedDagsskifte } from './racing'
 import { charterVedDagsskifte } from './charter'
 
 export const MAKS_UTGAVER = 7
@@ -315,6 +316,8 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   // Pakke 89: det som var leid ut og bedt hjem, er hjemme; auksjonshuset slår av og byr fram.
   charterVedDagsskifte(s)
   const auksjonssaker = auksjonVedDagsskifte(s, tittel(s))
+  // Pakke 90: racingteamets lønn, og løpet på løpsdagen.
+  const racingsaker = racingVedDagsskifte(s, tittel(s))
   const andre = [
     ...jordVedDagsskifte(s),
     ...landemerkerVedDagsskifte(s),
@@ -332,6 +335,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...omDeg(s, før),
     ...skattesaker,
     ...klubbsaker,
+    ...racingsaker.filter((x) => x.type === 'deg'),
     ...andre.filter((x) => x.type === 'deg'),
     ...auksjonssaker.filter((x) => x.type === 'deg'),
     ...startupsaker.filter((x) => x.type === 'deg'),
@@ -340,6 +344,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...omRivalene(s, før),
     // Auksjonen (Pakke 89) etter kappløpet — en fusjon med en rival er viktigere — men foran verden og kursene.
     ...auksjonssaker.filter((x) => x.type !== 'deg'),
+    ...racingsaker.filter((x) => x.type !== 'deg'),
     ...verden.marked,
     ...marked.andre,
     ...startupsaker.filter((x) => x.type !== 'deg'),

@@ -17,6 +17,7 @@ import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi, salgspris } from './klubb'
 import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
 import { TILBAKE_DAGER, unikRestverdi } from './unike'
+import { SALG_ANDEL } from './racing'
 
 /**
  * Bokfører gevinst (eller tap, negativt) på et salg: det du fikk, minus det du
@@ -81,6 +82,20 @@ export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
   n.luksus = n.luksus.filter((l) => l !== id)
   // Tvangssalg av noe som er leid ut (Pakke 89): utleien slutter med salget.
   if (n.charter?.[id]) delete n.charter[id]
+  return inntekt
+}
+
+/**
+ * Selger racingteamet (Pakke 90): du får SALG_ANDEL av det delene kostet, og
+ * resten bokføres som tap. Trofeene står igjen (`racingtrofeer`).
+ */
+export function utforRacingsalg(n: Spilltilstand): number {
+  const r = n.racing
+  if (!r) return 0
+  const inntekt = r.investert * SALG_ANDEL
+  n.kontanter += inntekt
+  bokforGevinst(n, inntekt - r.investert)
+  delete n.racing
   return inntekt
 }
 

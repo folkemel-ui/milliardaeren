@@ -36,6 +36,7 @@ Systemer som skulle kunne legges til uten å røre hovedstrømmen, har sin egen:
 | Kunst | `kunst.frø` | hver dag i `kunstVedDagsskifte` |
 
 | Klubb | `klubb.frø` (fra en hash av navn og dag) | hver dag i `klubbVedDagsskifte` |
+| Racingteamet (Pakke 90) | `racing.frø` (fra en hash av teamnavnet og sekundet det startet) | hvert løp i `racingVedDagsskifte`: tre trekk per bil, også et tomt sete, så takten står |
 
 Kunsten (Pakke 67) trekker like mange tall per dag som før — én sjanse per kunstner, to tall per maleri — så kunstterningen går i samme takt; bare regnestykket er nytt (en verdi per maleri som prisen trekkes mot). Verdiene ble ankret i dagens pris i migreringen 23 → 24.
 
@@ -63,6 +64,7 @@ Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når
 | Ukas bransjetrend (`verden.ts`) | `trend:<spilluke>` |
 | Valutakursene (`valuta.ts`, Pakke 59) | `valuta:<sti>:<lag>:<knute>` — tre glatte lag (14, 4 og 1 spilldag mellom knutene); DKK følger EUR, AED følger USD. Et spill fra før versjon 22 har `valutaanker` så kursen står på 1 der det var |
 | Auksjonene (`auksjon.ts`, Pakke 89) | `auksjon:<dag>` (hvilken ting bys fram), `auksjon:<id>:<dag>` (startprisen), `auksjon:pause:<dag>` (pausen etter), `auksjon:<id>:<fraDag>:rival` (rivalen som kjøper). Hva som passer, avhenger av formuen din den dagen |
+| De andre racingteamene og førerne (`racing.ts`, Pakke 90) | `racing:<team>:<sesong>:bil`, `racing:<team>:<sesong>:<sete>` (fører og ferdighet), `racing:marked:<ditt team>:<sesong>:<i>` (markedet), `racing:team:<sek>` (navnet ditt) |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.
 

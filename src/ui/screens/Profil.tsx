@@ -29,7 +29,8 @@ import { Maalepanel } from '../komponenter/Maalepanel'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
   // Pakke 86: et trofé fra kampen som spilles nå, står i skapet når den er ferdig.
-  const trofeer = synligeTrofeer(s)
+  // Pakke 90: racingteamets mesterskap står i samme skap.
+  const trofeer = [...synligeTrofeer(s), ...(s.racingtrofeer ?? [])]
   if (trofeer.length === 0) return null
   return (
     <div className="kort">

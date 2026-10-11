@@ -236,6 +236,74 @@ export interface Luksusgjenstand {
 
 export type LagerId = 'garasje' | 'havn' | 'hangar'
 
+/** Racingteamet (Pakke 90): delene på bilen, førerne og sesongen. */
+export type Bildel = 'motor' | 'aero' | 'chassis' | 'depot'
+export type Lopsstrategi = 'forsiktig' | 'normal' | 'aggressiv'
+
+export interface Forer {
+  id: number
+  navn: string
+  /** 0–100: hvor mye fører en legger til bilens fart. */
+  ferdighet: number
+  /** Lønn per spilldag. */
+  lonn: number
+}
+
+/** Ett løp, sett fra ditt team: hvor førerne kom (0 = ute), poengene, premien og pallen. */
+export interface Racinglop {
+  sesong: number
+  runde: number
+  dag: number
+  bane: string
+  strategi: Lopsstrategi
+  /** Plassen til fører 1 og 2, 1–20; 0 er ute av løpet (krasj), null er et tomt sete. */
+  plasser: (number | null)[]
+  poeng: number
+  premie: number
+  /** De tre på pallen: fører og team. */
+  pall: { forer: string; lag: string }[]
+}
+
+export interface Racingsesong {
+  sesong: number
+  /** Plassen i konstruktørmesterskapet. */
+  plass: number
+  poeng: number
+  /** Beste fører i førermesterskapet. */
+  forerplass: number
+  seire: number
+  titler: string[]
+}
+
+export interface Racingteam {
+  navn: string
+  sesong: number
+  /** Teamets egen terning: løpene trekker bare fra den. */
+  frø: number
+  /** Dagen neste løp avgjøres (ved dagsskiftet inn i den). */
+  nesteDag: number
+  /** Løp kjørt denne sesongen, 0–8. */
+  runde: number
+  deler: Record<Bildel, number>
+  /** Det delene har kostet — teamets verdi. */
+  investert: number
+  /** To seter; null er tomt. */
+  forere: (Forer | null)[]
+  /** Førerne som kan ansettes, nye hver sesong. */
+  marked: Forer[]
+  nesteForerId: number
+  strategi: Lopsstrategi
+  /** Poengene i år: konstruktører per team, førere per «navn|team». */
+  lagpoeng: Record<string, number>
+  forerpoeng: Record<string, number>
+  /** Løpene i år og i fjor, nyeste sist (høyst 16). */
+  lop: Racinglop[]
+  sesonger: Racingsesong[]
+  /** Premier og lønn så langt, til siden. */
+  premier: number
+  lonn: number
+}
+
 /** Utleie av yachten eller jeten (Pakke 89). Står den i lista, er den ute hos noen andre. */
 export interface Charter {
   /** Det den har tjent på denne utleien. */
@@ -586,6 +654,10 @@ export interface Spilltilstand {
   charter?: Partial<Record<LuksusId, Charter>>
   /** Auksjonshuset (Pakke 89): auksjonen som pågår, og de unike tingene. Mangler i eldre lagringer. */
   auksjon?: Auksjonshus
+  /** Racingteamet (Pakke 90), om du har startet ett. */
+  racing?: Racingteam
+  /** Mesterskapene teamet har vunnet — de står igjen om teamet selges. */
+  racingtrofeer?: Trofe[]
   /** De siste utgavene av avisen, nyeste sist. */
   avis: Avisutgave[]
   /** Dagen i den nyeste utgaven du har lest. */

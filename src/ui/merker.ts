@@ -58,6 +58,8 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   seriemester: { ikon: 'trofe', grad: 'gull' },
   'eliteserie-gull': { ikon: 'medalje', grad: 'gull' },
   cupmester: { ikon: 'trofe', grad: 'gull' },
+  'grand-prix': { ikon: 'medalje', grad: 'solv' },
+  verdensmester: { ikon: 'trofe', grad: 'gull' },
   europa: { ikon: 'globus', grad: 'solv' },
   europamester: { ikon: 'globus', grad: 'gull' },
   oljebaron: { ikon: 'drape', grad: 'gull' },

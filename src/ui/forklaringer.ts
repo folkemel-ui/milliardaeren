@@ -25,6 +25,7 @@ import { kortKroner, tall } from './format'
 import { AUKSJON_DAGER, BUDSTIGNING, PASSER_ANDEL, TILBAKE_DAGER, TILBAKE_PREMIE } from '../engine/auksjon'
 import { CHARTER_I_SESONG, CHARTER_UTENFOR } from '../engine/charter'
 import { UNIK_RESTVERDI } from '../engine/unike'
+import { DAGER_MELLOM, DELTRINN_PRIS, LOP_PER_SESONG, MESTERPREMIE, PREMIE_PER_POENG, RACING_TROFE_STATUS, SALG_ANDEL, STRATEGIER, TEAMPRIS } from '../engine/racing'
 
 const pst = (andel: number, desimaler = 0) => `${tall(andel * 100, desimaler)} %`
 
@@ -45,6 +46,7 @@ export type Tema =
   | 'klubb'
   | 'obligasjoner'
   | 'auksjon'
+  | 'racing'
 
 const trinn = SKATTETRINN.slice(1)
 
@@ -176,6 +178,15 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `En unik ting tar en plass som resten av samlingen, gir status og holder seg: den teller og selges for ${pst(UNIK_RESTVERDI)} av det du betalte. ` +
       `Yachtene og jetene kan leies ut de ukene du ikke bruker dem: ${pst(CHARTER_I_SESONG)} av nyprisen i timen i sesongen — yachtene mai–september, jetene november–mars — og ${pst(CHARTER_UTENFOR)} utenfor. ` +
       'De gir statusen som før mens de er ute, men kan ikke selges før de er hjemme, og det tar til neste dag.',
+  },
+  racing: {
+    tittel: 'Racingteamet',
+    tekst:
+      `Med Formel 1-bilen kan du starte et team for ${kortKroner(TEAMPRIS)}. En sesong er ${LOP_PER_SESONG} løp, ett hver ${DAGER_MELLOM}. spilldag, mot ni team med to førere hver; løpet avgjøres ved dagsskiftet. ` +
+      `Farten kommer fra bilen og førerne, og litt flaks. Bilen har fire deler i fem trinn, fra ${kortKroner(DELTRINN_PRIS[0])} til ${kortKroner(DELTRINN_PRIS[DELTRINN_PRIS.length - 1])}; førerne ansetter du fra markedet, som fornyes hver sesong, og de koster lønn hver dag. ` +
+      `Strategien gjelder begge førerne: ${STRATEGIER.forsiktig.navn.toLowerCase()} kommer nesten alltid i mål, ${STRATEGIER.aggressiv.navn.toLowerCase()} er raskere, men kjører av omtrent én gang av åtte — best når du jager, verre når du leder. ` +
+      `De ti første får poeng (25, 18, 15 … 1), og teamet får ${kortKroner(PREMIE_PER_POENG)} per poeng. Førermesterskapet og konstruktørmesterskapet gir hvert et trofé med ${RACING_TROFE_STATUS} i status og ${kortKroner(MESTERPREMIE)}. ` +
+      `Teamet teller i formuen med det delene har kostet; selger du, får du ${pst(SALG_ANDEL)} av det, og bilen og trofeene beholder du.`,
   },
   klubb: {
     tittel: 'Fotballklubben',

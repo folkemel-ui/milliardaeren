@@ -53,6 +53,7 @@ export function kjopLuksus(s: Spilltilstand, id: LuksusId): Utfall {
 export function selgLuksus(s: Spilltilstand, id: LuksusId): Utfall {
   if (!s.luksus.includes(id)) return feil('Du eier den ikke.')
   if (s.charter?.[id]) return feil('Den er leid ut. Hent den hjem først.')
+  if (id === 'formelbil' && s.racing) return feil('Bilen kjører for racingteamet. Selg teamet først.')
   const n = structuredClone(s)
   utforLuksussalg(n, id)
   return { ok: true, tilstand: n }
