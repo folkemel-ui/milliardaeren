@@ -23,7 +23,9 @@ import {
   divisjonsnavn,
   FLOMLYS,
   form,
-  forventetMaal,
+  dineForventedeMaal,
+  kampvaer,
+  motprofil,
   kjopspris,
   KLUBB_LAAST_OPP,
   KLUBBNAVN,
@@ -66,6 +68,8 @@ import { Forklaring } from '../komponenter/Forklaring'
 import { aapneKlubbside, KLUBBSIDER, type Klubbside as Side } from '../klubbsider'
 import { useVoksUt } from '../overgang'
 import { kampnokkel, klubbmerker, merkSett, nytt, startMerker, useKlubbmerker, type Klubbmerker } from '../klubbsett'
+import { dagnummer } from '../../engine/kalender'
+import { VAERTYPER } from '../../engine/verden'
 
 /**
  * Klubb-delen i Luksus (Pakke 62): klubben din rett i delen — et nav med
@@ -157,7 +161,7 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
       {neste && (
         <div className="kort nestekamp">
           <h2 className="kort-tittel">Neste kamp · om {varighet(tidTilNesteRunde(s))}</h2>
-          <Kampoppsett k={k} profil={profil} motstander={neste.motstander.navn} motStyrke={neste.motstander.styrke} hjemme={neste.hjemme} />
+          <Kampoppsett s={s} k={k} profil={profil} motstander={neste.motstander.navn} motStyrke={neste.motstander.styrke} hjemme={neste.hjemme} />
           <Turneringslinjer k={k} />
           <h3 className="etikett">Formasjon</h3>
           <div className="segment" role="radiogroup" aria-label="Formasjon">
@@ -1128,11 +1132,27 @@ function Potensial({ p }: { p: Spiller }) {
   return spenn ? <> · kan bli {spenn[0]}–{spenn[1]}</> : null
 }
 
-function Kampoppsett({ k, profil, motstander, motStyrke, hjemme }: { k: KlubbT; profil: Lagprofil; motstander: string; motStyrke: number; hjemme: boolean }) {
-  const [xh, xb] = hjemme ? forventetMaal(profil, motStyrke, k.taktikk, 'balansert') : forventetMaal(motStyrke, profil, 'balansert', k.taktikk)
+function Kampoppsett({ s, k, profil, motstander, motStyrke, hjemme }: { s: Spilltilstand; k: KlubbT; profil: Lagprofil; motstander: string; motStyrke: number; hjemme: boolean }) {
+  // Kampen spilles ved dagsskiftet etter i dag, i dagens vær (Pakke 85).
+  const dag = dagnummer(s.sek)
+  const [xh, xb] = dineForventedeMaal(k, profil, { navn: motstander, styrke: motStyrke }, hjemme, dag)
   const [egne, mot] = hjemme ? [xh, xb] : [xb, xh]
+  const p = motprofil(motstander, motStyrke)
   const ditt = `angrep ${tall(profil.angrep)} · forsvar ${tall(profil.forsvar)}`
-  const deres = `styrke ${tall(motStyrke)}`
+  const deres = `angrep ${tall(p.angrep)} · forsvar ${tall(p.forsvar)}`
+  const vaer = kampvaer(dag)
+  const vaerlinje = [
+    vaer.faktor < 1 ? `${VAERTYPER[vaer.vaer].navn} – færre mål ventet` : null,
+    vaer.vind ? 'Vind – hjelper det svakeste laget' : null,
+  ].filter(Boolean)
+  // Hva motstanderens profil sier om taktikken: et sterkt angrep, et svakt forsvar.
+  // Begge kan gjelde samme lag; da må du velge selv hva som veier tyngst.
+  const raad = [
+    p.angrep - motStyrke >= 5 ? 'Sterkt angrep: Forsvar tar mer av målene deres.' : null,
+    motStyrke - p.forsvar >= 5 ? 'Svakt forsvar: Angrep gir flere mål.' : null,
+  ]
+    .filter(Boolean)
+    .join(' ')
   return (
     <div className="kampoppsett">
       <div>
@@ -1149,6 +1169,11 @@ function Kampoppsett({ k, profil, motstander, motStyrke, hjemme }: { k: KlubbT; 
       <p className="dempet liten kamp-forventet">
         {hjemme ? 'Hjemmekamp' : 'Bortekamp'} · forventet {tall(egne, 1)} mål for, {tall(mot, 1)} mot
       </p>
+      {(vaerlinje.length > 0 || raad) && (
+        <p className="liten kamp-forventet">
+          {[...vaerlinje, raad].filter(Boolean).join(' · ')}
+        </p>
+      )}
     </div>
   )
 }

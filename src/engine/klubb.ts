@@ -19,7 +19,8 @@
 
 import { leggTilHendelse, meldBankenDekket } from './bank'
 import { dagnummer } from './kalender'
-import { hashTekst, Terning } from './rng'
+import { Hashkilde, hashTekst, Terning } from './rng'
+import { vaerPaaDag, type Vaertype } from './verden'
 import { kortKroner, tall } from './tall'
 import type { Akademi, Formasjon, Kamp, Klubb, Lag, Maalhendelse, Motlag, Overskrift, Posisjon, Sesongoppsummering, Spiller, Spillerstatistikk, Spillervurdering, Spilltilstand, Taktikk, Turnering, Utslag } from './types'
 
@@ -98,9 +99,9 @@ const PENSJONSALDER = 35
  * var sterkere i.
  */
 export const TAKTIKKER: Record<Taktikk, { navn: string; beskrivelse: string; egne: number; mot: number }> = {
-  forsvar: { navn: 'Forsvar', beskrivelse: 'Færre mål begge veier. Best når motstanderen er klart sterkere.', egne: 0.7, mot: 0.75 },
+  forsvar: { navn: 'Forsvar', beskrivelse: 'Færre mål begge veier. Best når motstanderen er klart sterkere — eller har et sterkt angrep.', egne: 0.7, mot: 0.75 },
   balansert: { navn: 'Balansert', beskrivelse: 'Vanlig spill. Best i en jevn kamp.', egne: 1, mot: 1 },
-  angrep: { navn: 'Angrep', beskrivelse: 'Flere mål begge veier. Best når du er klart sterkere.', egne: 1.3, mot: 1.4 },
+  angrep: { navn: 'Angrep', beskrivelse: 'Flere mål begge veier. Best når du er klart sterkere — eller forsvaret deres er svakt.', egne: 1.3, mot: 1.4 },
 }
 
 // ─────────────────────────────────────────────── Posisjoner og formasjoner (Pakke 71)
@@ -517,7 +518,8 @@ function inntekt(s: Spilltilstand, k: Klubb, felt: 'tv' | 'premier', belop: numb
  */
 function spillUtslagskamp(s: Spilltilstand, k: Klubb, t: Terning, mot: Motlag, hjemme: boolean, turnering: Turnering, runde: number): Kamp {
   const ditt = lagprofil(k)
-  const [xh, xb] = hjemme ? forventetMaal(ditt, mot.styrke, k.taktikk, 'balansert') : forventetMaal(mot.styrke, ditt, 'balansert', k.taktikk)
+  // Kampen spilles dagen som nettopp er slutt; Europa spilles ute i verden, uten norsk vær (Pakke 85).
+  const [xh, xb] = dineForventedeMaal(k, ditt, mot, hjemme, turnering === 'europa' ? null : dagnummer(s.sek) - 1)
   const mh = maal(t, xh)
   const mb = maal(t, xb)
   const kamp: Kamp = { sesong: k.sesong, runde, motstander: mot.navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh, turnering }
@@ -855,6 +857,68 @@ export function forventetMaal(hjemme: number | Lagprofil, borte: number | Lagpro
   ]
 }
 
+// ─────────────────────────────────────────────── Motstandernes profil og været (Pakke 85)
+
+/**
+ * En motstanders angrep og forsvar ligger hver for seg inntil så langt fra styrken.
+ * Før var en motstander ett tall, og en ren deling av det tallet endret riktig taktikk
+ * i bare 2–4 % av kampene (regnet eksakt på Poisson-målene).
+ */
+export const PROFIL_SPENN = 10
+/**
+ * Taktikken kontrer profilen: Forsvar tar så mye mer av målene deres per poeng angrepet
+ * deres ligger over styrken, Angrep gir så mye mer per poeng forsvaret deres ligger
+ * under. Med ±10 er riktig taktikk en annen enn styrkeregelen i 26 % av kampene.
+ */
+export const KONTRING = 0.01
+/** Været ganger begge lags mål: regn litt færre, snø enda færre — og flere uavgjort. */
+export const KAMPVAER: Partial<Record<Vaertype, number>> = { regn: 0.9, sno: 0.8 }
+/** Sjansen for vind på en kampdag (en egen hash: været i spillet har ingen vind) … */
+export const VIND_SJANSE = 1 / 6
+/** … og hva vinden gir det svakeste laget. */
+export const VIND_HJELP = 1.1
+
+/** Motstanderens angrep og forsvar: fra en hash av navnet, så samme lag har samme profil i alle lagringer. */
+export function motprofil(navn: string, styrke: number): Lagprofil {
+  const h = new Hashkilde(hashTekst(`profil:${navn}`))
+  return {
+    angrep: Math.round(styrke + (h.neste() * 2 - 1) * PROFIL_SPENN),
+    forsvar: Math.round(styrke + (h.neste() * 2 - 1) * PROFIL_SPENN),
+  }
+}
+
+/** Været på en kampdag: Norges vær den dagen, og vind fra en egen hash. */
+export function kampvaer(dag: number): { vaer: Vaertype; vind: boolean; faktor: number } {
+  const vaer = vaerPaaDag(dag)
+  const vind = new Hashkilde(hashTekst(`kampvind:${dag}`)).neste() < VIND_SJANSE
+  return { vaer, vind, faktor: KAMPVAER[vaer] ?? 1 }
+}
+
+/**
+ * Forventede mål i din kamp, som [hjemme, borte]: lagene mot hverandre, motstanderens
+ * profil, taktikken som kontrer den, og været (`dag` er kampdagen; null utenlands, der
+ * norsk vær ikke gjelder).
+ */
+export function dineForventedeMaal(k: Klubb, ditt: Lagprofil, mot: { navn: string; styrke: number }, hjemme: boolean, dag: number | null): [number, number] {
+  const p = motprofil(mot.navn, mot.styrke)
+  const [xh, xb] = hjemme ? forventetMaal(ditt, p, k.taktikk, 'balansert') : forventetMaal(p, ditt, 'balansert', k.taktikk)
+  let egne = hjemme ? xh : xb
+  let deres = hjemme ? xb : xh
+  if (k.taktikk === 'forsvar') deres *= 1 - KONTRING * Math.max(0, p.angrep - mot.styrke)
+  if (k.taktikk === 'angrep') egne *= 1 + KONTRING * Math.max(0, mot.styrke - p.forsvar)
+  if (dag !== null) {
+    const v = kampvaer(dag)
+    egne *= v.faktor
+    deres *= v.faktor
+    if (v.vind) {
+      const min = (ditt.angrep + ditt.forsvar) / 2
+      if (min < mot.styrke) egne *= VIND_HJELP
+      else if (min > mot.styrke) deres *= VIND_HJELP
+    }
+  }
+  return hjemme ? [egne, deres] : [deres, egne]
+}
+
 // ─────────────────────────────────────────────── Kamprapporten (Pakke 72)
 
 /** Så ofte en plass scorer, alt annet likt: en spiss fire ganger så ofte som en back, keeperen aldri. */
@@ -987,10 +1051,13 @@ function betal(s: Spilltilstand, belop: number): void {
 function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
   let din: Kamp | null = null
   const ditt = lagprofil(k)
+  // Kampene spilles ved dagsskiftet: været er dagen som nettopp er slutt (Pakke 85).
+  const dag = dagnummer(s.sek) - 1
   for (const [h, b] of rundensKamper(k.runde)) {
-    const sh = h === 0 ? ditt : k.lag[h].styrke
-    const sb = b === 0 ? ditt : k.lag[b].styrke
-    const [xh, xb] = forventetMaal(sh, sb, h === 0 ? k.taktikk : 'balansert', b === 0 ? k.taktikk : 'balansert')
+    const [xh, xb] =
+      h === 0 || b === 0
+        ? dineForventedeMaal(k, ditt, k.lag[h === 0 ? b : h], h === 0, dag)
+        : forventetMaal(k.lag[h].styrke, k.lag[b].styrke, 'balansert', 'balansert')
     const mh = maal(t, xh)
     const mb = maal(t, xb)
     registrer(k.lag[h], mh, mb)

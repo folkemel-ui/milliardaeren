@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 84, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 85, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,14 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **Check an idea's premise on exact odds before building it** (Pack 85): «give opponents an attack
+  and a defence so the tactic matters» would have changed the right tactic in 2–4 % of matches if the
+  one number were just split, because the tactics multiply goals the same way whoever attacks. A
+  30-line Poisson script showed it in a minute; independent attack and defence plus tactics that
+  counter them gave ~26 %. Put such a finding in the question to Folke, with the alternatives' numbers.
+- **A match is decided at the day change, so its day is `dagnummer(s.sek) − 1`** in the engine, while
+  the screen («Neste kamp») shows `dagnummer(s.sek)` — the same day. Anything tied to the match day
+  (weather, wind) must use those two, or the card and the result disagree.
 - **Measuring page heights (Pack 84)**: a `Seksjon` header carries `aria-expanded`, not the class
   `åpen` — clicking every `.seksjon-hode` without that check folds the open ones and halves the
   number. Measure before and after with the same script on the same frozen save (keep a copy in
