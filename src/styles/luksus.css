@@ -234,6 +234,44 @@
   border-left-color: var(--minus);
 }
 
+/* Pakke 87: kvalikplassene. */
+.tabell tr.kvalik td:first-child {
+  border-left-color: var(--gull);
+}
+
+/* Pakke 87: trofeskapet — en hylle med pokaler, tre i bredden på en telefon. */
+.trofeskap-hylle {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 8px;
+}
+
+.trofeskap-hylle li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.pokal-flate {
+  fill: var(--gull);
+}
+
+.pokal-skygge {
+  fill: var(--flate);
+  opacity: 0.55;
+}
+
+.pokal-hank {
+  fill: none;
+  stroke: var(--gull);
+  stroke-width: 1.6;
+}
+
 .tabell tr.deg td {
   color: var(--gull);
   font-weight: var(--vekt-fet);

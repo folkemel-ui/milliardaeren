@@ -783,7 +783,8 @@ export interface Runderesultat {
   mb: number
 }
 
-export type Turnering = 'cup' | 'europa'
+/** Cupen og Europa (Pakke 73), kvalik og supercupen (Pakke 87). */
+export type Turnering = 'cup' | 'europa' | 'kvalik' | 'supercup'
 
 /** En utslagsturnering (Pakke 73): lagene som er igjen, neste runde, og din egen terning. */
 export interface Utslag {
@@ -829,6 +830,8 @@ export interface Sesongoppsummering {
   /** Hvor langt det gikk i cupen og i Europa: «Kvartfinale», «Cupmester». */
   cup?: string
   europa?: string
+  /** Kvalikkampen, når du spilte den (Pakke 87): «Kvalik mot Ramsøy SK: 2–1, opp til 2. divisjon». */
+  kvalik?: string
   /** Hva som skjedde: opp, ned, nektet opprykk eller ingenting. */
   utfall: 'opp' | 'ned' | 'nektet' | 'samme'
   /** Divisjonen neste sesong spilles i. */
@@ -887,6 +890,8 @@ export interface Klubb {
   sisteRunde?: { dag: number; kamper: Runderesultat[] }
   synlig?: { seire: number; opprykk: number; trofeer: number; europa: boolean }
   ventendeSaker?: Overskrift[]
+  /** Supercupen (Pakke 87): seriemesteren mot cupmesteren på dag 1 i sesongen, når du er en av dem. */
+  supercup?: { sesong: number; mot: Motlag; hjemme: boolean }
   ventendeHendelser?: Omit<Hendelse, 'sek'>[]
   stadion: Stadionstand
   /**

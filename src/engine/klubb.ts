@@ -421,6 +421,18 @@ export const CUP_PREMIE = 40_000_000
 export const EUROPA_PREMIER = [10_000_000, 20_000_000, 40_000_000] as const
 export const CUPMESTER = 'Cupmester'
 export const EUROPAMESTER = 'Europamester'
+/** Pakke 87: trofeet for supercupen. */
+export const SUPERCUPMESTER = 'Supercupmester'
+
+/**
+ * Kvalik (Pakke 87): ved hver grense mellom to divisjoner møter nummer 3 og 4 nedenfra
+ * nummer 8 og 7 ovenfra, hos laget ovenfra, i én kamp — uavgjort avgjøres på straffer.
+ * Vinneren spiller i divisjonen over. Indeksene er plassene i rangeringen (0 = først).
+ */
+export const KVALIK: readonly (readonly [number, number])[] = [
+  [2, 7],
+  [3, 6],
+]
 /** Rundenavnene i cupen (seks runder) og i Europa (tre). */
 export const CUPRUNDER = ['1. runde', '2. runde', '3. runde', 'Kvartfinale', 'Semifinale', 'Finale'] as const
 export const EUROPARUNDER = ['Kvartfinale', 'Semifinale', 'Finale'] as const
@@ -584,6 +596,20 @@ function spillUtslagsrunde(s: Spilltilstand, k: Klubb, u: Utslag, turnering: Tur
 /** Cupen og Europa på dagens dag i sesongen. Gir avisens saker. Muterer. */
 function spillTurneringer(s: Spilltilstand, k: Klubb, dag: number): Overskrift[] {
   const saker: Overskrift[] = []
+  // Supercupen (Pakke 87) åpner sesongen, med sin egen terning — klubbens står som før.
+  if (dag === 1 && k.supercup && k.supercup.sesong === k.sesong) {
+    const sc = k.supercup
+    k.supercup = undefined
+    const din = spillUtslagskamp(s, k, new Terning(hashTekst(`${k.navn}:${k.sesong}:supercup`)), sc.mot, sc.hjemme, 'supercup', 0)
+    const resultat = din.hjemme ? `${k.navn} ${din.maalFor}–${din.maalMot} ${din.motstander}` : `${din.motstander} ${din.maalMot}–${din.maalFor} ${k.navn}`
+    if (vantDu(din)) {
+      s.trofeer.push({ navn: SUPERCUPMESTER, sesong: k.sesong, klubb: k.navn })
+      saker.push({ type: 'deg', tittel: `${k.navn} vinner supercupen!`, tekst: `${resultat}${din.straffer ? ', avgjort på straffer' : ''}. Sesongen er i gang, og det første trofeet er alt i skapet.` })
+      leggTilHendelse(s, { tittel: 'Trofé', tekst: `${k.navn} vant supercupen.`, alvor: 'info' })
+    } else {
+      saker.push({ type: 'deg', tittel: `Supercupen: ${resultat}`, tekst: `${din.straffer ? 'Avgjort på straffer. ' : ''}Trofeet gikk til ${din.motstander}.` })
+    }
+  }
   if (dag === 1) k.cup = nyCup(k)
   for (const turnering of ['cup', 'europa'] as const) {
     const u = k[turnering]
@@ -724,29 +750,68 @@ type Flytting = Motlag & { fra?: number; deg?: boolean }
  * litt, så et lag som rykker opp, ofte rykker ned igjen. Gir lagene som kom
  * til din divisjon. Muterer.
  */
-function skiftSerier(k: Klubb, t: Terning): Flytting[] {
+function skiftSerier(s: Spilltilstand, k: Klubb, t: Terning): { kom: Flytting[]; liga: Flytting[]; kvalik: { kamp: Kamp; opp: boolean; vant: boolean } | null } {
   const topp = DIVISJONER.length - 1
   const opp = rykkerOpp(k)
   const ned = rykkerNed(k)
   const nye: Flytting[][] = DIVISJONER.map(() => [])
   const ute: string[] = []
-  const flytt = (m: Flytting, fra: number, til: number) => {
-    if (til < 0) ute.push(m.navn)
-    else nye[til].push(til === fra ? m : { ...m, fra })
+  // Rangeringen i hver divisjon: din fra tabellen, de andre etter styrke pluss en sesong
+  // med flaks (trukket i samme rekkefølge som før Pakke 87).
+  const tabellen = tabell(k)
+  const rangert: Flytting[][] = DIVISJONER.map((_, d) =>
+    d === k.divisjon
+      ? tabellen.map((i): Flytting => (i === 0 ? { navn: k.navn, styrke: 0, deg: true } : { navn: k.lag[i].navn, styrke: k.lag[i].styrke }))
+      : k.serier[d]
+          .map((m) => ({ m: m as Flytting, x: m.styrke + t.mellom(-10, 10) }))
+          .sort((a, b) => b.x - a.x)
+          .map((r) => r.m),
+  )
+  // Hvor hvert lag skal: først de direkte, to opp og to ned.
+  const til = new Map<Flytting, number>()
+  for (let d = 0; d <= topp; d++) {
+    const r = rangert[d]
+    r.forEach((m, plass) => {
+      if (d === k.divisjon) {
+        const i = tabellen[plass]
+        til.set(m, opp.includes(i) ? d + 1 : ned.includes(i) ? d - 1 : d)
+      } else til.set(m, plass < OPPRYKK && d < topp ? d + 1 : plass >= r.length - OPPRYKK ? d - 1 : d)
+    })
+  }
+  // Kvalik (Pakke 87): ved hver grense nummer 3 og 4 nedenfra mot nummer 8 og 7 ovenfra,
+  // hos laget ovenfra. Du trenger stadion for divisjonen over for å spille deg opp; ellers
+  // tar neste lag plassen. Kampene har sin egen terning, så klubbens står som før.
+  const tk = new Terning(hashTekst(`${k.navn}:${k.sesong}:kvalik`))
+  let kvalik: { kamp: Kamp; opp: boolean; vant: boolean } | null = null
+  for (let d = 0; d < topp; d++) {
+    const nedenfra = rangert[d].filter((m) => til.get(m) === d && !(m.deg && !oppfyllerKrav(k, d + 1)))
+    for (let j = 0; j < KVALIK.length; j++) {
+      const lav = nedenfra[KVALIK[j][0] - OPPRYKK]
+      const hoy = rangert[d + 1][KVALIK[j][1]]
+      if (!lav || !hoy || til.get(hoy) !== d + 1) continue
+      let vinner: Flytting
+      if (lav.deg || hoy.deg) {
+        const mot = lav.deg ? hoy : lav
+        const kamp = spillUtslagskamp(s, k, tk, { navn: mot.navn, styrke: mot.styrke }, !!hoy.deg, 'kvalik', 0)
+        const vant = vantDu(kamp)
+        kvalik = { kamp, opp: !!lav.deg, vant }
+        vinner = vant ? (lav.deg ? lav : hoy) : mot
+      } else {
+        const [xh, xb] = forventetMaal(hoy.styrke, lav.styrke, 'balansert', 'balansert')
+        const mh = maal(tk, xh)
+        const mb = maal(tk, xb)
+        vinner = mh > mb ? hoy : mb > mh ? lav : tk.sjanse(0.5) ? hoy : lav
+      }
+      til.set(lav, vinner === lav ? d + 1 : d)
+      til.set(hoy, vinner === hoy ? d + 1 : d)
+    }
   }
   for (let d = 0; d <= topp; d++) {
-    if (d === k.divisjon) {
-      for (const i of tabell(k)) {
-        const m: Flytting = i === 0 ? { navn: k.navn, styrke: 0, deg: true } : { navn: k.lag[i].navn, styrke: k.lag[i].styrke }
-        flytt(m, d, opp.includes(i) ? d + 1 : ned.includes(i) ? d - 1 : d)
-      }
-      continue
+    for (const m of rangert[d]) {
+      const mål = til.get(m)!
+      if (mål < 0) ute.push(m.navn)
+      else nye[mål].push(mål === d ? m : { ...m, fra: d })
     }
-    const rangert = k.serier[d]
-      .map((m) => ({ m, x: m.styrke + t.mellom(-10, 10) }))
-      .sort((a, b) => b.x - a.x)
-      .map((r) => r.m)
-    rangert.forEach((m, plass) => flytt(m, d, plass < OPPRYKK && d < topp ? d + 1 : plass >= rangert.length - OPPRYKK ? d - 1 : d))
   }
   // Nye lag fra 5. divisjon fyller 4. divisjon — ikke de som nettopp rykket ned dit.
   const brukt = new Set([...nye.flat().map((m) => m.navn), ...ute])
@@ -762,7 +827,7 @@ function skiftSerier(k: Klubb, t: Terning): Flytting[] {
   const andre = nye[min].filter((m) => !m.deg)
   k.lag = [nyttLag(k.navn, 0), ...andre.map((m) => nyttLag(m.navn, m.styrke, m.fra))]
   k.serier = nye.map((l, d) => (d === min ? [] : l.map(({ navn, styrke }) => ({ navn, styrke }))))
-  return andre.filter((m) => m.fra !== undefined)
+  return { kom: andre.filter((m) => m.fra !== undefined), liga: rangert[topp], kvalik }
 }
 
 /** «2 000 plasser og flomlys» — det divisjonen krever. */
@@ -1144,7 +1209,22 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
     leggTilHendelse(s, { tittel: 'Trofé', tekst: `${k.navn} vant ${div.navn}.`, alvor: 'info' })
   }
   const iSteden = opp.map((i) => k.lag[i].navn).filter((n) => n !== k.navn)
-  const kom = skiftSerier(k, t)
+  // Cupmesteren må leses før skiftet: den nye cupen trekkes dag 1.
+  const cupmester = k.cup && k.cup.lag.length === 1 ? k.cup.lag[0] : null
+  const { kom, liga, kvalik } = skiftSerier(s, k, t)
+  if (kvalik) {
+    const { kamp, opp: oppover, vant } = kvalik
+    const resultat = kamp.hjemme ? `${k.navn} ${kamp.maalFor}–${kamp.maalMot} ${kamp.motstander}` : `${kamp.motstander} ${kamp.maalMot}–${kamp.maalFor} ${k.navn}`
+    const hva = oppover ? (vant ? `opp til ${DIVISJONER[fra + 1].navn}` : `blir i ${DIVISJONER[fra].navn}`) : vant ? `blir i ${DIVISJONER[fra].navn}` : `ned til ${DIVISJONER[fra - 1].navn}`
+    oppsummering.kvalik = `Kvalik mot ${kamp.motstander}: ${kamp.maalFor}–${kamp.maalMot}${kamp.straffer ? ' (straffer)' : ''}, ${hva}`
+    saker.push({ type: 'deg', tittel: `Kvalik: ${resultat}`, tekst: `${kamp.straffer ? 'Avgjort på straffer. ' : ''}${k.navn} ${hva}.` })
+  }
+  // Supercupen (Pakke 87): seriemesteren i Eliteserien mot cupmesteren, dag 1 neste sesong — når du er en av dem.
+  const seriemester = liga[0]
+  if (seriemester && cupmester && (seriemester.deg || cupmester.deg)) {
+    const mot = seriemester.deg && cupmester.deg ? liga[1] : seriemester.deg ? cupmester : seriemester
+    if (mot) k.supercup = { sesong: k.sesong + 1, mot: { navn: mot.navn, styrke: mot.styrke }, hjemme: !!seriemester.deg }
+  }
   oppsummering.utfall = k.divisjon > fra ? 'opp' : k.divisjon < fra ? 'ned' : sperret ? 'nektet' : 'samme'
   oppsummering.neste = k.divisjon
   k.sesonger = [...(k.sesonger ?? []), oppsummering].slice(-SESONGER_HUSKET)

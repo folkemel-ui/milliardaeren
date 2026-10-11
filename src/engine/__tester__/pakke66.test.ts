@@ -216,10 +216,13 @@ describe('faste lag', () => {
     spillSesong(s)
     expect(k.divisjon).toBe(0)
     const nå = k.lag.slice(1).map((l) => l.navn)
-    // Ni motstandere: to gikk opp og to ut, fem ble, to kom ned og to nye kom opp nedenfra.
-    expect(nå.filter((n) => før.includes(n))).toHaveLength(5)
-    expect(nå.filter((n) => fraOver.includes(n))).toHaveLength(2)
-    expect(k.lag.filter((l) => l.fra === 1)).toHaveLength(2)
+    // Ni motstandere: to gikk opp og to ut, to kom ned og to nye kom opp nedenfra. Kvalik
+    // (Pakke 87) kan bytte inntil to til: et lag går opp, og ett ovenfra kommer ned.
+    const bytter = k.lag.filter((l) => l.fra === 1).length - 2
+    expect(bytter).toBeGreaterThanOrEqual(0)
+    expect(bytter).toBeLessThanOrEqual(2)
+    expect(nå.filter((n) => før.includes(n))).toHaveLength(5 - bytter)
+    expect(nå.filter((n) => fraOver.includes(n))).toHaveLength(2 + bytter)
     expect(k.lag.filter((l) => l.fra === -1)).toHaveLength(2)
     // De som falt ut, kommer ikke tilbake som nye lag med en gang.
     for (const l of k.lag.filter((x) => x.fra === -1)) expect(før).not.toContain(l.navn)

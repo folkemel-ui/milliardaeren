@@ -23,7 +23,10 @@ import {
   divisjonsnavn,
   FLOMLYS,
   form,
+  CUPMESTER,
   dineForventedeMaal,
+  EUROPAMESTER,
+  SUPERCUPMESTER,
   kampvaer,
   motprofil,
   kjopspris,
@@ -32,6 +35,7 @@ import {
   KLUBBSALG_HONORAR,
   klubbTilSalgs,
   kravtekst,
+  KVALIK,
   klubbverdi,
   lagstyrke,
   LONN_ANDEL,
@@ -71,6 +75,7 @@ import { kampnokkel, klubbmerker, merkSett, nytt, startMerker, useKlubbmerker, t
 import { dagnummer } from '../../engine/kalender'
 import { VAERTYPER } from '../../engine/verden'
 import { kampminutt, liveKamper, stilling, visKlubb, type Visningsklubb } from '../klubblive'
+import { synligeTrofeer } from '../../engine/prestasjoner'
 
 /**
  * Klubb-delen i Luksus (Pakke 62): klubben din rett i delen — et nav med
@@ -136,11 +141,21 @@ const RESULTAT = (k: Kamp) => (k.maalFor > k.maalMot ? 'S' : k.maalFor === k.maa
 /** En cupkamp avgjort på straffer: videre er en seier, ute et tap. */
 const UTFALL_KAMP = (m: Kamp) => (m.straffer ? (m.straffer === 'deg' ? 'S' : 'T') : RESULTAT(m))
 
+/** Navnet på en turnering i en linje (Pakke 87: kvalik og supercupen). */
+const TURNERINGSNAVN: Record<Turnering, string> = { cup: 'Cupen', europa: 'Europa', kvalik: 'Kvalik', supercup: 'Supercupen' }
+
+/** Runden i en turnering: cupens og Europas runder har navn, kvalik og supercupen er én kamp. */
+function turneringsrunde(m: Kamp): string {
+  if (m.turnering === 'cup') return CUPRUNDER[m.runde] ?? ''
+  if (m.turnering === 'europa') return EUROPARUNDER[m.runde] ?? ''
+  return m.turnering ? TURNERINGSNAVN[m.turnering] : ''
+}
+
 /** «Cupen, hjemme mot X» eller «Hjemme mot X». */
 function kampnavn(m: Kamp): string {
   const sted = `${m.hjemme ? 'hjemme' : 'borte'} mot ${m.motstander}`
   if (!m.turnering) return sted[0].toUpperCase() + sted.slice(1)
-  return `${m.turnering === 'cup' ? 'Cupen' : 'Europa'}, ${sted}`
+  return `${TURNERINGSNAVN[m.turnering]}, ${sted}`
 }
 
 /** Nettoen i år: billetter, sponsor, TV og premier minus lønn. */
@@ -244,6 +259,10 @@ function Klubbtopp({ s, k, profil }: { s: Spilltilstand; k: KlubbT; profil: Lagp
 function Turneringslinjer({ s, k }: { s: Spilltilstand; k: KlubbT }) {
   const linjer: { turnering: Turnering; tekst: string }[] = []
   const live = liveKamper(s)
+  // Supercupen (Pakke 87): dag 1 i sesongen, når du er seriemester eller cupmester.
+  const supercup = live.find((m) => m.turnering === 'supercup')
+  if (supercup) linjer.push({ turnering: 'supercup', tekst: `mot ${supercup.motstander} spilles nå` })
+  else if (k.supercup && k.supercup.sesong === k.sesong) linjer.push({ turnering: 'supercup', tekst: `mot ${k.supercup.mot.navn} (${tall(k.supercup.mot.styrke)}), dag 1` })
   for (const turnering of ['cup', 'europa'] as const) {
     // Pakke 86: en turneringskamp som spilles nå, sier ingenting om hvordan det gikk.
     const naa = live.find((m) => m.turnering === turnering)
@@ -266,7 +285,7 @@ function Turneringslinjer({ s, k }: { s: Spilltilstand; k: KlubbT }) {
     <ul className="turneringslinjer">
       {linjer.map((l) => (
         <li key={l.turnering} className="liten">
-          <span className="etikett">{l.turnering === 'cup' ? 'Cupen' : 'Europa'}</span> {l.tekst}
+          <span className="etikett">{TURNERINGSNAVN[l.turnering]}</span> {l.tekst}
         </li>
       ))}
     </ul>
@@ -316,6 +335,14 @@ function Tabell({ k, rader, start }: { k: KlubbT; rader: number[]; start: number
   const opp = rykkerOpp(k)
   const ned = k.divisjon > 0 ? rykkerNed(k) : []
   const rekke = tabell(k)
+  // Kvalik (Pakke 87), som motoren: oppover de to neste etter opprykket som får lov
+  // (uten stadion for divisjonen over tar neste lag plassen din), nedover nummer 7 og 8.
+  const topp = DIVISJONER.length - 1
+  const sperret = k.divisjon < topp && !oppfyllerKrav(k, k.divisjon + 1)
+  const kvalik = [
+    ...(k.divisjon < topp ? rekke.filter((i) => !opp.includes(i) && !(i === 0 && sperret)).slice(0, KVALIK.length) : []),
+    ...(k.divisjon > 0 ? KVALIK.map(([, over]) => rekke[over]) : []),
+  ]
   return (
     <table className="tabell">
       <thead>
@@ -331,7 +358,7 @@ function Tabell({ k, rader, start }: { k: KlubbT; rader: number[]; start: number
         {rader.map((i, n) => {
           const l = k.lag[i]
           const forrige = rekke[start + n - 1]
-          const sone = opp.includes(i) ? 'opp' : ned.includes(i) ? 'ned' : ''
+          const sone = opp.includes(i) ? 'opp' : ned.includes(i) ? 'ned' : kvalik.includes(i) ? 'kvalik' : ''
           const strek = forrige === undefined ? '' : opp.includes(forrige) && !opp.includes(i) ? 'strek-opp' : !ned.includes(forrige) && ned.includes(i) ? 'strek-ned' : ''
           return (
             <tr key={l.navn} className={[i === 0 ? 'deg' : '', sone, strek].filter(Boolean).join(' ')}>
@@ -480,6 +507,7 @@ export function Klubbdetalj({ s, k, side, tilbake }: { s: Spilltilstand; k: Klub
           <Salgskort s={s} />
         </>
       )}
+      {side === 'sesonger' && <Trofeskap s={s} />}
       {side === 'sesonger' && (k.sesonger?.length ?? 0) > 0 && <Sesongkort k={k} ny={ny.sesong} />}
     </section>
   )
@@ -498,7 +526,7 @@ function Formliste({ k }: { k: KlubbT }) {
   const [valgt, velg] = useState<string | null>(null)
   const m = siste.find((x) => kampnokkel(x) === valgt) ?? siste[siste.length - 1]
   const hvor = m.turnering
-    ? `${(m.turnering === 'cup' ? CUPRUNDER : EUROPARUNDER)[m.runde]?.toLowerCase()}${m.straffer ? `, straffer (${m.straffer === 'deg' ? 'videre' : 'ute'})` : ''}`
+    ? `${turneringsrunde(m).toLowerCase()}${m.straffer ? `, straffer (${m.straffer === 'deg' ? 'videre' : 'ute'})` : ''}`
     : `runde ${m.runde + 1}`
   return (
     <div className="kort formliste">
@@ -545,11 +573,14 @@ function Tabellkort({ k }: { k: KlubbT }) {
   const sperret = k.divisjon < DIVISJONER.length - 1 && !oppfyllerKrav(k, k.divisjon + 1)
   const opp = k.divisjon < DIVISJONER.length - 1 ? `Over grønn strek: opp til ${DIVISJONER[k.divisjon + 1].navn}${sperret ? ' — men ikke du, før stadion holder kravet' : ''}.` : ''
   const ned = k.divisjon > 0 ? 'Under rød: ned.' : ''
+  const kvalik = [k.divisjon < DIVISJONER.length - 1 ? '3. og 4. spiller kvalik mot 8. og 7. i divisjonen over' : '', k.divisjon > 0 ? '7. og 8. mot 3. og 4. i divisjonen under' : '']
+    .filter(Boolean)
+    .join('; ')
   return (
     <div className="kort">
       <h2 className="kort-tittel">Tabell</h2>
       <Tabell k={k} rader={tabell(k)} start={0} />
-      <p className="dempet liten">{[opp, ned].filter(Boolean).join(' ')}</p>
+      <p className="dempet liten">{[opp, ned, kvalik ? `Gull: ${kvalik}.` : ''].filter(Boolean).join(' ')}</p>
     </div>
   )
 }
@@ -888,7 +919,7 @@ function Kamprapport({ kamp, k, ny }: { kamp: Kamp; k: KlubbT; ny: boolean }) {
           Kamprapport{ny && <span className="merke gull">Ny</span>}
         </h2>
         <span className="dempet liten">
-          {kamp.turnering ? (kamp.turnering === 'cup' ? 'cupen' : 'Europa') : `runde ${kamp.runde + 1}`} · {kamp.hjemme ? 'hjemme' : 'borte'}
+          {kamp.turnering ? TURNERINGSNAVN[kamp.turnering].toLowerCase() : `runde ${kamp.runde + 1}`} · {kamp.hjemme ? 'hjemme' : 'borte'}
         </span>
       </div>
       <p className="rapport-resultat">
@@ -1063,6 +1094,12 @@ function Sesongkort({ k, ny }: { k: KlubbT; ny: boolean }) {
             <dd>{siste.europa}</dd>
           </div>
         )}
+        {siste.kvalik && (
+          <div>
+            <dt>Kvalik</dt>
+            <dd>{siste.kvalik.replace(/^Kvalik mot /, '')}</dd>
+          </div>
+        )}
       </dl>
       <p className="liten">
         <span className={`merke ${siste.utfall === 'opp' ? 'gull' : siste.utfall === 'ned' || siste.utfall === 'nektet' ? 'varsel' : 'info'}`}>{UTFALL[siste.utfall]}</span>{' '}
@@ -1129,7 +1166,7 @@ function Livekort({ s }: { s: Spilltilstand }) {
           <div key={`${m.turnering ?? 'serie'}-${m.runde}`} className="livekamp-kamp">
             <div className="maal-topp">
               <h2 className="kort-tittel">
-                {m.turnering === 'cup' ? 'Cupen' : m.turnering === 'europa' ? 'Europa' : 'Kampen'} nå <span className="merke gull">{minutt}'</span>
+                {m.turnering ? TURNERINGSNAVN[m.turnering] : 'Kampen'} nå <span className="merke gull">{minutt}'</span>
               </h2>
               <span className="dempet liten">{m.hjemme ? 'hjemme' : 'borte'}</span>
             </div>
@@ -1157,6 +1194,72 @@ function Livekort({ s }: { s: Spilltilstand }) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+type Pokalart = 'serie' | 'cup' | 'europa' | 'supercup'
+
+function pokalart(navn: string): Pokalart {
+  if (navn === CUPMESTER) return 'cup'
+  if (navn === EUROPAMESTER) return 'europa'
+  if (navn === SUPERCUPMESTER) return 'supercup'
+  return 'serie'
+}
+
+/**
+ * Et trofé (Pakke 87): seriepokalen med to hanker, cuppokalen høy med lokk, Europas med
+ * en stjerne og supercupen som et fat. Enkle tegninger i gull; grafikksporet kan tegne dem på nytt.
+ */
+function Pokal({ art }: { art: Pokalart }) {
+  return (
+    <svg className={`pokal pokal-${art}`} width="40" height="40" viewBox="0 0 24 24" aria-hidden="true">
+      {art === 'supercup' ? (
+        <>
+          <ellipse cx="12" cy="11" rx="9" ry="8" className="pokal-flate" />
+          <ellipse cx="12" cy="11" rx="5.5" ry="4.8" className="pokal-skygge" />
+          <path d="M9 21h6l-1-3h-4z" className="pokal-flate" />
+        </>
+      ) : (
+        <>
+          {art === 'serie' && <path d="M5 6H2.5c0 3.5 1.6 5 3.6 5.4M19 6h2.5c0 3.5-1.6 5-3.6 5.4" className="pokal-hank" />}
+          <path d={art === 'cup' ? 'M7 5h10l-1.2 8.5a3.8 3.8 0 0 1-7.6 0z' : 'M6 4h12l-1 7.5a5 5 0 0 1-10 0z'} className="pokal-flate" />
+          {art === 'cup' && <path d="M7.5 3.2h9L15 1.8H9z" className="pokal-skygge" />}
+          {art === 'europa' && <path d="M12 6.2l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" className="pokal-skygge" />}
+          <path d="M10.5 15.5h3v3h-3zM8 18.5h8V21H8z" className="pokal-flate" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+/**
+ * Trofeskapet (Pakke 87): alt du har vunnet, med sesongen og klubben, nyeste først.
+ * Et trofé fra kampen som spilles nå, står her når den er ferdig (Pakke 86).
+ */
+function Trofeskap({ s }: { s: Spilltilstand }) {
+  const trofeer = [...synligeTrofeer(s)].reverse()
+  return (
+    <div className="kort trofeskap">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Trofeskapet</h2>
+        <span className="dempet liten">{trofeer.length}</span>
+      </div>
+      {trofeer.length === 0 ? (
+        <p className="dempet liten">Tomt ennå. Vinn en serie, cupen eller supercupen, så står pokalen her.</p>
+      ) : (
+        <ul className="trofeskap-hylle">
+          {trofeer.map((t, i) => (
+            <li key={`${t.navn}-${t.sesong}-${i}`}>
+              <Pokal art={pokalart(t.navn)} />
+              <strong className="liten">{t.navn}</strong>
+              <span className="dempet liten">
+                sesong {t.sesong} · {t.klubb}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

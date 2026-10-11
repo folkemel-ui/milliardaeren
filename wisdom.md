@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 86, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 87, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,15 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **New matches get a die of their own** (Pack 87): the playoffs (`${navn}:${sesong}:kvalik`) and the
+  Super Cup (`…:supercup`) draw from hashes, so adding them moved none of the club's existing dice — the
+  other divisions' strength-and-luck ranking still draws from the club's die in the same order as before.
+  Do the same for any new match or tournament. A playoff place is «the next two eligible», not a fixed
+  table position: a club whose stadium is too small for the division above is skipped, so the table's
+  gold rows must ask the same question the engine does (`oppfyllerKrav`), or they disagree.
+- **Check a test's premise against the constants** (Pack 87): «without a stadium you can't go up from
+  4. divisjon» was false — `STADIONKRAV` asks nothing for 3. divisjon. The engine was right; the test
+  moved one division up.
 - **The live match (Pack 86) is a display rule, not an engine change.** A match is still decided at
   the day change (`kamp.dag` = the new day); `ui/klubblive.ts` shows it over that day and `visKlubb(s, k)`
   gives the club pages a copy without it — the table undone from `k.sisteRunde`, players' numbers,

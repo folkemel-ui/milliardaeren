@@ -15,6 +15,7 @@ import { KLUBBNAVN, MAKS_TROPP, tabell } from '../../engine/klubb'
 import { simulerMedPauser } from './simulerMedPauser'
 import type { Spilltilstand } from '../../engine/types'
 import { aapenKlubbside } from '../klubbsider'
+import { visKlubb } from '../klubblive'
 
 let app: App | null = null
 afterEach(() => {
@@ -97,8 +98,10 @@ describe('klubben som nav', () => {
     const rad = mini.querySelectorAll('tbody tr')
     expect(rad).toHaveLength(5)
     expect(mini.querySelector('tr.deg')).not.toBeNull()
-    const din = tabell(s.klubb!).indexOf(0)
-    const forste = Math.max(0, Math.min(din - 2, s.klubb!.lag.length - 5))
+    // Siden viser tabellen slik den var før kampen som spilles nå (Pakke 86).
+    const vist = visKlubb(s, s.klubb!)
+    const din = tabell(vist).indexOf(0)
+    const forste = Math.max(0, Math.min(din - 2, vist.lag.length - 5))
     expect(rad[0].querySelector('td')!.textContent).toBe(String(forste + 1))
   })
 
@@ -167,7 +170,8 @@ describe('sidene', () => {
     s = await simulerMedPauser(s, 2700)
     app = await tilKlubben(s)
     await app.trykk(app.knapp('Sesongene', app.rot.querySelector('.klubbsider')!))
-    expect(titler(app)).toEqual(['Sesongen som var', 'Tidligere sesonger'])
+    // Trofeskapet står øverst (Pakke 87).
+    expect(titler(app)).toEqual(['Trofeskapet', 'Sesongen som var', 'Tidligere sesonger'])
     expect(app.rot.querySelectorAll('.sesongliste li')).toHaveLength(s.klubb!.sesonger!.length - 1)
     expect(app.knapper(/tidligere sesong/i)).toHaveLength(0)
   })
