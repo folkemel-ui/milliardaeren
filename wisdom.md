@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 93, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 94, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -564,6 +564,18 @@ session; delete what stops being true.
   (`plantetSek`, which a farm otherwise never resets) to now; Monday and a sale pay `opptjent` too.
   It uses that day's land value, so such a week pays ~0.1 % less, never more — a test that compares
   harvests must use the same day, since the land value rises 0.3 % a day.
+- **A lump payout must be earned per second and held until its day** (Pack 94, wool and slaughter).
+  A sheep that paid half a year's wool on shearing day would have doubled its price for anyone
+  buying the day before. `dyr.ts` accrues every animal's yield into `dyrKasse` from the purchase
+  (`dyrSek`, booked first by `bokforDyr` like the farm's `bokforOpptjent`), pays the daily part at
+  each day change and the wool and meat on their days, and a farm sale pays what has accrued.
+- **Calendar days pile up in tests** (Pack 94): 1 May (shearing), 1 February and day 56 (= 1 March,
+  slaughter) are also month changes, so the support came on top and three tests looked wrong. Before
+  trusting a payout test on a special day, list what else happens that day. And a daily yield priced
+  on the land value (+0.3 % a day) summed over 55 days is not 55 × the last day's — sum it day by day.
+- **Pack 65's 300-line rule for `handlinger/*`** is a test (`pakke65`). When a file passes it, move
+  an area to its own file in the barrel (`handlinger/gard.ts`: the farm-building actions) rather than
+  raising the limit.
 - **An upgrade against a smoothed effect must keep the smoothing's average** (Pack 93). Weather
   effects are divided by the season's average (`jevnetVaer`), so each season gives ×1. Feeding
   drainage in as a better rain value would have raised that average too and taken most of the
