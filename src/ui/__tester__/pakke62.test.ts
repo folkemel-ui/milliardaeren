@@ -61,13 +61,12 @@ describe('Luksus i deler', () => {
     // I scenen, ikke som kort i en liste.
     expect([...app.rot.querySelectorAll('.lagerscene .plass-navn')].some((el) => el.textContent === navn)).toBe(true)
     expect([...app.rot.querySelectorAll('.luksuskort h2')].some((el) => el.textContent?.startsWith(navn))).toBe(false)
-    // Lista over biler til salgs: bare de du ikke eier.
-    const seksjon = [...app.rot.querySelectorAll('.seksjon')].find((el) => el.textContent?.includes('Biler til salgs'))!
-    await app.trykk(seksjon.querySelector('.seksjon-hode')!)
-    const tilSalgs = [...app.rot.querySelectorAll('.seksjon.åpen .luksuskort h2')].map((el) => el.textContent ?? '')
+    // «Til salgs»-listene er borte (Pakke 91): oversikten viser alle bilene, og den du eier, er fylt inn.
+    expect([...app.rot.querySelectorAll('.seksjon')].some((el) => el.textContent?.includes('Biler til salgs'))).toBe(false)
+    const ting = [...app.rot.querySelectorAll('.samlingsoversikt button.samling-ting')]
     const biler = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === 'bil')
-    expect(tilSalgs).toHaveLength(biler.length - 1)
-    expect(tilSalgs.some((t) => t.startsWith(navn))).toBe(false)
+    expect(ting.filter((b) => biler.some((id) => b.getAttribute('aria-label')?.startsWith(LUKSUS[id].navn)))).toHaveLength(biler.length)
+    expect(ting.find((b) => b.getAttribute('aria-label') === navn)?.classList.contains('eid')).toBe(true)
   })
 
   it('klubben åpner rett i sin del, uten egen side og tilbakeknapp', async () => {

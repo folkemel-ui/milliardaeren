@@ -22,13 +22,16 @@ import {
 } from '../../engine/eiendom'
 import { rentesats } from '../../engine/formler'
 import { byggLagertrinn, hentHjem, kjopLuksus, leiUt, selgLuksus, utvidLager } from '../../engine/handlinger'
-import type { LagerId, LuksusId, LuksusKategori, Spilltilstand, UnikId } from '../../engine/types'
+import type { LagerId, LuksusId, Spilltilstand, UnikId } from '../../engine/types'
 import { charterPerSekFor, iSesong, kanLeiesUt } from '../../engine/charter'
 import { dagnummer } from '../../engine/kalender'
 import { mineUnike, UNIKE } from '../../engine/unike'
 import { Auksjonskort, Unikkort } from '../komponenter/Auksjon'
 import { Racingdetalj, Racingrad } from '../komponenter/Racing'
 import { aapneRacing, useRacingside } from '../racingside'
+import { aapneLager, useLagerside } from '../lagerside'
+import { Samlingsoversikt } from '../komponenter/Samlingsoversikt'
+import { useVoksUt } from '../overgang'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from '../komponenter/BedriftIkon'
@@ -73,8 +76,14 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   useEffect(() => () => aapneRacing(false), [])
   const racingAapen = racing && del === 'samling' && !!s.racing
   useTilbake(racingAapen, () => aapneRacing(false))
+  // Pakke 91: garasjen, havna eller hangaren i full størrelse.
+  const lagerside = useLagerside()
+  useEffect(() => () => aapneLager(null), [])
+  const lagerAapen = lagerside !== null && del === 'samling'
+  useTilbake(lagerAapen, () => aapneLager(null))
   if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
   if (racingAapen) return <Racingdetalj s={s} tilbake={() => aapneRacing(false)} />
+  if (lagerAapen) return <Lagerdetalj s={s} lager={lagerside} tilbake={() => aapneLager(null)} />
   if (klubbAapen) return <Klubbdetalj s={s} k={visKlubb(s, s.klubb!)} side={klubbside} tilbake={() => aapneKlubbside(null)} />
   return (
     <section className="skjerm">
@@ -97,9 +106,11 @@ export function Luksus({ s }: { s: Spilltilstand }) {
 
 
 /**
- * Samlingen: bilene, båtene og flyene du eier, står bare i scenen sin
- * (garasjen, havna, hangaren). Under hver scene ligger det som er til salgs,
- * så hver ting vises én gang. Klokkene ligger i bankboksen og har ingen scene.
+ * Samlingen: oversikten over alt øverst (Pakke 91), der en silhuett åpner tingens
+ * side og kjøpet, så bilene, båtene og flyene du eier i scenen sin (garasjen,
+ * havna, hangaren) — en ledig plass viser det neste. Klokkene ligger i bankboksen
+ * og har ingen scene. «Til salgs»-listene under scenene er borte: oversikten viser
+ * alt som finnes.
  */
 function Samling({ s }: { s: Spilltilstand }) {
   const klokker = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === 'klokke').sort(etterPris)
@@ -109,10 +120,10 @@ function Samling({ s }: { s: Spilltilstand }) {
   return (
     <>
       <Auksjonskort s={s} />
+      <Samlingsoversikt s={s} />
       {LAGERLISTE.map((l) => (
         <div key={l} className="lagerliste">
           <Lagerkort s={s} lager={l} />
-          <TilSalgs s={s} kategori={KATEGORI_I[l]} />
           {l === 'garasje' && <Racingrad s={s} />}
         </div>
       ))}
@@ -132,21 +143,6 @@ function Samling({ s }: { s: Spilltilstand }) {
         </ul>
       </Seksjon>
     </>
-  )
-}
-
-/** Det i kategorien du ikke eier ennå. Sammenfoldet fra start: den ledige plassen i scenen viser alt det neste. */
-function TilSalgs({ s, kategori }: { s: Spilltilstand; kategori: LuksusKategori }) {
-  const ider = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === kategori && !s.luksus.includes(id)).sort(etterPris)
-  if (ider.length === 0) return null
-  return (
-    <Seksjon id={`luksus-salg-${kategori}`} tittel={`${KATEGORINAVN[kategori]} til salgs`} sammendrag={`${ider.length} · fra ${kortKroner(LUKSUS[ider[0]].pris)}`} harInnhold={false}>
-      <ul className="kortliste">
-        {ider.map((id) => (
-          <Luksuskort key={id} s={s} id={id} />
-        ))}
-      </ul>
-    </Seksjon>
   )
 }
 
@@ -257,6 +253,7 @@ export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: L
           <NyMerke id={id} />
         </h2>
         <span className="gull liten">+{g.status} status</span>
+        <span className="dempet liten">{g.linje}</span>
         {charter && <span className="dempet liten">{charterlinje(s, id)}</span>}
       </div>
       {charter ? (
@@ -296,6 +293,8 @@ export function charterlinje(s: Spilltilstand, id: LuksusId): string {
 
 /** Nærbildet på en plass i lageret. Fast, så Illustrasjon (memo) ikke tegnes på nytt hvert sekund (Pakke 64). */
 const NAER_PLASS = [86, 74] as const
+/** … og i full størrelse (Pakke 91): en plass er 153 px bred på en telefon, nærbildet fyller ni tideler av den. */
+const NAER_STOR = [138, 119] as const
 
 const LAGERIKON: Record<LagerId, Ikonnavn> = { garasje: 'garasje', havn: 'anker', hangar: 'hangar' }
 
@@ -307,8 +306,11 @@ type Lagervalg = { slag: 'eid'; id: LuksusId } | { slag: 'unik'; id: UnikId } | 
  * står i hangaren. En ledig plass viser en skygge av det neste du kan kjøpe
  * dit, og bakerst kan du bygge en plass til. Trykk på en plass for kortet.
  */
-function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
+function Lagerkort({ s, lager, stor = false }: { s: Spilltilstand; lager: LagerId; stor?: boolean }) {
   const [valgt, velg] = useState<Lagervalg>(null)
+  // Pakke 91: på stedets egen side er hver plass dobbelt så stor, to i bredden.
+  const naer = stor ? NAER_STOR : NAER_PLASS
+  const str = stor ? 128 : 64
   const l = LAGER[lager]
   const pris = utvidelsespris(s, lager)
   // Pakke 88: stedet vokser i trinn — navnet står på skiltet, og gullkanten viser trinnet.
@@ -323,12 +325,21 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
   const trykk = (v: Lagervalg) => velg(JSON.stringify(v) === JSON.stringify(valgt) ? null : v)
 
   return (
-    <div className={`kort lagerkort lager-${lager} lager-trinn-${trinn}`}>
+    <div className={`kort lagerkort lager-${lager} lager-trinn-${trinn}${stor ? ' stor' : ''}`}>
       <div className="lagerkort-topp">
         <span className="lager-emoji" aria-hidden="true">
           <Ikon navn={LAGERIKON[lager]} størrelse={22} />
         </span>
-        <strong className={trinn > 0 ? 'lager-skilt' : undefined}>{lagernavn(s, lager)}</strong>
+        {stor ? (
+          <strong className={trinn > 0 ? 'lager-skilt' : undefined}>{lagernavn(s, lager)}</strong>
+        ) : (
+          <button className="lager-apne" onClick={() => aapneLager(lager)} aria-label={`Åpne ${lagernavn(s, lager).toLowerCase()} i full størrelse`}>
+            <strong className={trinn > 0 ? 'lager-skilt' : undefined}>{lagernavn(s, lager)}</strong>
+            <span className="gull" aria-hidden="true">
+              ›
+            </span>
+          </button>
+        )}
         <span className="dempet liten">
           {brukteplasser(s, lager)} / {s.lager[lager]} {l.enhet}
         </span>
@@ -344,12 +355,12 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
             valgt={valgt?.slag === 'eid' && valgt.id === id}
             trykk={() => trykk({ slag: 'eid', id })}
           >
-            <Illustrasjon id={id} størrelse={64} utklipp naerbilde={NAER_PLASS} />
+            <Illustrasjon id={id} størrelse={str} utklipp naerbilde={naer} />
           </Plass>
         ))}
         {unike.map((id) => (
           <Plass key={id} lager={lager} klasse="unik" navn={UNIKE[id].navn} under={`Unik · +${UNIKE[id].status} status`} valgt={valgt?.slag === 'unik' && valgt.id === id} trykk={() => trykk({ slag: 'unik', id })}>
-            <Illustrasjon id={UNIKE[id].tegning} størrelse={64} utklipp naerbilde={NAER_PLASS} />
+            <Illustrasjon id={UNIKE[id].tegning} størrelse={str} utklipp naerbilde={naer} />
           </Plass>
         ))}
         {Array.from({ length: ledige }, (_, i) => (
@@ -364,7 +375,7 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
           >
             {neste && (
               <span className="plass-skygge">
-                <Illustrasjon id={neste} størrelse={64} utklipp naerbilde={NAER_PLASS} />
+                <Illustrasjon id={neste} størrelse={str} utklipp naerbilde={naer} />
               </span>
             )}
           </Plass>
@@ -412,6 +423,20 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
         </ul>
       )}
     </div>
+  )
+}
+
+/** Garasjen, havna eller hangaren i full størrelse (Pakke 91), med tilbake til Samling. */
+function Lagerdetalj({ s, lager, tilbake }: { s: Spilltilstand; lager: LagerId; tilbake: () => void }) {
+  const voks = useVoksUt<HTMLElement>()
+  return (
+    <section className="skjerm detalj lagerdetalj" ref={voks}>
+      <button className="tilbake" onClick={tilbake}>
+        ‹ Luksus
+      </button>
+      <h1 className="skjerm-tittel">{lagernavn(s, lager)}</h1>
+      <Lagerkort s={s} lager={lager} stor />
+    </section>
   )
 }
 

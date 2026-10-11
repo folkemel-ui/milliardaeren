@@ -232,6 +232,8 @@ export interface Luksusgjenstand {
   pris: number
   /** Statuspoeng gjenstanden gir så lenge du eier den. */
   status: number
+  /** Én linje om tingen (Pakke 91), på kortet og detaljsiden. */
+  linje: string
 }
 
 export type LagerId = 'garasje' | 'havn' | 'hangar'

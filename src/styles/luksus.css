@@ -1154,3 +1154,94 @@
 .racing-penger {
   margin: 12px 0;
 }
+
+/* ── Samlingen på skjermen (Pakke 91) ────────────────────────────────────── */
+
+/* Oversikten: en rad per slag, en silhuett per ting, fylt inn når du eier den. */
+.samlingsoversikt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.samling-rad {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.samling-ikoner {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 44px);
+  /* Sju i bredden på en telefon (315 px): ingen luft mellom, ellers brytes båtene. */
+  row-gap: 2px;
+}
+
+/* Hver ting er et 44 × 44-mål (Pakke 74), med tegningen i midten. */
+.samling-ting {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+}
+
+button.samling-ting.eid {
+  background: var(--flate-2);
+}
+
+.samling-ting.unik.eid {
+  border-color: var(--gull);
+}
+
+/* Det du ikke eier: en mørk skygge, som den ledige plassen i scenen. */
+.samling-skygge {
+  display: grid;
+  filter: brightness(0);
+  opacity: 0.3;
+}
+
+/* Overskriften på garasjen, havna og hangaren åpner stedet i full størrelse. */
+.lager-apne {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+/* Stedet i full størrelse: to plasser i bredden, dobbelt så store, ingen rulling til siden. */
+.lagerkort.stor .lagerscene {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  overflow: visible;
+}
+
+.lagerkort.stor .plass,
+.lagerkort.stor .plass-hylle:last-child .plass {
+  width: 100%;
+  min-width: 0;
+}
+
+.lagerkort.stor .plass-bilde {
+  height: 168px;
+  border-radius: 10px;
+}
+
+.lagerkort.stor .plass-navn,
+.lagerkort.stor .plass-under {
+  max-width: none;
+}
