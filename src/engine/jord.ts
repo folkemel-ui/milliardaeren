@@ -12,7 +12,8 @@
 
 import { DAG_SEK, dagnummer, ukedag } from './kalender'
 import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
-import type { Gardsmaskin, JordId, Jordstykke, NorskBy, Overskrift, Spilltilstand } from './types'
+import { hashTekst, tilfeldig } from './rng'
+import type { Gardsbygg, Gardsmaskin, JordId, Jordstykke, NorskBy, Overskrift, Spilltilstand } from './types'
 import { kortKroner } from './tall'
 
 export interface Jordtype {
@@ -166,13 +167,6 @@ export function maskinpris(s: Spilltilstand, id: JordId, m: Gardsmaskin): number
   return MASKINER[m].andel * gardsverdi(s, id)
 }
 
-/** Hvor mye mer gården gir enn med tre jorder og ingen maskiner. Nøyaktig 1 for en gård fra før. */
-export function gardsfaktor(j: Jordstykke): number {
-  let f = jorder(j) / START_JORDER
-  for (const m of MASKINLISTE) if (j.maskiner?.[m]) f *= MASKINER[m].host
-  return f
-}
-
 /** Ukas vær for en gård: sprøyta tar en del av fallet i en dårlig uke. */
 export function gardsvaer(j: Jordstykke, faktor: number): number {
   if (faktor >= 1 || !j.maskiner?.sproyte) return faktor
@@ -187,8 +181,135 @@ export function gardsvaer(j: Jordstykke, faktor: number): number {
 export function bokforOpptjent(s: Spilltilstand, id: JordId): void {
   const j = s.jord?.[id]
   if (!j) return
-  j.opptjent = (j.opptjent ?? 0) + gardHost(s, id, dagnummer(s.sek), s.sek)
+  const d = gardHostDeler(s, id, dagnummer(s.sek), s.sek)
+  j.opptjent = (j.opptjent ?? 0) + d.korn + d.annet
+  j.opptjentKorn = (j.opptjentKorn ?? 0) + d.korn
   j.plantetSek = s.sek
+}
+
+// ─────────────────────────────────────────────── Vær og marked (Pakke 93)
+
+export type Avlingsgruppe = 'korn' | 'gronnsaker' | 'frukt'
+
+export const GRUPPENAVN: Record<Avlingsgruppe, string> = { korn: 'Korn', gronnsaker: 'Grønnsaker', frukt: 'Frukt og bær' }
+export const GRUPPELISTE = Object.keys(GRUPPENAVN) as Avlingsgruppe[]
+
+/** Det som vokser på hver jord, i fast rekkefølge, og gruppen prisen følger. */
+export const AVLINGER: readonly { navn: string; gruppe: Avlingsgruppe }[] = [
+  { navn: 'Bygg', gruppe: 'korn' },
+  { navn: 'Hvete', gruppe: 'korn' },
+  { navn: 'Havre', gruppe: 'korn' },
+  { navn: 'Poteter', gruppe: 'gronnsaker' },
+  { navn: 'Rug', gruppe: 'korn' },
+  { navn: 'Gulrøtter', gruppe: 'gronnsaker' },
+  { navn: 'Jordbær', gruppe: 'frukt' },
+  { navn: 'Raps', gruppe: 'korn' },
+  { navn: 'Kål', gruppe: 'gronnsaker' },
+  { navn: 'Epler', gruppe: 'frukt' },
+]
+/** Drivhuset (Pakke 93): tomater og agurk, som grønnsaker. */
+export const DRIVHUSAVLING = { navn: 'Tomater', gruppe: 'gronnsaker' as Avlingsgruppe }
+
+/**
+ * Ukas pris per gruppe, fra en hash av gruppen og uka — den samme i alle spill.
+ * Fra ×0,75 til ×1,30, i snitt nøyaktig 1 (0,75 + 0,55 · u^1,2 har snitt 0,75 + 0,55/2,2).
+ */
+export const PRIS_MIN = 0.75
+export const PRIS_SPENN = 0.55
+const PRIS_FORM = 1.2
+
+export const ukeFor = (dag: number) => Math.floor(dag / 7)
+
+export function avlingspris(gruppe: Avlingsgruppe, uke: number): number {
+  return PRIS_MIN + PRIS_SPENN * tilfeldig(hashTekst(`avlingspris:${gruppe}:${uke}`)) ** PRIS_FORM
+}
+
+/** Byggene på en gård: to mot været, drivhuset og lagrene. Priset som maskinene — drivhuset etter jorda. */
+export const GARDSBYGG: Record<Gardsbygg, { navn: string; tekst: string; andel: number }> = {
+  drenering: { navn: 'Drenering', tekst: 'Regndager teller som overskyet', andel: 0.25 },
+  frostdekke: { navn: 'Frostdekke', tekst: 'Snødager teller som regn', andel: 0.35 },
+  drivhus: { navn: 'Drivhus', tekst: 'En ellevte jord under glass, alltid ×0,9 av en vanlig uke', andel: 0.6 },
+  silo: { navn: 'Silo', tekst: 'Lagre opptil 4 uker korn og selg når prisen er god', andel: 0.3 },
+  laave: { navn: 'Låve', tekst: 'Plass til 8 uker korn', andel: 0.3 },
+}
+export const GARDSBYGGLISTE = Object.keys(GARDSBYGG) as Gardsbygg[]
+
+export const DRIVHUS_FAKTOR = 0.9
+/** Drivhuset krever en gård, ikke et småbruk. */
+export const DRIVHUS_FRA_JORDER = 5
+export const SILO_UKER = 4
+export const LAAVE_UKER = 8
+/** Korn i lager taper så mye per uke. */
+export const KORNSVINN = 0.01
+
+export function byggpris(s: Spilltilstand, id: JordId, b: Gardsbygg): number {
+  return GARDSBYGG[b].andel * (b === 'drivhus' ? landverdi(s, id) : gardsverdi(s, id))
+}
+
+/** Hvorfor et bygg ikke kan bygges ennå, eller null når det kan. */
+export function byggSperre(j: Jordstykke | undefined, b: Gardsbygg): string | null {
+  if (b === 'drivhus' && jorder(j) < DRIVHUS_FRA_JORDER) return `Krever ${DRIVHUS_FRA_JORDER} jorder`
+  if (b === 'laave' && !j?.bygg?.silo) return 'Krever silo'
+  return null
+}
+
+const DRENERT: Record<Vaertype, number> = { ...AVLING, regn: AVLING.overskyet }
+const FROSTFRI: Record<Vaertype, number> = { ...AVLING, sno: AVLING.regn }
+const BEGGE: Record<Vaertype, number> = { ...AVLING, regn: AVLING.overskyet, sno: AVLING.regn }
+const HUSKET_GARD = new Map<string, number>()
+
+/**
+ * Ukas værfaktor for en gård med drenering og/eller frostdekke: dagene de hjelper på
+ * teller som et bedre vær, mens sesongsnittet det jevnes mot står som før — ellers ville
+ * utjevningen tatt fordelen bort. Uten dem: nøyaktig ukas vær fra før.
+ */
+export function ukefaktor(dag: number, drenering: boolean, frost: boolean): number {
+  if (!drenering && !frost) return vaer(dag).faktor
+  const uke = ukeFor(dag)
+  const nokkel = `${uke}:${drenering ? 1 : 0}${frost ? 1 : 0}`
+  const husket = HUSKET_GARD.get(nokkel)
+  if (husket !== undefined) return husket
+  const virkning = drenering && frost ? BEGGE : drenering ? DRENERT : FROSTFRI
+  let sum = 0
+  for (let d = uke * 7; d < uke * 7 + 7; d++) {
+    const v = vaerPaaDag(d)
+    sum += (jevnetVaer(AVLING, 'norge', d) * virkning[v]) / AVLING[v]
+  }
+  const faktor = Math.min(1.8, Math.max(0.3, 1 + FORSTERKNING * (sum / 7 - 1)))
+  if (HUSKET_GARD.size > 400) HUSKET_GARD.clear()
+  HUSKET_GARD.set(nokkel, faktor)
+  return faktor
+}
+
+/** Traktoren og skurtreskeren ganget sammen. */
+export function maskinfaktor(j: Jordstykke): number {
+  let f = 1
+  for (const m of MASKINLISTE) if (j.maskiner?.[m]) f *= MASKINER[m].host
+  return f
+}
+
+/** Hvor mange uker korn lagrene rommer: 0, 4 med silo, 8 med låve. */
+export function lageruker(j: Jordstykke | undefined): number {
+  return j?.bygg?.laave ? LAAVE_UKER : j?.bygg?.silo ? SILO_UKER : 0
+}
+
+/** En normal ukes korn fra gården nå (pris 1, vær 1), som lagrene måles i. */
+export function kornPerUke(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  if (!j) return 0
+  let felt = 0
+  for (let i = 0; i < jorder(j); i++) if (AVLINGER[i].gruppe === 'korn') felt++
+  return ((landverdi(s, id) * HOST_ANDEL) / START_JORDER) * felt * maskinfaktor(j)
+}
+
+export function kornkapasitet(s: Spilltilstand, id: JordId): number {
+  return lageruker(s.jord?.[id]) * kornPerUke(s, id)
+}
+
+/** Kornet i lager, til denne ukas pris. */
+export function lagerverdi(s: Spilltilstand, id: JordId): number {
+  const l = s.jord?.[id]?.lager ?? 0
+  return l > 0 ? l * avlingspris('korn', ukeFor(dagnummer(s.sek))) : 0
 }
 
 export function jordfaktor(s: Spilltilstand): number {
@@ -220,7 +341,8 @@ export function jordverdi(s: Spilltilstand): number {
   let sum = 0
   for (const id of JORDLISTE) {
     const j = s.jord?.[id]
-    if (j) sum += landverdi(s, id) + tommerverdi(s, id) + (j.investert ?? 0)
+    // Kornet i silo og låve (Pakke 93) teller til denne ukas pris.
+    if (j) sum += landverdi(s, id) + tommerverdi(s, id) + (j.investert ?? 0) + lagerverdi(s, id)
   }
   return sum
 }
@@ -238,13 +360,35 @@ const UKE_SEK = 7 * DAG_SEK
  * +13 % av prisen etter meglerhonoraret.
  */
 export function gardHost(s: Spilltilstand, id: JordId, dag: number, til: number): number {
+  const d = gardHostDeler(s, id, dag, til)
+  return d.korn + d.annet
+}
+
+/**
+ * Avlingen delt i korn (som kan gå i silo) og resten (Pakke 93). Hver jord gir en
+ * tredel av en normal ukes avling ganget med ukas vær for gården, maskinene og prisen
+ * på det som vokser der. Drivhuset gir ×0,9 uansett vær, til grønnsakprisen.
+ */
+export function gardHostDeler(s: Spilltilstand, id: JordId, dag: number, til: number): { korn: number; annet: number } {
   const j = s.jord?.[id]
-  if (!j || JORD[id].type !== 'gard') return 0
+  if (!j || JORD[id].type !== 'gard') return { korn: 0, annet: 0 }
   const ukestart = Math.floor(dag / 7) * UKE_SEK
-  // For en gård er plantetSek dagen du kjøpte den: en gård hogges aldri.
+  // For en gård er plantetSek dagen du kjøpte den, eller sist du bygde ut: en gård hogges aldri.
   const andel = Math.min(1, Math.max(0, (til - Math.max(ukestart, j.plantetSek)) / UKE_SEK))
-  // Pakke 92: jordene og maskinene ganger avlingen, sprøyta demper en dårlig uke. Uten dem står tallene likt.
-  return landverdi(s, id) * HOST_ANDEL * gardsvaer(j, vaer(dag).faktor) * andel * gardsfaktor(j)
+  if (andel <= 0) return { korn: 0, annet: 0 }
+  const uke = ukeFor(dag)
+  const per = ((landverdi(s, id) * HOST_ANDEL) / START_JORDER) * andel * maskinfaktor(j)
+  const w = gardsvaer(j, ukefaktor(dag, !!j.bygg?.drenering, !!j.bygg?.frostdekke))
+  let korn = 0
+  let annet = 0
+  for (let i = 0; i < jorder(j); i++) {
+    const a = AVLINGER[i]
+    const x = per * w * avlingspris(a.gruppe, uke)
+    if (a.gruppe === 'korn') korn += x
+    else annet += x
+  }
+  if (j.bygg?.drivhus) annet += per * DRIVHUS_FAKTOR * avlingspris(DRIVHUSAVLING.gruppe, uke)
+  return { korn, annet }
 }
 
 /** Avlingen en gård du eier, gir mandag for uka som går nå — for dagene du eier den. */
@@ -258,16 +402,28 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   if (!s.jord || ukedag(s.sek) !== 0) return []
   const dag = dagnummer(s.sek)
   const forrige = dag - 1
+  const kornpris = avlingspris('korn', ukeFor(forrige))
   let host = 0
+  let lagret = 0
   for (const id of JORDLISTE) {
-    host += gardHost(s, id, forrige, dag * DAG_SEK)
     const j = s.jord[id]
-    if (j?.opptjent) {
-      host += j.opptjent
-      j.opptjent = 0
+    if (!j || JORD[id].type !== 'gard') continue
+    const d = gardHostDeler(s, id, forrige, dag * DAG_SEK)
+    let korn = d.korn + (j.opptjentKorn ?? 0)
+    const annet = d.annet + (j.opptjent ?? 0) - (j.opptjentKorn ?? 0)
+    j.opptjent = 0
+    j.opptjentKorn = 0
+    // Pakke 93: kornet i lager taper litt hver uke; ukas korn går i silo når du lagrer og det er plass.
+    if (j.lager) j.lager *= 1 - KORNSVINN
+    if (j.lagre && j.bygg?.silo && korn > 0) {
+      const inn = Math.min(korn / kornpris, Math.max(0, kornkapasitet(s, id) - (j.lager ?? 0)))
+      j.lager = (j.lager ?? 0) + inn
+      korn -= inn * kornpris
+      lagret += inn * kornpris
     }
+    host += korn + annet
   }
-  if (host <= 0) return []
+  if (host <= 0 && lagret <= 0) return []
   s.kontanter += host
   s.totaltHost += host
   s.totaltLeie += host
@@ -275,5 +431,6 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   // Pakke 92: avisa sier hva gårdene er blitt — «storgården på Lista og småbruket på Hedmarken».
   const garder = JORDLISTE.filter((id) => s.jord[id] && JORD[id].type === 'gard').map((id) => `${GARDSTRINN[gardstrinn(s.jord[id])].bestemt} på ${JORD[id].by}`)
   const fra = garder.length ? ` fra ${garder.length > 1 ? `${garder.slice(0, -1).join(', ')} og ${garder[garder.length - 1]}` : garder[0]}` : ''
-  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}${fra}.` }]
+  const silo = lagret > 0 ? ` Korn for ${kortKroner(lagret)} gikk i silo.` : ''
+  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}${fra}.${silo}` }]
 }

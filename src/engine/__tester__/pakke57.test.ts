@@ -9,7 +9,10 @@ import { describe, expect, it } from 'vitest'
 import { ansettForvalter, kjopEiendom, kjopJord, pussOpp, selgEiendom, selgJord } from '../handlinger'
 import { eiendomspris, EIENDOMSTYPER, forvalterpaaslag, kjopsprisEiendom, oppussingspris, STANDARDER } from '../eiendom'
 import { eiendomskurs } from '../regioner'
-import { HOST_ANDEL, landverdi, vaer } from '../jord'
+import { avlingspris, HOST_ANDEL, landverdi, ukeFor, vaer } from '../jord'
+
+/** Pakke 93: de tre første jordene er korn, og avlingen betales til ukas kornpris. */
+const korn = (dag: number) => avlingspris('korn', ukeFor(dag))
 import { DAG_SEK, dagnummer } from '../kalender'
 import { nettoformue } from '../formler'
 import { simuler } from '../simulering'
@@ -47,18 +50,18 @@ describe('gårdene: avlingen for dagene du eide gården', () => {
     const s = ok(kjopJord(simuler(rikt(), UKE), 'gard-hedmarken'))
     const mandag = simuler(s, UKE)
     // Uka fra dag 7 til 14, eid hele tiden.
-    expect(mandag.totaltHost - s.totaltHost).toBeCloseTo(landverdi(mandag, 'gard-hedmarken') * HOST_ANDEL * vaer(7).faktor, 0)
+    expect(mandag.totaltHost - s.totaltHost).toBeCloseTo(landverdi(mandag, 'gard-hedmarken') * HOST_ANDEL * vaer(7).faktor * korn(7), 0)
   })
 
   it('kjøpt midt i uka gir avling for dagene igjen; solgt midt i uka gir avlingen så langt', () => {
     // Kjøpt onsdag morgen i uke 1: fem av sju dager til mandag.
     const s = ok(kjopJord(simuler(rikt(), UKE + 2 * DAG_SEK), 'gard-hedmarken'))
     const mandag = simuler(s, 5 * DAG_SEK)
-    expect(mandag.totaltHost - s.totaltHost).toBeCloseTo(landverdi(mandag, 'gard-hedmarken') * HOST_ANDEL * vaer(7).faktor * (5 / 7), 0)
+    expect(mandag.totaltHost - s.totaltHost).toBeCloseTo(landverdi(mandag, 'gard-hedmarken') * HOST_ANDEL * vaer(7).faktor * korn(7) * (5 / 7), 0)
     // Solgt torsdag morgen uka etter: tre dager eid.
     const torsdag = simuler(mandag, 3 * DAG_SEK)
     const solgt = ok(selgJord(torsdag, 'gard-hedmarken'))
-    const forventet = landverdi(torsdag, 'gard-hedmarken') * HOST_ANDEL * vaer(dagnummer(torsdag.sek)).faktor * (3 / 7)
+    const forventet = landverdi(torsdag, 'gard-hedmarken') * HOST_ANDEL * vaer(dagnummer(torsdag.sek)).faktor * korn(dagnummer(torsdag.sek)) * (3 / 7)
     expect(solgt.totaltHost - torsdag.totaltHost).toBeCloseTo(forventet, 0)
   })
 })

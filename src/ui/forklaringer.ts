@@ -13,7 +13,7 @@ import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
-import { GARDSTRINN, JORDPRIS_VEKST, MAKS_JORDER, START_JORDER, TOMMER_DAGER } from '../engine/jord'
+import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_UKER, MAKS_JORDER, PRIS_MIN, PRIS_SPENN, SILO_UKER, START_JORDER, TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
 import { KURTASJE } from '../engine/marked'
@@ -157,7 +157,10 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `En gård starter med ${START_JORDER} jorder og kan dyrke opptil ${MAKS_JORDER}: den fjerde koster halve jordverdien, hver neste ${tall(JORDPRIS_VEKST, 1)} ganger så mye, og hver jord gir like mye avling. ` +
       'En traktor gir +10 % avling, en skurtresker +15 %, og en sprøyte gjør at en dårlig uke faller 30 % mindre — hver kjøpt én gang, priset etter gårdens verdi. ' +
       `Med ${GARDSTRINN[1].fra} jorder blir småbruket en gård, med ${GARDSTRINN[2].fra} en storgård og med ${GARDSTRINN[3].fra} et gods: +${GARDSTRINN[1].status}, +${GARDSTRINN[2].status} og +${GARDSTRINN[3].status} status. ` +
-      'Jordene og maskinene teller i gårdens verdi til det de kostet, og følger med når du selger.',
+      'Jordene, maskinene og byggene teller i gårdens verdi til det de kostet, og følger med når du selger. ' +
+      `Korn, grønnsaker og frukt har hver sin pris, ny hver mandag, fra ×${tall(PRIS_MIN, 2)} til ×${tall(PRIS_MIN + PRIS_SPENN, 2)} — i snitt 1; avlingen betales til prisen den uka den vokste. ` +
+      'Drenering gjør at regndager teller som overskyet, og frostdekke at snødager teller som regn. Drivhuset er en ellevte jord under glass som alltid gir ×0,9 av en vanlig uke, uansett vær. ' +
+      `En silo lagrer ukas korn i stedet for å selge det mandag — ${SILO_UKER} uker, ${LAAVE_UKER} med låve — og du selger når prisen er god. Kornet taper ${tall(KORNSVINN * 100)} % i uka.`,
   },
   landemerker: {
     tittel: 'Landemerker',

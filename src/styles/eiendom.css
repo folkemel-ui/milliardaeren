@@ -356,3 +356,18 @@
   padding-top: 10px;
   border-top: 1px solid var(--kant);
 }
+
+/* ── Vær og marked på gården (Pakke 93) ──────────────────────────────────── */
+
+/* Drivhuset: en ellevte rute under glass — blågrønt, som et tak av glass over åkeren. */
+.jordrute.drivhus {
+  background: linear-gradient(160deg, #6b9ba3 0%, #3f6f5a 100%);
+}
+
+.kornlager {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kant);
+}

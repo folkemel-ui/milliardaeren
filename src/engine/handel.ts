@@ -10,7 +10,7 @@ import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
 import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, PapirId, Spilltilstand, UnikId } from './types'
 import { FOND_GEBYR, fondskurs } from './fond'
-import { gardHost, landverdi, tommerverdi } from './jord'
+import { gardHost, lagerverdi, landverdi, tommerverdi } from './jord'
 import { dagnummer } from './kalender'
 import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
@@ -118,7 +118,8 @@ export function utforUniksalg(n: Spilltilstand, id: UnikId): number {
 export function utforJordsalg(n: Spilltilstand, id: JordId): number {
   // Avlingen så langt denne uka følger med salget (Pakke 57), som om det var mandag.
   // … og det som ble bokført før du sist bygde ut (Pakke 92).
-  const host = gardHost(n, id, dagnummer(n.sek), n.sek) + (n.jord[id]?.opptjent ?? 0)
+  // … og kornet i silo og låve (Pakke 93), til denne ukas pris.
+  const host = gardHost(n, id, dagnummer(n.sek), n.sek) + (n.jord[id]?.opptjent ?? 0) + lagerverdi(n, id)
   n.kontanter += host
   n.totaltHost += host
   n.totaltLeie += host

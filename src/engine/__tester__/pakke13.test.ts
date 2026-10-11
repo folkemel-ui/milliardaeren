@@ -18,7 +18,7 @@ import { nettoformue } from '../formler'
 import { leiePerSek, statuspoeng } from '../eiendom'
 import { BEDRIFTSTYPER, FORBEDRINGER, STIGEN } from '../innhold'
 import { DAG_SEK } from '../kalender'
-import { HOST_ANDEL, JORD, jordVedDagsskifte, landverdi, TOMMER_DAGER, TOMMER_MAKS, tommerfaktor, tommerverdi, vaer } from '../jord'
+import { avlingspris, HOST_ANDEL, JORD, jordVedDagsskifte, ukeFor, landverdi, TOMMER_DAGER, TOMMER_MAKS, tommerfaktor, tommerverdi, vaer } from '../jord'
 import {
   kjopsprisLandemerke,
   LANDEMERKER,
@@ -85,7 +85,8 @@ describe('jord og skog', () => {
     // Mandag: avling for uka som gikk, etter været den uka.
     s.sek = DAG_SEK * 7
     const kontanter = s.kontanter
-    const forventet = landverdi(s, 'gard-hedmarken') * HOST_ANDEL * vaer(6).faktor
+    // Pakke 93: de tre første jordene er korn, og avlingen betales til ukas kornpris.
+    const forventet = landverdi(s, 'gard-hedmarken') * HOST_ANDEL * vaer(6).faktor * avlingspris('korn', ukeFor(6))
     const saker = jordVedDagsskifte(s)
     expect(saker).toHaveLength(1)
     expect(s.kontanter - kontanter).toBeCloseTo(forventet, 0)

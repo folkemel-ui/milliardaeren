@@ -758,9 +758,18 @@ export interface Jordstykke {
   investert?: number
   /** Avlingen så langt denne uka før du sist bygde ut — betales mandag med resten. */
   opptjent?: number
+  /** Kornets del av `opptjent` (Pakke 93), så det kan gå i silo. */
+  opptjentKorn?: number
+  /** Drenering, frostdekke, drivhus, silo og låve (Pakke 93). */
+  bygg?: Partial<Record<Gardsbygg, boolean>>
+  /** Korn i silo og låve, målt i kroner til pris 1 (Pakke 93). */
+  lager?: number
+  /** Kornet går i silo mandag i stedet for å selges. */
+  lagre?: boolean
 }
 
 export type Gardsmaskin = 'traktor' | 'tresker' | 'sproyte'
+export type Gardsbygg = 'drenering' | 'frostdekke' | 'drivhus' | 'silo' | 'laave'
 
 export type LandemerkeId = 'fyret' | 'hoppbakken' | 'borgen' | 'tarnet'
 

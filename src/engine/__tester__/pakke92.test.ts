@@ -21,6 +21,9 @@ import {
   nesteJordpris,
   START_JORDER,
   vaer,
+  avlingspris,
+  AVLINGER,
+  ukeFor,
 } from '../jord'
 import { MEGLERHONORAR } from '../eiendom'
 import type { Spilltilstand } from '../types'
@@ -64,7 +67,7 @@ describe('jordene', () => {
     expect(jordverdi(etter) - jordverdi(s)).toBeCloseTo(nesteJordpris(s, ID)!, 2)
   })
 
-  it('avlingen følger jordene: ti jorder gir 10/3 av tre', () => {
+  it('avlingen følger jordene: hver jord gir en tredel av tre, til prisen på det som vokser der (Pakke 93)', () => {
     let s = medGard()
     const dag = dagnummer(s.sek)
     const til = (Math.floor(dag / 7) + 1) * 7 * DAG_SEK
@@ -72,7 +75,9 @@ describe('jordene', () => {
     while (jorder(s.jord[ID]) < MAKS_JORDER) s = ok(kjopJorde(s, ID))
     // Etter utbyggingen regnes uka fra nå (og det før er bokført); sett starten tilbake for å sammenligne en hel uke.
     s.jord[ID]!.plantetSek = 7 * DAG_SEK
-    expect(gardHost(s, ID, dag, til) / tre).toBeCloseTo(10 / 3, 6)
+    const uke = ukeFor(dag)
+    const sum = AVLINGER.reduce((x, a) => x + avlingspris(a.gruppe, uke), 0)
+    expect(gardHost(s, ID, dag, til) / tre).toBeCloseTo(sum / (3 * avlingspris('korn', uke)), 6)
   })
 
   it('en jord kjøpt søndag kveld gir ikke en hel ukes avling (Pakke 57s regel)', () => {
@@ -155,12 +160,12 @@ describe('trinnene', () => {
   })
 })
 
-it('en gård fra før Pakke 92 gir nøyaktig det samme som før', () => {
+it('en gård fra før Pakke 92 gir det samme som før, til ukas kornpris (Pakke 93)', () => {
   const s = medGard()
   const j = s.jord[ID]!
   expect(j.jorder).toBeUndefined()
   const dag = dagnummer(s.sek)
   const til = (Math.floor(dag / 7) + 1) * 7 * DAG_SEK
   // Formelen fra før, i samme rekkefølge: jordverdi × 8 % × ukas vær × andel av uka (her hele uka).
-  expect(gardHost(s, ID, dag, til)).toBe(landverdi(s, ID) * 0.08 * vaer(dag).faktor * 1)
+  expect(gardHost(s, ID, dag, til)).toBeCloseTo(landverdi(s, ID) * 0.08 * vaer(dag).faktor * avlingspris('korn', ukeFor(dag)), 4)
 })
