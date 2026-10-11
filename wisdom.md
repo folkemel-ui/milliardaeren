@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Packs 76–78 and version 2.7, 10–11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 80, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -495,6 +495,20 @@ session; delete what stops being true.
   status: `statuskandidat` in `bot.ts` bundles the cheapest luxury, rooms and landmarks per
   status point into one candidate that lifts the level, priced with the warehouse expansions
   it needs; it reaches level 5 at 1 mrd and 9 at 1 000 mrd, like a player would.
+  **After Pack 80 (from the hotel up: branches and direction at 25, a ×2 milestone at 35):
+  1 mrd 5 h 07, 10 mrd 11 h 28, 100 mrd 22 h 09, 1 000 mrd 34 h 05** (×1.5 at 35 gave 35 h 03).
+  The golden master did not move: its simple bot never owns a hotel, so it cannot see any rule
+  that only touches the top businesses — the bench is the only guard for those.
+- **Per-type rules (Pack 80)**: `milepaelfaktor`, `milepaelboost` and `nesteMilepael` take an
+  optional type; without it they give the shared milestones. Anything that shows or plans
+  milestones for a business must pass `b.type` (or use `milepaelerFor`), or the hotel's level 35
+  is invisible — the bot's «buy up to the next milestone» included. Likewise `filialFraNivaa(type)`
+  and `retningNivaa(type)` instead of the two constants. Passing such a function straight to
+  `.map` hands it the index as the type; `tsc` caught it in two old tests.
+- **Read the UI before trusting a list item about it**: «the card only shows +10 % · lønn» (Pack 80)
+  missed that the hire option had shown a net «Gir kr X/s» since Pack 48. What was really
+  missing: the net left out branches, nothing said a hire loses money, and there was no payback.
+  Say in the report how the item turned out, not just that it is done.
 - **The fast bench is the review's pace runner**: `scratchpad/tempo/runner.ts` (session of
   11 October) takes the smart bot to 1 000 mrd in about a minute bundled and prints a
   `TIER` line per tenfold. Swap a constant with `sed`, bundle one copy per variant, run them

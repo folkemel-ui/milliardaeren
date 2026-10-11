@@ -84,9 +84,9 @@ describe('fiendtlig oppkjøp', () => {
 
 describe('filialer til fast pris', () => {
   it('koster det samme ved nivå 50 og 150 — før ×118 ved nivå 100', () => {
-    const base = verdiVedNivaa(BEDRIFTSTYPER.oljeselskap, FILIAL_FRA_NIVAA)
-    const tidlig = bedrift('oljeselskap', { nivaa: 50, investert: base })
-    const sent = bedrift('oljeselskap', { nivaa: 150, investert: base * 5_000 })
+    const base = verdiVedNivaa(BEDRIFTSTYPER.restaurant, FILIAL_FRA_NIVAA)
+    const tidlig = bedrift('restaurant', { nivaa: 50, investert: base })
+    const sent = bedrift('restaurant', { nivaa: 150, investert: base * 5_000 })
     expect(filialpris(tidlig)).toBe(Math.round(FILIALPRIS * FILIALANDEL[0] * base))
     expect(filialpris(sent)).toBe(filialpris(tidlig))
   })

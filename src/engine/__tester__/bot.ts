@@ -146,7 +146,7 @@ function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
     // til å gå helt opp til neste dobling, regnes det som ett kjøp. Den sparer
     // ikke til det — det gjør de færreste. Den enkle boten ser bare neste nivå;
     // gullmesteren spiller med den, så fasiten står fast når boten blir klokere.
-    const m = nesteMilepael(b.nivaa)
+    const m = nesteMilepael(b.nivaa, b.type)
     const tilDobling = m === null ? Infinity : prisForNivaaer(b, m - b.nivaa)
     if (smart && m !== null && m - b.nivaa > 1 && tilDobling <= s.kontanter) {
       const antall = m - b.nivaa

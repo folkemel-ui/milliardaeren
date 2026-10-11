@@ -7,8 +7,8 @@
 import { ansettelsespris, bedriftsverdi, eierType, erLaastOpp, lederpris, maksAnsatte, forbedringspris, nesteForbedring, oppgraderingspris, MAKS_NIVAAER_PER_KJOP, prisForNivaaer } from '../formler'
 import { bokforGevinst } from '../handel'
 import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER } from '../innhold'
-import { FILIAL_FRA_NIVAA, FILIALBYER, filialer, filialpris, MAKS_FILIALER } from '../filialer'
-import { ansattnavn, GRADER, kanVelgeRetning, RETNING_NIVAA, RETNINGER, stab } from '../ansatte'
+import { filialFraNivaa, FILIALBYER, filialer, filialpris, MAKS_FILIALER } from '../filialer'
+import { ansattnavn, GRADER, kanVelgeRetning, retningNivaa, RETNINGER, stab } from '../ansatte'
 import type { Ansattgrad, Bedrift, BedriftstypeId, Retning, Spilltilstand, NorskBy } from '../types'
 import { feil, finn, ikkeTall, investerI, UGYLDIG, type Utfall } from './felles'
 
@@ -21,7 +21,7 @@ export function aapneFilial(s: Spilltilstand, id: string, by: NorskBy): Utfall {
   if (!b) return feil('Fant ikke bedriften.')
   if (!FILIALBYER.includes(by)) return feil('Du kan ikke åpne filial der.')
   if (filialer(b).some((f) => f.by === by)) return feil(`${BEDRIFTSTYPER[b.type].navn} har allerede en filial i ${by}.`)
-  if (b.nivaa < FILIAL_FRA_NIVAA) return feil(`Filialer åpner ved nivå ${FILIAL_FRA_NIVAA}.`)
+  if (b.nivaa < filialFraNivaa(b.type)) return feil(`Filialer åpner ved nivå ${filialFraNivaa(b.type)}.`)
   const pris = filialpris(b)
   if (pris === null) return feil(`Høyst ${MAKS_FILIALER} filialer per bedrift.`)
   return investerI(s, id, pris, (n) => {
@@ -117,13 +117,13 @@ export function siOpp(s: Spilltilstand, id: string, indeks?: number): Utfall {
   return { ok: true, tilstand: n }
 }
 
-/** Velger retning på nivå 50: volum eller premium. Gratis, men for godt (Pakke 48). */
+/** Velger retning på nivå 50 (25 fra hotellet og opp): volum eller premium. Gratis, men for godt (Pakke 48). */
 export function velgRetning(s: Spilltilstand, id: string, retning: Retning): Utfall {
   const b = finn(s, id)
   if (!b) return feil('Fant ikke bedriften.')
   if (!RETNINGER[retning]) return feil('Ukjent retning.')
   if (b.retning) return feil('Bedriften har allerede valgt retning.')
-  if (!kanVelgeRetning(b)) return feil(`Retningen velges på nivå ${RETNING_NIVAA}.`)
+  if (!kanVelgeRetning(b)) return feil(`Retningen velges på nivå ${retningNivaa(b.type)}.`)
   const n = structuredClone(s)
   finn(n, id)!.retning = retning
   return { ok: true, tilstand: n }

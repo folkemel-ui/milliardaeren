@@ -1,19 +1,19 @@
 import { vedKorttrykk } from '../detaljvisning'
 import {
+  ansattGir,
+  ansettelseGir,
   ansettelsespris,
   bedriftInntektIDag,
-  bedriftInntektPerSek,
-  dagensFaktor,
   lonnFor,
   lederpris,
   maksAnsatte,
   forbedringspris,
+  milepaelboost,
   nesteForbedring,
   nesteMilepael,
-  statusfaktor,
 } from '../../engine/formler'
 import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp, velgRetning } from '../../engine/handlinger'
-import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt, RETNING_NIVAA, RETNINGER, RETNINGSLISTE, retningsstatus, stab } from '../../engine/ansatte'
+import { GRADER, GRADLISTE, kanVelgeRetning, retningNivaa, RETNINGER, RETNINGSLISTE, retningsstatus, stab } from '../../engine/ansatte'
 import { Bekreftknapp } from './Bekreftknapp'
 import { dagsbilde, grunner } from '../../engine/verden'
 import { nyhetsfaktor } from '../../engine/bransjer'
@@ -23,9 +23,9 @@ import {
   BEDRIFTSTYPER,
   BORTE_TAK_SEK,
   MAKS_ANSATTE,
-  MILEPAELER,
+  milepaelerFor,
 } from '../../engine/innhold'
-import type { Bedrift, Retning, Spilltilstand } from '../../engine/types'
+import type { Bedrift, BedriftstypeId, Retning, Spilltilstand } from '../../engine/types'
 import { utfor, utforMed } from '../../state/lager'
 import { Koknapp, Koppknapp, useFlytetall, useHold } from './Hender'
 import { kortKroner, perSek, tall, varighet } from '../format'
@@ -35,20 +35,25 @@ import { NyMerke } from './Kjopsglimt'
 import { Ikon } from './Ikoner'
 
 /** Hvor langt bedriften har kommet fra forrige milepæl mot neste (0–1). */
-function milepaelFremdrift(nivaa: number, neste: number | null): number {
+function milepaelFremdrift(type: BedriftstypeId, nivaa: number, neste: number | null): number {
   if (neste === null) return 1
-  const forrige = [...MILEPAELER].reverse().find((m) => m <= nivaa) ?? 0
+  const forrige = [...milepaelerFor(type)].reverse().find((m) => m <= nivaa) ?? 0
   return (nivaa - forrige) / (neste - forrige)
+}
+
+/** «×2» eller «×1,5». */
+function gange(f: number): string {
+  return `×${String(f).replace('.', ',')}`
 }
 
 export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltilstand; mengde: Kjopsmengde; åpne: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
-  const neste = nesteMilepael(b.nivaa)
+  const neste = nesteMilepael(b.nivaa, b.type)
   // En forbedring som er låst opp men ikke kjøpt, får egen knapp rett på kortet.
   const f = nesteForbedring(b)
   const klarForbedring = f && b.nivaa >= f.nivaa ? f : null
   // Hvert kjøp i bedriften gir en puls — gull når en milepæl nettopp er nådd.
-  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
+  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), milepaelerFor(b.type).includes(b.nivaa))
   const [flytetall, legg] = useFlytetall()
 
   return (
@@ -77,9 +82,9 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
 
       <div className="milepael">
         <div className="milepael-spor">
-          <div className="milepael-fyll" style={{ width: `${milepaelFremdrift(b.nivaa, neste) * 100}%` }} />
+          <div className="milepael-fyll" style={{ width: `${milepaelFremdrift(b.type, b.nivaa, neste) * 100}%` }} />
         </div>
-        <span className="dempet liten">{neste ? `×2 inntekt ved nivå ${neste}` : 'Alle milepæler nådd'}</span>
+        <span className="dempet liten">{neste ? `${gange(milepaelboost(neste, b.type))} inntekt ved nivå ${neste}` : 'Alle milepæler nådd'}</span>
       </div>
 
       <Koknapp s={s} b={b} legg={legg} />
@@ -151,20 +156,24 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
 
       {folk.length > 0 && (
         <ul className="stab" aria-label="De ansatte">
-          {folk.map((a, i) => (
+          {folk.map((a, i) => {
+            const gir = ansattGir(s, b, i)
+            return (
             <li key={`${a.navn}-${i}`} className="stab-rad">
               <span className="stab-navn">
                 {a.navn}
                 <span className={`merke${a.grad === 'stjerne' ? ' gull' : a.grad === 'erfaren' ? ' kant' : ''}`}>{GRADER[a.grad].navn}</span>
               </span>
               <span className="dempet liten stab-tall">
-                +{tall(GRADER[a.grad].bonus * 100)} % · {perSek(lonnFor(b, a.grad)).slice(1)} i lønn
+                +{tall(GRADER[a.grad].bonus * 100)} % · {perSek(lonnFor(b, a.grad)).slice(1)} i lønn ·{' '}
+                <span className={gir >= 0 ? 'pluss' : 'minus'}>{gir >= 0 ? 'gir' : 'taper'} {perSek(Math.abs(gir)).slice(1)}</span>
               </span>
               <button className="knapp knapp-liten" onClick={() => utfor(siOpp(s, b.id, i))} aria-label={`Si opp ${a.navn}`}>
                 Si opp
               </button>
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
 
@@ -174,10 +183,12 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
             const g = GRADER[grad]
             const laast = b.nivaa < g.fraNivaa
             const pris = ansettelsespris(b, grad)
-            // Hva én til gir netto: ekstra inntekt minus lønnen. Kan være negativt.
-            const gir = (bedriftInntektPerSek(medNyAnsatt(b, grad), dagensFaktor(s, b.type)) - bedriftInntektPerSek(b, dagensFaktor(s, b.type))) * statusfaktor(s)
+            // Hva én til gir netto i dag: ekstra inntekt (med filialene) minus lønnen.
+            // En ansettelse som taper penger stoppes ikke, men står i rødt (Pakke 80).
+            const gir = ansettelseGir(s, b, grad)
+            const taper = !laast && gir < 0
             return (
-              <div key={grad} className={`ansett-grad${laast ? ' laast' : ''}`}>
+              <div key={grad} className={`ansett-grad${laast ? ' laast' : ''}${taper ? ' taper' : ''}`}>
                 <strong>{g.navn}</strong>
                 <span className="dempet liten">
                   +{tall(g.bonus * 100)} % · {perSek(lonnFor(b, grad)).slice(1)}
@@ -187,13 +198,16 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
                     <Ikon navn="las" størrelse={12} /> Nivå {g.fraNivaa}
                   </span>
                 ) : (
-                  <span className={`liten ${gir >= 0 ? 'pluss' : 'minus'}`}>Gir {perSek(gir)}</span>
+                  <span className={`liten ${taper ? 'minus' : 'pluss'}`}>
+                    {taper ? `Taper ${perSek(-gir).slice(1)}` : `Gir ${perSek(gir)}`}
+                    {!taper && gir > 0 && <span className="dempet"> · tilbake på {varighet(pris / gir)}</span>}
+                  </span>
                 )}
                 <button
-                  className="knapp knapp-gull knapp-liten"
+                  className={`knapp ${taper ? 'knapp-fare' : 'knapp-gull'} knapp-liten`}
                   disabled={laast || s.kontanter < pris}
                   onClick={() => utfor(ansett(s, b.id, grad))}
-                  aria-label={`Ansett ${g.navn.toLowerCase()} for ${kortKroner(pris)}`}
+                  aria-label={`Ansett ${g.navn.toLowerCase()} for ${kortKroner(pris)}${taper ? `, taper ${perSek(-gir).slice(1)}` : ''}`}
                 >
                   {kortKroner(pris)}
                 </button>
@@ -229,7 +243,7 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
 }
 
 /**
- * Retningen på nivå 50 (Pakke 48): volum eller premium, for godt. Under nivå 50
+ * Retningen på nivå 50, eller 25 fra hotellet og opp (Pakke 48, 80): volum eller premium, for godt. Under det nivået
  * står det hva som kommer; etter valget står det hva bedriften valgte.
  */
 export function Retningskort({ b, s }: { b: Bedrift; s: Spilltilstand }) {
@@ -253,7 +267,7 @@ export function Retningskort({ b, s }: { b: Bedrift; s: Spilltilstand }) {
       <p className="dempet liten">
         {kan
           ? 'Bedriften er stor nok til å velge vei. Valget er gratis, men det gjelder for godt.'
-          : `På nivå ${RETNING_NIVAA} velger bedriften vei, for godt. ${RETNING_NIVAA - b.nivaa} nivåer igjen.`}
+          : `På nivå ${retningNivaa(b.type)} velger bedriften vei, for godt. ${retningNivaa(b.type) - b.nivaa} nivåer igjen.`}
       </p>
       <div className="retning-valg">
         {RETNINGSLISTE.map((id) => (

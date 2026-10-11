@@ -28,8 +28,8 @@ describe('milepæler etter nivå 100', () => {
   it('150, 200 og 250 ganger inntekten med 1,5 — de tre første dobler som før', () => {
     expect(MILEPAELER).toEqual([25, 50, 100, 150, 200, 250])
     expect(MILEPAELFAKTORER).toHaveLength(MILEPAELER.length)
-    expect([100, 149, 150, 199, 200, 250, 1000].map(milepaelfaktor)).toEqual([8, 8, 12, 12, 18, 27, 27])
-    expect([25, 100, 150, 250].map(milepaelboost)).toEqual([2, 2, 1.5, 1.5])
+    expect([100, 149, 150, 199, 200, 250, 1000].map((n) => milepaelfaktor(n))).toEqual([8, 8, 12, 12, 18, 27, 27])
+    expect([25, 100, 150, 250].map((n) => milepaelboost(n))).toEqual([2, 2, 1.5, 1.5])
     expect(milepaelboost(112)).toBe(1)
   })
 
@@ -38,7 +38,7 @@ describe('milepæler etter nivå 100', () => {
   })
 
   it('neste milepæl går videre etter 100 og tar slutt etter 250', () => {
-    expect([100, 112, 150, 249, 250].map(nesteMilepael)).toEqual([150, 150, 200, 250, null])
+    expect([100, 112, 150, 249, 250].map((n) => nesteMilepael(n))).toEqual([150, 150, 200, 250, null])
   })
 
   it('forklaringen nevner begge settene', () => {

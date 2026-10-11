@@ -13,7 +13,7 @@
  */
 
 import { verdiVedNivaa } from './fusjon'
-import { BEDRIFTSTYPER } from './innhold'
+import { BEDRIFTSTYPER, erToppbedrift, TOPP_FRA_NIVAA } from './innhold'
 import { byfaktor, regionFor } from './regioner'
 import type { Bedrift, BedriftstypeId, NorskBy, Region, Spilltilstand } from './types'
 
@@ -23,6 +23,15 @@ export const MAKS_FILIALER = FILIALANDEL.length
 
 /** En bedrift må ha nådd så langt før den kan åpne filialer: den må stå på egne bein først. */
 export const FILIAL_FRA_NIVAA = 50
+
+/**
+ * Nivået filialene åpner på for en bransje: 50, men 25 fra hotellet og opp
+ * (Pakke 80). Prisen regnes av verdien på det samme nivået, så toppbedriftenes
+ * første filial gir rundt 15 %/t på prisen i stedet for 2–3 %/t.
+ */
+export function filialFraNivaa(type: BedriftstypeId): number {
+  return erToppbedrift(type) ? TOPP_FRA_NIVAA : FILIAL_FRA_NIVAA
+}
 
 /** Byene du kan åpne filial i: én per region. */
 export const FILIALBYER: NorskBy[] = ['Oslo', 'Bergen', 'Stavanger', 'Trondheim', 'Geilo', 'Lofoten']
@@ -52,7 +61,8 @@ export const HJEMREGION: Record<BedriftstypeId, Region> = {
 
 /**
  * En filial koster så mange ganger andelen av det det koster å bygge bransjen
- * opp til nivå 50 (før Pakke 68: av det du hadde investert). Satt på
+ * opp til nivået filialene åpner på — 50, eller 25 fra hotellet og opp (Pakke 80;
+ * før Pakke 68: av det du hadde investert). Satt på
  * balansebenken (Pakke 59) sammen med nivåkravet: uten
  * filialer 1 mrd på 6 t 36 min og 10 mrd på 15 t 28 min, med dem 6 t 12 min og
  * 13 t 47 min. Billigere (×2,5) eller uten nivåkrav ga 8–13 % raskere milliard
@@ -99,8 +109,9 @@ export function filialfaktor(s: Spilltilstand, b: Bedrift): number {
 /** Hva neste filial koster, eller null når bedriften ikke kan åpne flere: for lavt nivå, eller så mange den kan få. */
 export function filialpris(b: Bedrift): number | null {
   const nr = filialer(b).length
-  if (nr >= MAKS_FILIALER || b.nivaa < FILIAL_FRA_NIVAA) return null
-  return Math.round(FILIALPRIS * FILIALANDEL[nr] * verdiVedNivaa(BEDRIFTSTYPER[b.type], FILIAL_FRA_NIVAA))
+  const fra = filialFraNivaa(b.type)
+  if (nr >= MAKS_FILIALER || b.nivaa < fra) return null
+  return Math.round(FILIALPRIS * FILIALANDEL[nr] * verdiVedNivaa(BEDRIFTSTYPER[b.type], fra))
 }
 
 /** Byene bedriften ennå ikke har filial i. */

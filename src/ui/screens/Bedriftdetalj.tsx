@@ -2,7 +2,7 @@ import { bedriftInntektIDag, bedriftsverdi, forbedringspris, milepaelboost, nest
 import { bedriftssalgspris, kjopForbedring, selgBedrift } from '../../engine/handlinger'
 import type { Kjopsmengde } from '../kjopsmengde'
 import { fusjonsfaktor } from '../../engine/fusjon'
-import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER, FORBEDRINGER, MILEPAELER } from '../../engine/innhold'
+import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER, FORBEDRINGER, milepaelerFor } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
 import { INNTEKT_HISTORIKK_SEK } from '../../engine/simulering'
 import type { Bedrift, Spilltilstand } from '../../engine/types'
@@ -24,14 +24,14 @@ import { filialer } from '../../engine/filialer'
 export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
   const type = BEDRIFTSTYPER[b.type]
   const inntekt = bedriftInntektIDag(s, b)
-  const neste = nesteMilepael(b.nivaa)
+  const neste = nesteMilepael(b.nivaa, b.type)
   const punkter = [
     ...b.inntektHistorikk.map((v, i) => ({ sek: i * INNTEKT_HISTORIKK_SEK, verdi: v })),
     { sek: b.inntektHistorikk.length * INNTEKT_HISTORIKK_SEK, verdi: inntekt },
   ]
   const alder = s.sek - b.startetSek
   const voks = useVoksUt<HTMLElement>()
-  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), MILEPAELER.includes(b.nivaa))
+  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), milepaelerFor(b.type).includes(b.nivaa))
 
   return (
     <section className="skjerm detalj" ref={voks} style={nattstil(s.sek)}>
@@ -128,7 +128,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
       <div className="kort">
         <h2 className="kort-tittel">Milepæler</h2>
         <ul className="milepaeler">
-          {MILEPAELER.map((m) => {
+          {milepaelerFor(b.type).map((m) => {
             const nådd = b.nivaa >= m
             return (
               <li key={m} className={nådd ? 'nådd' : m === neste ? 'neste' : ''}>
@@ -136,7 +136,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
                   {nådd ? '✓' : m}
                 </span>
                 <span>
-                  Nivå {m}: ×{String(milepaelboost(m)).replace('.', ',')} inntekt
+                  Nivå {m}: ×{String(milepaelboost(m, b.type)).replace('.', ',')} inntekt
                   <span className="dempet liten">{nådd ? ' — nådd' : ` — ${m - b.nivaa} nivåer igjen`}</span>
                 </span>
               </li>

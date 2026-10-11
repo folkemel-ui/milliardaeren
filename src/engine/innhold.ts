@@ -93,6 +93,30 @@ export const MILEPAELER = [25, 50, 100, 150, 200, 250]
 /** Hva hver milepæl ganger inntekten med, i samme rekkefølge. */
 export const MILEPAELFAKTORER = [2, 2, 2, 1.5, 1.5, 1.5]
 
+/**
+ * Toppbedriftene, fra hotellet og opp (Pakke 80). De betaler seg tilbake så
+ * sakte at nivå 25–50 var en lang ørken: neste nivå ga 5,8 %/t, og filialer,
+ * retning og stjerner kom først på 50. Derfor får de en ekstra dobling på 35,
+ * og filialer og retning åpner på 25.
+ */
+export const TOPPBEDRIFTER: ReadonlySet<BedriftstypeId> = new Set(STIGEN.slice(STIGEN.indexOf('hotell')))
+/** Den ekstra milepælen for toppbedriftene, og hva den ganger inntekten med. */
+export const TOPPMILEPAEL = 35
+export const TOPPMILEPAEL_FAKTOR = 2
+/** Toppbedriftene kan åpne filialer og velge retning fra dette nivået. */
+export const TOPP_FRA_NIVAA = 25
+
+export function erToppbedrift(type: BedriftstypeId): boolean {
+  return TOPPBEDRIFTER.has(type)
+}
+
+const TOPPMILEPAELER = [...MILEPAELER, TOPPMILEPAEL].sort((a, b) => a - b)
+
+/** Milepælene for en bransje, i stigende rekkefølge: toppbedriftene har én til, på 35. */
+export function milepaelerFor(type: BedriftstypeId): readonly number[] {
+  return erToppbedrift(type) ? TOPPMILEPAELER : MILEPAELER
+}
+
 // ─────────────────────────────────────────────── Unike forbedringer
 
 /** Nivåene forbedringene låses opp på, og hvor mye hver ganger inntekten med. */

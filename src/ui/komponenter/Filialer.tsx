@@ -1,5 +1,5 @@
 import { bedriftInntektPerSek, dagensFaktor, statusfaktor } from '../../engine/formler'
-import { erHjemme, filialbidrag, filialer, filialpris, FILIAL_FRA_NIVAA, FILIALANDEL, HJEMME_BONUS, hjemby, ledigeFilialbyer, MAKS_FILIALER } from '../../engine/filialer'
+import { erHjemme, filialbidrag, filialer, filialFraNivaa, filialpris, FILIALANDEL, HJEMME_BONUS, hjemby, ledigeFilialbyer, MAKS_FILIALER } from '../../engine/filialer'
 import { aapneFilial } from '../../engine/handlinger'
 import { BEDRIFTSTYPER } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
@@ -21,6 +21,7 @@ export function Filialkort({ s, b }: { s: Spilltilstand; b: Bedrift }) {
   const mine = filialer(b)
   const nr = mine.length
   const pris = filialpris(b)
+  const fra = filialFraNivaa(b.type)
   // Inntekten før lønn i dag, med statusbonusen: det en filial tar en andel av.
   const brutto = (bedriftInntektPerSek(b, dagensFaktor(s, b.type)) - bedriftInntektPerSek(b, 0)) * statusfaktor(s)
   // Regionen, når den heter noe annet enn byen: «Trøndelag», men ikke «Bergen · Bergen».
@@ -30,9 +31,9 @@ export function Filialkort({ s, b }: { s: Spilltilstand; b: Bedrift }) {
     <div className="kort">
       <h2 className="kort-tittel">Filialer</h2>
       <p className="dempet liten">
-        Fra nivå {FILIAL_FRA_NIVAA} kan du åpne {navn.toLowerCase()} i opptil {MAKS_FILIALER} byer, én i hver. Den første gir {pst(FILIALANDEL[0])} av inntekten, den andre {pst(FILIALANDEL[1])} og den
+        Fra nivå {fra} kan du åpne {navn.toLowerCase()} i opptil {MAKS_FILIALER} byer, én i hver. Den første gir {pst(FILIALANDEL[0])} av inntekten, den andre {pst(FILIALANDEL[1])} og den
         tredje {pst(FILIALANDEL[2])} — og {pst(HJEMME_BONUS - 1)} mer i bransjens hjemby, {hjemby(b.type)}. Regionens økonomi drar litt opp eller ned. Prisen
-        følger det du har investert, og går inn i bedriftens verdi.
+        står fast per bransje, og går inn i bedriftens verdi.
       </p>
       <ul className="forbedringer">
         {mine.map((f, i) => (
@@ -69,9 +70,9 @@ export function Filialkort({ s, b }: { s: Spilltilstand; b: Bedrift }) {
           })}
       </ul>
       {nr >= MAKS_FILIALER && <p className="dempet liten">{navn} har filialer i {MAKS_FILIALER} byer — så mange den kan få.</p>}
-      {nr < MAKS_FILIALER && b.nivaa < FILIAL_FRA_NIVAA && (
+      {nr < MAKS_FILIALER && b.nivaa < fra && (
         <p className="dempet liten laast-merke">
-          <Ikon navn="las" størrelse={12} /> Filialer åpner ved nivå {FILIAL_FRA_NIVAA} — {FILIAL_FRA_NIVAA - b.nivaa} nivåer igjen.
+          <Ikon navn="las" størrelse={12} /> Filialer åpner ved nivå {fra} — {fra - b.nivaa} nivåer igjen.
         </p>
       )}
     </div>

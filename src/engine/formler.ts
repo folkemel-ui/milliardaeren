@@ -15,8 +15,12 @@ import {
   MAKS_BELAANING,
   MILEPAELER,
   MILEPAELFAKTORER,
+  milepaelerFor,
   RENTE_PER_TIME,
   SPARERENTE_PER_TIME,
+  TOPPBEDRIFTER,
+  TOPPMILEPAEL,
+  TOPPMILEPAEL_FAKTOR,
 } from './innhold'
 import { handelskurs, KURTASJE, maksPerOrdre, PAPIRER, rundAntall } from './marked'
 import {
@@ -29,7 +33,7 @@ import {
 } from './eiendom'
 import { rivalutbyttePerSek, rivalverdi } from './rivaler'
 import { fusjonsfaktor } from './fusjon'
-import { GRADER, retningsfaktor, teller, verdifaktor } from './ansatte'
+import { GRADER, medNyAnsatt, retningsfaktor, teller, utenAnsatt, verdifaktor } from './ansatte'
 import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { nyhetsfaktor } from './bransjer'
 import { filialfaktor } from './filialer'
@@ -44,23 +48,28 @@ import type { Ansattgrad, Bedrift, BedriftstypeId, Beholdning, Forbedring, Papir
 
 // ─────────────────────────────────────────────── Nivåer
 
-/** Inntektsmultiplikatoren fra milepælene: ×2 for 25, 50 og 100, ×1,5 for 150, 200 og 250 (Pakke 70). */
-export function milepaelfaktor(nivaa: number): number {
+/**
+ * Inntektsmultiplikatoren fra milepælene: ×2 for 25, 50 og 100, ×1,5 for 150, 200 og 250 (Pakke 70),
+ * og ×2 til på 35 for toppbedriftene, fra hotellet og opp (Pakke 80). Uten bransje: de felles.
+ */
+export function milepaelfaktor(nivaa: number, type?: BedriftstypeId): number {
   // Uten filter og nye lister: dette regnes for hver bedrift hvert sekund.
   // Til og med nivå 149 er produktet bit for bit det samme som 2 ** n var.
   let f = 1
   for (let i = 0; i < MILEPAELER.length; i++) if (nivaa >= MILEPAELER[i]) f *= MILEPAELFAKTORER[i]
+  if (nivaa >= TOPPMILEPAEL && type !== undefined && TOPPBEDRIFTER.has(type)) f *= TOPPMILEPAEL_FAKTOR
   return f
 }
 
 /** Hva milepælen på `nivaa` ganger inntekten med — 1 når nivået ikke er en milepæl. */
-export function milepaelboost(nivaa: number): number {
+export function milepaelboost(nivaa: number, type?: BedriftstypeId): number {
+  if (nivaa === TOPPMILEPAEL && type !== undefined && TOPPBEDRIFTER.has(type)) return TOPPMILEPAEL_FAKTOR
   return MILEPAELFAKTORER[MILEPAELER.indexOf(nivaa)] ?? 1
 }
 
-/** Neste nivå som dobler inntekten, eller null når alle er nådd. */
-export function nesteMilepael(nivaa: number): number | null {
-  return MILEPAELER.find((m) => m > nivaa) ?? null
+/** Neste nivå som gjør et hopp i inntekten, eller null når alle er nådd. */
+export function nesteMilepael(nivaa: number, type?: BedriftstypeId): number | null {
+  return (type === undefined ? MILEPAELER : milepaelerFor(type)).find((m) => m > nivaa) ?? null
 }
 
 export function oppgraderingspris(b: Bedrift): number {
@@ -123,7 +132,7 @@ export function forbedringspris(b: Bedrift, f: Forbedring): number {
 
 /** Inntekten fra nivået, forbedringene, fusjonene og retningen, før ansatte og lønn. */
 export function basisinntekt(b: Bedrift): number {
-  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa) * forbedringsfaktor(b) * fusjonsfaktor(b) * retningsfaktor(b)
+  return BEDRIFTSTYPER[b.type].grunninntekt * b.nivaa * milepaelfaktor(b.nivaa, b.type) * forbedringsfaktor(b) * fusjonsfaktor(b) * retningsfaktor(b)
 }
 
 /**
@@ -165,6 +174,22 @@ export function bedriftsfaktor(s: Spilltilstand, b: Bedrift): number {
 /** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor, filialene og statusbonusen. */
 export function bedriftInntektIDag(s: Spilltilstand, b: Bedrift): number {
   return bedriftInntektPerSek(b, bedriftsfaktor(s, b)) * statusfaktor(s)
+}
+
+/**
+ * Hva én ansatt til av et nivå gir netto per sekund i dag (Pakke 80): inntekten hen
+ * legger til — med kalenderen, nyhetene, filialene og statusen — minus lønnen.
+ * Negativ når lønnen er størst: da taper ansettelsen penger.
+ */
+export function ansettelseGir(s: Spilltilstand, b: Bedrift, grad: Ansattgrad): number {
+  const f = bedriftsfaktor(s, b)
+  return (bedriftInntektPerSek(medNyAnsatt(b, grad), f) - bedriftInntektPerSek(b, f)) * statusfaktor(s)
+}
+
+/** Hva den ansatte på plass `indeks` gir netto per sekund i dag: det bedriften mister om hen sies opp. */
+export function ansattGir(s: Spilltilstand, b: Bedrift, indeks: number): number {
+  const f = bedriftsfaktor(s, b)
+  return (bedriftInntektPerSek(b, f) - bedriftInntektPerSek(utenAnsatt(b, indeks), f)) * statusfaktor(s)
 }
 
 /**

@@ -7,9 +7,9 @@
  * eller sier opp. Navnene kommer fra en hash, aldri fra terningen.
  */
 
-import { ANSATT_BONUS, STIGEN } from './innhold'
+import { ANSATT_BONUS, erToppbedrift, STIGEN, TOPP_FRA_NIVAA } from './innhold'
 import { Hashkilde, hashTekst } from './rng'
-import type { Ansatt, Ansattgrad, Bedrift, Retning, Spilltilstand } from './types'
+import type { Ansatt, Ansattgrad, Bedrift, BedriftstypeId, Retning, Spilltilstand } from './types'
 
 export interface Grad {
   navn: string
@@ -23,8 +23,13 @@ export interface Grad {
   fraNivaa: number
 }
 
-/** Retningen og stjernene kommer på samme nivå. */
+/** Retningen og stjernene kommer på samme nivå … */
 export const RETNING_NIVAA = 50
+
+/** … men fra hotellet og opp velges retningen alt på nivå 25 (Pakke 80). Stjernene kommer fortsatt på 50. */
+export function retningNivaa(type: BedriftstypeId): number {
+  return erToppbedrift(type) ? TOPP_FRA_NIVAA : RETNING_NIVAA
+}
 
 export const GRADER: Record<Ansattgrad, Grad> = {
   junior: { navn: 'Junior', bonus: 0.05, lonn: 0.5, pris: 0.5, fraNivaa: 1 },
@@ -66,7 +71,7 @@ export function verdifaktor(b: Bedrift): number {
 }
 
 export function kanVelgeRetning(b: Bedrift): boolean {
-  return !b.retning && b.nivaa >= RETNING_NIVAA
+  return !b.retning && b.nivaa >= retningNivaa(b.type)
 }
 
 // ─────────────────────────────────────────────── Navn
