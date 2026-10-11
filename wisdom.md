@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 92, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 93, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -564,6 +564,19 @@ session; delete what stops being true.
   (`plantetSek`, which a farm otherwise never resets) to now; Monday and a sale pay `opptjent` too.
   It uses that day's land value, so such a week pays ~0.1 % less, never more — a test that compares
   harvests must use the same day, since the land value rises 0.3 % a day.
+- **An upgrade against a smoothed effect must keep the smoothing's average** (Pack 93). Weather
+  effects are divided by the season's average (`jevnetVaer`), so each season gives ×1. Feeding
+  drainage in as a better rain value would have raised that average too and taken most of the
+  gain back. `ukefaktor` multiplies the day's smoothed value by new/old for that weather instead,
+  and returns `vaer(dag).faktor` untouched without the upgrades. Measure such an upgrade over two
+  years of the game's weather (104 weeks) before offering its number.
+- **A price on an existing payout moves every old test that wrote the formula out** (Pack 93: the
+  crop prices). Packs 13, 57 and 92 each spelled out «land value × 8 % × weather»; each needed
+  «× this week's grain price» (the first three fields are grain). Grep the tests for the constant
+  (`HOST_ANDEL`) before running the suite.
+- **A test that clicks buttons by text must not match the label they turn into** (Pack 93): after
+  «Lagrer kornet» was tapped it read «Selger kornet», which `startsWith('Selg')` also matched, so
+  the «Selg» click hit the switch again. Select by class (`.knapp-gull`) or the full text.
 - **A test fixture bought one second into the week** made «a whole week» one second short and four
   tests disagree in the fourth decimal (Pack 92). Start fixtures on a day boundary when the rule
   counts seconds of the week.
