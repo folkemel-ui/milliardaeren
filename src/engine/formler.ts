@@ -38,6 +38,7 @@ import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { nyhetsfaktor } from './bransjer'
 import { filialfaktor } from './filialer'
 import { hjemverdi } from './hjemmene'
+import { charterPerSek } from './charter'
 import { kupongPerSek, obligasjonsverdi } from './obligasjoner'
 import { dagnummer } from './kalender'
 import { startupverdi } from './startups'
@@ -249,7 +250,7 @@ export function sparerentePerSek(s: Spilltilstand): number {
 
 /** Det som faktisk kommer inn hvert sekund: bedriftene, leien, sparerenten og rivalutbyttet, minus lånerenter. */
 export function nettoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) + kupongPerSek(s) - rentePerSek(s)
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) + kupongPerSek(s) - rentePerSek(s) + charterPerSek(s)
 }
 
 // ─────────────────────────────────────────────── Formue
@@ -301,7 +302,8 @@ export function belaaningsgrad(s: Spilltilstand): number {
 
 /** Alt som kommer inn per sekund før lånerentene: bedriftene, leien, sparerenten og rivalutbyttet. */
 export function bruttoPerSek(s: Spilltilstand): number {
-  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) + kupongPerSek(s)
+  // Utleien av yachtene og jetene (Pakke 89) lagt til sist, så summen ellers står helt likt.
+  return inntektPerSek(s) + leiePerSek(s) + sparerentePerSek(s) + rivalutbyttePerSek(s) + kupongPerSek(s) + charterPerSek(s)
 }
 
 /** Så stor kan gjelden bli etter inntekten: LAANETAK_TIMER timer av det som kommer inn. */

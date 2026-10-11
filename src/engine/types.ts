@@ -236,6 +236,45 @@ export interface Luksusgjenstand {
 
 export type LagerId = 'garasje' | 'havn' | 'hangar'
 
+/** Utleie av yachten eller jeten (Pakke 89). Står den i lista, er den ute hos noen andre. */
+export interface Charter {
+  /** Det den har tjent på denne utleien. */
+  tjent: number
+  /** Du har bedt om den hjem — den kommer ved neste dagsskifte. */
+  hentes?: boolean
+}
+
+/** De unike tingene som går under hammeren (Pakke 89). Én av hver i hele verden. */
+export type UnikId =
+  | 'urmakerens-forste' | 'kongelimousin' | 'sjoflyet' | 'regattavinneren'
+  | 'le-mans-1971' | 'polarklokka' | 'kongeyachten' | 'regjeringsflyet'
+  | 'prototypen' | 'store-komplikasjon' | 'overlydsflyet' | 'isbryteren'
+
+/** Auksjonen som pågår: hva, fra hvilken dag, og om du har kjøpt den. */
+export interface Auksjon {
+  id: UnikId
+  fraDag: number
+  /** Siste dag det kan bys — ved dagsskiftet etter den faller hammeren. */
+  tilDag: number
+  /** Prisen den startet på (estimatet ganget med dagens auksjonsfaktor). */
+  startpris: number
+  /** Du kjøpte den: saken kommer i avisa ved neste dagsskifte. */
+  kjopt?: boolean
+}
+
+export interface Auksjonshus {
+  aktiv?: Auksjon
+  /** Ingen ny auksjon før denne dagen. */
+  nesteDag: number
+  /** De unike tingene du eier, med det du betalte. */
+  eide: Partial<Record<UnikId, { kostpris: number; dag: number }>>
+  /**
+   * Det som gikk til en rival (eller ble trukket uten bud): det kommer tilbake fra
+   * `tilbakeDag`, dyrere for hver gang det har gått fra deg (`ganger`).
+   */
+  borte: Partial<Record<UnikId, { tilbakeDag: number; ganger: number; rival?: string; pris?: number }>>
+}
+
 // ─────────────────────────────────────────────── Avis, prestasjoner og rekorder
 
 export interface Overskrift {
@@ -543,6 +582,10 @@ export interface Spilltilstand {
   lager: Record<LagerId, number>
   /** Hvor langt hvert sted er bygd ut (Pakke 88): 0 er det vanlige, 1 og 2 de to trinnene. */
   lagerTrinn?: Partial<Record<LagerId, number>>
+  /** Yachtene og jetene som er leid ut (Pakke 89). Mangler i eldre lagringer. */
+  charter?: Partial<Record<LuksusId, Charter>>
+  /** Auksjonshuset (Pakke 89): auksjonen som pågår, og de unike tingene. Mangler i eldre lagringer. */
+  auksjon?: Auksjonshus
   /** De siste utgavene av avisen, nyeste sist. */
   avis: Avisutgave[]
   /** Dagen i den nyeste utgaven du har lest. */

@@ -12,12 +12,14 @@ import {
   utforKlubbsalg,
   utforLandemerkesalg,
   utforLuksussalg,
+  utforUniksalg,
   utforMalerisalg,
   utforRivalsalg,
   utforSalg,
   bokforGevinst,
 } from './handel'
 import { JORD, JORDLISTE, landverdi, tommerverdi } from './jord'
+import { mineUnike, unikISetning, unikRestverdi } from './unike'
 import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from './landemerker'
 import { maleripris, MALERIER, mineMalerier } from './kunst'
 import { aktive, ide, utforStartupovertakelse } from './startups'
@@ -158,6 +160,13 @@ export function sjekkMargin(s: Spilltilstand): void {
     utforLuksussalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(LUKSUS[id].navn.toLowerCase())
+  }
+  // Så de unike tingene fra auksjonene (Pakke 89), den mest verdifulle først.
+  for (const id of mineUnike(s).sort((a, b) => unikRestverdi(s, b) - unikRestverdi(s, a))) {
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
+    utforUniksalg(s, id)
+    nedbetalMed(s, s.kontanter)
+    solgt.push(unikISetning(id))
   }
   // Så gårder og skoger, den mest verdifulle først.
   for (const id of [...JORDLISTE].filter((x) => s.jord?.[x]).sort((a, b) => landverdi(s, b) + tommerverdi(s, b) - landverdi(s, a) - tommerverdi(s, a))) {

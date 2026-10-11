@@ -8,7 +8,7 @@ import { byggI, eiendomspris, EIENDOMSTYPER, MEGLERHONORAR, restverdi } from './
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
-import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, PapirId, Spilltilstand } from './types'
+import type { EiendomId, FondId, JordId, LandemerkeId, LuksusId, MaleriId, ObligasjonId, PapirId, Spilltilstand, UnikId } from './types'
 import { FOND_GEBYR, fondskurs } from './fond'
 import { gardHost, landverdi, tommerverdi } from './jord'
 import { dagnummer } from './kalender'
@@ -16,6 +16,7 @@ import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi, salgspris } from './klubb'
 import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
+import { TILBAKE_DAGER, unikRestverdi } from './unike'
 
 /**
  * Bokfører gevinst (eller tap, negativt) på et salg: det du fikk, minus det du
@@ -78,6 +79,23 @@ export function utforLuksussalg(n: Spilltilstand, id: LuksusId): number {
   const inntekt = restverdi(id)
   n.kontanter += inntekt
   n.luksus = n.luksus.filter((l) => l !== id)
+  // Tvangssalg av noe som er leid ut (Pakke 89): utleien slutter med salget.
+  if (n.charter?.[id]) delete n.charter[id]
+  return inntekt
+}
+
+/**
+ * Selger en unik ting tilbake til auksjonshuset for UNIK_RESTVERDI av det du betalte
+ * (Pakke 89). Som luksus er det forbruk, ikke en gevinst. Den kan bys fram igjen
+ * senere, til samme estimat.
+ */
+export function utforUniksalg(n: Spilltilstand, id: UnikId): number {
+  const h = n.auksjon
+  if (!h?.eide[id]) return 0
+  const inntekt = unikRestverdi(n, id)
+  n.kontanter += inntekt
+  delete h.eide[id]
+  h.borte[id] = { tilbakeDag: dagnummer(n.sek) + TILBAKE_DAGER, ganger: h.borte[id]?.ganger ?? 0 }
   return inntekt
 }
 

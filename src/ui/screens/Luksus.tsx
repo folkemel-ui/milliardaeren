@@ -1,6 +1,7 @@
 import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import {
   brukteplasser,
+  KATEGORI_I,
   KATEGORINAVN,
   LAGER,
   LAGER_FOR,
@@ -20,8 +21,12 @@ import {
   TRINN_PLASSER,
 } from '../../engine/eiendom'
 import { rentesats } from '../../engine/formler'
-import { byggLagertrinn, kjopLuksus, selgLuksus, utvidLager } from '../../engine/handlinger'
-import type { LagerId, LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types'
+import { byggLagertrinn, hentHjem, kjopLuksus, leiUt, selgLuksus, utvidLager } from '../../engine/handlinger'
+import type { LagerId, LuksusId, LuksusKategori, Spilltilstand, UnikId } from '../../engine/types'
+import { charterPerSekFor, iSesong, kanLeiesUt } from '../../engine/charter'
+import { dagnummer } from '../../engine/kalender'
+import { mineUnike, UNIKE } from '../../engine/unike'
+import { Auksjonskort, Unikkort } from '../komponenter/Auksjon'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from '../komponenter/BedriftIkon'
@@ -82,8 +87,6 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   )
 }
 
-/** Hvilken luksuskategori som står i hvert lager. */
-const KATEGORI_I: Record<LagerId, LuksusKategori> = { garasje: 'bil', havn: 'baat', hangar: 'fly' }
 
 /**
  * Samlingen: bilene, båtene og flyene du eier, står bare i scenen sin
@@ -93,16 +96,27 @@ const KATEGORI_I: Record<LagerId, LuksusKategori> = { garasje: 'bil', havn: 'baa
 function Samling({ s }: { s: Spilltilstand }) {
   const klokker = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === 'klokke').sort(etterPris)
   const eideKlokker = klokker.filter((id) => s.luksus.includes(id))
+  // Pakke 89: de unike klokkene ligger i bankboksen sammen med de andre.
+  const unikeKlokker = mineUnike(s).filter((id) => UNIKE[id].kategori === 'klokke')
   return (
     <>
+      <Auksjonskort s={s} />
       {LAGERLISTE.map((l) => (
         <div key={l} className="lagerliste">
           <Lagerkort s={s} lager={l} />
           <TilSalgs s={s} kategori={KATEGORI_I[l]} />
         </div>
       ))}
-      <Seksjon id="luksus-klokke" tittel={KATEGORINAVN.klokke} sammendrag={`${eideKlokker.length} av ${klokker.length} eid`} harInnhold={eideKlokker.length > 0}>
+      <Seksjon
+        id="luksus-klokke"
+        tittel={KATEGORINAVN.klokke}
+        sammendrag={`${eideKlokker.length} av ${klokker.length} eid${unikeKlokker.length ? ` · ${unikeKlokker.length} unik${unikeKlokker.length > 1 ? 'e' : ''}` : ''}`}
+        harInnhold={eideKlokker.length + unikeKlokker.length > 0}
+      >
         <ul className="kortliste">
+          {unikeKlokker.map((id) => (
+            <Unikkort key={id} s={s} id={id} />
+          ))}
           {[...eideKlokker, ...klokker.filter((id) => !s.luksus.includes(id))].map((id) => (
             <Luksuskort key={id} s={s} id={id} />
           ))}
@@ -211,6 +225,9 @@ export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: L
   const eier = s.luksus.includes(id)
   const lager = LAGER_FOR[g.kategori]
   const ingenPlass = !eier && lager !== null && brukteplasser(s, lager) >= s.lager[lager]
+  // Pakke 89: yachtene og jetene kan leies ut.
+  const charter = eier && kanLeiesUt(id)
+  const ute = s.charter?.[id]
 
   return (
     <li
@@ -231,8 +248,18 @@ export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: L
           <NyMerke id={id} />
         </h2>
         <span className="gull liten">+{g.status} status</span>
+        {charter && <span className="dempet liten">{charterlinje(s, id)}</span>}
       </div>
-      {eier ? (
+      {charter ? (
+        <div className="eiendom-knapper">
+          <button className="knapp knapp-liten" disabled={ute?.hentes} onClick={() => utfor(ute ? hentHjem(s, id) : leiUt(s, id))}>
+            {ute ? (ute.hentes ? 'På vei hjem' : 'Hent hjem') : 'Lei ut'}
+          </button>
+          <Bekreftknapp className="knapp knapp-liten" disabled={!!ute} onJa={() => utfor(selgLuksus(s, id))}>
+            Selg · {kortKroner(restverdi(id))}
+          </Bekreftknapp>
+        </div>
+      ) : eier ? (
         <Bekreftknapp className="knapp knapp-liten" onJa={() => utfor(selgLuksus(s, id))}>
           Selg · {kortKroner(restverdi(id))}
         </Bekreftknapp>
@@ -249,12 +276,21 @@ export function Luksuskort({ s, id, iDetalj = false }: { s: Spilltilstand; id: L
   )
 }
 
+/** «Leid ut · kr 12 mill i timen, høysesong» — eller hva den kan gi, når den står hjemme. */
+export function charterlinje(s: Spilltilstand, id: LuksusId): string {
+  const ute = s.charter?.[id]
+  const sesong = iSesong(id, dagnummer(s.sek)) ? 'høysesong' : 'lavsesong'
+  const timen = `${kortKroner(charterPerSekFor(s, id) * 3600)} i timen`
+  if (ute?.hentes) return 'Kommer hjem i morgen'
+  return ute ? `Leid ut · ${timen}, ${sesong}` : `Kan leies ut for ${timen} nå, ${sesong}`
+}
+
 /** Nærbildet på en plass i lageret. Fast, så Illustrasjon (memo) ikke tegnes på nytt hvert sekund (Pakke 64). */
 const NAER_PLASS = [86, 74] as const
 
 const LAGERIKON: Record<LagerId, Ikonnavn> = { garasje: 'garasje', havn: 'anker', hangar: 'hangar' }
 
-type Lagervalg = { slag: 'eid'; id: LuksusId } | { slag: 'ledig' } | null
+type Lagervalg = { slag: 'eid'; id: LuksusId } | { slag: 'unik'; id: UnikId } | { slag: 'ledig' } | null
 
 /**
  * Garasjen, havna eller hangaren som en scene, som gatebildet for eiendom:
@@ -270,7 +306,9 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
   const trinn = lagertrinn(s, lager)
   const nesteTrinn = nesteLagertrinn(s, lager)
   const her = s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)
-  const ledige = Math.max(0, s.lager[lager] - her.length)
+  // Pakke 89: de unike tingene fra auksjonene står sammen med resten og tar en plass.
+  const unike = mineUnike(s).filter((id) => UNIKE[id].kategori === KATEGORI_I[lager])
+  const ledige = Math.max(0, s.lager[lager] - her.length - unike.length)
   // Det billigste i kategorien du ikke eier ennå — det er det en ledig plass venter på.
   const neste = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === KATEGORI_I[lager] && !s.luksus.includes(id)).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)[0]
   const trykk = (v: Lagervalg) => velg(JSON.stringify(v) === JSON.stringify(valgt) ? null : v)
@@ -288,8 +326,21 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
       </div>
       <div className="lagerscene" role="list" aria-label={l.navn} data-ingen-sveip>
         {her.map((id) => (
-          <Plass key={id} lager={lager} navn={LUKSUS[id].navn} under={`+${LUKSUS[id].status} status`} valgt={valgt?.slag === 'eid' && valgt.id === id} trykk={() => trykk({ slag: 'eid', id })}>
+          <Plass
+            key={id}
+            lager={lager}
+            klasse={s.charter?.[id] ? 'utleid' : ''}
+            navn={LUKSUS[id].navn}
+            under={s.charter?.[id] ? 'Leid ut' : `+${LUKSUS[id].status} status`}
+            valgt={valgt?.slag === 'eid' && valgt.id === id}
+            trykk={() => trykk({ slag: 'eid', id })}
+          >
             <Illustrasjon id={id} størrelse={64} utklipp naerbilde={NAER_PLASS} />
+          </Plass>
+        ))}
+        {unike.map((id) => (
+          <Plass key={id} lager={lager} klasse="unik" navn={UNIKE[id].navn} under={`Unik · +${UNIKE[id].status} status`} valgt={valgt?.slag === 'unik' && valgt.id === id} trykk={() => trykk({ slag: 'unik', id })}>
+            <Illustrasjon id={UNIKE[id].tegning} størrelse={64} utklipp naerbilde={NAER_PLASS} />
           </Plass>
         ))}
         {Array.from({ length: ledige }, (_, i) => (
@@ -339,6 +390,11 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
       {valgt?.slag === 'eid' && s.luksus.includes(valgt.id) && (
         <ul className="kortliste lager-valgt">
           <Luksuskort s={s} id={valgt.id} />
+        </ul>
+      )}
+      {valgt?.slag === 'unik' && s.auksjon?.eide[valgt.id] && (
+        <ul className="kortliste lager-valgt">
+          <Unikkort s={s} id={valgt.id} />
         </ul>
       )}
       {valgt?.slag === 'ledig' && neste && (

@@ -62,6 +62,7 @@ Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når
 | Dårlig leietaker (`utleie.ts`) | `leietaker:<by>\|<uke>` |
 | Ukas bransjetrend (`verden.ts`) | `trend:<spilluke>` |
 | Valutakursene (`valuta.ts`, Pakke 59) | `valuta:<sti>:<lag>:<knute>` — tre glatte lag (14, 4 og 1 spilldag mellom knutene); DKK følger EUR, AED følger USD. Et spill fra før versjon 22 har `valutaanker` så kursen står på 1 der det var |
+| Auksjonene (`auksjon.ts`, Pakke 89) | `auksjon:<dag>` (hvilken ting bys fram), `auksjon:<id>:<dag>` (startprisen), `auksjon:pause:<dag>` (pausen etter), `auksjon:<id>:<fraDag>:rival` (rivalen som kjøper). Hva som passer, avhenger av formuen din den dagen |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.
 
@@ -86,6 +87,7 @@ Det betyr at **alt som legger til eller fjerner en sak en dag, flytter hovedtern
 - **Nytt system med tilfeldighet:** bruk en hash eller en egen terning, aldri `s.frø`. Se kunst, klubb og kø.
 - **Ny region:** legg den i `REGIONER` (`regioner.ts`) og skriv en migrering som gir den `nyRegion(frø, id, lengde)` med landsindeksens historikklengde — se 19 → 20 (Trøndelag og Nord). Hver region har sin egen hash, så de gamle står som før. `regiontikk` hopper over en region som mangler.
 - **Samme bygg i en ny by:** en ny `EiendomId` (`<bygg>-<by>`) i `EIENDOMSTYPER`, sortert inn etter pris, og en linje i `ILLUSTRASJONER` som peker på samme tegning. Ingen migrering: antallet er 0 til du kjøper.
+- **Utleie av yachtene og jetene** (Pakke 89, `charter.ts`) følger kalenderen alene — sesongmånedene — og trekker ingenting. Auksjonssakene i avisa flytter hovedterningen, som alle nye saker.
 - **Sesong** (ferieboligene fra Pakke 45) kommer fra kalenderen — månedens faktor i `SESONGER` — ikke fra noen terning. Snittet over året skal være 1.
 - **Nye papirer:** legg dem i `NYE_PAPIRER` (`marked.ts`) så de bruker `Hashkilde`. Fondene beholder medlemmene de hadde (`fond.ts`), ellers hopper fondskursen. Hver aksje trenger en `RAPPORTDAG` på høyst 26.
 - **Nye felt i tilstanden:** valgfrie felt kan leses med `?.`/`?? 0` uten migrering (som `handsalg`, `ko`). Endrer formen seg ellers: skriv migreringen i `state/migrering.ts` **før** `SPILLVERSJON` i `engine/start.ts` bumpes — ellers starter en åpen dev-side et nytt spill og legger det gamle i `milliardaer.lagring.korrupt`. Migreringene kjører dagens motorkode på gamle former, så motorfunksjoner som leser nyere felt bruker `?.`.

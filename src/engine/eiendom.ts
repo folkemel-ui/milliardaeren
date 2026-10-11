@@ -23,6 +23,7 @@ import { premiumstatus } from './ansatte'
 import { dagsbilde } from './verden'
 import { FORVALTER_ANDEL, forvalter, leiefaktorBy } from './utleie'
 import { hjemstatus } from './hjemmene'
+import { unikeI, unikstatus, unikverdi } from './unike'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -205,7 +206,7 @@ export function sesongfaktor(s: Spilltilstand, id: EiendomId): number {
 }
 
 /** Måneden for et dagnummer, husket for siste dag — leien spør hvert sekund. */
-function maanedFor(dag: number): number {
+export function maanedFor(dag: number): number {
   if (dag !== sisteDag) {
     sisteDag = dag
     sisteMaaned = dato(dag).maaned
@@ -422,7 +423,8 @@ export function restverdi(id: LuksusId): number {
 
 /** Luksus teller med i formuen til det du ville fått ved salg. */
 export function luksusverdi(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + restverdi(id), 0)
+  // De unike tingene fra auksjonene (Pakke 89) står i samlingen og teller med her.
+  return s.luksus.reduce((sum, id) => sum + restverdi(id), 0) + unikverdi(s)
 }
 
 // ─────────────────────────────────────────────── Lager
@@ -502,8 +504,12 @@ export function utvidelsespris(s: Spilltilstand, lager: LagerId): number {
   return Math.round(l.startpris * l.vekst ** Math.min(kjopt, PLASSVEKST_FRA - 1) * SEN_PLASSVEKST ** Math.max(0, kjopt - (PLASSVEKST_FRA - 1)))
 }
 
+/** Kategorien som står i hvert lager. */
+export const KATEGORI_I: Record<LagerId, LuksusKategori> = { garasje: 'bil', havn: 'baat', hangar: 'fly' }
+
+/** Plassene som er i bruk: det du har kjøpt, og de unike tingene fra auksjonene (Pakke 89). */
 export function brukteplasser(s: Spilltilstand, lager: LagerId): number {
-  return s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager).length
+  return s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager).length + unikeI(s, KATEGORI_I[lager])
 }
 
 // ─────────────────────────────────────────────── Status
@@ -532,7 +538,7 @@ export const STATUS_RENTEKUTT = 0.002
 
 /** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

@@ -4,11 +4,15 @@
  * en ren funksjon: tilstand inn, ny tilstand (eller en feilmelding) ut.
  */
 
-import { utforLuksussalg, utforMalerisalg } from '../handel'
+import { utforLuksussalg, utforMalerisalg, utforUniksalg } from '../handel'
+import { auksjonspris } from '../auksjon'
+import { kanLeiesUt } from '../charter'
+import { dagnummer } from '../kalender'
+import { UNIKE } from '../unike'
 import { brukteplasser, LAGER, LAGER_FOR, lagertrinn, LUKSUS, nesteLagertrinn, TRINN_PLASSER, utvidelsespris } from '../eiendom'
 import { HJEM, hjemAapent, hjemFor, nesteTrinn, ROM, romtrinn } from '../hjemmene'
 import { kjopsprisMaleri, MALERIER } from '../kunst'
-import type { LagerId, LuksusId, MaleriId, Spilltilstand, RomId } from '../types'
+import type { LagerId, LuksusId, MaleriId, Spilltilstand, RomId, UnikId } from '../types'
 import { feil, type Utfall } from './felles'
 
 /**
@@ -48,8 +52,64 @@ export function kjopLuksus(s: Spilltilstand, id: LuksusId): Utfall {
 
 export function selgLuksus(s: Spilltilstand, id: LuksusId): Utfall {
   if (!s.luksus.includes(id)) return feil('Du eier den ikke.')
+  if (s.charter?.[id]) return feil('Den er leid ut. Hent den hjem først.')
   const n = structuredClone(s)
   utforLuksussalg(n, id)
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Leier ut yachten eller jeten (Pakke 89). Den gir leie fra neste sekund og
+ * statusen som før, men kan ikke selges mens den er ute.
+ */
+export function leiUt(s: Spilltilstand, id: LuksusId): Utfall {
+  if (!kanLeiesUt(id)) return feil('Den kan ikke leies ut.')
+  if (!s.luksus.includes(id)) return feil('Du eier den ikke.')
+  if (s.charter?.[id]) return feil('Den er allerede leid ut.')
+  const n = structuredClone(s)
+  n.charter = { ...(n.charter ?? {}), [id]: { tjent: 0 } }
+  return { ok: true, tilstand: n }
+}
+
+/** Ber om den hjem: leien går til dagen er omme, og ved dagsskiftet er den hjemme. */
+export function hentHjem(s: Spilltilstand, id: LuksusId): Utfall {
+  const c = s.charter?.[id]
+  if (!c) return feil('Den er ikke leid ut.')
+  if (c.hentes) return feil('Den er allerede på vei hjem.')
+  const n = structuredClone(s)
+  n.charter![id]!.hentes = true
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Kjøper det som er under hammeren nå, til dagens bud (Pakke 89). Det tar en plass
+ * i garasjen, havna eller hangaren, og pengene går som luksus.
+ */
+export function kjopAuksjon(s: Spilltilstand): Utfall {
+  const a = s.auksjon?.aktiv
+  const pris = auksjonspris(s)
+  if (!a || pris === null) return feil('Ingen auksjon står åpen nå.')
+  const u = UNIKE[a.id]
+  const lager = LAGER_FOR[u.kategori]
+  if (lager && brukteplasser(s, lager) >= s.lager[lager]) {
+    return feil(`Du har ikke plass. Bygg ut ${LAGER[lager].bestemt} først.`)
+  }
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const h = n.auksjon!
+  n.kontanter -= pris
+  n.totaltForbruk += pris
+  h.eide[a.id] = { kostpris: pris, dag: dagnummer(n.sek) }
+  delete h.borte[a.id]
+  h.aktiv!.kjopt = true
+  return { ok: true, tilstand: n }
+}
+
+/** Selger en unik ting tilbake til auksjonshuset for 90 % av det du betalte. */
+export function selgUnik(s: Spilltilstand, id: UnikId): Utfall {
+  if (!s.auksjon?.eide[id]) return feil('Du eier den ikke.')
+  const n = structuredClone(s)
+  utforUniksalg(n, id)
   return { ok: true, tilstand: n }
 }
 

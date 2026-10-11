@@ -8,8 +8,8 @@ import { useSyncExternalStore } from 'react'
 import type { Fane } from './komponenter/Fanemeny'
 import type { Feiringsdata, Kjopsart } from './hendelsesstrom'
 
-/** Hvor et trykk på et varsel tar deg: en fane, hendelsesloggen (Pakke 61) eller klubben i Luksus (Pakke 62). */
-export type Mål = Fane | 'hendelser' | 'klubb'
+/** Hvor et trykk på et varsel tar deg: en fane, hendelsesloggen (Pakke 61), klubben i Luksus (Pakke 62) eller Samling (Pakke 89). */
+export type Mål = Fane | 'hendelser' | 'klubb' | 'samling'
 
 export type Varseltype = 'god' | 'advarsel' | 'kritisk' | 'feil' | 'avis'
 

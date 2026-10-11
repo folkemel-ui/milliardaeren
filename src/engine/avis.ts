@@ -29,6 +29,8 @@ import { dagnummer } from './kalender'
 import { verdenssaker } from './verden'
 import { utleieVedDagsskifte } from './utleie'
 import { byerMedEiendom, leieIByen } from './eiendom'
+import { auksjonVedDagsskifte } from './auksjon'
+import { charterVedDagsskifte } from './charter'
 
 export const MAKS_UTGAVER = 7
 const MAKS_SAKER = 5
@@ -310,6 +312,9 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
   const startupsaker = startupsVedDagsskifte(s, t)
   const klubbsaker = klubbVedDagsskifte(s)
+  // Pakke 89: det som var leid ut og bedt hjem, er hjemme; auksjonshuset slår av og byr fram.
+  charterVedDagsskifte(s)
+  const auksjonssaker = auksjonVedDagsskifte(s, tittel(s))
   const andre = [
     ...jordVedDagsskifte(s),
     ...landemerkerVedDagsskifte(s),
@@ -328,10 +333,13 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...skattesaker,
     ...klubbsaker,
     ...andre.filter((x) => x.type === 'deg'),
+    ...auksjonssaker.filter((x) => x.type === 'deg'),
     ...startupsaker.filter((x) => x.type === 'deg'),
     ...nyheter,
     ...marked.dine,
     ...omRivalene(s, før),
+    // Auksjonen (Pakke 89) etter kappløpet — en fusjon med en rival er viktigere — men foran verden og kursene.
+    ...auksjonssaker.filter((x) => x.type !== 'deg'),
     ...verden.marked,
     ...marked.andre,
     ...startupsaker.filter((x) => x.type !== 'deg'),

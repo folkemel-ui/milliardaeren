@@ -22,6 +22,9 @@ import { REVISJONSSJANSE, SKATTETRINN } from '../engine/skatt'
 import { DIN_DEL_AV_RUNDEN, RUNDEANDEL } from '../engine/startups'
 import { CUP_PREMIE, CUP_RUNDEPREMIE, EUROPA_PREMIER, KLUBBSALG_HONORAR, RUNDER_PER_SESONG, STADIONKRAV, STADIONTRINN } from '../engine/klubb'
 import { kortKroner, tall } from './format'
+import { AUKSJON_DAGER, BUDSTIGNING, PASSER_ANDEL, TILBAKE_DAGER, TILBAKE_PREMIE } from '../engine/auksjon'
+import { CHARTER_I_SESONG, CHARTER_UTENFOR } from '../engine/charter'
+import { UNIK_RESTVERDI } from '../engine/unike'
 
 const pst = (andel: number, desimaler = 0) => `${tall(andel * 100, desimaler)} %`
 
@@ -41,6 +44,7 @@ export type Tema =
   | 'kunst'
   | 'klubb'
   | 'obligasjoner'
+  | 'auksjon'
 
 const trinn = SKATTETRINN.slice(1)
 
@@ -161,6 +165,17 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Hvert maleri har en verdi som følger kunstnerens trend, og prisen svinger rundt den og trekkes tilbake mot den. Av og til åpner en utstilling, og alt kunstneren har laget, stiger — men løftet ebber ut. ' +
       `Auksjonshuset tar ${pst(KJOPSSALAER)} når du kjøper og ${pst(SALGSSALAER)} når du selger. ` +
       'Et maleri gir status — dobbelt så mye på museum, men da kan det ikke selges, og det tar en dag å hente det hjem.',
+  },
+  auksjon: {
+    tittel: 'Auksjoner og utleie',
+    tekst:
+      `Omtrent én gang i timen byr auksjonshuset fram én unik ting — det finnes bare én av hver. Det som bys fram, koster høyst ${pst(PASSER_ANDEL)} av formuen din. ` +
+      `Det kan bys i ${AUKSJON_DAGER} dager, og budet stiger ${pst(BUDSTIGNING)} for hver dag: den som kommer først, betaler minst. ` +
+      'Kjøper du den ikke, går den til en rival som har råd, og avisa skriver om det. ' +
+      `Den kan komme tilbake, men tidligst om ${TILBAKE_DAGER / 12} timer og ${tall(TILBAKE_PREMIE, 1)} gang så dyr. ` +
+      `En unik ting tar en plass som resten av samlingen, gir status og holder seg: den teller og selges for ${pst(UNIK_RESTVERDI)} av det du betalte. ` +
+      `Yachtene og jetene kan leies ut de ukene du ikke bruker dem: ${pst(CHARTER_I_SESONG)} av nyprisen i timen i sesongen — yachtene mai–september, jetene november–mars — og ${pst(CHARTER_UTENFOR)} utenfor. ` +
+      'De gir statusen som før mens de er ute, men kan ikke selges før de er hjemme, og det tar til neste dag.',
   },
   klubb: {
     tittel: 'Fotballklubben',

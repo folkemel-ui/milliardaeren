@@ -21,6 +21,7 @@ import { kotikk } from './hender'
 import { dagsbilde, konjunkturdrift } from './verden'
 import { nyhetsfaktor, trenddrift } from './bransjer'
 import { kupongPerSek } from './obligasjoner'
+import { betalCharter } from './charter'
 import type { PapirId, Spilltilstand } from './types'
 
 /**
@@ -130,6 +131,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
     const leie = leiePerSek(s) * leieSek
     s.kontanter += leie
     s.totaltLeie += leie
+    // Yachtene og jetene som er leid ut (Pakke 89), betales som leia.
+    betalCharter(s, leieSek)
   }
   if (m) t = runde(m, 'leie', t)
   dekkUnderskudd(s)

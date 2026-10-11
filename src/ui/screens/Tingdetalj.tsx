@@ -15,7 +15,8 @@ import { Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
 import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
-import { Luksuskort } from './Luksus'
+import { charterlinje, Luksuskort } from './Luksus'
+import { CHARTERBAR, kanLeiesUt } from '../../engine/charter'
 
 /**
  * Detaljsiden for noe du kan eie (G7), som bedriftene har: den store scenen
@@ -96,7 +97,14 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
         ['Ny pris', kortKroner(g.pris)],
       ]
       if (eier) fakta.push(['Selges for', kortKroner(restverdi(id as LuksusId))])
-      if (eier && lager) fakta.push(['Står i', LAGER[lager].bestemt])
+      if (eier && lager) fakta.push(['Står i', s.charter?.[id as LuksusId] ? 'leid ut' : LAGER[lager].bestemt])
+      // Pakke 89: yachtene og jetene kan leies ut — sesongen og det den har tjent.
+      if (eier && kanLeiesUt(id as LuksusId)) {
+        fakta.push(['Utleie', charterlinje(s, id as LuksusId)])
+        fakta.push(['Sesong', CHARTERBAR[id as LuksusId] === 'sommer' ? 'Mai–september' : 'November–mars'])
+        const ute = s.charter?.[id as LuksusId]
+        if (ute) fakta.push(['Tjent på utleien', kortKroner(ute.tjent)])
+      }
       return [<Luksuskort s={s} id={id as LuksusId} iDetalj />, fakta]
     }
     case 'hjem': {

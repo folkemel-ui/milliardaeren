@@ -41,6 +41,7 @@ const HENDELSE_FANE: Record<string, Mål> = {
   Hogst: 'eiendom',
   Bokettersyn: 'profil',
   'Skatt innkrevd': 'profil',
+  Auksjon: 'samling',
 }
 
 const MAKS_KJOP_SAMTIDIG = 3
@@ -203,8 +204,8 @@ export default function App() {
   }, [fane])
   const gåTil = (m: Mål) => {
     if (m === 'hendelser') return settLoggÅpen(true)
-    if (m === 'klubb') {
-      luksusdel.sett('klubb')
+    if (m === 'klubb' || m === 'samling') {
+      luksusdel.sett(m)
       return velg('luksus')
     }
     velg(m)

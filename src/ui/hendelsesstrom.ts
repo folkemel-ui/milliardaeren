@@ -15,6 +15,7 @@ import { FUSJONSFAKTOR } from '../engine/fusjon'
 import { JORD } from '../engine/jord'
 import { LANDEMERKER } from '../engine/landemerker'
 import { MALERIER } from '../engine/kunst'
+import { UNIKE, UNIKLISTE } from '../engine/unike'
 import { ide } from '../engine/startups'
 import type { BedriftstypeId, EiendomId, Hendelse, JordId, LandemerkeId, MaleriId, Spilltilstand } from '../engine/types'
 import { FANE_AAPNER, faneAapen } from './progresjon'
@@ -112,6 +113,10 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   }
   for (const id of etter.luksus) {
     if (!før.luksus.includes(id)) funn.push({ type: 'kjop', art: 'luksus', id, navn: LUKSUS[id].navn })
+  }
+  // Pakke 89: en unik ting fra auksjonen får samme øyeblikk, med tegningen den vises med.
+  for (const id of UNIKLISTE) {
+    if (etter.auksjon?.eide[id] && !før.auksjon?.eide[id]) funn.push({ type: 'kjop', art: 'luksus', id: UNIKE[id].tegning, navn: UNIKE[id].navn })
   }
   // Grafikkpakke G11: alt annet du kjøper, får også et øyeblikk.
   for (const id of Object.keys(etter.jord ?? {}) as JordId[]) {

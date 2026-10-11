@@ -1023,3 +1023,50 @@
 .tabell-ny {
   margin-left: 2px;
 }
+
+/* ── Utleie og auksjoner (Pakke 89) ──────────────────────────────────────── */
+
+/* Auksjonen øverst i Samling: en gullkant, tingen, linjen om den og budet. */
+.auksjonskort {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+  border-color: var(--gull);
+}
+
+.auksjon-topp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auksjon-topp .merke {
+  margin-left: auto;
+}
+
+.auksjon-rad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.auksjon-bud strong {
+  color: var(--gull);
+}
+
+/* En unik ting i scenen: navnet i gull. */
+.plass.unik .plass-navn {
+  color: var(--gull);
+}
+
+/* Det som er leid ut, står ikke hjemme: plassen viser den blek. */
+.plass.utleid .plass-bilde > * {
+  opacity: 0.35;
+}
+
+/* Lei ut og Selg på samme rad, under navnet. */
+.luksuskort .eiendom-knapper {
+  justify-self: stretch;
+}

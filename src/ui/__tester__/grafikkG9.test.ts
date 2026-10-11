@@ -91,6 +91,7 @@ describe('nærbilder der tegningene er små (G9)', () => {
     expect(inv).toContain('naerbilde={NAER_RIVAL}')
     const luksus = kilde('../screens/Luksus.tsx')
     expect(luksus).toContain('const NAER_PLASS = [86, 74] as const')
-    expect(luksus.match(/naerbilde=\{NAER_PLASS\}/g)).toHaveLength(2)
+    // Det du eier, en ledig plass, og de unike tingene fra auksjonene (Pakke 89).
+    expect(luksus.match(/naerbilde=\{NAER_PLASS\}/g)).toHaveLength(3)
   })
 })
