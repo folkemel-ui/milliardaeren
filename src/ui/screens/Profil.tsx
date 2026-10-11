@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { nettoformue } from '../../engine/formler'
 import { MAAL } from '../../engine/innhold'
-import { PRESTASJONER, synligePrestasjoner } from '../../engine/prestasjoner'
+import { PRESTASJONER, synligePrestasjoner, synligeTrofeer } from '../../engine/prestasjoner'
 import type { Spilltilstand } from '../../engine/types'
 import { startPaaNytt } from '../../state/lager'
 import { formue, kortKroner, kroner, perSek, tall, varighet } from '../format'
@@ -28,7 +28,8 @@ import { Endringslogg } from '../komponenter/Nyheter'
 import { Maalepanel } from '../komponenter/Maalepanel'
 
 function Trofeskap({ s }: { s: Spilltilstand }) {
-  const trofeer = s.trofeer ?? []
+  // Pakke 86: et trofé fra kampen som spilles nå, står i skapet når den er ferdig.
+  const trofeer = synligeTrofeer(s)
   if (trofeer.length === 0) return null
   return (
     <div className="kort">

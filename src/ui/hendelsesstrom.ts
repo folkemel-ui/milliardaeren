@@ -19,6 +19,9 @@ import { ide } from '../engine/startups'
 import type { BedriftstypeId, EiendomId, Hendelse, JordId, LandemerkeId, MaleriId, Spilltilstand } from '../engine/types'
 import { FANE_AAPNER, faneAapen } from './progresjon'
 import type { Fane } from './komponenter/Fanemeny'
+import { dagnummer } from '../engine/kalender'
+import type { Kamp, Klubb, Maalhendelse } from '../engine/types'
+import { kampminutt, stilling } from './klubblive'
 
 /**
  * Et kjøp som fortjener et øyeblikk: første bedrift av en type, første
@@ -36,6 +39,9 @@ export type Nytt =
   | { type: 'kjop'; art: Kjopsart; id: string; navn: string }
   | { type: 'fusjon'; id: BedriftstypeId; navn: string; faktor: number }
   | { type: 'fane'; fane: Fane }
+  /** Pakke 86: et mål i kampen som spilles nå, og fløyta. */
+  | { type: 'maal'; tittel: string; tekst: string; egne: boolean }
+  | { type: 'slutt'; tittel: string; tekst: string }
 
 /** Hvor stor feiringen er: et lite drys, gullblink og konfetti, eller milliarden. */
 export type Feiringsniva = 'liten' | 'stor' | 'milliard'
@@ -140,7 +146,55 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   const forrigeUtgave = før.avis.at(-1)?.dag ?? -1
   const nyUtgave = etter.avis.at(-1)?.dag ?? -1
   if (nyUtgave > forrigeUtgave) funn.push({ type: 'avis', dag: nyUtgave })
+  funn.push(...kampfunn(før, etter))
   return funn
+}
+
+/** Så lang tid kan gå mellom to tilstander før målene ikke meldes ett for ett (tid borte har velkomsten). */
+const LEVENDE_SEK = 10
+
+/** «Fjordby IL 2–1 Øyrane IL» etter `minutt`. */
+function stillingstekst(k: Klubb, m: Kamp, minutt: number): string {
+  const st = stilling(m, minutt)
+  return m.hjemme ? `${k.navn} ${st.for}–${st.mot} ${m.motstander}` : `${m.motstander} ${st.mot}–${st.for} ${k.navn}`
+}
+
+function maalfunn(k: Klubb, m: Kamp, x: Maalhendelse): Nytt {
+  const navn = x.navn.split(' ').at(-1)
+  return {
+    type: 'maal',
+    egne: !x.mot,
+    tittel: x.mot ? `Mål mot: ${navn}, ${x.minutt}. min` : `MÅL! ${navn}, ${x.minutt}. min`,
+    tekst: stillingstekst(k, m, x.minutt),
+  }
+}
+
+/**
+ * Pakke 86: målene i kampen som spilles nå, i sitt minutt, og fløyta ved dagsskiftet.
+ * Målene meldes bare i levende spill; fløyta alltid.
+ */
+function kampfunn(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
+  const k = etter.klubb
+  if (!k || !før.klubb || før.klubb.navn !== k.navn) return []
+  const ut: Nytt[] = []
+  const levende = etter.sek - før.sek <= LEVENDE_SEK
+  const dagF = dagnummer(før.sek)
+  const dagE = dagnummer(etter.sek)
+  const fra = kampminutt(før.sek)
+  // Kampene som var i gang, og som er ferdige nå: resten av målene, så fløyta.
+  if (dagE > dagF) {
+    for (const m of k.kamper.filter((x) => x.dag === dagF)) {
+      if (levende) for (const x of m.maal ?? []) if (x.minutt > fra) ut.push(maalfunn(k, m, x))
+      const utfall = m.maalFor > m.maalMot || m.straffer === 'deg' ? 'Seier' : m.maalFor < m.maalMot || m.straffer === 'dem' ? 'Tap' : 'Uavgjort'
+      ut.push({ type: 'slutt', tittel: `Slutt: ${utfall}${m.straffer ? ' på straffer' : ''}`, tekst: stillingstekst(k, m, 90) })
+    }
+  }
+  if (levende) {
+    const start = dagE > dagF ? 0 : fra
+    const til = kampminutt(etter.sek)
+    for (const m of k.kamper.filter((x) => x.dag === dagE)) for (const x of m.maal ?? []) if (x.minutt > start && x.minutt <= til) ut.push(maalfunn(k, m, x))
+  }
+  return ut
 }
 
 /** Flere funn enn dette på én gang (typisk etter tid borte) blir til ett oppsummeringsvarsel. */

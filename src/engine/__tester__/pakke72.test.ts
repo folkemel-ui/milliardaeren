@@ -89,7 +89,10 @@ describe('statistikk og priser', () => {
     expect(spilt.length).toBeGreaterThanOrEqual(11)
     expect(spilt.reduce((sum, p) => sum + p.sesong!.maal, 0)).toBe(maal)
     for (const p of spilt) {
-      expect(p.karriere).toEqual(p.sesong)
+      // Sesongen har også vurderingene til kurven (Pakke 86); karrieren har bare tallene.
+      const { vurderinger, ...tall } = p.sesong!
+      expect(p.karriere).toEqual(tall)
+      expect(vurderinger).toHaveLength(p.sesong!.kamper)
       expect(snittvurdering(p.sesong)).toBeGreaterThanOrEqual(4)
     }
     const { toppscorer, aaretsSpiller } = sesongpriser(k)

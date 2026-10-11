@@ -3,10 +3,10 @@ import { nyttSpill } from '../../engine/start'
 import { simuler } from '../../engine/simulering'
 import { ansettLeder, kjopKlubb, kjopPapir, type Utfall } from '../../engine/handlinger'
 import { BORTE_TAK_SEK } from '../../engine/innhold'
-import { DAG_SEK } from '../../engine/kalender'
+import { DAG_SEK, dagnummer } from '../../engine/kalender'
 import { KLUBBNAVN } from '../../engine/klubb'
 import { oppsummer } from '../velkomst'
-import type { Spilltilstand } from '../../engine/types'
+import type { Kamp, Spilltilstand } from '../../engine/types'
 
 function ok(u: Utfall): Spilltilstand {
   if (!u.ok) throw new Error(u.feil)
@@ -40,8 +40,13 @@ describe('velkomsten', () => {
     const etter = simuler(før, 2 * DAG_SEK, true)
     const o = oppsummer(før, etter, 2 * DAG_SEK)
     expect(o.nyeAviser).toBe(2)
-    expect(o.kamper).toHaveLength(2)
-    expect(o.kamper.every((k) => k.runde >= 1)).toBe(true)
+    // Pakke 86: kampen som var i gang da du gikk, er ny; den som spilles nå, venter.
+    const nokkel = (k: Kamp) => `${k.sesong}-${k.turnering ?? 'serie'}-${k.runde}`
+    const iGang = før.klubb!.kamper.filter((k) => k.dag === dagnummer(før.sek)).map(nokkel)
+    expect(iGang.length).toBeGreaterThan(0)
+    for (const n of iGang) expect(o.kamper.map(nokkel)).toContain(n)
+    expect(o.kamper.some((k) => k.dag === dagnummer(etter.sek))).toBe(false)
+    expect(o.kamper.filter((k) => !k.turnering)).toHaveLength(2)
   })
 
   it('sier fra når tiden borte er lengre enn det som telles', () => {

@@ -22,7 +22,7 @@ import { dagnummer } from './kalender'
 import { Hashkilde, hashTekst, Terning } from './rng'
 import { vaerPaaDag, type Vaertype } from './verden'
 import { kortKroner, tall } from './tall'
-import type { Akademi, Formasjon, Kamp, Klubb, Lag, Maalhendelse, Motlag, Overskrift, Posisjon, Sesongoppsummering, Spiller, Spillerstatistikk, Spillervurdering, Spilltilstand, Taktikk, Turnering, Utslag } from './types'
+import type { Akademi, Formasjon, Hendelse, Kamp, Klubb, Lag, Maalhendelse, Motlag, Overskrift, Posisjon, Runderesultat, Sesongoppsummering, Spiller, Spillerstatistikk, Spillervurdering, Spilltilstand, Taktikk, Turnering, Utslag } from './types'
 
 /**
  * `publikum` er hvor mange som vil se en hjemmekamp når laget går midt på
@@ -522,7 +522,7 @@ function spillUtslagskamp(s: Spilltilstand, k: Klubb, t: Terning, mot: Motlag, h
   const [xh, xb] = dineForventedeMaal(k, ditt, mot, hjemme, turnering === 'europa' ? null : dagnummer(s.sek) - 1)
   const mh = maal(t, xh)
   const mb = maal(t, xb)
-  const kamp: Kamp = { sesong: k.sesong, runde, motstander: mot.navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh, turnering }
+  const kamp: Kamp = { sesong: k.sesong, runde, motstander: mot.navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh, turnering, dag: dagnummer(s.sek) }
   kamprapport(k, kamp, hjemme ? xh : xb, hjemme ? xb : xh)
   if (kamp.maalFor === kamp.maalMot) kamp.straffer = t.sjanse(0.5) ? 'deg' : 'dem'
   if (kamp.hjemme) {
@@ -996,9 +996,19 @@ function kamprapport(k: Klubb, kamp: Kamp, forventetFor: number, forventetMot: n
       st.assist += assistert.get(spiller.id) ?? 0
       st.sum += v
     }
+    // Kurven (Pakke 86): hver kamps vurdering denne sesongen.
+    ;(spiller.sesong.vurderinger ??= []).push(v)
   }
   kamp.vurderinger = vurderinger
   kamp.beste = vurderinger.reduce((b, v) => (v.vurdering > b.vurdering ? v : b), vurderinger[0])?.id
+  // Motstanderens beste (Pakke 86): den som scoret flest for dem, ellers en fra laget; vurdert
+  // som dine, fra deres side av resultatet. Trekkes sist, så alt over står som før.
+  const deres = new Map<string, number>()
+  for (const m of hendelser) if (m.mot) deres.set(m.navn, (deres.get(m.navn) ?? 0) + 1)
+  const toppen = [...deres.entries()].sort((a, b) => b[1] - a[1])[0]
+  const navn = toppen ? toppen[0] : t.velg(ETTERNAVN)
+  const sv = 6 + (kamp.maalMot - forventetMot) * 0.3 + (forventetFor - kamp.maalFor) * 0.3 + (toppen ? toppen[1] : 0) + t.mellom(-0.4, 0.4)
+  kamp.motBeste = { navn, vurdering: Math.round(Math.max(4, Math.min(10, sv)) * 10) / 10 }
 }
 
 /** «Hansen (12), Berg (77)» — dine scorere, til avisa. */
@@ -1053,6 +1063,7 @@ function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
   const ditt = lagprofil(k)
   // Kampene spilles ved dagsskiftet: været er dagen som nettopp er slutt (Pakke 85).
   const dag = dagnummer(s.sek) - 1
+  const resultater: Runderesultat[] = []
   for (const [h, b] of rundensKamper(k.runde)) {
     const [xh, xb] =
       h === 0 || b === 0
@@ -1062,14 +1073,17 @@ function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
     const mb = maal(t, xb)
     registrer(k.lag[h], mh, mb)
     registrer(k.lag[b], mb, mh)
+    resultater.push({ hjemme: k.lag[h].navn, borte: k.lag[b].navn, mh, mb })
     if (h === 0 || b === 0) {
       const hjemme = h === 0
-      din = { sesong: k.sesong, runde: k.runde, motstander: k.lag[hjemme ? b : h].navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh }
+      // Pakke 86: kampen vises direkte gjennom spilldagen som starter nå.
+      din = { sesong: k.sesong, runde: k.runde, motstander: k.lag[hjemme ? b : h].navn, hjemme, maalFor: hjemme ? mh : mb, maalMot: hjemme ? mb : mh, dag: dagnummer(s.sek) }
       // Rapporten trekkes etter resultatet, med sin egen terning (Pakke 72).
       kamprapport(k, din, hjemme ? xh : xb, hjemme ? xb : xh)
     }
   }
   k.runde++
+  k.sisteRunde = { dag: dagnummer(s.sek), kamper: resultater }
   const kamp = din!
   if (kamp.maalFor > kamp.maalMot) k.seire++
   // Billettinntekter på hjemmebane: flere kommer når laget vinner, men ikke flere enn stadion tar.
@@ -1232,9 +1246,32 @@ const resultat = (kamp: Kamp) => (kamp.maalFor > kamp.maalMot ? 'seier' : kamp.m
  * Dagsskiftet for klubben: runden spilles, lønna betales, markedet fornyes,
  * og etter siste runde er sesongen over. Gir avisens saker. Muterer.
  */
+/** Hendelsene som venter til kampen er ferdig (Pakke 86): de som forteller resultatet. */
+const VENTER_PAA_FLØYTA = new Set(['Trofé', 'Opprykk', 'Nedrykk', 'Nektet opprykk'])
+
+/**
+ * Pakke 86: kampen som avgjøres nå, spilles direkte gjennom dagen. Det du ser av
+ * resultatet — avisa, hendelsene, prestasjonene — kommer når den er ferdig, ved neste
+ * dagsskifte. Her slippes gårsdagens løs og dagens holdes tilbake.
+ */
 export function klubbVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const k = s.klubb
   if (!k) return []
+  // Det som var avgjort før denne runden, er nå sett ferdig.
+  k.synlig = { seire: k.seire, opprykk: k.opprykk, trofeer: s.trofeer?.length ?? 0, europa: !!k.europa && (k.europa.runde > 0 || k.europa.ute) }
+  for (const h of k.ventendeHendelser ?? []) leggTilHendelse(s, h)
+  const kjente = new Set(s.hendelser)
+  const ut = k.ventendeSaker ?? []
+  const saker = runde(s, k)
+  const nye = s.hendelser.filter((h) => !kjente.has(h) && VENTER_PAA_FLØYTA.has(h.tittel))
+  s.hendelser = s.hendelser.filter((h) => !nye.includes(h))
+  k.ventendeHendelser = nye.map(({ sek: _, ...h }): Omit<Hendelse, 'sek'> => h)
+  k.ventendeSaker = saker
+  return ut
+}
+
+/** Runden og alt som følger den. Gir avisas saker om den. Muterer. */
+function runde(s: Spilltilstand, k: Klubb): Overskrift[] {
   const t = new Terning(k.frø)
   const saker: Overskrift[] = []
   const kamp = spillRunde(s, k, t)

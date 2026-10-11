@@ -60,7 +60,10 @@ describe('klubben som nav', () => {
   it('toppen, neste kamp rett under, formen, tabellen og radene — troppen og markedet står ikke på navet', async () => {
     app = await tilKlubben(await medSesong())
     const topp = app.rot.querySelector('.klubbtopp')!
-    expect(topp.nextElementSibling!.classList.contains('nestekamp')).toBe(true)
+    // Pakke 86: spilles en kamp nå, står den mellom toppen og neste kamp.
+    let under = topp.nextElementSibling!
+    if (under.classList.contains('livekamp')) under = under.nextElementSibling!
+    expect(under.classList.contains('nestekamp')).toBe(true)
     expect(titler(app)).toEqual(expect.arrayContaining(['Formen', 'Tabell']))
     for (const borte of ['Troppen', 'Overgangsmarkedet', 'Akademiet', 'Kamprapport', 'Toppscorere', 'Sesongen som var', 'Stadion', 'Bygg']) {
       expect(titler(app), borte).not.toContain(borte)
@@ -198,7 +201,8 @@ describe('cupen i neste kamp', () => {
     expect(s).not.toBeNull()
     app = await tilKlubben(s!)
     const linje = app.rot.querySelector('.nestekamp .turneringslinjer')!
-    expect(linje.textContent).toMatch(/^Cupen.+ mot .+, (dag \d|samme dag)/)
+    // Pakke 86: like etter dagsskiftet kan cupkampen spilles nå.
+    expect(linje.textContent).toMatch(/^Cupen.+ mot .+(, (dag \d|samme dag)| spilles nå)/)
   })
 })
 

@@ -14,6 +14,7 @@ import { kjopspris, KLUBBNAVN } from '../../engine/klubb'
 import { simulerMedPauser } from './simulerMedPauser'
 import type { Spilltilstand } from '../../engine/types'
 import { FORKLARINGER } from '../forklaringer'
+import { visKlubb } from '../klubblive'
 
 let app: App | null = null
 beforeEach(() => {
@@ -135,7 +136,8 @@ describe('kamper og tabell', () => {
     app = await tilSiden(s, 'Kamper og tabell')
     const kort = kortMed(app, 'Siste kamper')
     const brikker = [...kort.querySelectorAll<HTMLElement>('[role=radio]')]
-    expect(brikker).toHaveLength(Math.min(10, s.klubb!.kamper.length))
+    // Pakke 86: kampen som spilles nå, er ikke en brikke før den er ferdig.
+    expect(brikker).toHaveLength(Math.min(10, visKlubb(s, s.klubb!).kamper.length))
     expect(brikker[brikker.length - 1].getAttribute('aria-checked')).toBe('true')
     await app.trykk(brikker[0])
     expect(brikker[0].getAttribute('aria-checked')).toBe('true')

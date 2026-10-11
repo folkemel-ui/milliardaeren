@@ -101,7 +101,9 @@ describe('klubben', () => {
     expect(k.lag.every((l) => l.spilt === 1)).toBe(true)
     expect(k.kamper.filter((m) => !m.turnering)).toHaveLength(1)
     expect(k.lonn).toBe(lonn)
-    expect(saker[0].tittel).toContain(k.navn)
+    // Pakke 86: kampen spilles direkte gjennom dagen; avisa skriver om den når den er ferdig.
+    expect(saker).toEqual([])
+    expect(k.ventendeSaker![0].tittel).toContain(k.navn)
     // Hjemmekamp gir billettinntekter, bortekamp ikke.
     expect(s.kontanter).toBeCloseTo(kontanter - lonn + k.billetter, 0)
     expect(k.marked.map((p) => p.id)).not.toEqual(marked)
@@ -122,6 +124,10 @@ describe('klubben', () => {
     expect(k.lag.every((l) => l.spilt === 0)).toBe(true)
     expect(k.spillere.find((p) => p.alder === alder + 1) ?? k.spillere.length).toBeTruthy()
     expect(k.sponsor).toBe(DIVISJONER[1].sponsor)
+    // Pakke 86: den siste kampen spilles fortsatt — prestasjonene venter til den er ferdig.
+    sjekkPrestasjoner(s)
+    expect(s.prestasjoner.opprykk).toBeUndefined()
+    klubbVedDagsskifte(s)
     sjekkPrestasjoner(s)
     expect(s.prestasjoner.opprykk).toBeDefined()
     expect(s.prestasjoner.seriemester).toBeDefined()

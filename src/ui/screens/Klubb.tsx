@@ -70,6 +70,7 @@ import { useVoksUt } from '../overgang'
 import { kampnokkel, klubbmerker, merkSett, nytt, startMerker, useKlubbmerker, type Klubbmerker } from '../klubbsett'
 import { dagnummer } from '../../engine/kalender'
 import { VAERTYPER } from '../../engine/verden'
+import { kampminutt, liveKamper, stilling, visKlubb, type Visningsklubb } from '../klubblive'
 
 /**
  * Klubb-delen i Luksus (Pakke 62): klubben din rett i delen — et nav med
@@ -77,7 +78,8 @@ import { VAERTYPER } from '../../engine/verden'
  * har vært høy nok.
  */
 export function Klubbdel({ s }: { s: Spilltilstand }) {
-  if (s.klubb) return <Klubbside s={s} k={s.klubb} />
+  // Pakke 86: sidene viser klubben slik den var før dagens kamp, til fløyta går.
+  if (s.klubb) return <Klubbside s={s} k={visKlubb(s, s.klubb)} />
   if (s.hoyesteFormue < KLUBB_LAAST_OPP) {
     return (
       <div className="kort klubbkort">
@@ -158,11 +160,13 @@ function Klubbside({ s, k }: { s: Spilltilstand; k: KlubbT }) {
     <>
       <Klubbtopp s={s} k={k} profil={profil} />
 
+      <Livekort s={s} />
+
       {neste && (
         <div className="kort nestekamp">
           <h2 className="kort-tittel">Neste kamp · om {varighet(tidTilNesteRunde(s))}</h2>
           <Kampoppsett s={s} k={k} profil={profil} motstander={neste.motstander.navn} motStyrke={neste.motstander.styrke} hjemme={neste.hjemme} />
-          <Turneringslinjer k={k} />
+          <Turneringslinjer s={s} k={k} />
           <h3 className="etikett">Formasjon</h3>
           <div className="segment" role="radiogroup" aria-label="Formasjon">
             {FORMASJONSLISTE.map((f) => (
@@ -217,9 +221,7 @@ function Klubbtopp({ s, k, profil }: { s: Spilltilstand; k: KlubbT; profil: Lagp
       <div className="klubbtall">
         <div>
           <span className="etikett">Plass</span>
-          <strong>
-            {plassering(k)} / {ANTALL_LAG}
-          </strong>
+          <strong>{(k as Visningsklubb).tabellVenter ? '–' : `${plassering(k)} / ${ANTALL_LAG}`}</strong>
         </div>
         <div>
           <span className="etikett">Angrep · forsvar</span>
@@ -239,9 +241,16 @@ function Klubbtopp({ s, k, profil }: { s: Spilltilstand; k: KlubbT; profil: Lagp
 }
 
 /** Cupen og Europa som én linje hver i neste kamp, når du er med (Pakke 77). */
-function Turneringslinjer({ k }: { k: KlubbT }) {
+function Turneringslinjer({ s, k }: { s: Spilltilstand; k: KlubbT }) {
   const linjer: { turnering: Turnering; tekst: string }[] = []
+  const live = liveKamper(s)
   for (const turnering of ['cup', 'europa'] as const) {
+    // Pakke 86: en turneringskamp som spilles nå, sier ingenting om hvordan det gikk.
+    const naa = live.find((m) => m.turnering === turnering)
+    if (naa) {
+      linjer.push({ turnering, tekst: `${(turnering === 'cup' ? CUPRUNDER : EUROPARUNDER)[naa.runde]} mot ${naa.motstander} spilles nå` })
+      continue
+    }
     const u = k[turnering]
     if (!u || u.ute) continue
     const runder = turnering === 'cup' ? CUPRUNDER : EUROPARUNDER
@@ -353,6 +362,7 @@ function Tabell({ k, rader, start }: { k: KlubbT; rader: number[]; start: number
 
 /** Fem rader av tabellen med deg i midten — øverst og nederst så nær som det går (Pakke 77). */
 function Minitabell({ k }: { k: KlubbT }) {
+  if ((k as Visningsklubb).tabellVenter) return <Tabellventer />
   const rekke = tabell(k)
   const din = rekke.indexOf(0)
   const fra = Math.max(0, Math.min(din - 2, rekke.length - MINITABELL))
@@ -455,8 +465,8 @@ export function Klubbdetalj({ s, k, side, tilbake }: { s: Spilltilstand; k: Klub
       {side === 'kamper' && (
         <>
           {k.kamper.length > 0 && <Kamprapport kamp={k.kamper[k.kamper.length - 1]} k={k} ny={ny.kamp} />}
-          {k.cup && <Turneringskort k={k} u={k.cup} turnering="cup" />}
-          {k.europa && <Turneringskort k={k} u={k.europa} turnering="europa" />}
+          {k.cup && <Turneringskort k={k} u={k.cup} turnering="cup" live={liveKamper(s).find((m) => m.turnering === 'cup')} />}
+          {k.europa && <Turneringskort k={k} u={k.europa} turnering="europa" live={liveKamper(s).find((m) => m.turnering === 'europa')} />}
           {k.kamper.length > 0 && <Formliste k={k} />}
           <Tabellkort k={k} />
           <Toppscorerkort k={k} />
@@ -520,7 +530,18 @@ function Formliste({ k }: { k: KlubbT }) {
 }
 
 /** Den hele tabellen med strekene for opp- og nedrykk og én linje om dem (Pakke 78). */
+/** Siste serierunde spilles, og sesongen er alt gjort opp: tabellen kommer etter kampen (Pakke 86). */
+function Tabellventer() {
+  return (
+    <div className="kort">
+      <h2 className="kort-tittel">Tabell</h2>
+      <p className="dempet liten">Siste serierunde spilles nå. Tabellen står her når kampen er ferdig.</p>
+    </div>
+  )
+}
+
 function Tabellkort({ k }: { k: KlubbT }) {
+  if ((k as Visningsklubb).tabellVenter) return <Tabellventer />
   const sperret = k.divisjon < DIVISJONER.length - 1 && !oppfyllerKrav(k, k.divisjon + 1)
   const opp = k.divisjon < DIVISJONER.length - 1 ? `Over grønn strek: opp til ${DIVISJONER[k.divisjon + 1].navn}${sperret ? ' — men ikke du, før stadion holder kravet' : ''}.` : ''
   const ned = k.divisjon > 0 ? 'Under rød: ned.' : ''
@@ -568,6 +589,7 @@ function Troppkort({ s, k }: { s: Spilltilstand; k: KlubbT }) {
               <Potensial p={p} />
               <Sesongtall p={p} />
             </span>
+            <Vurderingskurve verdier={p.sesong?.vurderinger ?? []} />
             <Bekreftknapp
               className="knapp knapp-liten"
               ja="Ja, selg"
@@ -892,7 +914,21 @@ function Kamprapport({ kamp, k, ny }: { kamp: Kamp; k: KlubbT; ny: boolean }) {
       )}
       {beste && (
         <p className="liten">
-          Banens beste: <strong>{beste.navn}</strong> ({tall(beste.vurdering, 1)})
+          {kamp.motBeste && kamp.motBeste.vurdering > beste.vurdering ? (
+            <>
+              Banens beste: <strong>{kamp.motBeste.navn}</strong> ({kamp.motstander}, {tall(kamp.motBeste.vurdering, 1)}) · best hos {k.navn}: {beste.navn} ({tall(beste.vurdering, 1)})
+            </>
+          ) : (
+            <>
+              Banens beste: <strong>{beste.navn}</strong> ({tall(beste.vurdering, 1)})
+              {kamp.motBeste && (
+                <span className="dempet">
+                  {' '}
+                  · best hos {kamp.motstander}: {kamp.motBeste.navn} ({tall(kamp.motBeste.vurdering, 1)})
+                </span>
+              )}
+            </>
+          )}
         </p>
       )}
       {vurderinger && (
@@ -1055,6 +1091,76 @@ function Sesongkort({ k, ny }: { k: KlubbT; ny: boolean }) {
 }
 
 /** «3 mål · 1 assist · snitt 7,1» denne sesongen (Pakke 72). */
+/**
+ * Vurderingene denne sesongen som en liten kurve (Pakke 86), på en fast skala 4–10 med
+ * en strek ved 6 (en vanlig kamp), så formen vises uten et tall.
+ */
+function Vurderingskurve({ verdier }: { verdier: number[] }) {
+  if (verdier.length < 2) return null
+  const B = 120
+  const H = 28
+  const y = (v: number) => H - 2 - ((v - 4) / 6) * (H - 4)
+  const punkter = verdier.map((v, i) => `${((i / (verdier.length - 1)) * (B - 4) + 2).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+  return (
+    <svg className="vurderingskurve" width={B} height={H} viewBox={`0 0 ${B} ${H}`} role="img" aria-label={`Vurderinger denne sesongen: ${verdier.map((v) => tall(v, 1)).join(', ')}`}>
+      <line x1="0" x2={B} y1={y(6)} y2={y(6)} className="vurderingskurve-strek" />
+      <polyline points={punkter} className="vurderingskurve-linje" />
+      <circle cx={B - 2} cy={y(verdier[verdier.length - 1])} r="2.5" className="vurderingskurve-siste" />
+    </svg>
+  )
+}
+
+/**
+ * Kampen som spilles nå (Pakke 86): minuttet, stillingen og målene så langt. Avgjort
+ * ved dagsskiftet; her vises den i takt med dagen, 300 s for 90 minutter.
+ */
+function Livekort({ s }: { s: Spilltilstand }) {
+  const kamper = liveKamper(s)
+  const k = s.klubb
+  if (!k || kamper.length === 0) return null
+  const minutt = kampminutt(s.sek)
+  return (
+    <div className="kort livekamp">
+      {kamper.map((m) => {
+        const st = stilling(m, minutt)
+        const hjemmelag = m.hjemme ? k.navn : m.motstander
+        const bortelag = m.hjemme ? m.motstander : k.navn
+        return (
+          <div key={`${m.turnering ?? 'serie'}-${m.runde}`} className="livekamp-kamp">
+            <div className="maal-topp">
+              <h2 className="kort-tittel">
+                {m.turnering === 'cup' ? 'Cupen' : m.turnering === 'europa' ? 'Europa' : 'Kampen'} nå <span className="merke gull">{minutt}'</span>
+              </h2>
+              <span className="dempet liten">{m.hjemme ? 'hjemme' : 'borte'}</span>
+            </div>
+            <p className="rapport-resultat">
+              <strong>
+                {hjemmelag} {m.hjemme ? st.for : st.mot}–{m.hjemme ? st.mot : st.for} {bortelag}
+              </strong>
+            </p>
+            <div className="milepael-spor" aria-hidden="true">
+              <div className="milepael-fyll" style={{ width: `${(minutt / 90) * 100}%` }} />
+            </div>
+            {st.maal.length > 0 ? (
+              <ul className="rapport-maal">
+                {st.maal.map((x, i) => (
+                  <li key={i} className={x.mot ? 'mot' : 'egne'}>
+                    <span className="rapport-minutt">{x.minutt}'</span>
+                    <span>{x.navn}</span>
+                    <span className="dempet liten">{x.mot ? m.motstander : k.navn}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="dempet liten">Ingen mål ennå.</p>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function Sesongtall({ p }: { p: Spiller }) {
   const st = p.sesong
   const snitt = snittvurdering(st)
@@ -1071,11 +1177,25 @@ function Sesongtall({ p }: { p: Spiller }) {
  * Cupen og Europa (Pakke 73): hvor langt du er og neste motstander i én linje,
  * og rundene du har spilt som brikker (Pakke 78). Premiene står bak «?».
  */
-function Turneringskort({ k, u, turnering }: { k: KlubbT; u: Utslag; turnering: Turnering }) {
+function Turneringskort({ k, u, turnering, live }: { k: KlubbT; u: Utslag; turnering: Turnering; live?: Kamp }) {
   const runder = turnering === 'cup' ? CUPRUNDER : EUROPARUNDER
   const dager = turnering === 'cup' ? CUPDAGER : EUROPADAGER
   const neste = nesteUtslagskamp(u)
   const mester = !u.ute && u.lag.length === 1 && !!u.lag[0].deg
+  // Pakke 86: kampen som spilles nå, avslører ikke om du gikk videre.
+  if (live) {
+    return (
+      <div className="kort">
+        <div className="maal-topp">
+          <h2 className="kort-tittel">{turnering === 'cup' ? 'Cupen' : 'Europa'}</h2>
+          <span className="dempet liten">{runder[live.runde]} · spilles nå</span>
+        </div>
+        <p className="liten">
+          {runder[live.runde]} mot <strong>{live.motstander}</strong> spilles nå. Resultatet står på Klubb.
+        </p>
+      </div>
+    )
+  }
   const dag = dager[u.runde]
   const spilt = k.kamper.filter((m) => m.turnering === turnering && m.sesong === u.sesong)
   return (

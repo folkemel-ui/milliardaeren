@@ -156,6 +156,11 @@ export default function App() {
           visVarsel({ type: ALVOR[f.hendelse.alvor], tittel: f.hendelse.tittel, tekst: f.hendelse.tekst, mål: HENDELSE_FANE[f.hendelse.tittel] ?? 'hendelser' })
         } else if (f.type === 'prestasjon') {
           visVarsel({ type: 'god', tittel: `${f.skjult ? 'Skjult prestasjon' : 'Prestasjon'}: ${f.navn}`, mål: 'profil' })
+        } else if (f.type === 'maal') {
+          // Står kampen på skjermen, er varselet overflødig (Pakke 86).
+          if (!document.querySelector('.livekamp')) visVarsel({ type: f.egne ? 'god' : 'advarsel', tittel: f.tittel, tekst: f.tekst, mål: 'klubb' })
+        } else if (f.type === 'slutt') {
+          visVarsel({ type: 'god', tittel: f.tittel, tekst: f.tekst, mål: 'klubb' })
         } else if (f.type === 'fane') {
           visVarsel({ type: 'god', tittel: `Ny fane: ${FANER.find((x) => x.id === f.fane)!.navn}`, tekst: FANE_INNHOLD[f.fane], mål: f.fane })
         }

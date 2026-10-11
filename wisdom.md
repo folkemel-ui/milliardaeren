@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 85, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 86, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,17 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **The live match (Pack 86) is a display rule, not an engine change.** A match is still decided at
+  the day change (`kamp.dag` = the new day); `ui/klubblive.ts` shows it over that day and `visKlubb(s, k)`
+  gives the club pages a copy without it — the table undone from `k.sisteRunde`, players' numbers,
+  `seire`, opponents' scorers, and at a season's last round the old season with `tabellVenter`. Both
+  entry points (`Klubbdel`, Luksus → `Klubbdetalj`) pass the copy; actions still use the real `s`.
+  **Anything new that shows a result must go through it**, and anything the engine announces must
+  wait: the club's Avisa stories go to `k.ventendeSaker`, result events (`Trofé`, `Opprykk`, `Nedrykk`,
+  `Nektet opprykk`) to `k.ventendeHendelser`, and club achievements read `k.synlig` (a snapshot taken
+  at the start of each day change; `synligeTrofeer(s)` for the trophy list). There is a league match
+  every game day, so «nothing while a match is live» would mean never — snapshot per day instead.
+  Tests that read a club story, event or achievement right after `klubbVedDagsskifte` need one more.
 - **Check an idea's premise on exact odds before building it** (Pack 85): «give opponents an attack
   and a defence so the tactic matters» would have changed the right tactic in 2–4 % of matches if the
   one number were just split, because the tactics multiply goals the same way whoever attacks. A

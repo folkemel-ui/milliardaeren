@@ -859,6 +859,34 @@
   padding: 0 0 10px 40px;
 }
 
+/* Pakke 86: vurderingene denne sesongen som en kurve, med en strek ved 6. */
+.vurderingskurve-strek {
+  stroke: var(--kant);
+  stroke-dasharray: 2 3;
+}
+
+.vurderingskurve-linje {
+  fill: none;
+  stroke: var(--gull);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.vurderingskurve-siste {
+  fill: var(--gull);
+}
+
+/* Pakke 86: kampen som spilles nå. To kamper samme dag (serie og cup) står under hverandre. */
+.livekamp-kamp + .livekamp-kamp {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--kant);
+}
+
+.livekamp .milepael-spor {
+  margin: 4px 0 8px;
+}
+
 /* Markedet: prisen som et tall, kjøpet som én knapp. */
 .spillerliste.marked li {
   grid-template-columns: auto minmax(0, 1fr) auto auto;

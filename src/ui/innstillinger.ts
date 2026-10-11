@@ -66,7 +66,8 @@ export const lesVarsler = (): Varselnivaa => varsler
 export function vises(f: Nytt, nivaa: Varselnivaa = varsler): boolean {
   if (nivaa === 'av') return false
   if (nivaa === 'alle') return true
-  return f.type === 'fane' || (f.type === 'hendelse' && f.hendelse.alvor !== 'info')
+  // Fløyta i din kamp er viktig; målene underveis bare med «Alle» (Pakke 86).
+  return f.type === 'fane' || f.type === 'slutt' || (f.type === 'hendelse' && f.hendelse.alvor !== 'info')
 }
 
 /** Skal bevegelsen dempes — fordi du har valgt det her, eller fordi systemet ber om det? */

@@ -166,6 +166,9 @@ describe('lisenskravet', () => {
     klubbVedDagsskifte(s)
     expect(k.divisjon).toBe(1)
     expect(s.trofeer.at(-1)!.navn).toBe('Vinner av 3. divisjon')
+    // Pakke 86: hendelsen venter til den siste kampen er ferdig, ved neste dagsskifte.
+    expect(s.hendelser.some((h) => h.tittel === 'Nektet opprykk')).toBe(false)
+    klubbVedDagsskifte(s)
     const nektet = s.hendelser.find((h) => h.tittel === 'Nektet opprykk')!
     const gikkOpp = k.serier[2].map((m) => m.navn).filter((n) => gamle.includes(n))
     expect(gikkOpp).toHaveLength(2)

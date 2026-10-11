@@ -35,6 +35,7 @@ import { NyMerke } from '../komponenter/Kjopsglimt'
 import { Ikon, type Ikonnavn } from '../komponenter/Ikoner'
 import { useTilbake } from '../tilbake'
 import { LUKSUSDELER, luksusdel } from '../deler'
+import { visKlubb } from '../klubblive'
 
 /** Prisrekkefølge: lista over det som er til salgs, og klokkene, starter med det billigste. */
 const etterPris = (a: LuksusId, b: LuksusId) => LUKSUS[a].pris - LUKSUS[b].pris
@@ -57,7 +58,7 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   const klubbAapen = klubbside !== null && del === 'klubb' && !!s.klubb
   useTilbake(klubbAapen, () => aapneKlubbside(null))
   if (ting && egenTing) return <Tingdetalj s={s} ting={ting} tilbake={() => aapneTing(null)} fane="Luksus" />
-  if (klubbAapen) return <Klubbdetalj s={s} k={s.klubb!} side={klubbside} tilbake={() => aapneKlubbside(null)} />
+  if (klubbAapen) return <Klubbdetalj s={s} k={visKlubb(s, s.klubb!)} side={klubbside} tilbake={() => aapneKlubbside(null)} />
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>

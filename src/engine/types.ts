@@ -766,6 +766,21 @@ export interface Kamp {
   turnering?: Turnering
   /** Avgjort på straffer: hvem som gikk videre. */
   straffer?: 'deg' | 'dem'
+  /**
+   * Spilldagen kampen spilles i (Pakke 86): avgjort ved dagsskiftet som starter den,
+   * vist direkte gjennom dagen, ferdig ved neste dagsskifte. Mangler i gamle kamper.
+   */
+  dag?: number
+  /** Motstanderens beste spiller og vurderingen (Pakke 86), så rapporten forteller begge halvdeler. */
+  motBeste?: { navn: string; vurdering: number }
+}
+
+/** Et resultat i runden, til tabellen som vises før din kamp er ferdig (Pakke 86). */
+export interface Runderesultat {
+  hjemme: string
+  borte: string
+  mh: number
+  mb: number
 }
 
 export type Turnering = 'cup' | 'europa'
@@ -791,6 +806,8 @@ export interface Spillerstatistikk {
   assist: number
   /** Summen av vurderingene; snittet er sum / kamper. */
   sum: number
+  /** Hver kamps vurdering denne sesongen, i rekkefølge (Pakke 86) — til kurven. Bare på `sesong`. */
+  vurderinger?: number[]
 }
 
 /** Sesongen som var (Pakke 72), skrevet ved sesongslutt. */
@@ -862,6 +879,15 @@ export interface Klubb {
   /** Tellere til prestasjonene. */
   seire: number
   opprykk: number
+  /**
+   * Pakke 86: kampen spilles direkte gjennom dagen etter at den er avgjort. Rundens
+   * resultater (så tabellen kan vises som før runden), det du har sett av tellerne til
+   * prestasjonene, og klubbens saker og hendelser som venter til kampen er ferdig.
+   */
+  sisteRunde?: { dag: number; kamper: Runderesultat[] }
+  synlig?: { seire: number; opprykk: number; trofeer: number; europa: boolean }
+  ventendeSaker?: Overskrift[]
+  ventendeHendelser?: Omit<Hendelse, 'sek'>[]
   stadion: Stadionstand
   /**
    * Lagene i hver divisjon, 0–4 (Pakke 66). Din egen divisjon står tom — de

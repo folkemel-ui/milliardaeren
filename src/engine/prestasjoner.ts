@@ -19,6 +19,13 @@ import { DAG_SEK } from './kalender'
 /** Statusnivået som heter Udødelig: prestasjonen står der den sto da det var det høyeste (Pakke 81). */
 const UDODELIG = STATUSNIVAAER.findIndex((n) => n.navn === 'Udødelig')
 
+/** Trofeene du har sett vunnet: de fra kampen som spilles nå, venter til den er ferdig (Pakke 86). */
+export function synligeTrofeer(s: Spilltilstand): NonNullable<Spilltilstand['trofeer']> {
+  const alle = s.trofeer ?? []
+  const n = s.klubb?.synlig?.trofeer
+  return n === undefined ? alle : alle.slice(0, n)
+}
+
 /** «Kontrær»: et kjøp til høyst så stor andel av toppen de siste to timene. */
 export const KONTRAER_ANDEL = 0.8
 
@@ -126,14 +133,15 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'mesen', navn: 'Mesen', beskrivelse: 'Lån ut et maleri til et museum', klart: (s) => harUtlant(s) },
   { id: 'fusjon', navn: 'Fusjonist', beskrivelse: 'Slå sammen en rivals bedrift med din egen', klart: (s) => s.bedrifter.some((b) => (b.fusjoner ?? 0) > 0) },
   { id: 'klubbeier', navn: 'Klubbeier', beskrivelse: 'Kjøp en fotballklubb', klart: (s) => !!s.klubb },
-  { id: 'forste-seier', navn: 'Tre poeng', beskrivelse: 'Vinn din første kamp', klart: (s) => (s.klubb?.seire ?? 0) > 0 },
-  { id: 'opprykk', navn: 'Opprykk', beskrivelse: 'Rykk opp en divisjon', klart: (s) => (s.klubb?.opprykk ?? 0) > 0 },
-  { id: 'seriemester', navn: 'Seriemester', beskrivelse: 'Vinn en serie', klart: (s) => (s.trofeer?.length ?? 0) > 0 },
-  { id: 'eliteserie-gull', navn: 'Gull i Eliteserien', beskrivelse: 'Vinn Eliteserien', klart: (s) => (s.trofeer ?? []).some((t) => t.navn.includes('Eliteserien')) },
+  // Pakke 86: klubbens prestasjoner ser bare det som er spilt ferdig — kampen som går nå, venter.
+  { id: 'forste-seier', navn: 'Tre poeng', beskrivelse: 'Vinn din første kamp', klart: (s) => (s.klubb?.synlig?.seire ?? s.klubb?.seire ?? 0) > 0 },
+  { id: 'opprykk', navn: 'Opprykk', beskrivelse: 'Rykk opp en divisjon', klart: (s) => (s.klubb?.synlig?.opprykk ?? s.klubb?.opprykk ?? 0) > 0 },
+  { id: 'seriemester', navn: 'Seriemester', beskrivelse: 'Vinn en serie', klart: (s) => synligeTrofeer(s).length > 0 },
+  { id: 'eliteserie-gull', navn: 'Gull i Eliteserien', beskrivelse: 'Vinn Eliteserien', klart: (s) => synligeTrofeer(s).some((t) => t.navn.includes('Eliteserien')) },
   // Pakke 73: cupen og Europa.
-  { id: 'cupmester', navn: 'Cupmester', beskrivelse: 'Vinn cupen', klart: (s) => (s.trofeer ?? []).some((t) => t.navn === 'Cupmester') },
-  { id: 'europa', navn: 'Ut i Europa', beskrivelse: 'Spill en kamp i Europa', klart: (s) => !!s.klubb?.europa && (s.klubb.europa.runde > 0 || s.klubb.europa.ute) },
-  { id: 'europamester', navn: 'Europamester', beskrivelse: 'Vinn Europa', klart: (s) => (s.trofeer ?? []).some((t) => t.navn === 'Europamester') },
+  { id: 'cupmester', navn: 'Cupmester', beskrivelse: 'Vinn cupen', klart: (s) => synligeTrofeer(s).some((t) => t.navn === 'Cupmester') },
+  { id: 'europa', navn: 'Ut i Europa', beskrivelse: 'Spill en kamp i Europa', klart: (s) => (s.klubb?.synlig ? s.klubb.synlig.europa : !!s.klubb?.europa && (s.klubb.europa.runde > 0 || s.klubb.europa.ute)) },
+  { id: 'europamester', navn: 'Europamester', beskrivelse: 'Vinn Europa', klart: (s) => synligeTrofeer(s).some((t) => t.navn === 'Europamester') },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
   { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
   // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.
