@@ -27,7 +27,7 @@ import { selskapsverdi } from './rivaler'
 import { flyt, trekkFraSparing } from './portefolje'
 import { DAG_SEK } from './kalender'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LUKSUS, restverdi } from './eiendom'
-import { BEDRIFTSTYPER, MAKS_BELAANING, MAKS_HENDELSER, MARGINKRAV, TVANGSSALG_ANDEL } from './innhold'
+import { BEDRIFTSTYPER, MAKS_HENDELSER, MARGIN_MAAL, MARGINKRAV, TVANGSSALG_ANDEL } from './innhold'
 import { PAPIRER } from './marked'
 import type { Hendelse, PapirId, Spilltilstand } from './types'
 
@@ -116,14 +116,14 @@ export function sjekkMargin(s: Spilltilstand): void {
     (a, b) => s.beholdning[b]!.antall * s.marked.kurser[b].kurs - s.beholdning[a]!.antall * s.marked.kurser[a].kurs,
   )
   for (const id of poster) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     utforSalg(s, id, s.beholdning[id]!.antall)
     nedbetalMed(s, s.kontanter)
     solgt.push(PAPIRER[id].navn)
   }
   // Så fondene.
   for (const id of FONDLISTE) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     if (!s.fond?.[id]) continue
     utforFondssalg(s, id)
     nedbetalMed(s, s.kontanter)
@@ -131,7 +131,7 @@ export function sjekkMargin(s: Spilltilstand): void {
   }
   // Så obligasjonene (Pakke 53).
   for (const id of OBLIGASJONSLISTE) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     if (!s.obligasjoner?.[id]) continue
     utforObligasjonssalg(s, id)
     nedbetalMed(s, s.kontanter)
@@ -139,14 +139,14 @@ export function sjekkMargin(s: Spilltilstand): void {
   }
   // Så eierandeler i rivalselskaper, den største først.
   for (const r of [...(s.rivaler ?? [])].filter((x) => x.andel > 0).sort((a, b) => b.andel * selskapsverdi(b) - a.andel * selskapsverdi(a))) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     utforRivalsalg(s, r.id)
     nedbetalMed(s, s.kontanter)
     solgt.push(`andelen i ${r.selskap}`)
   }
   // Så eiendom, den dyreste først, én og én.
   for (const id of [...EIENDOMSSTIGEN].reverse()) {
-    while ((s.eiendommer[id] ?? 0) > 0 && belaaningsgrad(s) > MAKS_BELAANING) {
+    while ((s.eiendommer[id] ?? 0) > 0 && belaaningsgrad(s) > MARGIN_MAAL) {
       utforEiendomssalg(s, id)
       nedbetalMed(s, s.kontanter)
       solgt.push(EIENDOMSTYPER[id].navn.toLowerCase())
@@ -154,34 +154,34 @@ export function sjekkMargin(s: Spilltilstand): void {
   }
   // Så luksus, den mest verdifulle først.
   for (const id of [...s.luksus].sort((a, b) => restverdi(b) - restverdi(a))) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     utforLuksussalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(LUKSUS[id].navn.toLowerCase())
   }
   // Så gårder og skoger, den mest verdifulle først.
   for (const id of [...JORDLISTE].filter((x) => s.jord?.[x]).sort((a, b) => landverdi(s, b) + tommerverdi(s, b) - landverdi(s, a) - tommerverdi(s, a))) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     utforJordsalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(JORD[id].navn)
   }
   // Så landemerkene.
   for (const id of LANDEMERKELISTE.filter((x) => eierDu(s, x)).sort((a, b) => landemerkepris(s, b) - landemerkepris(s, a))) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     utforLandemerkesalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(LANDEMERKER[id].navn)
   }
   // Så kunsten — også maleriene som henger på museum.
   for (const id of mineMalerier(s).sort((a, b) => maleripris(s, b) - maleripris(s, a))) {
-    if (belaaningsgrad(s) <= MAKS_BELAANING) break
+    if (belaaningsgrad(s) <= MARGIN_MAAL) break
     utforMalerisalg(s, id)
     nedbetalMed(s, s.kontanter)
     solgt.push(`«${MALERIER[id].navn}»`)
   }
   // Så klubben.
-  if (s.klubb && belaaningsgrad(s) > MAKS_BELAANING) {
+  if (s.klubb && belaaningsgrad(s) > MARGIN_MAAL) {
     const navn = s.klubb.navn
     utforKlubbsalg(s)
     nedbetalMed(s, s.kontanter)

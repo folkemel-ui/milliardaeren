@@ -4,9 +4,9 @@
  */
 
 import * as h from '../handlinger'
-import { maksLaanMotSikkerhet, maksNyttLaan } from '../formler'
+import { eiendeler, maksNyttLaan } from '../formler'
 import { nyttSpill } from '../start'
-import { STIGEN } from '../innhold'
+import { MARGIN_MAAL, STIGEN } from '../innhold'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER, LAGERLISTE, LUKSUSLISTE } from '../eiendom'
 import { MALERILISTE } from '../kunst'
 import { LANDEMERKELISTE } from '../landemerker'
@@ -31,9 +31,11 @@ export const maksNyttLaanFor = maksNyttLaan
 
 /**
  * Et lån uten inntektstaket, for tester av marginkrav og renter der
- * spilleren ikke har inntekt nok til å låne så mye på vanlig vis.
+ * spilleren ikke har inntekt nok til å låne så mye på vanlig vis. Uten beløp:
+ * til gjelden er halvparten av eiendelene (MARGIN_MAAL), som var lånegrensen
+ * før Pakke 81 — så et krakk i testene fortsatt når marginkravet.
  */
-export function laanUtenTak(s: Spilltilstand, belop = maksLaanMotSikkerhet(s)): Spilltilstand {
+export function laanUtenTak(s: Spilltilstand, belop = Math.max(0, Math.floor((MARGIN_MAAL * eiendeler(s) - s.gjeld) / (1 - MARGIN_MAAL)))): Spilltilstand {
   const n = structuredClone(s)
   n.kontanter += belop
   n.gjeld += belop

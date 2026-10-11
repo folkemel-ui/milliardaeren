@@ -4,7 +4,7 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, innred, kjopBedrift, kjopForbedring, kjopLandemerke, kjopLuksus, oppgrader, oppgraderFlere, utvidLager, velgRetning, type Utfall } from '../handlinger'
+import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, innred, kjopBedrift, kjopForbedring, kjopLandemerke, kjopLuksus, laan, oppgrader, oppgraderFlere, utvidLager, velgRetning, type Utfall } from '../handlinger'
 import { brukteplasser, LAGER, LAGER_FOR, LUKSUS, LUKSUSLISTE, START_LAGER, STATUS_INNTEKT, STATUSNIVAAER, statusnivaa, statuspoeng } from '../eiendom'
 import { HJEM, HJEMLISTE, hjemAapent, nesteTrinn } from '../hjemmene'
 import { eierDu, kjopsprisLandemerke, LANDEMERKELISTE, LANDEMERKER } from '../landemerker'
@@ -19,6 +19,7 @@ import {
   erLaastOpp,
   forbedringspris,
   maksAnsatte,
+  maksNyttLaan,
   nesteForbedring,
   nesteMilepael,
   oppgraderingspris,
@@ -228,6 +229,17 @@ export function botTrekk(s: Spilltilstand, smart = false): Spilltilstand {
     s = u.tilstand
   }
   return s
+}
+
+/**
+ * Låner så mye banken gir før trekket (Pakke 81): spilleren som låner maks før hvert
+ * kjøp. Balansebenken spiller en runde med den ved siden av den vanlige.
+ */
+export function laanMaks(s: Spilltilstand): Spilltilstand {
+  const m = maksNyttLaan(s)
+  if (m <= 0) return s
+  const u = laan(s, m)
+  return u.ok ? u.tilstand : s
 }
 
 /** Spiller `sekunder` sekunder, med et trekk hvert `hvert` sekund. */

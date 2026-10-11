@@ -11,7 +11,7 @@ import { Konjunkturkort } from '../../komponenter/Dagen'
 import { Obligasjoner } from '../../komponenter/Obligasjoner'
 import { datotekst } from '../../kalender'
 import { dagnummer } from '../../../engine/kalender'
-import { LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../../../engine/innhold'
+import { LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, RENTE_PER_TIME } from '../../../engine/innhold'
 import type { Spilltilstand } from '../../../engine/types'
 import { utfor } from '../../../state/lager'
 import { kortKroner, kroner, perSek, tall } from '../../format'
@@ -71,7 +71,7 @@ export function Bank({ s }: { s: Spilltilstand }) {
   const grad = belaaningsgrad(s)
   const tilgjengelig = maksNyttLaan(s)
   const kanBetale = Math.min(s.gjeld, s.kontanter)
-  const fare = grad > MARGINKRAV * 0.9 ? 'kritisk' : grad > MAKS_BELAANING ? 'advarsel' : ''
+  const fare = grad > MARGINKRAV * 0.9 ? 'kritisk' : grad > MARGIN_MAAL ? 'advarsel' : ''
 
   const fast = fastrente(s)
   return (

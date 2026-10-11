@@ -12,7 +12,7 @@ import { BINDING_DAGER, FAST_PAASLAG, FASER, NORMAL_STYRINGSRENTE, TREND } from 
 import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
-import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
+import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
 import { TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
@@ -106,7 +106,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `Den flytende renten følger styringsrenten: ${FASER.lav.styringsrente} % i lavkonjunktur, ${NORMAL_STYRINGSRENTE} % i normale tider og ${FASER.hoy.styringsrente} % i høykonjunktur. ` +
       `Du kan binde den i ${BINDING_DAGER} dager for ${tall(FAST_PAASLAG, 1)} prosentpoeng ekstra. Sparerenten følger styringsrenten den også. ` +
       `Stiger gjelden til ${pst(MARGINKRAV)} — for eksempel fordi kursene faller — kommer et marginkrav: banken selger av det du eier ` +
-      `til du er nede på ${pst(MAKS_BELAANING)} igjen, og holder ikke det, tar den bedrifter.`,
+      `til du er nede på ${pst(MARGIN_MAAL)} igjen, og holder ikke det, tar den bedrifter.`,
   },
   skatt: {
     tittel: 'Skatt og offshore',

@@ -52,10 +52,29 @@ export function oppkjopspris(r: Rival): number {
   return (1 - r.andel) * selskapsverdi(r) * (1 + OPPKJOPSPREMIE)
 }
 
+/**
+ * En rival som holder følge (Pakke 81). Marit Aas stoppet på 150 mrd, så du ledet
+ * alene fra ~10 mrd; nå vokser hun med 0,18 i timen mot et tak tjue ganger så høyt
+ * (3 000 mrd) og ligger rundt halvparten av deg hele veien (0,16 på papiret ga en firedel:
+ * svingningen og starten trekker ned). Tallene i lagringen står
+ * som før — løftet er her, så gamle lagringer får det uten ny versjon, og et tak som
+ * er krympet av et oppkjøp (fusjon.ts) krymper fortsatt.
+ */
+export const RIVALLOFT: Partial<Record<string, { vekst: number; takFaktor: number }>> = {
+  aas: { vekst: 0.18, takFaktor: 20 },
+}
+
+/** Rivalens vekst og tak i spillet, med løftet. */
+export function rivalvekst(r: Rival): { vekst: number; tak: number } {
+  const l = RIVALLOFT[r.id]
+  return l ? { vekst: l.vekst, tak: r.tak * l.takFaktor } : { vekst: r.vekst, tak: r.tak }
+}
+
 /** Rivalene vokser, med litt tilfeldig svingning. Muterer — brukes på kopier. dt i timer. */
 export function rivaltikk(s: Spilltilstand, t: Terning, dt: number): void {
   for (const r of s.rivaler) {
-    const rate = r.vekst * Math.max(0, 1 - r.formue / r.tak)
+    const { vekst, tak } = rivalvekst(r)
+    const rate = vekst * Math.max(0, 1 - r.formue / tak)
     const u = 1 - t.neste()
     const normal = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * t.neste())
     r.formue *= Math.exp(rate * dt + SVINGNING * Math.sqrt(dt) * normal)

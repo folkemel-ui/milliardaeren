@@ -98,6 +98,8 @@ export const TITLER = [
   'Næringslivsikonet',
   'Finansmonarken',
   'Den udødelige',
+  'Dynastigrunnleggeren',
+  'Den mytiske',
 ]
 
 export function tittel(s: Spilltilstand): string {

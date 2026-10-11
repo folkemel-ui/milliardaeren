@@ -231,8 +231,17 @@ export const BORTE_TAK_SEK = 2 * 60 * 60
  * bare lønner seg for de beste kjøpene — ikke for alt.
  */
 export const RENTE_PER_TIME = 0.08
-/** Du kan låne til gjelden er så stor andel av alt du eier … */
-export const MAKS_BELAANING = 0.5
+/**
+ * Du kan låne til gjelden er så stor andel av alt du eier … 0,2 fra Pakke 81: med 0,5
+ * nådde en spiller som lånte maks før hvert kjøp milliarden på 3 t 28 og 1 000 mrd på
+ * 27 t (uten lån 5 t 07 og 34 t); med 0,2 tar det 4 t 32 og 30 t.
+ */
+export const MAKS_BELAANING = 0.2
+/**
+ * Et marginkrav selger til gjelden er nede på så stor andel igjen. Står på 0,5 som
+ * før Pakke 81, så ingen lagring får et hardere tvangssalg av at lånegrensen ble lavere.
+ */
+export const MARGIN_MAAL = 0.5
 /**
  * … og aldri mer enn så mange timer av inntekten din (1 fra Pakke 67: med 2
  * lønte det seg alltid å låne til taket). Et lån over taket står; du kan bare

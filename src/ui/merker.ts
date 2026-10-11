@@ -42,6 +42,7 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   rikmann: { ikon: 'stjerne', grad: 'solv' },
   legende: { ikon: 'stjerne', grad: 'gull' },
   udodelig: { ikon: 'krone', grad: 'gull' },
+  mytisk: { ikon: 'stjerne', grad: 'gull' },
   utenlands: { ikon: 'fly', grad: 'solv' },
   verdensborger: { ikon: 'globus', grad: 'gull' },
   jordeier: { ikon: 'aks', grad: 'solv' },

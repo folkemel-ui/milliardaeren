@@ -5,7 +5,7 @@ import { kjopPapir, laan, nedbetal, selgPapir } from '../handlinger'
 import { belaaningsgrad, maksKjop, maksNyttLaan, nettoformue, papirverdi } from '../formler'
 import { AKSJER, KRYPTO, lagMarked, MAKS_KURSHISTORIKK, PAPIRER } from '../marked'
 import { DAG_SEK } from '../kalender'
-import { MAKS_BELAANING, MARGINKRAV, RENTE_PER_TIME } from '../innhold'
+import { MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, RENTE_PER_TIME } from '../innhold'
 import type { PapirId, Spilltilstand } from '../types'
 import { bedrift, laanUtenTak } from './hjelp'
 
@@ -124,7 +124,7 @@ describe('banken', () => {
     const etter = simuler(s, 1)
     expect(etter.beholdning.LKS).toBeUndefined()
     expect(etter.hendelser.some((h) => h.tittel === 'Marginkrav')).toBe(true)
-    expect(belaaningsgrad(etter)).toBeLessThanOrEqual(MAKS_BELAANING)
+    expect(belaaningsgrad(etter)).toBeLessThanOrEqual(MARGIN_MAAL)
   })
 
   it('er du blakk etter salget, står gjelden igjen og du beholder bedriften', () => {

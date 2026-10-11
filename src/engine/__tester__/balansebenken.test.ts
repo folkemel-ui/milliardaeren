@@ -14,9 +14,10 @@
 
 import { describe, expect, it } from 'vitest'
 import { nyttSpill } from '../start'
-import { nettoformue } from '../formler'
+import { belaaningsgrad, nettoformue } from '../formler'
+import { simuler } from '../simulering'
 import { varighet } from '../../ui/format'
-import { botSpill } from './bot'
+import { botSpill, botTrekk, laanMaks } from './bot'
 import type { Spilltilstand } from '../types'
 
 const LANG = Boolean(process.env.BENK)
@@ -61,6 +62,33 @@ describe('balansebenken', () => {
 
     // Første million skal ta minst en halvtime aktiv spilling, og milliarden skal kunne nås.
     expect(naadd[1e6]).toBeGreaterThan(30 * 60)
+    expect(naadd[1e9]).toBeDefined()
+  })
+})
+
+/**
+ * Pakke 81: den samme boten, men den låner så mye banken gir før hvert trekk. Bare
+ * med BENK — tallene skal vise hvor mye raskere en spiller som låner til taket går.
+ */
+describe.runIf(LANG)('balansebenken med lån', () => {
+  it('boten som låner maks', { timeout: 3_600_000 }, async () => {
+    const naadd: Record<number, number> = {}
+    const gjeld: Record<number, number> = {}
+    const siste = MAAL[MAAL.length - 1]
+    let s = nyttSpill()
+    while (s.sek < MAKS_SEK && naadd[siste] === undefined) {
+      for (let i = 0; i < 360; i++) {
+        s = simuler(botTrekk(laanMaks(s), true), 10)
+        const f = nettoformue(s)
+        for (const m of MAAL) {
+          if (naadd[m] !== undefined || f < m) continue
+          naadd[m] = s.sek
+          gjeld[m] = belaaningsgrad(s)
+        }
+      }
+      await new Promise((r) => setTimeout(r, 0))
+    }
+    console.table(MAAL.map((m) => ({ formue: m.toLocaleString('nb-NO'), tid: naadd[m] ? varighet(naadd[m]) : '—', 'gjeld / eiendeler': gjeld[m] !== undefined ? `${Math.round(gjeld[m] * 100)} %` : '' })))
     expect(naadd[1e9]).toBeDefined()
   })
 })

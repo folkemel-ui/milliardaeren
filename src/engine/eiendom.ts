@@ -463,6 +463,9 @@ export const STATUSNIVAAER: { poeng: number; navn: string }[] = [
   { poeng: 500, navn: 'Ikon' },
   { poeng: 700, navn: 'Monark' },
   { poeng: 1000, navn: 'Udødelig' },
+  // Pakke 81: to til, så de fjerde romtrinnene, klubben og premium har noe å nå.
+  { poeng: 1200, navn: 'Dynasti' },
+  { poeng: 1400, navn: 'Mytisk' },
 ]
 
 /** Hvert statusnivå gir så mye mer inntekt fra bedriftene … */

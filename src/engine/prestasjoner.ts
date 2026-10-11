@@ -16,6 +16,9 @@ import { STIGEN } from './innhold'
 import { LUKSUSLISTE } from './eiendom'
 import { DAG_SEK } from './kalender'
 
+/** Statusnivået som heter Udødelig: prestasjonen står der den sto da det var det høyeste (Pakke 81). */
+const UDODELIG = STATUSNIVAAER.findIndex((n) => n.navn === 'Udødelig')
+
 /** «Kontrær»: et kjøp til høyst så stor andel av toppen de siste to timene. */
 export const KONTRAER_ANDEL = 0.8
 
@@ -111,7 +114,8 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'litt-luksus', navn: 'Litt luksus', beskrivelse: 'Kjøp noe du ikke trenger', klart: (s) => s.luksus.length >= 1 },
   { id: 'rikmann', navn: 'Rikmann', beskrivelse: 'Nå statusnivå 4', klart: (_, f) => f.status() >= 4 },
   { id: 'legende', navn: 'Legende', beskrivelse: 'Nå statusnivået Legende', klart: (_, f) => f.status() >= 7 },
-  { id: 'udodelig', navn: 'Udødelig', beskrivelse: 'Nå høyeste statusnivå', klart: (_, f) => f.status() >= STATUSNIVAAER.length - 1 },
+  { id: 'udodelig', navn: 'Udødelig', beskrivelse: 'Nå statusnivået Udødelig', klart: (_, f) => f.status() >= UDODELIG },
+  { id: 'mytisk', navn: 'Mytisk', beskrivelse: 'Nå det høyeste statusnivået', klart: (_, f) => f.status() >= STATUSNIVAAER.length - 1 },
   { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', klart: (_, f) => f.byerUtenlands().size >= 1 },
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (_, f) => f.byerUtenlands().size >= UTENLANDSBYER.length },
   { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },

@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 80, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 81, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -499,6 +499,20 @@ session; delete what stops being true.
   1 mrd 5 h 07, 10 mrd 11 h 28, 100 mrd 22 h 09, 1 000 mrd 34 h 05** (×1.5 at 35 gave 35 h 03).
   The golden master did not move: its simple bot never owns a hotel, so it cannot see any rule
   that only touches the top businesses — the bench is the only guard for those.
+- **The borrowing limit and the margin call were one constant until Pack 81.** `MAKS_BELAANING`
+  was both how far you can borrow and how far a margin call sells down; lowering it to 0.2 would
+  have made every forced sale harsher. Now `MARGIN_MAAL` (0.5) is the sell-down target and the
+  Bank page's warning colour. Old fixtures that «borrow the most» and then crash a market no longer
+  reach 75 %: `laanUtenTak()` now borrows to 50 % by default. The bench has a second run (only with
+  BENK) with a bot that borrows the most before every move (`laanMaks` in `bot.ts`): 1 mrd 4 h 32,
+  1 000 mrd 29 h 57 at 0.2 (3 h 28 and 27 h 02 at 0.5).
+- **Changing a rival without a save version (Pack 81).** A rival's `tak` and `vekst` are copied into
+  the save, and a takeover shrinks `tak` (`fusjon.ts`). So the lift sits in code: `RIVALLOFT` gives
+  Marit Aas her own growth and a cap ×20 of whatever her saved cap is, read through `rivalvekst(r)`.
+  The golden master did not move: it records your state, and the simple bot never trades with her.
+- **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
+  22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
+  in the engine and pick the number that hits the promise (0.18), and say so in the report.
 - **Per-type rules (Pack 80)**: `milepaelfaktor`, `milepaelboost` and `nesteMilepael` take an
   optional type; without it they give the shared milestones. Anything that shows or plans
   milestones for a business must pass `b.type` (or use `milepaelerFor`), or the hotel's level 35

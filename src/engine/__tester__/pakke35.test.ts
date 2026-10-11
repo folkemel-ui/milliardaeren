@@ -78,10 +78,11 @@ describe('eiendom følger stigen', () => {
 })
 
 describe('status', () => {
-  it('har nivåer etter Legende, opp til 1 000 poeng', () => {
+  it('har nivåer etter Legende, opp til 1 400 poeng (Udødelig på 1 000; Dynasti og Mytisk fra Pakke 81)', () => {
     const navn = STATUSNIVAAER.map((n) => n.navn)
-    expect(navn.slice(-4)).toEqual(['Legende', 'Ikon', 'Monark', 'Udødelig'])
-    expect(STATUSNIVAAER.at(-1)!.poeng).toBe(1000)
+    expect(navn.slice(-6)).toEqual(['Legende', 'Ikon', 'Monark', 'Udødelig', 'Dynasti', 'Mytisk'])
+    expect(STATUSNIVAAER.find((n) => n.navn === 'Udødelig')!.poeng).toBe(1000)
+    expect(STATUSNIVAAER.at(-1)!.poeng).toBe(1400)
   })
 
   it('all luksusen gir et høyere nivå enn Legende', () => {

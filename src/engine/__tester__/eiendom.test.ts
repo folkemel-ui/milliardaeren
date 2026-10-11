@@ -5,8 +5,7 @@ vi.mock('../utleie', async (ekte) => (await import('./utenUtleie')).utenUtleie(e
 import { nyttSpill } from '../start'
 import { simuler } from '../simulering'
 import { bedrift, kjopEiendom, kjopLuksus, laan, maksNyttLaanFor, selgEiendom, selgLuksus, utvidLager } from './hjelp'
-import { maksLaanMotSikkerhet } from '../formler'
-import { belaaningsgrad, inntektPerSek, nettoformue, rentesats } from '../formler'
+import { belaaningsgrad, eiendeler, inntektPerSek, nettoformue, rentesats } from '../formler'
 import {
   EIENDOMSTYPER,
   eiendomspris,
@@ -18,7 +17,7 @@ import {
   statuspoeng,
   utvidelsespris,
 } from '../eiendom'
-import { MAKS_BELAANING, RENTE_PER_TIME } from '../innhold'
+import { MARGIN_MAAL, RENTE_PER_TIME } from '../innhold'
 import type { Spilltilstand } from '../types'
 
 function rik(kontanter = 1e10): Spilltilstand {
@@ -133,9 +132,9 @@ describe('marginkrav med eiendom', () => {
     s.kontanter = 0
     s.bedrifter.push(bedrift('polsebod', { id: 'b2', investert: 3_000 }))
     s.eiendommer = { hybel: 4 }
-    // Uten gjeld er maks lån lik eiendelene; halvparten av det gir belåning på grensen.
-    s.gjeld = Math.floor(maksLaanMotSikkerhet(s) * MAKS_BELAANING)
-    expect(belaaningsgrad(s)).toBeCloseTo(MAKS_BELAANING, 1)
+    // Gjeld på det marginkravet selger ned til (halvparten av eiendelene).
+    s.gjeld = Math.floor(eiendeler(s) * MARGIN_MAAL)
+    expect(belaaningsgrad(s)).toBeCloseTo(MARGIN_MAAL, 1)
     // Boligkrakk: prisene faller 40 %, og belåningen går over marginkravet.
     s.marked.eiendom.avvik += Math.log(0.6)
     s.marked.eiendom.kurs *= 0.6
@@ -143,7 +142,7 @@ describe('marginkrav med eiendom', () => {
     expect(etter.eiendommer.hybel).toBeGreaterThan(0)
     expect(etter.eiendommer.hybel).toBeLessThan(4)
     expect(etter.bedrifter).toHaveLength(2)
-    expect(belaaningsgrad(etter)).toBeLessThanOrEqual(MAKS_BELAANING)
+    expect(belaaningsgrad(etter)).toBeLessThanOrEqual(MARGIN_MAAL)
   })
 
   it('et lån endrer ikke nettoformuen, heller ikke med eiendom', () => {
