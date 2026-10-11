@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 90, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 91, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -557,6 +557,15 @@ session; delete what stops being true.
   accounts and the tax needed nothing; its trophies sit in `racingtrofeer` at the top level, not in
   `s.trofeer` — the club's live view slices that list by a count (`synligeTrofeer`), and a trophy
   pushed in by another system would hide a club trophy for a day.
+- **Estimate a height with the 44 px rule in it** (Pack 91). I offered the Samling overview as
+  «about 200 px»; with every silhouette a 44 × 44 target, seven fit a 315 px card row, the eight
+  cars take two lines, and the card came out at 526 px (480 after showing only the unique things
+  you own and dropping the 2 px column gap that wrapped the seven boats). Work it out before
+  offering a number: rows × 44 + a label line per row + gaps, and say it in the question.
+- **A close-up box is the drawing's size in pixels, not a scale** (`naerbilde` in `Illustrasjon`).
+  Doubling it with the tile (86 × 74 → 172 × 148) overran the 153 px tile at 375 px; measure the
+  tile first and keep the old ratio (~0.9 of the width): 138 × 119. Check with rects (svg vs.
+  `.plass-bilde`), not by eye.
 - **Round prices a player reads as a bid** (Pack 89): `rundBud` keeps three significant digits
   (kr 66,4 mill, not kr 66 393 633), and a test can then compare the price exactly.
 - **New matches get a die of their own** (Pack 87): the playoffs (`${navn}:${sesong}:kvalik`) and the
