@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 91, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 92, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -557,6 +557,19 @@ session; delete what stops being true.
   accounts and the tax needed nothing; its trophies sit in `racingtrofeer` at the top level, not in
   `s.trofeer` — the club's live view slices that list by a count (`synligeTrofeer`), and a trophy
   pushed in by another system would hide a club trophy for a day.
+- **Anything that grows a weekly payout must book the week so far first** (Pack 92, the farm's
+  fields and machines). The harvest is paid on Monday for the days owned; a field that simply raised
+  the size would have paid a whole week for a field bought on Sunday night — Pakke 57's leak again.
+  `bokforOpptjent` adds the part so far at the old size to `opptjent` and moves the start
+  (`plantetSek`, which a farm otherwise never resets) to now; Monday and a sale pay `opptjent` too.
+  It uses that day's land value, so such a week pays ~0.1 % less, never more — a test that compares
+  harvests must use the same day, since the land value rises 0.3 % a day.
+- **A test fixture bought one second into the week** made «a whole week» one second short and four
+  tests disagree in the fourth decimal (Pack 92). Start fixtures on a day boundary when the rule
+  counts seconds of the week.
+- **Check an idea's premise against the model before offering it** (Pack 92's «Next up»): «irrigation
+  takes the loss in a dry, sunny week» — but in the game's weather sun is the farm's *best* week.
+  Say so in the next pack's description and offer alternatives in its questions.
 - **Estimate a height with the 44 px rule in it** (Pack 91). I offered the Samling overview as
   «about 200 px»; with every silhouette a 44 × 44 target, seven fit a 315 px card row, the eight
   cars take two lines, and the card came out at 526 px (480 after showing only the unique things
