@@ -8,6 +8,19 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '2.8.0',
+    navn: '2.8',
+    dato: 'Oktober 2026',
+    ingress: 'Toppbedriftene får verktøyene sine, og det sene spillet får noe å jage.',
+    punkter: [
+      'Fra hotellet og opp åpner filialer og retning på nivå 25, og en ekstra dobling venter på nivå 35.',
+      'Ansettelser viser hva de gir i dag — i rødt når lønnen koster mer enn den ansatte tjener, ellers med hvor lenge det tar å tjene inn.',
+      'To nye statusnivåer over Udødelig: Dynasti og Mytisk, +2 % inntekt hver.',
+      'Marit Aas holder følge helt til slutt, så kampen om Forbes-lista varer hele spillet.',
+      'Banken låner deg nå opptil 20 % av det du eier. Hele byen gir +10 % igjen etter de nye skyskraperne, og et spillersalg skattlegges som alt annet salg.',
+    ],
+  },
+  {
     versjon: '2.7.0',
     navn: '2.7',
     dato: 'Oktober 2026',
