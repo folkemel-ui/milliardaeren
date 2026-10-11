@@ -222,6 +222,8 @@ export type LuksusId =
   | 'dykkerklokke' | 'lommeur'
   | 'seilbaat' | 'seilyacht'
   | 'helikopter'
+  // Pakke 88: det sene sjiktet, fra 5 til 60 mrd.
+  | 'unikhyperbil' | 'skreddersyddklokke' | 'megayacht' | 'widebodyjet' | 'ubaat'
 
 export interface Luksusgjenstand {
   id: LuksusId
@@ -539,6 +541,8 @@ export interface Spilltilstand {
   luksus: LuksusId[]
   /** Plasser i garasjen, havna og hangaren. */
   lager: Record<LagerId, number>
+  /** Hvor langt hvert sted er bygd ut (Pakke 88): 0 er det vanlige, 1 og 2 de to trinnene. */
+  lagerTrinn?: Partial<Record<LagerId, number>>
   /** De siste utgavene av avisen, nyeste sist. */
   avis: Avisutgave[]
   /** Dagen i den nyeste utgaven du har lest. */

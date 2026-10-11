@@ -1253,6 +1253,166 @@ function Langdistansejet({ størrelse = 48 }: P) {
   )
 }
 
+// ─────────────────────────────────────────────── Det sene sjiktet (Pakke 88)
+// Tegnet av spillsporet i samme stil, enkelt; grafikksporet kan tegne dem på nytt i full ramme.
+
+/**
+ * Den unike hyperbilen (nær avstand, utstillingsrommet): samme lave form som hyperbilen,
+ * men i perlehvitt med to gullstriper over panseret og taket — den eneste som ble bygd.
+ */
+function Unikhyperbil({ størrelse = 48 }: P) {
+  const m = S.hvit
+  const bil = () => (
+    <g>
+      <path d="M10.6 68 L11.6 61.6 M15.6 67.6 L16.2 61.4" stroke={S.mork.flate} strokeWidth="1.2" />
+      <path d="M3.6 60.4 L19.6 59.4 L20 61.4 L4 62.4 Z" fill={S.gull.flate} />
+      <path d="M6.4 80 L5.6 72.6 Q6 69.4 9 68.6 L20 67.6 Q28 64 38 63.2 Q46 62.6 52 64.4 Q57 66 62 67.4 L80 70.2 Q88 71.6 90.6 75.6 L90.8 78.2 Q90.4 80 88 80 L80.14 80 A7.6 7.6 0 0 0 65.86 80 L30.14 80 A7.6 7.6 0 0 0 15.86 80 Z" fill={m.flate} />
+      <path d="M9 68.6 L20 67.6 Q28 64 38 63.2 Q46 62.6 52 64.4 Q57 66 62 67.4 L80 70.2 Q86 71.2 89 73.6 L80 71.6 L62 68.8 Q56 67.4 52 66 Q46 64.4 38 64.6 Q28 65.4 21 69 L9.6 70 Z" fill={m.lys} />
+      <path d="M6 76.6 L90.8 77.4 L90.8 78.2 Q90.4 80 88 80 L80.14 80 A7.6 7.6 0 0 0 65.86 80 L30.14 80 A7.6 7.6 0 0 0 15.86 80 L6.4 80 Z" fill={m.skygge} />
+      {/* De to gullstripene, fra snuten over taket til hekken. */}
+      <path d="M20 66.6 Q30 63.4 40 62.8 Q50 62.6 58 65.4 L80 69.2 Q87 70.6 90 74" fill="none" stroke={S.gull.flate} strokeWidth="1" />
+      <path d="M20.6 68 Q30 64.8 40 64.2 Q50 64 58 66.8 L80 70.6" fill="none" stroke={S.gull.skygge} strokeWidth="0.6" />
+      <path d="M33 64.4 Q41.6 62.6 48 63 Q53.6 63.6 58.6 66.4 L61 67.6 L34 68.2 Z" fill={S.mork.flate} />
+      <Glans d="M34.2 64.6 Q40 63.2 45 63.2 L40.6 67.8 L34.4 68 Z" />
+      <path d="M30.6 70.4 Q38 69 46 69.2 Q44 74 39.6 76.4 L31.6 76.6 Z" fill={S.mork.skygge} />
+      <path d="M81 71.4 L89 73.6 L88.6 74.6 L80.6 72.6 Z" fill={S.hvit.lys} />
+      <path d="M5.8 70.2 L9.4 69.8 L9.4 71 L5.9 71.4 Z" fill={S.faluRod.lys} />
+      <Hjulbue x={23} r={7.6} />
+      <Hjulbue x={73} r={7.6} />
+      <Bilhjul x={23} r={6.6} stil="krom" m={S.gull} kaliper={S.gull.lys} />
+      <Bilhjul x={73} r={6.6} stil="krom" m={S.gull} kaliper={S.gull.lys} />
+    </g>
+  )
+  return <Utstilling størrelse={størrelse} fra={5} til={92}>{bil}</Utstilling>
+}
+
+/**
+ * Klokka laget for deg (nær avstand, skrinet): platina med blå skive, gullindekser og en
+ * gravert plate i skrinet — ingen andre har en.
+ */
+function Skreddersyddklokke({ størrelse = 48 }: P) {
+  const cx = 49
+  const cy = 52
+  const rem = (y: number, h: number) => <rect x={cx - 5.2} y={y} width="10.4" height={h} rx="1.4" fill={S.marine.skygge} />
+  return (
+    <Klokkeskrin størrelse={størrelse} eske={S.marine} fôr={S.hvit} logo kant={S.gull.flate}>
+      {rem(29, 10)}
+      {rem(cy + 12, 10)}
+      <Urkasse cx={cx} cy={cy} R={14} kasse={S.metall} skive={S.marine.flate} visere={S.hvit.lys} indeks={S.gull.lys} sekund={S.gull.lys} dotter />
+      {/* Den graverte plata i lokket. */}
+      <rect x="58" y="24" width="16" height="7" rx="1" fill={S.gull.flate} />
+      <path d="M60 26.4 h12 M60 28.6 h8" stroke={S.gull.skygge} strokeWidth="0.5" />
+    </Klokkeskrin>
+  )
+}
+
+/**
+ * Megayachten (gateavstand, på havet): lengre og mørkere enn superyachten, fire dekk og
+ * en helikopterplattform på akterdekket, med helikopteret parkert.
+ */
+function Megayacht({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  const h = S.hvit
+  return (
+    <Lerret størrelse={størrelse}>
+      <Kantfade>
+        <Dis>
+          <polygon points={`0,${HORISONT + 1} 0,38 14,30 28,36 44,28 60,34 76,27 96,33 96,${HORISONT + 1}`} fill={S.fjell.flate} />
+        </Dis>
+      </Kantfade>
+      <Bakke type="hav" />
+      {[g + 1.6, g + 3.8].map((y, i) => (
+        <rect key={y} x={10 + i * 6} y={y} width={78 - i * 14} height="0.9" rx="0.45" fill={h.flate} opacity={0.3 - i * 0.1} />
+      ))}
+      {/* Dekkene, fra broa og ned. */}
+      <path d={`M40 ${g - 24} L42 ${g - 28.6} L62 ${g - 29} L67 ${g - 24.4} Z`} fill={h.lys} />
+      <path d={`M43 ${g - 25.6} L43.4 ${g - 27.4} L61 ${g - 27.6} L64 ${g - 25.8} Z`} fill={S.mork.flate} />
+      <path d={`M28 ${g - 18.8} L30 ${g - 24} L70 ${g - 24.6} L76 ${g - 19.4} Z`} fill={h.flate} />
+      <path d={`M31 ${g - 20.6} L31.6 ${g - 22.4} L69 ${g - 22.8} L72.6 ${g - 20.8} Z`} fill={S.mork.flate} />
+      <path d={`M14 ${g - 13.2} L16 ${g - 18.8} L80 ${g - 19.6} L86 ${g - 14} Z`} fill={h.flate} />
+      <path d={`M17 ${g - 15} L17.6 ${g - 17.2} L78 ${g - 17.8} L82 ${g - 15.2} Z`} fill={S.mork.flate} />
+      {[22, 34, 46, 58, 70, 36, 50, 62].map((x, i) => (
+        <rect key={i} x={x} y={i < 5 ? g - 16.8 : g - 22.2} width="2.2" height="1.4" fill={S.vinduLys.flate} opacity="0.85" />
+      ))}
+      {/* Helikopterplattformen akter, med H og helikopteret. */}
+      <ellipse cx="13" cy={g - 13.4} rx="10" ry="2" fill={h.skygge} />
+      <path d={`M10.6 ${g - 14.4} v2 M15.4 ${g - 14.4} v2 M10.6 ${g - 13.4} h4.8`} stroke={S.gull.flate} strokeWidth="0.6" />
+      <path d={`M8 ${g - 16.6} Q12 ${g - 19} 17 ${g - 17} L18 ${g - 15.6} L8.6 ${g - 15.4} Z`} fill={S.mork.flate} />
+      <path d={`M3 ${g - 19.4} H22`} stroke={S.mork.skygge} strokeWidth="0.5" />
+      {/* Skroget. */}
+      <path d={`M2 ${g - 7} L86 ${g - 9} Q92 ${g - 9.4} 95 ${g - 12.4} Q92 ${g - 4} 86 ${g - 0.6} L8 ${g} L3 ${g - 3} Z`} fill={S.mork.flate} />
+      <path d={`M2 ${g - 7} L86 ${g - 9} Q92 ${g - 9.4} 95 ${g - 12.4}`} fill="none" stroke={S.gull.flate} strokeWidth="0.7" />
+      <path d={`M4 ${g - 2.4} L88 ${g - 3.4}`} stroke={S.mork.lys} strokeWidth="0.6" />
+      <Figur x={50} y={g - 24.6} avstand="fjern" klaer={S.hvit} />
+    </Lerret>
+  )
+}
+
+/**
+ * Den private widebody-jeten (gateavstand, på forpladsen): et langdistansefly med bred
+ * kropp i privat drakt — hvit, med gullstripe og gullfinne — rød løper til trappa og en
+ * svart bil som venter.
+ */
+function Widebodyjet({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  const L = 90
+  return (
+    <Lerret størrelse={størrelse}>
+      <Bakke type="asfalt" />
+      <Passasjerfly x={3} gy={g} L={L} slag="wide" hale={S.gull.flate} />
+      <path d={`M${3 + L * 0.1} ${g - 8} L${3 + L * 0.96} ${g - 8}`} stroke={S.gull.flate} strokeWidth="0.8" />
+      {/* Trappa og den røde løperen. */}
+      <path d={`M70 ${g - 13.4} L74 ${g - 13.4} L67.6 ${g - 2.4} L63.6 ${g - 2.4} Z`} fill={S.hvit.flate} />
+      <rect x="52" y={g - 1} width="14" height="1.6" fill={S.vin.flate} />
+      {/* Bilen som venter. */}
+      <rect x="14" y={g - 4.4} width="10" height="3.4" rx="1" fill={S.mork.flate} />
+      <rect x="16" y={g - 4} width="3.6" height="1.6" fill={S.glass.skygge} />
+      <circle cx="16" cy={g - 0.8} r="0.9" fill={S.mork.skygge} />
+      <circle cx="22" cy={g - 0.8} r="0.9" fill={S.mork.skygge} />
+      <Figur x={58} y={g + 1.2} avstand="fjern" klaer={S.mork} />
+    </Lerret>
+  )
+}
+
+/**
+ * Ubåten (gateavstand, i overflaten ved kaia): et mørkt skrog som ligger lavt i vannet,
+ * tårnet med periskopet, opplyste koøyer og en gullstripe — en privat ubåt for lange turer
+ * under isen.
+ */
+function Ubaat({ størrelse = 48 }: P) {
+  const g = GRUNNLINJE
+  return (
+    <Lerret størrelse={størrelse}>
+      <Kantfade>
+        <Dis>
+          <polygon points={`0,${HORISONT + 1} 0,40 18,33 36,38 54,30 72,36 96,31 96,${HORISONT + 1}`} fill={S.fjell.flate} />
+        </Dis>
+      </Kantfade>
+      <Bakke type="hav" />
+      {/* Kjølvannet. */}
+      {[g + 1.4, g + 3.4].map((y, i) => (
+        <rect key={y} x={6 + i * 8} y={y} width={60 - i * 16} height="0.9" rx="0.45" fill={S.hvit.flate} opacity={0.3 - i * 0.1} />
+      ))}
+      {/* Skroget over vannet. */}
+      <path d={`M8 ${g - 1} Q12 ${g - 9} 30 ${g - 10} L74 ${g - 10} Q88 ${g - 9} 92 ${g - 2} Z`} fill={S.mork.flate} />
+      <path d={`M14 ${g - 7.6} Q30 ${g - 9.6} 74 ${g - 9.4} Q84 ${g - 8.8} 88 ${g - 5.4}`} fill="none" stroke={S.mork.lys} strokeWidth="0.7" />
+      <path d={`M10 ${g - 3} L90 ${g - 3}`} stroke={S.gull.flate} strokeWidth="0.7" />
+      {/* Koøyene. */}
+      {[26, 34, 42, 58, 66, 74].map((x) => (
+        <circle key={x} cx={x} cy={g - 6} r="1" fill={S.vinduLys.flate} />
+      ))}
+      {/* Tårnet, periskopet og masta. */}
+      <path d={`M44 ${g - 10} L46 ${g - 20} L58 ${g - 20} L60 ${g - 10} Z`} fill={S.mork.flate} />
+      <path d={`M46 ${g - 20} L58 ${g - 20} L57.6 ${g - 18.6} L46.4 ${g - 18.6} Z`} fill={S.mork.lys} />
+      <path d={`M52 ${g - 20} V${g - 27} H55`} fill="none" stroke={S.metall.skygge} strokeWidth="0.8" />
+      <rect x="47.6" y={g - 17} width="2.4" height="1.4" fill={S.vinduLys.flate} />
+      <Figur x={50} y={g - 20} avstand="fjern" klaer={S.marine} />
+      {/* Ror bak. */}
+      <path d={`M8 ${g - 1} L4 ${g - 6} L7 ${g - 6} L11 ${g - 2} Z`} fill={S.mork.skygge} />
+    </Lerret>
+  )
+}
+
 // ─────────────────────────────────────────────── Oppslag
 
 /** Luksustegningene, etter id. Illustrasjon i Illustrasjoner.tsx slår opp her når delen er lastet. */
@@ -1278,4 +1438,9 @@ export const LUKSUSTEGNINGER: Record<string, Tegning> = {
   propellfly: Propellfly,
   forretningsjet: Forretningsjet,
   langdistansejet: Langdistansejet,
+  unikhyperbil: Unikhyperbil,
+  skreddersyddklokke: Skreddersyddklokke,
+  megayacht: Megayacht,
+  widebodyjet: Widebodyjet,
+  ubaat: Ubaat,
 }

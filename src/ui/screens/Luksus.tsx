@@ -14,9 +14,13 @@ import {
   statusnivaa,
   statuspoeng,
   utvidelsespris,
+  lagernavn,
+  lagertrinn,
+  nesteLagertrinn,
+  TRINN_PLASSER,
 } from '../../engine/eiendom'
 import { rentesats } from '../../engine/formler'
-import { kjopLuksus, selgLuksus, utvidLager } from '../../engine/handlinger'
+import { byggLagertrinn, kjopLuksus, selgLuksus, utvidLager } from '../../engine/handlinger'
 import type { LagerId, LuksusId, LuksusKategori, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall } from '../format'
@@ -262,6 +266,9 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
   const [valgt, velg] = useState<Lagervalg>(null)
   const l = LAGER[lager]
   const pris = utvidelsespris(s, lager)
+  // Pakke 88: stedet vokser i trinn — navnet står på skiltet, og gullkanten viser trinnet.
+  const trinn = lagertrinn(s, lager)
+  const nesteTrinn = nesteLagertrinn(s, lager)
   const her = s.luksus.filter((id) => LAGER_FOR[LUKSUS[id].kategori] === lager).sort((a, b) => LUKSUS[a].pris - LUKSUS[b].pris)
   const ledige = Math.max(0, s.lager[lager] - her.length)
   // Det billigste i kategorien du ikke eier ennå — det er det en ledig plass venter på.
@@ -269,12 +276,12 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
   const trykk = (v: Lagervalg) => velg(JSON.stringify(v) === JSON.stringify(valgt) ? null : v)
 
   return (
-    <div className={`kort lagerkort lager-${lager}`}>
+    <div className={`kort lagerkort lager-${lager} lager-trinn-${trinn}`}>
       <div className="lagerkort-topp">
         <span className="lager-emoji" aria-hidden="true">
           <Ikon navn={LAGERIKON[lager]} størrelse={22} />
         </span>
-        <strong>{l.navn}</strong>
+        <strong className={trinn > 0 ? 'lager-skilt' : undefined}>{lagernavn(s, lager)}</strong>
         <span className="dempet liten">
           {brukteplasser(s, lager)} / {s.lager[lager]} {l.enhet}
         </span>
@@ -319,6 +326,16 @@ function Lagerkort({ s, lager }: { s: Spilltilstand; lager: LagerId }) {
           </button>
         </div>
       </div>
+      {nesteTrinn && s.lager[lager] > 0 && (
+        <div className="personale-rad lager-trinnrad">
+          <p className="dempet liten">
+            Bygg ut til <strong>{nesteTrinn.navn.toLowerCase()}</strong>: +{nesteTrinn.status} status og {TRINN_PLASSER} plasser til.
+          </p>
+          <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < nesteTrinn.pris} onClick={() => utfor(byggLagertrinn(s, lager))}>
+            Bygg · {kortKroner(nesteTrinn.pris)}
+          </button>
+        </div>
+      )}
       {valgt?.slag === 'eid' && s.luksus.includes(valgt.id) && (
         <ul className="kortliste lager-valgt">
           <Luksuskort s={s} id={valgt.id} />

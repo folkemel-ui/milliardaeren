@@ -388,6 +388,14 @@ export const LUKSUS: Record<LuksusId, Luksusgjenstand> = {
   limousin: { id: 'limousin', navn: 'Limousin', kategori: 'bil', pris: 9_000_000, status: 16 },
   seilyacht: { id: 'seilyacht', navn: 'Havseiler', kategori: 'baat', pris: 60_000_000, status: 38 },
   formelbil: { id: 'formelbil', navn: 'Formel 1-bil', kategori: 'bil', pris: 80_000_000, status: 45 },
+  // ── Pakke 88: det sene sjiktet. Samlingen sluttet ved langdistansejeten (1,2 mrd); dette varer
+  // til rundt 100 mrd. Statusen stiger med prisen i hver kategori (pakke28), så hver ny ting
+  // gir mer enn den dyreste før den: +440 status i alt.
+  unikhyperbil: { id: 'unikhyperbil', navn: 'Unik hyperbil', kategori: 'bil', pris: 5_000_000_000, status: 50 },
+  skreddersyddklokke: { id: 'skreddersyddklokke', navn: 'Klokke laget for deg', kategori: 'klokke', pris: 8_000_000_000, status: 40 },
+  megayacht: { id: 'megayacht', navn: 'Megayacht med helipad', kategori: 'baat', pris: 15_000_000_000, status: 90 },
+  widebodyjet: { id: 'widebodyjet', navn: 'Privat widebody-jet', kategori: 'fly', pris: 40_000_000_000, status: 160 },
+  ubaat: { id: 'ubaat', navn: 'Ubåt', kategori: 'baat', pris: 60_000_000_000, status: 100 },
 }
 
 export const LUKSUSLISTE = Object.keys(LUKSUS) as LuksusId[]
@@ -438,11 +446,60 @@ export const LAGERLISTE = Object.keys(LAGER) as LagerId[]
 /** Garasjen har én plass fra start; havna og hangaren må bygges. */
 export const START_LAGER: Record<LagerId, number> = { garasje: 1, havn: 0, hangar: 0 }
 
-/** Prisen for neste plass. Hver ny plass koster mer enn den forrige. */
+/**
+ * Trinnene hvert sted kan bygges ut i (Pakke 88): navn, pris og status. Hvert trinn gir
+ * også TRINN_PLASSER plasser, så de dyre tingene får plass uten at plassprisen løper fra.
+ */
+export const LAGERTRINN: Record<LagerId, { navn: string; pris: number; status: number }[]> = {
+  garasje: [
+    { navn: 'Utstillingshall', pris: 50_000_000, status: 10 },
+    { navn: 'Privat bilmuseum', pris: 2_000_000_000, status: 30 },
+  ],
+  havn: [
+    { navn: 'Marina', pris: 200_000_000, status: 15 },
+    { navn: 'Privat havn med verft', pris: 8_000_000_000, status: 40 },
+  ],
+  hangar: [
+    { navn: 'Privat terminal', pris: 1_000_000_000, status: 20 },
+    { navn: 'Egen flyplass', pris: 20_000_000_000, status: 50 },
+  ],
+}
+export const TRINN_PLASSER = 2
+/** Fra så mange kjøpte plasser vokser prisen bare ×2 per plass (Pakke 88; før ×3, ×4 og ×5 hele veien). */
+export const PLASSVEKST_FRA = 5
+export const SEN_PLASSVEKST = 2
+
+/** Hvor langt stedet er bygd ut: 0, 1 eller 2. */
+export function lagertrinn(s: Spilltilstand, lager: LagerId): number {
+  return s.lagerTrinn?.[lager] ?? 0
+}
+
+/** Stedets navn med trinnet: «Garasje», «Utstillingshall», «Privat bilmuseum». */
+export function lagernavn(s: Spilltilstand, lager: LagerId): string {
+  const n = lagertrinn(s, lager)
+  return n === 0 ? LAGER[lager].navn : LAGERTRINN[lager][n - 1].navn
+}
+
+/** Neste trinn for stedet, eller null når det er bygd helt ut. */
+export function nesteLagertrinn(s: Spilltilstand, lager: LagerId): { navn: string; pris: number; status: number } | null {
+  return LAGERTRINN[lager][lagertrinn(s, lager)] ?? null
+}
+
+/** Status fra trinnene du har bygd. */
+export function lagerstatus(s: Spilltilstand): number {
+  let sum = 0
+  for (const lager of LAGERLISTE) for (let i = 0; i < lagertrinn(s, lager); i++) sum += LAGERTRINN[lager][i].status
+  return sum
+}
+
+/**
+ * Prisen for neste plass. Hver ny plass koster mer enn den forrige: ×3, ×4 eller ×5 opp
+ * til den femte du kjøper, så ×2 (Pakke 88). Plassene trinnene gir, teller ikke.
+ */
 export function utvidelsespris(s: Spilltilstand, lager: LagerId): number {
   const l = LAGER[lager]
-  const kjopt = s.lager[lager] - START_LAGER[lager]
-  return Math.round(l.startpris * l.vekst ** kjopt)
+  const kjopt = s.lager[lager] - START_LAGER[lager] - TRINN_PLASSER * lagertrinn(s, lager)
+  return Math.round(l.startpris * l.vekst ** Math.min(kjopt, PLASSVEKST_FRA - 1) * SEN_PLASSVEKST ** Math.max(0, kjopt - (PLASSVEKST_FRA - 1)))
 }
 
 export function brukteplasser(s: Spilltilstand, lager: LagerId): number {
@@ -475,7 +532,7 @@ export const STATUS_RENTEKUTT = 0.002
 
 /** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

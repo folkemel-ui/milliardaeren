@@ -5,7 +5,7 @@
  */
 
 import { utforLuksussalg, utforMalerisalg } from '../handel'
-import { brukteplasser, LAGER, LAGER_FOR, LUKSUS, utvidelsespris } from '../eiendom'
+import { brukteplasser, LAGER, LAGER_FOR, lagertrinn, LUKSUS, nesteLagertrinn, TRINN_PLASSER, utvidelsespris } from '../eiendom'
 import { HJEM, hjemAapent, hjemFor, nesteTrinn, ROM, romtrinn } from '../hjemmene'
 import { kjopsprisMaleri, MALERIER } from '../kunst'
 import type { LagerId, LuksusId, MaleriId, Spilltilstand, RomId } from '../types'
@@ -61,6 +61,25 @@ export function utvidLager(s: Spilltilstand, lager: LagerId): Utfall {
   n.kontanter -= pris
   n.totaltForbruk += pris
   n.lager[lager] += 1
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Bygger stedet ut ett trinn (Pakke 88): garasjen blir utstillingshall og så bilmuseum,
+ * havna marina og verft, hangaren terminal og flyplass. Gir status og to plasser. Som
+ * plassene er det forbruk — det øker ikke det du eier.
+ */
+export function byggLagertrinn(s: Spilltilstand, lager: LagerId): Utfall {
+  if (!LAGER[lager]) return feil('Ukjent lager.')
+  const neste = nesteLagertrinn(s, lager)
+  if (!neste) return feil(`${LAGER[lager].navn} er bygd helt ut.`)
+  if (s.lager[lager] <= 0) return feil(`Bygg en plass i ${LAGER[lager].bestemt} først.`)
+  if (s.kontanter < neste.pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= neste.pris
+  n.totaltForbruk += neste.pris
+  n.lagerTrinn = { ...(n.lagerTrinn ?? {}), [lager]: lagertrinn(s, lager) + 1 }
+  n.lager[lager] += TRINN_PLASSER
   return { ok: true, tilstand: n }
 }
 

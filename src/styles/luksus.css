@@ -234,6 +234,26 @@
   border-left-color: var(--minus);
 }
 
+/* Pakke 88: stedene vokser — navnet på et skilt, og en gullkant i scenen som blir tykkere per trinn. */
+.lager-skilt {
+  padding: 0 6px;
+  border: 1px solid var(--gull);
+  border-radius: 4px;
+  color: var(--gull);
+}
+
+.lager-trinn-1 .lagerscene {
+  box-shadow: inset 0 -2px 0 var(--gull);
+}
+
+.lager-trinn-2 .lagerscene {
+  box-shadow: inset 0 -4px 0 var(--gull);
+}
+
+.lager-trinnrad {
+  margin-top: 8px;
+}
+
 /* Pakke 87: kvalikplassene. */
 .tabell tr.kvalik td:first-child {
   border-left-color: var(--gull);

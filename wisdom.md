@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 87, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 88, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,13 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **A new luxury thing needs (Pack 88)**: the `LuksusId`, a `LUKSUS` entry whose status beats every
+  cheaper thing in its kind (`pakke28.test.ts` — offer status figures that already obey it), a drawing
+  in `ved-behov/Luksustegninger.tsx` added at the end of `LUKSUSTEGNINGER`, its id at the end of
+  `LUKSUSIDER` and in `NY_STIL` (both lines in `Illustrasjoner.tsx`; `'manhattan-skyskraper']` ends two
+  lists, so edit by the line's name), a close-up in `NAERBILDER` if it stands in a place
+  (`grafikkG9`), and the drawing count in `grafikkG12`. Cloning a gallery `<svg>` into an overlay grid
+  crops it; one drawing at a time in a fixed 420 px box shows it whole.
 - **New matches get a die of their own** (Pack 87): the playoffs (`${navn}:${sesong}:kvalik`) and the
   Super Cup (`…:supercup`) draw from hashes, so adding them moved none of the club's existing dice — the
   other divisions' strength-and-luck ranking still draws from the club's die in the same order as before.

@@ -85,12 +85,13 @@ describe('bevegelse i scenen (G10)', () => {
 })
 
 describe('klokkene viser ekte tid i scenen (G10)', () => {
-  const KLOKKER = ['dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke']
+  // Pakke 88: klokka laget for deg er den sjette.
+  const KLOKKER = ['dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke', 'skreddersyddklokke']
 
   it('timeviser, minuttviser og sekundviser står der telefonens klokke sier', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date(2026, 9, 8, 16, 15, 30))
-    for (const id of ['dykkerklokke', 'gullklokke', 'mesterverk', 'diamantklokke']) {
+    for (const id of ['dykkerklokke', 'gullklokke', 'mesterverk', 'diamantklokke', 'skreddersyddklokke']) {
       const svg = tegn(id, true)
       expect(svg, id).toContain('transform:rotate(127.75deg)') // 4:15:30 → timeviseren
       expect(svg, id).toContain('transform:rotate(93deg)') // 15 min 30 s
@@ -101,12 +102,12 @@ describe('klokkene viser ekte tid i scenen (G10)', () => {
     expect(tegn('lommeur', true)).toMatch(/class="anim-viser tikk"/)
   })
 
-  it('alle fem har sekundviser, og i lista står de på ti over ti uten å gå', () => {
+  it('alle seks har sekundviser, og i lista står de på ti over ti uten å gå', () => {
     for (const id of KLOKKER) {
       expect(tegn(id, true).match(/anim-viser/g)?.length, id).toBeGreaterThanOrEqual(3)
       expect(tegn(id, false), id).not.toContain('anim-viser')
     }
-    expect(kilde.match(/sekund=\{S\./g)?.length).toBe(4)
+    expect(kilde.match(/sekund=\{S\./g)?.length).toBe(5)
   })
 })
 

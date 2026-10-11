@@ -2890,7 +2890,7 @@ const BEDRIFTER: Record<string, Tegning> = {
 export const EIENDOMSIDER = ['hybel', 'leilighet', 'rekkehus', 'hytte', 'hybel-trondheim', 'hybel-oslo', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus-bergen', 'hytte-trysil', 'hytte-lofoten', 'kontorbygg-stavanger', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'kontorbygg', 'kjopesenter', 'naeringsbygg', 'oy', 'stockholm', 'kobenhavn', 'berlin', 'london', 'dubai', 'newyork', 'amsterdam', 'roma', 'paris', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'fyret', 'hoppbakken', 'borgen', 'tarnet', 'canary-wharf', 'kjopesenterkjede', 'downtown-dubai', 'manhattan-skyskraper']
 
 /** Luksusen, tegnet i ved-behov/Luksustegninger.tsx og lastet når de trengs (G12). */
-export const LUKSUSIDER = ['stasjonsvogn', 'elbil', 'superbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'dykkerklokke', 'lommeur', 'seilbaat', 'seilyacht', 'helikopter', 'gullklokke', 'mesterverk', 'diamantklokke', 'snekke', 'motorbaat', 'superyacht', 'propellfly', 'forretningsjet', 'langdistansejet']
+export const LUKSUSIDER = ['stasjonsvogn', 'elbil', 'superbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'dykkerklokke', 'lommeur', 'seilbaat', 'seilyacht', 'helikopter', 'gullklokke', 'mesterverk', 'diamantklokke', 'snekke', 'motorbaat', 'superyacht', 'propellfly', 'forretningsjet', 'langdistansejet', 'unikhyperbil', 'skreddersyddklokke', 'megayacht', 'widebodyjet', 'ubaat']
 
 export const ILLUSTRASJONSIDER = [...Object.keys(BEDRIFTER), ...EIENDOMSIDER, ...LUKSUSIDER]
 
@@ -2918,7 +2918,7 @@ const TOMT: Tegning = ({ størrelse = 48 }) => (
  * Hver eiendom har sin egen tegning fra stedet den ligger (G5), så les `sted` i
  * EIENDOMSTYPER før du tegner en ny.
  */
-export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kontorbygg', 'kontorbygg-stavanger', 'superbil', 'seilbaat', 'saftbod', 'polsebod', 'gatekjokken', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'stasjonsvogn', 'elbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke', 'snekke', 'motorbaat', 'seilyacht', 'superyacht', 'propellfly', 'helikopter', 'forretningsjet', 'langdistansejet', 'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'oy', 'fyret', 'borgen', 'hoppbakken', 'tarnet', 'naeringsbygg', 'kjopesenter', 'stockholm', 'kobenhavn', 'berlin', 'london', 'newyork', 'dubai', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'amsterdam', 'roma', 'paris', 'canary-wharf', 'kjopesenterkjede', 'downtown-dubai', 'manhattan-skyskraper']
+export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kontorbygg', 'kontorbygg-stavanger', 'superbil', 'seilbaat', 'saftbod', 'polsebod', 'gatekjokken', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'stasjonsvogn', 'elbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke', 'snekke', 'motorbaat', 'seilyacht', 'superyacht', 'propellfly', 'helikopter', 'forretningsjet', 'langdistansejet', 'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'oy', 'fyret', 'borgen', 'hoppbakken', 'tarnet', 'naeringsbygg', 'kjopesenter', 'stockholm', 'kobenhavn', 'berlin', 'london', 'newyork', 'dubai', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'amsterdam', 'roma', 'paris', 'canary-wharf', 'kjopesenterkjede', 'downtown-dubai', 'manhattan-skyskraper', 'unikhyperbil', 'skreddersyddklokke', 'megayacht', 'widebodyjet', 'ubaat']
 
 /**
  * Tegningene med full ramme (G13): ingen vignett, og i scenen bredformat
@@ -2974,6 +2974,11 @@ export const NAERBILDER: Record<string, readonly [number, number, number, number
   propellfly: [4, 60, 90, 32],
   forretningsjet: [4, 60, 90, 32],
   langdistansejet: [2, 60, 94, 30],
+  // Pakke 88: det sene sjiktet.
+  unikhyperbil: [5, 54, 88, 34],
+  megayacht: [0, 50, 96, 44],
+  widebodyjet: [2, 58, 94, 32],
+  ubaat: [2, 56, 92, 34],
   helikopter: [2, 58, 92, 36],
 }
 
