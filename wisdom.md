@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 89, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 90, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -542,6 +542,21 @@ session; delete what stops being true.
   thing (`charter[id].tjent`) for its detail page, and add the per-second sum to `bruttoPerSek` and
   `nettoPerSek` last, so the sums stay bit-for-bit without it. Pay it in the rent block
   (`leieSek`), so time away pays the same.
+- **A new competition: measure the ladder before the screen** (Pack 90, the racing team). The first
+  numbers (rivals' cars 52–92, your car +3 a step to 100, luck σ 3.5) gave no points at all until
+  ~1 mrd of upgrades and a title every time at the top; a 30-line Vitest script that plays 60–200
+  seasons per car level and strategy showed it in seconds. Wider field at the bottom (40–88), +2.5 a
+  step (top 90), σ 5 gave points from the first kr 40 mill and ~90 % titles at 25 mrd. The same run
+  showed «Aggressiv» better than «Normal» at every level until it was made slower and riskier. And
+  check the money: wages first outran prizes five times over — a top team should about break even.
+  Keep the measuring script in the pack's test as a few snapshot assertions (`snittplass`).
+- **A system that lives on a page, not a part** (Pack 90): Luksus has four parts, so the team is a
+  row in Samling (`Racingrad`) and a page with back (`ui/racingside.ts`, rendered by `Luksus` in place
+  of the screen like the club pages, `useTilbake` before the early returns). Selling closes the page
+  itself, or it would reopen with the next team. Its money goes through `totaltKlubb`, so the
+  accounts and the tax needed nothing; its trophies sit in `racingtrofeer` at the top level, not in
+  `s.trofeer` — the club's live view slices that list by a count (`synligeTrofeer`), and a trophy
+  pushed in by another system would hide a club trophy for a day.
 - **Round prices a player reads as a bid** (Pack 89): `rundBud` keeps three significant digits
   (kr 66,4 mill, not kr 66 393 633), and a test can then compare the price exactly.
 - **New matches get a die of their own** (Pack 87): the playoffs (`${navn}:${sesong}:kvalik`) and the
