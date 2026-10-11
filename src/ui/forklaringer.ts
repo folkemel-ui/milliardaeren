@@ -13,7 +13,7 @@ import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
-import { TOMMER_DAGER } from '../engine/jord'
+import { GARDSTRINN, JORDPRIS_VEKST, MAKS_JORDER, START_JORDER, TOMMER_DAGER } from '../engine/jord'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
 import { KURTASJE } from '../engine/marked'
@@ -153,7 +153,11 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       'Jord stiger sakte i verdi. En gård gir avling hver mandag morgen, stor eller liten etter ukas vær. ' +
       `En skog gir ingenting mens den vokser, men tømmeret blir verdt mer for hver dag — raskest de første ${TOMMER_DAGER} dagene. ` +
-      'Du bestemmer selv når du hogger; da får du betalt, og ny skog plantes.',
+      'Du bestemmer selv når du hogger; da får du betalt, og ny skog plantes. ' +
+      `En gård starter med ${START_JORDER} jorder og kan dyrke opptil ${MAKS_JORDER}: den fjerde koster halve jordverdien, hver neste ${tall(JORDPRIS_VEKST, 1)} ganger så mye, og hver jord gir like mye avling. ` +
+      'En traktor gir +10 % avling, en skurtresker +15 %, og en sprøyte gjør at en dårlig uke faller 30 % mindre — hver kjøpt én gang, priset etter gårdens verdi. ' +
+      `Med ${GARDSTRINN[1].fra} jorder blir småbruket en gård, med ${GARDSTRINN[2].fra} en storgård og med ${GARDSTRINN[3].fra} et gods: +${GARDSTRINN[1].status}, +${GARDSTRINN[2].status} og +${GARDSTRINN[3].status} status. ` +
+      'Jordene og maskinene teller i gårdens verdi til det de kostet, og følger med når du selger.',
   },
   landemerker: {
     tittel: 'Landemerker',

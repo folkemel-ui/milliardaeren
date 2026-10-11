@@ -43,6 +43,7 @@ const HENDELSE_FANE: Record<string, Mål> = {
   'Skatt innkrevd': 'profil',
   Auksjon: 'samling',
   Racing: 'samling',
+  Gården: 'eiendom',
 }
 
 const MAKS_KJOP_SAMTIDIG = 3

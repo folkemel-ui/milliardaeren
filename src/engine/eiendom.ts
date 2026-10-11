@@ -16,7 +16,7 @@ import type {
   Spilltilstand,
 } from './types'
 import { klubbstatus } from './klubb'
-import { jordverdi } from './jord'
+import { jordstatus, jordverdi } from './jord'
 import { landemerkeleiePerSek, landemerkestatus, landemerkeverdi } from './landemerker'
 import { kunststatus } from './kunst'
 import { premiumstatus } from './ansatte'
@@ -540,7 +540,7 @@ export const STATUS_RENTEKUTT = 0.002
 
 /** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s) + racingstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s) + racingstatus(s) + jordstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

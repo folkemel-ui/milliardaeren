@@ -11,7 +11,7 @@ import { Hjemkort } from '../komponenter/Hjemmene'
 import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
-import { Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
+import { Gardskart, Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
 import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
@@ -71,7 +71,14 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
       ]
       if (t.type === 'skog') fakta.push(['Tømmeret', kortKroner(tommerverdi(s, id as JordId))])
       else fakta.push(['Ukas vær', vaer(dagnummer(s.sek)).navn])
-      return [<Jordkort s={s} id={id as JordId} iDetalj />, fakta]
+      // Pakke 92: gårdens kart med jordene og maskinene står under kortet.
+      return [
+        <>
+          <Jordkort s={s} id={id as JordId} iDetalj />
+          <Gardskart s={s} id={id as JordId} />
+        </>,
+        fakta,
+      ]
     }
     case 'landemerke': {
       const l = LANDEMERKER[id as LandemerkeId]

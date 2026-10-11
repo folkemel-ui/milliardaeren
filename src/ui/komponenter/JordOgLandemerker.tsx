@@ -1,6 +1,24 @@
-import { hoggSkog, jordSynlig, kjopJord, kjopLandemerke, selgJord, selgLandemerke } from '../../engine/handlinger'
+import { hoggSkog, jordSynlig, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, selgJord, selgLandemerke } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
-import { HOST_ANDEL, JORD, JORD_SYNLIG_VED, JORDLISTE, landverdi, skogalder, tommerverdi, ukensGardHost, vaer } from '../../engine/jord'
+import {
+  GARDSTRINN,
+  gardstrinn,
+  HOST_ANDEL,
+  JORD,
+  JORD_SYNLIG_VED,
+  JORDLISTE,
+  jorder,
+  landverdi,
+  MAKS_JORDER,
+  MASKINER,
+  MASKINLISTE,
+  maskinpris,
+  nesteJordpris,
+  skogalder,
+  tommerverdi,
+  ukensGardHost,
+  vaer,
+} from '../../engine/jord'
 import {
   eierDu,
   kjopsprisLandemerke,
@@ -12,7 +30,7 @@ import {
   TILBAKEKJOP_PREMIE,
 } from '../../engine/landemerker'
 import { MEGLERHONORAR } from '../../engine/eiendom'
-import { dagnummer } from '../../engine/kalender'
+import { DAG_SEK, dagnummer, ukedag } from '../../engine/kalender'
 import type { By, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall } from '../format'
@@ -56,6 +74,9 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
   const eid = s.jord[id]
   const land = landverdi(s, id)
   const tommer = tommerverdi(s, id)
+  // Pakke 92: jordene og maskinene teller i verdien og følger med i salget.
+  const bygd = eid?.investert ?? 0
+  const gard = t.type === 'gard'
   return (
     <li className={`kort bedriftskort${eid ? ' eid' : ''}${iDetalj ? '' : ' kan-aapnes'}`} onClick={iDetalj ? undefined : trykkApner({ slag: 'jord', id })}>
       {iDetalj && <Scene type={id} />}
@@ -67,10 +88,12 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
         )}
         <div className="bedriftskort-midt">
           <h2>{t.navn}</h2>
-          <span className="dempet">{t.sted}</span>
+          <span className="dempet">
+            {eid && gard ? `${GARDSTRINN[gardstrinn(eid)].navn} · ${jorder(eid)} av ${MAKS_JORDER} jorder` : t.sted}
+          </span>
         </div>
         <div className="eiendom-tall">
-          <span>{kortKroner(land + tommer)}</span>
+          <span>{kortKroner(land + tommer + bygd)}</span>
           <span className="dempet liten">{eid ? 'verdi' : 'pris'}</span>
         </div>
       </div>
@@ -91,7 +114,7 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
             </button>
           )}
           <Bekreftknapp onJa={() => utfor(selgJord(s, id))}>
-            Selg · {kortKroner((land + tommer) * (1 - MEGLERHONORAR))}
+            Selg · {kortKroner((land + tommer + bygd) * (1 - MEGLERHONORAR))}
           </Bekreftknapp>
         </div>
       ) : (
@@ -99,6 +122,86 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
           Kjøp · {kortKroner(land)}
         </button>
       )}
+    </li>
+  )
+}
+
+/** Det som vokser på hver jord, i fast rekkefølge. */
+const AVLINGER = ['Bygg', 'Hvete', 'Havre', 'Poteter', 'Rug', 'Gulrøtter', 'Jordbær', 'Raps', 'Kål', 'Epler']
+
+/**
+ * Gårdens kart (Pakke 92), på gårdens side: jordene som ruter — hva som vokser og hvor
+ * langt det er kommet mot mandagens høst — og der neste jord kan legges til. Under
+ * kartet maskinene. Trinnet (småbruk → gods) står øverst, med hva neste trinn gir.
+ */
+export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j || JORD[id].type !== 'gard') return null
+  const n = jorder(j)
+  const trinn = gardstrinn(j)
+  const neste = GARDSTRINN[trinn + 1]
+  const pris = nesteJordpris(s, id)
+  // Hvor langt uka er kommet: avlingen høstes mandag morgen.
+  const vekst = (ukedag(s.sek) + (s.sek % DAG_SEK) / DAG_SEK) / 7
+  return (
+    <li className="kort gardskart">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">{GARDSTRINN[trinn].navn}</h2>
+        <span className="dempet liten">
+          {n} av {MAKS_JORDER} jorder
+        </span>
+      </div>
+      <p className="dempet liten">
+        {neste ? `${neste.navn} ved ${neste.fra} jorder: +${neste.status} status.` : 'Gården er et gods: alle jordene er dyrket.'} Høsten mandag morgen.
+      </p>
+      <ul className="jordruter">
+        {Array.from({ length: MAKS_JORDER }, (_, i) => {
+          if (i < n) {
+            return (
+              <li key={i} className="jordrute dyrket">
+                <span className="jordrute-navn">{AVLINGER[i]}</span>
+                <span className="jordrute-spor" aria-hidden="true">
+                  <span style={{ width: `${Math.round(vekst * 100)}%` }} />
+                </span>
+              </li>
+            )
+          }
+          if (i === n && pris !== null) {
+            return (
+              <li key={i}>
+                <button className="jordrute ny" disabled={s.kontanter < pris} onClick={() => utfor(kjopJorde(s, id))} aria-label={`Dyrk jord ${i + 1} for ${kortKroner(pris)}`}>
+                  <span className="jordrute-pluss" aria-hidden="true">
+                    +
+                  </span>
+                  {/* «261 mill» — «kr» får ikke plass i ruta; hele prisen står i navnet på knappen. */}
+                  <span className="jordrute-navn">{kortKroner(pris).replace(/^kr\s/, '')}</span>
+                </button>
+              </li>
+            )
+          }
+          return <li key={i} className="jordrute laast" aria-hidden="true" />
+        })}
+      </ul>
+      {MASKINLISTE.map((m) => {
+        const eier = !!j.maskiner?.[m]
+        const mp = maskinpris(s, id, m)
+        return (
+          <div key={m} className="personale-rad gardsmaskin">
+            <p className="liten">
+              <strong>{MASKINER[m].navn}</strong>
+              <br />
+              <span className="dempet">{MASKINER[m].tekst}</span>
+            </p>
+            {eier ? (
+              <span className="merke ok">Kjøpt</span>
+            ) : (
+              <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < mp} onClick={() => utfor(kjopMaskin(s, id, m))}>
+                Kjøp · {kortKroner(mp)}
+              </button>
+            )}
+          </div>
+        )
+      })}
     </li>
   )
 }

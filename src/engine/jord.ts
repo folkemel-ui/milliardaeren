@@ -12,7 +12,7 @@
 
 import { DAG_SEK, dagnummer, ukedag } from './kalender'
 import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
-import type { JordId, NorskBy, Overskrift, Spilltilstand } from './types'
+import type { Gardsmaskin, JordId, Jordstykke, NorskBy, Overskrift, Spilltilstand } from './types'
 import { kortKroner } from './tall'
 
 export interface Jordtype {
@@ -101,6 +101,96 @@ function uketekst(d: Record<Vaertype, number>): string {
   return `${deler.length ? `${deler.join(', ')} og ${siste}` : siste}.`.replace(/^./, (c) => c.toUpperCase())
 }
 
+// ─────────────────────────────────────────────── En gård du bygger (Pakke 92)
+
+/** En gård starter med så mange jorder og kan vokse til så mange. */
+export const START_JORDER = 3
+export const MAKS_JORDER = 10
+/** Den fjerde jorda koster halve jordverdien; hver neste ×1,5. */
+export const JORDPRIS_ANDEL = 0.5
+export const JORDPRIS_VEKST = 1.5
+
+/** Maskinene: én av hver per gård, priset som en andel av gårdens verdi (jorda og det du har bygd). */
+export const MASKINER: Record<Gardsmaskin, { navn: string; tekst: string; andel: number; host: number; vaer: number }> = {
+  traktor: { navn: 'Traktor', tekst: '+10 % avling', andel: 0.2, host: 1.1, vaer: 0 },
+  tresker: { navn: 'Skurtresker', tekst: '+15 % avling', andel: 0.4, host: 1.15, vaer: 0 },
+  sproyte: { navn: 'Sprøyte', tekst: 'En dårlig uke faller 30 % mindre', andel: 0.3, host: 1, vaer: 0.3 },
+}
+export const MASKINLISTE = Object.keys(MASKINER) as Gardsmaskin[]
+
+/** Trinnene en gård vokser i, etter jordene: status og et navn på kortet og i avisa. */
+export const GARDSTRINN = [
+  { navn: 'Småbruk', bestemt: 'småbruket', fra: 3, status: 0 },
+  { navn: 'Gård', bestemt: 'gården', fra: 5, status: 3 },
+  { navn: 'Storgård', bestemt: 'storgården', fra: 8, status: 6 },
+  { navn: 'Gods', bestemt: 'godset', fra: 10, status: 10 },
+] as const
+
+/** Hvor mange jorder en gård har (3 for en gård fra før Pakke 92). */
+export function jorder(j: Jordstykke | undefined): number {
+  return j?.jorder ?? START_JORDER
+}
+
+/** Trinnet etter jordene: 0 småbruk … 3 gods. */
+export function gardstrinn(j: Jordstykke | undefined): number {
+  const n = jorder(j)
+  let t = 0
+  for (let i = 0; i < GARDSTRINN.length; i++) if (n >= GARDSTRINN[i].fra) t = i
+  return t
+}
+
+/** Status fra gårdenes trinn. */
+export function jordstatus(s: Spilltilstand): number {
+  if (!s.jord) return 0
+  let sum = 0
+  for (const id of JORDLISTE) {
+    const j = s.jord[id]
+    if (j && JORD[id].type === 'gard') sum += GARDSTRINN[gardstrinn(j)].status
+  }
+  return sum
+}
+
+/** Prisen for neste jord, eller null når gården er full. Følger jordverdien, så den vokser med deg. */
+export function nesteJordpris(s: Spilltilstand, id: JordId): number | null {
+  const n = jorder(s.jord?.[id])
+  if (n >= MAKS_JORDER) return null
+  return landverdi(s, id) * JORDPRIS_ANDEL * JORDPRIS_VEKST ** (n - START_JORDER)
+}
+
+/** Gårdens verdi: jorda og det du har bygd. Maskinprisene følger den. */
+export function gardsverdi(s: Spilltilstand, id: JordId): number {
+  return landverdi(s, id) + (s.jord?.[id]?.investert ?? 0)
+}
+
+export function maskinpris(s: Spilltilstand, id: JordId, m: Gardsmaskin): number {
+  return MASKINER[m].andel * gardsverdi(s, id)
+}
+
+/** Hvor mye mer gården gir enn med tre jorder og ingen maskiner. Nøyaktig 1 for en gård fra før. */
+export function gardsfaktor(j: Jordstykke): number {
+  let f = jorder(j) / START_JORDER
+  for (const m of MASKINLISTE) if (j.maskiner?.[m]) f *= MASKINER[m].host
+  return f
+}
+
+/** Ukas vær for en gård: sprøyta tar en del av fallet i en dårlig uke. */
+export function gardsvaer(j: Jordstykke, faktor: number): number {
+  if (faktor >= 1 || !j.maskiner?.sproyte) return faktor
+  return faktor + MASKINER.sproyte.vaer * (1 - faktor)
+}
+
+/**
+ * Før gården bygges ut, bokføres avlingen så langt denne uka med størrelsen den hadde,
+ * og resten regnes med den nye fra nå. Ellers ga en jord kjøpt søndag kveld en hel ukes
+ * avling (Pakke 57s regel: betal for tiden du eide). Muterer.
+ */
+export function bokforOpptjent(s: Spilltilstand, id: JordId): void {
+  const j = s.jord?.[id]
+  if (!j) return
+  j.opptjent = (j.opptjent ?? 0) + gardHost(s, id, dagnummer(s.sek), s.sek)
+  j.plantetSek = s.sek
+}
+
 export function jordfaktor(s: Spilltilstand): number {
   return (1 + JORDVEKST_PER_DAG) ** dagnummer(s.sek)
 }
@@ -125,10 +215,13 @@ export function tommerverdi(s: Spilltilstand, id: JordId): number {
   return JORD[id].type === 'skog' ? landverdi(s, id) * tommerfaktor(skogalder(s, id)) : 0
 }
 
-/** Jord og tømmer du eier. */
+/** Jord og tømmer du eier, og det du har bygd på gårdene (Pakke 92). */
 export function jordverdi(s: Spilltilstand): number {
   let sum = 0
-  for (const id of JORDLISTE) if (s.jord?.[id]) sum += landverdi(s, id) + tommerverdi(s, id)
+  for (const id of JORDLISTE) {
+    const j = s.jord?.[id]
+    if (j) sum += landverdi(s, id) + tommerverdi(s, id) + (j.investert ?? 0)
+  }
   return sum
 }
 
@@ -150,13 +243,14 @@ export function gardHost(s: Spilltilstand, id: JordId, dag: number, til: number)
   const ukestart = Math.floor(dag / 7) * UKE_SEK
   // For en gård er plantetSek dagen du kjøpte den: en gård hogges aldri.
   const andel = Math.min(1, Math.max(0, (til - Math.max(ukestart, j.plantetSek)) / UKE_SEK))
-  return landverdi(s, id) * HOST_ANDEL * vaer(dag).faktor * andel
+  // Pakke 92: jordene og maskinene ganger avlingen, sprøyta demper en dårlig uke. Uten dem står tallene likt.
+  return landverdi(s, id) * HOST_ANDEL * gardsvaer(j, vaer(dag).faktor) * andel * gardsfaktor(j)
 }
 
 /** Avlingen en gård du eier, gir mandag for uka som går nå — for dagene du eier den. */
 export function ukensGardHost(s: Spilltilstand, id: JordId): number {
   const dag = dagnummer(s.sek)
-  return gardHost(s, id, dag, (Math.floor(dag / 7) + 1) * UKE_SEK)
+  return gardHost(s, id, dag, (Math.floor(dag / 7) + 1) * UKE_SEK) + (s.jord?.[id]?.opptjent ?? 0)
 }
 
 /** Mandag morgen høstes gårdene for uka som gikk. Gir avisens sak. Muterer. */
@@ -164,11 +258,22 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   if (!s.jord || ukedag(s.sek) !== 0) return []
   const dag = dagnummer(s.sek)
   const forrige = dag - 1
-  const host = JORDLISTE.reduce((sum, id) => sum + gardHost(s, id, forrige, dag * DAG_SEK), 0)
+  let host = 0
+  for (const id of JORDLISTE) {
+    host += gardHost(s, id, forrige, dag * DAG_SEK)
+    const j = s.jord[id]
+    if (j?.opptjent) {
+      host += j.opptjent
+      j.opptjent = 0
+    }
+  }
   if (host <= 0) return []
   s.kontanter += host
   s.totaltHost += host
   s.totaltLeie += host
   const v = vaer(forrige)
-  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}.` }]
+  // Pakke 92: avisa sier hva gårdene er blitt — «storgården på Lista og småbruket på Hedmarken».
+  const garder = JORDLISTE.filter((id) => s.jord[id] && JORD[id].type === 'gard').map((id) => `${GARDSTRINN[gardstrinn(s.jord[id])].bestemt} på ${JORD[id].by}`)
+  const fra = garder.length ? ` fra ${garder.length > 1 ? `${garder.slice(0, -1).join(', ')} og ${garder[garder.length - 1]}` : garder[0]}` : ''
+  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}${fra}.` }]
 }

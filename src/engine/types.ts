@@ -744,9 +744,23 @@ export type JordId = 'gard-hedmarken' | 'gard-lista' | 'skog-trysil' | 'skog-nam
 
 export interface Jordstykke {
   kostpris: number
-  /** Når skogen sist ble plantet (kjøpt eller hogd). Tømmeret vokser fra da. */
+  /**
+   * Når skogen sist ble plantet (kjøpt eller hogd). Tømmeret vokser fra da. For en
+   * gård: fra når ukas avling regnes med gårdens størrelse nå (kjøpet, eller sist
+   * du bygde ut — Pakke 92).
+   */
   plantetSek: number
+  /** Jordene på gården (Pakke 92): 3 fra start, opptil 10. Mangler i eldre lagringer. */
+  jorder?: number
+  /** Maskinene du har kjøpt til gården. */
+  maskiner?: Partial<Record<Gardsmaskin, boolean>>
+  /** Det jordene og maskinene kostet: teller i gårdens verdi. */
+  investert?: number
+  /** Avlingen så langt denne uka før du sist bygde ut — betales mandag med resten. */
+  opptjent?: number
 }
+
+export type Gardsmaskin = 'traktor' | 'tresker' | 'sproyte'
 
 export type LandemerkeId = 'fyret' | 'hoppbakken' | 'borgen' | 'tarnet'
 

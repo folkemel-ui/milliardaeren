@@ -117,11 +117,13 @@ export function utforUniksalg(n: Spilltilstand, id: UnikId): number {
 /** Selger en gård eller skog med tømmeret som står, minus meglerhonorar. */
 export function utforJordsalg(n: Spilltilstand, id: JordId): number {
   // Avlingen så langt denne uka følger med salget (Pakke 57), som om det var mandag.
-  const host = gardHost(n, id, dagnummer(n.sek), n.sek)
+  // … og det som ble bokført før du sist bygde ut (Pakke 92).
+  const host = gardHost(n, id, dagnummer(n.sek), n.sek) + (n.jord[id]?.opptjent ?? 0)
   n.kontanter += host
   n.totaltHost += host
   n.totaltLeie += host
-  const inntekt = (landverdi(n, id) + tommerverdi(n, id)) * (1 - MEGLERHONORAR)
+  // Jordene og maskinene (Pakke 92) følger med i salget, til det de kostet.
+  const inntekt = (landverdi(n, id) + tommerverdi(n, id) + (n.jord[id]?.investert ?? 0)) * (1 - MEGLERHONORAR)
   n.kontanter += inntekt
   bokforGevinst(n, inntekt - (n.jord[id]?.kostpris ?? 0))
   delete n.jord[id]

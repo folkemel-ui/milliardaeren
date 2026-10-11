@@ -271,3 +271,88 @@
 .bykort .lenkeknapp {
   align-self: flex-start;
 }
+
+/* ── Gården du bygger (Pakke 92) ─────────────────────────────────────────── */
+
+/* Gårdens kart: ti ruter, fem i bredden — dyrket jord, neste jord du kan kjøpe, og det som venter. */
+.gardskart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jordruter {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.jordrute {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  font: inherit;
+}
+
+/* Dyrket jord har faste farger, som scenene: åkergrønt og lys tekst i begge temaene. */
+.jordrute.dyrket {
+  background: #5f7f3a;
+  color: #f8f6f1;
+}
+
+.jordrute-navn {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--skrift-1);
+  font-weight: var(--vekt-halvfet);
+}
+
+/* Hvor langt det er kommet mot mandagens høst. */
+.jordrute-spor {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(0 0 0 / 0.25);
+  overflow: hidden;
+}
+
+.jordrute-spor > span {
+  display: block;
+  height: 100%;
+  background: #ecd07a;
+}
+
+.jordrute.ny {
+  border: 1px dashed var(--gull);
+  background: none;
+  color: var(--gull);
+}
+
+.jordrute.ny:disabled {
+  opacity: 0.5;
+}
+
+.jordrute-pluss {
+  font-size: var(--skrift-4);
+  font-weight: var(--vekt-fet);
+  line-height: 1;
+}
+
+.jordrute.laast {
+  border: 1px dashed var(--kant);
+}
+
+.gardsmaskin {
+  padding-top: 10px;
+  border-top: 1px solid var(--kant);
+}
