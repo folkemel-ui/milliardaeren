@@ -33,11 +33,12 @@ const TUNGE = [
 ]
 
 /**
- * Høyst fire arbeidere (Pakke 78). Med seksten tunge filer på åtte kjerner sultet
- * hovedprosessen igjen («Timeout calling onTaskUpdate»), og ytelsestesten ble aldri
- * kjørt; femten gikk. Vitest 3.2 bryr seg ikke om grensen per gruppe, så den gjelder alle.
+ * Høyst tre arbeidere. Med seksten tunge filer på åtte kjerner sultet hovedprosessen
+ * («Timeout calling onTaskUpdate»), og ytelsestesten ble aldri kjørt: fire arbeidere
+ * holdt i Pakke 78, men en tregere natt i Pakke 79 ga feilen tre ganger på rad med fire
+ * og ingen med tre. Vitest 3.2 bryr seg ikke om grensen per gruppe, så den gjelder alle.
  */
-const ARBEIDERE = 4
+const ARBEIDERE = 3
 
 export default defineConfig({
   plugins: [react()],
