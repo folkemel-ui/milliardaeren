@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Packs 77–78, the club page, 10–11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Packs 76–78 and version 2.7, 10–11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -285,7 +285,17 @@ session; delete what stops being true.
   on `.graf-flate`, wait ~300 ms, then read `.graf-boble` or take the screenshot.
 - **Screenshots go stale** after SVG/CSS changes and scrolling. Resizing the viewport by
   1 px (375 ↔ 376) forces a fresh frame; for art, clone elements into a fixed overlay and
-  screenshot that. `zoom` with a region isn't supported.
+  screenshot that. `zoom` with a region works now (Pack 76), but it crops the screenshot, it does
+  not magnify.
+- **A card's drawing is a close-up** (`naerbilde`/`FLISUTSNITT`), so cloning the SVG from a card
+  shows only part of it. To look at a whole drawing, open `?galleri` and clone the `<svg>` from the
+  `<figure>` whose `<figcaption>` is the drawing's name, into a fixed overlay at 300–340 px.
+- **Editing a source file while a pane script runs reloads the page** under it («the page
+  navigated while this script was running»): Vite's full reload. Don't edit during a long script,
+  and when it happens, check the page before running the script again.
+- **A hidden browser pane pauses the game** (`document.hidden`), so «a live second» measures
+  nothing while the pane is hidden and a catch-up runs when it shows again. Read numbers that
+  depend on time passing with the pane visible.
 - **Tabs slide in**: a screenshot right after switching tabs shows an empty screen. Wait
   about a second and take it again.
 - **A hidden pane freezes CSS animations** (`document.visibilityState === 'hidden'`): the tab
@@ -971,6 +981,14 @@ session; delete what stops being true.
   (`npm version X --no-git-tag-version`) and adds an entry at the top of `ENDRINGER`. Players
   who've played ≥ 10 minutes then see "Nytt i X" once; brand-new players never do. The full
   log opens from "Hva er nytt" at the bottom of Innstillinger. Ask Folke before bumping.
+  The bump as done for 2.6 and 2.7: `git log <last version commit>..origin/master` to see what is
+  live since (both tracks), `npm version X --no-git-tag-version` (it updates the lock file too),
+  `VERSJON`, an entry at the top of `ENDRINGER` in `ved-behov/Endringslogg.ts` (the text lives in a
+  part since Pack 70), the «Releases» sentence in `Ideer.md` (what this version covered, «the next
+  entry should start from there»), one commit `Versjon X: endringsloggen`, `lever.mjs`, and push
+  only on Folke's word. Draft the points in the recommendation itself, so «yes» approves the text
+  as well as the number; if the entry gets anything the draft didn't have (the ingress line in
+  2.7), say so.
 - **Sort lists by values that change only when the player acts** (Pack 65). Sorting the
   businesses by today's income would reorder cards as the weather and the market move, under
   the player's finger. `ui/sortering.ts` uses steady income instead: no calendar, no news,
@@ -1087,6 +1105,12 @@ session; delete what stops being true.
   (`romkode(3,3,3)` was 63, now 219); the saves store step counts, not codes, so nothing migrates.
   A drawing that picks a colour by step from a list (`[...][n]` in the wine cellar) must clamp `n`,
   and `n === 3` checks become `n >= 3`.
+- **A hook called before an early return still subscribes.** The measuring panel called
+  `useMaalinger()` and then `return null` when hidden, so it listened all the same, and once the
+  store notified every second, every Innstillinger click test got a redraw outside `act` — the
+  suite stayed green and only the log said «not wrapped in act». Put the hook in a child that is
+  only rendered when shown. Grep the `lever.mjs` log for «not wrapped in act» after a change that
+  adds a timer or a store; a passing run doesn't show it.
 - **Numbers from the phone (Pack 76)**: `state/maaling.ts` times the catch-up after time away, each
   live step, each save and the start-up; the panel (`Maalepanel.tsx`) shows them in Innstillinger
   when the game was opened with `?maal` (read at start-up in `App`, remembered in localStorage).
