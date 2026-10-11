@@ -766,10 +766,39 @@ export interface Jordstykke {
   lager?: number
   /** Kornet går i silo mandag i stedet for å selges. */
   lagre?: boolean
+  /** Dyrene i fjøset (Pakke 94), antall per slag. */
+  dyr?: Partial<Record<Gardsdyr, number>>
+  /** Fra når dyrenes utbytte i dag regnes med antallet nå (kjøpet av det siste dyret). */
+  dyrSek?: number
+  /** Opptjent av dyrene, ikke betalt ennå: melk og egg (neste dagsskifte), ull (klippingen) og kjøtt (slakten). */
+  dyrKasse?: Partial<Record<'daglig' | 'ull' | 'slakt', number>>
+  /** Gårdens eget regnskap (Pakke 94): de siste åtte ukene, og alt siden du kjøpte den. */
+  regnskap?: Gardsuke[]
+  siden?: Gardstall
+}
+
+export type Gardsdyr = 'ku' | 'hone' | 'sau' | 'gris'
+
+/** Det gården har gitt og kostet, per slag (Pakke 94). */
+export interface Gardstall {
+  /** Avlingen som ble solgt mandag. */
+  host: number
+  /** Korn solgt fra silo og låve. */
+  korn: number
+  /** Melk, egg, ull og kjøtt. */
+  dyr: number
+  /** Produksjonstilskuddet ved hvert månedsskifte. */
+  tilskudd: number
+  /** Det du har bygd og kjøpt: jorder, maskiner, bygg og dyr. */
+  bygd: number
+}
+
+export interface Gardsuke extends Gardstall {
+  uke: number
 }
 
 export type Gardsmaskin = 'traktor' | 'tresker' | 'sproyte'
-export type Gardsbygg = 'drenering' | 'frostdekke' | 'drivhus' | 'silo' | 'laave'
+export type Gardsbygg = 'drenering' | 'frostdekke' | 'drivhus' | 'silo' | 'laave' | 'fjos'
 
 export type LandemerkeId = 'fyret' | 'hoppbakken' | 'borgen' | 'tarnet'
 

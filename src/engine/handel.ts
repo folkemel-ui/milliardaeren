@@ -17,6 +17,7 @@ import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi, salgspris } from './klubb'
 import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
 import { TILBAKE_DAGER, unikRestverdi } from './unike'
+import { dyrOpptjentNaa } from './dyr'
 import { SALG_ANDEL } from './racing'
 
 /**
@@ -119,7 +120,8 @@ export function utforJordsalg(n: Spilltilstand, id: JordId): number {
   // Avlingen så langt denne uka følger med salget (Pakke 57), som om det var mandag.
   // … og det som ble bokført før du sist bygde ut (Pakke 92).
   // … og kornet i silo og låve (Pakke 93), til denne ukas pris.
-  const host = gardHost(n, id, dagnummer(n.sek), n.sek) + (n.jord[id]?.opptjent ?? 0) + lagerverdi(n, id)
+  // … og det dyrene har opptjent (Pakke 94).
+  const host = gardHost(n, id, dagnummer(n.sek), n.sek) + (n.jord[id]?.opptjent ?? 0) + lagerverdi(n, id) + dyrOpptjentNaa(n, id)
   n.kontanter += host
   n.totaltHost += host
   n.totaltLeie += host

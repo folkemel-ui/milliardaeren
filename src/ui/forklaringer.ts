@@ -14,6 +14,7 @@ import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
 import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_UKER, MAKS_JORDER, PRIS_MIN, PRIS_SPENN, SILO_UKER, START_JORDER, TOMMER_DAGER } from '../engine/jord'
+import { DYR_PER_UKE, FJOSPLASSER, SLAKT_DAGER, TILSKUDD_DYR, TILSKUDD_JORD } from '../engine/dyr'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
 import { KURTASJE } from '../engine/marked'
@@ -160,7 +161,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Jordene, maskinene og byggene teller i gårdens verdi til det de kostet, og følger med når du selger. ' +
       `Korn, grønnsaker og frukt har hver sin pris, ny hver mandag, fra ×${tall(PRIS_MIN, 2)} til ×${tall(PRIS_MIN + PRIS_SPENN, 2)} — i snitt 1; avlingen betales til prisen den uka den vokste. ` +
       'Drenering gjør at regndager teller som overskyet, og frostdekke at snødager teller som regn. Drivhuset er en ellevte jord under glass som alltid gir ×0,9 av en vanlig uke, uansett vær. ' +
-      `En silo lagrer ukas korn i stedet for å selge det mandag — ${SILO_UKER} uker, ${LAAVE_UKER} med låve — og du selger når prisen er god. Kornet taper ${tall(KORNSVINN * 100)} % i uka.`,
+      `En silo lagrer ukas korn i stedet for å selge det mandag — ${SILO_UKER} uker, ${LAAVE_UKER} med låve — og du selger når prisen er god. Kornet taper ${tall(KORNSVINN * 100)} % i uka. ` +
+      `I et fjøs er det plass til ${FJOSPLASSER.join(', ').replace(/, (?=[^,]*$)/, ' og ')} dyr etter gårdens trinn. Hvert dyr gir rundt ${pst(DYR_PER_UKE)} av prisen i uka: kua og hønene hver dag, sauene ved klippingen 1. mai og 1. september, grisene ved slakt hver ${SLAKT_DAGER / 7}. uke — opptjent fra dagen du kjøpte dem. ` +
+      `Ved hvert månedsskifte kommer produksjonstilskudd: ${pst(TILSKUDD_JORD, 1)} av jordverdien per jord og ${pst(TILSKUDD_DYR)} av prisen per dyr. Gårdens side viser regnskapet de siste åtte ukene.`,
   },
   landemerker: {
     tittel: 'Landemerker',

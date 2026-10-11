@@ -1,4 +1,5 @@
-import { hoggSkog, jordSynlig, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
+import { antallDyr, DYR, DYRLISTE, dyrPerUke, dyrpris, fjosplasser, SLAKT_DAGER } from '../../engine/dyr'
+import { hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
 import {
   AVLINGER,
@@ -43,8 +44,8 @@ import {
   TILBAKEKJOP_PREMIE,
 } from '../../engine/landemerker'
 import { MEGLERHONORAR } from '../../engine/eiendom'
-import { DAG_SEK, dagnummer, ukedag } from '../../engine/kalender'
-import type { By, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
+import { DAG_SEK, dagnummer, ukedag, ukenummer } from '../../engine/kalender'
+import type { By, Gardstall, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from './BedriftIkon'
@@ -236,6 +237,7 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
           </div>
         )
       })}
+      {j.bygg?.fjos && <Fjos s={s} id={id} />}
       {GARDSBYGGLISTE.map((b) => {
         const eier = !!j.bygg?.[b]
         const sperre = byggSperre(j, b)
@@ -259,6 +261,123 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
           </div>
         )
       })}
+    </li>
+  )
+}
+
+/** Hvordan hvert dyr betaler, i én linje. */
+const BETALING: Record<'daglig' | 'ull' | 'slakt', string> = {
+  daglig: 'hver dag',
+  ull: 'klippes 1. mai og 1. september',
+  slakt: `slakt hver ${SLAKT_DAGER / 7}. uke`,
+}
+
+/**
+ * Fjøset (Pakke 94): plassene etter gårdens trinn, dyrene du har, hva de gir og når,
+ * og et kjøp per slag. Hvert dyr gir rundt 4 % av prisen i uka.
+ */
+function Fjos({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]!
+  const n = antallDyr(j)
+  const plasser = fjosplasser(j)
+  return (
+    <div className="kornlager fjos">
+      <div className="maal-topp">
+        <strong className="liten">Fjøs</strong>
+        <span className="dempet liten">
+          {n} av {plasser} plasser · {kortKroner(dyrPerUke(s, id))} i uka
+        </span>
+      </div>
+      {DYRLISTE.map((d) => {
+        const antall = j.dyr?.[d] ?? 0
+        const pris = dyrpris(s, id, d)
+        return (
+          <div key={d} className="personale-rad">
+            <p className="liten">
+              <strong>
+                {antall > 0 ? `${antall} ${antall === 1 ? DYR[d].navn.toLowerCase() : DYR[d].flertall}` : DYR[d].navn}
+              </strong>
+              <br />
+              <span className="dempet">
+                {DYR[d].vare[0].toUpperCase() + DYR[d].vare.slice(1)} · {BETALING[DYR[d].betaling]}
+              </span>
+            </p>
+            <button className="knapp knapp-gull knapp-liten" disabled={n >= plasser || s.kontanter < pris} onClick={() => utfor(kjopDyr(s, id, d))}>
+              Kjøp · {kortKroner(pris)}
+            </button>
+          </div>
+        )
+      })}
+      {n >= plasser && <p className="dempet liten">Fjøset er fullt. En større gård gir flere plasser: 4, 8, 12 og 20.</p>}
+    </div>
+  )
+}
+
+/**
+ * Gårdens eget regnskap (Pakke 94): de siste åtte ukene, én rad hver — det som kom inn
+ * (høst, korn, dyr og tilskudd) med en liten søyle, og det du bygde — og summen siden kjøpet.
+ */
+export function Gardsregnskap({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j || JORD[id].type !== 'gard') return null
+  const rader = [...(j.regnskap ?? [])].reverse()
+  const inn = (r: Gardstall) => r.host + r.korn + r.dyr + r.tilskudd
+  const storst = Math.max(1, ...rader.map(inn))
+  const sum = j.siden
+  return (
+    <li className="kort gardsregnskap">
+      <h2 className="kort-tittel">Gårdens regnskap</h2>
+      {rader.length === 0 ? (
+        <p className="dempet liten">Ingenting ført ennå. Høsten kommer mandag morgen.</p>
+      ) : (
+        <table className="tabell">
+          <thead>
+            <tr>
+              <th>Uke</th>
+              <th>Inn</th>
+              <th>Bygd</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rader.map((r) => (
+              <tr key={r.uke}>
+                <td>{ukenummer(r.uke * 7 + 3)}</td>
+                <td>
+                  <span className="regnskap-inn">
+                    <span className="regnskap-sule" style={{ width: `${Math.round((inn(r) / storst) * 100)}%` }} />
+                    <span>{kortKroner(inn(r))}</span>
+                  </span>
+                </td>
+                <td>{r.bygd > 0 ? kortKroner(r.bygd) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {sum && (
+        <dl className="status-fordeler">
+          <div>
+            <dt>Høst siden kjøpet</dt>
+            <dd>{kortKroner(sum.host)}</dd>
+          </div>
+          <div>
+            <dt>Korn fra silo</dt>
+            <dd>{kortKroner(sum.korn)}</dd>
+          </div>
+          <div>
+            <dt>Dyrene</dt>
+            <dd>{kortKroner(sum.dyr)}</dd>
+          </div>
+          <div>
+            <dt>Tilskudd</dt>
+            <dd>{kortKroner(sum.tilskudd)}</dd>
+          </div>
+          <div>
+            <dt>Bygd og kjøpt</dt>
+            <dd>{kortKroner(sum.bygd)}</dd>
+          </div>
+        </dl>
+      )}
     </li>
   )
 }

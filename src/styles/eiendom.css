@@ -371,3 +371,29 @@
   padding-top: 10px;
   border-top: 1px solid var(--kant);
 }
+
+/* ── Dyrene og regnskapet (Pakke 94) ─────────────────────────────────────── */
+
+.gardsregnskap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* «Inn» med en søyle bak tallet, så ukene kan sammenlignes på et øyeblikk. */
+.regnskap-inn {
+  position: relative;
+  display: block;
+  text-align: right;
+}
+
+.regnskap-inn > span:last-child {
+  position: relative;
+}
+
+.regnskap-sule {
+  position: absolute;
+  inset: 2px auto 2px 0;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--pluss) 25%, transparent);
+}

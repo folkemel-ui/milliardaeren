@@ -11,7 +11,7 @@ import { Hjemkort } from '../komponenter/Hjemmene'
 import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
-import { Gardskart, Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
+import { Gardskart, Gardsregnskap, Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
 import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
@@ -76,6 +76,7 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
         <>
           <Jordkort s={s} id={id as JordId} iDetalj />
           <Gardskart s={s} id={id as JordId} />
+          <Gardsregnskap s={s} id={id as JordId} />
         </>,
         fakta,
       ]

@@ -13,7 +13,7 @@
 import { DAG_SEK, dagnummer, ukedag } from './kalender'
 import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
 import { hashTekst, tilfeldig } from './rng'
-import type { Gardsbygg, Gardsmaskin, JordId, Jordstykke, NorskBy, Overskrift, Spilltilstand } from './types'
+import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, NorskBy, Overskrift, Spilltilstand } from './types'
 import { kortKroner } from './tall'
 
 export interface Jordtype {
@@ -231,6 +231,8 @@ export const GARDSBYGG: Record<Gardsbygg, { navn: string; tekst: string; andel: 
   drivhus: { navn: 'Drivhus', tekst: 'En ellevte jord under glass, alltid ×0,9 av en vanlig uke', andel: 0.6 },
   silo: { navn: 'Silo', tekst: 'Lagre opptil 4 uker korn og selg når prisen er god', andel: 0.3 },
   laave: { navn: 'Låve', tekst: 'Plass til 8 uker korn', andel: 0.3 },
+  // Pakke 94: fjøset dyrene står i. Plassene følger gårdens trinn.
+  fjos: { navn: 'Fjøs', tekst: 'Plass til dyr: 4 på et småbruk, 20 på et gods', andel: 0.25 },
 }
 export const GARDSBYGGLISTE = Object.keys(GARDSBYGG) as Gardsbygg[]
 
@@ -310,6 +312,29 @@ export function kornkapasitet(s: Spilltilstand, id: JordId): number {
 export function lagerverdi(s: Spilltilstand, id: JordId): number {
   const l = s.jord?.[id]?.lager ?? 0
   return l > 0 ? l * avlingspris('korn', ukeFor(dagnummer(s.sek))) : 0
+}
+
+// ─────────────────────────────────────────────── Gårdens regnskap (Pakke 94)
+
+/** Så mange uker gården husker i sitt eget regnskap. */
+export const REGNSKAP_UKER = 8
+
+export const tomtGardstall = (): Gardstall => ({ host: 0, korn: 0, dyr: 0, tilskudd: 0, bygd: 0 })
+
+/** Fører et beløp i gårdens regnskap: uka det hører til, og summen siden du kjøpte gården. Muterer. */
+export function bokforGard(j: Jordstykke, uke: number, felt: keyof Gardstall, belop: number): void {
+  if (belop === 0) return
+  const liste = (j.regnskap ??= [])
+  let rad: Gardsuke | undefined = liste.find((r) => r.uke === uke)
+  if (!rad) {
+    rad = { uke, ...tomtGardstall() }
+    liste.push(rad)
+    liste.sort((a, b) => a.uke - b.uke)
+    while (liste.length > REGNSKAP_UKER) liste.shift()
+  }
+  rad[felt] += belop
+  const sum = (j.siden ??= tomtGardstall())
+  sum[felt] += belop
 }
 
 export function jordfaktor(s: Spilltilstand): number {
@@ -422,6 +447,7 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
       lagret += inn * kornpris
     }
     host += korn + annet
+    bokforGard(j, ukeFor(forrige), 'host', korn + annet)
   }
   if (host <= 0 && lagret <= 0) return []
   s.kontanter += host

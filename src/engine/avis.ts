@@ -16,6 +16,7 @@ import { skattVedDagsskifte } from './skatt'
 import { startupsVedDagsskifte } from './startups'
 import { klubbVedDagsskifte } from './klubb'
 import { jordVedDagsskifte } from './jord'
+import { dyrVedDagsskifte } from './dyr'
 import { landemerkerVedDagsskifte } from './landemerker'
 import { kunstVedDagsskifte } from './kunst'
 import { kvartalVedDagsskifte } from './kvartal'
@@ -319,6 +320,8 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   // Pakke 90: racingteamets lønn, og løpet på løpsdagen.
   const racingsaker = racingVedDagsskifte(s, tittel(s))
   const andre = [
+    // Pakke 94: dyrene og tilskuddet hver dag, før mandagens høst.
+    ...dyrVedDagsskifte(s),
     ...jordVedDagsskifte(s),
     ...landemerkerVedDagsskifte(s),
     ...kunstVedDagsskifte(s),
