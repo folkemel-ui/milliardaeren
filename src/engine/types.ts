@@ -207,6 +207,8 @@ export interface Eiendomstype {
   statuskrav: number
   /** Utenlands: flyet du må eie for å komme dit og kjøpe (1 propellfly, 2 forretningsjet, 3 langdistansejet). */
   reise?: number
+  /** Teller ikke når du eier hele byen (Pakke 79): de sene byggene fra Pakke 76. */
+  utenforByen?: boolean
 }
 
 export type LuksusKategori = 'bil' | 'klokke' | 'baat' | 'fly'
@@ -675,6 +677,13 @@ export interface Spiller {
   forsvar: number
   /** Juniorer fra akademiet (Pakke 71): taket de vokser mot til de er 23. Spilleren ser bare et spenn. */
   potensial?: number
+  /**
+   * Det du betalte for spilleren (Pakke 79): kjøpsprisen, eller 0 for en junior fra
+   * akademiet. Skatten på et salg er salgsprisen minus dette. Mangler for spillere
+   * fra før Pakke 79 og troppen som fulgte med klubben — da venter gevinsten til
+   * klubben selges, som før.
+   */
+  kostpris?: number
   /** Denne sesongen og karrieren (Pakke 72). Mangler til første kamp. */
   sesong?: Spillerstatistikk
   karriere?: Spillerstatistikk

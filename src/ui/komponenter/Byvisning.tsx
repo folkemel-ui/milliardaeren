@@ -1,4 +1,4 @@
-import { BYEIER_BONUS, EIENDOMSSTIGEN, EIENDOMSTYPER, eierHeleByen, enheterI } from '../../engine/eiendom'
+import { BYEIER_BONUS, byggI, EIENDOMSSTIGEN, EIENDOMSTYPER, eierHeleByen, enheterI } from '../../engine/eiendom'
 import { eiendomSynlig, jordSynlig } from '../../engine/handlinger'
 import { JORD, JORDLISTE, ukensGardHost } from '../../engine/jord'
 import { eierDu, landemerkepris, LANDEMERKELISTE, LANDEMERKER } from '../../engine/landemerker'
@@ -143,6 +143,9 @@ export function Byvisning({ s, by, lukk, gatebilde }: { s: Spilltilstand; by: By
 function Byeier({ s, by }: { s: Spilltilstand; by: By }) {
   const { eid, av } = enheterI(s, by)
   const hel = eierHeleByen(s, by)
+  // De sene byggene fra Pakke 76 teller ikke for hele byen (Pakke 79); si hvilke.
+  const utenfor = byggI(by).filter((id) => EIENDOMSTYPER[id].utenforByen).map((id) => EIENDOMSTYPER[id].navn).join(' og ')
+  const unntak = utenfor ? ` ${utenfor} teller ikke.` : ''
   return (
     <div className={hel ? 'byeier hel' : 'byeier'}>
       <span className="byeier-krone" aria-hidden="true">
@@ -151,7 +154,7 @@ function Byeier({ s, by }: { s: Spilltilstand; by: By }) {
       <div className="byeier-tekst">
         <strong>{hel ? 'Du eier hele byen' : `${eid} av ${av} enheter`}</strong>
         <span className="dempet liten">
-          {hel ? `+${tall(BYEIER_BONUS * 100)} % leie på alt du eier her.` : `Eier du alle, gir leien her +${tall(BYEIER_BONUS * 100)} %.`}
+          {hel ? `+${tall(BYEIER_BONUS * 100)} % leie på alt du eier her.` : `Eier du alle, gir leien her +${tall(BYEIER_BONUS * 100)} %.${unntak}`}
         </span>
       </div>
       {!hel && (

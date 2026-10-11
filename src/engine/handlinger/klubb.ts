@@ -4,8 +4,8 @@
  * en ren funksjon: tilstand inn, ny tilstand (eller en feilmelding) ut.
  */
 
-import { utforKlubbsalg } from '../handel'
-import { bygg, byggAkademi as byggAkademiet, FORMASJONER, KLUBB_LAAST_OPP, KLUBBNAVN, kjopspris, klubbTilSalgs, MAKS_TROPP, MIN_TROPP, nesteAkademi, nesteUtbygging, salgspris, startKlubb, TAKTIKKER, type Stadiondel } from '../klubb'
+import { utforKlubbsalg, utforSpillersalg } from '../handel'
+import { bygg, byggAkademi as byggAkademiet, FORMASJONER, KLUBB_LAAST_OPP, KLUBBNAVN, kjopspris, klubbTilSalgs, MAKS_TROPP, MIN_TROPP, nesteAkademi, nesteUtbygging, startKlubb, TAKTIKKER, type Stadiondel } from '../klubb'
 import type { Formasjon, Spilltilstand, Taktikk } from '../types'
 import { feil, type Utfall } from './felles'
 
@@ -45,7 +45,7 @@ export function kjopSpiller(s: Spilltilstand, id: number): Utfall {
   n.kontanter -= pris
   nk.kostpris = (nk.kostpris ?? 0) + pris
   nk.marked = nk.marked.filter((x) => x.id !== id)
-  nk.spillere = [...nk.spillere, { ...p }].sort((a, b) => b.styrke - a.styrke)
+  nk.spillere = [...nk.spillere, { ...p, kostpris: pris }].sort((a, b) => b.styrke - a.styrke)
   return { ok: true, tilstand: n }
 }
 
@@ -56,9 +56,7 @@ export function selgSpiller(s: Spilltilstand, id: number): Utfall {
   if (!p) return feil('Fant ikke spilleren.')
   if (k.spillere.length <= MIN_TROPP) return feil(`Du må ha minst ${MIN_TROPP} spillere.`)
   const n = structuredClone(s)
-  n.kontanter += salgspris(p)
-  n.klubb!.kostpris = (n.klubb!.kostpris ?? 0) - salgspris(p)
-  n.klubb!.spillere = n.klubb!.spillere.filter((x) => x.id !== id)
+  utforSpillersalg(n, id)
   return { ok: true, tilstand: n }
 }
 

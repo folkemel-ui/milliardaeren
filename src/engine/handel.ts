@@ -4,7 +4,7 @@
  * samme kurtasje og flytter kursen likt. Ingen sjekker her — det gjør de som kaller.
  */
 
-import { eiendomspris, EIENDOMSTYPER, enheterI, MEGLERHONORAR, restverdi } from './eiendom'
+import { byggI, eiendomspris, EIENDOMSTYPER, MEGLERHONORAR, restverdi } from './eiendom'
 import { flyttKurs, handelskurs, KURTASJE, PAPIRER } from './marked'
 import { flyt } from './portefolje'
 import { SALGSHONORAR, selskapsverdi } from './rivaler'
@@ -14,7 +14,7 @@ import { gardHost, landverdi, tommerverdi } from './jord'
 import { dagnummer } from './kalender'
 import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
-import { KLUBBSALG_HONORAR, klubbverdi } from './klubb'
+import { KLUBBSALG_HONORAR, klubbverdi, salgspris } from './klubb'
 import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
 
 /**
@@ -52,9 +52,10 @@ export function utforEiendomssalg(n: Spilltilstand, id: EiendomId): number {
     delete n.eiendomKostpris[id]
     delete n.eiendomStandard[id]
     delete n.oppussing[id]
-    // Er det ingenting igjen i byen, slutter forvalteren der (Pakke 57).
+    // Er det ingenting igjen i byen, slutter forvalteren der (Pakke 57). Alle byggene teller her,
+    // også de sene som ikke teller for hele byen (Pakke 79): eier du skyskraperen, blir forvalteren.
     const by = EIENDOMSTYPER[id].by
-    if (n.forvaltere?.[by] && enheterI(n, by).eid === 0) delete n.forvaltere[by]
+    if (n.forvaltere?.[by] && byggI(by).every((b) => !n.eiendommer[b])) delete n.forvaltere[by]
   }
   return inntekt
 }
@@ -110,6 +111,28 @@ export function utforMalerisalg(n: Spilltilstand, id: MaleriId): number {
   n.kontanter += inntekt
   bokforGevinst(n, inntekt - (n.kunst.eide[id]?.kostpris ?? 0))
   delete n.kunst.eide[id]
+  return inntekt
+}
+
+/**
+ * Selger en spiller (Pakke 79). Med en kostpris (kjøpt, eller en junior til 0) er
+ * gevinsten salgsprisen minus den, og den skattes som alle andre salg; klubbens
+ * kostpris går ned med det spilleren kostet. Uten kostpris (spillere fra før
+ * Pakke 79 og troppen som fulgte med klubben) går klubbens kostpris ned med hele
+ * salgsprisen, og gevinsten venter til klubben selges — som før.
+ */
+export function utforSpillersalg(n: Spilltilstand, id: number): number {
+  const k = n.klubb!
+  const p = k.spillere.find((x) => x.id === id)!
+  const inntekt = salgspris(p)
+  n.kontanter += inntekt
+  if (p.kostpris !== undefined) {
+    bokforGevinst(n, inntekt - p.kostpris)
+    k.kostpris = (k.kostpris ?? 0) - p.kostpris
+  } else {
+    k.kostpris = (k.kostpris ?? 0) - inntekt
+  }
+  k.spillere = k.spillere.filter((x) => x.id !== id)
   return inntekt
 }
 

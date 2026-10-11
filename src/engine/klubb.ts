@@ -1107,7 +1107,8 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
   if (pensjonert.length) saker.push({ type: 'deg', tittel: `${pensjonert[0]} legger opp`, tekst: pensjonert.length > 1 ? `Også ${pensjonert.slice(1).join(' og ')} takker for seg.` : 'En lang karriere er over.' })
   const juniorer = nyeJuniorer(k, t)
   if (juniorer.length) {
-    k.spillere = [...k.spillere, ...juniorer].sort((a, b) => b.styrke - a.styrke)
+    // De kostet ingenting (Pakke 79): selges en, er hele salget gevinst.
+    k.spillere = [...k.spillere, ...juniorer.map((p) => ({ ...p, kostpris: 0 }))].sort((a, b) => b.styrke - a.styrke)
     const navn = juniorer.map((p) => `${p.navn} (${p.alder})`)
     saker.push({ type: 'deg', tittel: `${juniorer.length === 1 ? 'Ny junior' : `${juniorer.length} nye juniorer`} fra akademiet`, tekst: `${navn.join(', ')} rykker opp i A-troppen. Treneren ser et tak et stykke over dagens nivå.` })
   }

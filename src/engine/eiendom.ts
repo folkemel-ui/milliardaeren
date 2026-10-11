@@ -70,10 +70,10 @@ export const EIENDOMSTYPER: Record<EiendomId, Eiendomstype> = {
   newyork: { id: 'newyork', navn: 'Toppleilighet på Manhattan', sted: 'Manhattan, New York', by: 'New York', pris: 12_000_000_000, avkastning: 0.08, maksAntall: 1, statuskrav: 0, reise: 3 },
   // Pakke 76: det sene spillet. Over 12 mrd var det ingenting å kjøpe; nå går stigen
   // til 500 mrd, alt før 1 000 mrd-streken, i byer som har valuta og plass på kartet.
-  'canary-wharf': { id: 'canary-wharf', navn: 'Kontortårn i Canary Wharf', sted: 'Canary Wharf, London', by: 'London', pris: 25_000_000_000, avkastning: 0.07, maksAntall: 2, statuskrav: 0, reise: 2 },
-  kjopesenterkjede: { id: 'kjopesenterkjede', navn: 'Kjøpesenterkjede', sted: 'Tolv sentre, hovedkontor i Oslo', by: 'Oslo', pris: 75_000_000_000, avkastning: 0.065, maksAntall: 1, statuskrav: 0 },
-  'downtown-dubai': { id: 'downtown-dubai', navn: 'Skyskraper i Downtown Dubai', sted: 'Downtown, Dubai', by: 'Dubai', pris: 200_000_000_000, avkastning: 0.06, maksAntall: 1, statuskrav: 0, reise: 3 },
-  'manhattan-skyskraper': { id: 'manhattan-skyskraper', navn: 'Skyskraper på Manhattan', sted: 'Midtown, New York', by: 'New York', pris: 500_000_000_000, avkastning: 0.055, maksAntall: 1, statuskrav: 0, reise: 3 },
+  'canary-wharf': { id: 'canary-wharf', navn: 'Kontortårn i Canary Wharf', sted: 'Canary Wharf, London', by: 'London', pris: 25_000_000_000, avkastning: 0.07, maksAntall: 2, statuskrav: 0, reise: 2, utenforByen: true },
+  kjopesenterkjede: { id: 'kjopesenterkjede', navn: 'Kjøpesenterkjede', sted: 'Tolv sentre, hovedkontor i Oslo', by: 'Oslo', pris: 75_000_000_000, avkastning: 0.065, maksAntall: 1, statuskrav: 0, utenforByen: true },
+  'downtown-dubai': { id: 'downtown-dubai', navn: 'Skyskraper i Downtown Dubai', sted: 'Downtown, Dubai', by: 'Dubai', pris: 200_000_000_000, avkastning: 0.06, maksAntall: 1, statuskrav: 0, reise: 3, utenforByen: true },
+  'manhattan-skyskraper': { id: 'manhattan-skyskraper', navn: 'Skyskraper på Manhattan', sted: 'Midtown, New York', by: 'New York', pris: 500_000_000_000, avkastning: 0.055, maksAntall: 1, statuskrav: 0, reise: 3, utenforByen: true },
 }
 
 export const EIENDOMSSTIGEN = Object.keys(EIENDOMSTYPER) as EiendomId[]
@@ -232,19 +232,32 @@ const BYGG_I = new Map<By, EiendomId[]>()
  * alle hyblene og alle leilighetene, ikke bare én av hver. Byer uten bygg
  * (bare jord) kan ikke eies slik.
  */
+const BYGG_FOR_BYEN = new Map<By, readonly EiendomId[]>()
+
+/**
+ * Byggene som teller når du eier hele byen (Pakke 79): alle i byen unntatt de sene
+ * fra Pakke 76 (`utenforByen`). Med dem kostet hele Oslo 78 mrd i stedet for 3,3,
+ * og lagringer som eide en hel by, mistet bonusen.
+ */
+export function byggForHeleByen(by: By): readonly EiendomId[] {
+  let liste = BYGG_FOR_BYEN.get(by)
+  if (!liste) BYGG_FOR_BYEN.set(by, (liste = byggI(by).filter((id) => !EIENDOMSTYPER[id].utenforByen)))
+  return liste
+}
+
 export function eierHeleByen(s: Spilltilstand, by: By): boolean {
-  const bygg = byggI(by)
+  const bygg = byggForHeleByen(by)
   if (bygg.length === 0) return false
   // En vanlig løkke: dette spørres for hver by hvert sekund (Pakke 64).
   for (let i = 0; i < bygg.length; i++) if ((s.eiendommer[bygg[i]] ?? 0) < EIENDOMSTYPER[bygg[i]].maksAntall) return false
   return true
 }
 
-/** Hvor mange enheter du eier i en by, av hvor mange som finnes. */
+/** Hvor mange enheter du eier i en by, av hvor mange som teller for hele byen. */
 export function enheterI(s: Spilltilstand, by: By): { eid: number; av: number } {
   let eid = 0
   let av = 0
-  for (const id of byggI(by)) {
+  for (const id of byggForHeleByen(by)) {
     eid += Math.min(s.eiendommer[id] ?? 0, EIENDOMSTYPER[id].maksAntall)
     av += EIENDOMSTYPER[id].maksAntall
   }
