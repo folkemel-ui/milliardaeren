@@ -23,6 +23,7 @@ import { forbesliste } from './rivaler'
 import { FORMER, fusjonsnokler } from './fusjon'
 import { nettoformue } from './formler'
 import type { Terning } from './rng'
+import { kortKroner } from './tall'
 import type { Avisutgave, Dagsbilde, LuksusId, Overskrift, PapirId, Spilltilstand } from './types'
 import { dagnummer } from './kalender'
 import { verdenssaker } from './verden'
@@ -47,6 +48,7 @@ export function lagDagsbilde(s: Spilltilstand): Dagsbilde {
     rang: forbesliste(s, nettoformue(s)).findIndex((p) => p.deg) + 1,
     overtatte: (s.rivaler ?? []).filter((r) => r.overtatt).map((r) => r.id),
     fusjoner: fusjonsnokler(s),
+    stemningssone: stemningssone(s.forrigeDag?.stemningssone ?? 0, s.marked.stemning),
   }
 }
 
@@ -164,15 +166,94 @@ function sosietet(s: Spilltilstand, t: Terning): Overskrift[] {
   return [t.velg(kandidater)]
 }
 
-/** Sakene om markedet: dagens største bevegelser. */
-function omMarkedet(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
+/** Så mye en aksje må bevege seg for å komme i avisa — og en mynt. */
+const AKSJE_TERSKEL = 0.03
+const KRYPTO_TERSKEL = 0.1
+/**
+ * En post du eier, kommer i avisa ved halve terskelen (Pakke 82): avisa skriver heller
+ * om din aksje som steg 2 % enn om dagens største bevegelse i et papir du ikke har.
+ */
+export const EGEN_TERSKEL = 0.5
+/**
+ * Kryptostemningen blir «feber» over denne og «panikk» under minus den, og roer seg
+ * først innenfor ROLIG_GRENSE — ellers vippet den fram og tilbake over 0,6 og avisa
+ * skrev om det annenhver dag.
+ */
+const STEMNINGSGRENSE = 0.6
+const ROLIG_GRENSE = 0.4
+
+/** Sonen i dag, gitt sonen i går: 1 feber, −1 panikk, 0 rolig. */
+export function stemningssone(igaar: number, x: number): number {
+  if (x > STEMNINGSGRENSE) return 1
+  if (x < -STEMNINGSGRENSE) return -1
+  if (igaar === 1 && x > ROLIG_GRENSE) return 1
+  if (igaar === -1 && x < -ROLIG_GRENSE) return -1
+  return 0
+}
+
+const antallAv = (s: Spilltilstand, id: PapirId) => s.beholdning[id]?.antall ?? 0
+
+/** «Din post i Romfart Nord steg 6 %» — med hva det betydde i kroner for posten du har nå. */
+function egenSak(s: Spilltilstand, før: Dagsbilde, id: PapirId, e: number): Overskrift {
+  const p = PAPIRER[id]
+  const kroner = antallAv(s, id) * (s.marked.kurser[id].kurs - før.kurser[id])
+  const opp = e > 0
+  const tittel = p.klasse === 'krypto'
+    ? `Din ${p.navn} ${opp ? 'skyter i været' : 'stuper'}: ${opp ? '+' : '−'}${prosent(e)}`
+    : `Din post i ${p.navn} ${opp ? 'steg' : 'falt'} ${prosent(e)}`
+  return { type: 'marked', tittel, tekst: `Det er ${kortKroner(Math.abs(kroner))} ${opp ? 'mer' : 'mindre'} enn i går for posten din.` }
+}
+
+/**
+ * Stemningssaken (Pakke 82): bare den dagen stemningen krysser grensen, og én gang når
+ * den faller tilbake — før sto «Panikk i kryptomarkedet» på trykk hver dag den varte.
+ * Har du krypto, står det hva den er verdt og hvor mye kursene flyttet den siden i går.
+ */
+function stemningssak(s: Spilltilstand, før: Dagsbilde): Overskrift | null {
+  const forrige = før.stemningssone ?? 0
+  const naa = stemningssone(forrige, s.marked.stemning)
+  if (naa === forrige) return null
+  let sak: Overskrift
+  if (naa === 1) sak = { type: 'marked', tittel: 'Kryptofeber', tekst: 'Grådigheten rår i kryptomarkedet. Selv bestemor spør om Bitmynt.' }
+  else if (naa === -1) sak = { type: 'marked', tittel: 'Panikk i kryptomarkedet', tekst: 'Frykten rår, og mange selger for å redde det som reddes kan.' }
+  else sak = { type: 'marked', tittel: 'Roen senker seg over kryptomarkedet', tekst: `Etter dager med ${forrige === 1 ? 'feber' : 'panikk'} er stemningen tilbake på jorda.` }
+  let verdi = 0
+  let igaar = 0
+  for (const id of KRYPTO) {
+    const n = antallAv(s, id)
+    verdi += n * s.marked.kurser[id].kurs
+    igaar += n * før.kurser[id]
+  }
+  if (verdi > 0 && igaar > 0) {
+    const e = verdi / igaar - 1
+    sak.tekst += ` Kryptoen din er verdt ${kortKroner(verdi)} — ${e >= 0 ? '+' : '−'}${prosent(e)} siden i går.`
+  }
+  return sak
+}
+
+/**
+ * Sakene om markedet: dagens største bevegelser. Eier du aksjer eller krypto, skriver
+ * avisa om den av dine som beveget seg mest, ved halve terskelen (Pakke 82). Disse
+ * kommer i `dine`, som står foran rivalene og verden; resten i `andre`.
+ */
+export function omMarkedet(s: Spilltilstand, før: Dagsbilde): { dine: Overskrift[]; andre: Overskrift[] } {
+  const dine: Overskrift[] = []
   const saker: Overskrift[] = []
   const endring = (id: PapirId) => s.marked.kurser[id].kurs / før.kurser[id] - 1
   const størst = (ider: PapirId[]) => [...ider].sort((a, b) => Math.abs(endring(b)) - Math.abs(endring(a)))[0]
+  const egen = (ider: PapirId[], terskel: number): boolean => {
+    const mine = ider.filter((id) => antallAv(s, id) > 0)
+    if (!mine.length) return false
+    const id = størst(mine)
+    const e = endring(id)
+    if (Math.abs(e) < terskel * EGEN_TERSKEL) return false
+    dine.push(egenSak(s, før, id, e))
+    return true
+  }
 
   const aksje = størst(AKSJER)
   const ea = endring(aksje)
-  if (Math.abs(ea) >= 0.03) {
+  if (!egen(AKSJER, AKSJE_TERSKEL) && Math.abs(ea) >= AKSJE_TERSKEL) {
     saker.push({
       type: 'marked',
       tittel: `${PAPIRER[aksje].navn} ${ea > 0 ? 'stiger' : 'faller'} ${prosent(ea)}`,
@@ -181,7 +262,7 @@ function omMarkedet(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
   }
   const mynt = størst(KRYPTO)
   const ek = endring(mynt)
-  if (Math.abs(ek) >= 0.1) {
+  if (!egen(KRYPTO, KRYPTO_TERSKEL) && Math.abs(ek) >= KRYPTO_TERSKEL) {
     saker.push({
       type: 'marked',
       tittel: `${PAPIRER[mynt].navn} ${ek > 0 ? 'skyter i været' : 'stuper'}: ${ek > 0 ? '+' : '−'}${prosent(ek)}`,
@@ -194,9 +275,9 @@ function omMarkedet(s: Spilltilstand, før: Dagsbilde): Overskrift[] {
   } else if (Math.abs(ei) >= 0.02) {
     saker.push({ type: 'marked', tittel: `Boligprisene ${ei > 0 ? 'stiger' : 'faller'} ${prosent(ei)}`, tekst: ei > 0 ? 'Budrundene er tilbake i Bergen og Oslo.' : 'Flere boliger blir liggende usolgt.' })
   }
-  if (s.marked.stemning > 0.6) saker.push({ type: 'marked', tittel: 'Kryptofeber', tekst: 'Grådigheten rår i kryptomarkedet. Selv bestemor spør om Bitmynt.' })
-  else if (s.marked.stemning < -0.6) saker.push({ type: 'marked', tittel: 'Panikk i kryptomarkedet', tekst: 'Frykten rår, og mange selger for å redde det som reddes kan.' })
-  return saker
+  const stemning = stemningssak(s, før)
+  if (stemning) saker.push(stemning)
+  return { dine, andre: saker }
 }
 
 const LOKALT: Overskrift[] = [
@@ -238,6 +319,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   ]
   // Verden (Pakke 49): rentemøtet, ukas trender, helligdagen og været. Fra hasher, ikke terningen.
   const verden = verdenssaker(s)
+  const marked = omMarkedet(s, før)
   // Rekkefølgen er viktigheten: deg selv og skatten først, så nyheter som
   // flytter kurser, kappløpet, dagens bevegelser og sladder. Lokalstoff fyller
   // på når det er stille.
@@ -248,9 +330,10 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...andre.filter((x) => x.type === 'deg'),
     ...startupsaker.filter((x) => x.type === 'deg'),
     ...nyheter,
+    ...marked.dine,
     ...omRivalene(s, før),
     ...verden.marked,
-    ...omMarkedet(s, før),
+    ...marked.andre,
     ...startupsaker.filter((x) => x.type !== 'deg'),
     ...andre.filter((x) => x.type !== 'deg'),
     ...verden.lokalt,

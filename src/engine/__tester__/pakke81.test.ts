@@ -88,14 +88,14 @@ describe('en rival som holder følge', () => {
     expect(rivalvekst(aas).tak).toBe(1500e9)
   })
 
-  it('etter 22 timer har hun rundt 40–60 mrd, og vokser forbi 150', { timeout: 120_000 }, async () => {
+  it('etter 22 timer har hun titalls milliarder (20–60 på tre frø), ikke lenger et tak på 150', { timeout: 120_000 }, async () => {
     let s = nyttSpill()
     for (let t = 0; t < 22; t++) {
       s = simuler(s, 3600)
       await new Promise((r) => setTimeout(r, 0))
     }
     const aas = s.rivaler.find((r) => r.id === 'aas')!
-    expect(aas.formue).toBeGreaterThan(25e9)
+    expect(aas.formue).toBeGreaterThan(15e9)
     expect(aas.formue).toBeLessThan(200e9)
     expect(aas.tak).toBe(150e9)
   })

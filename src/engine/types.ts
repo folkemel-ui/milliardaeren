@@ -329,6 +329,8 @@ export interface Dagsbilde {
   overtatte?: string[]
   /** Fusjonene du hadde gjort ved dagens start, som «rivalId:bransje». */
   fusjoner?: string[]
+  /** Kryptostemningen ved dagens start (Pakke 82): 1 feber, −1 panikk, 0 rolig. Avisa skriver når den snur. */
+  stemningssone?: number
 }
 
 export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'obligasjon' | 'eiendom' | 'sparing' | 'rival' | 'startup'

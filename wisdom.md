@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 81, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 82, 11 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -513,6 +513,15 @@ session; delete what stops being true.
 - **A growth rate on paper is not the simulation's** (Pack 81, as Pack 67): 0.16/h «gives 67 mrd at
   22 h» on paper, but the engine gave ~30 (the noise and the slow start pull down). Measure three seeds
   in the engine and pick the number that hits the promise (0.18), and say so in the report.
+- **The front page holds five stories, and a fresh game's first day fills them** (Pack 82): company
+  news, quarterly notices and the week's trends took all five, so a test that bumped a stock and
+  looked for the market story on the front page found nothing. Test a story's own function
+  (`omMarkedet` is exported for that) and keep one front-page test for the order. Count stories per
+  issue as they are printed (`s.avis` keeps only the last seven).
+- **A threshold story needs a buffer** (Pack 82): «print when the mood crosses 0.6» still printed every
+  few days, because the mood hovers at the line. A zone that turns at 0.6 and calms only inside 0.4
+  (`stemningssone`, kept as `stemningssone` on the day's `Dagsbilde`) cut it from 50 to 23. A new
+  optional `Dagsbilde` field needs no save version; a save without it gets the story once.
 - **Per-type rules (Pack 80)**: `milepaelfaktor`, `milepaelboost` and `nesteMilepael` take an
   optional type; without it they give the shared milestones. Anything that shows or plans
   milestones for a business must pass `b.type` (or use `milepaelerFor`), or the hotel's level 35
