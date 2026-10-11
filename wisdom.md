@@ -1101,6 +1101,21 @@ session; delete what stops being true.
   it steps at a day change inside a 10 s block (cash still matched to 1e-8). Find the cause by
   zeroing one property at a time before widening a tolerance. A scene that stands at a distance
   needs half-size cars (`Smaabil`): a `Bil` is drawn at street size and covered the mall's entrance.
+- **A new building in an old city changes «the whole city» (Pack 79).** `eierHeleByen` counted every
+  building in the city, so Pack 76's late buildings took the +10 % away from saves that owned all of
+  Oslo, London, Dubai or New York — against the rule that nobody loses what they have. Now a type can
+  carry `utenforByen`, and `byggForHeleByen(by)` is what the bonus and the «x av y» count use; rent,
+  the city's value and the street view still use `byggI(by)`. Anything else that asks «do you own
+  anything here» must ask `byggI` (the manager leaving the city did, via `enheterI`, and would have
+  left while you still owned the skyscraper). Before adding a building to an existing city, check
+  every caller of `byggI` and `enheterI`.
+- **A player's own cost price (Pack 79).** Selling a player used to lower the club's cost price by the
+  whole sale, so the gain waited for the club sale, which most players never make. Now a player bought
+  gets `kostpris` (the price paid) and an academy junior 0, and `utforSpillersalg` in `handel.ts` books
+  sale − cost; a player without it (older saves, the squad that came with the club) is sold as before.
+  An optional field with the old behaviour as the fallback needs no save version and taxes nothing
+  backwards. Club trades were never in `flyt` (that is for the investment classes), so the weekly
+  report needed nothing.
 - **A fourth room step** meant the room code (`ui/romkode.ts`) needed 3 bits per room instead of 2
   (`romkode(3,3,3)` was 63, now 219); the saves store step counts, not codes, so nothing migrates.
   A drawing that picks a colour by step from a list (`[...][n]` in the wine cellar) must clamp `n`,
