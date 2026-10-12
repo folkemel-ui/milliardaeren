@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12–G15 (10–11 October 2026), G16, Pack 74 and G17 (11 October 2026). G18–G23 are planned in
-`Ideer.md`: the full frame for the rest of the properties and the luxury in groups (G18–G21), the
-seasons (G22) and the club in pictures (G23).
+2026), G12–G15 (10–11 October 2026), G16, Pack 74 and G17 (11 October 2026) and G18 (12 October
+2026). G19–G24 are planned in `Ideer.md`: the full frame for the rest of the properties and the luxury
+in groups (G19–G21), the seasons (G22), the club in pictures (G23) and racing (G24).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -1257,7 +1257,53 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   edit-and-look round. One line before each stretch («drawing the sides of the three cabins»,
   «waiting for the other track's tests») is enough, and it costs nothing.
 
-## 7. Notes for later (G1–G17 done; G18–G23 planned in `Ideer.md`; Pack 74 done)
+## 6g. A full frame for buildings, land and landmarks (G18)
+
+- **All four recommendations were taken again**: the chain from Pack 76 joined the thirteen, the
+  farms were drawn wide as they are (the growing farm stays its own item), the real neighbours per
+  place, more sea with skerries and boats for the three at sea, and one thing at work per piece of
+  land. Naming the neighbour per drawing in the option (the Munch museum, Sørenga, Tjuvholmen and the
+  City Hall towers, Skibladner, the Lista turbines, a sawmill at Namsos) again made it one click.
+  The scope option said why the farm growth is big (the drawing must take the farm's state through
+  the game track's cards) and flagged the item's wrong premise (irrigation; Pack 93 built drainage and
+  frost cover) — the item text now says so.
+- **Whole-function splicing.** `scratchpad/g18/splice.mjs <file> <snippet…>` replaces each
+  `function Name(` in the snippet up to its closing `\n}` at column 0, swaps the doc comment when the
+  snippet has one, and inserts a new helper before `//@@ før Name`. Each drawing lives in its own
+  snippet; small fixes go into the snippet with `fiks.mjs` (JSON pairs, all checked first) and the
+  snippet is spliced again. CRLF and BOM are kept. Fourteen drawings and ~30 rounds of fixes ran
+  without one stray edit.
+- **A hazy mountain in `fjell.flate` disappears against the full sky in the dark theme.** The
+  vignette used to darken the sky around the Lofoten wall; edge to edge, the hazed grey is the sky's
+  own tone and only the shadow faces and snow lines were left floating. The wall's body is now
+  `fjell.skygge` and its faces `skifer.skygge` (the island and, to match, G17's Rorbu). Check every
+  haze mountain once on a full sky — G19's Matterhorn and the Costa del Sol hills are next.
+- **The full frame shows gaps the vignette hid.** Between the haze band (a fjord, Mjøsa, the sea at
+  `HORISONT`) and the top of `Bakke` (y 68) there is bare sky on a wide canvas: Holmenkollen showed sky
+  *under* the fjord, and Hedmarken and Lista needed a far field band. Fill it with a hazy band of land
+  in the background group, drawn after the water.
+- **Size at a distance, again.** `Gatelykt` is a street-distance lamp, 44 units — 17 m at far
+  distance; a car-park pole there is 20 units. A bus at far distance is ~26 × 8.6, a car is
+  `Smaabil`. A side-on timber truck carries its logs lengthwise; the first one showed their ends
+  (the sense pass caught it, no test would).
+- **Keep the centre identical when a list grows to both sides.** Cars on a row went from 9 to 15 by
+  starting the index at −6 (`x = 12 + (i − 6) · 8.6`) and putting the six new colours first; a crowd's
+  colour index keeps its offset (`(… + x − 72) % n`). Then the square tile is the drawing it was.
+- **Everything in the scene is drawn twice** (the day subject and the night layer, G10), so a test
+  that counts markup — three turbines, lit windows — sees double. Count distinct values or expect ×2.
+- **A drawing with no windows has nothing at night.** Steinvik borg had only dark arrow slits, so the
+  night layer showed a black castle; three slits in the main house, one in the tower and a window in
+  the farm across the fjord now carry `nattvindu`. `grafikkG18.test.ts` asks for at least two lights
+  in every drawing and ten in the city ones.
+- **`Skjaer`** (in the part) draws a skerry with an irregular front edge, a pale ring of surf and a
+  faint reflection from a list of top points; the island, the lighthouse and the castle use it.
+- **Tiles**: a tall subject (the towers, the lighthouse, the ski jump) gets a tall box from the top
+  (78–86); a low wide one (the centres, the farms, the island) a tight box around the main building
+  (58–68), even if a neighbour is cut — the barn at Hedmarken, not the whole farm.
+- **Sizes after G18**: the property part is 146 kB raw, 35.1 gzipped (it also holds Pack 76's four
+  drawings); the start script 230.8 kB gzipped (Pack 96 moved the tabs out; G18's lists added ~0.1).
+
+## 7. Notes for later (G1–G18 done; G19–G24 planned in `Ideer.md`; Pack 74 done)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -1267,7 +1313,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **Next groups for the full frame (G18–G21)**: add the ids to `FULL_RAMME`, extend
+- **Next groups for the full frame (G19–G21)**: add the ids to `FULL_RAMME`, extend
   everything that ends at 0 and 96, fill the sides, and give the tile a crop (`FLISUTSNITT`, one
   square; a per-stage `TRINNUTSNITT` only where the subject grows, as for the businesses). Properties and luxury live in the lazy parts, so their helpers
   for the sides go there (or in the start file if a business needs them too). Cars use
@@ -1275,7 +1321,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   cars (G20).
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings grow the start script, which is at
-  249.9 kB gzipped after G17, against a budget of 500 (`startskript.test.ts`); the business steps (§6d) and
+  230.8 kB gzipped after G18 (249.9 after G17; Pack 96 moved the tabs into parts), against a budget of 500 (`startskript.test.ts`); the business steps (§6d) and
   the home scenes are parts of their own.
 - **G22 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
@@ -1286,7 +1332,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   should follow the same rule as their stage.
 - **Don't import one part from another.** The step helpers (`Kunde`, `Vimpler`, `Skip`) live
   in `Trinnsteg.tsx` and would be handy for the sides of G18–G21's drawings; copying 10 lines
-  is cheaper than moving them to the start file (249.9 of 500 kB), unless a business also
+  is cheaper than moving them to the start file (230.8 of 500 kB), unless a business also
   needs them.
 - **New milestones after level 100** (game track, Pack 70) change which levels are stage 3,
   not `stegFor`: it counts every fifth level from the stage start and is capped at 150. If a

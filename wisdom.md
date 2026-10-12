@@ -446,6 +446,12 @@ session; delete what stops being true.
   with the reason written there). The game can grow, but a phone still reads the whole script
   before the first screen, so new screens' code that is not on the first screen still belongs in a
   part (`ui/vedBehov.ts`). Details in `wisdom-grafikk.md` §6f.
+- **A full frame for buildings, land and landmarks (G18).** The office buildings, the shopping centre,
+  Aker Brygge, the island, both farms, both forests, the four landmarks and Pack 76's shopping-centre
+  chain are in `FULL_RAMME` too, each with a tile crop in `FLISUTSNITT`. A game pack that changes what
+  the farms or forests show (fields, machines, buildings) changes a wide drawing: anything it adds must
+  stay inside x −40…136 and leave the centre square readable on its own. Details in
+  `wisdom-grafikk.md` §6g.
 - **The tabs are parts too (Pack 96).** Investeringer, Eiendom, Luksus (with Klubb and racing),
   Profil and Avisa load through `vedBehov` (`ui/skjermer.tsx`, `<Skjerm del={…} p={…} />` in
   `App.tsx`); only Bedrifter, the top bar, the menu and the pop-ups that open at start stay in the
