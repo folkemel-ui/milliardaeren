@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 94, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 95, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -120,6 +120,9 @@ session; delete what stops being true.
   them). Building the structure first meant the second pack's measurements were per page, and
   an item the first pack had half-done (the form chips, the table around you) was rewritten in
   `Ideer.md` to say what was left, not removed or left as it was.
+- **The first time Folke chose against my recommendation** was Pack 95: the home-screen card on the
+  first visit, not «after 10 minutes». Build what was chosen, keep the sensible parts of the
+  recommendation that don't conflict (here «Ikke nå» and «Skjul»), and say so in the report.
 - **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–78.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
@@ -323,6 +326,19 @@ session; delete what stops being true.
   computed colours) and say in the report which checks were DOM-only.
 - **In mobile emulation `innerWidth` grows** when content overflows. Measure against
   `document.documentElement.clientWidth`.
+- **Safari wants the clipboard and the share sheet inside the tap** (Pack 95): an `await` before
+  `navigator.clipboard.writeText` or `navigator.share` (a gzip of the save) uses up the user's gesture.
+  Prepare the text when the panel or screen opens (`FlyttSpillet`, the crash report) and call the
+  clipboard synchronously in the handler; `ClipboardItem` with a promise is the fallback Safari
+  accepts. Desktop Chrome in the pane works either way, so it proves nothing about the iPhone.
+- **A full storage is `QuotaExceededError`** (or code 22/1014); private mode and blocked storage
+  throw other errors. Only the first should warn the player (`erFull` in `lager.ts`).
+- **Testing the save store**: `state/__tester__/lager.test.ts`'s fake globals (a Map for
+  localStorage, a fake document and window) plus a size limit in `setItem` make a full disk; note
+  the stored form is much smaller than raw JSON (74 vs 138 kB for a fresh game), so write once
+  before tightening the limit, and stub `removeEventListener` if the test stops the loop. A spy on
+  `visVarsel` must be attached after `vi.resetModules()` and the store's import, or it watches a
+  different copy of the module.
 - **Never import `/src/state/lager.ts`** from the page — a second store claims ownership
   and pauses the game. Engine modules and `ui/varsler.ts` are safe.
 - **Editing a running save: do it from `/ikon.svg`.** Navigate there (the game isn't
