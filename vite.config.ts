@@ -1,5 +1,7 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { defineConfig, type Plugin } from 'vite'
 import { configDefaults } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
@@ -40,8 +42,38 @@ const TUNGE = [
  */
 const ARBEIDERE = 3
 
+/**
+ * Service workeren med utgivelsens filliste (Pakke 96). `src/sw.js` har to plassholdere:
+ * lista over alle filene under assets/ (startskriptet, stilarket, skriften, hver del som
+ * lastes ved behov) og en utgave — en hash av lista. Service workeren lagrer hele lista ved
+ * installasjon, så første besøk er nok til å starte uten nett. Fila havner i bygget som
+ * `sw.js`; utviklingsserveren registrerer ingen service worker (src/pwa.ts).
+ */
+function serviceWorker(): Plugin {
+  return {
+    name: 'milliardaer-sw',
+    apply: 'build',
+    // Etter Vites egne steg, så stilarket og skriften er med i bunten.
+    enforce: 'post',
+    generateBundle(_, bunt) {
+      const filer = Object.keys(bunt)
+        .filter((f) => f.startsWith('assets/'))
+        .sort()
+        .map((f) => `./${f}`)
+      const utgave = createHash('sha256').update(filer.join('\n')).digest('hex').slice(0, 12)
+      const kilde = readFileSync(new URL('./src/sw.js', import.meta.url), 'utf8')
+      const fyll = (t: string, fra: string, til: string) => {
+        if (!t.includes(fra)) throw new Error(`src/sw.js mangler plassholderen ${fra}`)
+        return t.replace(fra, () => til)
+      }
+      const kode = fyll(fyll(kilde, '/*RESSURSER*/ []', JSON.stringify(filer)), '__UTGAVE__', utgave)
+      this.emitFile({ type: 'asset', fileName: 'sw.js', source: kode })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), serviceWorker()],
   // Relativ base: bygget fungerer både på rot og i en undermappe.
   base: './',
   server: { port: 5180 },

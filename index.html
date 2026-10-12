@@ -14,6 +14,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Milliardær" />
     <title>Milliardær</title>
+    <!-- Pakke 96: skriften hentes med en gang, ikke først når stilarket er lest. Bare latinske tegn (scripts/lag-skrift.mjs). -->
+    <link rel="preload" href="/src/assets/fonter/InterLatin.woff2" as="font" type="font/woff2" crossorigin />
     <!-- Lyst tema og redusert bevegelse settes før noe tegnes, så lasteskjermen ikke blinker mørk eller beveger seg
          når spilleren har bedt om ro (samme nøkler som ui/tema.ts og ui/innstillinger.ts). -->
     <script>
@@ -44,6 +46,9 @@
       @media (prefers-reduced-motion: reduce) { .laster svg, .laster svg *, .laster span { animation: none !important; } .laster .glans { display: none; } }
       html[data-bevegelse='redusert'] .laster svg, html[data-bevegelse='redusert'] .laster svg *, html[data-bevegelse='redusert'] .laster span { animation: none !important; }
       html[data-bevegelse='redusert'] .laster .glans { display: none; }
+      .laster p { margin: 0; color: #a39c8f; font-size: 15px; }
+      .laster button { min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #d4af37; color: #1a1508; font: 700 15px system-ui, sans-serif; }
+      html[data-theme='light'] .laster p { color: #5c5850; }
     </style>
   </head>
   <body>
@@ -67,6 +72,21 @@
         <span>Milliardær</span>
       </div>
     </div>
+    <!-- Pakke 96: har spillet ikke tegnet seg etter 10 s (uten nett og uten lagret kopi, eller en fil som ikke kom),
+         sier lasteskjermen det i stedet for å puste for alltid. Spillet erstatter hele #root når det tegner. -->
+    <script>
+      setTimeout(function () {
+        var l = document.querySelector('#root > .laster')
+        if (!l) return
+        var p = document.createElement('p')
+        p.textContent = 'Kunne ikke starte'
+        var b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = 'Prøv igjen'
+        b.onclick = function () { location.reload() }
+        l.append(p, b)
+      }, 10000)
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Avis } from './ui/komponenter/Avis'
 import { aktivVelkomst, lukkVelkomst, spillnummer, startSpillokke, useAvbrudd, useSpill, useVelkomst } from './state/lager'
 import { Avbruddskjerm } from './ui/komponenter/Avbrudd'
 import { Velkomstskjerm } from './ui/komponenter/Velkomst'
@@ -18,10 +17,8 @@ import { Nyheter } from './ui/komponenter/Nyheter'
 import type { Hendelse } from './engine/types'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
 import { Bedrifter } from './ui/screens/Bedrifter'
-import { Eiendom } from './ui/screens/Eiendom'
-import { Investeringer } from './ui/screens/Investeringer'
-import { Luksus } from './ui/screens/Luksus'
-import { Profil } from './ui/screens/Profil'
+import { AVIS, SKJERMER, Skjerm } from './ui/skjermer'
+import { useDel } from './ui/vedBehov'
 import { lyttEtterKorttrykk } from './ui/overgang'
 import { lyttEtterTilbake, useTilbake } from './ui/tilbake'
 import { Hendelseslogg } from './ui/komponenter/Hendelseslogg'
@@ -201,9 +198,12 @@ export default function App() {
   // En annen fane enn Bedrifter er et steg i historikken: tilbake går hjem, og fra Bedrifter ut av spillet.
   useTilbake(fane !== 'bedrifter', () => velg('bedrifter'))
   // Fanen åpner der du sist var i den — øverst første gang, og når delen er en annen.
+  // En fane som ikke er hentet ennå (Pakke 96), ruller når den kommer: før det er siden tom.
+  const fanedel = fane === 'bedrifter' ? null : SKJERMER[fane]
+  const fanenKlar = useDel(fanedel) !== undefined || fanedel === null
   useLayoutEffect(() => {
-    window.scrollTo({ top: hentRulling(fane, delnokkel(fane)) })
-  }, [fane])
+    if (fanenKlar) window.scrollTo({ top: hentRulling(fane, delnokkel(fane)) })
+  }, [fane, fanenKlar])
   const gåTil = (m: Mål) => {
     if (m === 'hendelser') return settLoggÅpen(true)
     if (m === 'klubb' || m === 'samling') {
@@ -242,10 +242,10 @@ export default function App() {
         }}
       >
         {fane === 'bedrifter' && <Bedrifter s={s} />}
-        {fane === 'investeringer' && <Investeringer s={s} />}
-        {fane === 'eiendom' && <Eiendom s={s} />}
-        {fane === 'luksus' && <Luksus s={s} />}
-        {fane === 'profil' && <Profil s={s} gåTil={velg} />}
+        {fane === 'investeringer' && <Skjerm del={SKJERMER.investeringer} p={{ s }} />}
+        {fane === 'eiendom' && <Skjerm del={SKJERMER.eiendom} p={{ s }} />}
+        {fane === 'luksus' && <Skjerm del={SKJERMER.luksus} p={{ s }} />}
+        {fane === 'profil' && <Skjerm del={SKJERMER.profil} p={{ s, gåTil: velg }} />}
       </main>
       <Fanemeny aktiv={fane} velg={velg} aapen={(f) => faneAapen(s, f)} />
       <Varselstabel gåTil={gåTil} />
@@ -264,7 +264,7 @@ export default function App() {
           gåTil={gåTil}
         />
       )}
-      {avisÅpen && <Avis s={s} lukk={lukkAvis} />}
+      {avisÅpen && <Skjerm del={AVIS} p={{ s, lukk: lukkAvis }} />}
       {loggÅpen && <Hendelseslogg s={s} lukk={() => settLoggÅpen(false)} />}
       {nyheter && !velkomst && !avisÅpen && !loggÅpen && (
         <Nyheter

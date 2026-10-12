@@ -62,6 +62,8 @@ export async function startApp(spill?: Spilltilstand, ekstra: Record<string, str
   for (const [nokkel, verdi] of Object.entries(ekstra)) localStorage.setItem(nokkel, verdi)
 
   const { default: App } = await import('../../App')
+  // Fanene og avisa er egne biter (Pakke 96): hent dem først, så et fanebytte tegner med en gang.
+  await (await import('../skjermer')).lastSkjermer()
   const lager = await import('../../state/lager')
   const rot = document.createElement('div')
   rot.id = 'root'

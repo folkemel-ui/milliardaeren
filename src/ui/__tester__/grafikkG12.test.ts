@@ -47,7 +47,9 @@ describe('en lettere start (G12)', () => {
   it('startskriptet tar ikke med eiendom, luksus, kartene eller galleriet', () => {
     const filer = startfiler()
     expect(filer.has('ui/komponenter/Illustrasjoner.tsx')).toBe(true)
-    expect(filer.has('ui/komponenter/Norgeskart.tsx')).toBe(true)
+    // Kartets skall kom med Eiendom-fanen; siden Pakke 96 er fanen selv en del (ui/skjermer.tsx).
+    expect(filer.has('ui/komponenter/Norgeskart.tsx')).toBe(false)
+    expect(filer.has('ui/skjermer.tsx')).toBe(true)
     for (const f of [
       'ui/komponenter/ved-behov/Eiendomstegninger.tsx',
       'ui/komponenter/ved-behov/Luksustegninger.tsx',
