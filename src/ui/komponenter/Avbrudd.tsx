@@ -1,5 +1,6 @@
 import { Component, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
-import { gjenopprettEtterFeil, lesReservekopi, meldFeil, type Avbrudd } from '../../state/lager'
+import { gjenopprettEtterFeil, lagringSomKode, lesReservekopi, meldFeil, oppdaterOgLastInn, type Avbrudd } from '../../state/lager'
+import { VERSJON } from '../versjon'
 import { kortKroner, varighet } from '../format'
 
 /**
@@ -27,16 +28,52 @@ export function Avbruddskjerm({ a }: { a: Avbrudd }) {
             </button>
           </>
         ) : (
-          <Feilinnhold melding={a.melding} tittel={tittel} />
+          <Feilinnhold melding={a.melding} stakk={a.stakk} tittel={tittel} />
         )}
       </div>
     </div>
   )
 }
 
-function Feilinnhold({ melding, tittel }: { melding: string; tittel: RefObject<HTMLHeadingElement | null> }) {
+/**
+ * Feilrapporten (Pakke 95): versjon, tid, nettleser, feilen og stakken, og lagringen som en
+ * kode, så spillet feilen skjedde i kan lastes og feilen gjenskapes. Bygges når skjermen
+ * åpnes, så kopieringen skjer inne i trykket — det Safari krever.
+ */
+function lagRapport(melding: string, stakk: string | undefined, kode: string | null): string {
+  return [
+    'Milliardær – feilrapport',
+    `Versjon: ${VERSJON}`,
+    `Tid: ${new Date().toISOString()}`,
+    `Nettleser: ${navigator.userAgent}`,
+    `Feil: ${melding}`,
+    stakk ? `Stakk:\n${stakk}` : 'Stakk: ingen',
+    `Lagring: ${kode ?? 'ingen'}`,
+  ].join('\n')
+}
+
+function Feilinnhold({ melding, stakk, tittel }: { melding: string; stakk?: string; tittel: RefObject<HTMLHeadingElement | null> }) {
   const [kopi] = useState(lesReservekopi)
   const [bekreftNytt, settBekreftNytt] = useState(false)
+  const [rapport, settRapport] = useState(() => lagRapport(melding, stakk, null))
+  const [kopiert, settKopiert] = useState<'ja' | 'nei' | null>(null)
+  useEffect(() => {
+    let aktiv = true
+    void lagringSomKode().then((kode) => aktiv && settRapport(lagRapport(melding, stakk, kode)))
+    return () => {
+      aktiv = false
+    }
+  }, [melding, stakk])
+  // Lagringen er fra en nyere versjon av spillet: svaret er å hente den nye, ikke et nytt spill.
+  const nyere = /nyere spillversjon/.test(melding)
+
+  function kopierRapport() {
+    navigator.clipboard
+      ?.writeText(rapport)
+      .then(() => settKopiert('ja'))
+      .catch(() => settKopiert('nei'))
+    if (!navigator.clipboard) settKopiert('nei')
+  }
 
   return (
     <>
@@ -48,9 +85,25 @@ function Feilinnhold({ melding, tittel }: { melding: string; tittel: RefObject<H
         <summary>Hva som skjedde</summary>
         <p className="liten">{melding}</p>
       </details>
-      <button className="knapp knapp-gull" onClick={() => location.reload()}>
-        Prøv igjen
+      {nyere ? (
+        <button className="knapp knapp-gull" onClick={() => void oppdaterOgLastInn()}>
+          Oppdater og last inn
+        </button>
+      ) : (
+        <button className="knapp knapp-gull" onClick={() => location.reload()}>
+          Prøv igjen
+        </button>
+      )}
+      <button className="knapp" onClick={kopierRapport}>
+        Kopier feilrapport
       </button>
+      {kopiert === 'ja' && <p className="dempet liten">Rapporten er kopiert. Lim den inn i en e-post eller melding til den som lager spillet.</p>}
+      {kopiert === 'nei' && (
+        <>
+          <p className="dempet liten">Kunne ikke kopiere automatisk. Merk alt i feltet og kopier.</p>
+          <textarea className="flytt-kode" rows={4} readOnly value={rapport} onFocus={(e) => e.currentTarget.select()} />
+        </>
+      )}
       {kopi && (
         <div className="bekreft">
           <p className="dempet liten">
@@ -73,7 +126,7 @@ function Feilinnhold({ melding, tittel }: { melding: string; tittel: RefObject<H
             </button>
           </div>
         </div>
-      ) : (
+      ) : nyere ? null : (
         <button className="knapp knapp-sekundær" onClick={() => settBekreftNytt(true)}>
           Start et nytt spill …
         </button>
@@ -83,11 +136,11 @@ function Feilinnhold({ melding, tittel }: { melding: string; tittel: RefObject<H
 }
 
 /** Fanger feil under tegningen, så en krasj gir feilskjermen i stedet for en hvit side. */
-export class Feilgrense extends Component<{ children: ReactNode }, { feil: string | null }> {
-  state = { feil: null as string | null }
+export class Feilgrense extends Component<{ children: ReactNode }, { feil: string | null; stakk?: string }> {
+  state = { feil: null as string | null, stakk: undefined as string | undefined }
 
   static getDerivedStateFromError(e: unknown) {
-    return { feil: e instanceof Error ? e.message : String(e) }
+    return { feil: e instanceof Error ? e.message : String(e), stakk: e instanceof Error ? e.stack : undefined }
   }
 
   componentDidCatch(e: unknown) {
@@ -96,6 +149,6 @@ export class Feilgrense extends Component<{ children: ReactNode }, { feil: strin
   }
 
   render() {
-    return this.state.feil ? <Avbruddskjerm a={{ type: 'feil', melding: this.state.feil }} /> : this.props.children
+    return this.state.feil ? <Avbruddskjerm a={{ type: 'feil', melding: this.state.feil, stakk: this.state.stakk }} /> : this.props.children
   }
 }

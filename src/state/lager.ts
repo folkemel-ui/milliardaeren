@@ -58,7 +58,7 @@ const faneId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,
  * Når spillet ikke kan fortsette her: en annen fane har tatt over, eller noe
  * gikk galt. Da stopper klokken og lagringen, og appen viser en egen skjerm.
  */
-export type Avbrudd = { type: 'annen-fane' } | { type: 'feil'; melding: string }
+export type Avbrudd = { type: 'annen-fane' } | { type: 'feil'; melding: string; stakk?: string }
 
 let avbrudd: Avbrudd | null = null
 const avbruddLyttere = new Set<() => void>()
@@ -88,7 +88,7 @@ export function aktivtAvbrudd(): Avbrudd | null {
 /** Stopper spillet med en feil. Den første feilen er den som vises. */
 export function meldFeil(e: unknown): void {
   if (avbrudd?.type === 'feil') return
-  settAvbrudd({ type: 'feil', melding: e instanceof Error ? e.message : String(e) })
+  settAvbrudd({ type: 'feil', melding: e instanceof Error ? e.message : String(e), stakk: e instanceof Error ? e.stack : undefined })
 }
 
 function kravEierskap(): void {
@@ -169,15 +169,51 @@ function lastFraDisk(): { type: 'tom' } | { type: 'ok'; tilstand: Spilltilstand 
  */
 let klokke = Date.now()
 
+/** Om en feil fra localStorage betyr at lagringen er full (ikke privat modus eller sperret). */
+function erFull(e: unknown): boolean {
+  if (!(e instanceof DOMException)) return false
+  return e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014
+}
+
+/** Bergingskopiene som kan slettes når lagringen er full (Pakke 95): de er gamle og sjelden i bruk. */
+const BERGINGSKOPIER = [FOR_MIGRERING_NOKKEL, BERGENOKKEL]
+
+let fullVarslet = false
+
+/**
+ * Skriver spillet. Er lagringen full (Pakke 95), slettes bergingskopiene — kopien fra før
+ * siste oppdatering og kopien av en ødelagt lagring — og det prøves igjen; reservekopien du
+ * ser i Innstillinger, står. Går det fortsatt ikke, kommer ett varsel per besøk. Før ble en
+ * full lagring svelget uten et ord.
+ */
 function skrivTilDisk(s: Spilltilstand): void {
+  const fra = performance.now()
+  let tekst: string
   try {
-    const fra = performance.now()
-    const tekst = tilLagring(s)
-    localStorage.setItem(LAGERNOKKEL, tekst)
+    tekst = tilLagring(s)
+  } catch {
+    return
+  }
+  try {
+    try {
+      localStorage.setItem(LAGERNOKKEL, tekst)
+    } catch (e) {
+      if (!erFull(e)) throw e
+      for (const k of BERGINGSKOPIER) localStorage.removeItem(k)
+      localStorage.setItem(LAGERNOKKEL, tekst)
+    }
     maalLagring(performance.now() - fra, tekst.length)
     localStorage.setItem(SIST_AKTIV_NOKKEL, String(klokke))
-  } catch {
-    // Full disk eller privat modus — spillet fungerer, det lagres bare ikke.
+  } catch (e) {
+    // Privat modus eller sperret lagring: spillet fungerer, det lagres bare ikke.
+    if (!erFull(e) || fullVarslet) return
+    fullVarslet = true
+    visVarsel({
+      type: 'advarsel',
+      tittel: 'Lagringen er full',
+      tekst: 'Spillet lagres ikke på denne enheten. Kopier koden under Profil → Innstillinger → Flytt spillet, så mister du ingenting.',
+      mål: 'profil',
+    })
   }
 }
 
@@ -427,6 +463,24 @@ export function startSpillokke(): void {
   window.addEventListener('pagehide', lagre)
   // En ny fane har åpnet spillet: denne stopper, så den ikke skriver over.
   window.addEventListener('storage', vedLagring)
+  // Pakke 95: be om at lagringen ikke slettes (Safari sletter ellers etter sju dager uten besøk).
+  if (typeof navigator !== 'undefined') void navigator.storage?.persist?.().catch(() => false)
+  window.addEventListener('error', vedUfanget)
+  window.addEventListener('unhandledrejection', vedUfanget)
+}
+
+const varsledeFeil = new Set<string>()
+
+/**
+ * En feil som ikke stoppet spillet — typisk i et trykk (Pakke 95): før skjedde ingenting
+ * synlig. Nå kommer et grått varsel, én gang per feiltekst.
+ */
+function vedUfanget(e: ErrorEvent | PromiseRejectionEvent): void {
+  const grunn = 'reason' in e ? e.reason : e.error ?? e.message
+  const tekst = grunn instanceof Error ? grunn.message : String(grunn ?? '')
+  if (!tekst || /ResizeObserver/.test(tekst) || varsledeFeil.has(tekst)) return
+  varsledeFeil.add(tekst)
+  visVarsel({ type: 'feil', tittel: 'Noe gikk galt', tekst })
 }
 
 /**
@@ -446,6 +500,74 @@ export function stoppSpillokke(): void {
   document.removeEventListener('visibilitychange', vedSynlighet)
   window.removeEventListener('pagehide', lagre)
   window.removeEventListener('storage', vedLagring)
+  window.removeEventListener('error', vedUfanget)
+  window.removeEventListener('unhandledrejection', vedUfanget)
+}
+
+// ─────────────────────────────────────────────── Feilrapporten og kopien fra før oppdateringen (Pakke 95)
+
+/**
+ * Lagringen som den ligger på disken (eller kopien av en ødelagt lagring), pakket som en
+ * kode — til feilrapporten. Null når det ikke finnes noen.
+ */
+export async function lagringSomKode(): Promise<string | null> {
+  let rå: string | null = null
+  try {
+    rå = localStorage.getItem(BERGENOKKEL) ?? localStorage.getItem(LAGERNOKKEL)
+  } catch {
+    return null
+  }
+  if (!rå) return null
+  try {
+    return await pakk(JSON.parse(rå) as Spilltilstand)
+  } catch {
+    return null
+  }
+}
+
+/** Kopien fra før siste oppdatering: nøkkeltall, eller null når den mangler eller ikke kan leses. */
+export function lesFoerOppdatering(): { formue: number; sek: number } | null {
+  try {
+    const rå = localStorage.getItem(FOR_MIGRERING_NOKKEL)
+    if (!rå) return null
+    const r = tolk(rå)
+    return r.ok ? { formue: nettoformue(r.tilstand), sek: r.tilstand.sek } : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Tar i bruk spillet fra før siste oppdatering: det du har nå, blir reservekopien, og siden
+ * lastes på nytt, så kopien løftes til denne versjonen som ved en vanlig oppdatering.
+ */
+export function hentFoerOppdatering(): string | null {
+  try {
+    const gammel = localStorage.getItem(FOR_MIGRERING_NOKKEL)
+    if (!gammel) return 'Det finnes ingen kopi fra før siste oppdatering.'
+    if (!tolk(gammel).ok) return 'Kopien kan ikke leses.'
+    lagre()
+    const naa = localStorage.getItem(LAGERNOKKEL)
+    if (naa) localStorage.setItem(ANGRENOKKEL, naa)
+    localStorage.setItem(LAGERNOKKEL, gammel)
+    localStorage.setItem(SIST_AKTIV_NOKKEL, String(Date.now()))
+  } catch {
+    return 'Kunne ikke bytte — lagringen er utilgjengelig.'
+  }
+  stoppSpillokke()
+  location.reload()
+  return null
+}
+
+/** «Fra en nyere spillversjon»: hent den nye versjonen og last inn på nytt. */
+export async function oppdaterOgLastInn(): Promise<void> {
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration()
+    await reg?.update()
+  } catch {
+    /* uten service worker: en vanlig ny innlasting henter siden fra nettet */
+  }
+  location.reload()
 }
 
 // ─────────────────────────────────────────────── Reservekopien

@@ -16,6 +16,7 @@ import { Forklaring } from '../komponenter/Forklaring'
 import { bedriftsrekkefolge, REKKEFOLGER } from '../deler'
 import { fastInntekt } from '../sortering'
 import { useTilbake } from '../tilbake'
+import { Hjemskjermkort } from '../komponenter/Hjemskjerm'
 
 export function Bedrifter({ s }: { s: Spilltilstand }) {
   const [valgt, settValgt] = useState<string | null>(null)
@@ -42,6 +43,8 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
       <h1 className="skjerm-tittel">
         Dine bedrifter <Forklaring tema="bedrifter" />
       </h1>
+      {/* Pakke 95: Safari-spillere får beskjed om Hjem-skjermen fra første besøk. */}
+      <Hjemskjermkort />
       <Dagen s={s} />
       {/* Pakke 75: ganger og rekkefølge på én rad. */}
       <div className="bedrifter-kontroller">

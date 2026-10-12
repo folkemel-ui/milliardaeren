@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { eksporter, importer } from '../../state/lager'
 import { tall } from '../format'
 
 const FILNAVN = 'milliardaer-lagring.txt'
+/** Så ofte koden lages på nytt mens panelet vises. */
+const FERSK_MS = 15_000
 
 /**
  * Flytt spillet til en annen enhet: kopier koden eller lagre den som fil her,
@@ -14,21 +16,52 @@ export function FlyttSpillet() {
   const [kode, settKode] = useState('')
   const [bekreft, settBekreft] = useState(false)
   const [henter, settHenter] = useState(false)
-
-  async function kopier() {
-    const k = await eksporter()
-    try {
-      await navigator.clipboard.writeText(k)
-      settMelding(`Koden er kopiert (${tall(k.length)} tegn). Lim den inn under «Hent inn» på den andre enheten.`)
-    } catch {
-      // Uten tilgang til utklippstavlen: vis koden, så den kan kopieres for hånd.
-      settKode(k)
-      settMelding('Kunne ikke kopiere automatisk. Koden står i feltet under — merk alt og kopier.')
+  /*
+   * Pakke 95: koden lages når panelet vises og holdes fersk, så «Kopier kode» og «Lagre som fil»
+   * kan kopiere eller dele inne i trykket. Safari nekter utklippstavlen og del-arket når det
+   * kommer etter en ventet komprimering — da trykket var «brukt opp».
+   */
+  const [ferdig, settFerdig] = useState<string | null>(null)
+  useEffect(() => {
+    let aktiv = true
+    const lag = () => void eksporter().then((k) => aktiv && settFerdig(k))
+    lag()
+    const t = setInterval(lag, FERSK_MS)
+    return () => {
+      aktiv = false
+      clearInterval(t)
     }
+  }, [])
+
+  function kopiert(k: string) {
+    settMelding(`Koden er kopiert (${tall(k.length)} tegn). Lim den inn under «Hent inn» på den andre enheten.`)
+  }
+
+  function ikkeKopiert(k: string) {
+    // Uten tilgang til utklippstavlen: vis koden, så den kan kopieres for hånd.
+    settKode(k)
+    settMelding('Kunne ikke kopiere automatisk. Koden står i feltet under — merk alt og kopier.')
+  }
+
+  function kopier() {
+    const k = ferdig
+    if (k && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(k).then(() => kopiert(k), () => ikkeKopiert(k))
+      return
+    }
+    // Koden er ikke klar ennå: gi utklippstavlen et løfte (ClipboardItem), som Safari godtar inne i trykket.
+    const lofte = eksporter()
+    if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+      navigator.clipboard
+        .write([new ClipboardItem({ 'text/plain': lofte.then((x) => new Blob([x], { type: 'text/plain' })) })])
+        .then(() => lofte.then(kopiert), () => lofte.then(ikkeKopiert))
+      return
+    }
+    void lofte.then(ikkeKopiert)
   }
 
   async function lagreFil() {
-    const k = await eksporter()
+    const k = ferdig ?? (await eksporter())
     const fil = new File([k], FILNAVN, { type: 'text/plain' })
     // På mobil: del-arket, så filen kan sendes eller lagres. Ellers: vanlig nedlasting.
     if (navigator.canShare?.({ files: [fil] })) {

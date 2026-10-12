@@ -461,3 +461,22 @@
   margin: 8px 0 0;
   text-align: center;
 }
+
+/* ── Lagring du kan stole på (Pakke 95) ──────────────────────────────────── */
+
+/* «Legg spillet på Hjem-skjermen» øverst på Bedrifter, med tre nummererte trykk. */
+.hjemskjermkort {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-color: var(--gull);
+}
+
+.hjemskjerm-steg {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

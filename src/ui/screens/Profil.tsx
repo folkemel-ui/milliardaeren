@@ -10,7 +10,7 @@ import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
 import { Skattekort } from '../komponenter/Skattekort'
 import { FlyttSpillet } from '../komponenter/FlyttSpillet'
-import { Reservekopi } from '../komponenter/Reservekopi'
+import { FoerOppdatering, Reservekopi } from '../komponenter/Reservekopi'
 import { lesAvisvalg, settAvisvalg, type Avisvalg } from '../avisvalg'
 import { lesTema, settTema, type Tema } from '../tema'
 import { forbesliste } from '../../engine/rivaler'
@@ -441,6 +441,7 @@ function Innstillinger() {
       <h2 className="seksjon-tittel">Lagringen</h2>
       <FlyttSpillet />
       <Reservekopi />
+      <FoerOppdatering />
 
       <div className="kort">
         {bekreft ? (
