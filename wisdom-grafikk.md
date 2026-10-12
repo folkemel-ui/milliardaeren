@@ -6,9 +6,9 @@ only matters when you draw. `wisdom.md` stays the source for how Folke works, th
 engine rules and the general tool quirks. It was started after G1 (6 October 2026).
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
-2026), G12–G15 (10–11 October 2026), G16, Pack 74 and G17 (11 October 2026) and G18 (12 October
-2026). G19–G24 are planned in `Ideer.md`: the full frame for the rest of the properties and the luxury
-in groups (G19–G21), the seasons (G22), the club in pictures (G23) and racing (G24).
+2026), G12–G15 (10–11 October 2026), G16, Pack 74 and G17 (11 October 2026), G18 (12 October
+2026) and G19 (13 October 2026). G20–G24 are planned in `Ideer.md`: the full frame for the luxury
+in groups (G20–G21), the seasons (G22), the club in pictures (G23) and racing (G24).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -1303,7 +1303,40 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
 - **Sizes after G18**: the property part is 146 kB raw, 35.1 gzipped (it also holds Pack 76's four
   drawings); the start script 230.8 kB gzipped (Pack 96 moved the tabs out; G18's lists added ~0.1).
 
-## 7. Notes for later (G1–G18 done; G19–G24 planned in `Ideer.md`; Pack 74 done)
+## 6h. A full frame abroad (G19)
+
+- **«Push please and start next pack»** meant: push, then the next pack's design questions, then
+  build. The four questions named each city's neighbours (Strandvägen's palaces and the Djurgården
+  bridge, the Späti and the tram stop, Berkeley Square, a Guimard Métro entrance, the water towers on
+  Manhattan's roofs), how a city's two drawings relate (each its own place, the other in the haze
+  only where it would really be seen), Marbella's sides and Zermatt's car-free street. All four
+  recommendations were taken.
+- **Shared helpers end at fixed x too.** `LaConcha` and `Matterhorn` are used by two drawings each and
+  stopped at their own width; `LaConcha` now runs −40…136, and Zermatt got `Alperygg` (a lower jagged
+  range edge to edge, snow on the peaks, the valley floor under it) behind the Matterhorn. Both haze
+  mountains got the darker body from G18 (`fjell.skygge`, faces `skifer.skygge`).
+- **The gap between the haze and the ground is systematic.** Every drawing with a mountain or a
+  horizon at y 56 and a ground starting at y 68 shows a band of bare sky in the wide frame (G18:
+  Holmenkollen, Hedmarken, Lista; G19: both Marbella drawings and both Zermatt ones). The fix is a band
+  of land in the haze from `HORISONT` to 70, drawn after the water. Look for it first on every new
+  outdoor drawing.
+- **A landmark from the city's other drawing must stay a hint.** The Downtown needle behind the Palm
+  villa first rose to y 4 and took over the scene; at Burj Al Arab's height (top y 24) it reads as
+  Dubai without competing. The same rule as Burj Al Arab in G9.
+- **The wide frame shows old nonsense.** Canary Wharf's towers stood straight in the water (the `kai`
+  ground is mostly sea); in a square tile it passed, edge to edge it did not. It is a wharf, so the
+  towers now stand on a stone quay. Look at the centre with fresh eyes when it gets sides.
+- **Keeping the centre exact, three ways.** A row that grows to the left shifts the index, so a light
+  pattern `(k + c + i) % 5` becomes `(k + c + i + 2) % 5` after three new houses; a helper call with
+  float sums (`x + 21.4` at x −36 gave −14.600000000000001) is drawn once more through
+  `translate(−44 0)` of the original call instead; and Pack 76's beacons (`fot − 70.6`) needed `r2`.
+- **An animal at far distance needs its parts.** The sleigh horse with two legs and no head read as a
+  stool; four legs, a neck with a head and a tail made it a horse at 1.6 m (4 units).
+- **Sizes after G19**: the property part is 172.5 kB raw, 40.9 gzipped; the start script 230.9 kB
+  gzipped (+0.14 for the frame list and the crops). Every property is now in `FULL_RAMME`
+  (`grafikkG19.test.ts` checks it; G17's «the others are as before» test became that check).
+
+## 7. Notes for later (G1–G19 done; G20–G24 planned in `Ideer.md`; Pack 74 done)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -1313,7 +1346,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **Next groups for the full frame (G19–G21)**: add the ids to `FULL_RAMME`, extend
+- **Next groups for the full frame (G20–G21)**: add the ids to `FULL_RAMME`, extend
   everything that ends at 0 and 96, fill the sides, and give the tile a crop (`FLISUTSNITT`, one
   square; a per-stage `TRINNUTSNITT` only where the subject grows, as for the businesses). Properties and luxury live in the lazy parts, so their helpers
   for the sides go there (or in the start file if a business needs them too). Cars use
@@ -1321,7 +1354,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   cars (G20).
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings grow the start script, which is at
-  230.8 kB gzipped after G18 (249.9 after G17; Pack 96 moved the tabs into parts), against a budget of 500 (`startskript.test.ts`); the business steps (§6d) and
+  230.9 kB gzipped after G19 (249.9 after G17; Pack 96 moved the tabs into parts), against a budget of 500 (`startskript.test.ts`); the business steps (§6d) and
   the home scenes are parts of their own.
 - **G22 (seasons) builds on G10**: the clock reaches the scene through `--natt` on the
   page, and the night layer shows how to change a drawing in CSS without re-rendering
@@ -1332,7 +1365,7 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   should follow the same rule as their stage.
 - **Don't import one part from another.** The step helpers (`Kunde`, `Vimpler`, `Skip`) live
   in `Trinnsteg.tsx` and would be handy for the sides of G18–G21's drawings; copying 10 lines
-  is cheaper than moving them to the start file (230.8 of 500 kB), unless a business also
+  is cheaper than moving them to the start file (230.9 of 500 kB), unless a business also
   needs them.
 - **New milestones after level 100** (game track, Pack 70) change which levels are stage 3,
   not `stegFor`: it counts every fifth level from the stage start and is capped at 150. If a

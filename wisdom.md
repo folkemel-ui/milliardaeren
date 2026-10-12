@@ -465,7 +465,9 @@ session; delete what stops being true.
   chain are in `FULL_RAMME` too, each with a tile crop in `FLISUTSNITT`. A game pack that changes what
   the farms or forests show (fields, machines, buildings) changes a wide drawing: anything it adds must
   stay inside x −40…136 and leave the centre square readable on its own. Details in
-  `wisdom-grafikk.md` §6g.
+  `wisdom-grafikk.md` §6g. **Since G19 every property is in `FULL_RAMME`** (the foreign ones and Pack
+  76's towers too; `grafikkG19.test.ts` fails if one is missing), so a new property drawing from the
+  game track must be drawn wide from the start, with a tile crop in `FLISUTSNITT` (§6h).
 - **The tabs are parts too (Pack 96).** Investeringer, Eiendom, Luksus (with Klubb and racing),
   Profil and Avisa load through `vedBehov` (`ui/skjermer.tsx`, `<Skjerm del={…} p={…} />` in
   `App.tsx`); only Bedrifter, the top bar, the menu and the pop-ups that open at start stay in the
