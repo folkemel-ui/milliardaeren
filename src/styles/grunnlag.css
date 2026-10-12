@@ -81,7 +81,9 @@
   --kant: #dcdfe5;
   --tekst: #15171c;
   --tekst-dempet: #5f6773;
-  --gull: #a67c00;
+  /* Pakke 97: #a67c00 → #8a6600, så gull som tekst holder 4.5:1 på bakgrunnen (4.83), kortene
+     (5.28) og de grå flatene (4.54), og hvit tekst på gullknappen 5.28. #8a6700 ga 4.496 på de grå. */
+  --gull: #8a6600;
   --gull-lys: #c99a0e;
   --gull-mørk: #7d5d00;
   --pluss: #13803a;

@@ -1,4 +1,5 @@
 {
+  "id": "/milliardaeren/",
   "name": "Milliardær",
   "short_name": "Milliardær",
   "description": "Fra 1 000 kr og en saftbod til milliardær.",
@@ -9,6 +10,7 @@
   "orientation": "portrait",
   "background_color": "#0d0c0a",
   "theme_color": "#0d0c0a",
+  "categories": ["games", "entertainment"],
   "icons": [
     {
       "src": "ikon.svg",
@@ -29,10 +31,25 @@
       "purpose": "any"
     },
     {
-      "src": "ikon-512.png",
+      "src": "ikon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "skjermbilder/bedrifter.png",
+      "sizes": "860x1864",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Bedriftene dine: oppgrader, ansett og velg retning"
     }
   ]
 }

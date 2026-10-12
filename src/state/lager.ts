@@ -22,6 +22,7 @@ import { sjekkTilstand } from './sjekk'
 import { tilLagring } from './lagringsformat'
 import { taIgjen } from './borte'
 import { maalBorte, maalLagring, maalSekund } from './maaling'
+import { hentFraSpeil, slippSpeil, speil } from './speil'
 import { VELKOMST_ETTER_SEK } from '../ui/velkomst'
 import { visVarsel } from '../ui/varsler'
 import type { Spilltilstand } from '../engine/types'
@@ -204,6 +205,8 @@ function skrivTilDisk(s: Spilltilstand): void {
     }
     maalLagring(performance.now() - fra, tekst.length)
     localStorage.setItem(SIST_AKTIV_NOKKEL, String(klokke))
+    // Pakke 97: i appen fra App Store/Google Play også til en fil (state/speil.ts).
+    speil(tekst, klokke)
   } catch (e) {
     // Privat modus eller sperret lagring: spillet fungerer, det lagres bare ikke.
     if (!erFull(e) || fullVarslet) return
@@ -282,9 +285,15 @@ function taIgjenBorteTid(s: Spilltilstand, borte: number): Spilltilstand {
 
 kravEierskap()
 
+/** Startet spillet uten lagring? Da kan den ligge i speilfila (Pakke 97). */
+let startetTom = false
+
 let tilstand: Spilltilstand = (() => {
   const lagret = lastFraDisk()
-  if (lagret.type === 'tom') return nyttSpill()
+  if (lagret.type === 'tom') {
+    startetTom = true
+    return nyttSpill()
+  }
   if (lagret.type === 'feil') {
     // Vises på feilskjermen; spillet under blir aldri lagret.
     avbrudd = { type: 'feil', melding: lagret.feil }
@@ -456,6 +465,8 @@ function vedLagring(e: StorageEvent): void {
 export function startSpillokke(): void {
   if (startet) return
   startet = true
+  // Før første lagring: den sperrer speilfila til den er lest, så et tomt spill aldri skriver over den.
+  if (startetTom) void gjenopprettFraSpeil()
   // Lagre med en gang, så klokken for tid borte alltid er satt.
   lagre()
   klokkeslag = setInterval(steg, 200)
@@ -467,6 +478,28 @@ export function startSpillokke(): void {
   if (typeof navigator !== 'undefined') void navigator.storage?.persist?.().catch(() => false)
   window.addEventListener('error', vedUfanget)
   window.addEventListener('unhandledrejection', vedUfanget)
+}
+
+/**
+ * I appen: startet spillet uten lagring, men speilfila har et spill (iOS tømte lagringen),
+ * legges det tilbake og siden lastes på nytt. Tiden borte regnes fra da fila ble skrevet.
+ * En fil lageret ikke kan bruke, blir liggende urørt til neste lagring skriver over den.
+ */
+async function gjenopprettFraSpeil(): Promise<void> {
+  startetTom = false
+  const fra = await hentFraSpeil()
+  if (!fra) return
+  if (!tolk(fra.lagring).ok) return slippSpeil()
+  stoppSpillokke()
+  try {
+    localStorage.setItem(LAGERNOKKEL, fra.lagring)
+    localStorage.setItem(SIST_AKTIV_NOKKEL, String(fra.sistAktiv))
+  } catch {
+    // Kan ikke lagringen skrives, ville en ny innlasting starte tomt igjen: spill videre her.
+    slippSpeil()
+    return startSpillokke()
+  }
+  location.reload()
 }
 
 const varsledeFeil = new Set<string>()

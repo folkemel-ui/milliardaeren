@@ -5,8 +5,13 @@
  *
  * Ikonene fyller hele flaten (ingen avrundede hjørner og ingen
  * gjennomsiktighet): iOS og Android runder av selv, og iOS godtar ikke
- * gjennomsiktige hjemskjermikoner. Innholdet ligger innenfor den sikre
- * sirkelen for «maskable» ikoner på Android.
+ * gjennomsiktige hjemskjermikoner.
+ *
+ * Pakke 97: ikon-1024.png er butikkikonet (App Store vil ha 1024 × 1024 uten
+ * gjennomsiktighet). ikon-maskable-512.png er Androids «maskable» ikon: samme
+ * tegning skalert til 80 % rundt midten, så stjerna står 159 px fra midten mot
+ * en sikker sirkel på 204.8 px (i de vanlige ikonene står den 199 px ut, og
+ * Android kunne kappe tuppen).
  *
  *     node scripts/lag-ikoner.mjs
  */
@@ -59,7 +64,8 @@ function farge(x, y) {
   return f
 }
 
-function tegn(n) {
+/** Tegner n × n piksler; `skala` under 1 krymper tegningen rundt midten (bakgrunnen fyller resten). */
+function tegn(n, skala = 1) {
   const piksler = Buffer.alloc(n * (n * 3 + 1))
   const S = 4
   for (let py = 0; py < n; py++) {
@@ -68,7 +74,7 @@ function tegn(n) {
       const sum = [0, 0, 0]
       for (let sy = 0; sy < S; sy++) {
         for (let sx = 0; sx < S; sx++) {
-          const f = farge(((px + (sx + 0.5) / S) * 512) / n, ((py + (sy + 0.5) / S) * 512) / n)
+          const f = farge(256 + (((px + (sx + 0.5) / S) * 512) / n - 256) / skala, 256 + (((py + (sy + 0.5) / S) * 512) / n - 256) / skala)
           sum[0] += f[0]
           sum[1] += f[1]
           sum[2] += f[2]
@@ -102,7 +108,7 @@ function bit(type, data) {
   return Buffer.concat([lengde, td, crc])
 }
 
-function png(n) {
+function png(n, skala = 1) {
   const ihdr = Buffer.alloc(13)
   ihdr.writeUInt32BE(n, 0)
   ihdr.writeUInt32BE(n, 4)
@@ -111,12 +117,19 @@ function png(n) {
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     bit('IHDR', ihdr),
-    bit('IDAT', deflateSync(tegn(n), { level: 9 })),
+    bit('IDAT', deflateSync(tegn(n, skala), { level: 9 })),
     bit('IEND', Buffer.alloc(0)),
   ])
 }
 
-for (const [navn, n] of [['apple-touch-icon.png', 180], ['ikon-192.png', 192], ['ikon-512.png', 512]]) {
-  writeFileSync(new URL(`../public/${navn}`, import.meta.url), png(n))
+const IKONER = [
+  ['apple-touch-icon.png', 180, 1],
+  ['ikon-192.png', 192, 1],
+  ['ikon-512.png', 512, 1],
+  ['ikon-1024.png', 1024, 1],
+  ['ikon-maskable-512.png', 512, 0.8],
+]
+for (const [navn, n, skala] of IKONER) {
+  writeFileSync(new URL(`../public/${navn}`, import.meta.url), png(n, skala))
   console.log(`public/${navn} (${n}×${n})`)
 }
