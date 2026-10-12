@@ -2630,7 +2630,10 @@ function Tarnet({ størrelse = 48 }: P) {
  * 1890-tallet langs kaia — ett i tegl med karnapp og tårn med grønt kobberspir,
  * ett i lys puss med kuppel og balkonger — lindealleen og en hvit
  * skjærgårdsbåt ved Nybrokajen foran, og Stadshustornet med de tre kronene i
- * dis bak.
+ * dis bak. I den brede rammen (G19) står ett palass til i lys stein med et
+ * hjørnetårn til venstre, med en gammel dampbåt fortøyd foran, og til høyre
+ * går Djurgårdsbron over vannet med lyktene sine mot de grønne trærne på
+ * Djurgården.
  */
 function Stockholm({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -2645,7 +2648,9 @@ function Stockholm({ størrelse = 48 }: P) {
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points={`0,${HORISONT + 1} 0,50 30,48 60,51 96,47 96,${HORISONT + 1}`} fill={S.stein.skygge} />
+          <polygon points={`-40,${HORISONT + 1} -40,49 -10,51 0,50 30,48 60,51 96,47 136,50 136,${HORISONT + 1}`} fill={S.stein.skygge} />
+          {/* Djurgården: trærne på andre siden av brua. */}
+          <path d={`M102 ${HORISONT + 1} Q106 40 114 42 Q120 36 126 41 Q132 38 136 42 V${HORISONT + 1} Z`} fill={S.gran.flate} />
           {/* Stadshustornet: smalt teglårn med grønn lanterne og tre gullkroner. */}
           <rect x="10" y="22" width="6" height="30" fill={S.tegl.flate} />
           <rect x="14.2" y="22" width="1.8" height="30" fill={S.tegl.skygge} />
@@ -2658,14 +2663,36 @@ function Stockholm({ størrelse = 48 }: P) {
         </Dis>
       </Kantfade>
       <Bakke type="hav" />
-      {/* Kaia: promenaden og kaimuren ned i sjøen. */}
+      {/* Kaia: promenaden og kaimuren ned i sjøen, fram til brua. */}
       <Kantfade>
-        <rect x="0" y={kai - 2.4} width="96" height="2.4" fill={S.stein.lys} />
-        <rect x="0" y={kai} width="96" height="5" fill={S.stein.flate} />
-        <rect x="0" y={kai + 5} width="96" height="0.8" fill={S.stein.skygge} />
-        <rect x="0" y={kai + 5.8} width="96" height="3" fill={S.stein.skygge} opacity="0.25" />
+        <rect x="-40" y={kai - 2.4} width="140" height="2.4" fill={S.stein.lys} />
+        <rect x="-40" y={kai} width="140" height="5" fill={S.stein.flate} />
+        <rect x="-40" y={kai + 5} width="140" height="0.8" fill={S.stein.skygge} />
+        <rect x="-40" y={kai + 5.8} width="140" height="3" fill={S.stein.skygge} opacity="0.25" />
       </Kantfade>
-      <Slagskygge x1={4} x2={92} y={kai - 2} lengde={10} d={12} />
+      {/* Djurgårdsbron: et lavt steinbuespenn med rekkverk og lykter over vannet. */}
+      <polygon points={pkt([100, kai - 2.4], [136, kai - 3.4], [136, kai + 0.6], [100, kai + 1.6])} fill={S.stein.lys} />
+      <path d={`M104 ${kai + 1.5} Q112 ${kai + 7.6} 120 ${kai + 1.1} Z M122 ${kai + 1} Q129 ${kai + 6.6} 136 ${kai + 0.6} Z`} fill={S.sjo.flate} />
+      <path d={`M100 ${kai + 1.6} L100 ${kai + 7} M121 ${kai + 1} L121 ${kai + 6.6}`} stroke={S.stein.skygge} strokeWidth="1.4" />
+      <line x1="100" y1={kai - 4} x2="136" y2={kai - 5} stroke={S.metall.flate} strokeWidth="0.5" />
+      {[104, 114, 124, 134].map((x) => (
+        <g key={x}>
+          <line x1={x} y1={r2(kai - 2.5 - (x - 100) * 0.028)} x2={x} y2={r2(kai - 10 - (x - 100) * 0.028)} stroke={S.mork.flate} strokeWidth="0.5" />
+          <rect x={r2(x - 0.9)} y={r2(kai - 11.6 - (x - 100) * 0.028)} width="1.8" height="1.8" fill={S.glass.skygge} className="nattvindu" />
+        </g>
+      ))}
+      <Figur x={110} y={kai - 2.8} avstand="fjern" klaer={S.oker} />
+      <Slagskygge x1={-36} x2={92} y={kai - 2} lengde={10} d={12} />
+      {/* Palasset i lys stein til venstre, med hjørnetårn og spir. */}
+      <Kloss x={-36} y={kai - 2} b={36} h={38} d={12} m={S.stein} />
+      <rect x="-36" y={kai - 10} width="36" height="8" fill={S.stein.skygge} />
+      {rader(-34, 32, 7, S.hvit.lys, [1, 3])}
+      <path d={`M-22 ${kai - 2} V${kai - 6.4} Q-20 ${kai - 8.8} -18 ${kai - 6.4} V${kai - 2} Z`} fill={S.mork.flate} />
+      <polygon points={pkt([-36, kai - 40], [-12, kai - 40], [-12, kai - 44], [-34, kai - 44])} fill={S.skifer.flate} />
+      <Kloss x={-12} y={kai - 40} b={9} h={6} d={7} m={S.stein} />
+      <polygon points={pkt([-13, kai - 46], [-7.5, kai - 58], [-2, kai - 46])} fill={S.skifer.flate} />
+      <polygon points={pkt([-7.5, kai - 58], [-2, kai - 46], [-7.5, kai - 46])} fill={S.skifer.skygge} />
+      <line x1="-7.5" y1={kai - 58} x2="-7.5" y2={kai - 61} stroke={S.gull.flate} strokeWidth="0.4" />
       {/* Nabogården lengst til høyre, i oker. */}
       <Kloss x={84} y={kai - 2} b={8} h={32} d={8} m={S.oker} />
       {[0, 1, 2].map((k) => (
@@ -2702,11 +2729,20 @@ function Stockholm({ størrelse = 48 }: P) {
       <polygon points={pkt([33, kai - 62], [39, kai - 48], [33, kai - 48])} fill={S.petrol.skygge} />
       <line x1="33" y1={kai - 62} x2="33" y2={kai - 65} stroke={S.gull.flate} strokeWidth="0.4" />
       {/* Lindealleen langs kaia, og folk på promenaden. */}
-      {[8, 22, 36, 50, 64, 78].map((x) => (
+      {[-34, -20, -6, 8, 22, 36, 50, 64, 78, 92].map((x) => (
         <Tre key={x} x={x} y={kai - 1} h={13} />
       ))}
+      <Figur x={-26} y={kai - 1.4} avstand="fjern" klaer={S.oker} />
       <Figur x={30} y={kai - 1.4} avstand="fjern" klaer={S.marine} />
       <Figur x={58} y={kai - 1.2} avstand="fjern" klaer={S.vin} vendt={-1} />
+      {/* Den gamle dampbåten fortøyd ved Strandvägen: hvitt skrog, svart pipe. */}
+      <path d={`M-38 ${g + 2} L-10 ${g + 1.6} Q-11 ${g + 4.6} -14 ${g + 5} L-34 ${g + 5} Q-37 ${g + 4.4} -38 ${g + 2} Z`} fill={S.hvit.flate} />
+      <line x1="-37.4" y1={g + 3.4} x2="-11" y2={g + 3.2} stroke={S.oker.flate} strokeWidth="0.6" />
+      <rect x="-32" y={g - 1.6} width="16" height="3.6" fill={S.hvit.lys} />
+      <Vindusrad x={-30.6} y={g - 0.8} antall={6} b={1.4} h={1.4} mellom={1.1} tent={2} />
+      <rect x="-24" y={g - 7.4} width="2.6" height="5.8" fill={S.mork.flate} />
+      <rect x="-24" y={g - 6} width="2.6" height="0.9" fill={S.hvit.flate} />
+      <line x1="-36" y1={g + 1.8} x2="-36" y2={g - 6} stroke={S.mork.lys} strokeWidth="0.3" />
       {/* Skjærgårdsbåten ved kaia. */}
       <g className="anim-duve">
         <path d={`M44 ${g + 2} L76 ${g + 1.6} Q75 ${g + 4.6} 72 ${g + 5} L48 ${g + 5} Q45 ${g + 4.4} 44 ${g + 2} Z`} fill={S.hvit.flate} />
@@ -2726,18 +2762,27 @@ function Stockholm({ størrelse = 48 }: P) {
  * Kontorhuset i Nyhavn (fjern avstand): de smale gavlhusene i gult, rødt,
  * blått og hvitt langs kanalen, med uteserveringer under parasoller på kaia,
  * to gamle treseilere fortøyd med mastene foran fasadene, og spiret på Vor
- * Frelsers Kirke med gulltrappa rundt i dis bak.
+ * Frelsers Kirke med gulltrappa rundt i dis bak. I den brede rammen (G19) går
+ * husrekka videre til begge sider, og en lav kanalbåt med glasstak kommer inn
+ * kanalen til høyre.
  */
 function Kobenhavn({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
   const kai = g - 4
   const hus: [number, number, number, number, Materiale][] = [
+    [-38, 13, 32, 7, S.puss],
+    [-25, 14, 34, 8, S.faluRod],
+    [-11, 13, 30, 7, S.oker],
     [2, 14, 34, 8, S.oker],
     [16, 13, 30, 7, S.tegl],
     [29, 15, 36, 9, S.marine],
     [44, 13, 32, 7, S.puss],
     [57, 14, 34, 8, S.faluRod],
     [71, 13, 30, 7, S.oker],
+    [84, 14, 33, 8, S.marine],
+    [98, 13, 30, 7, S.puss],
+    [111, 14, 34, 8, S.tegl],
+    [125, 11, 30, 6, S.oker],
   ]
   const skip = (x: number, h: number) => (
     <g className="anim-duve">
@@ -2765,13 +2810,13 @@ function Kobenhavn({ størrelse = 48 }: P) {
       </Kantfade>
       <Bakke type="hav" />
       <Kantfade>
-        <rect x="0" y={kai - 2.4} width="96" height="2.4" fill={S.stein.lys} />
-        <rect x="0" y={kai} width="96" height="5" fill={S.stein.flate} />
-        <rect x="0" y={kai + 5} width="96" height="0.8" fill={S.stein.skygge} />
-        <rect x="0" y={kai + 5.8} width="96" height="3" fill={S.stein.skygge} opacity="0.25" />
+        <rect x="-40" y={kai - 2.4} width="176" height="2.4" fill={S.stein.lys} />
+        <rect x="-40" y={kai} width="176" height="5" fill={S.stein.flate} />
+        <rect x="-40" y={kai + 5} width="176" height="0.8" fill={S.stein.skygge} />
+        <rect x="-40" y={kai + 5.8} width="176" height="3" fill={S.stein.skygge} opacity="0.25" />
       </Kantfade>
-      <Slagskygge x1={2} x2={84} y={kai - 2} lengde={10} d={8} />
-      {/* Gavlhusene, fra venstre, så naboen dekker skyggesiden. */}
+      <Slagskygge x1={-38} x2={136} y={kai - 2} lengde={10} d={8} />
+      {/* Gavlhusene, fra venstre, så naboen dekker skyggesiden. Lysmønsteret følger husene fra før (i − 3). */}
       {hus.map(([x, b, h, gavl, m], i) => (
         <Gavlhus key={x} x={x} y={kai - 2} b={b} h={h} gavl={gavl} d={8} m={m} tak={S.tegl}>
           {[0, 1, 2, 3].map((k) =>
@@ -2782,7 +2827,7 @@ function Kobenhavn({ størrelse = 48 }: P) {
                 y={r2(kai - 2 - h + 3 + k * ((h - 10) / 4))}
                 width="2.4"
                 height="3.6"
-                fill={(k + c + i) % 5 === 0 ? S.vinduLys.flate : S.glass.skygge}
+                fill={(k + c + i + 2) % 5 === 0 ? S.vinduLys.flate : S.glass.skygge}
                 stroke={S.hvit.lys}
                 strokeWidth="0.4"
               />
@@ -2793,18 +2838,29 @@ function Kobenhavn({ størrelse = 48 }: P) {
         </Gavlhus>
       ))}
       {/* Uteserveringene på kaia. */}
-      {[6, 20, 34, 48, 62, 76].map((x, i) => (
+      {[-34, -20, -6, 6, 20, 34, 48, 62, 76, 90, 104, 118, 132].map((x, i) => (
         <g key={x}>
           <line x1={x} y1={kai - 2.4} x2={x} y2={kai - 5} stroke={S.mork.lys} strokeWidth="0.3" />
           <polygon points={pkt([x - 3, kai - 4.6], [x, kai - 6.2], [x + 3, kai - 4.6])} fill={[S.hvit.lys, S.vin.flate, S.hvit.lys][i % 3]} />
         </g>
       ))}
+      <Figur x={-16} y={kai - 1.4} avstand="fjern" klaer={S.gran} />
       <Figur x={12} y={kai - 1.4} avstand="fjern" klaer={S.marine} />
       <Figur x={41} y={kai - 1.2} avstand="fjern" klaer={S.oker} vendt={-1} />
       <Figur x={68} y={kai - 1.4} avstand="fjern" klaer={S.vin} />
-      {/* De gamle treseilerne i kanalen. */}
+      <Figur x={110} y={kai - 1.2} avstand="fjern" klaer={S.hvit} vendt={-1} />
+      {/* De gamle treseilerne i kanalen, og en til lengst til venstre. */}
+      <g transform="translate(-44 0)">{skip(8, 38)}</g>
       {skip(8, 40)}
       {skip(52, 46)}
+      {/* Kanalbåten: lang og lav, med glasstak og folk om bord. */}
+      <g className="anim-duve sen">
+        <path d={`M98 ${g + 3} L132 ${g + 2.6} Q131 ${g + 5.6} 128 ${g + 6} L101 ${g + 6} Q99 ${g + 5.2} 98 ${g + 3} Z`} fill={S.marine.flate} />
+        <rect x="102" y={g + 0.6} width="24" height="2.4" rx="0.6" fill={S.glass.lys} opacity="0.8" />
+        {[106, 111, 116, 121].map((x) => (
+          <circle key={x} cx={x} cy={g + 1.8} r="0.6" fill={S.hud.flate} />
+        ))}
+      </g>
     </Lerret>
   )
 }
@@ -2814,18 +2870,35 @@ function Kobenhavn({ størrelse = 48 }: P) {
  * på et gatehjørne, med rundt hjørnetårn og kuppel, lyse gesimser, balkonger
  * med jernrekkverk og butikker med markiser i gateplanet, lindetrær, en gul
  * trikk på vei forbi, og Fernsehturm i dis bak. I scenen glir trikken,
- * lindene rører seg og lyset på tårnet blinker (G10).
+ * lindene rører seg og lyset på tårnet blinker (G10). I den brede rammen (G19)
+ * står en Altbau-gård med en späti i gateplanet på andre siden av tverrgata
+ * til venstre, med trikkeholdeplassen foran, og til høyre neste gård i gata og
+ * et U-Bahn-skilt.
  */
 function Berlin({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
   const fot = g - 6
   const e = maal('fjern', 'etasje')
   const etasjeY = (k: number) => r2(fot - (k + 1) * e + 2.4)
+  /** En enkel Altbau-gård i fire etasjer med gesimser og butikk i gateplanet. */
+  const altbau = (x: number, b: number, m: Materiale, start: number) => (
+    <g>
+      <Kloss x={x} y={fot} b={b} h={36} d={10} m={m} />
+      {[1, 2, 3, 4].map((k) => (
+        <g key={k}>
+          <rect x={x} y={r2(fot - (k + 1) * e + 7.2)} width={b} height="0.8" fill={m.lys} />
+          <Vindusrad x={x + 2.4} y={etasjeY(k)} antall={Math.floor((b - 3) / 5)} b={2.6} h={4.2} mellom={2.4} karm={S.hvit.lys} tent={(k + start) % 2 ? 2 : 0} start={k + start} />
+        </g>
+      ))}
+      <rect x={x - 0.6} y={fot - 37.4} width={b + 1.2} height="1.4" fill={m.lys} />
+      <rect x={x} y={fot - 7} width={b} height="7" fill={S.vinduLys.skygge} />
+    </g>
+  )
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points="0,64 20,58 46,62 70,56 96,60 96,70 0,70" fill={S.stein.skygge} />
+          <polygon points="-40,62 -16,57 0,64 20,58 46,62 70,56 96,60 118,56 136,61 136,70 -40,70" fill={S.stein.skygge} />
           {/* Fernsehturm: skaftet, kula med det lyse beltet og antenna. */}
           <polygon points="77.4,58 78.2,16 79.4,16 80.2,58" fill={S.stein.lys} />
           <circle cx="78.8" cy="20" r="4.6" fill={S.metall.flate} />
@@ -2835,6 +2908,14 @@ function Berlin({ størrelse = 48 }: P) {
         <Blinklys x={78.8} y={6} r={0.8} />
       </Kantfade>
       <Bakke type="asfalt" />
+      {/* Gården på andre siden av tverrgata, med spätien i gateplanet. */}
+      <Slagskygge x1={-38} x2={-8} y={fot} lengde={12} d={10} />
+      {altbau(-38, 30, S.oker, 1)}
+      <rect x="-34" y={fot - 5.6} width="10" height="5.6" fill={S.vinduLys.flate} opacity="0.8" />
+      <rect x="-34.6" y={fot - 8.4} width="11.2" height="2.2" fill={S.vin.flate} />
+      <rect x="-33" y={fot - 7.8} width="8" height="1" fill={S.hvit.lys} />
+      <rect x="-22" y={fot - 2} width="3" height="2" fill={S.marine.flate} />
+      <rect x="-21.6" y={fot - 3.4} width="2.2" height="1.4" fill={S.oker.flate} />
       <Slagskygge x1={8} x2={88} y={fot} lengde={12} d={12} />
       {/* Nabogården til høyre, lavere og enklere. */}
       <Kloss x={70} y={fot} b={18} h={32} d={10} m={S.stein} />
@@ -2842,6 +2923,9 @@ function Berlin({ størrelse = 48 }: P) {
         <Vindusrad key={k} x={72} y={etasjeY(k + 1)} antall={4} b={2.4} h={4} mellom={2.2} karm={S.hvit.flate} tent={k === 1 ? 3 : 0} />
       ))}
       <rect x="70" y={fot - 7} width="18" height="7" fill={S.vinduLys.skygge} />
+      {/* Neste gård i gata, til høyre: tegnet etter naboen, så den dekker naboens skyggeside. */}
+      <Slagskygge x1={90} x2={126} y={fot} lengde={12} d={10} />
+      {altbau(90, 36, S.hvit, 0)}
       {/* Hovedgården i varm puss, med gesimser, balkonger og mansardtak. */}
       <Kloss x={14} y={fot} b={56} h={40} d={12} m={S.puss} />
       {[1, 2, 3, 4].map((k) => (
@@ -2883,13 +2967,28 @@ function Berlin({ størrelse = 48 }: P) {
       <line x1="11" y1={fot - 50.6} x2="11" y2={fot - 54.6} stroke={S.gull.flate} strokeWidth="0.4" />
       <rect x="6" y={fot - 7} width="10" height="7" fill={S.vinduLys.skygge} />
       {/* Lindetrærne og trikken. */}
-      {[22, 52, 84].map((x, i) => (
-        <g key={x} className={i % 2 ? 'anim-svai sen' : 'anim-svai'}>
+      {[-24, 22, 52, 84, 110].map((x, i) => (
+        <g key={x} className={i % 2 ? 'anim-svai' : 'anim-svai sen'}>
           <Tre x={x} y={fot + 2} h={14} />
         </g>
       ))}
-      <rect x="0" y={g + 3} width="96" height="0.4" fill={S.metall.skygge} />
-      <rect x="0" y={g + 5.4} width="96" height="0.4" fill={S.metall.skygge} />
+      <rect x="-40" y={g + 3} width="176" height="0.4" fill={S.metall.skygge} />
+      <rect x="-40" y={g + 5.4} width="176" height="0.4" fill={S.metall.skygge} />
+      {/* Trikkeholdeplassen: leskur og det grønne skiltet med gul H. */}
+      <rect x="-10" y={g - 11} width="10" height="1" fill={S.mork.flate} />
+      <rect x="-9.6" y={g - 10} width="9.2" height="6.4" fill={S.glass.lys} opacity="0.5" />
+      <rect x="-9.6" y={g - 10} width="0.5" height="6.4" fill={S.mork.flate} />
+      <rect x="-0.9" y={g - 10} width="0.5" height="6.4" fill={S.mork.flate} />
+      <line x1="2" y1={g - 3.6} x2="2" y2={g - 14} stroke={S.metall.flate} strokeWidth="0.5" />
+      <circle cx="2" cy={g - 15.6} r="2" fill={S.gran.flate} />
+      <path d={`M1.2 ${g - 16.8} V${g - 14.4} M2.8 ${g - 16.8} V${g - 14.4} M1.2 ${g - 15.6} H2.8`} stroke={S.oker.lys} strokeWidth="0.4" />
+      <Figur x={-6} y={g - 3.6} avstand="fjern" klaer={S.oker} />
+      <Figur x={-3.4} y={g - 3.4} avstand="fjern" klaer={S.gran} vendt={-1} />
+      {/* U-Bahn-skiltet: blått med hvit U, ved trappa ned. */}
+      <line x1="130" y1={g - 3.6} x2="130" y2={g - 13} stroke={S.metall.flate} strokeWidth="0.5" />
+      <rect x="128" y={g - 17} width="4" height="4" fill={S.marine.flate} />
+      <path d={`M129.2 ${g - 16.2} V${g - 14.4} Q130 ${g - 13.6} 130.8 ${g - 14.4} V${g - 16.2}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.5" />
+      <rect x="124" y={g - 4} width="8" height="1" fill={S.metall.flate} />
       <g className="anim-glid">
         <rect x="30" y={g - 4.6} width="38" height="9" rx="1.6" fill={S.oker.lys} />
         <rect x="30" y={g + 2.4} width="38" height="2" fill={S.oker.skygge} />
@@ -2898,6 +2997,7 @@ function Berlin({ størrelse = 48 }: P) {
       </g>
       <Figur x={12} y={g - 4} avstand="fjern" klaer={S.marine} />
       <Figur x={76} y={g - 3.6} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <Figur x={118} y={g - 3.8} avstand="fjern" klaer={S.marine} />
     </Lerret>
   )
 }
@@ -2907,18 +3007,21 @@ function Berlin({ størrelse = 48 }: P) {
  * etasjer med søylebuer over dørene, svarte jerngjerder, balkongen som går
  * langs hele første etasje og pipene på taket — ditt med den mørkeblå døra —
  * en svart drosje ved fortauskanten, en platan og Big Ben i dis bak. I scenen
- * ryker det fra en pipe, platanen rører seg og lyset går av og på (G10).
+ * ryker det fra en pipe, platanen rører seg og lyset går av og på (G10). I den
+ * brede rammen (G19) går rekka videre til venstre, og til høyre står en rød
+ * telefonkiosk ved hjørnet og platanene på Berkeley Square bak jerngjerdet.
  */
 function London({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
   const fot = g - 6
   const e = maal('fjern', 'etasje')
   const hus = [4, 21.5, 39, 56.5]
+  const venstre = [-36, -18.5]
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points="0,64 30,60 60,62 96,58 96,70 0,70" fill={S.stein.skygge} />
+          <polygon points="-40,62 -10,60 0,64 30,60 60,62 96,58 116,61 136,59 136,70 -40,70" fill={S.stein.skygge} />
           {/* Big Ben: tårnet i lys stein, urskiva, klokketårnet og spiret. */}
           <rect x="80" y="22" width="7" height="40" fill={S.oker.lys} />
           <rect x="85" y="22" width="2" height="40" fill={S.oker.flate} />
@@ -2930,6 +3033,47 @@ function London({ størrelse = 48 }: P) {
         </Dis>
       </Kantfade>
       <Bakke type="fortau" />
+      {/* Berkeley Square: plenen bak jerngjerdet og de store platanene. */}
+      <polygon points={pkt([96, fot + 1], [136, fot + 1], [136, fot - 10], [100, fot - 10])} fill={S.gress.flate} />
+      {[104, 118, 132].map((x, i) => (
+        <g key={x} className={i % 2 ? 'anim-svai sen' : 'anim-svai'}>
+          <Tre x={x} y={fot - 4 + i * 0.6} h={24 + (i % 2) * 3} />
+        </g>
+      ))}
+      <rect x="96" y={fot + 1.4} width="40" height="0.4" fill={S.mork.flate} />
+      {Array.from({ length: 21 }, (_, i) => r2(96.6 + i * 1.95)).map((x) => (
+        <line key={x} x1={x} y1={fot + 1.4} x2={x} y2={fot + 3.4} stroke={S.mork.flate} strokeWidth="0.25" />
+      ))}
+      <Figur x={112} y={fot - 1} avstand="fjern" klaer={S.gran} />
+      {/* Rekka videre til venstre: de samme hvite husene. */}
+      <Slagskygge x1={-36} x2={4} y={fot} lengde={12} d={12} />
+      <Kloss x={-36} y={fot} b={40} h={40} d={12} m={S.hvit} />
+      <rect x="-36" y={fot - 9} width="40" height="9" fill={S.hvit.lys} />
+      {[fot - 3, fot - 6].map((y) => (
+        <rect key={y} x="-36" y={y} width="40" height="0.4" fill={S.hvit.skygge} />
+      ))}
+      <rect x={-18.8} y={fot - 40} width="0.6" height="31" fill={S.hvit.skygge} />
+      {[1, 2, 3, 4].map((k) => (
+        <Vindusrad key={k} x={-34} y={r2(fot - (k + 1) * e + (k === 4 ? 4.4 : 1.8))} antall={7} b={2.6} h={k === 4 ? 3.2 : k === 1 ? 5.4 : 4.6} mellom={2.9} karm={S.hvit.lys} tent={k === 3 ? 3 : 0} start={k + 2} />
+      ))}
+      <rect x="-36" y={r2(fot - 2 * e - 0.4)} width="40" height="1.2" fill={S.mork.flate} />
+      <rect x="-37" y={fot - 41.2} width="41" height="1.6" fill={S.hvit.lys} />
+      {venstre.map((x) => (
+        <g key={x}>
+          <Kloss x={r2(x + 6)} y={fot - 41} b={4} h={4} d={3} m={S.hvit} />
+          {[0, 1.4, 2.8].map((dx) => (
+            <rect key={dx} x={r2(x + 6.4 + dx)} y={r2(fot - 46.2)} width="0.8" height="1.6" fill={S.tegl.flate} />
+          ))}
+          <rect x={r2(x + 3)} y={fot - 8.4} width="7" height="1.2" fill={S.hvit.lys} />
+          <rect x={r2(x + 3.4)} y={fot - 7.2} width="0.8" height="7.2" fill={S.hvit.lys} />
+          <rect x={r2(x + 8.8)} y={fot - 7.2} width="0.8" height="7.2" fill={S.hvit.lys} />
+          <rect x={r2(x + 5)} y={fot - 6.4} width="3" height="6.4" fill={S.mork.flate} />
+        </g>
+      ))}
+      <rect x="-36" y={fot + 1.4} width="40" height="0.4" fill={S.mork.flate} />
+      {Array.from({ length: 20 }, (_, i) => r2(-35.4 + i * 1.95)).map((x) => (
+        <line key={x} x1={x} y1={fot + 1.4} x2={x} y2={fot + 3.4} stroke={S.mork.flate} strokeWidth="0.25" />
+      ))}
       <Slagskygge x1={4} x2={74} y={fot} lengde={12} d={12} />
       {/* Rekka: én lang hvit fasade, delt i fire hus. */}
       <Kloss x={4} y={fot} b={70} h={40} d={12} m={S.hvit} />
@@ -2988,6 +3132,10 @@ function London({ størrelse = 48 }: P) {
       <g className="anim-svai">
         <Tre x={84} y={g + 2} h={22} />
       </g>
+      {/* Den røde telefonkiosken på hjørnet: rødt hus, kuppeltak og glassruter. */}
+      <rect x="92" y={g - 4.6} width="2.6" height="6.4" fill={S.faluRod.flate} />
+      <path d={`M91.8 ${g - 4.6} Q93.3 ${g - 6} 94.8 ${g - 4.6} Z`} fill={S.faluRod.flate} />
+      <rect x="92.5" y={g - 3.4} width="1.6" height="3.4" fill={S.glass.skygge} className="nattvindu" />
       <g>
         <path d={`M30 ${g + 6} V${g + 3} Q30.4 ${g + 1.6} 32 ${g + 1.4} L34 ${g - 0.8} Q38 ${g - 1.6} 41.6 ${g - 0.8} L43.4 ${g + 1.4} Q45 ${g + 1.8} 45 ${g + 3.4} V${g + 6} Z`} fill={S.mork.flate} />
         <path d={`M34.6 ${g + 1.2} L35.6 ${g - 0.2} H38 V${g + 1.2} Z M38.8 ${g + 1.2} V${g - 0.2} H41.2 L42.2 ${g + 1.2} Z`} fill={S.glass.skygge} />
@@ -2996,6 +3144,7 @@ function London({ størrelse = 48 }: P) {
           <circle key={x} cx={x} cy={g + 6} r="1.4" fill={S.mork.skygge} />
         ))}
       </g>
+      <Figur x={-24} y={fot + 4.4} avstand="fjern" klaer={S.vin} />
       <Figur x={18} y={fot + 4.6} avstand="fjern" klaer={S.marine} />
       <Figur x={62} y={fot + 4.2} avstand="fjern" klaer={S.oker} vendt={-1} />
     </Lerret>
@@ -3007,7 +3156,9 @@ function London({ størrelse = 48 }: P) {
  * grachten, med trappegavler og klokkegavler, heisebjelken under mønet og
  * store vinduer med hvite karmer — ditt i midten med den grønne døra. Foran
  * en buet steinbro med sykler mot rekkverket og en husbåt i kanalen,
- * Westerkerk i dis bak. I scenen duver husbåten og lyset går av og på.
+ * Westerkerk i dis bak. I scenen duver husbåten og lyset går av og på. I den
+ * brede rammen (G19) står tre kanalhus til på hver side, syklene står langs
+ * rekkverket til venstre, og en husbåt med planter på taket ligger til høyre.
  */
 function Amsterdam({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3020,6 +3171,15 @@ function Amsterdam({ størrelse = 48 }: P) {
     [28, 14, 4 * e + 6, 'trapp', S.faluRod],
     [42, 12, 5 * e, 'klokke', S.tegl],
     [54, 13, 4 * e + 2, 'trapp', S.treMork],
+  ]
+  /** Husene på sidene (G19), med egne nummer i lysmønsteret så de fem i midten er som før. */
+  const sidehus: [number, number, number, 'trapp' | 'klokke', Materiale, number][] = [
+    [-38, 12, 4 * e + 2, 'klokke', S.faluRod, 6],
+    [-26, 14, 5 * e, 'trapp', S.tegl, 7],
+    [-12, 13, 4 * e + 4, 'klokke', S.treMork, 8],
+    [94, 13, 5 * e + 2, 'trapp', S.mork, 9],
+    [107, 12, 4 * e + 4, 'klokke', S.tegl, 10],
+    [119, 14, 4 * e + 6, 'trapp', S.faluRod, 11],
   ]
   const gavl = (x: number, b: number, topp: number, slag: 'trapp' | 'klokke', m: Materiale) =>
     slag === 'trapp' ? (
@@ -3043,11 +3203,30 @@ function Amsterdam({ størrelse = 48 }: P) {
     ) : (
       <path d={`M${x} ${topp} Q${x + 1} ${topp - 3} ${r2(x + b * 0.3)} ${topp - 4} Q${r2(x + b * 0.3)} ${topp - 7.6} ${r2(x + b / 2)} ${topp - 7.6} Q${r2(x + b * 0.7)} ${topp - 7.6} ${r2(x + b * 0.7)} ${topp - 4} Q${x + b - 1} ${topp - 3} ${x + b} ${topp} Z`} fill={m.flate} />
     )
+  /** Ett hus med gavl, vinduer, heisebjelke og trapp opp til døra; `i` styrer lysmønsteret. */
+  const etHus = ([x, b, h, slag, m]: [number, number, number, 'trapp' | 'klokke', Materiale], i: number) => {
+    const topp = r2(kai - 2 - h)
+    return (
+      <g key={x}>
+        <polygon points={pkt([x + b, kai - 2], inn(x + b, kai - 2, 6), inn(x + b, topp, 6), [x + b, topp])} fill={m.skygge} />
+        <rect x={x} y={topp} width={b} height={h} fill={m.flate} />
+        <rect x={x} y={topp} width="1" height={h} fill={m.lys} />
+        {gavl(x, b, topp, slag, m)}
+        <rect x={r2(x + b / 2 - 0.4)} y={r2(topp - 6.6)} width="0.8" height="2.4" fill={S.mork.flate} />
+        <line x1={r2(x + b / 2)} y1={r2(topp - 5.6)} x2={r2(x + b / 2 + 2.6)} y2={r2(topp - 5.6)} stroke={S.mork.flate} strokeWidth="0.5" />
+        {Array.from({ length: Math.floor((h - 8) / e) + 1 }, (_, k) => (
+          <Vindusrad key={k} x={r2(x + 1.8)} y={r2(topp + 2 + k * e)} antall={2} b={r2((b - 5.4) / 2)} h={4.2} mellom={1.8} karm={S.hvit.lys} tent={(k + i) % 3 === 0 ? 1 : 0} start={k + i} tennes={k === 1 ? i : undefined} />
+        ))}
+        <rect x={r2(x + b / 2 - 1.4)} y={kai - 7.6} width="2.8" height="5.6" fill={i === 2 ? S.gran.flate : S.mork.flate} />
+        {i === 2 && <circle cx={r2(x + b / 2 + 0.6)} cy={kai - 4.6} r="0.3" fill={S.gull.lys} />}
+      </g>
+    )
+  }
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points="0,58 24,54 52,57 96,53 96,64 0,64" fill={S.stein.skygge} />
+          <polygon points="-40,57 -14,55 0,58 24,54 52,57 96,53 120,56 136,54 136,64 -40,64" fill={S.stein.skygge} />
           {/* Westerkerk: tårnet i tre avsatser med den blå keiserkrona på toppen. */}
           <rect x="80" y="28" width="7" height="30" fill={S.tegl.skygge} />
           <rect x="81" y="18" width="5" height="10" fill={S.stein.lys} />
@@ -3058,30 +3237,15 @@ function Amsterdam({ størrelse = 48 }: P) {
       </Kantfade>
       <Bakke type="hav" />
       <Kantfade>
-        <rect x="0" y={kai - 2} width="96" height="2" fill={S.stein.lys} />
-        <rect x="0" y={kai} width="96" height="4" fill={S.stein.flate} />
-        <rect x="0" y={kai + 4} width="96" height="0.8" fill={S.stein.skygge} />
+        <rect x="-40" y={kai - 2} width="176" height="2" fill={S.stein.lys} />
+        <rect x="-40" y={kai} width="176" height="4" fill={S.stein.flate} />
+        <rect x="-40" y={kai + 4} width="176" height="0.8" fill={S.stein.skygge} />
       </Kantfade>
-      <Slagskygge x1={3} x2={67} y={kai - 2} lengde={10} d={8} />
-      {/* Husene, med gavl, vinduer, heisebjelke og trapp opp til døra. */}
-      {hus.map(([x, b, h, slag, m], i) => {
-        const topp = kai - 2 - h
-        return (
-          <g key={x}>
-            <polygon points={pkt([x + b, kai - 2], inn(x + b, kai - 2, 6), inn(x + b, topp, 6), [x + b, topp])} fill={m.skygge} />
-            <rect x={x} y={topp} width={b} height={h} fill={m.flate} />
-            <rect x={x} y={topp} width="1" height={h} fill={m.lys} />
-            {gavl(x, b, topp, slag, m)}
-            <rect x={r2(x + b / 2 - 0.4)} y={r2(topp - 6.6)} width="0.8" height="2.4" fill={S.mork.flate} />
-            <line x1={r2(x + b / 2)} y1={r2(topp - 5.6)} x2={r2(x + b / 2 + 2.6)} y2={r2(topp - 5.6)} stroke={S.mork.flate} strokeWidth="0.5" />
-            {Array.from({ length: Math.floor((h - 8) / e) + 1 }, (_, k) => (
-              <Vindusrad key={k} x={r2(x + 1.8)} y={r2(topp + 2 + k * e)} antall={2} b={r2((b - 5.4) / 2)} h={4.2} mellom={1.8} karm={S.hvit.lys} tent={(k + i) % 3 === 0 ? 1 : 0} start={k + i} tennes={k === 1 ? i : undefined} />
-            ))}
-            <rect x={r2(x + b / 2 - 1.4)} y={kai - 7.6} width="2.8" height="5.6" fill={i === 2 ? S.gran.flate : S.mork.flate} />
-            {i === 2 && <circle cx={r2(x + b / 2 + 0.6)} cy={kai - 4.6} r="0.3" fill={S.gull.lys} />}
-          </g>
-        )
-      })}
+      <Slagskygge x1={-38} x2={133} y={kai - 2} lengde={10} d={8} />
+      {/* Husene, fra venstre, så naboen dekker skyggesiden. */}
+      {sidehus.slice(0, 3).map(([x, b, h, slag, m, n]) => etHus([x, b, h, slag, m], n))}
+      {hus.map((h, i) => etHus(h, i))}
+      {sidehus.slice(3).map(([x, b, h, slag, m, n]) => etHus([x, b, h, slag, m], n))}
       {/* Buebroa over grachten, med syklene mot rekkverket. */}
       <path d={`M68 ${kai - 2} Q80 ${kai - 9} 92 ${kai - 2} V${kai + 4} H88 Q80 ${kai - 3} 72 ${kai + 4} H68 Z`} fill={S.tegl.flate} />
       <path d={`M68 ${kai - 2} Q80 ${kai - 9} 92 ${kai - 2}`} fill="none" stroke={S.tegl.lys} strokeWidth="1" />
@@ -3091,6 +3255,15 @@ function Amsterdam({ størrelse = 48 }: P) {
           <circle cx={x + 3} cy={r2(kai - 6.2 + Math.abs(x + 3 - 80) * 0.5)} r="1.4" fill="none" stroke={[S.vin.flate, S.marine.flate, S.mork.lys, S.oker.flate][i]} strokeWidth="0.4" />
         </g>
       ))}
+      {/* Syklene langs rekkverket på kaia til venstre. */}
+      <line x1="-40" y1={kai - 3.4} x2="0" y2={kai - 3.4} stroke={S.mork.flate} strokeWidth="0.4" />
+      {[-37, -31, -25, -19, -9, -3].map((x, i) => (
+        <g key={x}>
+          <circle cx={x} cy={kai - 3.6} r="1.4" fill="none" stroke={S.mork.flate} strokeWidth="0.4" />
+          <circle cx={x + 3} cy={kai - 3.6} r="1.4" fill="none" stroke={[S.vin.flate, S.marine.flate, S.oker.flate, S.gran.flate][i % 4]} strokeWidth="0.4" />
+          <line x1={x} y1={kai - 3.6} x2={r2(x + 1.8)} y2={kai - 5.6} stroke={S.mork.flate} strokeWidth="0.3" />
+        </g>
+      ))}
       {/* Husbåten i kanalen. */}
       <g className="anim-duve">
         <rect x="14" y={g + 1} width="34" height="3.6" rx="1" fill={S.treMork.flate} />
@@ -3098,8 +3271,23 @@ function Amsterdam({ størrelse = 48 }: P) {
         <rect x="18" y={g - 4.8} width="24" height="0.8" fill={S.gran.lys} />
         <Vindusrad x={20} y={g - 3} antall={5} b={2.6} h={2.6} mellom={1.8} karm={S.hvit.lys} tent={2} />
       </g>
+      {/* Husbåten til høyre, med potteplanter på taket. */}
+      <g className="anim-duve sen">
+        <rect x="100" y={g + 1} width="32" height="3.6" rx="1" fill={S.marine.skygge} />
+        <rect x="104" y={g - 4} width="22" height="5" fill={S.oker.flate} />
+        <rect x="104" y={g - 4.8} width="22" height="0.8" fill={S.oker.lys} />
+        <Vindusrad x={106} y={g - 3} antall={4} b={2.6} h={2.6} mellom={2.2} karm={S.hvit.lys} tent={1} start={3} />
+        {[106, 111, 117, 123].map((x, i) => (
+          <g key={x}>
+            <rect x={x} y={g - 6.6} width="1.8" height="1.8" fill={S.tegl.flate} />
+            <circle cx={r2(x + 0.9)} cy={g - 7.4} r={i % 2 ? 1.4 : 1.8} fill={i % 2 ? S.gran.lys : S.gran.flate} />
+          </g>
+        ))}
+      </g>
+      <Figur x={-14} y={kai - 1.2} avstand="fjern" klaer={S.vin} />
       <Figur x={9} y={kai - 1.2} avstand="fjern" klaer={S.oker} />
       <Figur x={63} y={kai - 1.4} avstand="fjern" klaer={S.marine} vendt={-1} />
+      <Figur x={114} y={kai - 1.4} avstand="fjern" klaer={S.gran} />
     </Lerret>
   )
 }
@@ -3109,18 +3297,43 @@ function Amsterdam({ størrelse = 48 }: P) {
  * fire etasjer med buede vinduer i gateplanet, grønne skodder, en gesims med
  * dypt takutstikk og takterrasse med pergola. En vespa ved døra, en pinje som
  * skjermer, og Peterskirkens kuppel i dis bak. I scenen rører pinjen seg og
- * lyset går av og på.
+ * lyset går av og på. I den brede rammen (G19) står lavere hus i terrakotta
+ * med eføy til venstre, og til høyre åpner gata seg mot en liten piazza med
+ * en fontene, kafébord og et kirketårn i teglstein.
  */
 function Roma({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
   const fot = g - 6
   const e = maal('fjern', 'etasje')
   const etasjeY = (k: number) => r2(fot - (k + 1) * e + 2.2)
+  /** Et lavere hus i gata: puss, skodder og et takutstikk i tegl. */
+  const hus = (x: number, b: number, et: number, m: Materiale, efoy: boolean) => {
+    const topp = fot - et * e - 2
+    return (
+      <g>
+        <Kloss x={x} y={fot} b={b} h={et * e + 2} d={10} m={m} />
+        {Array.from({ length: et - 1 }, (_, k) => k + 1).map((k) =>
+          Array.from({ length: Math.floor((b - 4) / 7) }, (_, i) => r2(x + 4 + i * 7)).map((wx, i) => (
+            <g key={`${k}-${wx}`}>
+              <rect x={r2(wx - 1.6)} y={etasjeY(k)} width="1.2" height="4.4" fill={S.gran.skygge} />
+              <rect x={r2(wx - 0.4)} y={etasjeY(k)} width="2.4" height="4.4" fill={(k + i + x) % 3 === 0 ? S.vinduLys.flate : S.glass.skygge} className="nattvindu" />
+              <rect x={r2(wx + 2)} y={etasjeY(k)} width="1.2" height="4.4" fill={S.gran.skygge} />
+            </g>
+          )),
+        )}
+        <rect x={x + 3} y={fot - 6} width="3" height="6" fill={S.treMork.flate} />
+        <polygon points={pkt([x - 1, topp], [x + b + 1, topp], [x + b - 1, topp - 3], [x + 1, topp - 3])} fill={S.tegl.flate} />
+        {efoy && (
+          <path d={`M${x} ${fot} V${r2(topp + 6)} Q${x + 4} ${r2(topp + 2)} ${x + 8} ${r2(topp + 7)} Q${x + 6} ${fot - 10} ${x + 9} ${fot} Z`} fill={S.gran.flate} opacity="0.9" />
+        )}
+      </g>
+    )
+  }
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points="0,62 26,58 56,61 96,57 96,68 0,68" fill={S.stein.skygge} />
+          <polygon points="-40,61 -14,58 0,62 26,58 56,61 96,57 118,60 136,58 136,68 -40,68" fill={S.stein.skygge} />
           {/* Peterskirken: tamburen, kuppelen og lanternen. */}
           <rect x="70" y="40" width="18" height="18" fill={S.stein.lys} />
           <rect x="72" y="34" width="14" height="6" fill={S.stein.lys} />
@@ -3130,6 +3343,36 @@ function Roma({ størrelse = 48 }: P) {
         </Dis>
       </Kantfade>
       <Bakke type="fortau" />
+      {/* Husene til venstre i gata, med eføy. */}
+      <Slagskygge x1={-38} x2={2} y={fot} lengde={10} d={10} />
+      {hus(-38, 18, 3, S.tegl, true)}
+      {hus(-20, 20, 3, S.oker, false)}
+      {/* Kirketårnet på piazzaen: teglstein, buede glugger og et lavt pyramidetak. */}
+      <Slagskygge x1={118} x2={128} y={fot - 4} lengde={14} d={6} />
+      <Kloss x={118} y={fot - 4} b={9} h={42} d={6} m={S.tegl} />
+      {[0, 1, 2].map((k) => (
+        <g key={k}>
+          <rect x="118" y={fot - 18 - k * 8} width="9" height="0.6" fill={S.stein.lys} />
+          {[119.6, 123].map((x) => (
+            <path key={x} d={`M${x} ${fot - 18.6 - k * 8} V${fot - 22.6 - k * 8} Q${r2(x + 1.2)} ${fot - 24.2 - k * 8} ${r2(x + 2.4)} ${fot - 22.6 - k * 8} V${fot - 18.6 - k * 8} Z`} fill={S.mork.flate} />
+          ))}
+        </g>
+      ))}
+      <polygon points={pkt([117.4, fot - 46], [122.5, fot - 51], [127.6, fot - 46])} fill={S.tegl.skygge} />
+      {/* Piazzaen: fontenen med vannet, og kafébordene under parasoller. */}
+      <ellipse cx="104" cy={g + 1} rx="8" ry="2.4" fill={S.stein.lys} />
+      <ellipse cx="104" cy={g + 0.6} rx="6.4" ry="1.7" fill={S.sjo.lys} />
+      <rect x="103.3" y={g - 6} width="1.4" height="6.4" fill={S.stein.flate} />
+      <path className="anim-boelge" d={`M104 ${g - 6} Q101 ${g - 7.6} 100 ${g - 1} M104 ${g - 6} Q107 ${g - 7.6} 108 ${g - 1}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.4" />
+      {[116, 128].map((x, i) => (
+        <g key={x}>
+          <line x1={x} y1={g + 4} x2={x} y2={g - 3} stroke={S.mork.lys} strokeWidth="0.3" />
+          <polygon points={pkt([x - 4, g - 2.4], [x, g - 4.2], [x + 4, g - 2.4])} fill={i ? S.hvit.lys : S.vin.flate} />
+          <ellipse cx={x} cy={g + 2} rx="2.2" ry="0.6" fill={S.metall.lys} />
+        </g>
+      ))}
+      <Figur x={124} y={g + 4.6} avstand="fjern" klaer={S.oker} />
+      <Figur x={96} y={g + 3.6} avstand="fjern" klaer={S.gran} vendt={-1} />
       <Slagskygge x1={6} x2={70} y={fot} lengde={12} d={12} />
       {/* Palasset i okerpuss. */}
       <Kloss x={6} y={fot} b={62} h={4 * e + 2} d={12} m={S.oker} />
@@ -3173,6 +3416,7 @@ function Roma({ størrelse = 48 }: P) {
         <circle cx="21" cy={g + 2.6} r="1.6" fill={S.mork.flate} />
         <circle cx="29.6" cy={g + 2.6} r="1.6" fill={S.mork.flate} />
       </g>
+      <Figur x={-26} y={fot + 4.2} avstand="fjern" klaer={S.marine} />
       <Figur x={40} y={fot + 4.4} avstand="fjern" klaer={S.vin} />
       <Figur x={64} y={fot + 4.6} avstand="fjern" klaer={S.marine} vendt={-1} />
     </Lerret>
@@ -3184,6 +3428,9 @@ function Roma({ størrelse = 48 }: P) {
  * kalkstein, seks etasjer med smijernsbalkonger langs andre og femte, et grått
  * mansardtak av sink med kvistvinduer og piper, og en kafé med vinrød markise
  * og småbord på fortauet. Eiffeltårnet i dis bak. I scenen går lyset av og på.
+ * I den brede rammen (G19) står en eldre nabogård i stein med en plakatsøyle (colonne Morris)
+ * foran til venstre, og til høyre en lavere gård og en Métro-nedgang i
+ * jugendstil med de grønne støpejernslyktene.
  */
 function Paris({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3191,11 +3438,26 @@ function Paris({ størrelse = 48 }: P) {
   const e = maal('fjern', 'etasje')
   const topp = fot - 5 * e - 2
   const etasjeY = (k: number) => r2(fot - (k + 1) * e + 2.4)
+  /** En nabogård: kalkstein, vindusrader, et enkelt mansardtak og butikk i gateplanet. */
+  const nabo = (x: number, b: number, et: number, m: Materiale, start: number) => {
+    const t = fot - et * e - 2
+    return (
+      <g>
+        <Kloss x={x} y={fot} b={b} h={et * e + 2} d={10} m={m} />
+        {Array.from({ length: et - 1 }, (_, k) => k + 1).map((k) => (
+          <Vindusrad key={k} x={x + 2.4} y={etasjeY(k)} antall={Math.floor((b - 3) / 6)} b={3} h={4.6} mellom={3} karm={S.hvit.lys} tent={(k + start) % 2 ? 2 : 0} start={k + start} />
+        ))}
+        <polygon points={pkt([x - 1, t], [x + b + 1, t], [x + b - 2, t - 6], [x + 2, t - 6])} fill={S.skifer.lys} />
+        <rect x={x - 1} y={t} width={b + 2} height="1" fill={m.lys} />
+        <rect x={x} y={fot - 7} width={b} height="7" fill={S.vinduLys.skygge} />
+      </g>
+    )
+  }
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points="0,64 30,60 62,63 96,59 96,70 0,70" fill={S.stein.skygge} />
+          <polygon points="-40,62 -10,59 0,64 30,60 62,63 96,59 120,62 136,60 136,70 -40,70" fill={S.stein.skygge} />
           {/* Eiffeltårnet: de fire beina, de to plattformene og spiret. */}
           <path d="M74 58 Q78.6 40 80.4 24 L81.6 24 Q83.4 40 88 58 H85 Q82.4 50 81 44 Q79.6 50 77 58 Z" fill={S.metall.skygge} />
           <rect x="76.6" y="44" width="8.8" height="1" fill={S.metall.flate} />
@@ -3204,6 +3466,9 @@ function Paris({ størrelse = 48 }: P) {
         </Dis>
       </Kantfade>
       <Bakke type="fortau" />
+      {/* Den eldre nabogården til venstre. */}
+      <Slagskygge x1={-38} x2={2} y={fot} lengde={12} d={10} />
+      {nabo(-38, 40, 4, S.stein, 1)}
       <Slagskygge x1={4} x2={76} y={fot} lengde={12} d={12} />
       {/* Gården i kalkstein, med fuger og vindusrader. */}
       <Kloss x={4} y={fot} b={72} h={5 * e + 2} d={12} m={S.puss} />
@@ -3241,6 +3506,9 @@ function Paris({ størrelse = 48 }: P) {
           ))}
         </g>
       ))}
+      {/* Den lavere gården til høyre, tegnet etter, så den dekker skyggesiden. */}
+      <Slagskygge x1={90} x2={130} y={fot} lengde={10} d={10} />
+      {nabo(90, 40, 4, S.puss, 0)}
       {/* Kafeen i gateplanet: markisen og småbordene på fortauet. */}
       <rect x="4" y={fot - 8} width="72" height="8" fill={S.vinduLys.skygge} />
       <rect x="8" y={fot - 6.4} width="28" height="6.4" fill={S.glass.skygge} />
@@ -3253,9 +3521,29 @@ function Paris({ størrelse = 48 }: P) {
           <line x1={x} y1={fot + 1.4} x2={x} y2={fot + 4} stroke={S.mork.flate} strokeWidth="0.3" />
         </g>
       ))}
+      {/* Plakatsøylen: mørkegrønn med kuppeltopp og plakater. */}
+      <rect x="-12" y={g - 9} width="3.4" height="9" fill={S.gran.skygge} />
+      <path d={`M-12.4 ${g - 9} Q-10.3 ${g - 12} -8.2 ${g - 9} Z`} fill={S.gran.skygge} />
+      <rect x="-11.6" y={g - 7.6} width="2.6" height="2.4" fill={S.oker.lys} />
+      <rect x="-11.6" y={g - 4.8} width="2.6" height="2" fill={S.vin.lys} />
+      {/* Métro-nedgangen: grønt støpejernsgjerde, to buede lyktestolper og skiltet mellom. */}
+      <rect x="100" y={g - 3.4} width="14" height="0.5" fill={S.gran.flate} />
+      {Array.from({ length: 8 }, (_, i) => r2(100.6 + i * 1.8)).map((x) => (
+        <line key={x} x1={x} y1={g - 3.4} x2={x} y2={g - 0.4} stroke={S.gran.flate} strokeWidth="0.3" />
+      ))}
+      {[100, 114].map((x, i) => (
+        <g key={x}>
+          <path d={`M${x} ${g - 0.4} V${g - 10} Q${x} ${g - 12.6} ${i ? x - 2 : x + 2} ${g - 12.6}`} fill="none" stroke={S.gran.flate} strokeWidth="0.6" />
+          <ellipse cx={i ? x - 2 : x + 2} cy={g - 12.2} rx="0.9" ry="1.3" fill={S.oker.lys} className="nattvindu" />
+        </g>
+      ))}
+      <rect x="102.4" y={g - 11.6} width="9.2" height="1.6" fill={S.oker.lys} />
+      <line x1="103.4" y1={g - 10.8} x2="110.6" y2={g - 10.8} stroke={S.gran.skygge} strokeWidth="0.4" strokeDasharray="0.8 0.4" />
+      <Figur x={-18} y={fot + 4.4} avstand="fjern" klaer={S.oker} />
       <Figur x={14} y={fot + 4.4} avstand="fjern" klaer={S.mork} />
       <Figur x={46} y={fot + 4.6} avstand="fjern" klaer={S.oker} vendt={-1} />
       <Figur x={84} y={g - 3.6} avstand="fjern" klaer={S.marine} />
+      <Figur x={120} y={g - 3.4} avstand="fjern" klaer={S.vin} vendt={-1} />
     </Lerret>
   )
 }
@@ -3294,15 +3582,32 @@ function Palme({ x, y = GRUNNLINJE, h, boy = 1 }: { x: number; y?: number; h: nu
  * Villaen på Palmen (fjern avstand, Palm Jumeirah): en hvit, moderne villa i
  * to etasjer med glass og utkragede terrasser, infinitybasseng, palmer og
  * egen strand mot Persiabukta, en yacht på vannet og Burj Al Arab som et seil
- * i dis ute i havet.
+ * i dis ute i havet. I den brede rammen (G19) står nabovillaene langs
+ * palmebladet på begge sider, en vannscooter trekker kjølvann til høyre, og
+ * skyskraperen i Downtown står som en nål i dis langt bak til venstre.
  */
 function Dubai({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
   const fot = g - 8
+  /** En nabovilla: lav og hvit, med glassbånd, takterrasse og en palme. */
+  const nabo = (x: number, b: number) => (
+    <g>
+      <Slagskygge x1={x} x2={x + b} y={fot} lengde={8} d={10} />
+      <Kloss x={x} y={fot} b={b} h={7} d={10} m={S.hvit} />
+      <rect x={x + 2} y={fot - 5.8} width={b - 4} height="4.6" fill={S.glass.skygge} className="nattvindu" />
+      <Kloss x={x + 4} y={fot - 7} b={b - 10} h={5} d={8} m={S.hvit} />
+      <rect x={x + 5.6} y={fot - 11} width={b - 13} height="2.6" fill={S.glass.flate} />
+      <rect x={x} y={fot + 1.6} width={b} height="2" fill={S.sjo.lys} />
+    </g>
+  )
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
+          {/* Skyskraperen i Downtown: en nål i trinn, langt inne på land. */}
+          <polygon points={`-21,${HORISONT} -21,46 -20,46 -20,38 -19.2,38 -19.2,32 -18.6,32 -18.3,24 -18,32 -17.4,32 -17.4,38 -16.6,38 -16.6,46 -15.6,46 -15.6,${HORISONT}`} fill={S.metall.lys} />
+          <rect x="-30" y="50" width="4" height="6" fill={S.stein.lys} />
+          <rect x="-12" y="51" width="3.6" height="5" fill={S.stein.lys} />
           {/* Burj Al Arab: seilet med masta og helikopterplattformen. */}
           <path d={`M78 ${HORISONT} Q78.4 42 81 32 Q85.4 41 86.4 ${HORISONT} Z`} fill={S.hvit.lys} />
           <path d={`M81 32 Q84.4 42 86.4 ${HORISONT} H84 Q83 43 81 32 Z`} fill={S.hvit.skygge} />
@@ -3313,11 +3618,11 @@ function Dubai({ størrelse = 48 }: P) {
         </Dis>
       </Kantfade>
       <Bakke type="hav" />
-      {/* Stranda og hagen. */}
+      {/* Stranda og hagen langs hele palmebladet. */}
       <Kantfade>
-        <polygon points={`0,${g - 12} 96,${g - 14} 96,${g + 12} 0,${g + 12}`} fill={S.puss.lys} />
-        <polygon points={`0,${g - 12} 96,${g - 14} 96,${g - 10} 0,${g - 8}`} fill={S.gress.flate} />
-        <path d={`M0 ${g + 7} Q30 ${g + 4} 60 ${g + 6} T96 ${g + 5}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" opacity="0.8" />
+        <polygon points={`-40,${g - 11} 136,${g - 15} 136,${g + 12} -40,${g + 12}`} fill={S.puss.lys} />
+        <polygon points={`-40,${g - 11} 136,${g - 15} 136,${g - 11} -40,${g - 7}`} fill={S.gress.flate} />
+        <path d={`M-40 ${g + 6} Q-6 ${g + 8} 0 ${g + 7} Q30 ${g + 4} 60 ${g + 6} T96 ${g + 5} Q116 ${g + 3} 136 ${g + 5}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" opacity="0.8" />
       </Kantfade>
       {/* Yachten ute på vannet. */}
       <g className="anim-duve">
@@ -3325,6 +3630,15 @@ function Dubai({ størrelse = 48 }: P) {
         <rect x="12" y={HORISONT + 3.4} width="8" height="2.2" rx="0.6" fill={S.hvit.flate} />
         <rect x="13" y={HORISONT + 3.8} width="6" height="0.8" fill={S.glass.skygge} />
       </g>
+      {/* Vannscooteren med kjølvannet. */}
+      <path d={`M104 ${HORISONT + 4} Q114 ${HORISONT + 2.6} 122 ${HORISONT + 3.6}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.8" opacity="0.7" />
+      <path d={`M122 ${HORISONT + 3.6} L127 ${HORISONT + 3.2} L126 ${HORISONT + 4.6} L122.4 ${HORISONT + 4.6} Z`} fill={S.oker.lys} />
+      <circle cx="124.4" cy={HORISONT + 2.2} r="0.6" fill={S.hud.flate} />
+      {/* Nabovillaene langs palmebladet. */}
+      {nabo(-34, 28)}
+      <Palme x={-2} y={fot + 2} h={20} />
+      {nabo(98, 28)}
+      <Palme x={132} y={fot + 2} h={21} boy={-1} />
       {/* Villaen: to etasjer i hvitt med glass, den øverste kraget ut. */}
       <Slagskygge x1={22} x2={66} y={fot} lengde={12} d={14} />
       <Kloss x={22} y={fot} b={40} h={8} d={14} m={S.hvit} />
@@ -3349,28 +3663,45 @@ function Dubai({ størrelse = 48 }: P) {
       <Palme x={72} y={fot + 1} h={24} />
       <Palme x={82} y={fot + 3} h={18} />
       <Figur x={46} y={fot + 8} avstand="fjern" klaer={S.hvit} />
+      <Figur x={-20} y={fot + 8.4} avstand="fjern" klaer={S.oker} vendt={-1} />
     </Lerret>
   )
 }
 
-/** La Concha, fjellet over Marbella, i dis: en lang rygg med den runde «skjellet» øverst. */
+/**
+ * La Concha, fjellet over Marbella, i dis: en lang rygg med den runde «skjellet»
+ * øverst. Ryggen går fra kant til kant i den brede rammen, og kroppen er mørk
+ * nok til å stå mot en himmel uten vignett (G19).
+ */
 function LaConcha({ dx = 0 }: { dx?: number }) {
   return (
     <Kantfade>
       <Dis>
-        <polygon points={pkt([0 + dx, HORISONT + 1], [12 + dx, 46], [28 + dx, 40], [40 + dx, 28], [48 + dx, 22], [56 + dx, 24], [62 + dx, 32], [74 + dx, 40], [90 + dx, 44], [110 + dx, HORISONT + 1])} fill={S.fjell.flate} />
-        <polygon points={pkt([48 + dx, 22], [56 + dx, 24], [62 + dx, 32], [52 + dx, 36], [46 + dx, 30])} fill={S.fjell.skygge} />
+        <polygon points={pkt([-40, HORISONT + 1], [-40, 50], [-26, 46], [-12, 49], [0 + dx, 50], [12 + dx, 46], [28 + dx, 40], [40 + dx, 28], [48 + dx, 22], [56 + dx, 24], [62 + dx, 32], [74 + dx, 40], [90 + dx, 44], [110 + dx, 48], [124 + dx, 45], [136, 49], [136, HORISONT + 1])} fill={S.fjell.skygge} />
+        <polygon points={pkt([48 + dx, 22], [56 + dx, 24], [62 + dx, 32], [52 + dx, 36], [46 + dx, 30])} fill={S.skifer.skygge} />
       </Dis>
     </Kantfade>
   )
 }
 
+/** Et hvitt andalusisk hus på fjern avstand: kubisk, med takstein og et mørkt vindu. */
+function Hvitthus({ x, y, b, h }: { x: number; y: number; b: number; h: number }) {
+  return (
+    <g>
+      <Kloss x={x} y={y} b={b} h={h} d={6} m={S.hvit} tak={false} />
+      <polygon points={pkt([x - 0.6, r2(y - h)], [r2(x + b + 0.6), r2(y - h)], [r2(x + b - 1), r2(y - h - 2.4)], [x + 1, r2(y - h - 2.4)])} fill={S.tegl.flate} />
+      <rect x={r2(x + b * 0.3)} y={r2(y - h * 0.7)} width="1.6" height="2.2" fill={S.glass.skygge} className="nattvindu" />
+    </g>
+  )
+}
 /**
  * Ferieleiligheten i Marbella (fjern avstand, høysesong om sommeren): en hvit
  * andalusisk leilighetsblokk i tre terrasser oppover lia, med takstein,
  * buede vinduer og bougainvillea over rekkverkene, bassenget foran med
  * solsenger og en parasoll, folk i vannet, palmer og La Concha i dis bak. I
- * scenen rører palmene seg og vannet i bassenget krusner seg (G10).
+ * scenen rører palmene seg og vannet i bassenget krusner seg (G10). I den
+ * brede rammen (G19) ligger gamlebyen med de hvite husene og kirketårnet til
+ * venstre, og til høyre skimtes havet nedenfor lia.
  */
 function Ferieleilighet({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3388,7 +3719,41 @@ function Ferieleilighet({ størrelse = 48 }: P) {
   return (
     <Lerret størrelse={størrelse}>
       <LaConcha />
+      {/* Landet nedenfor fjellet, i dis, så det ikke blir himmel mellom fjellet og lia. */}
+      <Kantfade>
+        <Dis>
+          <polygon points={`-40,${HORISONT} 136,${HORISONT} 136,70 -40,70`} fill={S.gress.flate} />
+        </Dis>
+      </Kantfade>
+      {/* Havet som skimtes nedenfor lia til høyre. */}
+      <Kantfade>
+        <polygon points={`96,${HORISONT + 2} 136,${HORISONT + 1} 136,${HORISONT + 8} 96,${HORISONT + 9}`} fill={S.sjo.flate} />
+        <rect x="96" y={HORISONT + 1} width="40" height="1" fill={S.sjo.lys} opacity="0.7" />
+      </Kantfade>
       <Bakke type="gress" />
+      {/* Gamlebyen til venstre: lia den står på, de hvite husene og kirketårnet. */}
+      <polygon points={pkt([-40, 70], [-40, 57], [-24, 56], [-6, 60], [8, 68], [8, 70])} fill={S.gress.skygge} />
+      <Kloss x={-24} y={fot - 10} b={6} h={30} d={5} m={S.hvit} />
+      <polygon points={pkt([-24.6, fot - 40], [-21, fot - 46], [-17.4, fot - 40])} fill={S.tegl.flate} />
+      <path d={`M-22.6 ${fot - 36} V${fot - 33} Q-21 ${fot - 35} -19.4 ${fot - 33} V${fot - 36} Z`} fill={S.mork.flate} />
+      <rect x="-22" y={fot - 38.6} width="2" height="0.8" fill={S.oker.flate} />
+      {[
+        [-38, fot - 14, 10, 8],
+        [-14, fot - 16, 9, 7],
+        [-36, fot - 4, 12, 8],
+        [-22, fot - 6, 10, 9],
+        [-8, fot - 2, 11, 8],
+      ].map(([x, y, b, h]) => (
+        <Hvitthus key={`${x}-${y}`} x={x} y={y} b={b} h={h} />
+      ))}
+      {/* Husene til høyre, nedover mot havet. */}
+      {[
+        [98, fot - 6, 10, 7],
+        [112, fot - 4, 12, 8],
+        [126, fot - 2, 9, 7],
+      ].map(([x, y, b, h]) => (
+        <Hvitthus key={`${x}-${y}`} x={x} y={y} b={b} h={h} />
+      ))}
       <Slagskygge x1={12} x2={72} y={fot} lengde={12} d={10} />
       {/* Øverste terrasse, med valmtak i takstein. */}
       <Kloss x={30} y={fot - 30} b={30} h={11} d={10} m={S.hvit} />
@@ -3424,6 +3789,10 @@ function Ferieleilighet({ størrelse = 48 }: P) {
       <g className="anim-svai">
         <Palme x={82} y={fot + 5} h={22} />
       </g>
+      <g className="anim-svai sen">
+        <Palme x={106} y={fot + 6} h={20} />
+      </g>
+      <Figur x={-30} y={fot + 5} avstand="fjern" klaer={S.oker} />
     </Lerret>
   )
 }
@@ -3432,13 +3801,16 @@ function Ferieleilighet({ størrelse = 48 }: P) {
  * Strandhotellet på Costa del Sol (fjern avstand, høysesong om sommeren): et
  * bredt hvitt hotell med balkonger i hver etasje og en lavere fløy, palmer og
  * basseng foran, stranda med parasoller, solsenger og folk, badende i havet
- * nederst og La Concha i dis bak.
+ * nederst og La Concha i dis bak. I den brede rammen (G19) står en chiringuito
+ * med stråtak på stranda til venstre og vannsykler ute i havet, og til høyre
+ * ligger yachtene i Puerto Banús ved molo og brygger.
  */
 function Strandhotell({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
   const fot = g - 14
   const e = maal('fjern', 'etasje')
   const parasoller: [number, number, string][] = [
+    [-14, g - 5, S.marine.lys],
     [10, g - 6, S.oker.lys],
     [24, g - 4, S.hvit.lys],
     [38, g - 7, S.marine.lys],
@@ -3449,17 +3821,35 @@ function Strandhotell({ størrelse = 48 }: P) {
   return (
     <Lerret størrelse={størrelse}>
       <LaConcha dx={-8} />
-      {/* Stranda, og havet nederst. */}
+      {/* Stranda, og havet nederst; landet i dis mellom fjellet og stranda. */}
       <Kantfade>
-        <rect x="0" y={fot - 2} width="96" height="20" fill={S.puss.lys} />
-        <rect x="0" y={fot - 2} width="96" height="3" fill={S.gress.flate} />
+        <Dis>
+          <polygon points={`-40,${HORISONT} 136,${HORISONT} 136,70 -40,70`} fill={S.gress.flate} />
+        </Dis>
+        <rect x="-40" y={fot - 2} width="176" height="20" fill={S.puss.lys} />
+        <rect x="-40" y={fot - 2} width="176" height="3" fill={S.gress.flate} />
       </Kantfade>
       <Bunnfade>
-        <path d={`M0 ${g + 2} Q30 ${g} 60 ${g + 1.6} T96 ${g + 1} V96 H0 Z`} fill={S.sjo.flate} />
-        <path d={`M0 ${g + 2} Q30 ${g} 60 ${g + 1.6} T96 ${g + 1}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.8" />
+        <path d={`M-40 ${g + 1.6} Q-10 ${g + 2.6} 0 ${g + 2} Q30 ${g} 60 ${g + 1.6} T96 ${g + 1} Q116 ${g} 136 ${g + 1.4} V96 H-40 Z`} fill={S.sjo.flate} />
+        <path d={`M-40 ${g + 1.6} Q-10 ${g + 2.6} 0 ${g + 2} Q30 ${g} 60 ${g + 1.6} T96 ${g + 1} Q116 ${g} 136 ${g + 1.4}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.8" />
         <polyline className="anim-boelge" points={`20,${g + 7} 24,${g + 5.8} 28,${g + 7}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.7" strokeLinecap="round" />
         <polyline className="anim-boelge sen" points={`66,${g + 9} 70,${g + 7.8} 74,${g + 9}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.7" strokeLinecap="round" />
       </Bunnfade>
+      {/* Puerto Banús til høyre: moloen, bryggene og yachtene. */}
+      <polygon points={pkt([98, fot - 2], [136, fot - 3], [136, fot + 1], [100, fot + 2])} fill={S.stein.flate} />
+      <rect x="98" y={g + 6.6} width="38" height="1" fill={S.treverk.flate} />
+      {[100, 110, 120, 130].map((x, i) => (
+        <g key={x}>
+          <path d={`M${x} ${g + 4.6} L${x + 8} ${g + 4.4} Q${x + 7.4} ${g + 6.4} ${x + 6} ${g + 6.6} L${x + 1.4} ${g + 6.6} Z`} fill={S.hvit.lys} />
+          <rect x={x + 2} y={g + 3} width="3.6" height="1.6" rx="0.4" fill={S.hvit.flate} />
+          {i % 2 === 0 && <line x1={x + 4} y1={g + 4.4} x2={x + 4} y2={g - 4} stroke={S.mork.lys} strokeWidth="0.3" />}
+        </g>
+      ))}
+      <Kloss x={104} y={fot - 2} b={10} h={8} d={6} m={S.hvit} />
+      <Kloss x={118} y={fot - 2} b={12} h={10} d={6} m={S.hvit} />
+      {[106, 120].map((x) => (
+        <rect key={x} x={x} y={fot - 8} width="6" height="2" fill={S.glass.skygge} className="nattvindu" />
+      ))}
       <Slagskygge x1={8} x2={88} y={fot} lengde={12} d={12} />
       {/* Den lave fløyen til høyre. */}
       <Kloss x={70} y={fot} b={18} h={24} d={10} m={S.hvit} />
@@ -3487,6 +3877,14 @@ function Strandhotell({ størrelse = 48 }: P) {
       <rect x="24" y={fot + 1.4} width="30" height="2.6" fill={S.sjo.lys} />
       <Palme x={16} y={fot + 3} h={22} boy={-1} />
       <Palme x={62} y={fot + 3} h={20} />
+      <Palme x={-24} y={fot + 3} h={20} />
+      {/* Chiringuitoen: et lite strandbarhus med stråtak og krakker. */}
+      <rect x="-38" y={g - 12} width="12" height="6" fill={S.treverk.flate} />
+      <rect x="-37" y={g - 10.6} width="10" height="2.4" fill={S.vinduLys.skygge} className="nattvindu" />
+      <polygon points={pkt([-40, g - 11.6], [-32, g - 16], [-24, g - 11.6])} fill={S.oker.flate} />
+      {[-36, -33, -30].map((x) => (
+        <line key={x} x1={x} y1={g - 6} x2={x} y2={g - 4.2} stroke={S.mork.flate} strokeWidth="0.4" />
+      ))}
       {/* Parasollene, solsengene og folk på stranda. */}
       {parasoller.map(([x, y, farge]) => (
         <g key={x}>
@@ -3497,8 +3895,17 @@ function Strandhotell({ størrelse = 48 }: P) {
       ))}
       <Figur x={31} y={g - 2} avstand="fjern" klaer={S.marine} />
       <Figur x={77} y={g - 1.4} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <Figur x={-20} y={g - 2} avstand="fjern" klaer={S.oker} />
       {[40, 56].map((x) => (
         <circle key={x} cx={x} cy={g + 6} r="0.8" fill={S.hud.flate} />
+      ))}
+      {/* Vannsyklene ute i havet. */}
+      {[-30, -18].map((x, i) => (
+        <g key={x} className={i ? 'anim-duve sen' : 'anim-duve'}>
+          <rect x={x} y={g + 6.6} width="6" height="1.6" rx="0.6" fill={i ? S.oker.lys : S.hvit.lys} />
+          <circle cx={x + 2} cy={g + 5.8} r="0.7" fill={S.hud.flate} />
+          <circle cx={x + 4} cy={g + 5.8} r="0.7" fill={S.hud.flate} />
+        </g>
       ))}
     </Lerret>
   )
@@ -3506,15 +3913,16 @@ function Strandhotell({ størrelse = 48 }: P) {
 
 /**
  * Matterhorn i dis, med den skjeve toppen som bøyer seg mot høyre og snø i
- * renner nedover. `x` er toppen, `s` skalaen.
+ * renner nedover. `x` er toppen, `s` skalaen. Kroppen er mørk nok til å stå mot
+ * en himmel uten vignett (G19, som Lofotveggen i G18).
  */
 function Matterhorn({ x, s = 1 }: { x: number; s?: number }) {
   const p = (dx: number, y: number): [number, number] => [r2(x + dx * s), r2(HORISONT + 1 - (HORISONT + 1 - y) * s)]
   return (
     <Kantfade>
       <Dis>
-        <polygon points={pkt(p(-34, HORISONT + 1), p(-14, 30), p(-4, 12), p(0, 8), p(3, 10), p(6, 18), p(18, 34), p(36, HORISONT + 1))} fill={S.fjell.flate} />
-        <polygon points={pkt(p(0, 8), p(3, 10), p(6, 18), p(18, 34), p(36, HORISONT + 1), p(8, HORISONT + 1), p(2, 26))} fill={S.fjell.skygge} />
+        <polygon points={pkt(p(-34, HORISONT + 1), p(-14, 30), p(-4, 12), p(0, 8), p(3, 10), p(6, 18), p(18, 34), p(36, HORISONT + 1))} fill={S.fjell.skygge} />
+        <polygon points={pkt(p(0, 8), p(3, 10), p(6, 18), p(18, 34), p(36, HORISONT + 1), p(8, HORISONT + 1), p(2, 26))} fill={S.skifer.skygge} />
         <path d={`M${p(-2, 12).join(' ')} L${p(-6, 24).join(' ')} M${p(1, 14).join(' ')} L${p(-1, 30).join(' ')} M${p(-10, 28).join(' ')} L${p(-16, 40).join(' ')} M${p(8, 22).join(' ')} L${p(10, 34).join(' ')}`} stroke={S.sno.lys} strokeWidth={r2(1.2 * s)} />
       </Dis>
     </Kantfade>
@@ -3536,11 +3944,66 @@ function Snogran({ x, y = GRUNNLINJE, h }: { x: number; y?: number; h: number })
 }
 
 /**
+ * Fjellene rundt Zermatt (G19): en lavere, takket rygg i dis bak Matterhorn,
+ * fra kant til kant i den brede rammen, med snø på toppene. `topper` er
+ * [x, y] for hver topp; dalene ligger midt mellom.
+ */
+function Alperygg({ topper }: { topper: [number, number][] }) {
+  const pkter: [number, number][] = [[-40, HORISONT + 1]]
+  topper.forEach(([x, y], i) => {
+    if (i > 0) pkter.push([r2((topper[i - 1][0] + x) / 2), r2(Math.max(topper[i - 1][1], y) + 10)])
+    pkter.push([x, y])
+  })
+  pkter.push([136, HORISONT + 1])
+  return (
+    <Kantfade>
+      <Dis>
+        <polygon points={pkt(...pkter)} fill={S.fjell.flate} />
+        {/* Dalbunnen under fjellene, så det ikke blir himmel ned til snøen foran. */}
+        <rect x="-40" y={HORISONT} width="176" height="14" fill={S.sno.skygge} />
+        {topper.map(([x, y]) => (
+          <polygon key={x} points={pkt([x, y], [r2(x - 4), r2(y + 5)], [r2(x - 1), r2(y + 4)], [r2(x + 1.6), r2(y + 5.6)], [r2(x + 4.4), r2(y + 5)])} fill={S.sno.lys} />
+        ))}
+      </Dis>
+    </Kantfade>
+  )
+}
+/** En chalet på fjern avstand: steinsokkel, etasje i mørk lerk, en hvit balkong og tung snø på taket. */
+function Chalet({ x, y, b = 14 }: { x: number; y: number; b?: number }) {
+  const h = r2(b * 0.62)
+  return (
+    <g>
+      <Kloss x={x} y={y} b={b} h={3} d={7} m={S.stein} />
+      <Kloss x={x} y={r2(y - 3)} b={b} h={h} d={7} m={S.treMork} tak={false} />
+      <Saltak x={x} y={r2(y - 3 - h)} b={b} d={7} h={r2(b * 0.3)} m={S.sno} gavl={S.treMork} overheng={1.2} />
+      <rect x={r2(x + 1.4)} y={r2(y - 3 - h * 0.7)} width={r2(b * 0.22)} height={r2(h * 0.34)} fill={S.glass.skygge} className="nattvindu" />
+      <rect x={r2(x + b * 0.6)} y={r2(y - 3 - h * 0.7)} width={r2(b * 0.22)} height={r2(h * 0.34)} fill={S.vinduLys.flate} />
+      <rect x={x} y={r2(y - 3 - h * 0.3)} width={b} height="0.8" fill={S.hvit.lys} />
+    </g>
+  )
+}
+/** Den lille elektriske drosjen i Zermatt (bilfritt): en kassebil med store ruter. */
+function Elbil({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <rect x={x} y={r2(y - 5)} width="8" height="4.2" rx="0.8" fill={S.hvit.lys} />
+      <rect x={r2(x + 0.8)} y={r2(y - 4.4)} width="3" height="1.8" fill={S.glass.skygge} className="nattvindu" />
+      <rect x={r2(x + 4.2)} y={r2(y - 4.4)} width="3" height="1.8" fill={S.glass.skygge} />
+      <rect x={x} y={r2(y - 2)} width="8" height="0.6" fill={S.marine.flate} />
+      {[1.8, 6.2].map((dx) => (
+        <circle key={dx} cx={r2(x + dx)} cy={r2(y - 0.6)} r="0.9" fill={S.mork.flate} />
+      ))}
+    </g>
+  )
+}
+/**
  * Skileiligheten i Zermatt (fjern avstand, høysesong om vinteren): et stort
  * chaletbygg med steinsokkel og etasjer i mørk lerk, hvite balkonger, varmt lys
  * i vinduene og tung snø på taket, granene med snø, skiløpere med skiene på
  * skulderen og Matterhorn bak. I scenen går skiløperne og lyset går av og
- * på (G10).
+ * på (G10). I den brede rammen (G19) står flere chaleter og en liten
+ * eldrosje i gata til venstre, og til høyre klatrer det røde tannhjulstoget til
+ * Gornergrat oppover lia, med fjellene rundt fra kant til kant.
  */
 function Skileilighet({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3548,8 +4011,23 @@ function Skileilighet({ størrelse = 48 }: P) {
   const e = maal('fjern', 'etasje')
   return (
     <Lerret størrelse={størrelse}>
+      <Alperygg topper={[[-34, 34], [-18, 40], [-2, 32], [96, 34], [112, 28], [128, 38]]} />
       <Matterhorn x={62} />
       <Bakke type="sno" />
+      {/* Gornergratbanen: sporet opp lia og det røde toget med to vogner. */}
+      <line x1="88" y1="70" x2="136" y2="47" stroke={S.stein.skygge} strokeWidth="1" />
+      <g transform="rotate(-25.6 112 58)">
+        {[104, 113].map((x) => (
+          <g key={x}>
+            <rect x={x} y="54.6" width="8" height="3.4" rx="0.6" fill={S.faluRod.flate} />
+            <rect x={x + 0.8} y="55.2" width="6.4" height="1.2" fill={S.glass.skygge} className="nattvindu" />
+          </g>
+        ))}
+      </g>
+      {/* Chaletene i gata til venstre. */}
+      <Chalet x={-38} y={fot + 1} b={15} />
+      <Chalet x={-20} y={fot - 1} b={13} />
+      <Chalet x={98} y={fot + 2} b={14} />
       <Slagskygge x1={18} x2={64} y={fot} lengde={12} d={14} />
       {/* Sokkelen i stein og etasjene i lerk. */}
       <Kloss x={18} y={fot} b={46} h={10} d={14} m={S.stein} />
@@ -3572,10 +4050,13 @@ function Skileilighet({ størrelse = 48 }: P) {
       <rect x="40" y="35" width="3.4" height="3.4" fill={S.vinduLys.flate} />
       <Vindusrad x={22} y={fot - 7.4} antall={6} b={3.4} h={3.6} mellom={3.6} tent={3} start={1} karm={S.stein.lys} />
       <rect x="54" y={fot - 7} width="4" height="7" fill={S.treverk.flate} />
-      {/* Granene og skiløperne. */}
+      {/* Granene, eldrosjen og skiløperne. */}
+      <Snogran x={-28} y={fot + 6} h={16} />
       <Snogran x={8} y={fot + 2} h={20} />
       <Snogran x={78} y={fot + 3} h={18} />
       <Snogran x={88} y={fot + 1} h={14} />
+      <Snogran x={124} y={fot + 4} h={17} />
+      <Elbil x={-10} y={g + 3} />
       {[
         [66, S.vin],
         [70, S.marine],
@@ -3585,6 +4066,8 @@ function Skileilighet({ størrelse = 48 }: P) {
           <line x1={(x as number) - 1.6} y1={g - 3.6} x2={(x as number) + 2.2} y2={g - 1.2} stroke={S.oker.flate} strokeWidth="0.4" />
         </g>
       ))}
+      <Figur x={110} y={g + 3} avstand="fjern" klaer={S.faluRod} />
+      <line x1="108.4" y1={g - 2.6} x2="112.2" y2={g - 0.2} stroke={S.oker.flate} strokeWidth="0.4" />
     </Lerret>
   )
 }
@@ -3593,7 +4076,9 @@ function Skileilighet({ størrelse = 48 }: P) {
  * Alpehotellet i Zermatt (fjern avstand, høysesong om vinteren): et grand
  * hotell fra belle époque i lys stein, fem etasjer med mansardtak under snø,
  * hjørnetårn med små spir, sveitserflagg på taket og varmt lys i vinduene,
- * granene med snø, skiløpere og Matterhorn stort bak til venstre.
+ * granene med snø, skiløpere og Matterhorn stort bak til venstre. I den brede
+ * rammen (G19) står chaleter på begge sider, en hesteslede med to passasjerer
+ * og en eldrosje kommer bortover gata, og fjellene går fra kant til kant.
  */
 function Alpehotell({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3613,8 +4098,14 @@ function Alpehotell({ størrelse = 48 }: P) {
   )
   return (
     <Lerret størrelse={størrelse}>
+      <Alperygg topper={[[-30, 36], [-14, 42], [70, 38], [88, 30], [106, 36], [124, 30]]} />
       <Matterhorn x={26} s={1.1} />
       <Bakke type="sno" />
+      {/* Chaletene på begge sider. */}
+      <Chalet x={-38} y={fot} b={14} />
+      <Chalet x={-22} y={fot + 2} b={12} />
+      <Chalet x={100} y={fot + 1} b={15} />
+      <Chalet x={118} y={fot - 1} b={13} />
       <Slagskygge x1={8} x2={86} y={fot} lengde={12} d={12} />
       {/* Hovedfløyen med mansardtak under snø. */}
       <Kloss x={16} y={fot} b={62} h={40} d={12} m={S.puss} />
@@ -3642,11 +4133,31 @@ function Alpehotell({ størrelse = 48 }: P) {
         <rect x="47.2" y={fot - 56} width="3.6" height="3.6" fill={S.faluRod.lys} />
         <path d={`M49 ${r2(fot - 55.2)} V${r2(fot - 53.2)} M48 ${r2(fot - 54.2)} H50`} stroke={S.hvit.lys} strokeWidth="0.6" />
       </g>
-      {/* Granene og skiløperne. */}
+      {/* Granene, sleden, eldrosjen og skiløperne. */}
+      <Snogran x={-30} y={g + 6} h={17} />
       <Snogran x={4} y={g + 4} h={18} />
       <Snogran x={92} y={g + 4} h={16} />
+      <Snogran x={132} y={g + 6} h={18} />
+      {/* Hestesleden: en brun hest, en rød slede med to under et pledd. */}
+      <g>
+        {[-6, -5.1, -2.9, -2].map((x) => (
+          <line key={x} x1={x} y1={g + 2.6} x2={x} y2={g + 5.4} stroke={S.treverk.skygge} strokeWidth="0.5" />
+        ))}
+        <ellipse cx="-4" cy={g + 2} rx="2.6" ry="1.3" fill={S.treverk.skygge} />
+        <polygon points={pkt([-2.2, g + 1.4], [-0.8, g - 1.4], [0.4, g - 1], [-1, g + 2.2])} fill={S.treverk.skygge} />
+        <polygon points={pkt([-1.2, g - 1.6], [1.6, g - 0.6], [1.4, g + 0.2], [-0.4, g - 0.4])} fill={S.treverk.skygge} />
+        <path d={`M-6.5 ${g + 1.4} Q-7.6 ${g + 2.4} -7.2 ${g + 3.8}`} fill="none" stroke={S.mork.flate} strokeWidth="0.5" />
+        <line x1="-6.4" y1={g + 2.2} x2="-10" y2={g + 2.8} stroke={S.mork.flate} strokeWidth="0.3" />
+        <path d={`M-18 ${g + 5.2} H-9 Q-8 ${g + 5.2} -8.4 ${g + 4} L-9 ${g + 1} H-16.6 Z`} fill={S.faluRod.flate} />
+        <path d={`M-18.6 ${g + 5.6} H-8`} stroke={S.mork.flate} strokeWidth="0.4" />
+        <circle cx="-14.6" cy={g - 0.4} r="0.7" fill={S.hud.flate} />
+        <circle cx="-11.8" cy={g - 0.2} r="0.7" fill={S.hud.flate} />
+        <rect x="-16" y={g + 0.2} width="5.6" height="1.6" fill={S.marine.flate} />
+      </g>
+      <Elbil x={104} y={g + 6} />
       <Figur x={30} y={g + 3} avstand="fjern" klaer={S.marine} />
       <Figur x={62} y={g + 2} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <Figur x={118} y={g + 3} avstand="fjern" klaer={S.oker} />
     </Lerret>
   )
 }
@@ -3656,10 +4167,27 @@ function Alpehotell({ størrelse = 48 }: P) {
  * av et tårn, med takterrasse, trær i kasser, et lite basseng og noen ved
  * rekkverket, tårnets fasade som forsvinner nedover, og skylinen med Empire
  * State Building i dis rundt. I scenen blinker lyset på Empire State, vannet
- * i bassenget krusner seg og trærne rører seg i vinden der oppe (G10).
+ * i bassenget krusner seg og trærne rører seg i vinden der oppe (G10). I den
+ * brede rammen (G19) står lavere nabotak med de runde vanntårnene i tre på
+ * begge sider, skyskraperen i Midtown med det avtrappede krontaket står i
+ * skylinen til høyre, og et helikopter går over byen.
  */
 function NewYork({ størrelse = 48 }: P) {
   const tak = 50
+  /** Et vanntårn i tre på et tak: tønna med bånd, kjegletaket og beina. */
+  const vanntaarn = (x: number, y: number) => (
+    <g>
+      {[-2.2, 2.2].map((dx) => (
+        <line key={dx} x1={r2(x + dx)} y1={y} x2={r2(x + dx * 0.8)} y2={y - 4} stroke={S.mork.flate} strokeWidth="0.5" />
+      ))}
+      <rect x={r2(x - 2.8)} y={y - 10} width="5.6" height="6" fill={S.treverk.flate} />
+      <rect x={r2(x + 1)} y={y - 10} width="1.8" height="6" fill={S.treverk.skygge} />
+      {[y - 8.4, y - 6].map((yy) => (
+        <rect key={yy} x={r2(x - 2.8)} y={yy} width="5.6" height="0.4" fill={S.mork.flate} />
+      ))}
+      <polygon points={pkt([x - 3.2, y - 10], [x, y - 13], [x + 3.2, y - 10])} fill={S.skifer.flate} />
+    </g>
+  )
   return (
     <Lerret størrelse={størrelse}>
       <Kantfade>
@@ -3669,23 +4197,60 @@ function NewYork({ størrelse = 48 }: P) {
           <rect x="12" y="4" width="0.6" height="10" fill={S.stein.lys} />
           <Blinklys x={12.3} y={4} r={0.7} />
           {[
+            [-40, 48, 8],
+            [-30, 40, 7],
+            [-20, 54, 9],
+            [-10, 44, 6],
             [0, 52, 7],
             [20, 46, 6],
             [74, 38, 8],
             [84, 50, 10],
             [64, 56, 9],
+            [96, 44, 8],
+            [124, 50, 9],
           ].map(([x, y, b]) => (
             <rect key={x} x={x} y={y} width={b} height={96 - y} fill={x % 3 ? S.stein.flate : S.glass.skygge} />
           ))}
+          {/* Skyskraperen i Midtown: art deco-kronen i trinn med buer, og spiret. */}
+          <rect x="108" y="30" width="10" height="66" fill={S.stein.lys} />
+          {[0, 1, 2].map((k) => (
+            <path key={k} d={`M${109 + k * 1.4} ${30 - k * 4} Q113 ${24 - k * 4} ${117 - k * 1.4} ${30 - k * 4} Z`} fill={S.metall.lys} />
+          ))}
+          <line x1="113" y1="18" x2="113" y2="8" stroke={S.metall.lys} strokeWidth="0.6" />
         </Dis>
       </Kantfade>
-      {/* Tårnet: fasaden blekner ut nedover. */}
+      {/* Helikopteret over byen. */}
+      <g transform="translate(96 16)">
+        <ellipse cx="0" cy="0" rx="3.4" ry="1.6" fill={S.mork.flate} />
+        <rect x="2.4" y="-0.4" width="5" height="0.7" fill={S.mork.flate} />
+        <line x1="-4.6" y1="-2" x2="4.6" y2="-2" stroke={S.mork.lys} strokeWidth="0.4" />
+        <rect x="-1.6" y="-1" width="1.8" height="0.9" fill={S.glass.lys} />
+      </g>
+      {/* Tårnet: fasaden blekner ut nedover. Nabotakene står lavere på begge sider. */}
       <Bunnfade>
+        <Kloss x={-38} y={110} b={30} h={48} d={12} m={S.stein} />
+        {Array.from({ length: 4 }, (_, k) => 66 + k * 6).map((y, k) => (
+          <Vindusrad key={y} x={-36.6} y={y} antall={6} b={3} h={3.6} mellom={1.6} tent={k % 2 ? 2 : 0} start={k + 3} />
+        ))}
+        <Kloss x={82} y={110} b={40} h={52} d={12} m={S.tegl} />
+        {Array.from({ length: 5 }, (_, k) => 62 + k * 6).map((y, k) => (
+          <Vindusrad key={y} x={83.4} y={y} antall={8} b={3} h={3.6} mellom={1.6} tent={k % 2 ? 0 : 3} start={k + 1} />
+        ))}
         <Kloss x={24} y={110} b={48} h={60} d={14} m={S.skifer} />
         {Array.from({ length: 7 }, (_, k) => tak + 4 + k * 6).map((y, k) => (
           <Vindusrad key={y} x={25.4} y={y} antall={10} b={3} h={3.6} mellom={1.6} tent={k % 2 ? 4 : 0} start={k} tennes={k === 0 ? 6 : undefined} />
         ))}
       </Bunnfade>
+      {vanntaarn(-30, 62)}
+      {vanntaarn(-16, 62)}
+      {vanntaarn(100, 58)}
+      {/* Takhagen på nabotaket til høyre. */}
+      {[110, 116].map((x) => (
+        <g key={x}>
+          <rect x={x - 1.6} y="56.4" width="3.2" height="1.6" fill={S.treMork.flate} />
+          <Tre x={x} y={56.6} h={6} />
+        </g>
+      ))}
       {/* Takterrassen: glassrekkverk, basseng, trær i kasser. */}
       <rect x="24" y={tak - 2.4} width="48" height="2.4" fill={S.glass.lys} opacity="0.55" />
       <rect x="24" y={tak - 2.6} width="48" height="0.4" fill={S.metall.lys} />
@@ -3727,7 +4292,10 @@ function Smaabil({ x, y, farge, taxi = false }: { x: number; y: number; farge: M
 
 /**
  * Kontortårnet i Canary Wharf: et høyt tårn i stål og glass med pyramidetak og
- * blinklys, to lavere tårn ved siden av, og Themsen foran med en elvebuss.
+ * blinklys, to lavere tårn ved siden av, og Themsen foran med en elvebuss. I den
+ * brede rammen (G19) går DLR-banen på viadukten sin forbi til venstre med et
+ * tog, flere tårn står i dis på begge sider, og en Thames Clipper skjærer
+ * gjennom elva til høyre.
  */
 function CanaryWharf({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3737,10 +4305,15 @@ function CanaryWharf({ størrelse = 48 }: P) {
       <Kantfade>
         <Dis>
           {[
+            [-38, 9, 28, S.glass],
+            [-26, 7, 36, S.stein],
             [2, 8, 30, S.glass],
             [12, 6, 22, S.stein],
             [74, 7, 34, S.glass],
             [84, 9, 26, S.puss],
+            [104, 8, 40, S.glass],
+            [116, 7, 30, S.stein],
+            [126, 9, 24, S.glass],
           ].map(([x, b, hh, m]) => (
             <Kloss key={x as number} x={x as number} y={fot} b={b as number} h={hh as number} d={5} m={m as Materiale} />
           ))}
@@ -3748,10 +4321,28 @@ function CanaryWharf({ størrelse = 48 }: P) {
       </Kantfade>
       <Bakke type="kai" />
       <Kantfade>
-        <rect x="0" y={g + 3} width="96" height="13" fill={S.sjo.flate} />
-        <rect x="0" y={g + 2.2} width="96" height="0.8" fill={S.stein.skygge} />
+        <rect x="-40" y={g + 3} width="176" height="13" fill={S.sjo.flate} />
+        <rect x="-40" y={g + 2.2} width="176" height="0.8" fill={S.stein.skygge} />
         <polyline className="anim-boelge" points={`20,${g + 8} 24,${g + 6.8} 28,${g + 8}`} fill="none" stroke={S.sjo.lys} strokeWidth="0.7" strokeLinecap="round" />
+        {/* Kaia som tårnene står på: Canary Wharf er en kai, steinkant mot elva. */}
+        <rect x="26" y={g - 12} width="110" height="14.2" fill={S.stein.lys} />
+        <rect x="26" y={g - 1} width="110" height="3.2" fill={S.stein.flate} />
+        {[40, 60, 80, 100, 120].map((x) => (
+          <line key={x} x1={x} y1={g - 1} x2={x} y2={g + 2.2} stroke={S.stein.skygge} strokeWidth="0.5" />
+        ))}
       </Kantfade>
+      {/* DLR-viadukten med et tog i rødt, hvitt og blått. */}
+      <rect x="-40" y={fot - 16} width="52" height="2" fill={S.stein.flate} />
+      <rect x="-40" y={fot - 14} width="52" height="0.8" fill={S.stein.skygge} />
+      {[-34, -20, -6, 8].map((x) => (
+        <rect key={x} x={x} y={fot - 13.2} width="2" height="13.2" fill={S.stein.flate} />
+      ))}
+      <g className="anim-glid">
+        <rect x="-32" y={fot - 21} width="24" height="5" rx="1" fill={S.hvit.lys} />
+        <rect x="-32" y={fot - 17.6} width="24" height="0.9" fill={S.faluRod.flate} />
+        <rect x="-31" y={fot - 20.2} width="22" height="1.6" fill={S.glass.skygge} className="nattvindu" />
+        <rect x="-20.4" y={fot - 21} width="0.6" height="5" fill={S.marine.flate} />
+      </g>
       {/* Nabotårnene, lavere, i glass. */}
       <Slagskygge x1={20} x2={36} y={fot} lengde={14} d={6} />
       <Kloss x={20} y={fot} b={14} h={40} d={6} m={S.glass} />
@@ -3767,13 +4358,25 @@ function CanaryWharf({ størrelse = 48 }: P) {
       ))}
       <polygon points={pkt([37, fot - 60], [47, fot - 70], [57, fot - 60])} fill={S.metall.lys} />
       <polygon points={pkt([47, fot - 70], [57, fot - 60], inn(57, fot - 60, 8), inn(47, fot - 70, 4))} fill={S.metall.skygge} />
-      <Blinklys x={47} y={fot - 70.6} r={0.8} />
+      <Blinklys x={47} y={r2(fot - 70.6)} r={0.8} />
       <Glans points={`37,${fot - 60} 41,${fot - 60} 39,${fot} 37,${fot}`} />
+      {/* Et lavere kontorbygg ved kaia til høyre. */}
+      <Slagskygge x1={88} x2={112} y={fot} lengde={10} d={6} />
+      <Kloss x={88} y={fot} b={24} h={20} d={6} m={S.stein} />
+      {[0, 1, 2].map((k) => (
+        <Vindusrad key={k} x={89.4} y={fot - 17 + k * 6} antall={6} b={2.6} h={3} mellom={1.2} tent={k === 1 ? 2 : 1} start={k + 2} />
+      ))}
       {/* Elvebussen på Themsen og noen på kaia. */}
       <path d={`M60 ${g + 6} L80 ${g + 6} Q79 ${g + 8.4} 76 ${g + 8.6} L63 ${g + 8.6} Z`} fill={S.hvit.flate} />
       <rect x="64" y={g + 4.4} width="12" height="1.8" fill={S.marine.flate} />
+      {/* Thames Clipper: en lav katamaran med kjølvann bak. */}
+      <path d={`M98 ${g + 9} Q108 ${g + 7.6} 114 ${g + 8.6}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.8" opacity="0.7" />
+      <path d={`M112 ${g + 8} L132 ${g + 7.6} Q131 ${g + 9.8} 128 ${g + 10} L114 ${g + 10} Z`} fill={S.mork.flate} />
+      <rect x="116" y={g + 5.8} width="12" height="2.2" rx="0.8" fill={S.hvit.lys} />
+      <rect x="117" y={g + 6.2} width="10" height="1" fill={S.glass.skygge} className="nattvindu" />
       <Figur x={14} y={g + 1} avstand="fjern" klaer={S.marine} />
       <Figur x={30} y={g + 1.4} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <Figur x={96} y={g + 1.2} avstand="fjern" klaer={S.oker} />
     </Lerret>
   )
 }
@@ -3883,7 +4486,9 @@ function Kjopesenterkjede({ størrelse = 48 }: P) {
 
 /**
  * Skyskraperen i Downtown Dubai: en nål i trinn som smalner mot et spir, et
- * fontenebasseng foran og ørkendis bak.
+ * fontenebasseng foran og ørkendis bak. I den brede rammen (G19) går metroen på
+ * viadukten sin forbi til venstre, kjøpesenteret med glassinngangen ligger lavt
+ * til høyre, palmer står langs promenaden, og flere tårn står i dis.
  */
 function DowntownDubai({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3899,13 +4504,30 @@ function DowntownDubai({ størrelse = 48 }: P) {
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          <polygon points={pkt([0, 70], [30, 64], [62, 68], [96, 62], [96, 80], [0, 80])} fill={S.oker.lys} />
-          {[[4, 8, 26], [14, 6, 18], [72, 8, 30], [84, 7, 22]].map(([x, b, hh]) => (
+          <polygon points={pkt([-40, 66], [-10, 70], [0, 70], [30, 64], [62, 68], [96, 62], [120, 66], [136, 64], [136, 80], [-40, 80])} fill={S.oker.lys} />
+          {[[-36, 7, 24], [-24, 9, 32], [4, 8, 26], [14, 6, 18], [72, 8, 30], [84, 7, 22], [108, 8, 28], [122, 6, 20]].map(([x, b, hh]) => (
             <Kloss key={x} x={x} y={fot} b={b} h={hh} d={5} m={S.glass} />
           ))}
         </Dis>
       </Kantfade>
       <Bakke type="promenade" />
+      {/* Metroen på viadukten til venstre. */}
+      <rect x="-40" y={fot - 14} width="50" height="2" fill={S.hvit.flate} />
+      {[-30, -14, 2].map((x) => (
+        <polygon key={x} points={pkt([x, fot - 12], [x + 3, fot - 12], [x + 2.2, fot], [x + 0.8, fot])} fill={S.hvit.flate} />
+      ))}
+      <g className="anim-glid">
+        <rect x="-36" y={fot - 19} width="26" height="5" rx="2" fill={S.hvit.lys} />
+        <rect x="-35" y={fot - 18} width="24" height="1.6" fill={S.glass.skygge} className="nattvindu" />
+        <rect x="-36" y={fot - 15.6} width="26" height="0.6" fill={S.gull.flate} />
+      </g>
+      {/* Kjøpesenteret til høyre: lavt og langt, med en buet glassinngang. */}
+      <Slagskygge x1={92} x2={134} y={fot} lengde={8} d={8} />
+      <Kloss x={92} y={fot} b={42} h={11} d={8} m={S.puss} />
+      <rect x="92" y={fot - 11} width="42" height="1.2" fill={S.oker.flate} />
+      <path d={`M106 ${fot} V${fot - 6} Q113 ${fot - 12} 120 ${fot - 6} V${fot} Z`} fill={S.glass.skygge} className="nattvindu" />
+      <rect x="96" y={fot - 7} width="7" height="3" fill={S.vinduLys.skygge} />
+      <rect x="124" y={fot - 7} width="7" height="3" fill={S.vinduLys.skygge} />
       <Slagskygge x1={36} x2={60} y={fot} lengde={26} d={8} />
       {trinn.map(([x, b, hh], i) => {
         const bunn = y
@@ -3922,21 +4544,28 @@ function DowntownDubai({ størrelse = 48 }: P) {
       })}
       <rect x="47.6" y={y - 14} width="0.8" height="14" fill={S.metall.lys} />
       <Blinklys x={48} y={y - 14.4} r={0.8} />
-      {/* Fontenebassenget foran. */}
-      <ellipse cx="48" cy={g + 4} rx="30" ry="3.4" fill={S.stein.lys} />
-      <ellipse cx="48" cy={g + 4} rx="27" ry="2.6" fill={S.sjo.lys} />
-      {[36, 44, 52, 60].map((x) => (
+      {/* Fontenebassenget foran, som en innsjø helt ut til sidene. */}
+      <ellipse cx="48" cy={g + 4} rx="58" ry="4.4" fill={S.stein.lys} />
+      <ellipse cx="48" cy={g + 4} rx="55" ry="3.6" fill={S.sjo.lys} />
+      {[36, 44, 52, 60, 20, 76].map((x) => (
         <path key={x} className="anim-damp" d={`M${x} ${g + 3.6} Q${x - 1} ${g - 1} ${x} ${g - 4}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" strokeLinecap="round" />
       ))}
+      <Palme x={-4} y={g + 1} h={16} />
+      <Palme x={98} y={g + 1} h={16} boy={-1} />
+      <Palme x={128} y={g + 1.6} h={18} />
       <Figur x={18} y={g + 1} avstand="fjern" klaer={S.hvit} />
       <Figur x={78} y={g + 1} avstand="fjern" klaer={S.mork} vendt={-1} />
+      <Figur x={112} y={g + 1.4} avstand="fjern" klaer={S.oker} />
     </Lerret>
   )
 }
 
 /**
  * Skyskraperen på Manhattan: art deco i stein med et avtrappet krontak og spir,
- * glasstårn rundt, og en gul drosje i gata.
+ * glasstårn rundt, og en gul drosje i gata. I den brede rammen (G19) står
+ * nabotårnene i glass og stein på begge sider, en T-banenedgang med de grønne
+ * kulelyktene på fortauet til venstre, damp fra en kum i gata og flere gule
+ * drosjer.
  */
 function ManhattanSkyskraper({ størrelse = 48 }: P) {
   const g = GRUNNLINJE
@@ -3945,12 +4574,23 @@ function ManhattanSkyskraper({ størrelse = 48 }: P) {
     <Lerret størrelse={størrelse}>
       <Kantfade>
         <Dis>
-          {[[0, 40, 10], [12, 52, 8], [72, 46, 9], [84, 36, 12]].map(([x, yy, b]) => (
+          {[[-40, 44, 9], [-28, 38, 10], [0, 40, 10], [12, 52, 8], [72, 46, 9], [84, 36, 12], [104, 42, 10], [124, 48, 12]].map(([x, yy, b]) => (
             <rect key={x} x={x} y={yy} width={b} height={96 - yy} fill={x % 3 ? S.glass.skygge : S.stein.flate} />
           ))}
         </Dis>
       </Kantfade>
       <Bakke type="asfalt" />
+      {/* Nabotårnene på motivets avstand. */}
+      <Slagskygge x1={-36} x2={-12} y={fot} lengde={20} d={8} />
+      <Kloss x={-36} y={fot} b={22} h={52} d={8} m={S.glass} />
+      {Array.from({ length: 8 }, (_, k) => fot - 49 + k * 6).map((vy, k) => (
+        <Vindusrad key={vy} x={-34.6} y={vy} antall={5} b={2.8} h={3.4} mellom={1.4} tent={k % 3 === 0 ? 2 : 0} start={k + 1} />
+      ))}
+      <Slagskygge x1={92} x2={120} y={fot} lengde={20} d={8} />
+      <Kloss x={92} y={fot} b={26} h={46} d={8} m={S.stein} />
+      {Array.from({ length: 7 }, (_, k) => fot - 43 + k * 6).map((vy, k) => (
+        <Vindusrad key={vy} x={93.4} y={vy} antall={6} b={2.8} h={3.4} mellom={1.3} tent={k % 2 ? 2 : 0} start={k + 4} />
+      ))}
       {/* Tårnet i stein, med vinduene i bånd. */}
       <Slagskygge x1={30} x2={62} y={fot} lengde={24} d={10} />
       <Kloss x={30} y={fot} b={32} h={40} d={10} m={S.stein} />
@@ -3968,12 +4608,29 @@ function ManhattanSkyskraper({ størrelse = 48 }: P) {
         <polygon key={x} points={pkt([x, fot - 66], [x + 1.2, fot - 69], [x + 2.4, fot - 66])} fill={S.vinduLys.lys} className="nattvindu" />
       ))}
       <rect x="45.6" y={fot - 84} width="0.8" height="14" fill={S.metall.lys} />
-      <Blinklys x={46} y={fot - 84.4} r={0.8} />
+      <Blinklys x={46} y={r2(fot - 84.4)} r={0.8} />
       <Glans points={`30,${fot - 40} 34,${fot - 40} 32,${fot} 30,${fot}`} />
-      {/* Gata: en gul drosje og folk på fortauet. */}
+      {/* T-banenedgangen: rekkverk og to grønne kulelykter. */}
+      <rect x="-6" y={g - 2.6} width="10" height="0.5" fill={S.gran.skygge} />
+      {[-6, 4].map((x) => (
+        <g key={x}>
+          <line x1={x} y1={g - 2.6} x2={x} y2={g - 8} stroke={S.gran.skygge} strokeWidth="0.5" />
+          <circle cx={x} cy={g - 8.8} r="1" fill={S.gran.lys} className="nattvindu" />
+        </g>
+      ))}
+      {/* Damp fra en kum i gata. */}
+      <ellipse cx="88" cy={g + 5} rx="2" ry="0.6" fill={S.mork.flate} />
+      <circle className="anim-roeyk" cx="88" cy={g + 2} r="2" fill={S.hvit.flate} opacity="0.5" />
+      <circle className="anim-roeyk sen" cx="89" cy={g - 2} r="2.6" fill={S.hvit.flate} opacity="0.35" />
+      <circle cx="87.4" cy={g - 6.4} r="2.2" fill={S.hvit.flate} opacity="0.2" />
+      {/* Gata: gule drosjer og folk på fortauet. */}
       <Smaabil x={74} y={g + 1} farge={S.oker} taxi />
+      <Smaabil x={-20} y={g + 6} farge={S.oker} taxi />
+      <Smaabil x={116} y={g + 6} farge={S.oker} taxi />
       <Figur x={16} y={g} avstand="fjern" klaer={S.mork} />
       <Figur x={24} y={g + 0.4} avstand="fjern" klaer={S.vin} vendt={-1} />
+      <Figur x={-10} y={g + 0.2} avstand="fjern" klaer={S.marine} />
+      <Figur x={104} y={g} avstand="fjern" klaer={S.oker} vendt={-1} />
     </Lerret>
   )
 }

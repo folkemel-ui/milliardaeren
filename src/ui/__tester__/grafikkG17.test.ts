@@ -125,11 +125,7 @@ describe('full ramme for boligene og hyttene (G17)', () => {
     expect(lykt).not.toContain('<Lampe')
   })
 
-  it('de andre eiendommene er som før, til gruppen deres kommer (G18–G19)', () => {
-    for (const id of EIENDOMSIDER.filter((x) => !FULL_RAMME.includes(x))) {
-      const html = scene(id)
-      expect(html, id).toContain('class="scene"')
-      expect(viewBox(html), id).toBe('0 0 96 96')
-    }
+  it('etter G18 og G19 har hver eiendom full ramme, ingen står igjen i den gamle firkanten', () => {
+    expect(EIENDOMSIDER.filter((x) => !FULL_RAMME.includes(x))).toEqual([])
   })
 })

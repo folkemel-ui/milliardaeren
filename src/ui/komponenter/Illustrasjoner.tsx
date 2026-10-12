@@ -2934,6 +2934,8 @@ export const FULL_RAMME: readonly string[] = [
   'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'hytte', 'hytte-trysil', 'hytte-lofoten',
   // G18: byggene, jorda og landemerkene, og kjøpesenterkjeden fra Pakke 76.
   'kontorbygg', 'kontorbygg-stavanger', 'kjopesenter', 'naeringsbygg', 'oy', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'fyret', 'hoppbakken', 'borgen', 'tarnet', 'kjopesenterkjede',
+  // G19: eiendommene utenlands, og de tre siste fra Pakke 76.
+  'stockholm', 'kobenhavn', 'amsterdam', 'berlin', 'london', 'roma', 'paris', 'dubai', 'newyork', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'canary-wharf', 'downtown-dubai', 'manhattan-skyskraper',
 ]
 
 /** Bedriftene, som har fire vekstrinn. */
@@ -3038,6 +3040,23 @@ export const FLISUTSNITT: Record<string, readonly [number, number, number, numbe
   borgen: [8, 22, 74, 74],
   tarnet: [6, 6, 84, 84],
   kjopesenterkjede: [16, 32, 64, 64],
+  // G19: utenlands. Tårnene med spir som går ut over toppen av lerretet får en høy boks fra y 4.
+  stockholm: [4, 10, 80, 80],
+  kobenhavn: [2, 28, 66, 66],
+  amsterdam: [4, 22, 70, 70],
+  berlin: [4, 18, 74, 74],
+  london: [2, 26, 68, 68],
+  roma: [6, 26, 68, 68],
+  paris: [4, 20, 72, 72],
+  dubai: [14, 34, 62, 62],
+  newyork: [14, 26, 68, 68],
+  'marbella-leilighet': [8, 26, 68, 68],
+  'marbella-hotell': [6, 14, 80, 80],
+  'zermatt-leilighet': [10, 14, 76, 76],
+  'zermatt-hotell': [4, 10, 82, 82],
+  'canary-wharf': [10, 4, 76, 76],
+  'downtown-dubai': [4, 4, 88, 88],
+  'manhattan-skyskraper': [6, 4, 84, 84],
 }
 
 /**
