@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 96, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 97, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -123,6 +123,10 @@ session; delete what stops being true.
 - **The first time Folke chose against my recommendation** was Pack 95: the home-screen card on the
   first visit, not «after 10 minutes». Build what was chosen, keep the sensible parts of the
   recommendation that don't conflict (here «Ikke nå» and «Skjul»), and say so in the report.
+- **Pack 97: a multi-select with every option marked «Recommended» got one pick** (only the Bedrifter
+  screenshot of four screens), and a question left with no answer (the native shell) went with the
+  recommended option, said in one line before building. In a multi-select, mark only what you would
+  really pick, and expect a subset.
 - **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78 and 96.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
@@ -261,6 +265,16 @@ session; delete what stops being true.
 - **To read Vitest's «Unhandled Error»**, write the run to a scratchpad log and strip the
   colour codes (`sed 's/\x1b\[[0-9;]*m//g'`) before grepping — grep on the coloured output
   found nothing and cost two extra runs of the suite.
+- **Run engine TypeScript from a Node script with Vite**: `createServer({ server: { middlewareMode: true },
+  appType: 'custom' })` and `ssrLoadModule('/scripts/x.ts')` (Pack 97's store-screenshot save). No
+  esbuild bundle step, and `scripts/*.ts` stays outside `tsc`'s `src`.
+- **Screenshots from headless Chrome: drive it over the DevTools protocol.** `chrome --headless
+  --screenshot` on a page that sets localStorage and redirects failed with `ERR_ABORTED` after four
+  minutes of virtual time. Starting Chrome with `--remote-debugging-port`, reading
+  `/json/list` and talking to the page with Node's own `WebSocket` (`Runtime.evaluate`,
+  `Emulation.setDeviceMetricsOverride` with `deviceScaleFactor`, `Page.captureScreenshot`) took
+  seconds: write the save from `/ikon.svg`, open `/`, wait for `.bedriftskort` and
+  `document.fonts.ready`, finish the animations, capture (`scripts/lag-skjermbilder.mjs`).
 - **There is no Python on this machine** (`python` opens the Microsoft Store stub and does
   nothing). Write edit scripts in Node.
 - **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
@@ -517,6 +531,18 @@ session; delete what stops being true.
   `EIENDOMSTYPER` price and yield (`sorterEiendom`), never on `leieHverPerSek`, which moves with
   weather, vacancy and the index. The choice is a `lagDelvalg` (`eiendomsrekkefolge`) and sits
   in `ALLE_DELVALG`.
+- **A contrast sweep must parse every colour syntax.** Pack 97's light-theme sweep (every element
+  with gold text on every tab and part, against the first opaque ancestor background) reported the
+  tab bar at 3.96:1 — its background is `color(srgb 1 1 1 / 0.94)`, which a regex for `rgb()` read
+  as black. Channels in `color(srgb …)` are 0–1. And test the exact ratio: `#8a6700` on `#eceef2` is
+  4.496, which the list rounded to «4.50»; the test caught it and `#8a6600` (4.54) went in instead,
+  flagged in the report.
+- **The native save mirror (Pack 97).** `state/speil.ts` writes every save to a file when
+  `window.Capacitor.isNativePlatform()` and its Filesystem plugin exist (no dependency here), and
+  `lager.ts` brings a save back from the file when the game started empty. Writes are blocked from
+  the moment the read starts (before `startSpillokke`'s first `lagre()`), so a new empty game never
+  overwrites the file. In tests, stub `window`/`document` with `removeEventListener` too
+  (`stoppSpillokke` calls it), and `vi.advanceTimersByTimeAsync(0)` lets the file's promises settle.
 - **Check computed styles, not just class names.** A new rule placed earlier in
   the stylesheet silently lost to an older rule with the same specificity (`.kjopskort`
   beat `.luksuskort`). `getComputedStyle(el).gridTemplateColumns` showed it. Animations:
