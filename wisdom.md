@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 95, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 96, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -123,7 +123,7 @@ session; delete what stops being true.
 - **The first time Folke chose against my recommendation** was Pack 95: the home-screen card on the
   first visit, not «after 10 minutes». Build what was chosen, keep the sensible parts of the
   recommendation that don't conflict (here «Ikke nå» and «Skjul»), and say so in the report.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60 and 61–78.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78 and 96.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -224,6 +224,10 @@ session; delete what stops being true.
 - **When Vitest prints nothing and hangs**, bundle the script with esbuild
   (`npx esbuild x.ts --bundle --platform=node --format=esm --outfile=…`) and run it in
   plain Node: output streams line by line, so you see where it stops.
+- **One `plan()` per file in a patch script.** The helper reads every planned file, then writes
+  them all; two `plan()` calls for the same file (Pack 96: the «Next up» text, then the done items)
+  each start from the original text, so the second write silently undoes the first. Put every
+  replacement for one file in one `plan()`, and check `git diff --stat` after the run.
 - **Patch scripts: check every `from` before writing anything.** The pattern that worked in
   Packs 55–60: collect `plan(file, [[from, to], …])` calls, loop once to throw on any
   missing `from`, and only then write. A stale anchor (an import line changed two packs
@@ -442,6 +446,40 @@ session; delete what stops being true.
   with the reason written there). The game can grow, but a phone still reads the whole script
   before the first screen, so new screens' code that is not on the first screen still belongs in a
   part (`ui/vedBehov.ts`). Details in `wisdom-grafikk.md` §6f.
+- **The tabs are parts too (Pack 96).** Investeringer, Eiendom, Luksus (with Klubb and racing),
+  Profil and Avisa load through `vedBehov` (`ui/skjermer.tsx`, `<Skjerm del={…} p={…} />` in
+  `App.tsx`); only Bedrifter, the top bar, the menu and the pop-ups that open at start stay in the
+  start script. The start script had grown ~5 kB a pack, 249.8 kB gzipped after Pack 74 to 290.7
+  after Pack 95; the split took it to 230.7. So anything new that is only seen inside one of those
+  tabs is outside the start script already; a new thing in Bedrifter, the top bar or a start pop-up
+  is not. `startApp` in `klikk.ts` awaits `lastSkjermer()`, so click tests change tab and read
+  the screen at once; a test that renders `App` some other way must do the same. Rollup put
+  Luksus in the chunk named `Tingdetalj` (the two import each other), so `startskript.test.ts`
+  checks *modules* (in no chunk but the start one), never chunk names. G12's test asserted the
+  Norway map's shell was in the start script; it came with Eiendom and left with it.
+- **The font is a subset (Pack 96).** `InterLatin.woff2` (92.7 kB, from the 352 kB
+  `InterVariable.woff2`, which stays in the repo as the source) holds Latin-1 and the 44 signs in
+  `ui/skrifttegn.ts`, every OpenType feature (tabular numbers) and the weight axis.
+  `pakke96.test.ts` reads the woff2's `cmap` itself (brotli from `node:zlib`, ~60 lines) and scans
+  `src` for every character above ASCII: a new sign (an arrow, a symbol) fails it — add it to
+  `skrifttegn.ts` and run `node scripts/lag-skrift.mjs <folder>` after `npm install --prefix
+  <folder> subset-font@2.4.0` into a scratch folder (not a project dependency; there is no Python
+  for pyftsubset). The output is deterministic (same list, same bytes).
+- **The service worker (Pack 96).** `src/sw.js` (no longer in `public/`) is written into the build
+  by `serviceWorker()` in `vite.config.ts`: the list of every `assets/` file and a hash of it,
+  so each release is a new `sw.js` that stores the whole release at install (all or nothing),
+  keeps this release and the one before (`./__utgaver.json` in the cache remembers which), lets a
+  navigation wait 3 s for the network, and never stores a request with a query string.
+  `pakke96.test.ts` runs `sw.js` against a fake `caches`/`fetch` with fake timers.
+  **Test offline for real in the browser pane**: `npx vite build` into `dist`, `preview_start`
+  `milliardaer-bygg` (vite preview on 5183), unregister the worker and delete the caches from the
+  page, navigate once, wait ~3 s, then `preview_stop` and navigate again — the server is gone, so
+  only the worker can answer. That found the bug the fake did not have: the stored files carry
+  `Vary: Origin` (vite preview sends it; GitHub Pages may too), a module script and a preloaded
+  font ask *with* an Origin and the install's `addAll` without, so `caches.match` found nothing
+  and the coin breathed forever. Lookups use `{ ignoreVary: true }` now, and the fake cache honours
+  Vary so the test fails without it. To see the «Kunne ikke starte» line, delete the start script
+  from the cache while offline and reload; it comes after 10 s.
 - **Fits the phone (Pack 74).** Four rules now hold on every screen. (1) A phone on its side
   (`orientation: landscape`, `max-height: 500px`, `max-width: 1023px`, last in `bred.css`) gets the
   sidebar layout: one top line (53 px), a 92 px column of tabs, two columns of cards;
