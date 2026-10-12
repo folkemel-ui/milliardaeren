@@ -2932,6 +2932,8 @@ export const FULL_RAMME: readonly string[] = [
   'saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
   // G17: boligene og hyttene.
   'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'hytte', 'hytte-trysil', 'hytte-lofoten',
+  // G18: byggene, jorda og landemerkene, og kjøpesenterkjeden fra Pakke 76.
+  'kontorbygg', 'kontorbygg-stavanger', 'kjopesenter', 'naeringsbygg', 'oy', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'fyret', 'hoppbakken', 'borgen', 'tarnet', 'kjopesenterkjede',
 ]
 
 /** Bedriftene, som har fire vekstrinn. */
@@ -3020,6 +3022,22 @@ export const FLISUTSNITT: Record<string, readonly [number, number, number, numbe
   hytte: [6, 20, 76, 76],
   'hytte-trysil': [6, 18, 78, 78],
   'hytte-lofoten': [12, 22, 74, 74],
+  // G18: et høyt motiv (tårnene, fyret, hoppbakken) får en høy boks fra toppen; et lavt og
+  // bredt (sentrene, gårdene, øya) en tett boks rundt hovedbygget, så flisa ikke blir halvt himmel.
+  kontorbygg: [6, 2, 86, 86],
+  'kontorbygg-stavanger': [16, 22, 72, 72],
+  kjopesenter: [6, 28, 68, 68],
+  naeringsbygg: [4, 14, 82, 82],
+  oy: [14, 30, 64, 64],
+  'gard-hedmarken': [28, 38, 58, 58],
+  'gard-lista': [16, 36, 60, 60],
+  'skog-trysil': [20, 26, 66, 66],
+  'skog-namdalen': [16, 30, 64, 64],
+  fyret: [12, 14, 78, 78],
+  hoppbakken: [2, 8, 86, 86],
+  borgen: [8, 22, 74, 74],
+  tarnet: [6, 6, 84, 84],
+  kjopesenterkjede: [16, 32, 64, 64],
 }
 
 /**
