@@ -119,6 +119,22 @@
   gap: 2px;
 }
 
+/* Pakke 98: kampene per turnering på en linje under tellingen. */
+.velkomst-liste li.velkomst-kamper {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+
+/* Teksten bryter heller enn å skyve knappen ned på en egen linje. */
+.velkomst-kamper > span:first-child {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.velkomst-under {
+  flex-basis: 100%;
+}
+
 .varsler {
   position: fixed;
   left: 50%;

@@ -207,7 +207,8 @@ function SidenStart({ s }: { s: Spilltilstand }) {
     utbytte: s.totaltUtbytte,
     sparerente: s.totaltSparerente,
     gevinster: s.totaltGevinst ?? 0,
-    klubb: s.totaltKlubb ?? 0,
+    klubb: (s.totaltKlubb ?? 0) - (s.totaltRacing ?? 0),
+    racing: s.totaltRacing ?? 0,
   }
   const ut: [string, number][] = [
     ['Lånerenter', s.totaltRentebetalt],

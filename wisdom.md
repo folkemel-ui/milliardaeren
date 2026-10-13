@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 97, 12 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 98, 13 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -712,6 +712,21 @@ session; delete what stops being true.
   at the start of each day change; `synligeTrofeer(s)` for the trophy list). There is a league match
   every game day, so «nothing while a match is live» would mean never — snapshot per day instead.
   Tests that read a club story, event or achievement right after `klubbVedDagsskifte` need one more.
+- **A match is known by competition, season and round** (Pack 98: `kampnokkel` in `ui/velkomst.ts`).
+  The cup, Europe, the Super Cup and the playoffs number their own rounds from 1, so «season:round»
+  let a cup match hide behind the league match with the same number. A season holds up to ~20
+  matches and two hours away plays ~27, so the club keeps 40 (`KAMPER_HUSKET`) and only the last 10
+  keep the report (`maal`, `vurderinger`): every new match goes through `leggTilKamp`, never a bare
+  `push`. Anything that reads a report must read one of the last ten (the live match, the form chips,
+  the report card all do).
+- **A new kind of income inside an old one keeps tax and the accounts still** (Pack 98, racing money).
+  `totaltRacing` is a part of `totaltKlubb`, as `totaltHost` is a part of `totaltLeie`: the engine
+  adds to both, the tax and the monthly accounts read the whole as before, and only Statistikk
+  subtracts (`klubb − racing`) to show the part as its own source. Tellerstander from before have
+  no `racing`, and then the part stays in the whole — the `start.x === undefined ? 0` pattern.
+- **`racing.ts` cannot import `bank.ts`**: bank → eiendom → racing makes a ring, so racing trims the
+  event log itself with `MAKS_HENDELSER` from `innhold.ts` (which imports only types). Before Pack 98
+  racing pushed to `s.hendelser` with no trim at all; grep `hendelser.push` when adding a system.
 - **Check an idea's premise on exact odds before building it** (Pack 85): «give opponents an attack
   and a defence so the tactic matters» would have changed the right tactic in 2–4 % of matches if the
   one number were just split, because the tactics multiply goals the same way whoever attacks. A

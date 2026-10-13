@@ -8,7 +8,7 @@ import type { Oppgjor, Periodestart, Spilltilstand } from '../engine/types'
 import { kortDato, ukenummer } from './kalender'
 import { dato, MÅNEDER } from '../engine/kalender'
 
-export type KildeId = 'bedrifter' | 'leie' | 'host' | 'utbytte' | 'sparerente' | 'gevinster' | 'klubb'
+export type KildeId = 'bedrifter' | 'leie' | 'host' | 'utbytte' | 'sparerente' | 'gevinster' | 'klubb' | 'racing'
 
 export const KILDER: { id: KildeId; navn: string; farge: string }[] = [
   { id: 'bedrifter', navn: 'Bedriftene', farge: 'var(--kilde-1)' },
@@ -18,10 +18,12 @@ export const KILDER: { id: KildeId; navn: string; farge: string }[] = [
   { id: 'sparerente', navn: 'Sparerente', farge: 'var(--kilde-5)' },
   { id: 'gevinster', navn: 'Gevinst og tap ved salg', farge: 'var(--kilde-6)' },
   { id: 'klubb', navn: 'Klubben', farge: 'var(--kilde-7)' },
+  // Pakke 98: racingteamet sto i klubben. Tellerne fra før har det der fortsatt.
+  { id: 'racing', navn: 'Racing', farge: 'var(--kilde-8)' },
 ]
 
 /** Inntekten per kilde i et oppgjør. Leie er uten jorda; oppgjør fra før Pakke 39 har jorda i leia. */
-export function kildeverdier(o: Pick<Oppgjor, 'bedrifter' | 'leie' | 'utbytte' | 'sparerente' | 'gevinster' | 'klubb' | 'host'>): Record<KildeId, number> {
+export function kildeverdier(o: Pick<Oppgjor, 'bedrifter' | 'leie' | 'utbytte' | 'sparerente' | 'gevinster' | 'klubb' | 'host' | 'racing'>): Record<KildeId, number> {
   const host = o.host ?? 0
   return {
     bedrifter: o.bedrifter,
@@ -30,13 +32,15 @@ export function kildeverdier(o: Pick<Oppgjor, 'bedrifter' | 'leie' | 'utbytte' |
     utbytte: o.utbytte,
     sparerente: o.sparerente,
     gevinster: o.gevinster ?? 0,
-    klubb: o.klubb ?? 0,
+    klubb: (o.klubb ?? 0) - (o.racing ?? 0),
+    racing: o.racing ?? 0,
   }
 }
 
 /** Perioden som pågår: tellerne nå minus tellerstanden ved periodens start. */
 export function paagaende(s: Spilltilstand, start: Periodestart): Record<KildeId, number> {
   const host = start.host === undefined ? 0 : (s.totaltHost ?? 0) - start.host
+  const racing = start.racing === undefined ? 0 : (s.totaltRacing ?? 0) - start.racing
   return {
     bedrifter: s.totaltTjent - start.tjent,
     leie: s.totaltLeie - start.leie - host,
@@ -44,7 +48,8 @@ export function paagaende(s: Spilltilstand, start: Periodestart): Record<KildeId
     utbytte: s.totaltUtbytte - start.utbytte,
     sparerente: s.totaltSparerente - start.sparerente,
     gevinster: (s.totaltGevinst ?? 0) - (start.gevinst ?? 0),
-    klubb: start.klubb === undefined ? 0 : (s.totaltKlubb ?? 0) - start.klubb,
+    klubb: (start.klubb === undefined ? 0 : (s.totaltKlubb ?? 0) - start.klubb) - racing,
+    racing,
   }
 }
 

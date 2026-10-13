@@ -13,6 +13,7 @@
  * tallformatet, så eiendom.ts kan bruke verdien og statusen herfra.
  */
 
+import { MAKS_HENDELSER } from './innhold'
 import { dagnummer } from './kalender'
 import { hashTekst, Terning, tilfeldig } from './rng'
 import { kortKroner } from './tall'
@@ -287,8 +288,19 @@ export function kjorLop(r: Racingteam, dag: number): Racinglop {
 /** Plassen som tekst: «3.», eller «ute» for en krasj. */
 export const plasstekst = (p: number) => (p === 0 ? 'ute' : `${p}.`)
 
+/**
+ * En linje i hendelsesloggen. Kortet som `leggTilHendelse` i bank.ts (som ikke kan importeres
+ * hit uten en ring: bank → eiendom → racing), med samme tak — før Pakke 98 vokste loggen uten.
+ */
 function hendelse(s: Spilltilstand, tekst: string): void {
   s.hendelser.push({ sek: s.sek, tittel: 'Racing', tekst, alvor: 'info' })
+  if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+}
+
+/** Racingpenger: i klubbens linje, som før, og i racingens egen del av den (Pakke 98). Muterer. */
+function racingpenger(s: Spilltilstand, belop: number): void {
+  s.totaltKlubb = (s.totaltKlubb ?? 0) + belop
+  s.totaltRacing = (s.totaltRacing ?? 0) + belop
 }
 
 /** Sesongen er over: mesterskapene, trofeene, et sammendrag, og en ny sesong med nytt marked. Muterer. */
@@ -305,7 +317,7 @@ function sesongslutt(s: Spilltilstand, r: Racingteam, hvem: string): Overskrift[
     const trofe: Trofe = { navn, sesong: r.sesong, klubb: r.navn }
     s.racingtrofeer = [...(s.racingtrofeer ?? []), trofe]
     s.kontanter += MESTERPREMIE
-    s.totaltKlubb = (s.totaltKlubb ?? 0) + MESTERPREMIE
+    racingpenger(s, MESTERPREMIE)
     r.premier += MESTERPREMIE
   }
   if (titler.includes(FORERMESTER)) {
@@ -339,13 +351,13 @@ export function racingVedDagsskifte(s: Spilltilstand, hvem: string): Overskrift[
   const dag = dagnummer(s.sek)
   const lonn = lonnPerDag(r)
   s.kontanter -= lonn
-  s.totaltKlubb = (s.totaltKlubb ?? 0) - lonn
+  racingpenger(s, -lonn)
   r.lonn += lonn
   if (dag < r.nesteDag) return []
   const lop = kjorLop(r, dag)
   r.nesteDag = dag + DAGER_MELLOM
   s.kontanter += lop.premie
-  s.totaltKlubb = (s.totaltKlubb ?? 0) + lop.premie
+  racingpenger(s, lop.premie)
   r.premier += lop.premie
   const saker: Overskrift[] = []
   const mine = lop.plasser.map((p, i) => ({ p, f: r.forere[i] })).filter((x): x is { p: number; f: Forer } => x.p !== null && !!x.f)

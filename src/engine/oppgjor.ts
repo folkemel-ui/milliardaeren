@@ -75,6 +75,7 @@ export function periodestart(s: Spilltilstand, uke = false): Periodestart {
     gevinst: s.totaltGevinst ?? 0,
     klubb: s.totaltKlubb ?? 0,
     host: s.totaltHost ?? 0,
+    racing: s.totaltRacing ?? 0,
     bedrifter: Object.fromEntries(s.bedrifter.map((b) => [b.id, b.tjent])),
     kurser,
   }
@@ -102,6 +103,8 @@ function lagOppgjor(s: Spilltilstand, start: Periodestart, periode: Oppgjor['per
     // En tellerstand fra før Pakke 39 har ikke klubb og avling: da teller perioden fra nå.
     klubb: start.klubb === undefined ? 0 : (s.totaltKlubb ?? 0) - start.klubb,
     host: start.host === undefined ? 0 : (s.totaltHost ?? 0) - start.host,
+    // Pakke 98: en tellerstand fra før har ingen racing; da står racingen i klubben, som før.
+    racing: start.racing === undefined ? 0 : (s.totaltRacing ?? 0) - start.racing,
     formueFor: start.formue,
     formueEtter: nettoformue(s),
     besteBedrift: beste,

@@ -9,6 +9,10 @@ import { EIENDOM_SYNLIG_VED, EIENDOMSTYPER, LUKSUS } from '../engine/eiendom'
 import { STARTUP_LAAST_OPP } from '../engine/startups'
 import { KLUBB_LAAST_OPP } from '../engine/klubb'
 import { LANDEMERKELISTE, LANDEMERKER } from '../engine/landemerker'
+import { MAAL } from '../engine/innhold'
+import { PASSER_ANDEL } from '../engine/auksjon'
+import { TEAMPRIS } from '../engine/racing'
+import { UNIKE, UNIKLISTE } from '../engine/unike'
 import { PRESTASJONER } from '../engine/prestasjoner'
 import type { Spilltilstand } from '../engine/types'
 import type { Fane } from './komponenter/Fanemeny'
@@ -94,6 +98,13 @@ export function alleMaal(): Maal[] {
   maal.push({ belop: EIENDOMSTYPER.newyork.pris, tekst: 'New York', art: 'annet', fane: 'eiendom' })
   // Pakke 76: skyskraperen på Manhattan, det dyreste du kan eie.
   maal.push({ belop: EIENDOMSTYPER['manhattan-skyskraper'].pris, tekst: 'Skyskraper på Manhattan', art: 'annet', fane: 'eiendom' })
+  // Pakke 98: portene i Luksus. Stripa gikk fra Restaurant rett til milepælen på 100 mill og nevnte aldri
+  // auksjonshuset (den billigste unike tingen bys fram når den er en firedel av formuen), Formel 1-bilen
+  // med racingteamet eller ubåten, det siste i Samling.
+  const billigsteUnike = Math.min(...UNIKLISTE.map((id) => UNIKE[id].estimat))
+  maal.push({ belop: billigsteUnike / PASSER_ANDEL, tekst: 'Auksjonshuset', art: 'annet', fane: 'luksus' })
+  maal.push({ belop: LUKSUS.formelbil.pris + TEAMPRIS, tekst: 'Formel 1-bil og racingteam', art: 'annet', fane: 'luksus' })
+  maal.push({ belop: LUKSUS.ubaat.pris, tekst: 'Ubåt', art: 'annet', fane: 'luksus' })
   for (const m of MILEPAELER) maal.push({ belop: m.belop, tekst: m.navn, art: 'milepael', fane: 'profil' })
   const rang: Record<Maalart, number> = { fane: 0, bedrift: 1, annet: 2, milepael: 3, prestasjon: 4 }
   return maal.sort((a, b) => a.belop - b.belop || rang[a.art] - rang[b.art])
@@ -138,6 +149,38 @@ function prestasjonsmaal(s: Spilltilstand): Neste | null {
     andel: klart / PRESTASJONER.length,
     visning: `${klart} / ${PRESTASJONER.length}`,
   }
+}
+
+/** Målet på Profil → Meg (Pakke 98). */
+export interface Profilmaal {
+  /** Beløpet målet står på, eller null når det er prestasjonene som er igjen. */
+  belop: number | null
+  /** Milepælen før, som streken regnes fra. */
+  fra: number
+  /** Hvor langt du er kommet, 0–1. */
+  andel: number
+  /** Prestasjonene: klart av totalt, når beløpene er brukt opp. */
+  prestasjoner?: { klart: number; totalt: number }
+}
+
+/**
+ * Milliarden først — spillets tittel, fra kr 1 på logaritmisk skala, som før. Etter den
+ * milepælene: 10, 100 og 1 000 mrd, hver fra den forrige, på den høyeste formuen du har hatt,
+ * som stripa. Etter billionen prestasjonene som er igjen. Før sto streken full fra ~5 h.
+ */
+export function profilmaal(s: Spilltilstand, verdi: number): Profilmaal {
+  const logg = (x: number) => Math.log10(Math.max(1, x))
+  const klem = (x: number) => Math.min(1, Math.max(0, x))
+  if (s.hoyesteFormue < MAAL) return { belop: MAAL, fra: 1, andel: klem(logg(verdi) / logg(MAAL)) }
+  const etter = MILEPAELER.filter((m) => m.belop > MAAL)
+  const neste = etter.find((m) => m.belop > s.hoyesteFormue)
+  if (!neste) {
+    let klart = 0
+    for (const p of PRESTASJONER) if (s.prestasjoner[p.id] !== undefined) klart++
+    return { belop: null, fra: MILEPAELER[MILEPAELER.length - 1].belop, andel: klart / PRESTASJONER.length, prestasjoner: { klart, totalt: PRESTASJONER.length } }
+  }
+  const fra = Math.max(MAAL, ...etter.filter((m) => m.belop < neste.belop).map((m) => m.belop))
+  return { belop: neste.belop, fra, andel: klem((logg(verdi) - logg(fra)) / (logg(neste.belop) - logg(fra))) }
 }
 
 /** De neste `antall` beløpene med mål, til lista på Profil. */

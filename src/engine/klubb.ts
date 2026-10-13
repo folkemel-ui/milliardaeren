@@ -67,6 +67,24 @@ export type Stadiondel = 'tribune' | 'flomlys' | 'vip'
 
 /** Klubben er til salgs når formuen din en gang har vært så stor. */
 export const KLUBB_LAAST_OPP = 10_000_000
+/**
+ * Kampene klubben husker (Pakke 98): en sesong kan ha rundt tjue (serien, cupen, Europa,
+ * supercupen og kvalik), og to timer borte spiller ~27 — med bare ti kom ikke alle med på
+ * velkomsten. Bare de siste har rapporten (målene og vurderingene), så lagringen holder seg liten.
+ */
+export const KAMPER_HUSKET = 40
+export const RAPPORTER_HUSKET = 10
+
+/** Legger en spilt kamp til klubben: de eldste går ut, og rapporten tas av det som er eldre enn de siste ti. Muterer. */
+export function leggTilKamp(k: Klubb, kamp: Kamp): void {
+  k.kamper.push(kamp)
+  if (k.kamper.length > KAMPER_HUSKET) k.kamper.splice(0, k.kamper.length - KAMPER_HUSKET)
+  const eldre = k.kamper[k.kamper.length - 1 - RAPPORTER_HUSKET]
+  if (eldre) {
+    delete eldre.maal
+    delete eldre.vurderinger
+  }
+}
 export const ANTALL_LAG = 10
 export const RUNDER_PER_SESONG = ANTALL_LAG - 1
 /** De to beste rykker opp, de to dårligste ned. */
@@ -544,8 +562,7 @@ function spillUtslagskamp(s: Spilltilstand, k: Klubb, t: Terning, mot: Motlag, h
     s.totaltKlubb = (s.totaltKlubb ?? 0) + billett
     k.billetter += billett
   }
-  k.kamper.push(kamp)
-  if (k.kamper.length > 10) k.kamper.shift()
+  leggTilKamp(k, kamp)
   return kamp
 }
 
@@ -1159,8 +1176,7 @@ function spillRunde(s: Spilltilstand, k: Klubb, t: Terning): Kamp {
     s.totaltKlubb = (s.totaltKlubb ?? 0) + inntekt
     k.billetter += inntekt
   }
-  k.kamper.push(kamp)
-  if (k.kamper.length > 10) k.kamper.shift()
+  leggTilKamp(k, kamp)
   return kamp
 }
 

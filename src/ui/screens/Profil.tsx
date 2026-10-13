@@ -21,7 +21,7 @@ import { investeringsdel, luksusdel, PROFILDELER, settProfildel, useProfildel } 
 import { formuedeler, GRUPPEFARGE, type Formuemaal } from '../formuedeler'
 import type { Fane } from '../komponenter/Fanemeny'
 import { Statistikk } from '../komponenter/Statistikk'
-import { kommendeMaal } from '../progresjon'
+import { kommendeMaal, profilmaal } from '../progresjon'
 import { settBevegelse, settVarsler, useBevegelse, useVarselnivaa } from '../innstillinger'
 import { VERSJON } from '../versjon'
 import { Endringslogg } from '../komponenter/Nyheter'
@@ -156,9 +156,23 @@ function Rekordbok({ s }: { s: Spilltilstand }) {
   )
 }
 
-/** Fremdrift mot milliarden på logaritmisk skala: hvert nuller er like langt. */
-function fremdrift(n: number): number {
-  return Math.min(1, Math.max(0, Math.log10(Math.max(1, n)) / Math.log10(MAAL)))
+/** «1 milliard», «10 milliarder», «1 000 milliarder». */
+function milliarder(belop: number): string {
+  const n = belop / 1e9
+  return `${tall(n, 0)} ${n === 1 ? 'milliard' : 'milliarder'}`
+}
+
+/** Tittelen og linja under streken på Profil → Meg (Pakke 98). */
+function maaltekst(m: ReturnType<typeof profilmaal>): { tittel: string; linje: string } {
+  if (m.prestasjoner) {
+    const igjen = m.prestasjoner.totalt - m.prestasjoner.klart
+    return igjen === 0
+      ? { tittel: 'Alle målene er nådd', linje: 'Billionær og hver eneste prestasjon. Det er ikke mer å nå — bare mer å eie.' }
+      : { tittel: 'Mål: alle prestasjonene', linje: `Alle milepælene er nådd. ${m.prestasjoner.klart} av ${m.prestasjoner.totalt} prestasjoner, ${igjen} igjen.` }
+  }
+  if (m.belop === MAAL) return { tittel: `Mål: ${milliarder(MAAL)}`, linje: 'Hvert nuller teller like mye: 1 000 → 10 000 er like langt som 100 mill → 1 mrd.' }
+  const halvveis = Math.sqrt(m.fra * m.belop!)
+  return { tittel: `Mål: ${milliarder(m.belop!)}`, linje: `Fra ${kortKroner(m.fra)}: hver dobling teller like mye, så halvveis er ${kortKroner(halvveis)}.` }
 }
 
 /** De neste målene over den høyeste formuen din: hva som åpner, og milepælene. */
@@ -374,7 +388,9 @@ function Formuedeler({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => voi
 
 function Meg({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
   const verdi = nettoformue(s)
-  const andel = fremdrift(verdi)
+  const maal = profilmaal(s, verdi)
+  const andel = maal.andel
+  const { tittel, linje } = maaltekst(maal)
   return (
     <>
       <div className="kort profil-formue">
@@ -392,7 +408,7 @@ function Meg({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
 
       <div className="kort">
         <div className="maal-topp">
-          <span className="etikett">Mål: 1 milliard</span>
+          <span className="etikett">{tittel}</span>
           <span className="dempet">{tall(andel * 100, 0)} %</span>
         </div>
         <div
@@ -404,7 +420,7 @@ function Meg({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
         >
           <div className="maal-fyll" style={{ width: `${andel * 100}%` }} />
         </div>
-        <p className="dempet liten">Hvert nuller teller like mye: 1 000 → 10 000 er like langt som 100 mill → 1 mrd.</p>
+        <p className="dempet liten">{linje}</p>
         <KommendeMaal s={s} />
       </div>
 

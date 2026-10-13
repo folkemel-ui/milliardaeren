@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFokusfelle } from './useFokusfelle'
 import type { Velkomst } from '../../state/lager'
-import { oppsummer } from '../velkomst'
+import { oppsummer, tapt, TURNERINGSNAVN, vunnet } from '../velkomst'
 import { UTFALLTEKST } from '../../engine/kvartal'
 import { fortegnKroner, kortKroner, varighet } from '../format'
 import type { Mål } from '../varsler'
@@ -25,9 +25,10 @@ export function Velkomstskjerm({
   const o = useMemo(() => oppsummer(v.før, v.etter, v.borteSek), [v])
   const kappet = o.borteSek > o.telteSek
   const endring = o.formueEtter - o.formueFor
-  const seire = o.kamper.filter((k) => k.maalFor > k.maalMot).length
-  const uavgjort = o.kamper.filter((k) => k.maalFor === k.maalMot).length
-  const tap = o.kamper.length - seire - uavgjort
+  // Pakke 98: en kamp vunnet på straffer er en seier, som i cupen.
+  const seire = o.kamper.filter(vunnet).length
+  const tap = o.kamper.filter(tapt).length
+  const uavgjort = o.kamper.length - seire - tap
 
   const boks = useRef<HTMLDivElement>(null)
   useFokusfelle(boks, lukk)
@@ -83,13 +84,34 @@ export function Velkomstskjerm({
             </li>
           )}
           {o.kamper.length > 0 && (
-            <li>
+            <li className="velkomst-kamper">
               <span>
                 <Ikon navn="ball" størrelse={16} /> {o.kamper.length} {o.kamper.length === 1 ? 'kamp' : 'kamper'}: {seire} {seire === 1 ? 'seier' : 'seire'}, {uavgjort} uavgjort, {tap} tap
               </span>
               <button className="knapp knapp-liten" onClick={() => (gåTil('klubb'), lukk())}>
                 Klubben
               </button>
+              {o.turneringer.length > 1 && (
+                <span className="dempet liten velkomst-under">{o.turneringer.map((t) => `${TURNERINGSNAVN[t.turnering]} ${t.antall}`).join(' · ')}</span>
+              )}
+            </li>
+          )}
+          {o.racing && (
+            <li>
+              <span>
+                <Ikon navn="trofe" størrelse={16} /> {o.racing.lop} løp: {o.racing.seire} {o.racing.seire === 1 ? 'seier' : 'seire'}, {o.racing.poeng} poeng
+              </span>
+              <button className="knapp knapp-liten" onClick={() => (gåTil('samling'), lukk())}>
+                Racing
+              </button>
+            </li>
+          )}
+          {o.tapteAuksjoner.length > 0 && (
+            <li className="velkomst-rapporter">
+              <span>
+                <Ikon navn="diamant" størrelse={16} /> {o.tapteAuksjoner.length === 1 ? 'Tapt på auksjon' : `${o.tapteAuksjoner.length} tapt på auksjon`}
+              </span>
+              <span className="dempet liten">{o.tapteAuksjoner.map((a) => `${a.navn} gikk til ${a.rival} for ${kortKroner(a.pris)}`).join(' · ')}</span>
             </li>
           )}
           {o.rapporter.length > 0 && (

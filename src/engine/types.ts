@@ -376,6 +376,8 @@ export interface Periodestart {
   /** Klubbens resultat og jordas avling. Mangler i tellerstander fra før Pakke 39. */
   klubb?: number
   host?: number
+  /** Racingteamets del av klubben (Pakke 98). Mangler i tellerstander fra før. */
+  racing?: number
   /** Hva hver bedrift hadde tjent totalt ved periodens start, etter id. */
   bedrifter: Record<string, number>
   kurser: Record<PapirId, number>
@@ -407,6 +409,8 @@ export interface Oppgjor {
   klubb?: number
   /** Delen av `leie` som kom fra jorda: avlinger og tømmer. Mangler i oppgjør fra før Pakke 39. */
   host?: number
+  /** Delen av `klubb` som kom fra racingteamet (Pakke 98). Mangler i oppgjør fra før. */
+  racing?: number
   formueFor: number
   formueEtter: number
   besteBedrift: { type: BedriftstypeId; tjent: number } | null
@@ -642,6 +646,11 @@ export interface Spilltilstand {
    * Mangler i lagringer fra før Pakke 39.
    */
   totaltKlubb?: number
+  /**
+   * Delen av `totaltKlubb` som kom fra racingteamet (Pakke 98): premier minus lønn. Statistikken
+   * viser den som egen kilde, som avlingene i leia. Mangler før Pakke 98 — det som kom før, står i klubben.
+   */
+  totaltRacing?: number
   /** Tellerstanden ved starten av dagen, til statistikken. Mangler før Pakke 39. */
   dagstart?: Periodestart
   /** Oppgjør for hver av de siste dagene, nyeste sist — bare til statistikken. */
