@@ -726,3 +726,65 @@
     transform: translateY(-36px);
   }
 }
+
+/* Pakke 99: hvor fort neste kjøp tjener seg inn, under oppgraderingsknappen. */
+.tilbake-linje {
+  display: block;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.ferdigrad {
+  grid-template-areas: 'bilde navn inntekt' 'bilde knapp knapp' 'bilde linje linje';
+}
+
+.ferdigrad > .tilbake-linje {
+  grid-area: linje;
+  margin-top: -4px;
+}
+
+.forbedring-tilbake {
+  display: block;
+  font-weight: var(--vekt-normal);
+}
+
+/* Forbedringen på detaljsiden: prisen på knappen, og tiden under. */
+.forbedring-kjop {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+/* Fusjonene på bedriftens side: en rad som åpner rivalen i Selskaper. */
+.fusjonsrad {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--tekst);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-color: var(--gull-mørk);
+}
+
+.fusjonsrad > span:last-child {
+  color: var(--gull);
+  font-size: var(--skrift-4);
+}
+
+/*
+ * Pakke 99: med «Milepæl» er det sju knapper på 44 px — de får ikke plass på én rad på en telefon
+ * (343 px). Mengdene tar hele raden, og rekkefølgen står til høyre under.
+ */
+.bedrifter-kontroller > .mengdevalg {
+  flex: 1 1 260px;
+}
+
+.bedrifter-kontroller > .rekkefolge {
+  margin-left: auto;
+}

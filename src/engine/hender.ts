@@ -10,7 +10,7 @@
 import { bedriftInntektIDag } from './formler'
 import { hashTekst, tilfeldig } from './rng'
 import type { Utfall } from './handlinger'
-import type { Spilltilstand } from './types'
+import type { Bedrift, Spilltilstand } from './types'
 
 const feil = (tekst: string): Utfall => ({ ok: false, feil: tekst })
 
@@ -47,8 +47,20 @@ export function selgKopp(s: Spilltilstand): Utfall {
 export const KO_SJANSE = 1 / 180
 /** Så lenge køen står før kundene går. */
 export const KO_VARER_SEK = 10
-/** Bonusen er så mange sekunder av bedriftens inntekt. */
+/** Bonusen er så mange sekunder av bedriftens inntekt — eller av snittet, når det er større (Pakke 99). */
 export const KO_BONUS_SEK = 30
+
+/**
+ * Hva en kø ved bedriften gir (Pakke 99): tretti sekunder av det bedriften tjener i dag, men aldri
+ * under tretti sekunder av snittet for bedriftene dine. Før var de fleste køene verdt et øyeblikk sent
+ * i spillet: ved 1 000 mrd tjente oljeselskapet 72,5 % av alt, og medianen var 0,25 s av det du tjente.
+ */
+export function kobonus(s: Spilltilstand, b: Bedrift): number {
+  let sum = 0
+  for (const x of s.bedrifter) sum += Math.max(0, bedriftInntektIDag(s, x))
+  const snitt = s.bedrifter.length > 0 ? sum / s.bedrifter.length : 0
+  return KO_BONUS_SEK * Math.max(bedriftInntektIDag(s, b), snitt)
+}
 
 const KO_FRØ = hashTekst('kø')
 
@@ -68,8 +80,8 @@ export function kotikk(s: Spilltilstand, borte: boolean): void {
   if (s.ko || s.bedrifter.length === 0) return
   if (tilfeldig(KO_FRØ + s.sek) >= KO_SJANSE) return
   const b = s.bedrifter[Math.floor(tilfeldig(KO_FRØ + s.sek + 1) * s.bedrifter.length)]
-  // Tretti sekunder av det bedriften tjener i dag — med helligdag, vær og nyheter (Pakke 58).
-  const bonus = bedriftInntektIDag(s, b) * KO_BONUS_SEK
+  // Tretti sekunder av det bedriften tjener i dag — med helligdag, vær og nyheter (Pakke 58) — eller av snittet (Pakke 99).
+  const bonus = kobonus(s, b)
   if (bonus <= 0) return
   s.ko = { bedriftId: b.id, slutterSek: s.sek + KO_VARER_SEK, bonus }
 }

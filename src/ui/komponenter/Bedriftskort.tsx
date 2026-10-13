@@ -11,7 +11,9 @@ import {
   milepaelboost,
   nesteForbedring,
   nesteMilepael,
+  prisForNivaaer,
 } from '../../engine/formler'
+import { forbedringGir, oppgraderingGir, tilbakeTekst } from '../inntjening'
 import { ansett, ansettLeder, kjopForbedring, oppgraderFlere, siOpp, velgRetning } from '../../engine/handlinger'
 import { GRADER, GRADLISTE, kanVelgeRetning, retningNivaa, RETNINGER, RETNINGSLISTE, retningsstatus, stab } from '../../engine/ansatte'
 import { Bekreftknapp } from './Bekreftknapp'
@@ -76,7 +78,11 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
           </h2>
           <span className={`${bedriftInntektIDag(s, b) >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(bedriftInntektIDag(s, b))}</span>
           <Oppgraderingsknapp s={s} b={b} mengde={mengde} />
+          <Tilbakelinje s={s} b={b} mengde={mengde} />
         </div>
+        {/* Pakke 99: køen står også på det korte kortet — før var 4 av 10 køer usynlige sent i spillet. */}
+        {flytetall}
+        <Koknapp s={s} b={b} legg={legg} />
       </li>
     )
   }
@@ -109,7 +115,9 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
         <div className="milepael-spor">
           <div className="milepael-fyll" style={{ width: `${milepaelFremdrift(b.type, b.nivaa, neste) * 100}%` }} />
         </div>
-        <span className="dempet liten">{neste ? `${gange(milepaelboost(neste, b.type))} inntekt ved nivå ${neste}` : 'Alle milepæler nådd'}</span>
+        <span className="dempet liten">
+          {neste ? `${gange(milepaelboost(neste, b.type))} inntekt ved nivå ${neste} · ${kortKroner(prisForNivaaer(b, neste - b.nivaa))}` : 'Alle milepæler nådd'}
+        </span>
       </div>
 
       <Koknapp s={s} b={b} legg={legg} />
@@ -123,6 +131,7 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
         >
           <span>
             <Ikon navn="gnist" størrelse={14} /> <strong>{klarForbedring.navn}</strong> · ×{tall(klarForbedring.faktor, 1)} inntekt
+            <span className="dempet liten forbedring-tilbake">{tilbakeTekst(forbedringspris(b, klarForbedring), forbedringGir(s, b))}</span>
           </span>
           <span>{kortKroner(forbedringspris(b, klarForbedring))}</span>
         </button>
@@ -136,8 +145,20 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
           </svg>
         </button>
       </div>
+      <Tilbakelinje s={s} b={b} mengde={mengde} />
     </li>
   )
+}
+
+/**
+ * Hvor fort neste kjøp på oppgraderingsknappen tjener seg inn (Pakke 99), på en linje under den.
+ * Uten råd til noe: for neste nivå.
+ */
+export function Tilbakelinje({ s, b, mengde }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde }) {
+  const k = kjop(b, mengde, s.kontanter)
+  const antall = k.antall > 0 ? k.antall : 1
+  const pris = k.antall > 0 ? k.pris : prisForNivaaer(b, 1)
+  return <span className="dempet liten tilbake-linje">{tilbakeTekst(pris, oppgraderingGir(s, b, antall))}</span>
 }
 
 /**
@@ -346,7 +367,7 @@ export function Oppgraderingsknapp({ s, b, mengde, bred = false }: { s: Spilltil
       disabled={antall === 0 || s.kontanter < pris}
       {...hold}
     >
-      {antall === 0 ? `Maks · trenger ${kortKroner(pris)}` : `→ nivå ${b.nivaa + antall} · ${kortKroner(pris)}`}
+      {antall === 0 ? (mengde === 'milepael' ? 'Alle milepæler nådd' : `Maks · trenger ${kortKroner(pris)}`) : `→ nivå ${b.nivaa + antall} · ${kortKroner(pris)}`}
     </button>
   )
 }

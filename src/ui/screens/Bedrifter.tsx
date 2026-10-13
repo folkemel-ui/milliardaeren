@@ -18,7 +18,8 @@ import { fastInntekt } from '../sortering'
 import { useTilbake } from '../tilbake'
 import { Hjemskjermkort } from '../komponenter/Hjemskjerm'
 
-export function Bedrifter({ s }: { s: Spilltilstand }) {
+/** `tilRival` åpner en rival i Investeringer → Selskaper (Pakke 99: fusjonsraden). */
+export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: string, type: BedriftstypeId) => void }) {
   const [valgt, settValgt] = useState<string | null>(null)
   const [mengde, settMengde] = useState<Kjopsmengde>(lesKjopsmengde)
   const velgMengde = (m: Kjopsmengde) => {
@@ -36,7 +37,7 @@ export function Bedrifter({ s }: { s: Spilltilstand }) {
   // Bedriften kan forsvinne mens siden er åpen (banken kan ta den over).
   const detalj = valgt ? s.bedrifter.find((b) => b.id === valgt) : undefined
   useTilbake(detalj !== undefined, () => settValgt(null))
-  if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengde} tilbake={() => settValgt(null)} />
+  if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengde} tilbake={() => settValgt(null)} tilRival={tilRival} />
 
   return (
     <section className="skjerm">

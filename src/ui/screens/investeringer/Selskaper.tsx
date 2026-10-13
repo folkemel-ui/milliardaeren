@@ -3,7 +3,8 @@
  * En del av Investeringer-fanen (Pakke 65 delte Investeringer.tsx per del).
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { rivalvalg, rullTil } from '../../rivalvalg'
 import { Bekreftknapp } from '../../komponenter/Bekreftknapp'
 import { nettoformue } from '../../../engine/formler'
 import { byPaaBedrift, godtaMotbud, granskStartup, investerIStartup, kjopRivalblokk, overtaRival, selgRivalandel } from '../../../engine/handlinger'
@@ -135,6 +136,13 @@ export function Startups({ s }: { s: Spilltilstand }) {
 }
 
 export function Rivaler({ s }: { s: Spilltilstand }) {
+  // Pakke 99: kom du fra fusjonsraden på en bedrift, åpnes den rivalens bedrifter, og siden ruller dit.
+  const [valgt] = useState(() => rivalvalg.ta())
+  useEffect(() => {
+    if (!valgt) return
+    const el = document.getElementById(`rival-${valgt.id}-${valgt.type}`) ?? document.getElementById(`rival-${valgt.id}`)
+    if (el) rullTil(el)
+  }, [valgt])
   const liste = forbesliste(s, nettoformue(s))
   return (
     <>
@@ -177,7 +185,7 @@ export function Rivaler({ s }: { s: Spilltilstand }) {
           const bp = blokkpris(r)
           const op = fulltOppkjop(s, r)
           return (
-            <li key={r.id} className={r.overtatt ? 'kort rivalkort eid' : 'kort rivalkort'}>
+            <li key={r.id} id={`rival-${r.id}`} className={r.overtatt ? 'kort rivalkort eid' : 'kort rivalkort'}>
               <div className="rival-topp">
                 <Rivalportrett id={r.id} størrelse={44} />
                 <div className="rival-navn">
@@ -226,7 +234,7 @@ export function Rivaler({ s }: { s: Spilltilstand }) {
                   </Bekreftknapp>
                 )}
               </div>
-              <Rivalbedrifter s={s} r={r} />
+              <Rivalbedrifter s={s} r={r} aapen={valgt?.id === r.id} />
             </li>
           )
         })}
@@ -236,7 +244,7 @@ export function Rivaler({ s }: { s: Spilltilstand }) {
 }
 
 /** Bedriftene en rival eier, med bud, motbud og avslag. */
-function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
+function Rivalbedrifter({ s, r, aapen = false }: { s: Spilltilstand; r: Rival; aapen?: boolean }) {
   const [melding, settMelding] = useState<string | null>(null)
   const liste = rivalbedrifter(r)
   if (r.overtatt) return null
@@ -254,7 +262,7 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
   }
 
   return (
-    <details className="rivalbedrifter">
+    <details className="rivalbedrifter" open={aapen || undefined}>
       <summary>
         Bedriftene til {r.navn.split(' ')[0]} <span className="dempet">({liste.length})</span>
       </summary>
@@ -268,7 +276,7 @@ function Rivalbedrifter({ s, r }: { s: Spilltilstand; r: Rival }) {
             const f = dagensForhandling(s, r, rb.type)
             const antydning = prisantydning(s, rb)
             return (
-              <li key={rb.type}>
+              <li key={rb.type} id={`rival-${r.id}-${rb.type}`}>
                 <div className="rivalbedrift-topp">
                   <Illustrasjon id={rb.type} størrelse={32} naerbilde={NAER_RIVAL} />
                   <div>

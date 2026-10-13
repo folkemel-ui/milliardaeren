@@ -94,6 +94,19 @@ export function rivalbedrifter(r: Rival): Rivalbedrift[] {
   return liste
 }
 
+/**
+ * Rivalene som eier en bedrift av samme type som din og ikke har solgt den til deg (Pakke 99), med
+ * prisantydningen — billigst først. Til raden på bedriftens side; budene gis i Selskaper.
+ */
+export function fusjonstilbud(s: Spilltilstand, b: Bedrift): { rival: Rival; antydning: number }[] {
+  const ut: { rival: Rival; antydning: number }[] = []
+  for (const r of s.rivaler) {
+    const rb = rivalbedrifter(r).find((x) => x.type === b.type)
+    if (rb) ut.push({ rival: r, antydning: prisantydning(s, rb) })
+  }
+  return ut.sort((a, c) => a.antydning - c.antydning)
+}
+
 export function fusjonsfaktor(b: Bedrift): number {
   return FUSJONSFAKTOR ** (b.fusjoner ?? 0)
 }

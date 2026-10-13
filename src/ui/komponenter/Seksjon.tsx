@@ -21,6 +21,11 @@ function lagreValg(id: string, åpen: boolean): void {
   }
 }
 
+/** Åpner en seksjon før du sendes dit (Pakke 99: fusjonsraden åpner Rivaler), som om du hadde trykket. */
+export function apneSeksjon(id: string): void {
+  lagreValg(id, true)
+}
+
 /**
  * Overskriften for en hel del (Pakke 62): Hjem og Kunst er hver sin del i
  * Luksus, og en del som åpner på en sammenfoldet seksjon, ser tom ut.

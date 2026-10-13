@@ -1,7 +1,9 @@
-import { bedriftInntektIDag, bedriftsverdi, forbedringspris, milepaelboost, nesteMilepael, statusfaktor } from '../../engine/formler'
+import { bedriftInntektIDag, bedriftsverdi, forbedringspris, milepaelboost, nesteMilepael, prisForNivaaer, statusfaktor } from '../../engine/formler'
 import { bedriftssalgspris, kjopForbedring, selgBedrift } from '../../engine/handlinger'
 import type { Kjopsmengde } from '../kjopsmengde'
-import { fusjonsfaktor } from '../../engine/fusjon'
+import { FORMER, FUSJON_FRA_NIVAA, FUSJONSFAKTOR, fusjonsfaktor, fusjonstilbud, kanSlaasSammen } from '../../engine/fusjon'
+import { kanVelgeRetning } from '../../engine/ansatte'
+import { forbedringGir, fusjonGir, tilbakeTekst } from '../inntjening'
 import { BEDRIFTSSALG_RABATT, BEDRIFTSTYPER, FORBEDRINGER, milepaelerFor } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
 import { INNTEKT_HISTORIKK_SEK } from '../../engine/simulering'
@@ -10,7 +12,8 @@ import { utfor } from '../../state/lager'
 import { kortKroner, kroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
 import { Scene } from '../komponenter/BedriftIkon'
-import { IDag, Oppgraderingsknapp, Personale, Retningskort } from '../komponenter/Bedriftskort'
+import { IDag, Oppgraderingsknapp, Personale, Retningskort, Tilbakelinje } from '../komponenter/Bedriftskort'
+import { Koknapp, useFlytetall } from '../komponenter/Hender'
 import { BedriftBorsen } from '../komponenter/Bransje'
 import { Linjegraf } from '../komponenter/Linjegraf'
 import { usePuls } from '../komponenter/Tikk'
@@ -21,7 +24,19 @@ import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import { Filialkort } from '../komponenter/Filialer'
 import { filialer } from '../../engine/filialer'
 
-export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; tilbake: () => void }) {
+export function Bedriftdetalj({
+  s,
+  b,
+  mengde,
+  tilbake,
+  tilRival,
+}: {
+  s: Spilltilstand
+  b: Bedrift
+  mengde: Kjopsmengde
+  tilbake: () => void
+  tilRival: (id: string, type: Bedrift['type']) => void
+}) {
   const type = BEDRIFTSTYPER[b.type]
   const inntekt = bedriftInntektIDag(s, b)
   const neste = nesteMilepael(b.nivaa, b.type)
@@ -32,6 +47,10 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
   const alder = s.sek - b.startetSek
   const voks = useVoksUt<HTMLElement>()
   const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), milepaelerFor(b.type).includes(b.nivaa))
+  const [flytetall, legg] = useFlytetall()
+  // Pakke 99: retningen står først mens valget venter — før var den den åttende blokken.
+  const venterRetning = kanVelgeRetning(b)
+  const tilbud = fusjonstilbud(s, b)
 
   return (
     <section className="skjerm detalj" ref={voks} style={nattstil(s.sek)}>
@@ -40,6 +59,7 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
       </button>
 
       <div className="kort">
+        {flytetall}
         <Scene type={b.type} nivaa={b.nivaa} forbedringer={b.forbedringer} />
         <div className="bedriftskort-topp">
           <div className="bedriftskort-midt">
@@ -61,13 +81,37 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
           <span className="dempet liten">Inntekt i dag, etter lønn{statusfaktor(s) > 1 && ' og statusbonus'}</span>
           <IDag s={s} b={b} />
         </div>
+        <Koknapp s={s} b={b} legg={legg} />
         {b.inntektHistorikk.length > 0 ? (
           <Linjegraf punkter={punkter} format={(n) => perSek(n)} farge="var(--pluss)" etikett={`Inntekten til ${type.navn}`} />
         ) : (
           <p className="graf-tom">Grafen fylles ut minutt for minutt.</p>
         )}
         <Oppgraderingsknapp s={s} b={b} mengde={mengde} bred />
+        <Tilbakelinje s={s} b={b} mengde={mengde} />
       </div>
+
+      {venterRetning && (
+        <div className="kort">
+          <Retningskort b={b} s={s} />
+        </div>
+      )}
+
+      {kanSlaasSammen(b) && tilbud.length > 0 && (
+        <button className="kort fusjonsrad" onClick={() => tilRival(tilbud[0].rival.id, b.type)}>
+          <span>
+            <strong>
+              {tilbud.length === 1 ? `${tilbud[0].rival.navn} eier` : `${tilbud.length} rivaler eier`} {FORMER[b.type].en}
+            </strong>
+            <span className="dempet liten">
+              {' '}
+              · ×{tall(FUSJONSFAKTOR, 1)} inntekt{tilbud.length > 1 ? ' hver' : ''} · fra {kortKroner(tilbud[0].antydning)} ·{' '}
+              {tilbakeTekst(tilbud[0].antydning, fusjonGir(s, b)).toLowerCase()}
+            </span>
+          </span>
+          <span aria-hidden="true">›</span>
+        </button>
+      )}
 
       <dl className="kort rekorder">
         <div>
@@ -109,9 +153,12 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
                 {kjøpt ? (
                   <span className="merke ok">✓ Kjøpt</span>
                 ) : neste && låstOpp ? (
-                  <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(kjopForbedring(s, b.id))}>
-                    {kortKroner(pris)}
-                  </button>
+                  <span className="forbedring-kjop">
+                    <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(kjopForbedring(s, b.id))}>
+                      {kortKroner(pris)}
+                    </button>
+                    <span className="dempet liten">{tilbakeTekst(pris, forbedringGir(s, b))}</span>
+                  </span>
                 ) : (
                   <span className="dempet liten laast-merke">
                     <Ikon navn="las" størrelse={12} /> Nivå {f.nivaa}
@@ -137,19 +184,28 @@ export function Bedriftdetalj({ s, b, mengde, tilbake }: { s: Spilltilstand; b: 
                 </span>
                 <span>
                   Nivå {m}: ×{String(milepaelboost(m, b.type)).replace('.', ',')} inntekt
-                  <span className="dempet liten">{nådd ? ' — nådd' : ` — ${m - b.nivaa} nivåer igjen`}</span>
+                  <span className="dempet liten">
+                    {nådd ? ' — nådd' : ` — ${m - b.nivaa} nivåer igjen${m === neste ? `, ${kortKroner(prisForNivaaer(b, m - b.nivaa))}` : ''}`}
+                  </span>
                 </span>
               </li>
             )
           })}
         </ul>
+        {b.nivaa < FUSJON_FRA_NIVAA && tilbud.length > 0 && (
+          <p className="dempet liten">
+            Fusjoner åpner ved nivå {FUSJON_FRA_NIVAA}: {tilbud.length === 1 ? `${tilbud[0].rival.navn} eier` : `${tilbud.length} rivaler eier`} {FORMER[b.type].en}.
+          </p>
+        )}
       </div>
 
       <BedriftBorsen s={s} b={b} />
 
-      <div className="kort">
-        <Retningskort b={b} s={s} />
-      </div>
+      {!venterRetning && (
+        <div className="kort">
+          <Retningskort b={b} s={s} />
+        </div>
+      )}
 
       <div className="kort">
         <Personale b={b} s={s} />

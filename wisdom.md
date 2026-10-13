@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 98, 13 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 99, 13 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -1442,6 +1442,21 @@ session; delete what stops being true.
 - **Event log (Pack 61)**: `Hendelseslogg.tsx` behind the bell in the date line; what's
   been seen is a `sek` in localStorage (`ui/hendelsessett.ts`). A notice can point at it
   with `mål: 'hendelser'` (`Mål` in `ui/varsler.ts`).
+- **Payback on a buy (Pack 99)**: `ui/inntjening.ts` — what the buy adds to today's income
+  (`bedriftInntektIDag` on a copy with the change: `{ ...b, nivaa: b.nivaa + n }`) against the
+  price, worded «Tilbake på T» like the hires since Pack 80. A new buy button in a business gets
+  the same line, not its own wording.
+- **Jumping to a thing on another tab (Pack 99, merger row → a rival in Selskaper)**: a one-shot
+  module value (`ui/rivalvalg.ts`, read once with `ta()` in a `useState` initialiser), the folded
+  section opened first (`apneSeksjon(id)` from `Seksjon.tsx`), the part set (`investeringsdel.sett`),
+  then the tab (`velg` in `App`). Scroll with `rullTil`, not `scrollIntoView`: the top bar
+  (`.toppfelt`) is sticky and 121 px tall at 375 × 812, so `block: 'start'` hid the target under it.
+  Aim at the row you act on (the kiosk among the rival's businesses), not the card's top.
+- **Seven 44 px buttons don't fit one phone row**: 7 × 44 + paddings and gaps ≈ 352 px against
+  343. Adding «Milepæl» to the buy amounts sent the sort to a second row (Pack 75 had them on one);
+  check the row count with rects when a segment grows, and say so if one row is impossible.
+- **`kanSlaasSammen` is a type guard** (`din is Bedrift`): `!kanSlaasSammen(b)` on a `Bedrift`
+  narrows `b` to `never`. Compare `b.nivaa < FUSJON_FRA_NIVAA` for the negative case.
 
 ## 7. Verifying well
 

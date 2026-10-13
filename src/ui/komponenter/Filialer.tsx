@@ -7,6 +7,7 @@ import { REGIONER, regionFor } from '../../engine/regioner'
 import type { Bedrift, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall } from '../format'
+import { tilbakeTekst } from '../inntjening'
 import { kortDato } from '../kalender'
 import { Ikon } from './Ikoner'
 
@@ -59,7 +60,7 @@ export function Filialkort({ s, b }: { s: Spilltilstand; b: Bedrift }) {
                     {by} <span className="gull">{pst(bidrag)}</span>
                   </strong>
                   <p className="dempet liten">
-                    {sted(by)}gir {perSek(brutto * bidrag)} i dag
+                    {sted(by)}gir {perSek(brutto * bidrag)} i dag · {tilbakeTekst(pris, brutto * bidrag).toLowerCase()}
                   </p>
                 </div>
                 <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(aapneFilial(s, b.id, by))}>

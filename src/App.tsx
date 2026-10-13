@@ -14,7 +14,7 @@ import { lesAvisvalg } from './ui/avisvalg'
 import { vises } from './ui/innstillinger'
 import { merkVersjonSett, visNyheter } from './ui/versjon'
 import { Nyheter } from './ui/komponenter/Nyheter'
-import type { Hendelse } from './engine/types'
+import type { BedriftstypeId, Hendelse } from './engine/types'
 import { Toppfelt } from './ui/komponenter/Toppfelt'
 import { Bedrifter } from './ui/screens/Bedrifter'
 import { AVIS, SKJERMER, Skjerm } from './ui/skjermer'
@@ -23,7 +23,9 @@ import { lyttEtterKorttrykk } from './ui/overgang'
 import { lyttEtterTilbake, useTilbake } from './ui/tilbake'
 import { Hendelseslogg } from './ui/komponenter/Hendelseslogg'
 import type { Mål } from './ui/varsler'
-import { delnokkel, luksusdel } from './ui/deler'
+import { delnokkel, investeringsdel, luksusdel } from './ui/deler'
+import { rivalvalg } from './ui/rivalvalg'
+import { apneSeksjon } from './ui/komponenter/Seksjon'
 import { hentRulling, huskRulling } from './ui/rullehusk'
 import { maalOppstart, visMaaling } from './state/maaling'
 
@@ -204,6 +206,13 @@ export default function App() {
   useLayoutEffect(() => {
     if (fanenKlar) window.scrollTo({ top: hentRulling(fane, delnokkel(fane)) })
   }, [fane, fanenKlar])
+  // Pakke 99: fusjonsraden på en bedrift åpner rivalen i Selskaper, med Rivaler-seksjonen åpen.
+  const tilRival = (id: string, type: BedriftstypeId) => {
+    rivalvalg.sett({ id, type })
+    apneSeksjon('selskaper-rivaler')
+    investeringsdel.sett('selskaper')
+    velg('investeringer')
+  }
   const gåTil = (m: Mål) => {
     if (m === 'hendelser') return settLoggÅpen(true)
     if (m === 'klubb' || m === 'samling') {
@@ -241,7 +250,7 @@ export default function App() {
           if (ny && faneAapen(s, ny.id)) velg(ny.id)
         }}
       >
-        {fane === 'bedrifter' && <Bedrifter s={s} />}
+        {fane === 'bedrifter' && <Bedrifter s={s} tilRival={tilRival} />}
         {fane === 'investeringer' && <Skjerm del={SKJERMER.investeringer} p={{ s }} />}
         {fane === 'eiendom' && <Skjerm del={SKJERMER.eiendom} p={{ s }} />}
         {fane === 'luksus' && <Skjerm del={SKJERMER.luksus} p={{ s }} />}
