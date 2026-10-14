@@ -25,7 +25,7 @@ import {
 } from '../jord'
 import { leggTilHendelse } from '../bank'
 import { flyt } from '../portefolje'
-import type { Gardsbygg, Gardsdyr, Gardsmaskin, JordId, Spilltilstand } from '../types'
+import type { Gardsbygg, Gardsdyr, Gardsmaskin, JordId, Lagring, Spilltilstand } from '../types'
 import { feil, type Utfall } from './felles'
 
 /**
@@ -80,7 +80,7 @@ export function kjopMaskin(s: Spilltilstand, id: JordId, m: Gardsmaskin): Utfall
 /**
  * Bygger på gården (Pakke 93): drenering, frostdekke, drivhus, silo eller låve. Teller i
  * gårdens verdi til det det kostet. Ukas avling så langt bokføres først, siden været og
- * drivhuset endrer den. En silo slår på lagringen av kornet.
+ * drivhuset endrer den. En silo slår på lagringen: fra Pakke 105 «lagre billig, selg dyrt».
  */
 export function kjopGardsbygg(s: Spilltilstand, id: JordId, b: Gardsbygg): Utfall {
   const j = s.jord[id]
@@ -99,21 +99,26 @@ export function kjopGardsbygg(s: Spilltilstand, id: JordId, b: Gardsbygg): Utfal
   nj.kostpris += pris
   nj.investert = (nj.investert ?? 0) + pris
   nj.bygg = { ...(nj.bygg ?? {}), [b]: true }
-  if (b === 'silo') nj.lagre = true
+  if (b === 'silo') nj.lagring = 'smart'
   flyt(n, 'eiendom', pris)
   bokforGard(nj, ukeFor(dagnummer(n.sek)), 'bygd', pris)
   return { ok: true, tilstand: n }
 }
 
-/** Selger alt kornet i silo og låve til denne ukas pris. Det er avling, som høsten mandag. */
+/**
+ * Selger alt på lager — kornet, og (Pakke 105) grønnsakene og frukten i låven — til denne
+ * ukas priser. Det er avling, som høsten mandag.
+ */
 export function selgKorn(s: Spilltilstand, id: JordId): Utfall {
-  if (!s.jord[id]?.lager) return feil('Det er ikke noe korn å selge.')
+  const j = s.jord[id]
+  if (!j?.lager && !j?.lagerAnnet?.gronnsaker && !j?.lagerAnnet?.frukt) return feil('Det er ikke noe på lager å selge.')
   const n = structuredClone(s)
   const verdi = lagerverdi(n, id)
   n.kontanter += verdi
   n.totaltHost += verdi
   n.totaltLeie += verdi
   n.jord[id]!.lager = 0
+  delete n.jord[id]!.lagerAnnet
   bokforGard(n.jord[id]!, ukeFor(dagnummer(n.sek)), 'korn', verdi)
   return { ok: true, tilstand: n }
 }
@@ -144,10 +149,11 @@ export function kjopDyr(s: Spilltilstand, id: JordId, d: Gardsdyr): Utfall {
   return { ok: true, tilstand: n }
 }
 
-/** Slår av eller på at kornet går i silo mandag. */
-export function settLagring(s: Spilltilstand, id: JordId, lagre: boolean): Utfall {
+/** Velger hva lageret gjør mandag (Pakke 105): selger avlingen, lagrer den, eller lagrer billig og selger dyrt. */
+export function settLagring(s: Spilltilstand, id: JordId, valg: Lagring): Utfall {
   if (!s.jord[id]?.bygg?.silo) return feil('Gården har ingen silo.')
+  if (valg !== 'selg' && valg !== 'lagre' && valg !== 'smart') return feil('Ukjent valg.')
   const n = structuredClone(s)
-  n.jord[id]!.lagre = lagre
+  n.jord[id]!.lagring = valg
   return { ok: true, tilstand: n }
 }

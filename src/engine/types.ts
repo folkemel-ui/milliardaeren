@@ -773,12 +773,21 @@ export interface Jordstykke {
   opptjent?: number
   /** Kornets del av `opptjent` (Pakke 93), så det kan gå i silo. */
   opptjentKorn?: number
+  /** Grønnsakenes og fruktens del av `opptjent` (Pakke 105), så det kan gå i låven. */
+  opptjentAnnet?: Partial<Record<'gronnsaker' | 'frukt', number>>
   /** Drenering, frostdekke, drivhus, silo og låve (Pakke 93). */
   bygg?: Partial<Record<Gardsbygg, boolean>>
   /** Korn i silo og låve, målt i kroner til pris 1 (Pakke 93). */
   lager?: number
-  /** Kornet går i silo mandag i stedet for å selges. */
+  /** Kornet går i silo mandag i stedet for å selges. Fra før Pakke 105; nå leses `lagring` først. */
   lagre?: boolean
+  /**
+   * Hva lageret gjør mandag (Pakke 105): selger ukas avling, lagrer den, eller lagrer når
+   * prisen er lav og selger alt når den er høy. Mangler den, er `lagre` «smart» og ellers «selg».
+   */
+  lagring?: Lagring
+  /** Grønnsaker og frukt i låven (Pakke 105), målt i kroner til pris 1 som kornet. */
+  lagerAnnet?: Partial<Record<'gronnsaker' | 'frukt', number>>
   /** Dyrene i fjøset (Pakke 94), antall per slag. */
   dyr?: Partial<Record<Gardsdyr, number>>
   /** Fra når dyrenes utbytte i dag regnes med antallet nå (kjøpet av det siste dyret). */
@@ -792,11 +801,14 @@ export interface Jordstykke {
 
 export type Gardsdyr = 'ku' | 'hone' | 'sau' | 'gris'
 
+/** Lagerets valg mandag (Pakke 105). */
+export type Lagring = 'selg' | 'lagre' | 'smart'
+
 /** Det gården har gitt og kostet, per slag (Pakke 94). */
 export interface Gardstall {
   /** Avlingen som ble solgt mandag. */
   host: number
-  /** Korn solgt fra silo og låve. */
+  /** Solgt fra silo og låve: for hånd, og (Pakke 105) mandag når prisen var god. */
   korn: number
   /** Melk, egg, ull og kjøtt. */
   dyr: number

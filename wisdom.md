@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 104, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 105, 15 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -820,6 +820,26 @@ session; delete what stops being true.
 - **The speed test's `leie` part (budget 22 ms) fails under full-suite load** — 23 ms in Packs 93 and 95,
   25 ms in Pack 103 — and passes alone. Rerun `ytelse.test.ts` alone before suspecting the change;
   `lever.mjs` has passed it every time so far.
+- **A payback line on something that pays weekly is a snittuke, not today** (Pack 105, the farm). The
+  harvest swings with the week's weather and prices, so «tilbake på T» uses `forventetUke` with and
+  without the purchase (`gardGir`): the weather averaged over two years of the game's own hash
+  (`snittvaer`, 0.981 bare, 1.303 with drainage, frost cover and sprayer — not 1) and the price
+  average 1. A store's gain is the rule *played* over 312 weeks of the real price hash
+  (`lagringsgevinst`: +13.4 % grain with a silo), not a constant — so the line follows the rule if
+  the threshold is ever changed. Both are memoised; nothing runs per second.
+- **Price an add-on on what it multiplies, not on what you own** (Pack 105). Farm machines cost a
+  share of land + everything built, so every field and machine made the next one dearer, and a
+  tractor paid back 5× slower on a full farm. Land × fields ÷ 3 makes the payback the same at any
+  size (14.9 h for the tractor on 3 and 10 fields — `pakke105.test.ts` checks the equality). A
+  store doesn't follow that rule: the silo only multiplies the grain, which is 3 of 3 fields on a
+  small farm and 5 of 10 on a full one, so it pays back in 17 h small and 33 h full.
+- **A boolean that grows a third choice: read the old field through a function** (Pack 105, the
+  silo). `lagre: boolean` became `lagring: 'selg' | 'lagre' | 'smart'`, and `lagringsvalg(j)` reads
+  `lagring ?? (lagre ? 'smart' : 'selg')` — so «move the old default to the new setting» needed no
+  migration and no save version. Grep every reader of the old field (`j.lagre` had three).
+- **A harvest test computed before Monday is ~2 % short** (Pack 105): `gardHostDeler` uses the land
+  value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
+  the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.
 - **Paying part of a bill is a new action, not a change to the old one** (Pack 103): the bots call
   `betalSkatt` and keep cash for upgrades when it fails; had it paid part, both bots would have spent
   every tick's cash on tax and the golden master and the bench would have moved. `betalDelAvSkatt` is

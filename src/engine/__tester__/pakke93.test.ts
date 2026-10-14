@@ -19,6 +19,7 @@ import {
   KORNSVINN,
   lagerverdi,
   landverdi,
+  lagringsvalg,
   PRIS_MIN,
   PRIS_SPENN,
   ukefaktor,
@@ -125,7 +126,9 @@ describe('silo og låve', () => {
     let s = medGard()
     expect(kjopGardsbygg(s, ID, 'laave').ok).toBe(false)
     s = ok(kjopGardsbygg(s, ID, 'silo'))
-    expect(s.jord[ID]!.lagre).toBe(true)
+    // Pakke 105: en ny silo lagrer billig og selger dyrt; «lagre» er det gamle valget.
+    expect(lagringsvalg(s.jord[ID])).toBe('smart')
+    s = ok(settLagring(s, ID, 'lagre'))
     expect(kornkapasitet(s, ID)).toBeCloseTo(4 * kornPerUke(s, ID), 2)
     // Tre jorder er alle korn: første mandag går alt i silo, ingenting betales.
     expect(hostMandag(s, 1)).toBeCloseTo(0, 2)
@@ -139,11 +142,11 @@ describe('silo og låve', () => {
   })
 
   it('kornet taper 1 % i uka, teller i formuen til ukas pris og selges som avling', () => {
-    let s = ok(kjopGardsbygg(medGard(), ID, 'silo'))
+    let s = ok(settLagring(ok(kjopGardsbygg(medGard(), ID, 'silo')), ID, 'lagre'))
     hostMandag(s, 1)
     const lager = s.jord[ID]!.lager!
     expect(jordverdi(s)).toBeGreaterThan(landverdi(s, ID) + s.jord[ID]!.investert!)
-    s = ok(settLagring(s, ID, false))
+    s = ok(settLagring(s, ID, 'selg'))
     hostMandag(s, 2)
     expect(s.jord[ID]!.lager).toBeCloseTo(lager * (1 - KORNSVINN), 4)
     const verdi = lagerverdi(s, ID)
@@ -157,7 +160,7 @@ describe('silo og låve', () => {
   })
 
   it('uten lagring selges kornet mandag som før', () => {
-    const s = ok(settLagring(ok(kjopGardsbygg(medGard(), ID, 'silo')), ID, false))
+    const s = ok(settLagring(ok(kjopGardsbygg(medGard(), ID, 'silo')), ID, 'selg'))
     expect(hostMandag(s, 1)).toBeGreaterThan(0)
     expect(s.jord[ID]!.lager ?? 0).toBe(0)
   })

@@ -11,9 +11,13 @@ import {
   GARDSBYGGLISTE,
   GRUPPELISTE,
   GRUPPENAVN,
-  kornkapasitet,
-  kornPerUke,
+  gardGir,
+  gruppePerUke,
+  lagerAv,
+  lagerkapasitet,
   lagerverdi,
+  lagringsvalg,
+  SELG_DYRT,
   ukeFor,
   GARDSTRINN,
   gardstrinn,
@@ -51,6 +55,9 @@ import { kortKroner, perSek, tall } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from './BedriftIkon'
 import { trykkApner } from '../detaljvisning'
 import { Seksjon } from './Seksjon'
+import { gardTekst } from '../inntjening'
+import type { Avlingsgruppe } from '../../engine/jord'
+import type { Lagring } from '../../engine/types'
 
 /** Gårder og skoger — filtrert på by når en by er valgt på kartet. */
 export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
@@ -216,6 +223,7 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
           </li>
         )}
       </ul>
+      {pris !== null && <p className="dempet liten">Neste jord: {gardTekst(pris, gardGir(s, id, { jord: true }))}</p>}
       {j.bygg?.silo && <Kornlager s={s} id={id} />}
       {MASKINLISTE.map((m) => {
         const eier = !!j.maskiner?.[m]
@@ -226,6 +234,12 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
               <strong>{MASKINER[m].navn}</strong>
               <br />
               <span className="dempet">{MASKINER[m].tekst}</span>
+              {!eier && (
+                <>
+                  <br />
+                  <span className="dempet">{gardTekst(mp, gardGir(s, id, { maskin: m }))}</span>
+                </>
+              )}
             </p>
             {eier ? (
               <span className="merke ok">Kjøpt</span>
@@ -248,6 +262,13 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
               <strong>{GARDSBYGG[b].navn}</strong>
               <br />
               <span className="dempet">{GARDSBYGG[b].tekst}</span>
+              {/* Fjøset gir ingenting selv; dyrene gjør det. */}
+              {!eier && !sperre && b !== 'fjos' && (
+                <>
+                  <br />
+                  <span className="dempet">{gardTekst(bp, gardGir(s, id, { bygg: b }))}</span>
+                </>
+              )}
             </p>
             {eier ? (
               <span className="merke ok">Bygd</span>
@@ -361,7 +382,7 @@ export function Gardsregnskap({ s, id }: { s: Spilltilstand; id: JordId }) {
             <dd>{kortKroner(sum.host)}</dd>
           </div>
           <div>
-            <dt>Korn fra silo</dt>
+            <dt>Solgt fra lager</dt>
             <dd>{kortKroner(sum.korn)}</dd>
           </div>
           <div>
@@ -382,38 +403,69 @@ export function Gardsregnskap({ s, id }: { s: Spilltilstand; id: JordId }) {
   )
 }
 
+/** Lagerets tre valg (Pakke 105), og hva hvert gjør mandag. */
+const LAGRINGSVALG: { id: Lagring; navn: string; tekst: string }[] = [
+  { id: 'selg', navn: 'Selg', tekst: 'Ukas avling selges mandag til ukas pris. Det som ligger på lager, selger du selv.' },
+  { id: 'lagre', navn: 'Lagre', tekst: 'Ukas avling går på lager mandag, så lenge det er plass. Du selger selv.' },
+  {
+    id: 'smart',
+    navn: 'Selg dyrt',
+    tekst: `Lagre billig, selg dyrt: avlingen går på lager når ukas pris er under ×${tall(SELG_DYRT, 2)}, og alt selges mandag den er ×${tall(SELG_DYRT, 2)} eller mer.`,
+  },
+]
+
 /**
- * Kornlageret (Pakke 93): hvor mye som ligger i silo og låve, hva det er verdt til denne
- * ukas pris, om ukas korn går i lager mandag, og salget.
+ * Lageret (Pakke 93): hvor mye som ligger i silo og låve, hva det er verdt til denne ukas
+ * priser, hva lageret gjør mandag, og salget. Pakke 105: låven tar grønnsakene og frukten
+ * også, én rad per slag, og lageret kan lagre billig og selge dyrt.
  */
 function Kornlager({ s, id }: { s: Spilltilstand; id: JordId }) {
   const j = s.jord[id]!
-  const lager = j.lager ?? 0
-  const kap = kornkapasitet(s, id)
-  const uker = kornPerUke(s, id) > 0 ? lager / kornPerUke(s, id) : 0
+  const valg = lagringsvalg(j)
   const verdi = lagerverdi(s, id)
+  const grupper = GRUPPELISTE.filter((g) => lagerkapasitet(s, id, g) > 0)
   return (
     <div className="kornlager">
       <div className="maal-topp">
-        <strong className="liten">Kornlager</strong>
+        <strong className="liten">{j.bygg?.laave ? 'Silo og låve' : 'Silo'}</strong>
+        <span className="dempet liten">{kortKroner(verdi)}</span>
+      </div>
+      {grupper.map((g) => (
+        <Lagerrad key={g} s={s} id={id} g={g} />
+      ))}
+      <div className="segment" role="radiogroup" aria-label="Lageret mandag">
+        {LAGRINGSVALG.map((v) => (
+          <button key={v.id} role="radio" aria-checked={valg === v.id} className={valg === v.id ? 'aktiv' : ''} onClick={() => utfor(settLagring(s, id, v.id))}>
+            {v.navn}
+          </button>
+        ))}
+      </div>
+      <p className="dempet liten">
+        {LAGRINGSVALG.find((v) => v.id === valg)!.tekst} Det som ligger på lager, taper 1&nbsp;% i uka.
+      </p>
+      <button className="knapp knapp-gull bred" disabled={verdi <= 0} onClick={() => utfor(selgKorn(s, id))}>
+        Selg lageret · {kortKroner(verdi)}
+      </button>
+    </div>
+  )
+}
+
+/** Én rad i lageret: «Korn · 2,1 av 4 uker» og en strek for hvor fullt det er. */
+function Lagerrad({ s, id, g }: { s: Spilltilstand; id: JordId; g: Avlingsgruppe }) {
+  const per = gruppePerUke(s, id, g)
+  const l = lagerAv(s.jord[id], g)
+  const kap = lagerkapasitet(s, id, g)
+  return (
+    <div className="lagerrad">
+      <div className="maal-topp">
+        <span className="liten">{GRUPPENAVN[g]}</span>
         <span className="dempet liten">
-          {tall(uker, 1)} av {tall(kap / Math.max(1, kornPerUke(s, id)))} uker · {kortKroner(verdi)}
+          {tall(per > 0 ? l / per : 0, 1)} av {tall(per > 0 ? kap / per : 0)} uker
         </span>
       </div>
       <div className="milepael-spor">
-        <div className="milepael-fyll" style={{ width: `${kap > 0 ? Math.min(100, (lager / kap) * 100) : 0}%` }} />
+        <div className="milepael-fyll" style={{ width: `${kap > 0 ? Math.min(100, (l / kap) * 100) : 0}%` }} />
       </div>
-      <div className="eiendom-knapper">
-        <button className="knapp knapp-liten" aria-pressed={!!j.lagre} onClick={() => utfor(settLagring(s, id, !j.lagre))}>
-          {j.lagre ? 'Lagrer kornet' : 'Selger kornet'}
-        </button>
-        <button className="knapp knapp-gull knapp-liten" disabled={lager <= 0} onClick={() => utfor(selgKorn(s, id))}>
-          Selg · {kortKroner(verdi)}
-        </button>
-      </div>
-      <p className="dempet liten">
-        {j.lagre ? 'Ukas korn går i lager mandag, så lenge det er plass.' : 'Ukas korn selges mandag til ukas pris.'} Kornet taper 1 % i uka.
-      </p>
     </div>
   )
 }

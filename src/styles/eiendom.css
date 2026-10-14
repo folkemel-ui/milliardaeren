@@ -372,6 +372,13 @@
   border-top: 1px solid var(--kant);
 }
 
+/* Pakke 105: én rad per slag på lager — korn, og grønnsaker og frukt i låven. */
+.lagerrad {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* ── Dyrene og regnskapet (Pakke 94) ─────────────────────────────────────── */
 
 .gardsregnskap {

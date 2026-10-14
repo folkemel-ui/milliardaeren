@@ -45,18 +45,18 @@ function medGard(kontanter = 1e12): Spilltilstand {
 const ID = 'gard-lista' as const
 
 describe('jordene', () => {
-  it('tre fra start, opptil ti; den fjerde koster halve jordverdien, hver neste ×1,5', () => {
+  it('tre fra start, opptil ti; den fjerde koster halve jordverdien, hver neste ×1,25 (Pakke 105)', () => {
     let s = medGard()
     expect(jorder(s.jord[ID])).toBe(START_JORDER)
     const land = landverdi(s, ID)
     expect(nesteJordpris(s, ID)).toBeCloseTo(land * 0.5, 2)
     s = ok(kjopJorde(s, ID))
-    expect(nesteJordpris(s, ID)).toBeCloseTo(land * 0.75, 2)
+    expect(nesteJordpris(s, ID)).toBeCloseTo(land * 0.625, 2)
     while (jorder(s.jord[ID]) < MAKS_JORDER) s = ok(kjopJorde(s, ID))
     expect(nesteJordpris(s, ID)).toBeNull()
     expect(kjopJorde(s, ID).ok).toBe(false)
-    // Alle sju nye jordene: halve jordverdien × (1 + 1,5 + … + 1,5⁶) ≈ 16 ganger jorda.
-    expect(s.jord[ID]!.investert! / land).toBeCloseTo(16.1, 0)
+    // Alle sju nye jordene: halve jordverdien × (1 + 1,25 + … + 1,25⁶) ≈ 7,5 ganger jorda (16,1 før Pakke 105).
+    expect(s.jord[ID]!.investert! / land).toBeCloseTo(7.54, 1)
   })
 
   it('en jord teller i gårdens verdi til det den kostet: kjøpet flytter bare penger', () => {

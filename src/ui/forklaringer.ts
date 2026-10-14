@@ -13,7 +13,7 @@ import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
-import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_UKER, MAKS_JORDER, PRIS_MIN, PRIS_SPENN, SILO_UKER, START_JORDER, TOMMER_DAGER } from '../engine/jord'
+import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_ANNET_UKER, LAAVE_UKER, MAKS_JORDER, MASKINER, PRIS_MIN, PRIS_SPENN, SELG_DYRT, SILO_UKER, START_JORDER, TOMMER_DAGER } from '../engine/jord'
 import { DYR_PER_UKE, FJOSPLASSER, SLAKT_DAGER, TILSKUDD_DYR, TILSKUDD_JORD } from '../engine/dyr'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
@@ -157,13 +157,15 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Jord stiger sakte i verdi. En gård gir avling hver mandag morgen, stor eller liten etter ukas vær. ' +
       `En skog gir ingenting mens den vokser, men tømmeret blir verdt mer for hver dag — raskest de første ${TOMMER_DAGER} dagene. ` +
       'Du bestemmer selv når du hogger; da får du betalt, og ny skog plantes. ' +
-      `En gård starter med ${START_JORDER} jorder og kan dyrke opptil ${MAKS_JORDER}: den fjerde koster halve jordverdien, hver neste ${tall(JORDPRIS_VEKST, 1)} ganger så mye, og hver jord gir like mye avling. ` +
-      'En traktor gir +10 % avling, en skurtresker +15 %, og en sprøyte gjør at en dårlig uke faller 30 % mindre — hver kjøpt én gang, priset etter gårdens verdi. ' +
+      `En gård starter med ${START_JORDER} jorder og kan dyrke opptil ${MAKS_JORDER}: den fjerde koster halve jordverdien, hver neste ${tall(JORDPRIS_VEKST, 2)} ganger så mye, og hver jord gir like mye avling. ` +
+      `En traktor gir +${pst(MASKINER.traktor.host - 1)} avling, en skurtresker +${pst(MASKINER.tresker.host - 1)}, og en sprøyte +${pst(MASKINER.sproyte.host - 1)}, og med den faller en dårlig uke ${pst(MASKINER.sproyte.vaer)} mindre — hver kjøpt én gang. ` +
+      'Maskinene og byggene koster en andel av jordverdien ganger jordene delt på tre, så de tjener seg inn like fort på en liten gård som på et gods; drivhuset følger bare jorda. ' +
       `Med ${GARDSTRINN[1].fra} jorder blir småbruket en gård, med ${GARDSTRINN[2].fra} en storgård og med ${GARDSTRINN[3].fra} et gods: +${GARDSTRINN[1].status}, +${GARDSTRINN[2].status} og +${GARDSTRINN[3].status} status. ` +
       'Jordene, maskinene og byggene teller i gårdens verdi til det de kostet, og følger med når du selger. ' +
       `Korn, grønnsaker og frukt har hver sin pris, ny hver mandag, fra ×${tall(PRIS_MIN, 2)} til ×${tall(PRIS_MIN + PRIS_SPENN, 2)} — i snitt 1; avlingen betales til prisen den uka den vokste. ` +
       'Drenering gjør at regndager teller som overskyet, og frostdekke at snødager teller som regn. Drivhuset er en ellevte jord under glass som alltid gir ×0,9 av en vanlig uke, uansett vær. ' +
-      `En silo lagrer ukas korn i stedet for å selge det mandag — ${SILO_UKER} uker, ${LAAVE_UKER} med låve — og du selger når prisen er god. Kornet taper ${tall(KORNSVINN * 100)} % i uka. ` +
+      `En silo lagrer opptil ${SILO_UKER} uker korn, ${LAAVE_UKER} med låve, og låven ${LAAVE_ANNET_UKER} uker grønnsaker og frukt. Lageret kan selge avlingen mandag, lagre den, eller lagre billig og selge dyrt: ` +
+      `da går avlingen på lager når ukas pris er under ×${tall(SELG_DYRT, 2)}, og alt selges mandag den er ×${tall(SELG_DYRT, 2)} eller mer. Det som ligger på lager, taper ${tall(KORNSVINN * 100)} % i uka, og du kan selge det selv når som helst. ` +
       `I et fjøs er det plass til ${FJOSPLASSER.join(', ').replace(/, (?=[^,]*$)/, ' og ')} dyr etter gårdens trinn. Hvert dyr gir rundt ${pst(DYR_PER_UKE)} av prisen i uka: kua og hønene hver dag, sauene ved klippingen 1. mai og 1. september, grisene ved slakt hver ${SLAKT_DAGER / 7}. uke — opptjent fra dagen du kjøpte dem. ` +
       `Ved hvert månedsskifte kommer produksjonstilskudd: ${pst(TILSKUDD_JORD, 1)} av jordverdien per jord og ${pst(TILSKUDD_DYR)} av prisen per dyr. Gårdens side viser regnskapet de siste åtte ukene.`,
   },

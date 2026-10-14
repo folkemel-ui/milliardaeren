@@ -6,8 +6,9 @@
  */
 
 import { bedriftInntektIDag } from '../engine/formler'
+import { UKE_SEK } from '../engine/jord'
 import type { Bedrift, Spilltilstand } from '../engine/types'
-import { varighet } from './format'
+import { kortKroner, varighet } from './format'
 
 /** Det bedriften tjener mer per sekund i dag med endringen. */
 export function merinntekt(s: Spilltilstand, b: Bedrift, endret: Bedrift): number {
@@ -21,4 +22,13 @@ export const fusjonGir = (s: Spilltilstand, b: Bedrift) => merinntekt(s, b, { ..
 /** «Tilbake på 2 t 10 min», som på ansettelsene — eller at kjøpet ikke tjener seg inn i dag. */
 export function tilbakeTekst(pris: number, gir: number): string {
   return gir > 0 ? `Tilbake på ${varighet(pris / gir)}` : 'Tjener seg ikke inn i dag'
+}
+
+/**
+ * Et kjøp på gården (Pakke 105): «≈ kr 2,1 mill i uka · tilbake på 14 t». Gården betaler
+ * per uke og svinger med vær og priser, så det er snittuka, ikke dagen i dag.
+ */
+export function gardTekst(pris: number, perUke: number): string {
+  if (perUke <= 0) return 'Gir ingenting mer på denne gården'
+  return `≈ ${kortKroner(perUke)} i uka · tilbake på ${varighet(pris / (perUke / UKE_SEK))}`
 }
