@@ -792,6 +792,11 @@ export interface Jordstykke {
   dyr?: Partial<Record<Gardsdyr, number>>
   /** Fra når dyrenes utbytte i dag regnes med antallet nå (kjøpet av det siste dyret). */
   dyrSek?: number
+  /**
+   * Hvor langt kassene er ført (Pakke 106): kjøpet av et dyr eller sist dagsskifte. Formuen
+   * regnes før dagsskiftet i samme sekund, så uten den manglet gårsdagens siste del da.
+   */
+  dyrBokfort?: number
   /** Opptjent av dyrene, ikke betalt ennå: melk og egg (neste dagsskifte), ull (klippingen) og kjøtt (slakten). */
   dyrKasse?: Partial<Record<'daglig' | 'ull' | 'slakt', number>>
   /** Gårdens eget regnskap (Pakke 94): de siste åtte ukene, og alt siden du kjøpte den. */

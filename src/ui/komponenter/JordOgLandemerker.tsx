@@ -1,4 +1,4 @@
-import { antallDyr, DYR, DYRLISTE, dyrPerUke, dyrpris, fjosplasser, SLAKT_DAGER } from '../../engine/dyr'
+import { antallDyr, DYR, DYRLISTE, dyrGir, dyrKasseNaa, dyrPerUke, dyrpris, fjosplasser, nesteKlipping, nesteSlakt, SLAKT_DAGER } from '../../engine/dyr'
 import { hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
 import {
@@ -32,7 +32,9 @@ import {
   MASKINLISTE,
   maskinpris,
   nesteJordpris,
+  dagerTilHogst,
   skogalder,
+  tommervekst,
   tommerverdi,
   ukensGardHost,
   vaer,
@@ -48,7 +50,7 @@ import {
   TILBAKEKJOP_PREMIE,
 } from '../../engine/landemerker'
 import { MEGLERHONORAR } from '../../engine/eiendom'
-import { DAG_SEK, dagnummer, ukedag, ukenummer } from '../../engine/kalender'
+import { DAG_SEK, dagnummer, dato, MÅNEDER, ukedag, ukenummer } from '../../engine/kalender'
 import type { By, Gardstall, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall } from '../format'
@@ -127,6 +129,7 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
             ? `Tømmer ${kortKroner(tommer)} etter ${tall(skogalder(s, id))} dager`
             : 'Kjøpes nyplantet. Tømmeret vokser fra første dag.'}
       </p>
+      {eid && t.type === 'skog' && <Skogstatus s={s} id={id} />}
       {eid ? (
         <div className={t.type === 'skog' ? 'eiendom-knapper' : 'eiendom-knapper en'}>
           {t.type === 'skog' && (
@@ -144,6 +147,22 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
         </button>
       )}
     </li>
+  )
+}
+
+/**
+ * Når skogen bør hogges (Pakke 106): hvor fort tømmeret vokser nå, og hvor mange dager til
+ * en hogst gir mest — eller «Klar for hogst». Før sto bare tømmeret og alderen der, og
+ * hjelpeteksten sa at veksten var raskest de første 36 dagene; den topper ved dag 18.
+ */
+function Skogstatus({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const igjen = dagerTilHogst(s, id)
+  return (
+    <p className="dempet liten skogstatus">
+      Vokser nå {kortKroner(tommervekst(s, id))} om dagen
+      {igjen > 0 ? ` · best å hogge om ${tall(Math.ceil(igjen))} ${Math.ceil(igjen) === 1 ? 'dag' : 'dager'}` : ' · '}
+      {igjen <= 0 && <span className="merke gull">Klar for hogst</span>}
+    </p>
   )
 }
 
@@ -295,7 +314,8 @@ const BETALING: Record<'daglig' | 'ull' | 'slakt', string> = {
 
 /**
  * Fjøset (Pakke 94): plassene etter gårdens trinn, dyrene du har, hva de gir og når,
- * og et kjøp per slag. Hvert dyr gir rundt 4 % av prisen i uka.
+ * og et kjøp per slag. Pakke 106: hvert slag gir sin andel av prisen, hver rad sier hva
+ * ett dyr til gir og når det er tjent inn, og ulla og kjøttet som venter, står over radene.
  */
 function Fjos({ s, id }: { s: Spilltilstand; id: JordId }) {
   const j = s.jord[id]!
@@ -309,6 +329,7 @@ function Fjos({ s, id }: { s: Spilltilstand; id: JordId }) {
           {n} av {plasser} plasser · {kortKroner(dyrPerUke(s, id))} i uka
         </span>
       </div>
+      <Venter s={s} id={id} />
       {DYRLISTE.map((d) => {
         const antall = j.dyr?.[d] ?? 0
         const pris = dyrpris(s, id, d)
@@ -322,6 +343,12 @@ function Fjos({ s, id }: { s: Spilltilstand; id: JordId }) {
               <span className="dempet">
                 {DYR[d].vare[0].toUpperCase() + DYR[d].vare.slice(1)} · {BETALING[DYR[d].betaling]}
               </span>
+              {n < plasser && (
+                <>
+                  <br />
+                  <span className="dempet">{gardTekst(pris, dyrGir(s, id, d))}</span>
+                </>
+              )}
             </p>
             <button className="knapp knapp-gull knapp-liten" disabled={n >= plasser || s.kontanter < pris} onClick={() => utfor(kjopDyr(s, id, d))}>
               Kjøp · {kortKroner(pris)}
@@ -331,6 +358,33 @@ function Fjos({ s, id }: { s: Spilltilstand; id: JordId }) {
       })}
       {n >= plasser && <p className="dempet liten">Fjøset er fullt. En større gård gir flere plasser: 4, 8, 12 og 20.</p>}
     </div>
+  )
+}
+
+/** «12. mai»: dagen i måneden og månedens navn. */
+const datotekst = (dag: number) => `${dato(dag).dag}. ${MÅNEDER[dato(dag).maaned]}`
+
+/**
+ * Det dyrene har tjent og som venter på betalingsdagen (Pakke 106): ulla til klippingen og
+ * kjøttet til slakten. Det teller i formuen fra dagen det vokser.
+ */
+function Venter({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]!
+  const k = dyrKasseNaa(s, id)
+  const dag = dagnummer(s.sek)
+  const linjer: string[] = []
+  if ((j.dyr?.sau ?? 0) > 0 || k.ull > 0) linjer.push(`Ull så langt ${kortKroner(k.ull)} · klippes ${datotekst(nesteKlipping(dag))}`)
+  if ((j.dyr?.gris ?? 0) > 0 || k.slakt > 0) linjer.push(`Kjøtt så langt ${kortKroner(k.slakt)} · slakt ${datotekst(nesteSlakt(dag))}`)
+  if (linjer.length === 0) return null
+  return (
+    <p className="dempet liten">
+      {linjer.map((l, i) => (
+        <span key={l}>
+          {i > 0 && <br />}
+          {l}
+        </span>
+      ))}
+    </p>
   )
 }
 

@@ -13,6 +13,7 @@
 import { DAG_SEK, dagnummer, ukedag } from './kalender'
 import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
 import { hashTekst, tilfeldig } from './rng'
+import { byfaktor } from './regioner'
 import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, Lagring, NorskBy, Overskrift, Spilltilstand } from './types'
 import { kortKroner } from './tall'
 
@@ -494,14 +495,39 @@ export function jordfaktor(s: Spilltilstand): number {
   return (1 + JORDVEKST_PER_DAG) ** dagnummer(s.sek)
 }
 
+/**
+ * Jordas verdi nå: prisen, 0,3 % om dagen, og (Pakke 106) regionens prisfaktor — Hedmarken
+ * følger Oslo, Lista Stavanger, Trysil Fjellet og Namdalen Trøndelag, som husene der gjør.
+ * Faktoren svinger rundt 1 med omtrent ±6 % og trekkes tilbake i løpet av et par timer.
+ * Avlingen, dyrene, jordene og maskinene prises etter den, så de følger med.
+ */
 export function landverdi(s: Spilltilstand, id: JordId): number {
-  return JORD[id].pris * jordfaktor(s)
+  return JORD[id].pris * jordfaktor(s) * byfaktor(s, JORD[id].by)
 }
 
 /** Tømmeret som andel av jordverdien, etter hvor mange dager skogen har vokst. */
 export function tommerfaktor(dager: number): number {
   const d = Math.max(0, dager)
   return TOMMER_MAKS * (d / (d + TOMMER_DAGER)) ** 2
+}
+
+/**
+ * Tømmeret vokser raskest ved dag 18 (halve TOMMER_DAGER), men det som gir mest per dag
+ * over en hel omgang — hogst og ny skog — er å hogge ved dag 36: tømmer(d)/d er størst der
+ * (Pakke 106). Fra dag 28 til 46 er det under 2 % fra det beste, så det haster ikke.
+ */
+export const HOGST_BEST_DAG = TOMMER_DAGER
+
+/** Hvor fort tømmeret i en skog vokser nå, i kroner per spilldag. */
+export function tommervekst(s: Spilltilstand, id: JordId): number {
+  if (JORD[id].type !== 'skog' || !s.jord?.[id]) return 0
+  const d = Math.max(0, skogalder(s, id))
+  return (landverdi(s, id) * TOMMER_MAKS * 2 * d * TOMMER_DAGER) / (d + TOMMER_DAGER) ** 3
+}
+
+/** Hvor mange dager til skogen er best å hogge; 0 når den er klar. */
+export function dagerTilHogst(s: Spilltilstand, id: JordId): number {
+  return Math.max(0, HOGST_BEST_DAG - skogalder(s, id))
 }
 
 export function skogalder(s: Spilltilstand, id: JordId): number {

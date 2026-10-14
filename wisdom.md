@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 105, 15 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 106, 15 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -837,6 +837,20 @@ session; delete what stops being true.
   silo). `lagre: boolean` became `lagring: 'selg' | 'lagre' | 'smart'`, and `lagringsvalg(j)` reads
   `lagring ?? (lagre ? 'smart' : 'selg')` — so «move the old default to the new setting» needed no
   migration and no save version. Grep every reader of the old field (`j.lagre` had three).
+- **Net worth is computed before the day change in the same second** (`sekund`: formue, then
+  `gisUtAvis`). Anything counted «so far today» from `dagnummer(s.sek) * DAG_SEK` therefore drops
+  yesterday's last part at that one second — and the net-worth log can land on it. Pack 106 counts the
+  animals' unpaid wool, meat, milk and eggs in net worth, so the tills now carry `dyrBokfort` (booked
+  up to: a purchase or the last day change), and «not yet booked» starts there, not at the day's start.
+  Old saves fall back to the old rule until their first day change.
+- **A value change on purpose moves the old-save test, which must say so** (Pack 106). Land following
+  its region moved every old test save's net worth by the same 57 mill. `gamle-lagringer.test.ts` now
+  adds `pakke106(s)` (land × (region factor − 1), with the timber, plus the animals' unpaid yield) to
+  the old engine's figure and still checks to 2 kr — don't loosen the tolerance instead.
+- **«Best to fell» is the best average, not the fastest growth** (Pack 106). Timber grows fastest at
+  day 18 (the peak of f′), but a whole rotation gives most per day where f(d)/d peaks: day 36, and
+  28–46 is within 2 %. A test comparing growth on two days must stand well apart from the peak: land
+  rises 0.3 % a day, more than f′ changes between day 15 and 21.
 - **A harvest test computed before Monday is ~2 % short** (Pack 105): `gardHostDeler` uses the land
   value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
   the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.

@@ -17,6 +17,24 @@ import { simuler } from '../../engine/simulering'
 import { botSpill } from '../../engine/__tester__/bot'
 import { DAG_SEK, dagnummer } from '../../engine/kalender'
 import type { BedriftstypeId, Spilltilstand } from '../../engine/types'
+import { JORD, JORDLISTE, jordfaktor, skogalder, tommerfaktor } from '../../engine/jord'
+import { byfaktor } from '../../engine/regioner'
+import { dyrOpptjent } from '../../engine/dyr'
+
+/**
+ * Det Pakke 106 flyttet med vilje: jorda følger regionens prisfaktor (tømmeret med den), og
+ * det dyrene har opptjent, teller i formuen. Den gamle motoren regnet uten begge.
+ */
+function pakke106(s: Spilltilstand): number {
+  let sum = dyrOpptjent(s)
+  for (const id of JORDLISTE) {
+    if (!s.jord?.[id]) continue
+    const uten = JORD[id].pris * jordfaktor(s)
+    const tommer = JORD[id].type === 'skog' ? tommerfaktor(skogalder(s, id)) : 0
+    sum += uten * (byfaktor(s, JORD[id].by) - 1) * (1 + tommer)
+  }
+  return sum
+}
 
 const MAPPE = join(__dirname, 'gamle-lagringer')
 
@@ -80,10 +98,11 @@ describe('lagringer fra alle gamle versjoner', () => {
 
       it('har den samme formuen som den gamle motoren regnet ut', () => {
         // Den eneste migreringen som flytter verdi med vilje er 18 → 19, som tok
-        // lederens pris ut av bedriftens verdi. Alt annet skal stemme på kronen.
+        // lederens pris ut av bedriftens verdi. Pakke 106 flyttet jorda og dyrene
+        // (pakke106 over). Alt annet skal stemme på kronen.
         const g = l.tilstand as { bedrifter: { type: BedriftstypeId; leder?: boolean }[] }
         const ledere = l.versjon < 19 ? g.bedrifter.filter((b) => b.leder).reduce((sum, b) => sum + lederpris(b.type), 0) : 0
-        expect(Math.abs(nettoformue(s) - (l.formue - ledere))).toBeLessThan(2)
+        expect(Math.abs(nettoformue(s) - (l.formue - ledere + pakke106(s)))).toBeLessThan(2)
       })
 
       it('kan spilles videre en måned, også med boten', () => {

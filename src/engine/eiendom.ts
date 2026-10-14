@@ -17,6 +17,7 @@ import type {
 } from './types'
 import { klubbstatus } from './klubb'
 import { jordstatus, jordverdi } from './jord'
+import { dyrOpptjent } from './dyr'
 import { landemerkeleiePerSek, landemerkestatus, landemerkeverdi } from './landemerker'
 import { kunststatus } from './kunst'
 import { premiumstatus } from './ansatte'
@@ -170,9 +171,12 @@ export function oppussingspris(s: Spilltilstand, id: EiendomId): number | null {
   return antall * EIENDOMSTYPER[id].pris * eiendomskurs(s, EIENDOMSTYPER[id].by) * neste.kostnad
 }
 
-/** Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker. */
+/**
+ * Alt i eiendomsfanen: boliger og næringsbygg, jord og skog, og landemerker — og (Pakke 106)
+ * det dyrene har opptjent, lagt til sist så summene uten dyr er nøyaktig som før.
+ */
 export function eiendomsverdi(s: Spilltilstand): number {
-  if (!harEiendom(s)) return jordverdi(s) + landemerkeverdi(s)
+  if (!harEiendom(s)) return jordverdi(s) + landemerkeverdi(s) + dyrOpptjent(s)
   // Regnes hvert sekund: byens kurs regnes én gang per by, og bare for det du eier.
   BYKURS.fill(NaN)
   let sum = 0
@@ -187,7 +191,7 @@ export function eiendomsverdi(s: Spilltilstand): number {
     // Samme regnestykke som eiendomspris.
     sum += antall * (t.pris * kurs * STANDARDER[standard(s, id)].verdi)
   }
-  return sum + jordverdi(s) + landemerkeverdi(s)
+  return sum + jordverdi(s) + landemerkeverdi(s) + dyrOpptjent(s)
 }
 
 /**

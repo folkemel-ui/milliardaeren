@@ -6,7 +6,7 @@ import { kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, selgJord, type Utfall } fr
 import { nettoformue } from '../formler'
 import { DAG_SEK, dagFra } from '../kalender'
 import { jordVedDagsskifte, landverdi, REGNSKAP_UKER, ukeFor } from '../jord'
-import { DYR, DYR_PER_UKE, dyrpris, dyrVedDagsskifte, FJOSPLASSER, SLAKT_DAGER, tilskudd, TILSKUDD_DYR, TILSKUDD_JORD } from '../dyr'
+import { DYR, dyrpris, dyrVedDagsskifte, FJOSPLASSER, SLAKT_DAGER, tilskudd, TILSKUDD_DYR, TILSKUDD_JORD } from '../dyr'
 import type { Spilltilstand } from '../types'
 
 function ok(u: Utfall): Spilltilstand {
@@ -61,7 +61,7 @@ describe('fjøset og dyrene', () => {
     const s = ok(kjopDyr(medFjos(), ID, 'ku'))
     const pris = dyrpris(s, ID, 'ku')
     const fikk = dagsskifte(s, 8)
-    expect(fikk / (pris * DYR_PER_UKE / 7)).toBeCloseTo(1, 2)
+    expect(fikk / (pris * DYR.ku.uke / 7)).toBeCloseTo(1, 2)
     expect(s.jord[ID]!.regnskap!.at(-1)!.dyr).toBeCloseTo(fikk, 2)
   })
 
@@ -71,7 +71,7 @@ describe('fjøset og dyrene', () => {
     // 1. mai er også et månedsskifte: tilskuddet kommer i tillegg.
     const fikk = dagsskifte(s, mai) - tilskudd(s, ID)
     // Én dag ull — ikke et halvt år.
-    expect(fikk / (dyrpris(s, ID, 'sau') * DYR_PER_UKE / 7)).toBeCloseTo(1, 2)
+    expect(fikk / (dyrpris(s, ID, 'sau') * DYR.sau.uke / 7)).toBeCloseTo(1, 2)
   })
 
   it('ulla og kjøttet samles opp og betales på klippe- og slaktedagen', () => {
@@ -86,7 +86,7 @@ describe('fjøset og dyrene', () => {
     let forventet = 0
     for (let d = 2; d <= SLAKT_DAGER; d++) {
       prove.sek = d * DAG_SEK
-      forventet += (dyrpris(prove, ID, 'gris') * DYR_PER_UKE) / 7
+      forventet += (dyrpris(prove, ID, 'gris') * DYR.gris.uke) / 7
     }
     expect(slakt / forventet).toBeCloseTo(1, 4)
     expect(s.jord[ID]!.dyrKasse!.ull).toBeGreaterThan(0)
@@ -121,7 +121,7 @@ describe('tilskuddet', () => {
     s.jord[ID]!.dyrSek = s.sek
     const fikk = dagsskifte(s, feb)
     // Melken regnes med jordverdien den dagen dagsskiftet skjer.
-    const melk = (dyrpris(s, ID, 'ku') * DYR_PER_UKE) / 7
+    const melk = (dyrpris(s, ID, 'ku') * DYR.ku.uke) / 7
     expect(fikk - melk).toBeCloseTo(tilskudd(s, ID), -2)
     expect(s.jord[ID]!.regnskap!.at(-1)!.tilskudd).toBeGreaterThan(0)
   })
