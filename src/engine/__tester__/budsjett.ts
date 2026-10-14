@@ -7,14 +7,16 @@
  * travel maskin.
  */
 export const BUDSJETT: Record<string, number> = {
-  formue: 25,
+  // 25 → 35 etter Pakke 104: nettoformuen går gjennom alle papirene, og det ble åtte flere (20 alene, 30 under last).
+  formue: 35,
   // 22 → 30 etter Pakke 103: leia målte 22 ms alene og 23–25 ms under en hel kjøring (Pakkene 93, 95
   // og 103). Den har vokst med det som betales som leie: de sene eiendommene (Pakke 76), utleien av
   // yachtene og jetene (Pakke 89) og gårdene (Pakkene 92–94).
   leie: 30,
   prestasjoner: 14,
   inntekt: 55,
-  marked: 45,
+  // 45 → 55 etter Pakke 104: åtte nye aksjer gjorde markedet 27 → 39–42 ms.
+  marked: 55,
   bank: 20,
   'dagsskifte og kø': 20,
   oppussing: 10,
@@ -29,4 +31,6 @@ export const BUDSJETT: Record<string, number> = {
  * Målt ~3,7 ms (≈ 18 ms på en treg telefon, ett bilde); vokser den, er det
  * lagringen som har vokst.
  */
-export const LEVENDE_SEKUND_MS = 5
+// 5 → 6,5 etter Pakke 104: de åtte nye aksjene (240 punkter historikk hver) gjorde kopien 4,87 → 5,50 ms
+// og sekundet 4,3 → 5,6–5,8 ms. Midlertidig: neste steg er en lettere kopi (se «Next up» i Ideer.md).
+export const LEVENDE_SEKUND_MS = 6.5
