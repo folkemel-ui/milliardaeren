@@ -8,6 +8,21 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '3.0.0',
+    navn: '3.0',
+    dato: 'Oktober 2026',
+    ingress: 'Et racingteam, en gård du bygger, auksjoner og en samling som varer — og et spill som viser deg tallene.',
+    punkter: [
+      'Samlingen varer helt til slutt: fem nye ting fra hyperbil til ubåt, garasjen, havna og hangaren vokser i trinn, og alt får plass på én skjerm.',
+      'Auksjonshuset byr fram én unik ting omtrent hver time, og yachtene og jetene kan leies ut i sesongen.',
+      'Et eget racingteam: bygg bilen, ansett førerne, velg strategi og kjør om to mesterskap.',
+      'Gården vokser fra småbruk til gods: jorder, maskiner, drenering, drivhus, silo, dyr og et eget regnskap — og prisene på kornet svinger hver uke.',
+      'Hvert kjøp sier hvor fort det tjener seg inn, «Milepæl» kjøper helt dit, og fusjonene står på bedriftens side. Forbedringene og banken koster mindre.',
+      'Velkomsten teller hver kamp, hvert løp og hver tapte auksjon, og målet på Profil går videre etter milliarden.',
+      'Avisa: analytikerne betyr noe, rentemøtet står alltid på forsiden, og den skriver om den største posten din. Lagringen er tryggere, og spillet starter raskere — også uten nett.',
+    ],
+  },
+  {
     versjon: '2.10.0',
     navn: '2.10',
     dato: 'Oktober 2026',
