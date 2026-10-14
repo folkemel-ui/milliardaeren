@@ -84,7 +84,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       'En aksje er en bit av et børsnotert selskap. Kursen går opp og ned, og selskapet betaler utbytte hver børsdag — de trygge betaler mest. ' +
       `Hver handel koster ${pst(KURTASJE, 1)} i kurtasje, og store handler flytter kursen. Børsen er stengt i helgene. ` +
-      'Én gang i måneden legger hvert selskap frem tall; analytikernes estimat kommer noen dager før. ' +
+      'Én gang i måneden legger hvert selskap frem tall; analytikernes estimat kommer noen dager før. Det er et hint, ikke et løfte: et sterkt estimat slår til litt oftere enn det skuffer, et svakt omvendt. ' +
       `Seks selskaper hører til en bransje du kan eie: ukas trend flytter kursen, og en nyhet om selskapet gir bedriften din i bransjen ${pst(NYHET_VIRKNING)} mer eller mindre i ${NYHET_DAGER} dager.`,
   },
   krypto: {

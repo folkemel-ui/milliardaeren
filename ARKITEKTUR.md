@@ -52,7 +52,8 @@ Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når
 | Vær på gårdene (`jord.ts`) | ingen egen nøkkel fra Pakke 54: avlingen regnes fra ukas sju dager med norsk vær |
 | Rivaler kjøper landemerker | `<landemerke>:<rival>:<dag>` |
 | Rivalens pris i fusjoner | `<rival>:<bransje>:<dag>` |
-| Kvartalsrapporter | `estimat:<id>:<dag>`, `resultat:<id>:<dag>` |
+| Kvartalsrapporter | `estimat:<id>:<dag>`, `resultat:<id>:<dag>` — resultatet trekkes ±0,4 rundt estimatets skjevhet (−0,06 / 0 / +0,06, Pakke 101), uten klemme |
+| Avistekstene (`hashvalg` i `rng.ts`, Pakke 82 og 101) | selskapsnyheter `<sek>:<id>`, rapporter `rapport:<id>:<dag>`, estimater `estimat:<id>:<dag>`, vær `vaer:<dag>`, utstillinger `utstilling:<kunstner>:<dag>`, andres startups `bors:<navn>` og `oppkjop:<navn>` — teksten flytter aldri terningen |
 | Regioner | `marked.regioner.frø` + region + tikk |
 | Papirene fra versjon 17 | `Hashkilde` på `marked.nyeFrø` + id + tikk |
 | Klubb til salgs | `<navn>:<dag>` |

@@ -11,6 +11,14 @@ export function tilfeldig(fro: number): number {
 }
 
 /** FNV-1a — en stabil tallverdi av en tekst, til frø som ikke skal avhenge av terningen. */
+/**
+ * Én av tekstene, valgt med en hash av nøkkelen (Pakke 82, 101): samme svar hver gang for
+ * samme dag og sak, og terningen flytter seg ikke.
+ */
+export function hashvalg<T>(liste: readonly T[], nokkel: string): T {
+  return liste[(hashTekst(nokkel) >>> 0) % liste.length]
+}
+
 export function hashTekst(tekst: string): number {
   let h = 2166136261
   for (let i = 0; i < tekst.length; i++) {

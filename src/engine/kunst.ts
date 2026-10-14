@@ -11,7 +11,22 @@
  * Kunstmarkedet har sin egen terning, så kunst endrer ikke resten av spillet.
  */
 
-import { Terning } from './rng'
+import { hashvalg, Terning } from './rng'
+import { dagnummer } from './kalender'
+
+/** Utstillingssakene for kunstnere du ikke eier (Pakke 101): hver sto på trykk 14–19 ganger med én tekst. */
+const UTSTILLINGSTEKSTER = [
+  'Samlerne står i kø, og prisene stiger kraftig.',
+  'Åpningen var utsolgt på en time. Galleriene ringer rundt etter flere verk.',
+  'Kritikerne er enige for en gangs skyld, og prisene følger etter.',
+  'Museene låner ut alt de har. Det de ikke har, vil alle kjøpe.',
+] as const
+const UTSTILLINGSTEKSTER_EIER = [
+  'Prisene på verkene stiger kraftig — også på dem du eier.',
+  'Galleristene ringer samlerne som eier verk av kunstneren. Du står på lista.',
+  'Køen til åpningen gikk rundt kvartalet. Verkene på veggen din er verdt mer i kveld.',
+  'Kritikerne kaller det et gjennombrudd. Samlingen din har nettopp fått et.',
+] as const
 import type { Kunstmarked, MaleriId, Overskrift, Spilltilstand } from './types'
 
 export interface Kunstner {
@@ -120,7 +135,7 @@ export function kunstVedDagsskifte(s: Spilltilstand): Overskrift[] {
       saker.push({
         type: eier ? 'deg' : 'marked',
         tittel: `Stor utstilling for ${KUNSTNERE[kid].navn}`,
-        tekst: eier ? 'Prisene på verkene stiger kraftig — også på dem du eier.' : 'Samlerne står i kø, og prisene stiger kraftig.',
+        tekst: hashvalg(eier ? UTSTILLINGSTEKSTER_EIER : UTSTILLINGSTEKSTER, `utstilling:${kid}:${dagnummer(s.sek)}`),
       })
     }
   }

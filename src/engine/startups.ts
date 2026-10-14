@@ -14,7 +14,21 @@ import { leggTilHendelse } from './bank'
 import { DAG_SEK, dagnummer } from './kalender'
 import { flyt } from './portefolje'
 import { bokforGevinst } from './handel'
-import { Hashkilde, hashTekst, type Terning } from './rng'
+import { Hashkilde, hashTekst, hashvalg, type Terning } from './rng'
+
+/** Andres startups som går på børs eller blir kjøpt opp, tre–fire tekster hver (Pakke 101). */
+const BORSTEKSTER = [
+  'Kursen steg på første handelsdag. De tidlige investorene jubler.',
+  'Tegningen ble overtegnet fire ganger. Gründerne ringte banken og spurte om det var en feil.',
+  'Første handelsdag endte i pluss. De som sa nei i fjor, sier lite i dag.',
+  'Børsklokka ringte, og gründerne kjøpte kake til hele kontoret.',
+] as const
+const OPPKJOPTEKSTER = [
+  'En utenlandsk gigant sikret seg det lovende selskapet.',
+  'Et amerikansk selskap la et bud gründerne ikke kunne si nei til. De prøvde ikke.',
+  'Oppkjøpet ble kunngjort en tirsdag. Gründerne er på ferie på ubestemt tid.',
+  'Kjøperen lover at ingenting skal endres. Det pleier de å si.',
+] as const
 import type { Overskrift, Spilltilstand, Startup, Startupstatus } from './types'
 import { kortKroner } from './tall'
 
@@ -228,12 +242,12 @@ export function startupsVedDagsskifte(s: Spilltilstand, t: Terning): Overskrift[
     } else if (u < konkursrisiko(st) + RUNDER[st.runde].oppkjop) {
       const utbetalt = verdiFor * t.mellom(OPPKJOP_MIN, OPPKJOP_MAKS)
       avslutt(s, st, 'solgt', utbetalt)
-      saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} kjøpt opp`, tekst: med ? 'En utenlandsk gigant kjøper selskapet, og investorene får betalt.' : 'En utenlandsk gigant sikret seg det lovende selskapet.' })
+      saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} kjøpt opp`, tekst: med ? 'En utenlandsk gigant kjøper selskapet, og investorene får betalt.' : hashvalg(OPPKJOPTEKSTER, `oppkjop:${navn}`) })
       if (med) leggTilHendelse(s, { tittel: 'Oppkjøp', tekst: `${navn} ble kjøpt opp. Du fikk ${kortKroner(utbetalt)}.`, alvor: 'info' })
     } else if (st.runde === RUNDER.length - 1) {
       const utbetalt = verdiFor * t.mellom(BORS_MIN, BORS_MAKS)
       avslutt(s, st, 'bors', utbetalt)
-      saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} til børs`, tekst: med ? 'Kursen steg på første handelsdag, og de tidlige investorene kan telle gevinsten.' : 'Kursen steg på første handelsdag. De tidlige investorene jubler.' })
+      saker.push({ type: med ? 'deg' : 'marked', tittel: `${navn} til børs`, tekst: med ? 'Kursen steg på første handelsdag, og de tidlige investorene kan telle gevinsten.' : hashvalg(BORSTEKSTER, `bors:${navn}`) })
       if (med) leggTilHendelse(s, { tittel: 'Børsnotering', tekst: `${navn} gikk på børs. Du fikk ${kortKroner(utbetalt)}.`, alvor: 'info' })
     } else {
       // Pengene du satte inn i denne runden, ER de nye pengene — bare andelen

@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 100, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 101, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -780,6 +780,20 @@ session; delete what stops being true.
   few days, because the mood hovers at the line. A zone that turns at 0.6 and calms only inside 0.4
   (`stemningssone`, kept as `stemningssone` on the day's `Dagsbilde`) cut it from 50 to 23. A new
   optional `Dagsbilde` field needs no save version; a save without it gets the story once.
+- **A story that must always print needs a fixed slot, not a high place in the list** (Pack 101). Late
+  in the game your own stories (tax, club, racing, farm, auction) fill all five, so the rate meeting was
+  printed 1 of 8 times even though it sat high. `gisUtAvis` now cuts the list to four on its day and
+  splices it in second. Measure the paper on a late save day by day (`simuler(s, DAG_SEK, true)` × 360,
+  compare `verdenssaker(s)` with `s.avis.at(-1)`), in a throwaway `zz-` test.
+- **A clamp around an estimate turns the signal against it** (Pack 101): the quarterly result was
+  `clamp(expected ± 0.4, 0, 1)`, so a strong estimate (expected 0.83) could surprise up by 0.17 but down
+  by 0.4 — «Sterkt» in green meant a worse day on average. Look for clamps before trusting a signal;
+  the fix was a lean on an unclamped spread (`ESTIMAT_SKJEVHET`), measured over 40 years × 12 stocks.
+- **A floor tied to net worth silences late saves** (Pack 101, «your biggest post»): 0.1 % of kr 329
+  bill is kr 329 mill, so `fulltSpill` with kr 100 mill in papers got no own stories at all — right by
+  the rule, but useless as a measurement. Measure such a rule on a mid-game save (~1 mrd) as well.
+- **A percent bar on a moved price needs a tolerance**: `kurs *= 0.95` then `kurs / før − 1` gave
+  0.0499999…, so «at least 5 %» failed depending on the price. `>= terskel − 1e-9`.
 - **Per-type rules (Pack 80)**: `milepaelfaktor`, `milepaelboost` and `nesteMilepael` take an
   optional type; without it they give the shared milestones. Anything that shows or plans
   milestones for a business must pass `b.type` (or use `milepaelerFor`), or the hotel's level 35

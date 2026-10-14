@@ -9,12 +9,15 @@ import { Terning } from '../rng'
 import { MALER, malTekst } from '../selskapsnyheter'
 import type { Overskrift, PapirId, Spilltilstand } from '../types'
 
-/** Et spill der dagen akkurat har startet: i går = nå, og ingenting har beveget seg. */
+/**
+ * Et spill der dagen akkurat har startet: i går = nå, og ingenting har beveget seg. Hver post er
+ * kr 10 mill, så 2 % er over kronegulvet fra Pakke 101 (0,1 % av formuen, minst kr 10 000).
+ */
 function spill(eier: PapirId[] = []): Spilltilstand {
   let s = nyttSpill(82)
   s.kontanter = 1e8
   for (const id of eier) {
-    const u = kjopPapir(s, id, 10)
+    const u = kjopPapir(s, id, Math.floor(1e7 / s.marked.kurser[id].kurs))
     if (!u.ok) throw new Error(u.feil)
     s = u.tilstand
   }

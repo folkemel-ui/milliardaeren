@@ -19,7 +19,7 @@ import { jordVedDagsskifte } from './jord'
 import { dyrVedDagsskifte } from './dyr'
 import { landemerkerVedDagsskifte } from './landemerker'
 import { kunstVedDagsskifte } from './kunst'
-import { kvartalVedDagsskifte } from './kvartal'
+import { kvartalssaker } from './kvartal'
 import { forbesliste } from './rivaler'
 import { FORMER, fusjonsnokler } from './fusjon'
 import { nettoformue } from './formler'
@@ -179,6 +179,13 @@ const KRYPTO_TERSKEL = 0.1
  */
 export const EGEN_TERSKEL = 0.5
 /**
+ * … og flytter seg minst så mye i kroner (Pakke 101): 0,1 % av nettoformuen, og aldri under
+ * kr 10 000. Før valgte avisa den største bevegelsen i prosent: kr 10 000 i Elgcoin fikk 66 saker
+ * og kr 100 mill i Bitmynt 4 på 360 dager, og noen sa «Det er kr 0 mer enn i går».
+ */
+export const EGEN_FORMUE_ANDEL = 0.001
+export const EGEN_KRONER_MIN = 10_000
+/**
  * Kryptostemningen blir «feber» over denne og «panikk» under minus den, og roer seg
  * først innenfor ROLIG_GRENSE — ellers vippet den fram og tilbake over 0,6 og avisa
  * skrev om det annenhver dag.
@@ -245,13 +252,14 @@ export function omMarkedet(s: Spilltilstand, før: Dagsbilde): { dine: Overskrif
   const saker: Overskrift[] = []
   const endring = (id: PapirId) => s.marked.kurser[id].kurs / før.kurser[id] - 1
   const størst = (ider: PapirId[]) => [...ider].sort((a, b) => Math.abs(endring(b)) - Math.abs(endring(a)))[0]
+  // Pakke 101: den av dine som flyttet seg mest i kroner, blant dem som når terskelen i prosent og i kroner.
+  const kroner = (id: PapirId) => Math.abs(antallAv(s, id) * (s.marked.kurser[id].kurs - før.kurser[id]))
+  const gulv = Math.max(EGEN_KRONER_MIN, EGEN_FORMUE_ANDEL * nettoformue(s))
   const egen = (ider: PapirId[], terskel: number): boolean => {
-    const mine = ider.filter((id) => antallAv(s, id) > 0)
+    const mine = ider.filter((id) => antallAv(s, id) > 0 && Math.abs(endring(id)) >= terskel * EGEN_TERSKEL - 1e-9 && kroner(id) >= gulv)
     if (!mine.length) return false
-    const id = størst(mine)
-    const e = endring(id)
-    if (Math.abs(e) < terskel * EGEN_TERSKEL) return false
-    dine.push(egenSak(s, før, id, e))
+    const id = mine.reduce((a, b) => (kroner(b) > kroner(a) ? b : a))
+    dine.push(egenSak(s, før, id, endring(id)))
     return true
   }
 
@@ -309,7 +317,9 @@ const LOKALT: Overskrift[] = [
  */
 export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const før = s.forrigeDag
-  const nyheter = [...kvartalVedDagsskifte(s), ...selskapsnyheter(s, t)]
+  // Pakke 101: rapportene står med selskapsnyhetene; estimatene for om tre dager under markedet.
+  const kvartal = kvartalssaker(s)
+  const nyheter = [...kvartal.rapporter, ...selskapsnyheter(s, t)]
   const oppgjor = dagsskifteOppgjor(s)
   const skattesaker = skattVedDagsskifte(s, oppgjor, t, tittel(s))
   const startupsaker = startupsVedDagsskifte(s, t)
@@ -348,13 +358,17 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     // Auksjonen (Pakke 89) etter kappløpet — en fusjon med en rival er viktigere — men foran verden og kursene.
     ...auksjonssaker.filter((x) => x.type !== 'deg'),
     ...racingsaker.filter((x) => x.type !== 'deg'),
-    ...verden.marked,
+    ...verden.marked.filter((x) => x !== verden.rente),
     ...marked.andre,
+    ...kvartal.estimater,
     ...startupsaker.filter((x) => x.type !== 'deg'),
     ...andre.filter((x) => x.type !== 'deg'),
     ...verden.lokalt,
     ...sosietet(s, t),
-  ].slice(0, MAKS_SAKER)
+  ].slice(0, verden.rente ? MAKS_SAKER - 1 : MAKS_SAKER)
+  // Pakke 101: rentemøtet flytter lån, sparing, obligasjoner og aksjer, så det har fast plass —
+  // nest øverst, under dagens største sak om deg. Før kom 7 av 8 aldri på trykk sent i spillet.
+  if (verden.rente) saker.splice(Math.min(1, saker.length), 0, verden.rente)
   const brukt = new Set(saker.map((x) => x.tittel))
   while (saker.length < MIN_SAKER) {
     const sak = t.velg(LOKALT)

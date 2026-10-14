@@ -13,7 +13,7 @@
 
 import { STIGEN } from './innhold'
 import { DAG_SEK, dagFra, dagnummer, dato, ukedag } from './kalender'
-import { Hashkilde, hashTekst } from './rng'
+import { Hashkilde, hashTekst, hashvalg } from './rng'
 import type { BedriftstypeId, EiendomId, Overskrift, Spilltilstand } from './types'
 
 /**
@@ -415,10 +415,36 @@ const prosent = (n: number) => `${String(n).replace('.', ',')} %`
  * skifter, helligdagen, ukas trender på mandag og været når det betyr noe.
  * \`marked\` er saker som flytter penger; \`lokalt\` er stoff fra landet.
  */
-export function verdenssaker(s: Spilltilstand): { marked: Overskrift[]; lokalt: Overskrift[] } {
+/** Værsakene, tre–fire tekster hver (Pakke 101): «Sol over hele landet» sto i 36 % av utgavene, med én tekst. */
+const VAERTEKSTER = {
+  sol: [
+    'Det er kø ved saftbodene fra morgen til kveld.',
+    'Termometeret krøp over tjue grader, og saftbodene gikk tom for is før lunsj.',
+    'Meteorologene lover mer av det samme. Saftbodeierne lover ingenting, men smiler.',
+    'Parkene er fulle, og en kopp saft er plutselig en investering.',
+  ],
+  sno: [
+    'Skisentrene melder om pudder og fulle heiser.',
+    'Tretti centimeter over natta. Heiskøen begynner før heisen åpner.',
+    'Fjellet er hvitt, og skisentrene hever prisen på vaflene.',
+  ],
+  regn: [
+    'Saftbodene står tomme. Paraplyselgerne gnir seg i hendene.',
+    'Kundene holder seg inne, og saftbodene teller dråper i stedet for kopper.',
+    'Det regner sidelengs. Bare kafeene klager ikke.',
+    'Ukas prognose: vått, vått og vått. Saftbodene vurderer å selge te.',
+  ],
+} as const
+
+/**
+ * Verdens saker til avisa. `rente` er rentemøtet (Pakke 101), som også står i `marked`: avisa
+ * gir det fast plass på forsiden, for før kom 7 av 8 rentemøter aldri på trykk sent i spillet.
+ */
+export function verdenssaker(s: Spilltilstand): { marked: Overskrift[]; lokalt: Overskrift[]; rente: Overskrift | null } {
   const dag = dagnummer(s.sek)
   const marked: Overskrift[] = []
   const lokalt: Overskrift[] = []
+  let rente: Overskrift | null = null
 
   // Rentemøtet: første dag i en ny periode, når fasen er en annen enn sist.
   const p = periode(dag)
@@ -426,18 +452,19 @@ export function verdenssaker(s: Spilltilstand): { marked: Overskrift[]; lokalt: 
     const ny = faseI(s, p)
     const gammel = faseI(s, p - 1)
     if (ny !== gammel) {
-      const rente = FASER[ny].styringsrente
-      const opp = rente > FASER[gammel].styringsrente
-      marked.push({
+      const styringsrente = FASER[ny].styringsrente
+      const opp = styringsrente > FASER[gammel].styringsrente
+      rente = {
         type: 'marked',
-        tittel: `Sentralbanken ${opp ? 'hever' : 'kutter'} renten til ${prosent(rente)}`,
+        tittel: `Sentralbanken ${opp ? 'hever' : 'kutter'} renten til ${prosent(styringsrente)}`,
         tekst:
           ny === 'hoy'
             ? 'Økonomien går for fullt. Børsen og boligprisene stiger, og lånene blir dyrere.'
             : ny === 'lav'
               ? 'Lavkonjunktur. Aksjene og boligprisene faller, men lån blir billigere — for den som tør.'
               : 'Normale tider igjen, ifølge sentralbanksjefen. Markedet puster ut.',
-      })
+      }
+      marked.push(rente)
     }
   }
 
@@ -457,9 +484,10 @@ export function verdenssaker(s: Spilltilstand): { marked: Overskrift[]; lokalt: 
   // Været bare når det merkes: saftbodene i sola, skisentrene i snøen — eller regnet.
   const saft = vaerfaktor('saftbod', d.vaer, dag)
   const ski = vaerfaktor('skisenter', d.vaer, dag)
-  if (d.vaer === 'sol' && saft > 1.15) lokalt.push({ type: 'lokalt', tittel: 'Sol over hele landet', tekst: 'Det er kø ved saftbodene fra morgen til kveld.' })
-  else if (d.vaer === 'sno' && ski > 1.15) lokalt.push({ type: 'lokalt', tittel: 'Nysnø i fjellet', tekst: 'Skisentrene melder om pudder og fulle heiser.' })
-  else if (d.vaer === 'regn' && saft < 0.7) lokalt.push({ type: 'lokalt', tittel: 'Regnet høljer ned', tekst: 'Saftbodene står tomme. Paraplyselgerne gnir seg i hendene.' })
+  const vaertekst = (v: keyof typeof VAERTEKSTER) => hashvalg(VAERTEKSTER[v], `vaer:${dag}`)
+  if (d.vaer === 'sol' && saft > 1.15) lokalt.push({ type: 'lokalt', tittel: 'Sol over hele landet', tekst: vaertekst('sol') })
+  else if (d.vaer === 'sno' && ski > 1.15) lokalt.push({ type: 'lokalt', tittel: 'Nysnø i fjellet', tekst: vaertekst('sno') })
+  else if (d.vaer === 'regn' && saft < 0.7) lokalt.push({ type: 'lokalt', tittel: 'Regnet høljer ned', tekst: vaertekst('regn') })
 
-  return { marked, lokalt }
+  return { marked, lokalt, rente }
 }

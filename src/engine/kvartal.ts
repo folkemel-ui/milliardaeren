@@ -14,7 +14,7 @@
 
 import { dagFra, dato, erHelg, DAG_SEK, dagnummer } from './kalender'
 import { AKSJER, MARKED_TIKK_SEK, PAPIRER } from './marked'
-import { hashTekst, tilfeldig } from './rng'
+import { hashTekst, hashvalg, tilfeldig } from './rng'
 import type { Estimat, Kvartal, Overskrift, PapirId, Rapport, Spilltilstand } from './types'
 
 /**
@@ -32,6 +32,16 @@ export const ESTIMAT_DAGER = 3
 const KURSVIRKNING = 0.3
 /** Overraskelser mindre enn dette regnes som «som ventet». */
 const GRENSE = 0.08
+/** Overraskelsen spres jevnt over så stort et spenn rundt estimatet. */
+const SPREDNING = 0.8
+/**
+ * Hvor mye estimatet drar resultatet (Pakke 101): «Sterkt» +0,06, «Svakt» −0,06. Før lå resultatet
+ * rundt estimatet, men klemt mellom 0 og 1 — så et sterkt estimat kunne overraske mest nedover:
+ * over 40 år og 12 aksjer slo «Sterkt» estimatet 41 % av gangene og ga −0,73 % på rapportdagen,
+ * mens det sto i grønt. Nå slår «Sterkt» det 48 % av gangene og skuffer 33 % («Som i fjor» 40/40),
+ * rundt +2,1 % på dagen og +1,1 % etter kurtasjen: et hint, ikke en pengemaskin.
+ */
+export const ESTIMAT_SKJEVHET = [-0.06, 0, 0.06] as const
 /** Bevegelsen prises inn over like lang tid som en selskapsnyhet. */
 const INNPRISING_TIKK = 180 / MARKED_TIKK_SEK
 
@@ -61,11 +71,33 @@ export function estimat(id: PapirId, rapportdag: number): Estimat {
 
 /** Resultatet og hvor mye det overrasket, for en rapportdag. */
 export function resultat(id: PapirId, rapportdag: number): { overraskelse: number; utfall: Rapport['utfall'] } {
-  const forventet = (estimat(id, rapportdag) + 0.5) / 3
-  const faktisk = Math.max(0, Math.min(1, forventet + (tilfeldig(hashTekst(`resultat:${id}:${rapportdag}`)) - 0.5) * 0.8))
-  const overraskelse = faktisk - forventet
+  const overraskelse = (tilfeldig(hashTekst(`resultat:${id}:${rapportdag}`)) - 0.5) * SPREDNING + ESTIMAT_SKJEVHET[estimat(id, rapportdag)]
   return { overraskelse, utfall: overraskelse > GRENSE ? 'bedre' : overraskelse < -GRENSE ? 'svakere' : 'ventet' }
 }
+
+/** Tekstene til rapportsakene, tre–fire for hvert utfall (Pakke 101): hver sto på trykk ~50 ganger på 240 dager. */
+const RAPPORTTEKSTER: Record<Rapport['utfall'], readonly string[]> = {
+  bedre: [
+    'Kvartalstallene slo analytikernes estimat. Kursen ventes å stige, og utbyttet økes.',
+    'Ledelsen leverte bedre enn ventet og sier det skyldes «disiplin». Utbyttet økes.',
+    'Tallene overrasket positivt. Analytikerne justerer kursmålene — oppover, for en gangs skyld.',
+    'Sterkere salg og lavere kostnader enn fryktet. Aksjonærene får mer i utbytte.',
+  ],
+  svakere: [
+    'Kvartalstallene skuffet. Kursen ventes å falle, og utbyttet kuttes.',
+    'Ledelsen skylder på markedet, været og valutaen. Utbyttet kuttes.',
+    'Tallene var svakere enn ventet. Analytikerne leter etter et positivt ord og finner «utfordrende».',
+    'Et kvartal toppsjefen helst vil glemme. Markedet glemmer det ikke, og utbyttet går ned.',
+  ],
+  ventet: [
+    'Kvartalstallene var omtrent som ventet. Markedet trekker på skuldrene.',
+    'Ingen overraskelser, verken opp eller ned. Analytikerne kan ta helg.',
+    'Tallene traff estimatet nesten på krona. Kursen står stille.',
+    '«Som forventet», sier ledelsen. Det samme sier markedet.',
+  ],
+}
+/** Estimatsakene: tre rammer rundt det analytikerne venter. */
+const ESTIMATRAMMER = [(x: string) => `Analytikerne venter ${x}.`, (x: string) => `Meglerhusene tror på ${x}.`, (x: string) => `Konsensus blant analytikerne: ${x}.`] as const
 
 /** Utgangspunktet: vanlig utbytte og ingen rapport ennå, for hver aksje. */
 export function nyeKvartal(): Partial<Record<PapirId, Kvartal>> {
@@ -101,9 +133,19 @@ export function rapportkalender(s: Spilltilstand, dager = 14): { id: PapirId; da
  * Muterer — brukes på kopier.
  */
 export function kvartalVedDagsskifte(s: Spilltilstand): Overskrift[] {
-  if (!s.kvartal) return []
-  const d = dagnummer(s.sek)
+  const k = kvartalssaker(s)
+  return [...k.rapporter, ...k.estimater]
+}
+
+/**
+ * Det samme, delt i rapportene og estimatene (Pakke 101): avisa setter estimatene under
+ * markedet, så de ikke skyver rentemøtet og ukas trender ut av forsiden.
+ */
+export function kvartalssaker(s: Spilltilstand): { rapporter: Overskrift[]; estimater: Overskrift[] } {
   const saker: Overskrift[] = []
+  const estimater: Overskrift[] = []
+  if (!s.kvartal) return { rapporter: saker, estimater }
+  const d = dagnummer(s.sek)
   for (const id of AKSJER) {
     const navn = PAPIRER[id].navn
     if (nesteRapport(id, d) === d) {
@@ -117,18 +159,13 @@ export function kvartalVedDagsskifte(s: Spilltilstand): Overskrift[] {
       saker.push({
         type: 'marked',
         tittel: `${navn}: ${UTFALLTEKST[utfall].toLowerCase()}`,
-        tekst:
-          utfall === 'bedre'
-            ? 'Kvartalstallene slo analytikernes estimat. Kursen ventes å stige, og utbyttet økes.'
-            : utfall === 'svakere'
-              ? 'Kvartalstallene skuffet. Kursen ventes å falle, og utbyttet kuttes.'
-              : 'Kvartalstallene var omtrent som ventet. Markedet trekker på skuldrene.',
+        tekst: hashvalg(RAPPORTTEKSTER[utfall], `rapport:${id}:${d}`),
       })
     }
     const kommende = nesteRapport(id, d + 1)
     if (kommende - d === ESTIMAT_DAGER) {
-      saker.push({ type: 'marked', tittel: `${navn} legger frem tall om ${ESTIMAT_DAGER} dager`, tekst: `Analytikerne venter ${ESTIMATSETNING[estimat(id, kommende)]}.` })
+      estimater.push({ type: 'marked', tittel: `${navn} legger frem tall om ${ESTIMAT_DAGER} dager`, tekst: hashvalg(ESTIMATRAMMER, `estimat:${id}:${d}`)(ESTIMATSETNING[estimat(id, kommende)]) })
     }
   }
-  return saker
+  return { rapporter: saker, estimater }
 }
