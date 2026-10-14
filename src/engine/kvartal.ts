@@ -25,6 +25,8 @@ import type { Estimat, Kvartal, Overskrift, PapirId, Rapport, Spilltilstand } fr
 export const RAPPORTDAG: Partial<Record<PapirId, number>> = {
   NFS: 4, FJK: 7, VTK: 10, BSH: 13, POL: 16, NLT: 19, AUB: 22, TRS: 25,
   NRB: 2, KRV: 11, FJF: 17, ROM: 26,
+  // Pakke 104: de åtte nye på ledige dager til og med den 24., så en helg aldri skyver en rapport inn i neste måned.
+  SOL: 1, NPL: 3, GMN: 6, KBN: 9, BRD: 15, FJH: 18, TOP: 21, NBE: 24,
 }
 /** Estimatet kommer så mange dager før. */
 export const ESTIMAT_DAGER = 3

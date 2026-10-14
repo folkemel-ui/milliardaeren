@@ -48,16 +48,26 @@ export const PAPIRER: Record<PapirId, Papir> = {
   // Memecoins: bittesmå kurser, voldsomme svingninger og hyppige hopp.
   ELG: { id: 'ELG', navn: 'Elgcoin', klasse: 'krypto', risiko: 'høy', startkurs: 0.004, drift: 0, volatilitet: 0.8, reversjon: 0.2, utbytte: 0, dybde: 3e7, hopp: 0.004 },
   BRN: { id: 'BRN', navn: 'Brunostcoin', klasse: 'krypto', risiko: 'høy', startkurs: 0.02, drift: 0, volatilitet: 0.7, reversjon: 0.2, utbytte: 0, dybde: 4e7, hopp: 0.0035 },
+  // ── Børsnotert i Pakke 104: en aksje for hver av de sju bransjene som ikke hadde en, og et
+  // eiendomsselskap. Nå har hver bedrift sin aksje: ukas trend og selskapsnyhetene når alle tretten.
+  SOL: { id: 'SOL', navn: 'Solbær Drikker', klasse: 'aksje', bransje: 'saftbod', risiko: 'lav', startkurs: 48, drift: 0.015, volatilitet: 0.025, reversjon: 0.5, utbytte: 0.0008, dybde: 1.2e9, hopp: 0 },
+  NPL: { id: 'NPL', navn: 'Nordisk Pølse', klasse: 'aksje', bransje: 'polsebod', risiko: 'lav', startkurs: 56, drift: 0.015, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.00075, dybde: 1.2e9, hopp: 0 },
+  GMN: { id: 'GMN', navn: 'Gatemat Norge', klasse: 'aksje', bransje: 'gatekjokken', risiko: 'middels', startkurs: 88, drift: 0.03, volatilitet: 0.065, reversjon: 0.4, utbytte: 0.0003, dybde: 8e8, hopp: 0 },
+  KBN: { id: 'KBN', navn: 'Kaffebrenneriet Nord', klasse: 'aksje', bransje: 'kafe', risiko: 'lav', startkurs: 132, drift: 0.02, volatilitet: 0.03, reversjon: 0.5, utbytte: 0.0007, dybde: 1.5e9, hopp: 0 },
+  BRD: { id: 'BRD', navn: 'Bordet Gruppen', klasse: 'aksje', bransje: 'restaurant', risiko: 'middels', startkurs: 210, drift: 0.03, volatilitet: 0.07, reversjon: 0.4, utbytte: 0.00035, dybde: 9e8, hopp: 0 },
+  FJH: { id: 'FJH', navn: 'Fjordhotellene', klasse: 'aksje', bransje: 'hotell', risiko: 'middels', startkurs: 340, drift: 0.03, volatilitet: 0.06, reversjon: 0.4, utbytte: 0.0004, dybde: 1e9, hopp: 0 },
+  TOP: { id: 'TOP', navn: 'Topptur Alpin', klasse: 'aksje', bransje: 'skisenter', risiko: 'høy', startkurs: 64, drift: 0.05, volatilitet: 0.14, reversjon: 0.3, utbytte: 0, dybde: 3e8, hopp: 0.0008 },
+  NBE: { id: 'NBE', navn: 'Nordbygg Eiendom', klasse: 'aksje', risiko: 'middels', startkurs: 150, drift: 0.025, volatilitet: 0.05, reversjon: 0.4, utbytte: 0.0005, dybde: 1.2e9, hopp: 0 },
 }
 
 /**
- * Papirene som kom i versjon 17. I markedstikkene trekker de tilfeldighet fra
+ * Papirene som kom i versjon 17 og i Pakke 104 (versjon 26). I markedstikkene trekker de tilfeldighet fra
  * en hash av markedets nyeFrø, ikke fra terningen, så de gamle papirenes
  * tikk trekker nøyaktig det samme som før. (Avisa skriver om de nye også, og
  * hvor mange fyllsaker den trekker avhenger av det — så en gammel lagring går
  * ikke tikk for tikk som den ville gjort uten dem, men like forutsigbart.)
  */
-export const NYE_PAPIRER: PapirId[] = ['NRB', 'KRV', 'FJF', 'ROM', 'STK', 'ELG', 'BRN']
+export const NYE_PAPIRER: PapirId[] = ['NRB', 'KRV', 'FJF', 'ROM', 'STK', 'ELG', 'BRN', 'SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE']
 
 export const AKSJER = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'aksje')
 export const KRYPTO = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'krypto')

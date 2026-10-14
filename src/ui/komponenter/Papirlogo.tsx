@@ -306,6 +306,105 @@ const LOGOER: Record<PapirId, Logo> = {
       </>
     ),
   },
+  // ── Pakke 104 (spillsporet): de åtte nye aksjene. Merkene er i G4-stilen; ordmerkene venter på Grafikk.
+  // Solbær Drikker: en flaske med en solbærklase på etiketten.
+  SOL: {
+    farge: '#a5468f',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M9.5 2h5v3.2c2 1 3 2.6 3 4.6V21a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 6.5 21V9.8c0-2 1-3.6 3-4.6z" />
+        <circle cx="10.5" cy="14.4" r="1.6" fill={lys} />
+        <circle cx="13.5" cy="14.4" r="1.6" fill={lys} />
+        <circle cx="12" cy="16.9" r="1.6" fill={lys} />
+        <path d="M12 12.6c.4-1 1.2-1.6 2.3-1.8" {...strek(lys, 0.9)} />
+      </>
+    ),
+  },
+  // Nordisk Pølse: en pølse på skrå, med sennep.
+  NPL: {
+    farge: '#b8562e',
+    merke: ({ m, lys }) => (
+      <g transform="rotate(-30 12 12)">
+        <rect x="2.5" y="8.5" width="19" height="7" rx="3.5" fill={m} />
+        <path d="M6.4 12.8l1.8-1.6 1.6 1.4 1.8-1.6 1.6 1.4 1.8-1.6 1.6 1.4 1.8-1.6" {...strek(lys, 1)} />
+      </g>
+    ),
+  },
+  // Gatemat Norge: matbilen, med luka åpen.
+  GMN: {
+    farge: '#a87418',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M1.5 7.5h12.5v9.5H1.5zM14 10.6h4.4l3.6 3.6V17H14z" />
+        <path fill={lys} d="M3.4 9.6h8.6v3.2H3.4zM15.4 11.9h2.5l2 2.1h-4.5z" />
+        <path d="M2.6 9.6h10.2" {...strek(m, 1.2)} />
+        <circle cx="5.8" cy="18.4" r="2.2" fill={m} />
+        <circle cx="17.6" cy="18.4" r="2.2" fill={m} />
+        <circle cx="5.8" cy="18.4" r="0.8" fill={lys} />
+        <circle cx="17.6" cy="18.4" r="0.8" fill={lys} />
+      </>
+    ),
+  },
+  // Kaffebrenneriet Nord: en kaffebønne med furen gjennom.
+  KBN: {
+    farge: '#9a6640',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M12 2.5c4.6 0 7.6 4.3 7.6 9.5s-3 9.5-7.6 9.5-7.6-4.3-7.6-9.5 3-9.5 7.6-9.5z" />
+        <path d="M12.8 3.8c-2.6 2.9-2.6 5.4-.7 8.2s1.9 5.3-.7 8.2" {...strek(lys, 1.4)} />
+      </>
+    ),
+  },
+  // Bordet Gruppen: tallerkenen mellom gaffel og kniv.
+  BRD: {
+    farge: '#b8455c',
+    merke: ({ m, lys }) => (
+      <>
+        <circle cx="12" cy="12" r="5.2" fill="none" stroke={m} strokeWidth="1.6" />
+        <circle cx="12" cy="12" r="2.8" fill={m} />
+        <circle cx="11.2" cy="11.2" r="0.9" fill={lys} />
+        <path fill={m} d="M1.6 3v6c0 1 .6 1.7 1.5 1.9V21h1.5V10.9c.9-.2 1.5-.9 1.5-1.9V3h-1v5h-.8V3h-1.4v5h-.8V3z" />
+        <path fill={m} d="M19.6 3c1.8 1.2 2.8 3.6 2.8 7.2h-1.5V21h-1.5V3z" />
+      </>
+    ),
+  },
+  // Fjordhotellene: hotellet ved fjorden.
+  FJH: {
+    farge: '#2f8a86',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M5 3h14v15H5z" />
+        <path fill={lys} d="M7.4 5.4h2.6v2.2H7.4zM14 5.4h2.6v2.2H14zM7.4 9.4h2.6v2.2H7.4zM14 9.4h2.6v2.2H14zM10.6 18v-3.8a1.4 1.4 0 0 1 2.8 0V18z" />
+        <path d="M1.5 21.2c1.7-1.4 3.4-1.4 5.1 0s3.4 1.4 5.1 0 3.4-1.4 5.1 0 3.4 1.4 5.1 0" {...strek(m, 1.5)} />
+      </>
+    ),
+  },
+  // Topptur Alpin: fjellet med snø på toppen og en gondol på vei opp.
+  TOP: {
+    farge: '#4f7fc4',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M1.5 21L10 6.4l3.6 6 2.4-3.6L22.5 21z" />
+        <path fill={lys} d="M10 6.4l2.2 3.7-1.4-.6-.8.9-1-.9-1.3.6z" />
+        <path d="M2 3.4l20 3.4" {...strek(m, 0.9)} />
+        <path d="M15.4 5.2v1.4" {...strek(m, 0.7)} />
+        <path fill={m} d="M14.2 6.6h2.4v2.2h-2.4z" />
+      </>
+    ),
+  },
+  // Nordbygg Eiendom: et hus og kranen som bygger det neste.
+  NBE: {
+    farge: '#6c8636',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M2.5 21v-8.6l6.2-5.2 6.2 5.2V21z" />
+        <path fill={lys} d="M7.3 21v-4h2.8v4z" />
+        <path d="M19 21V3M10.6 4.2h12" {...strek(m, 1.4)} />
+        <path d="M12.6 4.2v2.8" {...strek(m, 0.8)} />
+        <path fill={m} d="M11.8 7h1.6v1.4h-1.6z" />
+      </>
+    ),
+  },
 }
 
 export const PAPIRLOGOER = Object.keys(LOGOER) as PapirId[]

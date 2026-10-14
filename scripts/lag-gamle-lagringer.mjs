@@ -57,6 +57,8 @@ const NESTE_BUMP = {
   22: { fra: 'af93990' },
   // Versjon 23 ble bumpet i Pakke 67; lagringen lages fra commiten før.
   23: { fra: 'd2747dd' },
+  // Versjon 25 ble bumpet i Pakke 104; lagringen lages fra Pakke 102, den siste med versjon 25.
+  25: { fra: '4250508' },
   // Versjon 24 ble bumpet i Pakke 71; lagringen lages fra Pakke 70.
   24: { fra: 'aa563b0' },
 }

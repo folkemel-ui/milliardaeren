@@ -91,6 +91,8 @@ export type PapirId =
   // Børsnotert i versjon 17 (se NYE_PAPIRER i marked.ts).
   | 'NRB' | 'KRV' | 'FJF' | 'ROM'
   | 'STK' | 'ELG' | 'BRN'
+  // Børsnotert i Pakke 104: en aksje for hver bransje som manglet, og et eiendomsselskap.
+  | 'SOL' | 'NPL' | 'GMN' | 'KBN' | 'BRD' | 'FJH' | 'TOP' | 'NBE'
 
 export type Risiko = 'lav' | 'middels' | 'høy'
 

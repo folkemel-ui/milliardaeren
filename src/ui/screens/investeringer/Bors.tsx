@@ -12,9 +12,9 @@ import { erHelg } from '../../../engine/kalender'
 import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, maksPerOrdre, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../../engine/marked'
 import type { Ordretype, PapirId, Spilltilstand } from '../../../engine/types'
 import { utfor } from '../../../state/lager'
-import { antall as fmtAntall, endring, kortKroner, kroner, kurs as fmtKurs, tall, varighet } from '../../format'
+import { antall as fmtAntall, endring, kortKroner, kroner, kurs as fmtKurs, varighet } from '../../format'
 import { Minigraf } from '../../komponenter/Linjegraf'
-import { Fondkort, Kursgraf, Nokkeltall } from '../../komponenter/Marked'
+import { Fondkort, Kursgraf, Nokkeltall, utbyttetekst } from '../../komponenter/Marked'
 import { fondKostpris, fondverdi } from '../../../engine/fond'
 import { Tikkekurs } from '../../komponenter/Tikk'
 import { RulleTall } from '../../komponenter/RulleTall'
@@ -25,6 +25,8 @@ import { borsdel, type Borsdel } from '../../deler'
 import { Endring } from './felles'
 
 const RISIKO_TEKST = { lav: 'Lav risiko', middels: 'Middels risiko', høy: 'Høy risiko' } as const
+/** Kort form i lista når utbyttet står etter (Pakke 104), så linja ikke går over tre rader på en telefon. */
+const RISIKO_KORT = { lav: 'Lav', middels: 'Middels', høy: 'Høy' } as const
 
 /** Endring over kurshistorikken (to timer), som andel. */
 function endringTo(s: Spilltilstand, id: PapirId): number {
@@ -138,7 +140,7 @@ export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aks
                 <span className="papirrad-navn">
                   <strong>{p.navn}</strong>
                   <span className="dempet liten">
-                    {id} · {klasse === 'aksje' ? RISIKO_TEKST[p.risiko] : 'Krypto'}
+                    {id} · {klasse !== 'aksje' ? 'Krypto' : utbyttetekst(s, id) ? `${RISIKO_KORT[p.risiko]} · ${utbyttetekst(s, id)}` : RISIKO_TEKST[p.risiko]}
                   </span>
                 </span>
                 <Minigraf verdier={s.marked.kurser[id].historikk} />
@@ -194,7 +196,7 @@ export function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId;
             <h1 className="skjerm-tittel">{p.navn}</h1>
             <span className="dempet liten">
               {id} · {RISIKO_TEKST[p.risiko]}
-              {p.utbytte > 0 && ` · Utbytte ${tall(p.utbytte * 100, 3)} % hver børsdag`}
+              {utbyttetekst(s, id) && ` · Utbytte ${utbyttetekst(s, id)}`}
             </span>
           </div>
         </div>

@@ -218,7 +218,8 @@ describe('akademiet', () => {
 
 describe('lagringsversjon 24 → 25', () => {
   it('spillerne får posisjon, angrep og forsvar; styrken og klubbverdien står til kronen', () => {
-    expect(SPILLVERSJON).toBe(25)
+    // Steget 24 → 25 står som det var; senere versjoner (26 fra Pakke 104) bygger på det.
+    expect(SPILLVERSJON).toBeGreaterThanOrEqual(25)
     const s = medKlubb()
     const gammel = structuredClone(s.klubb!) as unknown as Record<string, unknown>
     delete gammel.formasjon

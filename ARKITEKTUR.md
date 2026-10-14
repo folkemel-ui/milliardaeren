@@ -55,7 +55,7 @@ Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når
 | Kvartalsrapporter | `estimat:<id>:<dag>`, `resultat:<id>:<dag>` — resultatet trekkes ±0,4 rundt estimatets skjevhet (−0,06 / 0 / +0,06, Pakke 101), uten klemme |
 | Avistekstene (`hashvalg` i `rng.ts`, Pakke 82 og 101) | selskapsnyheter `<sek>:<id>`, rapporter `rapport:<id>:<dag>`, estimater `estimat:<id>:<dag>`, vær `vaer:<dag>`, utstillinger `utstilling:<kunstner>:<dag>`, andres startups `bors:<navn>` og `oppkjop:<navn>` — teksten flytter aldri terningen |
 | Regioner | `marked.regioner.frø` + region + tikk |
-| Papirene fra versjon 17 | `Hashkilde` på `marked.nyeFrø` + id + tikk |
+| Papirene fra versjon 17 og Pakke 104 (versjon 26) | `Hashkilde` på `marked.nyeFrø` + id + tikk — `NYE_PAPIRER`; en lagring uten dem får dem av `leggTilNyePapirer` i migreringen |
 | Klubb til salgs | `<navn>:<dag>` |
 | Ansattnavn (`ansatte.ts`) | bedrift + sek + antall ved ansettelse; bedrift + plass for ansatte fra før Pakke 48 |
 | Konjunkturen (`verden.ts`) | `konjunktur:<periode>` (28 dager per periode; periode 0 er alltid normal) |

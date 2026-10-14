@@ -32,11 +32,19 @@ const tegn = (el: Parameters<typeof renderToStaticMarkup>[0]) => renderToStaticM
 const logo = (id: PapirId, ordmerke = false) => tegn(createElement(Papirlogo, { id, størrelse: 36, ordmerke }))
 const portrett = (id: RivalId, størrelse: number, form: 'rund' | 'omslag' = 'rund') => tegn(createElement(Rivalportrett, { id, størrelse, form }))
 
+/**
+ * Aksjene fra Pakke 104 (spillsporet) venter på ordmerkene sine (Grafikk): til da tegnes merket
+ * alene. Fjern dem herfra når ordmerkene er laget med scripts/lag-ordmerker.mjs.
+ */
+const VENTER_PAA_ORDMERKE: PapirId[] = ['SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE']
+const harOrdmerke = (id: PapirId) => !VENTER_PAA_ORDMERKE.includes(id)
+
 describe('selskapslogoene (G4)', () => {
   it('hvert papir har merke, ordmerke og en farge som står på alle flater', () => {
     for (const id of Object.keys(PAPIRER) as PapirId[]) {
       expect(PAPIRLOGOER, id).toContain(id)
-      expect(ORDMERKER[id].d.length, id).toBeGreaterThan(100)
+      if (harOrdmerke(id)) expect(ORDMERKER[id]!.d.length, id).toBeGreaterThan(100)
+      else expect(ORDMERKER[id], id).toBeUndefined()
       const farge = papirfarge(id)!
       for (const [flate, bunn] of Object.entries(FLATER)) {
         expect(kontrast(farge, bunn), `${id} på ${flate}`).toBeGreaterThanOrEqual(3)
@@ -62,9 +70,15 @@ describe('selskapslogoene (G4)', () => {
     for (const id of PAPIRLOGOER) {
       const svg = logo(id, true)
       const bredde = +svg.match(/viewBox="0 0 ([\d.]+) 24"/)![1]
-      expect(bredde, id).toBeCloseTo(29 + ORDMERKER[id].bredde, 1)
-      expect(ORDMERKER[id].hoyde, id).toBeLessThanOrEqual(22)
-      expect(svg, id).toContain(ORDMERKER[id].d)
+      const o = ORDMERKER[id]
+      // Uten ordmerke ennå: merket alene, 24 bredt.
+      if (!o) {
+        expect(bredde, id).toBe(24)
+        continue
+      }
+      expect(bredde, id).toBeCloseTo(29 + o.bredde, 1)
+      expect(o.hoyde, id).toBeLessThanOrEqual(22)
+      expect(svg, id).toContain(o.d)
     }
   })
 

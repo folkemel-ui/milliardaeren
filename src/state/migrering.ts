@@ -330,6 +330,14 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     const marked = (k.marked ?? []).map((p) => del(p, vektet[(hashTekst(`${p.id}:${p.navn}:posisjon`) >>> 0) % vektet.length]))
     return { ...s, klubb: { ...k, spillere, marked, formasjon: '4-4-2', akademi: nyttAkademi() } }
   },
+  /* 25 → 26: åtte nye aksjer på børsen (Pakke 104), som de sju i versjon 17: to timers
+     historikk, start på katalogkursen, tikk fra en hash av nyeFrø — terningen og alle de
+     gamle kursene er nøyaktig som før. Kvartalene får de nye ved første rapport. */
+  25: (s) => {
+    const marked = structuredClone(s.marked) as Spilltilstand['marked']
+    leggTilNyePapirer(marked, s.frø as number)
+    return { ...s, marked }
+  },
 }
 
 export type MigreringsResultat =

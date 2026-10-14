@@ -134,6 +134,16 @@ export function Kursgraf({ s, id }: { s: Spilltilstand; id: PapirId }) {
   )
 }
 
+/**
+ * Utbyttet i én enhet overalt (Pakke 104): det justerte etter kvartalene (×0,5–2), per uke.
+ * Før sto grunnutbyttet «% hver børsdag» øverst på aksjen og det justerte «% i uka» i
+ * nøkkeltallene — etter tre rapporter betalte Fjellkraft 1,97 ganger tallet øverst.
+ */
+export function utbyttetekst(s: Spilltilstand, id: PapirId): string | null {
+  const u = utbytteFor(s, id)
+  return u > 0 ? `${tall(u * 5 * 100, 2)} % i uka` : null
+}
+
 /** Høyeste og laveste kurs, utbytte og neste rapport. */
 export function Nokkeltall({ s, id }: { s: Spilltilstand; id: PapirId }) {
   const p = PAPIRER[id]
@@ -164,7 +174,7 @@ export function Nokkeltall({ s, id }: { s: Spilltilstand; id: PapirId }) {
         {aksje && (
           <div>
             <dt>Utbytte</dt>
-            <dd>{utbytteFor(s, id) > 0 ? `${tall(utbytteFor(s, id) * 5 * 100, 2)} % i uka` : 'Ingen'}</dd>
+            <dd>{utbyttetekst(s, id) ?? 'Ingen'}</dd>
           </div>
         )}
       </dl>

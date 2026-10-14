@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 102, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 104, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -1514,6 +1514,16 @@ session; delete what stops being true.
 - **«Same place on every card» means its own row** (Pack 102, the «Leder» badge): on the name line it
   dropped down for a long name, on the level line for a long level («Nivå 121 · 10 ansatte»). Only a
   row of its own is fixed; it costs 16 px per card that has a badge — say so in the report.
+- **A new stock needs (Pack 104)**: the `PapirId`, a `PAPIRER` entry (with `bransje` if it belongs to a
+  business type — `AKSJE_FOR` then routes weekly trends and company news to it), a place in `NYE_PAPIRER`
+  (ticks from a hash, so the die and old prices stay; leave it out of the index funds), a save-version step
+  calling `leggTilNyePapirer`, a `RAPPORTDAG` on the 24th or earlier (a later day slides past a weekend
+  into the next month, and two tests catch it), a logo in `Papirlogo.tsx` with a unique colour at ≥ 3:1 on
+  #181613, #ffffff and #ebe4d4 (check in `node -e` before drawing), and a word mark from
+  `scripts/lag-ordmerker.mjs` — which needs Google Fonts files that are not on this machine, so ask, or
+  leave it to the graphics track (`ORDMERKER` is partial since Pack 104). A version bump also needs
+  `vN.json.gz` for the old version: add it to `NESTE_BUMP` in `scripts/lag-gamle-lagringer.mjs` with the
+  last commit at that version and run `node scripts/lag-gamle-lagringer.mjs N` (about a minute).
 - **`kanSlaasSammen` is a type guard** (`din is Bedrift`): `!kanSlaasSammen(b)` on a `Bedrift`
   narrows `b` to `never`. Compare `b.nivaa < FUSJON_FRA_NIVAA` for the negative case.
 
