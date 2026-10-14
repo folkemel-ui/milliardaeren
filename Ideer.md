@@ -83,6 +83,8 @@ Loose ends after G1–G7, and what was picked for v10.0.
 15. **The farms as they grow.** Packs 92–94 give the farms fields as tiles (3 to 10), machines (tractor, combine, sprayer), stages (småbruk → gård → storgård → gods), drainage and frost cover (Pack 93 built those instead of irrigation), a greenhouse, a silo, a barn and a cowshed with cows, hens, sheep and pigs. Each needs its state drawn in the farm’s scene and on the field map. G18 drew both farms wide as they are today (Hedmarken with Mjøsa and Skibladner, Lista with the wind turbines), so this builds on those; the drawing has to take the farm's state, which comes through `Jordkort` and `Tingdetalj` (shared screens), and the field map is HTML in `JordOgLandemerker.tsx`.
 16. **The racing car as it is built.** The Formula 1 car is one drawing in Samling. Draw the team’s own car with its upgrades (the wings, the floor, the engine cover) in the team’s colours, on the racing page and in the race report, and the eight tracks as a small map or scene each. Picked from the racing list on 12 October 2026; fits after Pack 108 (the car’s figures).
 17. **Three late paintings.** *Art that moves and lasts* (*Improving what exists*) adds three late works (3, 10 and 30 mrd) that need paintings in `Malerier.tsx`; until they are drawn, the game shows the nearest painting. Fits after Pack 106.
+18. **Map names you can read.** At 375 px wide the city names, the rent arrows and the badges on the Norway map (Namdalen, Lofoten, Lista …) are about 8–9 px, under the 13 px that Pack 74 set for text. Bigger names and badges, a tap to zoom into a region, or both — `Norgeskart.tsx`, `Verdenskart.tsx`, `ui/norgeskartet.ts` (with the collision test in `norgeskartet.test.ts`). From the screen review on 14 October 2026.
+19. **Silhouettes that fill their place.** The overview card in Samling (Pack 91) gives each thing a 44 px target, but the silhouettes inside are about 30 × 10 px for the cars and boats, so the card reads as a row of dots; and the eighth car stands alone on a second row. Crop each silhouette to fill its target (as `NAERBILDER` does for the storage slots), perhaps four to a row with larger targets. From the screen review on 14 October 2026.
 
 ## Speed and tests
 
@@ -154,6 +156,41 @@ From the second farm list on 13 October 2026: Folke picked 13 of 22 (the other n
 11. **A «Silo full» notice.** When the silo is full, the rest of the grain is sold on Monday without a word (`jordVedDagsskifte`). A notice and a chip on the card.
 12. **Fewer Monday stories.** Avisa prints «… på gårdene» every game week, every 35 minutes, «Normal uke» too. Print only record and bad weeks, and put the rest in the Sunday paper’s «Uka di».
 13. **Farm achievements.** Two today (Godseier, Tømmerhogger). E.g. Gods, Fullt fjøs, Alle fire (all four pieces of land), Kornbaron (sell the silo at ×1.25 or more), Rekorduke and 1 mrd from the land, some hidden like «Kontrær».
+
+## The screens at phone size
+
+From the screen review on 14 October 2026: every tab looked at in the browser at 375 × 812, on a fresh game and on a late test save (`fulltSpill()` + three game days), and checked again after Packs 97–101. Folke picked 18 of 20; the two drawing items are *Graphics* 18–19 (the map names, the Samling silhouettes), one went to *Parked*, and «Mål: 1 milliard» still shown at 66 bill was already fixed by Pack 98. Not in a pack yet. The screens are shared, so most of these are the game track’s.
+
+### On every screen
+
+1. **Less above the first card.** On Bedrifter the first business starts 488 px down an 812 px screen: the top bar, the date row, the goal strip, «Dine bedrifter», the date again («Onsdag 13. januar» under «Ons 13. jan»), the buy amounts with «Milepæl», the sort, and «N bedrifter venter på retning». Drop the second date, put «Markedet i dag ›» in the heading row and let the goal strip scroll away with the page (only cash and net worth stay pinned) — about 150 px back, the first card at ~340.
+2. **One count of the achievements.** The goal strip says «39 / 59» and the Profil goal «66 %» (all of `PRESTASJONER`, the hidden ones too; `ui/progresjon.ts`), while the Prestasjoner card on the same page says «39 / 57» (`synligePrestasjoner`). Count the same way everywhere.
+3. **Short amounts in the stat tiles.** «Tjent totalt» shows every digit — «kr −2 209 642 914», with «kr» alone on the line above — while the rest of the game writes «kr 66,6 bill». Use the short form there (`Profil.tsx`, `Bedriftdetalj.tsx`).
+4. **Numbers that don’t break.** On Investeringer → Oversikt, «+kr 8,55 mill · +0,3 %» breaks so the «%» stands alone on the next line (the same with «−1,2 %»). Keep an amount and its sign or unit together (a non-breaking space or `white-space: nowrap` on the pair).
+5. **A tab that answers at once.** Since Pack 96 the tabs are parts; the first visit to one left the old tab on screen for about a second on the dev server, with nothing to say a tap was taken. Measure it in a build on a phone first; if it shows, put the tab’s heading up at once while the rest loads.
+
+### Bedrifter
+
+6. **The badge in one place.** «LEDER» sits on the name line for Saftbod but drops to the second line for Gatekjøkken (a longer name), and the direction dot moves with it. Give the badge and the dot a fixed place, on the level line (`Bedriftskort.tsx`).
+7. **One button for the cheap improvements.** Late, every card has an improvement row priced like «Saftpresse kr 2 358» while the cash is billions — thirteen small taps. A line above the list, «Kjøp alle billige forbedringer (7) · kr X», for those under some share of the cash (e.g. 0.1 %).
+8. **Buy amounts when they matter.** ×1 / ×10 / ×100 / Maks shows from the first minute, with one business at level 1, and does not fill its row. Show it from a second business or level 10, and stretch it to the width.
+
+### Investeringer
+
+9. **Empty kinds on one line.** Obligasjoner, Startups and Sparekonto at kr 0 each take a full row on Oversikt. One line under the others: «Ikke i bruk: Obligasjoner · Startups · Sparekonto ›» (`investeringer/Oversikt.tsx`).
+10. **«< 1 %» instead of «0 %».** Aksjer worth kr 2,95 mill shows «0 % av porteføljen» (rounded in `Oversikt.tsx`). Profil already writes «< 0,1 %»; use the same.
+
+### Eiendom and Luksus
+
+11. **Property grouped by city.** With 77 owned the list is Hybel Moholt, Hybel Møhlenpris, Hybel Blindern, then the flats — by type, with the cities mixed. Group by city under a heading with the count and the total rent, each group foldable, so the list follows the map and the city chips above it.
+12. **Status as a strip on Luksus.** The status card (~230 px: level, points, the bar, income and rate, the rule) stands above the Samling · Hjem · Kunst · Klubb switch, so every part starts ~360 px down. A 52 px strip like the club’s (Pack 77) — «11 Dynasti · 120 til Mytisk» — that opens the full card.
+13. **A garage row that fits.** The garage, harbour and hangar rows scroll sideways and cut the names at the edge («Brukt», «Elektrisk»). Wrap them, or show what fits and «Se alle» (the heading already opens the place at full size).
+
+### Profil and Avisa
+
+14. **A chart where every zero counts.** The net worth chart is linear (kr 0, 100 bill, 200 bill, 300 bill), so everything before the last jump is a flat line at zero — while the goal card says «Hvert nuller teller like mye». A scale with one step per tenfold (1 000, 1 mill, 1 mrd, 1 bill) (`Formuegraf.tsx`).
+15. **Room for «Innstillinger».** In Meg · Regnskap · Statistikk · Innstillinger the last word touches the edge of its button at 375 px. A shorter word («Valg»), an icon, or a smaller gap.
+16. **Avisa in one column on a phone.** The stories stand in two columns down to 340 px (`avisa.css`), so at 375 a headline beside its 30 px picture breaks almost a word a line («Din post i / Trollspill / steg 5 %»). One column under ~420 px, or the picture under the headline.
 
 ## Parked (not chosen yet)
 
@@ -273,6 +310,9 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Sprint races.** A short Saturday race with half points at three or four tracks.
 - **Avisa for the race weekend.** Qualifying, the title fight before the last race, a driver’s first win.
 - **More racing achievements.** Pole position, a 1-2, a «grand slam», a win on every track.
+
+**Not picked from the screen review on 14 October 2026**
+- **Say what pulls the day down.** «−29 % i dag · Het bransje, Snø» reads as a contradiction (a hot trade, yet a minus); show each part with its own sign, e.g. «Snø −35 % · Het bransje +10 %».
 
 **Declined in earlier rounds** (from lists Folke saw and didn't pick; the details were in chat, not in this file)
 - **Before v1.0:** a guided tutorial, an ending, missions, sound, accessibility.
