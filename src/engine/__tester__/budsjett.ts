@@ -18,7 +18,9 @@ export const BUDSJETT: Record<string, number> = {
   // 45 → 55 etter Pakke 104: åtte nye aksjer gjorde markedet 27 → 39–42 ms.
   marked: 55,
   bank: 20,
-  'dagsskifte og kø': 20,
+  // 20 → 25 etter Pakke 106: målte 19–20 alene og 21 under en hel kjøring (to ganger 15. oktober),
+  // likt før og etter Pakkene 105–106 — avisa husker 24 utgaver og har åtte flere aksjer å skrive om.
+  'dagsskifte og kø': 25,
   oppussing: 10,
   'sparing og utbytte': 6,
   'utbytte og margin': 6,
