@@ -283,6 +283,13 @@ session; delete what stops being true.
   `document.fonts.ready`, finish the animations, capture (`scripts/lag-skjermbilder.mjs`).
 - **There is no Python on this machine** (`python` opens the Microsoft Store stub and does
   nothing). Write edit scripts in Node.
+- **«Timeout calling onTaskUpdate» with every test green is a blocked worker, not a slow machine**
+  (Pack 104). The runner's messages have a 60 s deadline whose timer runs in the worker, and between
+  tests Vitest awaits only promises, never a macrotask — so a file of synchronous tests (G13, G16 and
+  the old saves, 49–55 s alone) holds its worker; past 60 s the timer fires before the waiting reply is
+  read. Every file passes alone, master fails too, and 2 workers fail like 3 — all signs of it.
+  `src/testoppsett.ts` (in `setupFiles`) now yields with `setTimeout(0)` after every test. Work done in
+  a `describe` body (collection) is not covered: keep it short, or move it into a `beforeAll`.
 - **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
 
 ## 4. Dev server and browser pane

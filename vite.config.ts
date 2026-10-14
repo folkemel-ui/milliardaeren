@@ -85,6 +85,8 @@ export default defineConfig({
     // i parallell er standardgrensen på 5 s for knapp.
     testTimeout: 20_000,
     maxWorkers: ARBEIDERE,
+    // Arbeideren slipper til meldingene sine etter hver test (Pakke 104; se src/testoppsett.ts).
+    setupFiles: ['src/testoppsett.ts'],
     // Tre grupper som kjører etter hverandre: de raske i parallell først, så de
     // tunge, og til slutt ytelsestesten alene. I samme gruppe feilet den ofte på en
     // travel maskin.
