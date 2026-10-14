@@ -8,6 +8,7 @@ import type { Spilltilstand } from '../../../engine/types'
 import { kortKroner, tall } from '../../format'
 import { RulleTall } from '../../komponenter/RulleTall'
 import { Endring } from './felles'
+import { SkattSaLangt } from '../../komponenter/Skattekort'
 
 const KLASSENAVN: Record<Aktivaklasse, string> = {
   aksje: 'Aksjer',
@@ -53,6 +54,7 @@ export function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Exclude<Akti
               ))}
           </div>
         )}
+        <SkattSaLangt s={s} />
       </div>
 
       <ul className="kortliste">

@@ -65,12 +65,17 @@ export const DIN_DEL_AV_RUNDEN = 1
 /** En gransking koster så stor andel av selskapets verdi, og viser det sanne teamet og risikoen. */
 export const GRANSKING_ANDEL = 0.01
 /**
- * Støyen i inntrykket av teamet, per runde: ±0,25 ved start, og en ny, skarpere lesning
+ * Støyen i inntrykket av teamet, per runde: ±0,5 ved start, og en ny, skarpere lesning
  * for hver runde selskapet overlever (Pakke 83). Fra en hash, så terningen står.
+ * Doblet i Pakke 103: med ±0,25 var inntrykket nesten det sanne teamet, så granskingen
+ * (1 % av verdien) var et dødt valg.
  */
-export const INNTRYKK_STOY = [0.25, 0.2, 0.15, 0.1, 0.05]
-/** Verdien ved start, som andel av den høyeste formuen din — så startups alltid betyr noe. */
-const STARTVERDI_ANDEL = 0.02
+export const INNTRYKK_STOY = [0.5, 0.4, 0.3, 0.2, 0.1]
+/**
+ * Verdien ved start, som andel av den høyeste formuen din — så startups alltid betyr noe.
+ * 2 → 5 % i Pakke 103: en runde var ~0,4 % av formuen. Avkastningen per krone er den samme.
+ */
+export const STARTVERDI_ANDEL = 0.05
 const STARTVERDI_MIN = 2_000_000
 /** Et oppkjøp betaler verdien ganget med dette. */
 export const OPPKJOP_MIN = 1.1
@@ -177,7 +182,7 @@ function nyStartup(s: Spilltilstand, t: Terning): Startup {
   const ledige = STARTUP_IDEER.map((_, i) => i).filter((i) => !brukte.has(i))
   const kvalitet = t.neste()
   // Inntrykket er kvaliteten pluss støy, delt i tre.
-  const inntrykk = Math.max(0, Math.min(2, Math.floor((kvalitet + t.mellom(-0.25, 0.25)) * 3)))
+  const inntrykk = Math.max(0, Math.min(2, Math.floor((kvalitet + t.mellom(-INNTRYKK_STOY[0], INNTRYKK_STOY[0])) * 3)))
   return {
     id: s.nesteStartupId++,
     ide: t.velg(ledige),

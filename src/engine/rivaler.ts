@@ -60,8 +60,11 @@ export function oppkjopspris(r: Rival): number {
  * som før — løftet er her, så gamle lagringer får det uten ny versjon, og et tak som
  * er krympet av et oppkjøp (fusjon.ts) krymper fortsatt.
  */
-export const RIVALLOFT: Partial<Record<string, { vekst: number; takFaktor: number }>> = {
-  aas: { vekst: 0.18, takFaktor: 20 },
+export const RIVALLOFT: Partial<Record<string, { vekst: number; takFaktor: number; svingning?: number }>> = {
+  // Pakke 103: svingningen 0,15 → 0,04. Med 0,15 endte hun hvor som helst fra 270 til 1 710 mrd
+  // ved 34 t (p10–p90), og var foran benken på slutten i 19 % av spillene — flaks, ikke spill. Nå
+  // 13–19 mrd ved 11,5 t (foran benkens ~11), 79–126 ved 22 t (jevnt) og 550–900 ved 34 t.
+  aas: { vekst: 0.18, takFaktor: 20, svingning: 0.04 },
 }
 
 /** Rivalens vekst og tak i spillet, med løftet. */
@@ -77,7 +80,8 @@ export function rivaltikk(s: Spilltilstand, t: Terning, dt: number): void {
     const rate = vekst * Math.max(0, 1 - r.formue / tak)
     const u = 1 - t.neste()
     const normal = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * t.neste())
-    r.formue *= Math.exp(rate * dt + SVINGNING * Math.sqrt(dt) * normal)
+    // Samme trekk som før, bare mindre utslag for den som har egen svingning: terningen går i samme takt.
+    r.formue *= Math.exp(rate * dt + (RIVALLOFT[r.id]?.svingning ?? SVINGNING) * Math.sqrt(dt) * normal)
   }
 }
 

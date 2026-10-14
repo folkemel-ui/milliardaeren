@@ -36,6 +36,27 @@ export function skattegrunnlag(o: Oppgjor): number {
   return Math.max(0, o.bedrifter + o.leie + o.utbytte + o.sparerente + (o.gevinster ?? 0) + (o.klubb ?? 0) - o.renter)
 }
 
+/**
+ * Skatten så langt denne måneden (Pakke 103): månedens tellere fra `maanedstart` til nå, regnet
+ * som skatteoppgjøret den 1. gjør det — med offshore halvert. Før sa skattekortet bare at neste
+ * regning kom den 1., og den var 15–28 % av formuen: den smarte boten betalte 5 av 6 for sent.
+ */
+export function skattSaLangt(s: Spilltilstand): number {
+  const st = s.maanedstart
+  const grunnlag = Math.max(
+    0,
+    s.totaltTjent - st.tjent +
+      (s.totaltLeie - st.leie) +
+      (s.totaltUtbytte - st.utbytte) +
+      (s.totaltSparerente - st.sparerente) +
+      ((s.totaltGevinst ?? 0) - (st.gevinst ?? 0)) +
+      (st.klubb === undefined ? 0 : (s.totaltKlubb ?? 0) - st.klubb) -
+      (s.totaltRentebetalt - st.rentebetalt),
+  )
+  const full = beregnSkatt(grunnlag)
+  return s.skatt.offshore ? full / 2 : full
+}
+
 export function beregnSkatt(grunnlag: number): number {
   let skatt = 0
   for (let i = 0; i < SKATTETRINN.length; i++) {

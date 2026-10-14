@@ -147,10 +147,11 @@ describe('startups du kan lese', () => {
   })
 
   it('inntrykket leses på nytt etter hver runde, med mindre støy, fra en hash', () => {
-    expect(INNTRYKK_STOY).toEqual([0.25, 0.2, 0.15, 0.1, 0.05])
-    // Et sterkt team (0,95) leses som «Erfarent» så snart støyen er under 0,28 — fra runde 1.
+    // Pakke 103 doblet støyen, så granskingen betaler seg: ±0,5 ved start, ±0,1 i siste runde.
+    expect(INNTRYKK_STOY).toEqual([0.5, 0.4, 0.3, 0.2, 0.1])
+    // Et sterkt team (0,95) leses som «Erfarent» så snart støyen er under 0,28 — fra runde 3.
     let s = medStartup(0.95, 0)
-    for (let d = 0; d < 6 && s.startups.some((st) => st.status === 'aktiv' && st.runde < 2); d++) s = simuler(s, DAG_SEK)
+    for (let d = 0; d < 8 && s.startups.some((st) => st.status === 'aktiv' && st.runde < 3); d++) s = simuler(s, DAG_SEK)
     const st = s.startups.find((x) => x.id === 1)!
     if (st.status === 'aktiv') expect(st.inntrykk).toBe(2)
   })

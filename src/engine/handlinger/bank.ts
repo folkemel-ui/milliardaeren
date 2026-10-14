@@ -66,6 +66,24 @@ export function betalSkatt(s: Spilltilstand, id: number): Utfall {
   return { ok: true, tilstand: n }
 }
 
+/**
+ * Betaler det du har av en regning nå (Pakke 103): resten står igjen med samme forfall, og
+ * gebyret ved forfall regnes bare av resten. Før kunne en regning bare betales helt, og den
+ * var ofte større enn kontantene. Botene bruker `betalSkatt` som før.
+ */
+export function betalDelAvSkatt(s: Spilltilstand, id: number): Utfall {
+  const r = s.skatt.regninger.find((x) => x.id === id)
+  if (!r) return feil('Fant ikke regningen.')
+  const belop = Math.min(r.belop, Math.max(0, s.kontanter))
+  if (belop < 1) return feil('Du har ingen kontanter å betale med.')
+  if (belop >= r.belop) return betalSkatt(s, id)
+  const n = structuredClone(s)
+  n.kontanter -= belop
+  n.skatt.totaltBetalt += belop
+  n.skatt.regninger.find((x) => x.id === id)!.belop -= belop
+  return { ok: true, tilstand: n }
+}
+
 export function settOffshore(s: Spilltilstand, på: boolean): Utfall {
   if (s.skatt.offshore === på) return feil(på ? 'Offshore er allerede i bruk.' : 'Offshore er allerede av.')
   const n = structuredClone(s)

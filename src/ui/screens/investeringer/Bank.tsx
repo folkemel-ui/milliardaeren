@@ -17,6 +17,7 @@ import { utfor } from '../../../state/lager'
 import { kortKroner, kroner, perSek, tall } from '../../format'
 import { RulleTall } from '../../komponenter/RulleTall'
 import { Forklaring } from '../../komponenter/Forklaring'
+import { SkattSaLangt } from '../../komponenter/Skattekort'
 
 function Sparekonto({ s }: { s: Spilltilstand }) {
   const andeler = [0.25, 0.5, 1]
@@ -86,6 +87,7 @@ export function Bank({ s }: { s: Spilltilstand }) {
         Gjeld og lån <Forklaring tema="laan" />
       </h2>
       <div className="kort bank">
+        <SkattSaLangt s={s} />
         <div className="bank-rad">
           <div>
             <span className="etikett">Gjeld</span>

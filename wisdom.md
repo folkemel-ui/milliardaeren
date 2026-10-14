@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 101, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 103, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -156,6 +156,12 @@ session; delete what stops being true.
   included. Each session should check where its server runs (the `node.exe` command line in
   `Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`), and stop and restart it from
   its own folder. Don't stop the other session's server; tell Folke.
+- **Fetch before you start a pack, not only before you deliver** (Pack 103). Folke can reshuffle the
+  pack plan in another session: on 14 October «Bedrifter from the top» was moved up as Pack 102 and the
+  tax pack became 103 while this session was building the tax pack as «Pakke 102». `lever.mjs` caught it
+  as an `Ideer.md` conflict at the end. Resolve to the plan on master (their «Next up», their numbering),
+  rename your pack (commit message, comments, test file) to the number it has there, and say so. Better:
+  `git fetch` and read `origin/master:Ideer.md`'s «Next up» before asking the pack's questions.
 - **Run `lever.mjs` before the report, not after.** In Pack 66 the graphics track had pushed
   G12 while the pack was being built; the rebase stopped on `Ideer.md` (both tracks removed
   items from the same section, which then had to go) and `vite.config.ts` (both added a
@@ -796,6 +802,21 @@ session; delete what stops being true.
   the rule, but useless as a measurement. Measure such a rule on a mid-game save (~1 mrd) as well.
 - **A percent bar on a moved price needs a tolerance**: `kurs *= 0.95` then `kurs / før − 1` gave
   0.0499999…, so «at least 5 %» failed depending on the price. `>= terskel − 1e-9`.
+- **Tame a rival's luck without moving the die** (Pack 103): `rivaltikk` draws the same two numbers
+  per tick whatever the swing, so a smaller swing for one rival (`RIVALLOFT[id].svingning`) changes her
+  path but not anyone else's draws — the golden master stayed. Measure such a change with a plain-Node
+  Monte Carlo of the formula (400 seeds, quantiles at 11.5, 22 and 34 h against the bench), then pin it
+  with an engine test over 40 seeds.
+- **Check a list item's «worth ~N points» with a small model** (Pack 103, startup research): uniform
+  quality, the impression as quality ± noise in thirds, and Pack 83's measured return per true team gave
+  +3.6 points at ±0.25 and +7.4 at ±0.5 — matching the review's claim — in a one-line `node -e`.
+- **The speed test's `leie` part (budget 22 ms) fails under full-suite load** — 23 ms in Packs 93 and 95,
+  25 ms in Pack 103 — and passes alone. Rerun `ytelse.test.ts` alone before suspecting the change;
+  `lever.mjs` has passed it every time so far.
+- **Paying part of a bill is a new action, not a change to the old one** (Pack 103): the bots call
+  `betalSkatt` and keep cash for upgrades when it fails; had it paid part, both bots would have spent
+  every tick's cash on tax and the golden master and the bench would have moved. `betalDelAvSkatt` is
+  for the player's button only.
 - **Per-type rules (Pack 80)**: `milepaelfaktor`, `milepaelboost` and `nesteMilepael` take an
   optional type; without it they give the shared milestones. Anything that shows or plans
   milestones for a business must pass `b.type` (or use `milepaelerFor`), or the hotel's level 35

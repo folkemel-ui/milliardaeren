@@ -121,7 +121,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tittel: 'Skatt og offshore',
     tekst:
       `Hver måned kommer en regning på månedens overskudd — inntektene, klubbens resultat og gevinsten på det du har solgt, minus tap og lånerenter — med trinnskatt: ${trinn.map((t) => `${pst(t.sats)} over ${kortKroner(t.fra)}`).join(', ').replace(/, (?=[^,]*$)/, ' og ')}. ` +
-      `Du har en uke på å betale — etter det kommer gebyr, og skatten kreves inn. ` +
+      `Du har en uke på å betale — etter det kommer gebyr på det som ikke er betalt, og skatten kreves inn. Mangler du kontanter, kan du betale det du har; skattekortet, Bank og Oversikt viser hva måneden har gitt i skatt så langt. ` +
       `Offshore halverer skatten, men hver måned er det ${pst(REVISJONSSJANSE)} sjanse for bokettersyn. Da betales alt som er unndratt tilbake, pluss like mye i tillegg.`,
   },
   rivaler: {
@@ -137,7 +137,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       `Oppstartsselskaper henter penger i runder, fra pre-seed til serie C. Hver runde varer én spilldag, og du kan ta opptil ${pst(DIN_DEL_AV_RUNDEN)} av den. ` +
       `Ved dagsskiftet går selskapet videre, går konkurs eller blir kjøpt opp, og nye penger i hver runde gjør andelen du hadde fra før, ${pst(RUNDEANDEL)} mindre — det du satte inn i selve runden, vannes ikke ut. ` +
-      'Etter serie C børsnoteres det, og du får betalt. Teamet er det som teller: et sterkt team lønner seg i snitt, et svakt taper — men inntrykket lyver av og til.',
+      'Etter serie C børsnoteres det, og du får betalt. Teamet er det som teller: et sterkt team lønner seg i snitt, et svakt taper — men inntrykket lyver ofte ved start, og blir skarpere for hver runde. En gransking viser det sanne teamet.',
   },
   eiendom: {
     tittel: 'Eiendom',

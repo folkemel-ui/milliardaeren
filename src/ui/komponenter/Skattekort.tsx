@@ -1,10 +1,26 @@
 import { useState } from 'react'
-import { betalSkatt, settOffshore } from '../../engine/handlinger'
-import { FORSINKELSESGEBYR, REVISJONSSJANSE, SKATTETRINN } from '../../engine/skatt'
+import { betalDelAvSkatt, betalSkatt, settOffshore } from '../../engine/handlinger'
+import { FORSINKELSESGEBYR, REVISJONSSJANSE, SKATTETRINN, skattSaLangt } from '../../engine/skatt'
+import { dato, MÅNEDER } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, kroner, tall, varighet } from '../format'
 import { Forklaring } from './Forklaring'
+
+/**
+ * «Skatt så langt i oktober: ca. kr X» (Pakke 103) — på skattekortet, i Bank og på Oversikt,
+ * så regningen den 1. ikke kommer som en overraskelse. Ingenting når måneden ikke har gitt skatt.
+ */
+export function SkattSaLangt({ s }: { s: Spilltilstand }) {
+  const belop = skattSaLangt(s)
+  if (belop < 1) return null
+  return (
+    <p className="liten skatt-saa-langt">
+      Skatt så langt i {MÅNEDER[dato(s.maanedstart.dag).maaned]}: <strong>ca. {kortKroner(belop)}</strong>
+      <span className="dempet"> · regningen kommer den 1.{s.kontanter < belop ? ', og kontantene dekker den ikke ennå' : ''}</span>
+    </p>
+  )
+}
 
 /** Skattekortet: åpne regninger, offshore-valget og hva du har betalt. */
 export function Skattekort({ s }: { s: Spilltilstand }) {
@@ -20,6 +36,7 @@ export function Skattekort({ s }: { s: Spilltilstand }) {
         <span className="dempet liten">Betalt totalt {kortKroner(k.totaltBetalt)}</span>
       </div>
 
+      <SkattSaLangt s={s} />
       {k.regninger.length === 0 ? (
         <p className="dempet liten">Ingen ubetalte regninger. Neste skatteoppgjør kommer den 1. i neste måned.</p>
       ) : (
@@ -34,9 +51,16 @@ export function Skattekort({ s }: { s: Spilltilstand }) {
                     {kroner(r.belop)} · forfaller om {varighet(Math.max(0, igjen))}
                   </span>
                 </div>
-                <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < r.belop} onClick={() => utfor(betalSkatt(s, r.id))}>
-                  Betal
-                </button>
+                {/* Pakke 103: mangler kontantene, betaler knappen det du har — gebyret ved forfall gjelder bare resten. */}
+                {s.kontanter >= r.belop ? (
+                  <button className="knapp knapp-gull knapp-liten" onClick={() => utfor(betalSkatt(s, r.id))}>
+                    Betal
+                  </button>
+                ) : (
+                  <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < 1} onClick={() => utfor(betalDelAvSkatt(s, r.id))}>
+                    Betal {kortKroner(Math.max(0, s.kontanter))}
+                  </button>
+                )}
               </li>
             )
           })}
