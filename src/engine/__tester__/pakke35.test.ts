@@ -24,11 +24,17 @@ describe('bransjestigen', () => {
     }
   })
 
-  it('første oppgradering koster en jevnt stigende andel av prisen fra kiosken til banken', () => {
-    const andeler = typer.slice(STIGEN.indexOf('kiosk'), STIGEN.indexOf('bank') + 1).map((t) => t.oppgraderingspris / t.pris)
+  it('første oppgradering koster en jevnt stigende andel av prisen fra kiosken til hotellet', () => {
+    const andeler = typer.slice(STIGEN.indexOf('kiosk'), STIGEN.indexOf('hotell') + 1).map((t) => t.oppgraderingspris / t.pris)
     for (let i = 1; i < andeler.length; i++) expect(andeler[i]).toBeGreaterThanOrEqual(andeler[i - 1] - 1e-9)
     expect(andeler[0]).toBeCloseTo(0.25)
     expect(andeler.at(-1)).toBeLessThanOrEqual(0.8)
+  })
+
+  it('banken er unntaket (Pakke 100): litt billigere enn hotellet, så den ikke blir stående på nivå 9', () => {
+    const andel = (id: (typeof STIGEN)[number]) => typer[STIGEN.indexOf(id)].oppgraderingspris / typer[STIGEN.indexOf(id)].pris
+    expect(andel('bank')).toBeCloseTo(0.45)
+    expect(andel('bank')).toBeLessThan(andel('hotell'))
   })
 
   it('i sluttspillet stiger andelen igjen, fra halvparten (Pakke 47)', () => {

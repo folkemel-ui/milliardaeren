@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 99, 13 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 100, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -592,6 +592,20 @@ session; delete what stops being true.
   1 mrd 5 h 07, 10 mrd 11 h 28, 100 mrd 22 h 09, 1 000 mrd 34 h 05** (×1.5 at 35 gave 35 h 03).
   The golden master did not move: its simple bot never owns a hotel, so it cannot see any rule
   that only touches the top businesses — the bench is the only guard for those.
+  **After Pack 100 (improvements at 10/24/48 upgrades, bank upgrade kr 270 mill): 1 mrd 5 h 01,
+  10 mrd 11 h 16, 100 mrd 22 h 05, 1 000 mrd 33 h 07.** The golden master moved (its simple bot
+  buys improvements): kr 113.6 → 146.5 mill after 4 h.
+- **«Make X worth buying» is a pace change when X competes with something per krone** (Pack 100,
+  stars). The bot hires by payback, so a star is either never hired (price 2.5, 2.75, 3 and 4 gave
+  identical benches — a cliff) or beats the experienced hire, and then hiring as a whole gets
+  better: 2.25 made the game 12 % faster. There is no price where stars are «sometimes right» for
+  a payback buyer. Show the cliff in the question with the bench numbers on both sides; Folke chose
+  to keep the price and say plainly on the card when an experienced hire gives more per krone.
+- **Bench several variants in one go** (Pack 100: `scratchpad/benk100/prov.mjs`): copy `src` per
+  variant, swap strings (throw unless exactly one hit), bundle `zz-benk.ts` with esbuild, spawn all
+  and print one line per tenfold with what the bot owned (stars hired, improvements bought, the
+  bank's level and share of income). Seven variants to 1 000 mrd took 2.5 min; the `base` variant
+  reproduced the Vitest bench to the minute (34 h 03 against 34 h 04).
 - **The borrowing limit and the margin call were one constant until Pack 81.** `MAKS_BELAANING`
   was both how far you can borrow and how far a margin call sells down; lowering it to 0.2 would
   have made every forced sale harsher. Now `MARGIN_MAAL` (0.5) is the sell-down target and the

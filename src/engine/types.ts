@@ -79,6 +79,8 @@ export interface Forbedring {
   nivaa: number
   /** Inntekten ganges med dette. */
   faktor: number
+  /** Prisen, i vanlige oppgraderinger på nivået den låses opp (Pakke 100). */
+  prisfaktor: number
 }
 
 // ─────────────────────────────────────────────── Markedet

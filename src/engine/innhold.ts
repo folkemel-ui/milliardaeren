@@ -50,7 +50,7 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
   },
   bank: {
     id: 'bank', navn: 'Bank',
-    pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 300_000_000, vekst: 1.1, laasesOppVed: 750_000_000,
+    pris: 600_000_000, grunninntekt: 20_000, oppgraderingspris: 270_000_000, vekst: 1.1, laasesOppVed: 750_000_000,
   },
   oljeselskap: {
     id: 'oljeselskap', navn: 'Oljeselskap',
@@ -122,11 +122,18 @@ export function milepaelerFor(type: BedriftstypeId): readonly number[] {
 /** Nivåene forbedringene låses opp på, og hvor mye hver ganger inntekten med. */
 const FORBEDRING_NIVAA = [10, 40, 80]
 const FORBEDRING_FAKTOR = [1.5, 1.5, 2]
-/** En forbedring koster så mange vanlige oppgraderinger på nivået den låses opp. */
-export const FORBEDRING_PRISFAKTOR = 30
+/**
+ * En forbedring koster så mange vanlige oppgraderinger på nivået den låses opp (Pakke 100). Før
+ * kostet alle tre 30: den første (×1,5 på nivå 10) tjente seg inn seks ganger saktere enn neste
+ * nivå og gikk i null først på nivå 22, den andre halvannen gang saktere, mens den tredje (×2 på
+ * nivå 80) var 2,7 ganger bedre. Med 10, 24 og 48 tjener de seg inn på 2, 1,2 og 0,6 ganger tiden
+ * neste nivå tar der de låses opp (før 6, 1,5 og 0,37) — den første er ikke lenger en felle.
+ * Benken: 1 mrd 5 t 07 → 5 t 01, 1 000 mrd 34 t 03 → 32 t 56 (alene).
+ */
+export const FORBEDRING_PRISFAKTOR = [10, 24, 48] as const
 
 function forbedringer(liste: [string, string][]): Forbedring[] {
-  return liste.map(([navn, beskrivelse], i) => ({ navn, beskrivelse, nivaa: FORBEDRING_NIVAA[i], faktor: FORBEDRING_FAKTOR[i] }))
+  return liste.map(([navn, beskrivelse], i) => ({ navn, beskrivelse, nivaa: FORBEDRING_NIVAA[i], faktor: FORBEDRING_FAKTOR[i], prisfaktor: FORBEDRING_PRISFAKTOR[i] }))
 }
 
 /** Tre forbedringer per bransje, i rekkefølge. Hver ganger inntekten. */

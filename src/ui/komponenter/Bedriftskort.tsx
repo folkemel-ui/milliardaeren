@@ -28,7 +28,7 @@ import {
   MAKS_ANSATTE,
   milepaelerFor,
 } from '../../engine/innhold'
-import type { Bedrift, BedriftstypeId, Retning, Spilltilstand } from '../../engine/types'
+import type { Ansattgrad, Bedrift, BedriftstypeId, Retning, Spilltilstand } from '../../engine/types'
 import { utfor, utforMed } from '../../state/lager'
 import { Koknapp, Koppknapp, useFlytetall, useHold } from './Hender'
 import { kortKroner, perSek, tall, varighet } from '../format'
@@ -189,6 +189,10 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
   const ledPris = lederpris(b.type)
   const nesteplass = (Math.floor(b.nivaa / ANSATTE_PER_NIVAA) + 1) * ANSATTE_PER_NIVAA
   const folk = stab(b)
+  // Pakke 100: hva hver grad gir per krone i dag. En stjerne gir mest per plass, men en erfaren
+  // nesten alltid mer per krone — og det skal stå, i stedet for at stjernen ser ut som det beste kjøpet.
+  const perKrone = (grad: Ansattgrad) => ansettelseGir(s, b, grad) / ansettelsespris(b, grad)
+  const erfarenBedre = perKrone('erfaren') > perKrone('stjerne')
 
   return (
     <div className="personale">
@@ -251,6 +255,7 @@ export function Personale({ b, s }: { b: Bedrift; s: Spilltilstand }) {
                     {!taper && gir > 0 && <span className="dempet"> · tilbake på {varighet(pris / gir)}</span>}
                   </span>
                 )}
+                {!laast && grad === 'stjerne' && erfarenBedre && <span className="liten stjerne-merknad">En erfaren gir mer per krone</span>}
                 <button
                   className={`knapp ${taper ? 'knapp-fare' : 'knapp-gull'} knapp-liten`}
                   disabled={laast || s.kontanter < pris}

@@ -50,9 +50,11 @@ describe('milepæler etter nivå 100', () => {
 describe('tempoet etter milliarden', () => {
   it('første oppgradering fra hotellet og opp koster mer — det som holder ~15 t per tidobling', () => {
     // Målt på benken: 1 mrd 5 t 07, så 6 t 20, 10 t 46 og 14 t 01 per tidobling (uten: 6 t 09, 10 t 10, 12 t 30).
+    // Etter Pakke 100 (forbedringene, banken 0,45): 1 mrd 5 t 01, 1 000 mrd 33 t 07.
     const andel = (id: keyof typeof BEDRIFTSTYPER) => BEDRIFTSTYPER[id].oppgraderingspris / BEDRIFTSTYPER[id].pris
     expect(andel('hotell')).toBeCloseTo(0.5)
-    expect(andel('bank')).toBeCloseTo(0.5)
+    // Pakke 100: banken ned til 0,45 — med 0,5 sto den på nivå 9 fra ~10 t til ~22 t.
+    expect(andel('bank')).toBeCloseTo(0.45)
     expect(andel('oljeselskap')).toBeCloseTo(0.275)
     expect(andel('rederi')).toBeCloseTo(0.4)
     expect(andel('fiskeoppdrett')).toBeCloseTo(0.4)

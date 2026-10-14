@@ -788,3 +788,9 @@
 .bedrifter-kontroller > .rekkefolge {
   margin-left: auto;
 }
+
+/* Pakke 100: under stjernen, når en erfaren gir mer per krone. */
+.ansett-grad > .stjerne-merknad {
+  grid-column: 1 / -1;
+  color: var(--tekst-dempet);
+}

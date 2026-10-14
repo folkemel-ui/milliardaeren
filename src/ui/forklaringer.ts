@@ -69,7 +69,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `Hver oppgradering gir litt mer inntekt; på nivå ${og(MILEPAELER.filter((_, i) => MILEPAELFAKTORER[i] === 2))} dobles den, og på nivå ${og(MILEPAELER.filter((_, i) => MILEPAELFAKTORER[i] !== 2))} ganges den med 1,5. ` +
       `Fra hotellet og opp ${TOPPMILEPAEL_FAKTOR === 2 ? 'dobles' : 'øker'} den også på nivå ${TOPPMILEPAEL}, og filialer og retning kommer alt på nivå ${TOPP_FRA_NIVAA}. ` +
       `En erfaren ansatt gir ${pst(ANSATT_BONUS)} mer, en junior ${pst(GRADER.junior.bonus)} for halv lønn, og fra nivå ${RETNING_NIVAA} en stjerne ${pst(GRADER.stjerne.bonus)} for tredobbel lønn. ` +
-      'Lønnen er fast: i en liten bedrift koster de ansatte mer enn de gir, og da står ansettelsen i rødt. Stjernene er dyre, men gir mest per plass — de lønner seg når plassene er fulle. ' +
+      'Lønnen er fast: i en liten bedrift koster de ansatte mer enn de gir, og da står ansettelsen i rødt. ' +
+      `En stjerne gir mest per plass, men en erfaren gir mer per krone: stjernen koster ${tall(GRADER.stjerne.pris)} ganger så mye for ${tall(GRADER.stjerne.bonus / ANSATT_BONUS, 1)} ganger så mye. Den er for den som vil ha mest ut av hver plass — kortet sier når en erfaren er det bedre kjøpet. ` +
+      'Forbedringene og oppgraderingene sier hvor fort de tjener seg inn, som ansettelsene. ' +
       'Kalenderen betyr noe: restauranter og hoteller tjener mest i helgen, bankene og kafeene på hverdager, saftbodene i sola og skisentrene i snøen. ' +
       `Hver uke kan én bransje være het (+${pst(TREND)}) og én kald (−${pst(TREND)}). Over tid jevner det seg ut — helligdagene er rene bonuser, som 17. mai for pølsebodene. ` +
       `På nivå ${RETNING_NIVAA} (${TOPP_FRA_NIVAA} fra hotellet og opp) velger hver bedrift retning for godt: volum gir ${pst(RETNINGER.volum.inntekt - 1)} mer inntekt; premium ${pst(RETNINGER.premium.inntekt - 1)} mer, ingen dårlige dager og ${pst(RETNINGER.premium.verdi - 1)} mer verdi og status — best der dagene svinger mest. ` +

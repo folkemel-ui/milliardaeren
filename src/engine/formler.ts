@@ -6,7 +6,6 @@ import {
   ANSETTELSE_FAKTOR,
   ANSETTELSE_VEKST,
   BEDRIFTSTYPER,
-  FORBEDRING_PRISFAKTOR,
   FORBEDRINGER,
   LAANETAK_TIMER,
   LEDER_MINSTEPRIS,
@@ -128,7 +127,7 @@ export function nesteForbedring(b: Bedrift): Forbedring | null {
 
 export function forbedringspris(b: Bedrift, f: Forbedring): number {
   const t = BEDRIFTSTYPER[b.type]
-  return Math.round(t.oppgraderingspris * t.vekst ** (f.nivaa - 1) * FORBEDRING_PRISFAKTOR)
+  return Math.round(t.oppgraderingspris * t.vekst ** (f.nivaa - 1) * f.prisfaktor)
 }
 
 /** Inntekten fra nivået, forbedringene, fusjonene og retningen, før ansatte og lønn. */
