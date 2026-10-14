@@ -77,8 +77,10 @@ describe('full ramme for gatebedriftene (G13)', () => {
       }
   })
 
-  it('på kortet fyller nærbildet hele flisa, og utsnittet holder seg på lerretet på hvert trinn', () => {
-    for (const id of FULL_RAMME)
+  // Én test per tegning (spillsporet, Pakke 103, som G14 gjorde): FULL_RAMME vokste med G20, og alle i én
+  // test tok ~10 s alene og over 20 s i hele kjøringen — testkjøreren ga opp («Timeout calling onTaskUpdate»).
+  it.each(FULL_RAMME)('på kortet fyller nærbildet av %s hele flisa, og utsnittet holder seg på lerretet på hvert trinn', (id) => {
+    {
       for (const [n, stor] of NIVAA.flatMap((n) => [[n, false], [n, true]] as const)) {
         const html = renderToStaticMarkup(createElement(BedriftIkon, { type: id, nivaa: n, forbedringer: 3, stor }))
         const px = stor ? 68 : 52
@@ -92,6 +94,7 @@ describe('full ramme for gatebedriftene (G13)', () => {
         expect(x + b, `${id} ${n}`).toBeLessThanOrEqual(136)
         expect(html, id).not.toMatch(VIGNETT)
       }
+    }
   })
 
   it('en silhuett av en bedrift med full ramme er bare motivet', () => {

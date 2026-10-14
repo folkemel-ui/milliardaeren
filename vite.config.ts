@@ -32,6 +32,9 @@ const TUNGE = [
   '**/ui/__tester__/pakke74b.test.ts',
   '**/ui/__tester__/pakke77.test.ts',
   '**/ui/__tester__/pakke78.test.ts',
+  // Etter G20 (FULL_RAMME med bilene og klokkene): 69 og 49 s i den raske gruppen, og testkjøreren ga opp.
+  '**/grafikkG13.test.ts',
+  '**/grafikkG16.test.ts',
 ]
 
 /**
