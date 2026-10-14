@@ -11,19 +11,23 @@ import { useFokusfelle } from './useFokusfelle'
  * en het eller kald bransje, høy- eller lavkonjunktur). Et trykk åpner arket
  * med været, trendene og konjunkturen, og forklaringen.
  */
-export function Dagen({ s }: { s: Spilltilstand }) {
+/**
+ * «Markedet i dag ›» (Pakke 75), i overskriftsraden på Bedrifter siden Pakke 102: datoen sto der
+ * en gang til («Torsdag 7. januar» under «Tor 7. jan» i toppfeltet), og raden tok 44 px. Datoen
+ * står i arket.
+ */
+export function Markedsknapp({ s }: { s: Spilltilstand }) {
   const [åpen, settÅpen] = useState(false)
   const m = markedetIDag(s)
   return (
-    <div className="dagen" aria-label="Dagen i dag">
-      <span className="dagen-dato">{m.dato}</span>
+    <>
       <button type="button" className="markedslinje" aria-haspopup="dialog" aria-expanded={åpen} onClick={() => settÅpen(true)}>
         Markedet i dag
         {m.spesielle > 0 && <span className="brikke markedstall">{m.spesielle}</span>}
         <span aria-hidden="true"> ›</span>
       </button>
       {åpen && <Markedsark s={s} lukk={() => settÅpen(false)} />}
-    </div>
+    </>
   )
 }
 

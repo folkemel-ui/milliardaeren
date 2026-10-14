@@ -340,20 +340,17 @@
   flex-wrap: wrap;
 }
 
-/* Dagen i dag (Pakke 49; én linje siden Pakke 75): datoen og «Markedet i dag ›». */
-.dagen {
+/* Overskriften på Bedrifter med «Markedet i dag ›» til høyre (Pakke 102; før en egen rad med datoen). */
+.skjerm-hode {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
   margin: 0 0 8px;
 }
 
-.dagen-dato {
-  font-size: var(--skrift-2);
-  font-weight: var(--vekt-halvfet);
-  color: var(--tekst-dempet);
-  margin-right: 4px;
+.skjerm-hode > .skjerm-tittel {
+  margin: 0;
 }
 
 .markedslinje {
@@ -778,15 +775,69 @@
 }
 
 /*
- * Pakke 99: med «Milepæl» er det sju knapper på 44 px — de får ikke plass på én rad på en telefon
- * (343 px). Mengdene tar hele raden, og rekkefølgen står til høyre under.
+ * Pakke 102: mengdene og rekkefølgen på én rad igjen. Pakke 99 la til «Milepæl», og sju knapper på
+ * 44 px fikk ikke plass på 343 px; nå er rekkefølgen én knapp som bytter. Mengdene fyller raden,
+ * hver minst 44 px — «Milepæl» trenger 58.
  */
+.bedrifter-kontroller {
+  flex-wrap: nowrap;
+}
+
 .bedrifter-kontroller > .mengdevalg {
-  flex: 1 1 260px;
+  flex: 1 1 auto;
+  min-width: 0;
+  grid-auto-columns: minmax(44px, 1fr);
+}
+
+.mengdevalg button:last-child {
+  min-width: 58px;
 }
 
 .bedrifter-kontroller > .rekkefolge {
+  flex: 0 0 auto;
   margin-left: auto;
+}
+
+.rekkefolge button {
+  min-width: 60px;
+}
+
+/* Merkene på en egen rad under nivålinja (Pakke 102): samme sted på hvert kort. */
+.kortmerker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.kortmerker .retningsprikk {
+  margin-left: 0;
+}
+
+/* «Kjøp alle billige forbedringer (N) · kr X» over lista (Pakke 102). */
+.billiglinje {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 0 0 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--gull);
+  background: color-mix(in srgb, var(--gull) 10%, transparent);
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.billiglinje-pris {
+  margin-left: auto;
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+  white-space: nowrap;
 }
 
 /* Pakke 100: under stjernen, når en erfaren gir mer per krone. */

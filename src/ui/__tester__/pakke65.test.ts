@@ -118,7 +118,8 @@ describe('bedriftene etter inntekt', () => {
     const rekkefolge = () => [...app!.rot.querySelectorAll('main .bedriftskort h2')].map((el) => el.textContent ?? '')
     // Kjøpt (standard): saftboden først.
     expect(rekkefolge()[0]).toContain(BEDRIFTSTYPER.saftbod.navn)
-    await app.trykk(app.knapp('Inntekt', app.rot.querySelector('[aria-label="Rekkefølge på bedriftene"]')!))
+    // Pakke 102: rekkefølgen er én knapp som viser hvordan lista står; et trykk bytter til inntekt.
+    await app.trykk(app.knapp('Kjøpt', app.rot.querySelector('[aria-label="Rekkefølge på bedriftene"]')!))
     const forventet = [...s.bedrifter].sort((a, b) => fastInntekt(b) - fastInntekt(a))[0]
     expect(rekkefolge()[0]).toContain(BEDRIFTSTYPER[forventet.type].navn)
     expect(forventet.type).toBe('kiosk')

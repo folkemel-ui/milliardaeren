@@ -96,15 +96,23 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
           <h2>
             {type.navn}
             <NyMerke id={b.type} />
-            {b.leder && <span className="merke kant">Leder</span>}
-            {b.retning && <span className="merke kant">{RETNINGER[b.retning].navn}</span>}
-            {kanVelgeRetning(b) && <span className="retningsprikk" role="img" aria-label="Venter på retning" title="Venter på retning" />}
           </h2>
           <span className="dempet">
             Nivå {b.nivaa}
             {b.ansatte > 0 && ` · ${b.ansatte} ansatte`}
             {(b.fusjoner ?? 0) > 0 && ` · ${b.fusjoner} ${b.fusjoner === 1 ? 'fusjon' : 'fusjoner'}`}
           </span>
+          {/*
+            Pakke 102: merkene på en egen liten rad under nivålinja. Før sto «Leder» på navnelinja for
+            Saftbod og falt ned for Gatekjøkken; på nivålinja falt de ned når den var lang.
+          */}
+          {(b.leder || b.retning || kanVelgeRetning(b)) && (
+            <span className="kortmerker">
+              {b.leder && <span className="merke kant">Leder</span>}
+              {b.retning && <span className="merke kant">{RETNINGER[b.retning].navn}</span>}
+              {kanVelgeRetning(b) && <span className="retningsprikk" role="img" aria-label="Venter på retning" title="Venter på retning" />}
+            </span>
+          )}
         </div>
         <span className={`${bedriftInntektIDag(s, b) >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(bedriftInntektIDag(s, b))}</span>
       </div>

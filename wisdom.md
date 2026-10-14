@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 103, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 102, 14 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -1506,6 +1506,14 @@ session; delete what stops being true.
 - **Seven 44 px buttons don't fit one phone row**: 7 × 44 + paddings and gaps ≈ 352 px against
   343. Adding «Milepæl» to the buy amounts sent the sort to a second row (Pack 75 had them on one);
   check the row count with rects when a segment grows, and say so if one row is impossible.
+- **Plan a row of buttons with real text widths** (Pack 102): a canvas `measureText` with the
+  button's computed font gave «Milepæl» 50 px and the rest ≤ 34 px at 600 13px Inter, so four 44 px
+  amounts, «Milepæl» at 58 and a 60 px sort button fit 343 px — after Pack 99 had concluded seven
+  equal 44 px buttons could not. `grid-auto-columns: minmax(44px, 1fr)` plus a `min-width` on the
+  wide one does the rest.
+- **«Same place on every card» means its own row** (Pack 102, the «Leder» badge): on the name line it
+  dropped down for a long name, on the level line for a long level («Nivå 121 · 10 ansatte»). Only a
+  row of its own is fixed; it costs 16 px per card that has a badge — say so in the report.
 - **`kanSlaasSammen` is a type guard** (`din is Bedrift`): `!kanSlaasSammen(b)` on a `Bedrift`
   narrows `b` to `never`. Compare `b.nivaa < FUSJON_FRA_NIVAA` for the negative case.
 

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { eierType, erLaastOpp } from '../../engine/formler'
+import { eierType, erLaastOpp, forbedringspris, nesteForbedring } from '../../engine/formler'
 import { kanVelgeRetning } from '../../engine/ansatte'
 import { Bedriftdetalj } from './Bedriftdetalj'
-import { kjopBedrift } from '../../engine/handlinger'
+import { kjopBedrift, kjopForbedringer } from '../../engine/handlinger'
 import { BEDRIFTSTYPER, STIGEN } from '../../engine/innhold'
 import type { BedriftstypeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
@@ -10,15 +10,21 @@ import { kortKroner, perSek } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Bedriftskort } from '../komponenter/Bedriftskort'
 import { Seksjon } from '../komponenter/Seksjon'
-import { Dagen } from '../komponenter/Dagen'
+import { Markedsknapp } from '../komponenter/Dagen'
 import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
 import { Forklaring } from '../komponenter/Forklaring'
 import { bedriftsrekkefolge, REKKEFOLGER } from '../deler'
 import { fastInntekt } from '../sortering'
 import { useTilbake } from '../tilbake'
 import { Hjemskjermkort } from '../komponenter/Hjemskjerm'
+import { Ikon } from '../komponenter/Ikoner'
 
 /** `tilRival` åpner en rival i Investeringer → Selskaper (Pakke 99: fusjonsraden). */
+/** En forbedring er billig når den koster under så stor andel av kontantene (Pakke 102). */
+export const BILLIG_ANDEL = 0.001
+/** Knappen for de billige forbedringene kommer når det er minst så mange. */
+const BILLIGE_MIN = 2
+
 export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: string, type: BedriftstypeId) => void }) {
   const [valgt, settValgt] = useState<string | null>(null)
   const [mengde, settMengde] = useState<Kjopsmengde>(lesKjopsmengde)
@@ -31,41 +37,61 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
   const bedrifter = rekkefolge === 'inntekt' ? [...s.bedrifter].sort((a, b) => fastInntekt(b) - fastInntekt(a)) : s.bedrifter
   // Bedriftene som venter på en retning (Pakke 75): én linje øverst i stedet for et merke på hvert kort.
   const venter = bedrifter.filter(kanVelgeRetning)
+  // Pakke 102: kjøpsmengdene først når de betyr noe — med en bedrift nummer to, eller nivå 10.
+  const visMengde = s.bedrifter.length >= 2 || s.bedrifter.some((b) => b.nivaa >= 10)
+  const visRekkefolge = s.bedrifter.length >= 3
+  // Uten valget kjøper knappen ett nivå om gangen, uansett hva som er lagret fra før.
+  const mengdeNaa: Kjopsmengde = visMengde ? mengde : '1'
+  // De billige forbedringene (Pakke 102): klare til kjøp og under 0,1 % av kontantene hver.
+  const billige = s.bedrifter.flatMap((b) => {
+    const f = nesteForbedring(b)
+    return f && b.nivaa >= f.nivaa && forbedringspris(b, f) <= BILLIG_ANDEL * s.kontanter ? [{ id: b.id, pris: forbedringspris(b, f) }] : []
+  })
   const tilSalgs = STIGEN.filter((t) => !eierType(s, t) && erLaastOpp(s, t))
   const laaste = STIGEN.filter((t) => !erLaastOpp(s, t))
 
   // Bedriften kan forsvinne mens siden er åpen (banken kan ta den over).
   const detalj = valgt ? s.bedrifter.find((b) => b.id === valgt) : undefined
   useTilbake(detalj !== undefined, () => settValgt(null))
-  if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengde} tilbake={() => settValgt(null)} tilRival={tilRival} />
+  if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengdeNaa} tilbake={() => settValgt(null)} tilRival={tilRival} />
+
+  // Rekkefølgen som én knapp (Pakke 102): den viser hvordan lista står, og et trykk bytter.
+  const neste = REKKEFOLGER[(REKKEFOLGER.findIndex((r) => r.id === rekkefolge) + 1) % REKKEFOLGER.length]
+  const naa = REKKEFOLGER.find((r) => r.id === rekkefolge) ?? REKKEFOLGER[0]
+  const prisBillige = billige.reduce((sum, x) => sum + x.pris, 0)
 
   return (
     <section className="skjerm">
-      <h1 className="skjerm-tittel">
-        Dine bedrifter <Forklaring tema="bedrifter" />
-      </h1>
+      {/* Pakke 102: «Markedet i dag» i overskriftsraden; datoen står alt i toppfeltet. */}
+      <div className="skjerm-hode">
+        <h1 className="skjerm-tittel">
+          Dine bedrifter <Forklaring tema="bedrifter" />
+        </h1>
+        <Markedsknapp s={s} />
+      </div>
       {/* Pakke 95: Safari-spillere får beskjed om Hjem-skjermen fra første besøk. */}
       <Hjemskjermkort />
-      <Dagen s={s} />
-      {/* Pakke 75: ganger og rekkefølge på én rad. */}
-      <div className="bedrifter-kontroller">
-        <div className="segment mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
-          {MENGDER.map((m) => (
-            <button key={m.id} role="radio" aria-checked={mengde === m.id} className={mengde === m.id ? 'aktiv' : ''} onClick={() => velgMengde(m.id)}>
-              {m.navn}
-            </button>
-          ))}
-        </div>
-        {s.bedrifter.length >= 3 && (
-          <div className="segment rekkefolge" role="radiogroup" aria-label="Rekkefølge på bedriftene">
-            {REKKEFOLGER.map((r) => (
-              <button key={r.id} role="radio" aria-checked={rekkefolge === r.id} className={rekkefolge === r.id ? 'aktiv' : ''} onClick={() => bedriftsrekkefolge.sett(r.id)}>
-                {r.navn}
+      {/* Pakke 75: ganger og rekkefølge på én rad — med rekkefølgen som én knapp igjen (Pakke 102). */}
+      {(visMengde || visRekkefolge) && (
+        <div className="bedrifter-kontroller">
+          {visMengde && (
+            <div className="segment mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
+              {MENGDER.map((m) => (
+                <button key={m.id} role="radio" aria-checked={mengde === m.id} className={mengde === m.id ? 'aktiv' : ''} onClick={() => velgMengde(m.id)}>
+                  {m.navn}
+                </button>
+              ))}
+            </div>
+          )}
+          {visRekkefolge && (
+            <div className="segment rekkefolge" role="group" aria-label="Rekkefølge på bedriftene">
+              <button type="button" className="aktiv" aria-label={`Rekkefølge: ${naa.navn.toLowerCase()}. Trykk for ${neste.navn.toLowerCase()}.`} onClick={() => bedriftsrekkefolge.sett(neste.id)}>
+                {naa.navn}
               </button>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
       {venter.length > 0 && (
         <button type="button" className="retningslinje" onClick={() => settValgt(venter[0].id)}>
           <span className="retningsprikk" aria-hidden="true" />
@@ -73,9 +99,15 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
           <span aria-hidden="true"> ›</span>
         </button>
       )}
+      {billige.length >= BILLIGE_MIN && (
+        <button type="button" className="billiglinje" onClick={() => utfor(kjopForbedringer(s, billige.map((x) => x.id)))}>
+          <Ikon navn="gnist" størrelse={14} /> Kjøp alle billige forbedringer ({billige.length})
+          <span className="billiglinje-pris">{kortKroner(prisBillige)}</span>
+        </button>
+      )}
       <ul className="kortliste">
         {bedrifter.map((b) => (
-          <Bedriftskort key={b.id} b={b} s={s} mengde={mengde} åpne={() => settValgt(b.id)} />
+          <Bedriftskort key={b.id} b={b} s={s} mengde={mengdeNaa} åpne={() => settValgt(b.id)} />
         ))}
       </ul>
 

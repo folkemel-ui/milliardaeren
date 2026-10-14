@@ -87,6 +87,24 @@ export function kjopForbedring(s: Spilltilstand, id: string): Utfall {
 }
 
 /**
+ * Kjøper neste forbedring i hver av bedriftene (Pakke 102: «Kjøp alle billige forbedringer»).
+ * Hver kjøpes som med knappen på kortet; en som ikke går (pengene tok slutt), hoppes over.
+ * Feiler bare når ingen ble kjøpt.
+ */
+export function kjopForbedringer(s: Spilltilstand, ider: string[]): Utfall {
+  let n = s
+  let kjopt = 0
+  for (const id of ider) {
+    const u = kjopForbedring(n, id)
+    if (u.ok) {
+      n = u.tilstand
+      kjopt++
+    }
+  }
+  return kjopt > 0 ? { ok: true, tilstand: n } : feil('Du har ikke råd til noen av dem.')
+}
+
+/**
  * Ansetter én til, med et nivå: junior, erfaren eller — fra nivå 50 — stjerne.
  * Den nye får et navn fra en hash av bedriften og tidspunktet (Pakke 48).
  */
