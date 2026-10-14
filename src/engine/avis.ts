@@ -34,7 +34,12 @@ import { auksjonVedDagsskifte } from './auksjon'
 import { racingVedDagsskifte } from './racing'
 import { charterVedDagsskifte } from './charter'
 
-export const MAKS_UTGAVER = 7
+/**
+ * Utgavene avisa tar vare på: like mange som to timer borte trykker (BORTE_TAK_SEK / DAG_SEK = 24).
+ * Før 7, så 17 av utgavene fra et langt fravær kunne aldri leses — rentemøter, titler, tapte
+ * auksjoner — og velkomsten sa «7 nye utgaver». Hver utgave er under 1 kB i lagringen.
+ */
+export const MAKS_UTGAVER = 24
 const MAKS_SAKER = 5
 const MIN_SAKER = 3
 

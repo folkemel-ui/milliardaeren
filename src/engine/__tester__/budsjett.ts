@@ -8,7 +8,10 @@
  */
 export const BUDSJETT: Record<string, number> = {
   formue: 25,
-  leie: 22,
+  // 22 → 30 etter Pakke 103: leia målte 22 ms alene og 23–25 ms under en hel kjøring (Pakkene 93, 95
+  // og 103). Den har vokst med det som betales som leie: de sene eiendommene (Pakke 76), utleien av
+  // yachtene og jetene (Pakke 89) og gårdene (Pakkene 92–94).
+  leie: 30,
   prestasjoner: 14,
   inntekt: 55,
   marked: 45,

@@ -52,10 +52,10 @@ describe('kalenderen', () => {
 })
 
 describe('avisen', () => {
-  it('kommer ut hver dag, med minst tre saker, og husker de siste sju', () => {
-    const s = simuler(nyttSpill(), 10 * DAG_SEK)
+  it('kommer ut hver dag, med minst tre saker, og husker så mange som to timer borte trykker', () => {
+    const s = simuler(nyttSpill(), 30 * DAG_SEK)
     expect(s.avis).toHaveLength(MAKS_UTGAVER)
-    expect(s.avis.map((u) => u.dag)).toEqual([4, 5, 6, 7, 8, 9, 10])
+    expect(s.avis.map((u) => u.dag)).toEqual(Array.from({ length: MAKS_UTGAVER }, (_, i) => 30 - MAKS_UTGAVER + 1 + i))
     for (const u of s.avis) expect(u.saker.length).toBeGreaterThanOrEqual(3)
   })
 
