@@ -7,8 +7,9 @@ engine rules and the general tool quirks. It was started after G1 (6 October 202
 Update it at the end of each G pack, and delete what stops being true. Updated after G10,
 the Saftbod and Pølsebod redraws (10 October 2026, outside any pack), G11 (11 October
 2026), G12–G15 (10–11 October 2026), G16, Pack 74 and G17 (11 October 2026), G18 (12 October
-2026) and G19 (13 October 2026). G20–G24 are planned in `Ideer.md`: the full frame for the luxury
-in groups (G20–G21), the seasons (G22), the club in pictures (G23) and racing (G24).
+2026), G19 (13 October 2026) and G20 (14 October 2026). G21–G24 are planned in `Ideer.md`: the
+last full-frame group (G21, boats and planes), the seasons (G22), the club in pictures (G23) and
+racing (G24).
 
 **Since Pack 63 (10 October 2026) the graphics track has its own folder:** start the session in
 `Desktop\milliardaer-grafikk`, on branch `grafikk` (a git worktree of the same repo). Commit
@@ -1336,7 +1337,58 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   gzipped (+0.14 for the frame list and the crops). Every property is now in `FULL_RAMME`
   (`grafikkG19.test.ts` checks it; G17's «the others are as before» test became that check).
 
-## 7. Notes for later (G1–G19 done; G20–G24 planned in `Ideer.md`; Pack 74 done)
+## 6i. A full frame for the cars and watches (G20)
+
+- **All four recommendations were taken** (a room per car, a pit garage for the Formula 1 car, a
+  surface per watch, a lit cabinet that replaces the folded watch list). Naming each car's room in the
+  option (a home garage with winter tyres, a glass showroom with a charger, a dealer with a car under a
+  cover, the factory hall, a brick workshop with a fuel pump, a hotel entrance with a doorman) made it
+  one click again. The pack began in the same session as a screen review and a push; «Start on G20»
+  after that meant questions first, then build.
+- **A room behind the car, not a stage around it.** `Utstilling` takes `rom` (wall, floor tone, side
+  props, in `Kantfade`, drawn before the reflection) and `forgrunn` (in front, e.g. the museum's ropes).
+  The wall is a fixed-colour rect over the whole wide frame, so indoors the subject no longer follows
+  the theme's sky; on the light card it reads as a photo, as the night scenes did. Everything in the
+  room is background, so the garage slot (utklipp) still shows only the car — no `NAERBILDER` box moved.
+- **`Speiling`'s `rm` mask and `Lakksveip`'s mask were 96 wide**; both now take the canvas's `x`/`b`
+  from `Ider` (`definisjon` already had them). Check any mask or filter with a hard 0/96 when a new
+  kind of drawing goes wide.
+- **One thing, two crops.** A car needs a wide close-up in the garage and a square one on the card,
+  but `Illustrasjon` read `NAERBILDER` before `FLISUTSNITT`. A `flis` prop (set by `BedriftIkon`'s
+  full-frame tile) now prefers `FLISUTSNITT`; businesses and properties have only one of the two, so
+  nothing else moved. A car's square tile is the whole car in the lower third with the room above
+  ([5, 9, 87, 87]): cutting a car's nose to make it bigger read worse than a small car in its room.
+- **A drawing function is called, not rendered.** `Illustrasjon` calls `Tegning({...})` inside its
+  own render, *before* its `Utklipp`/`Naerbilde`/`Fullramme` providers exist, so a `useContext` in a
+  drawing's body reads the value from above `Illustrasjon` (wrong for `Utklipp`; right for `IScenen`,
+  which `Scene` provides from outside). The made-for-you watch's plate kept showing in the cabinet;
+  moving it into a small component (`Graveringsplate`) fixed it. `Klokkeskrin` and `Lerret` are JSX
+  components, which is why they always saw the context.
+- **The cabinet is a `Lagerkort` without a limit.** `Plass` takes `lager: LagerId | 'skap'`, the CSS is
+  `.plass.skap` (velvet, a top light, a glass shelf, brass strips) in the game track's `luksus.css`, and
+  `Klokkeskrin` in utklipp draws only the cushion and the watch. The first close-up (86 × 74) filled
+  the cell so the velvet and shelf vanished; `NAER_SKAP` (70 × 60) shows them. A new `klokke` icon went
+  into `Ikoner.tsx` (shared).
+- **An outdoor watch gets the night.** The dive watch is the one surface outdoors (`himmel="dag"`): its
+  indices carry `nattlys` through a new `lume` prop on `Urkasse`, and a lantern on the rail is a
+  `nattvindu`, so the deck has two lights at night (G18's rule).
+- **Old long decimals again** (as in G17): the crown (`cx + R − 0.6`), the chrome wheel's arc
+  (`f × 0.8`), the diamond watch's strap lines and its sparkles had always leaked 15-digit numbers;
+  G20's test on the whole scene found them. And G1's cutout test proved «no sky» by the vignette mask
+  in the whole drawing — a full-frame drawing has none, so it now also accepts `lerret-himmel`.
+- **The side count is a proxy.** G19's «≥ 12 coordinates past x −2 and 98» undercounts a room: a
+  covered car is one path and people are a `translate`. G20's test also counts `translate(x` and asks
+  for 6; the contact sheet is the real check.
+- **Shapes that read wrong at first look**: a car under a cover drawn as one bumpy outline was a rock
+  (it needed a bonnet, a windscreen slope, a roofline and wheel bulges in the cloth); a bare carbon
+  shell was a piano lid (it needed wheel-arch cut-outs and a cockpit opening); two soft ovals of light
+  on a dark wall were ghosts (cones from a fitting in the ceiling read as spotlights); a swim fin with
+  ribs fanning out from the tip was a fan (parallel ribs and a black foot pocket at the edge); a
+  mechanic with the wheel gun held out at chest height was pointing a stick (at the hip, pointing down).
+- **Sizes after G20**: the luxury part is 84.8 kB raw, 19.8 gzipped; the start script 234.8 kB
+  gzipped with Packs 97–101 in it (G20 added only the lists, the `flis` prop and an icon there).
+
+## 7. Notes for later (G1–G20 done; G21–G24 planned in `Ideer.md`; Pack 74 done)
 
 - **New content from the game track** gets a drawing in the current style. A new
   Norwegian city needs a `BYPLAN` side (`norgeskartet.test.ts`, `grafikkG3.test.ts`), a
@@ -1346,12 +1398,12 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   moves in the scene at every stage, with no improvements bought**, and warm windows in
   `S.vinduLys` (or `nattvindu`) so it lights up at night (`grafikkG10.test.ts`). A new
   detail page must set `style={nattstil(s.sek)}`.
-- **Next groups for the full frame (G20–G21)**: add the ids to `FULL_RAMME`, extend
-  everything that ends at 0 and 96, fill the sides, and give the tile a crop (`FLISUTSNITT`, one
-  square; a per-stage `TRINNUTSNITT` only where the subject grows, as for the businesses). Properties and luxury live in the lazy parts, so their helpers
-  for the sides go there (or in the start file if a business needs them too). Cars use
-  `Speiling`, `Lakksveip` and the `rm` mask, which are still 96 wide: widen them with the
-  cars (G20).
+- **The last group for the full frame (G21)**: add the ids to `FULL_RAMME`, extend
+  everything that ends at 0 and 96, fill the sides, and give the tile a square crop in `FLISUTSNITT`
+  (the boats and planes also have a wide `NAERBILDER` box for the harbour and hangar; the card's
+  `flis` prop picks the square one, §6i). Their helpers for the sides go in the luxury part. The
+  three late ones from Pack 88 (megayacht, widebody jet, submarine) are in G21 too, and with them the
+  Samling silhouettes (`Samlingsoversikt.tsx`, 40 × 34 close-ups) and the map names.
 - **New property or luxury drawings go in the parts** (`ved-behov/`), with the id in
   `EIENDOMSIDER`/`LUKSUSIDER`. New business drawings grow the start script, which is at
   230.9 kB gzipped after G19 (249.9 after G17; Pack 96 moved the tabs into parts), against a budget of 500 (`startskript.test.ts`); the business steps (§6d) and
