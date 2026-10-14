@@ -43,7 +43,6 @@ import { Klubbdel, Klubbdetalj } from './Klubb'
 import { aapneKlubbside, useKlubbside } from '../klubbsider'
 import { Kunst } from '../komponenter/Kunst'
 import { Hjemmene } from '../komponenter/Hjemmene'
-import { Seksjon } from '../komponenter/Seksjon'
 import { Illustrasjon } from '../komponenter/Illustrasjoner'
 import { NyMerke } from '../komponenter/Kjopsglimt'
 import { Ikon, type Ikonnavn } from '../komponenter/Ikoner'
@@ -108,15 +107,10 @@ export function Luksus({ s }: { s: Spilltilstand }) {
 /**
  * Samlingen: oversikten over alt øverst (Pakke 91), der en silhuett åpner tingens
  * side og kjøpet, så bilene, båtene og flyene du eier i scenen sin (garasjen,
- * havna, hangaren) — en ledig plass viser det neste. Klokkene ligger i bankboksen
- * og har ingen scene. «Til salgs»-listene under scenene er borte: oversikten viser
- * alt som finnes.
+ * havna, hangaren) — en ledig plass viser det neste. Klokkene står i klokkeskapet
+ * (G20). «Til salgs»-listene under scenene er borte: oversikten viser alt som finnes.
  */
 function Samling({ s }: { s: Spilltilstand }) {
-  const klokker = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === 'klokke').sort(etterPris)
-  const eideKlokker = klokker.filter((id) => s.luksus.includes(id))
-  // Pakke 89: de unike klokkene ligger i bankboksen sammen med de andre.
-  const unikeKlokker = mineUnike(s).filter((id) => UNIKE[id].kategori === 'klokke')
   return (
     <>
       <Auksjonskort s={s} />
@@ -127,22 +121,73 @@ function Samling({ s }: { s: Spilltilstand }) {
           {l === 'garasje' && <Racingrad s={s} />}
         </div>
       ))}
-      <Seksjon
-        id="luksus-klokke"
-        tittel={KATEGORINAVN.klokke}
-        sammendrag={`${eideKlokker.length} av ${klokker.length} eid${unikeKlokker.length ? ` · ${unikeKlokker.length} unik${unikeKlokker.length > 1 ? 'e' : ''}` : ''}`}
-        harInnhold={eideKlokker.length + unikeKlokker.length > 0}
-      >
-        <ul className="kortliste">
-          {unikeKlokker.map((id) => (
-            <Unikkort key={id} s={s} id={id} />
-          ))}
-          {[...eideKlokker, ...klokker.filter((id) => !s.luksus.includes(id))].map((id) => (
-            <Luksuskort key={id} s={s} id={id} />
-          ))}
-        </ul>
-      </Seksjon>
+      <Klokkeskap s={s} />
     </>
+  )
+}
+
+/**
+ * Klokkeskapet (G20): klokkene får et sted, som bilene, båtene og flyene — et
+ * opplyst glasskap med en fløyelspute per klokke. De du eier og de unike fra
+ * auksjonene står på puta si (nærbildet uten esken), og den neste du kan kjøpe står
+ * dempet. Klokker tar ingen plass, så det er ingen «bygg plass». Et trykk viser
+ * kortet under, som i garasjen.
+ */
+function Klokkeskap({ s }: { s: Spilltilstand }) {
+  const [valgt, velg] = useState<Lagervalg>(null)
+  const klokker = LUKSUSLISTE.filter((id) => LUKSUS[id].kategori === 'klokke').sort(etterPris)
+  const eide = klokker.filter((id) => s.luksus.includes(id))
+  // Pakke 89: de unike klokkene står sammen med de andre.
+  const unike = mineUnike(s).filter((id) => UNIKE[id].kategori === 'klokke')
+  const neste = klokker.find((id) => !s.luksus.includes(id))
+  const trykk = (v: Lagervalg) => velg(JSON.stringify(v) === JSON.stringify(valgt) ? null : v)
+  return (
+    <div className="kort lagerkort klokkeskap">
+      <div className="lagerkort-topp">
+        <span className="lager-emoji" aria-hidden="true">
+          <Ikon navn="klokke" størrelse={22} />
+        </span>
+        <strong>Klokkeskapet</strong>
+        <span className="dempet liten">
+          {eide.length} av {klokker.length} {KATEGORINAVN.klokke.toLowerCase()}
+          {unike.length > 0 && ` · ${unike.length} unik${unike.length > 1 ? 'e' : ''}`}
+        </span>
+      </div>
+      <div className="lagerscene" role="list" aria-label="Klokkeskapet" data-ingen-sveip>
+        {eide.map((id) => (
+          <Plass key={id} lager="skap" navn={LUKSUS[id].navn} under={`+${LUKSUS[id].status} status`} valgt={valgt?.slag === 'eid' && valgt.id === id} trykk={() => trykk({ slag: 'eid', id })}>
+            <Illustrasjon id={id} størrelse={64} utklipp naerbilde={NAER_SKAP} />
+          </Plass>
+        ))}
+        {unike.map((id) => (
+          <Plass key={id} lager="skap" klasse="unik" navn={UNIKE[id].navn} under={`Unik · +${UNIKE[id].status} status`} valgt={valgt?.slag === 'unik' && valgt.id === id} trykk={() => trykk({ slag: 'unik', id })}>
+            <Illustrasjon id={UNIKE[id].tegning} størrelse={64} utklipp naerbilde={NAER_SKAP} />
+          </Plass>
+        ))}
+        {neste && (
+          <Plass lager="skap" klasse="ledig" navn={LUKSUS[neste].navn} under={kortKroner(LUKSUS[neste].pris)} valgt={valgt?.slag === 'ledig'} trykk={() => trykk({ slag: 'ledig' })}>
+            <span className="plass-skygge">
+              <Illustrasjon id={neste} størrelse={64} utklipp naerbilde={NAER_SKAP} />
+            </span>
+          </Plass>
+        )}
+      </div>
+      {valgt?.slag === 'eid' && s.luksus.includes(valgt.id) && (
+        <ul className="kortliste lager-valgt">
+          <Luksuskort s={s} id={valgt.id} />
+        </ul>
+      )}
+      {valgt?.slag === 'unik' && s.auksjon?.eide[valgt.id] && (
+        <ul className="kortliste lager-valgt">
+          <Unikkort s={s} id={valgt.id} />
+        </ul>
+      )}
+      {valgt?.slag === 'ledig' && neste && (
+        <ul className="kortliste lager-valgt">
+          <Luksuskort s={s} id={neste} />
+        </ul>
+      )}
+    </div>
   )
 }
 
@@ -293,6 +338,8 @@ export function charterlinje(s: Spilltilstand, id: LuksusId): string {
 
 /** Nærbildet på en plass i lageret. Fast, så Illustrasjon (memo) ikke tegnes på nytt hvert sekund (Pakke 64). */
 const NAER_PLASS = [86, 74] as const
+/** … i klokkeskapet (G20) litt mindre, så fløyelen og glasshylla synes rundt puta … */
+const NAER_SKAP = [70, 60] as const
 /** … og i full størrelse (Pakke 91): en plass er 153 px bred på en telefon, nærbildet fyller ni tideler av den. */
 const NAER_STOR = [138, 119] as const
 
@@ -450,7 +497,7 @@ function Plass({
   trykk,
   children,
 }: {
-  lager: LagerId
+  lager: LagerId | 'skap'
   klasse?: string
   navn: string
   under: string

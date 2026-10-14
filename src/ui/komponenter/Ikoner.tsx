@@ -344,6 +344,14 @@ const TEGNINGER = {
       <line x1="2" y1="21" x2="22" y2="21" />
     </>
   ),
+  // G20: klokkeskapet i Samling.
+  klokke: (
+    <>
+      <path d="M9 6.4 L9.6 2.5 H14.4 L15 6.4 M9 17.6 L9.6 21.5 H14.4 L15 17.6" />
+      <circle cx="12" cy="12" r="6" />
+      <path d="M12 9 V12 L14 13.4" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>
 
 export type Ikonnavn = keyof typeof TEGNINGER

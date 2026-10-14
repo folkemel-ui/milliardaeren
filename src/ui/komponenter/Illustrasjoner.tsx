@@ -2936,6 +2936,9 @@ export const FULL_RAMME: readonly string[] = [
   'kontorbygg', 'kontorbygg-stavanger', 'kjopesenter', 'naeringsbygg', 'oy', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'fyret', 'hoppbakken', 'borgen', 'tarnet', 'kjopesenterkjede',
   // G19: eiendommene utenlands, og de tre siste fra Pakke 76.
   'stockholm', 'kobenhavn', 'amsterdam', 'berlin', 'london', 'roma', 'paris', 'dubai', 'newyork', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'canary-wharf', 'downtown-dubai', 'manhattan-skyskraper',
+  // G20: bilene og klokkene, med de to laget for deg fra Pakke 88.
+  'stasjonsvogn', 'elbil', 'superbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'unikhyperbil',
+  'dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke', 'skreddersyddklokke',
 ]
 
 /** Bedriftene, som har fire vekstrinn. */
@@ -2984,6 +2987,13 @@ export const NAERBILDER: Record<string, readonly [number, number, number, number
   widebodyjet: [2, 58, 94, 32],
   ubaat: [2, 56, 92, 34],
   helikopter: [2, 58, 92, 36],
+  // G20: klokkene i skapet — klokka på puta, uten esken (utklippet tar den bort).
+  dykkerklokke: [19, 26, 60, 50],
+  gullklokke: [19, 26, 60, 50],
+  mesterverk: [19, 26, 60, 50],
+  lommeur: [19, 26, 60, 50],
+  diamantklokke: [19, 26, 60, 50],
+  skreddersyddklokke: [19, 26, 60, 50],
 }
 
 /**
@@ -3057,6 +3067,22 @@ export const FLISUTSNITT: Record<string, readonly [number, number, number, numbe
   'canary-wharf': [10, 4, 76, 76],
   'downtown-dubai': [4, 4, 88, 88],
   'manhattan-skyskraper': [6, 4, 84, 84],
+  // G20: bilene og klokkene. De har også et nærbilde i `NAERBILDER` (garasjen, skapet), som er
+  // bredt eller uten esken; flisa på kortet er kvadratisk og tar med rommet bak (`flis`).
+  stasjonsvogn: [5, 9, 87, 87],
+  elbil: [5, 9, 87, 87],
+  superbil: [5, 9, 87, 87],
+  hyperbil: [4, 9, 87, 87],
+  veteranbil: [5, 9, 87, 87],
+  limousin: [4, 7, 89, 89],
+  formelbil: [4, 6, 90, 90],
+  unikhyperbil: [4, 9, 87, 87],
+  dykkerklokke: [17, 18, 64, 64],
+  gullklokke: [17, 18, 64, 64],
+  mesterverk: [17, 18, 64, 64],
+  lommeur: [17, 18, 64, 64],
+  diamantklokke: [17, 18, 64, 64],
+  skreddersyddklokke: [17, 18, 64, 64],
 }
 
 /**
@@ -3065,8 +3091,9 @@ export const FLISUTSNITT: Record<string, readonly [number, number, number, numbe
  * Med `utklipp` kommer tegningene uten himmel, bakke og bakgrunn, til steder
  * som har sin egen scene rundt. Med `naerbilde` ([maks bredde, maks høyde] i
  * piksler) vises bare utsnittet rundt motivet (`NAERBILDER`), så stort det får
- * plass; tegninger uten utsnitt vises hele, i `størrelse`. Til en eiendoms- eller
- * luksustegning er hentet, står et tomt lerret i samme størrelse (G12).
+ * plass; tegninger uten utsnitt vises hele, i `størrelse`. Med `flis` (kortet) går
+ * det kvadratiske utsnittet i `FLISUTSNITT` foran nærbildet (G20: en bil har begge).
+ * Til en eiendoms- eller luksustegning er hentet, står et tomt lerret i samme størrelse (G12).
  */
 export const Illustrasjon = memo(function Illustrasjon({
   id,
@@ -3075,6 +3102,7 @@ export const Illustrasjon = memo(function Illustrasjon({
   forbedringer = 0,
   utklipp = false,
   naerbilde,
+  flis = false,
   steg = 0,
 }: {
   id: string
@@ -3083,6 +3111,7 @@ export const Illustrasjon = memo(function Illustrasjon({
   forbedringer?: number
   utklipp?: boolean
   naerbilde?: readonly [number, number]
+  flis?: boolean
   /** Steget inne i vekstrinnet (`stegFor`), bare i scenen. */
   steg?: number
 }) {
@@ -3090,7 +3119,7 @@ export const Illustrasjon = memo(function Illustrasjon({
   const hentet = useDel(del)
   if (!del && !BEDRIFTER[id]) return null
   const Tegning: Tegning = del ? (hentet?.[id] ?? TOMT) : BEDRIFTER[id]
-  const boks = naerbilde && (TRINNUTSNITT[id]?.[trinn] ?? NAERBILDER[id] ?? FLISUTSNITT[id])
+  const boks = naerbilde && (TRINNUTSNITT[id]?.[trinn] ?? (flis ? (FLISUTSNITT[id] ?? NAERBILDER[id]) : (NAERBILDER[id] ?? FLISUTSNITT[id])))
   const skala = boks ? Math.min(naerbilde[0] / boks[2], naerbilde[1] / boks[3]) : 1
   const naer = boks ? { boks, bredde: Math.round(boks[2] * skala), hoyde: Math.round(boks[3] * skala) } : null
   return (

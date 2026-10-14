@@ -90,8 +90,9 @@ describe('tegningene i den nye stilen (G1)', () => {
     for (const id of ['superbil', 'seilbaat']) {
       const hel = tegn(id)
       const utklipp = renderToStaticMarkup(createElement(Illustrasjon, { id, utklipp: true }))
-      expect(hel, id).toMatch(/mask="url\(#[^)]*vm\)"/)
-      expect(utklipp, id).not.toMatch(/mask="url\(#[^)]*(vm|bm|rm)\)"/)
+      // Hele tegningen har himmelen: med vignett, eller kant i kant i full ramme (superbilen fra G20).
+      expect(hel, id).toMatch(/mask="url\(#[^)]*vm\)"|class="lerret-himmel"/)
+      expect(utklipp, id).not.toMatch(/mask="url\(#[^)]*(vm|bm|rm)\)"|class="lerret-(himmel|bakke|bakgrunn)"/)
       expect(utklipp.length, id).toBeLessThan(hel.length)
     }
   })

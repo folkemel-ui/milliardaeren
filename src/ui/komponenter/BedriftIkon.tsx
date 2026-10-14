@@ -60,7 +60,7 @@ export const BedriftIkon = memo(function BedriftIkon({
     const px = stor ? 68 : 52
     return (
       <div className={`bedrift-ikon fylt${stor ? ' stor' : ''}${dempet ? ' dempet-ikon' : ''}`} aria-hidden="true">
-        <Illustrasjon id={type} størrelse={px} trinn={trinnFor(nivaa)} forbedringer={forbedringer} naerbilde={stor ? FLIS_STOR : FLIS} />
+        <Illustrasjon id={type} størrelse={px} trinn={trinnFor(nivaa)} forbedringer={forbedringer} naerbilde={stor ? FLIS_STOR : FLIS} flis />
       </div>
     )
   }

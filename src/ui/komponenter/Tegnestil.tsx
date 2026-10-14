@@ -296,7 +296,7 @@ function definisjon(id: string, navn: string, tema: keyof typeof HIMMEL, x0 = 0,
     case 'rm':
       return (
         <mask id={`${id}rm`} maskContentUnits="userSpaceOnUse">
-          <rect x="0" y={GRUNNLINJE} width="96" height={96 - GRUNNLINJE} fill={`url(#${id}r)`} />
+          <rect x={x0} y={GRUNNLINJE} width={b} height={96 - GRUNNLINJE} fill={`url(#${id}r)`} />
         </mask>
       )
     // Dis: hver farge blandes halvveis mot DISFARGE (#b3b2a5).
@@ -514,14 +514,15 @@ export function Speiling({ children }: { children: ReactNode }) {
  * utenfor lerretet og synes ikke.
  */
 export function Lakksveip({ children }: { children: ReactNode }) {
-  const { id } = useContext(Ider)
+  const { id, x, b } = useContext(Ider)
   const iScenen = useContext(IScenen)
   const utklipp = useContext(Utklipp)
   if (!iScenen || utklipp) return null
   const m = `${id}lakk`
+  // Masken følger lerretet, så den også dekker en bil i den brede rammen (G20).
   return (
     <g>
-      <mask id={m} maskUnits="userSpaceOnUse" x="0" y="0" width="96" height="96">
+      <mask id={m} maskUnits="userSpaceOnUse" x={x} y="0" width={b} height="96">
         <g className="lakkmaske">{children}</g>
       </mask>
       <g mask={`url(#${m})`}>

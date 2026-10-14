@@ -7,8 +7,8 @@
  */
 
 import { useContext, type ReactNode } from 'react'
-import { r2, Blinklys, IScenen, Lakksveip, Bakke, Dis, GRUNNLINJE, HORISONT, Kantfade, Kloss, Lerret, Person as Figur, S, Slagskygge, Speiling, Glans, inn, type Materiale } from '../Tegnestil'
-import { Passasjerfly, type P, type Tegning } from '../Illustrasjoner'
+import { r2, Blinklys, Bunnskygge, Folk, IScenen, Lakksveip, Lampe, Bakke, Dis, GRUNNLINJE, HORISONT, Kantfade, Kloss, Lerret, Person as Figur, S, Slagskygge, Speiling, Glans, Tre, Utklipp, Vindusrad, inn, type Materiale } from '../Tegnestil'
+import { Passasjerfly, Sykkel, type P, type Tegning } from '../Illustrasjoner'
 
 // ─────────────────────────────────────────────── Bilene i ny stil (G5)
 
@@ -88,7 +88,7 @@ function Bilhjul({ x, r = 6, stil, m = S.metall, kaliper }: { x: number; r?: num
           <circle cx={x} cy={cy} r={f} fill={m.lys} />
           <circle cx={x} cy={cy} r={+(f * 0.72).toFixed(2)} fill={m.flate} />
           <circle cx={x} cy={cy} r={+(f * 0.35).toFixed(2)} fill={m.lys} />
-          <path d={`M${+(x - f * 0.6).toFixed(2)} ${+(cy - f * 0.5).toFixed(2)} A${f * 0.8} ${f * 0.8} 0 0 1 ${+(x + f * 0.2).toFixed(2)} ${+(cy - f * 0.78).toFixed(2)}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" opacity="0.8" />
+          <path d={`M${+(x - f * 0.6).toFixed(2)} ${+(cy - f * 0.5).toFixed(2)} A${r2(f * 0.8)} ${r2(f * 0.8)} 0 0 1 ${+(x + f * 0.2).toFixed(2)} ${+(cy - f * 0.78).toFixed(2)}`} fill="none" stroke={S.hvit.lys} strokeWidth="0.6" opacity="0.8" />
         </>
       )}
       {/* Lys fra venstre på dekket. */}
@@ -105,19 +105,497 @@ function Hjulbue({ x, r, bunn = 80 }: { x: number; r: number; bunn?: number }) {
 }
 
 /**
- * Utstillingsrommet til bilene (som superbilen fra G1): blankt gulv, lys
- * ovenfra, bilen speiler seg i gulvet og har en mørk kontaktskygge. I scenen
- * glir et lys over lakken (`Lakksveip`, G10).
+ * Rommet bilen står i (som superbilen fra G1): blankt gulv, lys ovenfra, bilen
+ * speiler seg i gulvet og har en mørk kontaktskygge. I scenen glir et lys over
+ * lakken (`Lakksveip`, G10). Fra G20 har hver bil sitt eget rom (`rom`: veggen,
+ * gulvet og det som står ved siden av, bak bilen; `forgrunn`: det som står foran),
+ * tegnet ut til kantene av den brede rammen. Rommet er bakgrunn, så garasjen i
+ * Samling (utklippet) viser bare bilen.
  */
-function Utstilling({ størrelse, fra = 8, til = 90, children }: { størrelse: number; fra?: number; til?: number; children: () => ReactNode }) {
+function Utstilling({ størrelse, fra = 8, til = 90, rom, forgrunn, children }: { størrelse: number; fra?: number; til?: number; rom?: ReactNode; forgrunn?: ReactNode; children: () => ReactNode }) {
   return (
     <Lerret størrelse={størrelse} himmel="inne">
       <Bakke type="gulv" />
+      {rom && <Kantfade>{rom}</Kantfade>}
       <Speiling>{children()}</Speiling>
       <ellipse cx={(fra + til) / 2} cy={GRUNNLINJE + 0.3} rx={(til - fra) / 2} ry="2" fill="#000000" opacity="0.45" />
       {children()}
+      {forgrunn && <Kantfade>{forgrunn}</Kantfade>}
       <Lakksveip>{children()}</Lakksveip>
     </Lerret>
+  )
+}
+
+// ─────────────────────────────────────────────── Rommene bilene står i (G20)
+// Nær avstand: 18 enheter per meter. Veggen står fra y 0 til gulvet på y 72, og den
+// brede rammen går fra x −40 til 136; bilen står i midten, fra x 4 til 93.
+
+/** Veggen bak, over hele den brede rammen, og en mørkere stripe nederst der lyset ikke når. */
+function Vegg({ farge }: { farge: string }) {
+  return (
+    <g>
+      <rect x="-40" y="0" width="176" height="72" fill={farge} />
+      <Bunnskygge x={-40} y={36} b={176} h={36} />
+    </g>
+  )
+}
+
+/** Gulvet i rommets tone, lagt over det blanke gulvet, så speilingen fortsatt synes. */
+function Gulvtone({ farge, opasitet }: { farge: string; opasitet: number }) {
+  return <rect x="-40" y="72" width="176" height="24" fill={farge} opacity={opasitet} />
+}
+
+/** Et lysrør i taket med et svakt skjær ned over veggen. */
+function Lysror({ x, b }: { x: number; b: number }) {
+  return (
+    <g>
+      <ellipse cx={r2(x + b / 2)} cy="10" rx={r2(b * 0.8)} ry="12" fill={S.hvit.lys} opacity="0.07" />
+      <rect x={x} y="2" width={b} height="2.2" rx="1.1" fill={S.hvit.lys} />
+      <rect x={x} y="4" width={b} height="0.6" fill={S.metall.skygge} />
+    </g>
+  )
+}
+
+/**
+ * Den brukte stasjonsvognen står i garasjen hjemme: malte betongblokker, et
+ * lysrør, en hullplate med verktøy over arbeidsbenken, vinterdekkene under den,
+ * og på den andre siden et vindu mot hagen, en hylle med malingsbokser og sykkelen.
+ */
+function RomGarasje() {
+  const fuger = Array.from({ length: 8 }, (_, r) => {
+    const y = r * 9
+    let d = `M-40 ${y}H136`
+    for (let x = -40 + (r % 2) * 11; x < 136; x += 22) d += `M${x} ${y}v9`
+    return d
+  }).join('')
+  const hull: [number, number][] = []
+  for (let x = -36; x <= -16; x += 2.5) for (let y = 21; y <= 41; y += 2.5) hull.push([x, y])
+  return (
+    <g>
+      <Vegg farge={S.puss.skygge} />
+      <path d={fuger} stroke={S.stein.flate} strokeWidth="0.35" fill="none" opacity="0.7" />
+      <Gulvtone farge={S.stein.skygge} opasitet={0.45} />
+      <ellipse cx="34" cy="90" rx="12" ry="1.8" fill={S.mork.skygge} opacity="0.3" />
+      <Lysror x={20} b={48} />
+      {/* Hullplata med verktøyet: hammer, fastnøkkel, sag og tang. */}
+      <rect x="-38" y="19" width="26" height="25" fill={S.treverk.lys} />
+      {hull.map(([x, y]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="0.3" fill={S.treverk.skygge} />
+      ))}
+      <rect x="-34" y="23" width="1.3" height="13" rx="0.5" fill={S.treverk.skygge} />
+      <rect x="-36.2" y="22" width="5.6" height="2.4" rx="0.4" fill={S.metall.skygge} />
+      <rect x="-28" y="22" width="1.5" height="15" rx="0.7" fill={S.metall.flate} />
+      <circle cx="-27.25" cy="22.4" r="1.8" fill={S.metall.flate} />
+      <circle cx="-27.25" cy="22" r="0.8" fill={S.treverk.lys} />
+      <path d="M-23 23 L-15 23 L-15 33 L-23 26 Z" fill={S.metall.lys} />
+      <rect x="-24.4" y="21.6" width="3" height="4.4" rx="1" fill={S.faluRod.flate} />
+      <path d="M-18 36 L-16.6 42 M-15.4 36 L-16.8 42" stroke={S.faluRod.flate} strokeWidth="1" strokeLinecap="round" />
+      {/* Arbeidsbenken med skrustikka, og vinterdekkene stablet under. */}
+      <rect x="-39" y="58" width="32" height="2.6" fill={S.treverk.flate} />
+      <rect x="-39" y="58" width="32" height="0.8" fill={S.treverk.lys} />
+      <rect x="-37.6" y="60.6" width="2" height="23.4" fill={S.treverk.skygge} />
+      <rect x="-10.6" y="60.6" width="2" height="23.4" fill={S.treverk.skygge} />
+      <rect x="-15" y="53.6" width="6" height="4.4" rx="0.6" fill={S.petrol.flate} />
+      <rect x="-17" y="54.8" width="2" height="1.6" fill={S.metall.flate} />
+      {[0, 1, 2, 3].map((i) => (
+        <g key={i}>
+          <rect x="-34" y={r2(80.4 - i * 3.6)} width="20" height="3.4" rx="1.6" fill={i % 2 ? S.mork.lys : S.mork.flate} />
+          <path d={`M-31 ${r2(81.2 - i * 3.6)}h14`} stroke={S.mork.skygge} strokeWidth="0.4" strokeDasharray="1 0.8" />
+        </g>
+      ))}
+      <ellipse cx="-24" cy="69.6" rx="7" ry="1.2" fill={S.mork.skygge} />
+      {/* Vinduet mot hagen: hekk, gjerde og himmel. */}
+      <rect x="103" y="18" width="26" height="22" fill={S.treverk.lys} />
+      <rect x="104.4" y="19.4" width="23.2" height="19.2" fill={S.glass.lys} />
+      <rect x="104.4" y="31" width="23.2" height="7.6" fill={S.gran.flate} />
+      <path d="M104.4 31 q2 -2.4 4 0 q2 -2.4 4 0 q2 -2.4 4 0 q2 -2.4 4 0 q2 -2.4 4 0 q2 -2.4 3.2 0" fill={S.gran.lys} />
+      <rect x="115.4" y="19.4" width="1.2" height="19.2" fill={S.treverk.lys} />
+      <polygon points="106,19.4 111,19.4 106,27" fill="#ffffff" opacity="0.18" />
+      {/* Hylla med malingsbokser. */}
+      <rect x="100" y="48" width="34" height="1.4" fill={S.treverk.flate} />
+      {[[102, S.hvit.flate], [108, S.sjo.lys], [114, S.oker.lys], [122, S.hvit.flate]].map(([x, c]) => (
+        <g key={x as number}>
+          <rect x={x as number} y="42" width="5" height="6" rx="0.6" fill={c as string} />
+          <rect x={x as number} y="42" width="5" height="1" fill={S.metall.flate} />
+        </g>
+      ))}
+      {/* Sykkelen lener mot veggen. */}
+      <g transform="translate(102 76) scale(1.8)">
+        <Sykkel x={0} y={0} farge={S.vin.flate} />
+      </g>
+    </g>
+  )
+}
+
+/**
+ * Den elektriske sportsbilen står i et hvitt utstillingslokale med glassfasade:
+ * lyse fliser, en lysstripe langs veggen, laderen på veggen med kabelen til
+ * bilen, en plante, og gjennom glasset gata utenfor med et hus, et tre og folk.
+ */
+function RomGlass() {
+  return (
+    <g>
+      <Vegg farge={S.hvit.flate} />
+      {[-18, 4, 26, 48, 70].map((x) => (
+        <line key={x} x1={x} y1="0" x2={x} y2="72" stroke={S.hvit.skygge} strokeWidth="0.4" />
+      ))}
+      <rect x="-40" y="14" width="140" height="1.2" fill={S.hvit.lys} />
+      <rect x="-40" y="15.2" width="140" height="6" fill={S.hvit.lys} opacity="0.2" />
+      <Gulvtone farge={S.hvit.skygge} opasitet={0.5} />
+      {[-30, -6, 18, 42, 66, 90, 114].map((x) => (
+        <line key={x} x1={x} y1="72" x2={r2(x - 7)} y2="96" stroke={S.hvit.flate} strokeWidth="0.35" opacity="0.6" />
+      ))}
+      {/* Laderen på veggen, og kabelen ned til ladeluka bak på bilen. */}
+      <rect x="-16" y="40" width="8" height="12" rx="1.2" fill={S.hvit.lys} stroke={S.metall.flate} strokeWidth="0.4" />
+      <rect x="-13.4" y="43" width="2.8" height="1" rx="0.5" fill={S.petrol.lys} />
+      <path d="M-12 52 C-12 66 -6 78 6 72" fill="none" stroke={S.mork.flate} strokeWidth="1" strokeLinecap="round" />
+      {/* Planten i en hvit potte. */}
+      <path d="M-36 84 L-35 73 L-27 73 L-26 84 Z" fill={S.hvit.lys} />
+      <rect x="-36" y="73" width="10" height="1.2" fill={S.hvit.skygge} />
+      {[[-31, 72, -38, 50], [-31, 72, -30, 44], [-31, 72, -22, 52], [-31, 72, -35, 58], [-31, 72, -25, 60]].map(([x1, y1, x2, y2], i) => (
+        <path key={i} d={`M${x1} ${y1} Q${r2((x1 + x2) / 2 + (i % 2 ? 3 : -3))} ${r2((y1 + y2) / 2)} ${x2} ${y2}`} fill="none" stroke={i % 2 ? S.gran.flate : S.gran.lys} strokeWidth="2.2" strokeLinecap="round" />
+      ))}
+      {/* Glassfasaden, og gata utenfor. */}
+      <rect x="100" y="0" width="36" height="72" fill={S.glass.lys} />
+      <Dis>
+        <rect x="104" y="18" width="34" height="44" fill={S.stein.lys} />
+        <Vindusrad x={107} y={22} antall={3} b={6} h={8} mellom={4} />
+        <Vindusrad x={107} y={36} antall={3} b={6} h={8} mellom={4} />
+        <rect x="104" y="52" width="34" height="10" fill={S.stein.flate} />
+      </Dis>
+      <rect x="100" y="62" width="36" height="10" fill={S.stein.flate} />
+      <Tre x={128} y={66} h={26} />
+      <Figur x={112} y={67} avstand="gate" klaer={S.marine} />
+      {[100, 112.4, 124.8].map((x) => (
+        <rect key={x} x={x} y="0" width="1.4" height="72" fill={S.metall.flate} />
+      ))}
+      <rect x="100" y="48" width="36" height="1" fill={S.metall.flate} />
+      <polygon points="104,0 112,0 104,22" fill="#ffffff" opacity="0.16" />
+      <polygon points="116,0 120,0 113,40 109,40" fill="#ffffff" opacity="0.1" />
+    </g>
+  )
+}
+
+/**
+ * Den italienske superbilen står hos forhandleren: mørk vegg med merket i gull,
+ * spotter i taket, en bil til under et grått trekk til venstre, og til høyre
+ * en disk med selgeren bak.
+ */
+function RomForhandler() {
+  return (
+    <g>
+      <Vegg farge={S.mork.lys} />
+      <rect x="-40" y="0" width="30" height="72" fill={S.faluRod.skygge} />
+      <rect x="-10.6" y="0" width="0.6" height="72" fill={S.gull.flate} />
+      {/* Merket: et skjold i gull. */}
+      <path d="M42 12 H56 V20 Q56 27 49 30 Q42 27 42 20 Z" fill={S.gull.flate} />
+      <path d="M44.4 15 L49 22 L53.6 15" fill="none" stroke={S.gull.skygge} strokeWidth="1.2" />
+      {/* Spottene i taket og lyset de kaster på gulvet. */}
+      {[14, 49, 84, 118].map((x) => (
+        <g key={x}>
+          <rect x={x - 1.6} y="0" width="3.2" height="3.4" rx="0.6" fill={S.mork.flate} />
+          <ellipse cx={x} cy="88" rx="16" ry="3" fill={S.vinduLys.lys} opacity="0.07" />
+        </g>
+      ))}
+      {/* Bilen under trekket: et grått klede med folder, og dekkene stikker fram nederst. */}
+      <circle cx="-4" cy="80.4" r="3.6" fill={S.mork.skygge} />
+      <circle cx="-36" cy="80.4" r="3.6" fill={S.mork.skygge} />
+      <path d="M-40 80 L-40 64 Q-36 62.6 -32 62.4 L-28 62 Q-22 57.6 -16 57.4 Q-10 57.6 -7 61.6 L-1 63.6 Q3 64.8 3.8 68 L4 74 Q4 78 2.6 80 Q1.4 74 -4 74 Q-9.4 74 -10.4 80 Q-20 78.6 -29.6 80 Q-30.6 74 -36 74 Q-38.6 74 -40 76 Z" fill={S.stein.flate} />
+      <path d="M-40 64 Q-36 62.6 -32 62.4 L-28 62 Q-22 57.6 -16 57.4 Q-10 57.6 -7 61.6 L-1 63.6 Q3 64.8 3.8 68" fill="none" stroke={S.stein.lys} strokeWidth="1.2" />
+      <path d="M-28 62 Q-27 70 -25 79 M-16 58 Q-17 68 -16 79 M-7 62 Q-8 69 -6.6 74 M1 64 Q0.6 70 2 76" fill="none" stroke={S.stein.skygge} strokeWidth="0.6" />
+      {/* Selgeren bak disken. */}
+      <Folk x={118} y={72} m={1.8} klaer={S.mork} />
+      <rect x="104" y="62" width="28" height="22" fill={S.hvit.flate} />
+      <rect x="104" y="62" width="28" height="1.6" fill={S.hvit.lys} />
+      <rect x="104" y="66" width="28" height="0.6" fill={S.gull.flate} />
+      <rect x="125" y="58" width="6" height="4" rx="0.5" fill={S.mork.flate} />
+    </g>
+  )
+}
+
+/**
+ * Hyperbilen står i fabrikkhallen der den ble bygget: høye vinduer, stålsøyler,
+ * en traverskran, gule linjer på gulvet, et karbonskall på et stativ til venstre,
+ * og til høyre en robotarm og en ingeniør med nettbrett.
+ */
+function RomFabrikk() {
+  return (
+    <g>
+      <Vegg farge={S.fjell.flate} />
+      {[-34, 8, 50, 92, 132].map((x) => (
+        <rect key={x} x={x} y="0" width="3" height="72" fill={S.fjell.skygge} />
+      ))}
+      <rect x="-40" y="3" width="176" height="10" fill={S.glass.lys} opacity="0.75" />
+      {[-24, -6, 14, 32, 64, 76, 104, 118].map((x) => (
+        <rect key={x} x={x} y="3" width="0.8" height="10" fill={S.fjell.skygge} />
+      ))}
+      <rect x="-40" y="17" width="176" height="2" fill={S.oker.skygge} />
+      <rect x="108" y="19" width="5" height="4" fill={S.oker.flate} />
+      <line x1="110.5" y1="23" x2="110.5" y2="34" stroke={S.mork.flate} strokeWidth="0.5" />
+      <path d="M109 34 h3 l-1.5 2.4 Z" fill={S.metall.skygge} />
+      <Gulvtone farge={S.skifer.lys} opasitet={0.35} />
+      <rect x="-40" y="75" width="176" height="0.8" fill={S.oker.lys} />
+      <rect x="-40" y="93" width="176" height="0.8" fill={S.oker.lys} />
+      {/* Karbonskallet på stativet. */}
+      <rect x="-34" y="66" width="2" height="18" fill={S.oker.flate} />
+      <rect x="-12" y="66" width="2" height="18" fill={S.oker.flate} />
+      <rect x="-36" y="65" width="28" height="2" fill={S.oker.skygge} />
+      <path d="M-39 65 L-38.4 60.6 Q-32 59.4 -27 59.2 Q-21 54.6 -15 54.4 Q-9.4 54.6 -6.6 58.6 L-3.4 60.4 Q-2 61.4 -2 63 L-2 65 L-5 65 A4.6 4.6 0 0 0 -14.2 65 L-26 65 A4.6 4.6 0 0 0 -35.2 65 Z" fill={S.mork.flate} />
+      <path d="M-24 59 Q-19 56.2 -14 56.2 Q-10 56.4 -8.4 59 Z" fill={S.mork.skygge} />
+      <path d="M-36 63 l3 -3 M-31 63 l3 -3 M-21 63 l3 -3 M-11 63 l3 -3 M-6 63 l2.4 -2.4" stroke={S.mork.lys} strokeWidth="0.4" />
+      <path d="M-38.4 60.6 Q-32 59.4 -27 59.2 Q-21 54.6 -15 54.4 Q-9.4 54.6 -6.6 58.6" fill="none" stroke={S.mork.lys} strokeWidth="0.6" />
+      {/* Robotarmen. */}
+      <rect x="112" y="78" width="10" height="6" rx="1" fill={S.oker.skygge} />
+      <path d="M117 78 L114 60 L104 52" fill="none" stroke={S.oker.flate} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="114" cy="60" r="2.2" fill={S.oker.skygge} />
+      <path d="M103 50 l-3 -1 M103 54 l-3 1" stroke={S.mork.flate} strokeWidth="1" strokeLinecap="round" />
+      <Folk x={128} y={84} m={1.75} klaer={S.hvit} arm="holde" ting="kort" />
+    </g>
+  )
+}
+
+/**
+ * Veteranbilen står i et gammelt verksted av tegl: emaljeskilt på veggen, en rød
+ * verktøykiste og en jekk, og på den andre siden en bensinpumpe med glasskuppel,
+ * en plakat fra et billøp og en lampe i bur.
+ */
+function RomVeteran() {
+  const tegl = Array.from({ length: 24 }, (_, r) => {
+    const y = r * 3
+    let d = `M-40 ${y}H136`
+    for (let x = -40 + (r % 2) * 4.5; x < 136; x += 9) d += `M${r2(x)} ${y}v3`
+    return d
+  }).join('')
+  return (
+    <g>
+      <Vegg farge={S.tegl.flate} />
+      <path d={tegl} stroke={S.puss.skygge} strokeWidth="0.3" fill="none" opacity="0.55" />
+      <Gulvtone farge={S.stein.skygge} opasitet={0.4} />
+      <ellipse cx="-20" cy="88" rx="8" ry="1.4" fill={S.mork.skygge} opacity="0.35" />
+      <ellipse cx="60" cy="92" rx="10" ry="1.4" fill={S.mork.skygge} opacity="0.25" />
+      {/* Emaljeskiltet. */}
+      <circle cx="-22" cy="22" r="8" fill={S.hvit.lys} stroke={S.faluRod.flate} strokeWidth="1.6" />
+      <rect x="-29" y="20" width="14" height="4" fill={S.marine.flate} />
+      <circle cx="-22" cy="22" r="1.4" fill={S.oker.lys} />
+      {/* Verktøykista på hjul, og jekken på gulvet. */}
+      <rect x="-37" y="58" width="22" height="22" rx="1" fill={S.faluRod.flate} />
+      <rect x="-37" y="58" width="22" height="1.4" fill={S.faluRod.lys} />
+      {[63, 68, 73].map((y) => (
+        <g key={y}>
+          <line x1="-37" y1={y} x2="-15" y2={y} stroke={S.faluRod.skygge} strokeWidth="0.5" />
+          <rect x="-29" y={y + 1.4} width="6" height="0.9" rx="0.4" fill={S.metall.lys} />
+        </g>
+      ))}
+      <circle cx="-34" cy="82" r="1.8" fill={S.mork.flate} />
+      <circle cx="-18" cy="82" r="1.8" fill={S.mork.flate} />
+      <path d="M-10 84 L-10 80 L0 79 L2 81 L2 84 Z" fill={S.faluRod.flate} />
+      <line x1="-10" y1="80" x2="-16" y2="72" stroke={S.metall.flate} strokeWidth="0.8" />
+      {/* Lampa i bur, hengende fra taket. */}
+      <line x1="98" y1="0" x2="98" y2="20" stroke={S.mork.flate} strokeWidth="0.4" />
+      <Lampe x={98} y={23} r={3.4} />
+      <path d="M96 20.4 h4 M95.6 23 h4.8 M96 25.6 h4" stroke={S.mork.flate} strokeWidth="0.4" />
+      {/* Bensinpumpa med glasskuppelen. */}
+      <rect x="107" y="50" width="12" height="34" rx="2" fill={S.faluRod.flate} />
+      <rect x="107" y="50" width="3" height="34" rx="1" fill={S.faluRod.lys} />
+      <circle cx="113" cy="60" r="3.4" fill={S.hvit.lys} />
+      <line x1="113" y1="60" x2="114.6" y2="58" stroke={S.mork.flate} strokeWidth="0.4" />
+      <path d="M119 66 q5 2 4 10 q-1 6 -4 6" fill="none" stroke={S.mork.flate} strokeWidth="0.9" />
+      <circle cx="113" cy="45" r="5.4" fill={S.hvit.lys} />
+      <rect x="107.6" y="44" width="10.8" height="2" fill={S.oker.flate} />
+      <rect x="110" y="49" width="6" height="1.6" fill={S.metall.flate} />
+      {/* Plakaten fra et billøp. */}
+      <rect x="123" y="14" width="13" height="20" fill={S.treMork.flate} />
+      <rect x="124" y="15" width="11" height="18" fill={S.oker.lys} />
+      <path d="M125 28 q2 -3 5 -3 q3 0 4 3 Z" fill={S.gran.flate} />
+      <circle cx="127" cy="28.4" r="1" fill={S.mork.flate} />
+      <circle cx="132.6" cy="28.4" r="1" fill={S.mork.flate} />
+      <rect x="125" y="17" width="9" height="1.4" fill={S.faluRod.flate} />
+    </g>
+  )
+}
+
+/**
+ * Limousinen står under hotellets overbygde innkjørsel: lys steinfasade med
+ * opplyste vinduer, et tak med gullkant og lys under, en bagasjetralle til
+ * venstre, og til høyre svingdøra, den røde løperen og portieren.
+ */
+function RomHotell() {
+  const vindu = (x: number) => (
+    <g key={x}>
+      <path d={`M${x} 52 V30 Q${x + 6} 23 ${x + 12} 30 V52 Z`} fill={S.vinduLys.flate} />
+      <path d={`M${x + 6} 26 V52 M${x} 40 H${x + 12}`} stroke={S.puss.skygge} strokeWidth="0.8" />
+      <path d={`M${x} 52 V30 Q${x + 6} 23 ${x + 12} 30 V52`} fill="none" stroke={S.puss.skygge} strokeWidth="1" />
+    </g>
+  )
+  return (
+    <g>
+      <Vegg farge={S.puss.lys} />
+      {[18, 36, 54].map((y) => (
+        <line key={y} x1="-40" y1={y} x2="136" y2={y} stroke={S.puss.flate} strokeWidth="0.5" />
+      ))}
+      {[-34, -14, 22, 42, 62].map(vindu)}
+      {/* Taket over innkjørselen, med gullkant og lys under. */}
+      <rect x="-40" y="0" width="176" height="9" fill={S.mork.flate} />
+      <rect x="-40" y="9" width="176" height="1" fill={S.gull.flate} />
+      {[-28, 4, 36, 68, 100, 128].map((x) => (
+        <Lampe key={x} x={x} y={12} r={1.8} />
+      ))}
+      <Gulvtone farge={S.stein.flate} opasitet={0.5} />
+      {[-24, 0, 24, 48, 72, 96, 120].map((x) => (
+        <line key={x} x1={x} y1="72" x2={r2(x - 6)} y2="96" stroke={S.stein.skygge} strokeWidth="0.35" opacity="0.6" />
+      ))}
+      {/* Svingdøra i messing, med varmt lys fra lobbyen. */}
+      <rect x="104" y="26" width="24" height="46" fill={S.vinduLys.lys} opacity="0.9" />
+      <rect x="104" y="26" width="24" height="46" fill="none" stroke={S.gull.flate} strokeWidth="1.2" />
+      <path d="M116 26 V72 M104 49 H128" stroke={S.gull.flate} strokeWidth="0.8" />
+      <rect x="102" y="22" width="28" height="4" fill={S.gull.skygge} />
+      <polygon points="96,73 136,73 136,82 92,82" fill={S.vin.flate} />
+      <polygon points="96,73 136,73 136,74 95,74" fill={S.vin.lys} />
+      <Folk x={99} y={82} m={1.85} klaer={S.marine} caps={S.marine.skygge} />
+      <rect x="97.6" y="70" width="0.8" height="0.8" fill={S.gull.lys} />
+      {/* Topptrær i potter ved døra og ved tralla. */}
+      {[132, -37].map((x) => (
+        <g key={x}>
+          <path d={`M${x - 4} 84 L${x - 3.4} 76 L${x + 3.4} 76 L${x + 4} 84 Z`} fill={S.mork.flate} />
+          <rect x={x - 0.5} y="64" width="1" height="12" fill={S.treMork.flate} />
+          <circle cx={x} cy="60" r="6" fill={S.gran.flate} />
+          <circle cx={x - 1.6} cy="58.4" r="3" fill={S.gran.lys} />
+        </g>
+      ))}
+      {/* Bagasjetralla med koffertene. */}
+      <rect x="-30" y="80" width="22" height="1.4" fill={S.gull.flate} />
+      <path d="M-29 80 V54 Q-19 46 -9 54 V80" fill="none" stroke={S.gull.flate} strokeWidth="1" />
+      <rect x="-27" y="66" width="17" height="14" rx="1" fill={S.treMork.flate} />
+      <rect x="-26" y="57" width="12" height="9" rx="1" fill={S.vin.flate} />
+      <rect x="-21.6" y="55.6" width="3.2" height="1.4" rx="0.6" fill="none" stroke={S.mork.flate} strokeWidth="0.5" />
+      <circle cx="-27" cy="82.8" r="1.4" fill={S.mork.flate} />
+      <circle cx="-11" cy="82.8" r="1.4" fill={S.mork.flate} />
+    </g>
+  )
+}
+
+/**
+ * Formel 1-bilen står i teamets garasje i depotet: paneler i teamets farger,
+ * tidsskjermer under taket, dekk i røde varmetepper på et stativ og en
+ * verktøyvogn, og gjennom den åpne porten depotfeltet, depotmuren og tribunen.
+ * En mekaniker står klar med muttertrekkeren.
+ */
+function RomDepot() {
+  return (
+    <g>
+      <Vegg farge={S.mork.flate} />
+      <rect x="-40" y="38" width="176" height="6" fill={S.faluRod.flate} />
+      <rect x="-40" y="44" width="176" height="1.2" fill={S.hvit.lys} />
+      <rect x="-40" y="0" width="176" height="5" fill={S.metall.skygge} />
+      {[-30, -2, 26, 54, 82].map((x) => (
+        <path key={x} d={`M${x} 5 L${x + 14} 0 L${x + 28} 5`} fill="none" stroke={S.metall.flate} strokeWidth="0.6" />
+      ))}
+      {/* Tidsskjermene. */}
+      {[20, 58].map((x) => (
+        <g key={x}>
+          <line x1={x + 4} y1="5" x2={x + 4} y2="10" stroke={S.mork.skygge} strokeWidth="0.5" />
+          <line x1={x + 12} y1="5" x2={x + 12} y2="10" stroke={S.mork.skygge} strokeWidth="0.5" />
+          <rect x={x} y="10" width="16" height="10" rx="0.6" fill={S.mork.skygge} stroke={S.metall.skygge} strokeWidth="0.5" />
+          {[12.4, 14.6, 16.8].map((y, i) => (
+            <rect key={y} x={x + 2} y={y} width={[9, 11, 7][i]} height="0.9" fill={i === 1 ? S.oker.lys : S.petrol.lys} />
+          ))}
+        </g>
+      ))}
+      <Gulvtone farge={S.fjell.lys} opasitet={0.3} />
+      <rect x="-40" y="91" width="176" height="1" fill={S.hvit.lys} opacity="0.7" />
+      {/* Dekkstativet med dekk i varmetepper, og verktøyvogna. */}
+      <rect x="-38" y="44" width="1.4" height="40" fill={S.metall.flate} />
+      <rect x="-15" y="44" width="1.4" height="40" fill={S.metall.flate} />
+      {[0, 1, 2].map((r) =>
+        [0, 1].map((k) => (
+          <g key={`${r}-${k}`}>
+            <rect x={-36 + k * 10.4} y={46 + r * 12.4} width="10" height="11.4" rx="2.4" fill={S.faluRod.flate} />
+            <rect x={-36 + k * 10.4} y={46 + r * 12.4} width="10" height="2" rx="1" fill={S.faluRod.lys} />
+            <rect x={-35 + k * 10.4} y={r2(55.4 + r * 12.4)} width="8" height="1.4" fill={S.mork.skygge} />
+          </g>
+        )),
+      )}
+      <rect x="-12" y="62" width="12" height="20" rx="1" fill={S.mork.lys} />
+      {[66, 71, 76].map((y) => (
+        <rect key={y} x="-10.6" y={y} width="9.2" height="0.8" fill={S.metall.flate} />
+      ))}
+      <circle cx="-10" cy="83" r="1.2" fill={S.mork.skygge} />
+      <circle cx="-2" cy="83" r="1.2" fill={S.mork.skygge} />
+      {/* Porten mot depotfeltet. */}
+      <rect x="102" y="10" width="34" height="62" fill={S.glass.lys} />
+      <Dis>
+        <path d="M102 40 L136 30 L136 44 L102 48 Z" fill={S.stein.flate} />
+        {[33, 36, 39, 42].map((y, i) => (
+          <line key={y} x1="102" y1={r2(y + 9 - i * 0.6)} x2="136" y2={r2(y - 1 - i * 0.2)} stroke={S.vin.lys} strokeWidth="0.6" strokeDasharray="0.6 0.9" />
+        ))}
+      </Dis>
+      <rect x="102" y="54" width="34" height="18" fill={S.skifer.flate} />
+      <rect x="102" y="50" width="34" height="5" fill={S.stein.lys} />
+      <path d="M102 50 V44 M108 50 V44 M114 50 V44 M120 50 V44 M126 50 V44 M132 50 V44 M102 44 H136" stroke={S.metall.flate} strokeWidth="0.4" />
+      <rect x="102" y="63" width="34" height="0.8" fill={S.hvit.lys} opacity="0.8" />
+      <rect x="100" y="8" width="3" height="64" fill={S.metall.skygge} />
+      <rect x="100" y="8" width="36" height="3" fill={S.metall.skygge} />
+      {/* Mekanikeren med muttertrekkeren. */}
+      <Folk x={110} y={84} m={1.8} klaer={S.faluRod} caps={S.mork.flate} arm="holde" />
+      <rect x="117.6" y="64.4" width="3" height="5" rx="0.6" fill={S.metall.flate} />
+      <rect x="118.4" y="69.4" width="1.4" height="2.6" fill={S.mork.flate} />
+      <path d="M120.6 66 q4 1 4 6" fill="none" stroke={S.mork.flate} strokeWidth="0.6" />
+    </g>
+  )
+}
+
+/**
+ * Den unike hyperbilen står på en lav sokkel i et privat museum: mørk vegg med
+ * spotter som faller på bilen, innrammede bilder, en messingplate på et stativ,
+ * og tau i rød fløyel mellom messingstolper foran.
+ */
+function RomMuseum() {
+  return (
+    <g>
+      <Vegg farge={S.marine.skygge} />
+      <polygon points="38,0 60,0 92,84 6,84" fill={S.hvit.lys} opacity="0.06" />
+      <polygon points="44,0 54,0 74,84 24,84" fill={S.hvit.lys} opacity="0.05" />
+      {[40, 58].map((x) => (
+        <rect key={x} x={x - 2} y="0" width="4" height="3" rx="0.6" fill={S.mork.flate} />
+      ))}
+      {[-34, -16, 104, 122].map((x, i) => (
+        <g key={x}>
+          <rect x={x} y="22" width="14" height="18" fill={S.gull.skygge} />
+          <rect x={x + 1.2} y="23.2" width="11.6" height="15.6" fill={i % 2 ? S.puss.flate : S.puss.skygge} />
+          <path d={`M${x + 2.4} 34 q4 -4 9 -1`} fill="none" stroke={S.treMork.flate} strokeWidth="0.8" />
+        </g>
+      ))}
+      {/* Sokkelen. */}
+      <ellipse cx="49" cy="84" rx="52" ry="6" fill={S.mork.lys} />
+      <ellipse cx="49" cy="84" rx="52" ry="6" fill="none" stroke={S.gull.flate} strokeWidth="0.6" />
+      <ellipse cx="49" cy="83.4" rx="50" ry="5" fill={S.mork.flate} />
+      {/* Messingplata på stativet. */}
+      <rect x="113.4" y="70" width="1.2" height="14" fill={S.gull.skygge} />
+      <path d="M108 64 L120 64 L121 70 L107 70 Z" fill={S.gull.flate} />
+      <path d="M110 66.4 h8 M110 68 h5" stroke={S.gull.skygge} strokeWidth="0.4" />
+    </g>
+  )
+}
+
+/** Tauet foran den unike hyperbilen: messingstolper med rød fløyel imellom, på begge sider. */
+function Museumstau() {
+  const stolpe = (x: number) => (
+    <g key={x}>
+      <ellipse cx={x} cy="92" rx="2.6" ry="0.8" fill={S.gull.skygge} />
+      <rect x={x - 0.6} y="76" width="1.2" height="16" fill={S.gull.flate} />
+      <circle cx={x} cy="75.6" r="1.2" fill={S.gull.lys} />
+    </g>
+  )
+  return (
+    <g>
+      {[[-36, -6], [104, 134]].map(([a, b]) => (
+        <g key={a}>
+          <path d={`M${a} 77 Q${(a + b) / 2} 84 ${b} 77`} fill="none" stroke={S.vin.flate} strokeWidth="1.4" />
+          {stolpe(a)}
+          {stolpe(b)}
+        </g>
+      ))}
+    </g>
   )
 }
 
@@ -167,7 +645,7 @@ function Stasjonsvogn({ størrelse = 48 }: P) {
       <Bilhjul x={73} stil="stal" />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={5} til={92}>{bil}</Utstilling>
+  return <Utstilling størrelse={størrelse} fra={5} til={92} rom={<RomGarasje />}>{bil}</Utstilling>
 }
 
 /**
@@ -204,7 +682,7 @@ function Elbil({ størrelse = 48 }: P) {
       <Bilhjul x={72} r={6.2} stil="aero" />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={6} til={91}>{bil}</Utstilling>
+  return <Utstilling størrelse={størrelse} fra={6} til={91} rom={<RomGlass />}>{bil}</Utstilling>
 }
 
 
@@ -257,17 +735,9 @@ function SuperbilKarosseri() {
 
 function Superbil({ størrelse = 48 }: P) {
   return (
-    <Lerret størrelse={størrelse} himmel="inne">
-      <Bakke type="gulv" />
-      <Speiling>
-        <SuperbilKarosseri />
-      </Speiling>
-      <ellipse cx="49" cy={GRUNNLINJE + 0.3} rx="40" ry="2" fill="#000000" opacity="0.45" />
-      <SuperbilKarosseri />
-      <Lakksveip>
-        <SuperbilKarosseri />
-      </Lakksveip>
-    </Lerret>
+    <Utstilling størrelse={størrelse} fra={9} til={89} rom={<RomForhandler />}>
+      {() => <SuperbilKarosseri />}
+    </Utstilling>
   )
 }
 
@@ -306,7 +776,7 @@ function Hyperbil({ størrelse = 48 }: P) {
       <Bilhjul x={73} r={6.6} stil="eiker" m={S.gull} kaliper={S.gull.lys} />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={5} til={92}>{bil}</Utstilling>
+  return <Utstilling størrelse={størrelse} fra={5} til={92} rom={<RomFabrikk />}>{bil}</Utstilling>
 }
 
 /**
@@ -362,7 +832,7 @@ function Veteranbil({ størrelse = 48 }: P) {
       <Bilhjul x={73} r={6.3} stil="wire" />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={8} til={90}>{bil}</Utstilling>
+  return <Utstilling størrelse={størrelse} fra={8} til={90} rom={<RomVeteran />}>{bil}</Utstilling>
 }
 
 /**
@@ -417,7 +887,7 @@ function Limousin({ størrelse = 48 }: P) {
       <Bilhjul x={80} stil="krom" />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={4} til={93}>{bil}</Utstilling>
+  return <Utstilling størrelse={størrelse} fra={4} til={93} rom={<RomHotell />}>{bil}</Utstilling>
 }
 
 /**
@@ -458,7 +928,7 @@ function Formelbil({ størrelse = 48 }: P) {
       <Bilhjul x={74} r={6.6} stil="racing" />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={4} til={94}>{bil}</Utstilling>
+  return <Utstilling størrelse={størrelse} fra={4} til={94} rom={<RomDepot />}>{bil}</Utstilling>
 }
 
 // ─────────────────────────────────────────────── Klokkene i ny stil (G5)
@@ -468,12 +938,33 @@ function Formelbil({ størrelse = 48 }: P) {
  * for innvendig, og en pute klokka sitter rundt. Klokkene er et nærbilde —
  * en klokke er fire centimeter, så målestokken gjelder ikke her.
  * `logo` legger et lite preget merke i gull på lokket (de dyreste).
+ *
+ * Fra G20 står esken der klokka hører hjemme, tegnet ut til kantene av den brede
+ * rammen: `rom` er bakgrunnen og flata esken står på (tegnet bak esken), `ting` det
+ * som ligger ved siden av (foran). I klokkeskapet i Samling (utklippet) står bare
+ * puta med klokka, uten esken rundt.
  */
-function Klokkeskrin({ størrelse, eske, fôr, logo = false, kant, children }: { størrelse: number; eske: Materiale; fôr: Materiale; logo?: boolean; kant?: string; children: ReactNode }) {
+function Klokkeskrin({ størrelse, eske, fôr, logo = false, kant, himmel = 'inne', rom, ting, children }: { størrelse: number; eske: Materiale; fôr: Materiale; logo?: boolean; kant?: string; himmel?: 'inne' | 'dag'; rom?: ReactNode; ting?: ReactNode; children: ReactNode }) {
   const g = GRUNNLINJE
+  const pute = (
+    <g>
+      <rect x="22" y="29" width="54" height="44" rx="9" fill={fôr.flate} />
+      <rect x="23" y="30" width="52" height="7" rx="3.5" fill={fôr.lys} opacity="0.7" />
+      <path d="M30 29.6 V72 M68 29.6 V72" stroke={fôr.skygge} strokeWidth="0.6" opacity="0.7" />
+    </g>
+  )
+  if (useContext(Utklipp)) {
+    return (
+      <Lerret størrelse={størrelse}>
+        {pute}
+        {children}
+      </Lerret>
+    )
+  }
   return (
-    <Lerret størrelse={størrelse} himmel="inne">
+    <Lerret størrelse={størrelse} himmel={himmel}>
       <Bakke type="gulv" />
+      {rom && <Kantfade>{rom}</Kantfade>}
       <Slagskygge x1={14} x2={74} lengde={10} d={16} />
       {/* Lokket, slått opp bak, med foret innvendig. */}
       <polygon points="22,63.2 82,63.2 85,14 25,14" fill={eske.skygge} />
@@ -486,16 +977,279 @@ function Klokkeskrin({ størrelse, eske, fôr, logo = false, kant, children }: {
       <Kloss x={14} b={60} h={16} d={16} m={eske} />
       <polygon points={`16,${g - 16.6} 72,${g - 16.6} ${inn(72, g - 16.6, 13).join(',')} ${inn(16, g - 16.6, 13).join(',')}`} fill={fôr.skygge} />
       {/* Puta klokka sitter rundt. */}
-      <rect x="22" y="29" width="54" height="44" rx="9" fill={fôr.flate} />
-      <rect x="23" y="30" width="52" height="7" rx="3.5" fill={fôr.lys} opacity="0.7" />
-      <path d="M30 29.6 V72 M68 29.6 V72" stroke={fôr.skygge} strokeWidth="0.6" opacity="0.7" />
+      {pute}
       {children}
       {/* Eskens front foran puta. */}
       <rect x="14" y={g - 16} width="60" height="16" fill={eske.flate} />
       <rect x="14" y={g - 16} width="60" height="1.2" fill={eske.lys} />
       {kant && <rect x="14" y={g - 16} width="60" height="16" fill="none" stroke={kant} strokeWidth="0.6" />}
       <rect x="41" y={g - 11} width="6" height="3" rx="0.8" fill={kant ?? S.metall.flate} />
+      {ting && <Kantfade>{ting}</Kantfade>}
     </Lerret>
+  )
+}
+
+// ─────────────────────────────────────────────── Der klokkene ligger (G20)
+// Et nærbilde: esken er rundt 12 cm bred, så 5 enheter er en centimeter. Det som
+// ligger ved siden av, er like stort som det er — en dykkermaske eller en svømmefot
+// går ut av bildet. Flata esken står på, starter på y 72.
+
+/** Dykkerklokka på dekket av en båt: teakplanker, rekka og havet bak, en lanterne på rekka. */
+function DekkBak() {
+  return (
+    <g>
+      <rect x="-40" y="36" width="176" height="36" fill={S.sjo.flate} />
+      <rect x="-40" y="36" width="176" height="1" fill={S.sjo.lys} />
+      {[[-30, 44], [6, 40], [38, 48], [70, 42], [104, 46], [124, 39], [-12, 58], [92, 60], [20, 64]].map(([x, y]) => (
+        <path key={`${x}-${y}`} d={`M${x} ${y} q2 -1.2 4 0 q2 -1.2 4 0`} fill="none" stroke={S.sjo.lys} strokeWidth="0.6" />
+      ))}
+      <rect x="-40" y="42" width="176" height="1.6" fill={S.metall.lys} />
+      <rect x="-40" y="57" width="176" height="1" fill={S.metall.flate} />
+      {[-26, 8, 88, 120].map((x) => (
+        <rect key={x} x={x} y="42" width="1.6" height="30" fill={S.metall.flate} />
+      ))}
+      <rect x="117.6" y="34" width="6" height="8" rx="1" fill={S.mork.flate} />
+      <rect x="118.8" y="35.2" width="3.6" height="5.4" rx="0.6" fill={S.glass.skygge} className="nattvindu" />
+      <rect x="-40" y="72" width="176" height="24" fill={S.treverk.flate} />
+      {[75.4, 79, 82.6, 86.2, 89.8, 93.4].map((y) => (
+        <rect key={y} x="-40" y={y} width="176" height="0.5" fill={S.mork.skygge} />
+      ))}
+    </g>
+  )
+}
+
+/** På dekket ved esken: dykkermasken til venstre, tuppen av en svømmefot til høyre og noen dråper. */
+function DekkTing() {
+  return (
+    <g>
+      <path d="M-40 77 Q-30 74 -22 76 Q-14 74 -6 78 Q-4 86 -12 90 Q-20 92 -22 88 Q-26 92 -34 92 L-40 91 Z" fill={S.mork.flate} />
+      <path d="M-38 79 Q-30 77 -24 79 L-24 87 Q-30 89 -38 88 Z" fill={S.glass.lys} opacity="0.55" />
+      <path d="M-20 79 Q-14 77 -9 80 Q-9 86 -13 88 Q-18 89 -20 86 Z" fill={S.glass.lys} opacity="0.55" />
+      <path d="M-6 80 Q4 82 8 90" fill="none" stroke={S.mork.flate} strokeWidth="1.6" />
+      <path d="M128 78 L98 83 Q94 85 98 87 L128 91 Z" fill={S.oker.flate} />
+      <path d="M128 80 L100 84 M128 89 L100 86" stroke={S.oker.skygge} strokeWidth="0.9" />
+      <path d="M126 76 Q132 74 136 75 L136 94 Q130 94 126 92 Z" fill={S.mork.flate} />
+      {[[2, 74], [90, 80], [86, 92], [-2, 94]].map(([x, y]) => (
+        <ellipse key={`${x}-${y}`} cx={x} cy={y} rx="1.2" ry="0.6" fill={S.glass.lys} opacity="0.7" />
+      ))}
+    </g>
+  )
+}
+
+/** Gullklokka på kommoden: tapet bak, mørkt tre med årer, et bilde i gullramme og en flaske. */
+function KommodeBak() {
+  return (
+    <g>
+      <rect x="-40" y="0" width="176" height="72" fill={S.marine.skygge} />
+      {Array.from({ length: 22 }, (_, i) => -38 + i * 8).map((x) => (
+        <rect key={x} x={x} y="0" width="2" height="72" fill={S.marine.flate} opacity="0.5" />
+      ))}
+      <Bunnskygge x={-40} y={36} b={176} h={36} />
+      <rect x="-40" y="72" width="176" height="24" fill={S.treMork.flate} />
+      <rect x="-40" y="72" width="176" height="1" fill={S.treMork.lys} />
+      {[78, 84, 90].map((y, i) => (
+        <path key={y} d={`M-40 ${y} Q${-10 + i * 20} ${y - 1.4} 40 ${y} T136 ${y}`} fill="none" stroke={S.treMork.skygge} strokeWidth="0.5" />
+      ))}
+      {/* Bildet i gullramme: noen på en strand. */}
+      <rect x="-36" y="40" width="22" height="32" fill={S.gull.flate} />
+      <rect x="-34" y="42" width="18" height="28" fill={S.glass.lys} />
+      <rect x="-34" y="58" width="18" height="6" fill={S.sjo.flate} />
+      <rect x="-34" y="64" width="18" height="6" fill={S.puss.lys} />
+      <circle cx="-27" cy="59" r="1.2" fill={S.hud.flate} />
+      <rect x="-28" y="60" width="2" height="5" fill={S.vin.flate} />
+      {/* Parfymeflaska. */}
+      <rect x="116" y="52" width="12" height="20" rx="2" fill={S.glass.lys} opacity="0.75" />
+      <rect x="117" y="60" width="10" height="11" rx="1.4" fill={S.oker.lys} opacity="0.6" />
+      <rect x="119" y="46" width="6" height="6" rx="1" fill={S.gull.flate} />
+    </g>
+  )
+}
+
+/** På kommoden ved esken: to mansjettknapper og et sammenbrettet slips. */
+function KommodeTing() {
+  return (
+    <g>
+      {[-4, 4].map((x) => (
+        <g key={x}>
+          <ellipse cx={x + 0.6} cy="90.6" rx="3" ry="0.8" fill="#000000" opacity="0.3" />
+          <rect x={x - 2.4} y="86" width="4.8" height="4" rx="0.8" fill={S.gull.flate} />
+          <rect x={x - 1.6} y="86.6" width="3.2" height="2.4" rx="0.5" fill={S.marine.flate} />
+        </g>
+      ))}
+      <path d="M92 80 L136 74 L136 86 L96 90 Z" fill={S.marine.flate} />
+      <path d="M100 81 L104 89 M110 80 L114 88 M120 78 L124 87 M130 77 L134 86" stroke={S.vin.lys} strokeWidth="1.2" />
+      <path d="M92 80 L96 90" stroke={S.marine.skygge} strokeWidth="0.8" />
+    </g>
+  )
+}
+
+/** Mesterverket på urmakerbenken: panelvegg med skrujern på rad, grønn lærmatte og en lampe. */
+function BenkBak() {
+  return (
+    <g>
+      <rect x="-40" y="0" width="176" height="72" fill={S.treverk.skygge} />
+      {[-28, -8, 12, 32, 52, 72, 92, 112, 132].map((x) => (
+        <rect key={x} x={x} y="0" width="0.6" height="72" fill={S.treMork.flate} />
+      ))}
+      <Bunnskygge x={-40} y={36} b={176} h={36} />
+      <rect x="98" y="24" width="32" height="3" fill={S.treMork.flate} />
+      {[101, 106, 111, 116, 121, 126].map((x, i) => (
+        <g key={x}>
+          <rect x={x} y="27" width="1.6" height="7" rx="0.6" fill={[S.petrol.flate, S.oker.flate, S.vin.flate][i % 3]} />
+          <line x1={x + 0.8} y1="34" x2={x + 0.8} y2="40" stroke={S.metall.lys} strokeWidth="0.5" />
+        </g>
+      ))}
+      <rect x="-40" y="72" width="176" height="24" fill={S.gran.skygge} />
+      <rect x="-40" y="74" width="176" height="0.5" fill={S.gran.lys} opacity="0.6" />
+      {/* Lampa på en arm fra høyre, med lys ned på benken. */}
+      <path d="M136 4 L120 16 L108 14" fill="none" stroke={S.metall.skygge} strokeWidth="1.2" />
+      <path d="M102 12 L112 12 L114 18 L100 18 Z" fill={S.metall.flate} />
+      <Lampe x={107} y={19} r={3} />
+      <polygon points="100,18 114,18 128,72 86,72" fill={S.vinduLys.lys} opacity="0.06" />
+    </g>
+  )
+}
+
+/** På benken: lupen, en pinsett, et fat med tannhjul, og skrujern. */
+function BenkTing() {
+  return (
+    <g>
+      <rect x="-32" y="76" width="12" height="8" rx="2" fill={S.mork.flate} />
+      <ellipse cx="-20" cy="80" rx="1.6" ry="4" fill={S.glass.lys} />
+      <path d="M-38 92 L-8 86 M-38 93 L-8 87.4" stroke={S.metall.lys} strokeWidth="0.6" />
+      <ellipse cx="2" cy="90" rx="7" ry="2.4" fill={S.metall.flate} />
+      <ellipse cx="2" cy="89.6" rx="5.6" ry="1.6" fill={S.metall.lys} />
+      {[[-1, 89.4], [2, 90], [5, 89.2], [1, 88.8]].map(([x, y]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="0.6" fill={S.gull.flate} />
+      ))}
+      {[80, 85, 90].map((y, i) => (
+        <g key={y}>
+          <rect x="102" y={y} width="12" height="2" rx="1" fill={[S.petrol.flate, S.oker.flate, S.vin.flate][i]} />
+          <line x1="114" y1={y + 1} x2="128" y2={y + 1} stroke={S.metall.lys} strokeWidth="0.6" />
+        </g>
+      ))}
+    </g>
+  )
+}
+
+/** Lommeuret på en gammel skrivepult: mørk panelvegg, mahogni med grønt lær, og en lysestake. */
+function PultBak() {
+  return (
+    <g>
+      <rect x="-40" y="0" width="176" height="72" fill={S.treMork.skygge} />
+      {[-20, 20, 60, 100].map((x) => (
+        <rect key={x} x={x} y="8" width="32" height="54" fill="none" stroke={S.treMork.flate} strokeWidth="0.8" />
+      ))}
+      <Bunnskygge x={-40} y={36} b={176} h={36} />
+      <rect x="-40" y="72" width="176" height="24" fill={S.vin.skygge} />
+      <rect x="-40" y="76" width="176" height="15" fill={S.gran.skygge} opacity="0.85" />
+      <rect x="-40" y="77" width="176" height="13" fill="none" stroke={S.gull.skygge} strokeWidth="0.4" />
+      {/* Lysestaken med et tent lys. */}
+      <ellipse cx="128" cy="84" rx="5" ry="1.4" fill={S.gull.skygge} />
+      <rect x="127" y="58" width="2" height="26" fill={S.gull.flate} />
+      <ellipse cx="128" cy="58" rx="3.4" ry="1" fill={S.gull.flate} />
+      <rect x="126.6" y="44" width="2.8" height="14" fill={S.hvit.lys} />
+      <Lampe x={128} y={41} r={2.4} />
+    </g>
+  )
+}
+
+/** På pulten: blekkhuset med fjærpennen, og et brev med rødt lakksegl. */
+function PultTing() {
+  return (
+    <g>
+      <rect x="-32" y="72" width="12" height="12" rx="1.4" fill={S.glass.skygge} opacity="0.85" />
+      <rect x="-31" y="76" width="10" height="7" fill={S.mork.skygge} opacity="0.7" />
+      <rect x="-33" y="70" width="14" height="2.4" rx="1" fill={S.gull.flate} />
+      <path d="M-24 70 Q-20 52 -10 34 Q-13 48 -21 60 Z" fill={S.hvit.flate} />
+      <path d="M-24 70 Q-18 54 -10 34" fill="none" stroke={S.hvit.skygge} strokeWidth="0.4" />
+      <polygon points="94,80 126,77 128,90 96,93" fill={S.hvit.lys} />
+      <path d="M94 80 L111 86 L126 77" fill="none" stroke={S.hvit.skygge} strokeWidth="0.5" />
+      <circle cx="111" cy="86" r="2.4" fill={S.vin.lys} />
+    </g>
+  )
+}
+
+/** Diamantklokka på disken hos juveleren: mørk fløyel bak, glassdisk med ringer under glasset. */
+function DiskBak() {
+  return (
+    <g>
+      <rect x="-40" y="0" width="176" height="72" fill={S.mork.skygge} />
+      {[-24, 116].map((x) => (
+        <g key={x}>
+          <rect x={x - 2} y="0" width="4" height="3" rx="0.6" fill={S.mork.flate} />
+          <polygon points={`${x - 2},3 ${x + 2},3 ${x + 14},72 ${x - 14},72`} fill={S.hvit.lys} opacity="0.06" />
+        </g>
+      ))}
+      <rect x="-40" y="72" width="176" height="24" fill={S.mork.flate} />
+      <rect x="-40" y="80" width="176" height="16" fill={S.vin.skygge} opacity="0.85" />
+      {[-32, -20, -8, 94, 106, 118, 130].map((x, i) => (
+        <g key={x}>
+          <ellipse cx={x} cy={i % 2 ? 87 : 90} rx="2" ry="1.2" fill="none" stroke={S.gull.lys} strokeWidth="0.6" />
+          <circle cx={x} cy={i % 2 ? 85.6 : 88.6} r="0.7" fill={S.hvit.lys} />
+        </g>
+      ))}
+      <rect x="-40" y="72" width="176" height="1" fill={S.glass.lys} opacity="0.6" />
+      <polygon points="-30,73 -20,73 -36,96 -46,96" fill="#ffffff" opacity="0.08" />
+      <polygon points="100,73 108,73 94,96 86,96" fill="#ffffff" opacity="0.08" />
+    </g>
+  )
+}
+
+/** På disken: et ringstativ og en byste med perlekjede. */
+function DiskTing() {
+  return (
+    <g>
+      <polygon points="-29,84 -19,84 -24,58" fill={S.mork.lys} />
+      {[66, 72, 78].map((y, i) => (
+        <ellipse key={y} cx="-24" cy={y} rx={2 + i} ry="0.8" fill="none" stroke={S.gull.flate} strokeWidth="0.7" />
+      ))}
+      <path d="M104 84 L106 70 Q104 64 108 60 Q112 56 116 56 Q120 56 124 60 Q128 64 126 70 L128 84 Z" fill={S.mork.lys} />
+      <rect x="112.6" y="46" width="6.8" height="11" rx="2" fill={S.mork.lys} />
+      {Array.from({ length: 11 }, (_, i) => {
+        const v = (i / 10) * Math.PI
+        return <circle key={i} cx={r2(116 - Math.cos(v) * 7)} cy={r2(60 + Math.sin(v) * 5)} r="0.9" fill={S.hvit.lys} />
+      })}
+    </g>
+  )
+}
+
+/** Klokka laget for deg på urmakerens tegnebord: tegningene av den, en passer og en blyant. */
+function TegningBak() {
+  return (
+    <g>
+      <rect x="-40" y="0" width="176" height="72" fill={S.skifer.flate} />
+      <Bunnskygge x={-40} y={36} b={176} h={36} />
+      {/* Arbeidstegningen festet på veggen. */}
+      <rect x="98" y="10" width="32" height="40" fill={S.marine.flate} />
+      <circle cx="114" cy="28" r="10" fill="none" stroke={S.hvit.flate} strokeWidth="0.5" />
+      <circle cx="114" cy="28" r="7" fill="none" stroke={S.hvit.flate} strokeWidth="0.4" />
+      <path d="M100 28 H128 M114 14 V42 M102 46 H126" stroke={S.hvit.flate} strokeWidth="0.3" />
+      {[100, 128].map((x) => (
+        <circle key={x} cx={x} cy="12" r="0.8" fill={S.faluRod.lys} />
+      ))}
+      <rect x="-40" y="72" width="176" height="24" fill={S.treverk.lys} />
+      <polygon points="-38,74 6,73 8,95 -36,96" fill={S.hvit.lys} />
+      <circle cx="-15" cy="85" r="8" fill="none" stroke={S.marine.lys} strokeWidth="0.5" />
+      <circle cx="-15" cy="85" r="5.4" fill="none" stroke={S.marine.lys} strokeWidth="0.4" />
+      <path d="M-26 85 H-4 M-15 75 V95" stroke={S.marine.lys} strokeWidth="0.3" />
+      <polygon points="90,75 134,74 136,92 92,94" fill={S.hvit.lys} />
+      {[78, 81, 84, 87, 90].map((y) => (
+        <line key={y} x1="94" y1={y} x2={y % 2 ? 128 : 118} y2={r2(y - 0.6)} stroke={S.marine.lys} strokeWidth="0.35" />
+      ))}
+    </g>
+  )
+}
+
+/** På tegnebordet: passeren og blyanten. */
+function TegningTing() {
+  return (
+    <g>
+      <path d="M-15 73 L-22 92 M-15 73 L-6 91" stroke={S.metall.lys} strokeWidth="1" strokeLinecap="round" />
+      <circle cx="-15" cy="73" r="1.4" fill={S.metall.flate} />
+      <polygon points="100,90 128,84 129,86 101,92" fill={S.oker.flate} />
+      <polygon points="128,84 133,84.4 129,86" fill={S.puss.lys} />
+    </g>
   )
 }
 
@@ -521,7 +1275,7 @@ function Viser({ cx, cy, omlop, t, tikk = false, children }: { cx: number; cy: n
  * indekser og visere som står på ti over ti, krone til høyre og glans på glasset.
  * `lunette` og `ekstra` legger til det som er spesielt for hver klokke.
  */
-function Urkasse({ cx = 49, cy = 52, R = 14, kasse, skive, visere, indeks, sekund, lunette, ekstra, dotter = false, horn = true }: { cx?: number; cy?: number; R?: number; kasse: Materiale; skive: string; visere: string; indeks: string; sekund?: string; lunette?: ReactNode; ekstra?: ReactNode; dotter?: boolean; horn?: boolean }) {
+function Urkasse({ cx = 49, cy = 52, R = 14, kasse, skive, visere, indeks, sekund, lunette, ekstra, dotter = false, horn = true, lume = false }: { cx?: number; cy?: number; R?: number; kasse: Materiale; skive: string; visere: string; indeks: string; sekund?: string; lunette?: ReactNode; ekstra?: ReactNode; dotter?: boolean; horn?: boolean; lume?: boolean }) {
   // Ekte tid bare i scenen; i lister og galleri står de på ti over ti.
   const naa = useContext(IScenen) ? new Date() : null
   const r = +(R - 2.6).toFixed(2)
@@ -540,14 +1294,16 @@ function Urkasse({ cx = 49, cy = 52, R = 14, kasse, skive, visere, indeks, sekun
           <rect x={cx + 4.2} y={cy + s * (R - 1) - (s < 0 ? 4 : 0)} width="3.2" height="4" rx="1" fill={kasse.skygge} />
         </g>
       ))}
-      <rect x={cx + R - 0.6} y={cy - 2} width="3" height="4" rx="0.8" fill={kasse.flate} />
-      <path d={`M${cx + R + 0.4} ${cy - 1.4}v2.8M${cx + R + 1.4} ${cy - 1.4}v2.8`} stroke={kasse.skygge} strokeWidth="0.35" />
+      <rect x={r2(cx + R - 0.6)} y={cy - 2} width="3" height="4" rx="0.8" fill={kasse.flate} />
+      <path d={`M${r2(cx + R + 0.4)} ${cy - 1.4}v2.8M${r2(cx + R + 1.4)} ${cy - 1.4}v2.8`} stroke={kasse.skygge} strokeWidth="0.35" />
       {/* Kassa: lys oppe til venstre, skygge nede til høyre. */}
       <circle cx={cx} cy={cy} r={R} fill={kasse.flate} />
       <path d={`M${p(-2.3, R - 0.7).join(' ')} A${n(R - 0.7)} ${n(R - 0.7)} 0 0 1 ${p(0.75, R - 0.7).join(' ')}`} fill="none" stroke={kasse.lys} strokeWidth="1.3" strokeLinecap="round" />
       <path d={`M${p(0.85, R - 0.7).join(' ')} A${n(R - 0.7)} ${n(R - 0.7)} 0 0 1 ${p(3.9, R - 0.7).join(' ')}`} fill="none" stroke={kasse.skygge} strokeWidth="1.3" strokeLinecap="round" />
       {lunette}
       <circle cx={cx} cy={cy} r={r} fill={skive} />
+      {/* Selvlysende indekser (`lume`) lyser gjennom natta i scenen (G20). */}
+      <g className={lume ? 'nattlys' : undefined}>
       {Array.from({ length: 12 }, (_, i) => {
         const v = (i / 12) * Math.PI * 2
         if (dotter) {
@@ -558,6 +1314,7 @@ function Urkasse({ cx = 49, cy = 52, R = 14, kasse, skive, visere, indeks, sekun
         const [x2, y2] = p(v, r * 0.9)
         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={indeks} strokeWidth={i % 3 === 0 ? 1.2 : 0.6} strokeLinecap="round" />
       })}
+      </g>
       {ekstra}
       {naa ? (
         // I scenen: viserne viser klokka på telefonen og går (G10).
@@ -605,7 +1362,7 @@ function Gullklokke({ størrelse = 48 }: P) {
     </g>
   )
   return (
-    <Klokkeskrin størrelse={størrelse} eske={S.treMork} fôr={S.puss}>
+    <Klokkeskrin størrelse={størrelse} eske={S.treMork} fôr={S.puss} rom={<KommodeBak />} ting={<KommodeTing />}>
       {rem(29, 10)}
       {rem(cy + 12, 10)}
       <Urkasse cx={cx} cy={cy} R={13.4} kasse={S.gull} skive={S.puss.lys} visere={S.treMork.skygge} indeks={S.gull.skygge} sekund={S.gull.skygge} />
@@ -629,7 +1386,7 @@ function Mesterverk({ størrelse = 48 }: P) {
       </g>
     ))
   return (
-    <Klokkeskrin størrelse={størrelse} eske={S.mork} fôr={S.marine} logo>
+    <Klokkeskrin størrelse={størrelse} eske={S.mork} fôr={S.marine} logo rom={<BenkBak />} ting={<BenkTing />}>
       {lenker(28.6, 4)}
       {lenker(cy + 13, 4)}
       <Urkasse
@@ -683,7 +1440,7 @@ function Dykkerklokke({ størrelse = 48 }: P) {
   const cy = 52
   const merker = Array.from({ length: 60 }, (_, i) => i).filter((i) => i % 5 === 0 && i > 0)
   return (
-    <Klokkeskrin størrelse={størrelse} eske={S.treverk} fôr={S.stein}>
+    <Klokkeskrin størrelse={størrelse} eske={S.treverk} fôr={S.stein} himmel="dag" rom={<DekkBak />} ting={<DekkTing />}>
       <rect x={cx - 5.6} y="29" width="11.2" height="10" rx="1.6" fill={S.mork.flate} />
       <rect x={cx - 5.6} y={cy + 13} width="11.2" height="9" rx="1.6" fill={S.mork.flate} />
       {[31.6, 34.6].map((y) => (
@@ -699,6 +1456,7 @@ function Dykkerklokke({ størrelse = 48 }: P) {
         indeks={S.hvit.lys}
         sekund={S.oker.lys}
         dotter
+        lume
         lunette={
           <>
             <circle cx={cx} cy={cy} r="12.7" fill="none" stroke={S.marine.skygge} strokeWidth="2.6" />
@@ -725,7 +1483,7 @@ function Lommeur({ størrelse = 48 }: P) {
   const cx = 52
   const cy = 52
   return (
-    <Klokkeskrin størrelse={størrelse} eske={S.vin} fôr={S.vin} logo>
+    <Klokkeskrin størrelse={størrelse} eske={S.vin} fôr={S.vin} logo rom={<PultBak />} ting={<PultTing />}>
       {/* Kjedet i en bue ned mot venstre. */}
       <path d={`M${cx} ${cy - 16.6} Q30 ${cy - 22} 28 ${cy + 4} Q27 ${cy + 16} 36 ${cy + 18}`} fill="none" stroke={S.gull.flate} strokeWidth="1" strokeDasharray="1.2 0.7" />
       <circle cx="36.4" cy={cy + 18} r="1.2" fill="none" stroke={S.gull.lys} strokeWidth="0.7" />
@@ -774,7 +1532,7 @@ function Diamantklokke({ størrelse = 48 }: P) {
     <g>
       <rect x={cx - 5.2} y={y} width="10.4" height={h} rx="1.4" fill={S.mork.flate} />
       {Array.from({ length: Math.floor(h / 2.2) }, (_, i) => (
-        <path key={i} d={`M${cx - 4.4} ${y + 1.4 + i * 2.2} h8.8`} stroke={S.mork.lys} strokeWidth="0.4" />
+        <path key={i} d={`M${cx - 4.4} ${r2(y + 1.4 + i * 2.2)} h8.8`} stroke={S.mork.lys} strokeWidth="0.4" />
       ))}
     </g>
   )
@@ -782,9 +1540,9 @@ function Diamantklokke({ størrelse = 48 }: P) {
     const v = (i / 24) * Math.PI * 2
     return [+(cx + Math.sin(v) * 12.6).toFixed(2), +(cy - Math.cos(v) * 12.6).toFixed(2), i]
   })
-  const gnist = (x: number, y: number, s: number) => <path d={`M${x} ${y - s}L${x + s * 0.25} ${y - s * 0.25}L${x + s} ${y}L${x + s * 0.25} ${y + s * 0.25}L${x} ${y + s}L${x - s * 0.25} ${y + s * 0.25}L${x - s} ${y}L${x - s * 0.25} ${y - s * 0.25}Z`} fill={S.hvit.lys} />
+  const gnist = (x: number, y: number, s: number) => <path d={`M${x} ${r2(y - s)}L${r2(x + s * 0.25)} ${r2(y - s * 0.25)}L${r2(x + s)} ${y}L${r2(x + s * 0.25)} ${r2(y + s * 0.25)}L${x} ${r2(y + s)}L${r2(x - s * 0.25)} ${r2(y + s * 0.25)}L${r2(x - s)} ${y}L${r2(x - s * 0.25)} ${r2(y - s * 0.25)}Z`} fill={S.hvit.lys} />
   return (
-    <Klokkeskrin størrelse={størrelse} eske={S.mork} fôr={S.mork} logo kant={S.gull.flate}>
+    <Klokkeskrin størrelse={størrelse} eske={S.mork} fôr={S.mork} logo kant={S.gull.flate} rom={<DiskBak />} ting={<DiskTing />}>
       {rem(29, 10)}
       {rem(cy + 12, 10)}
       <rect x={cx - 3.6} y={cy + 19} width="7.2" height="2.4" rx="0.6" fill="none" stroke={S.gull.lys} strokeWidth="0.6" />
@@ -1283,25 +2041,38 @@ function Unikhyperbil({ størrelse = 48 }: P) {
       <Bilhjul x={73} r={6.6} stil="krom" m={S.gull} kaliper={S.gull.lys} />
     </g>
   )
-  return <Utstilling størrelse={størrelse} fra={5} til={92}>{bil}</Utstilling>
+  return (
+    <Utstilling størrelse={størrelse} fra={5} til={92} rom={<RomMuseum />} forgrunn={<Museumstau />}>
+      {bil}
+    </Utstilling>
+  )
 }
 
 /**
  * Klokka laget for deg (nær avstand, skrinet): platina med blå skive, gullindekser og en
  * gravert plate i skrinet — ingen andre har en.
  */
+/** Den graverte plata i lokket — borte i klokkeskapet, der esken ikke er med (G20). */
+function Graveringsplate() {
+  if (useContext(Utklipp)) return null
+  return (
+    <g>
+      <rect x="58" y="24" width="16" height="7" rx="1" fill={S.gull.flate} />
+      <path d="M60 26.4 h12 M60 28.6 h8" stroke={S.gull.skygge} strokeWidth="0.5" />
+    </g>
+  )
+}
+
 function Skreddersyddklokke({ størrelse = 48 }: P) {
   const cx = 49
   const cy = 52
   const rem = (y: number, h: number) => <rect x={cx - 5.2} y={y} width="10.4" height={h} rx="1.4" fill={S.marine.skygge} />
   return (
-    <Klokkeskrin størrelse={størrelse} eske={S.marine} fôr={S.hvit} logo kant={S.gull.flate}>
+    <Klokkeskrin størrelse={størrelse} eske={S.marine} fôr={S.hvit} logo kant={S.gull.flate} rom={<TegningBak />} ting={<TegningTing />}>
       {rem(29, 10)}
       {rem(cy + 12, 10)}
       <Urkasse cx={cx} cy={cy} R={14} kasse={S.metall} skive={S.marine.flate} visere={S.hvit.lys} indeks={S.gull.lys} sekund={S.gull.lys} dotter />
-      {/* Den graverte plata i lokket. */}
-      <rect x="58" y="24" width="16" height="7" rx="1" fill={S.gull.flate} />
-      <path d="M60 26.4 h12 M60 28.6 h8" stroke={S.gull.skygge} strokeWidth="0.5" />
+      <Graveringsplate />
     </Klokkeskrin>
   )
 }
