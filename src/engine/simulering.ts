@@ -17,6 +17,7 @@ import { sjekkPrestasjoner } from './prestasjoner'
 import { rivaltikk, rivalutbyttePerSek } from './rivaler'
 import { sjekkOrdre } from './ordre'
 import { Terning } from './rng'
+import { merkDelt } from './delteLister'
 import { kotikk } from './hender'
 import { dagsbilde, konjunkturdrift } from './verden'
 import { nyhetsfaktor, trenddrift } from './bransjer'
@@ -66,7 +67,7 @@ export const BORTE_TAKT = 10
  */
 export function simuler(s: Spilltilstand, antall = 1, borte = false): Spilltilstand {
   if (antall <= 0) return s
-  const n = structuredClone(s)
+  const n = kopierSpill(s)
   const terning = new Terning(n.frø)
   let ventende = 0
   for (let i = 0; i < antall; i++) {
@@ -76,6 +77,45 @@ export function simuler(s: Spilltilstand, antall = 1, borte = false): Spilltilst
     if (regn) ventende = 0
   }
   n.frø = terning.fro
+  return n
+}
+
+/**
+ * Kopien et sekund jobber på (etter Pakke 105). Alt kopieres, bortsett fra historikkene i
+ * markedet — kursene (240 punkter hver), sluttkursene, eiendomsindeksen og regionene — som
+ * var halve lagringen og 2,2 av de 5,4 ms kopien tok på det tyngste spillet. Den nye
+ * tilstanden deler de listene med den gamle, og de merkes som delt (`delteLister.ts`):
+ * markedet tar en egen kopi av en merket liste før det legger til et punkt, så den gamle
+ * tilstanden står urørt som før. Sluttkursene skiftes alltid ut hele, så de trenger ikke merket.
+ */
+export function kopierSpill(s: Spilltilstand): Spilltilstand {
+  const m = s.marked
+  const kurser = {} as Spilltilstand['marked']['kurser']
+  for (const id in m.kurser) kurser[id as PapirId] = { ...m.kurser[id as PapirId], historikk: [], dagslutt: undefined }
+  const marked: Spilltilstand['marked'] = { ...m, kurser, eiendom: { ...m.eiendom, historikk: [] } }
+  if (m.regioner) {
+    const indekser = {} as typeof m.regioner.indekser
+    for (const r in m.regioner.indekser) indekser[r as keyof typeof indekser] = { ...m.regioner.indekser[r as keyof typeof indekser], historikk: [] }
+    marked.regioner = { ...m.regioner, indekser }
+  }
+  const n = structuredClone({ ...s, marked })
+  for (const id in m.kurser) {
+    const k = n.marked.kurser[id as PapirId]
+    const fra = m.kurser[id as PapirId]
+    k.historikk = fra.historikk
+    merkDelt(fra.historikk)
+    if (fra.dagslutt) k.dagslutt = fra.dagslutt
+    else delete k.dagslutt
+  }
+  n.marked.eiendom.historikk = m.eiendom.historikk
+  merkDelt(m.eiendom.historikk)
+  if (m.regioner && n.marked.regioner) {
+    for (const r in m.regioner.indekser) {
+      const h = m.regioner.indekser[r as keyof typeof m.regioner.indekser].historikk
+      n.marked.regioner.indekser[r as keyof typeof m.regioner.indekser].historikk = h
+      merkDelt(h)
+    }
+  }
   return n
 }
 

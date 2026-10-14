@@ -32,5 +32,6 @@ export const BUDSJETT: Record<string, number> = {
  * lagringen som har vokst.
  */
 // 5 → 6,5 etter Pakke 104: de åtte nye aksjene (240 punkter historikk hver) gjorde kopien 4,87 → 5,50 ms
-// og sekundet 4,3 → 5,6–5,8 ms. Midlertidig: neste steg er en lettere kopi (se «Next up» i Ideer.md).
-export const LEVENDE_SEKUND_MS = 6.5
+// og sekundet 4,3 → 5,6–5,8 ms. 6,5 → 4,5 etter Pakke 105: kopien deler markedets historikker med
+// sekundet før (`kopierSpill`), 5,3 → 2,8 ms, og sekundet ble ~3,0 ms.
+export const LEVENDE_SEKUND_MS = 4.5

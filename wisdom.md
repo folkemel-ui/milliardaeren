@@ -1188,6 +1188,16 @@ session; delete what stops being true.
   keep the copy: removing it touches how every screen redraws). I first set the limit from
   the review agent's 1.7 ms, measured on a lighter save, and it failed — measure on the exact
   save the test uses before writing a limit.
+- **The copy shares the market's histories (after Pack 105).** Pack 104's eight stocks took a live
+  second to 5.6 ms; the price, property-index and region histories were 2.2 of the copy's 5.4 ms.
+  `kopierSpill` (simulering.ts) clones everything else and hands the new state the *same* history
+  arrays, marked in a `WeakSet` (`delteLister.ts`); `medPunkt` copies a marked array once before
+  adding a point, then pushes into its own copy. Copy 5.3 → 2.8 ms, live second ~3 ms (budget 6.5 →
+  4.5). **Never `push` into a market history** — go through `medPunkt` and write the result back, or
+  the previous state changes under the screen. The first version copied the array at *every* point
+  (`[...liste, x]`): the live second was as fast, but two hours away got 15 ms slower (240 copies
+  of 37 lists of 240) — compare away time as well, interleaved, before calling a speed-up done.
+  `kopi.test.ts` checks that an old state stays byte-identical across day changes.
 - **Saving (Pack 69)**: every 15 s while playing, in `requestIdleCallback` (2 s deadline)
   where it exists — Safari has none, so it saves at once there; `stoppSpillokke` cancels a
   pending one. Hiding the page and actions still save as before. To watch it in the pane,

@@ -8,6 +8,7 @@
  */
 
 import { lagRegioner, regiontikk } from './regioner'
+import { medPunkt } from './delteLister'
 import { Hashkilde, hashTekst, Terning } from './rng'
 import type { Kurs, Marked, Papir, PapirId, Spilltilstand } from './types'
 
@@ -168,10 +169,7 @@ function papirtikk(m: Marked, t: Terning, helg = false, konjunktur = 0, perPapir
       // Ukas bransjetrend (Pakke 53) legges på konjunkturen for selskapene i bransjen.
       papirsteg(p, k, m.stemning, kilde, konjunktur + (perPapir?.[id] ?? 0))
     }
-    if (m.tikk % HISTORIKK_TIKK === 0) {
-      k.historikk.push(k.kurs)
-      if (k.historikk.length > MAKS_KURSHISTORIKK) k.historikk.shift()
-    }
+    if (m.tikk % HISTORIKK_TIKK === 0) k.historikk = medPunkt(k.historikk, k.kurs, MAKS_KURSHISTORIKK)
   }
 }
 
@@ -233,10 +231,7 @@ function eiendomstikk(k: Kurs, tikk: number, t: Terning, konjunktur = 0): void {
   k.avvik += -EIENDOM.reversjon * k.avvik * DT + EIENDOM.volatilitet * Math.sqrt(DT) * normal(t)
   if (t.sjanse(EIENDOM.krakk)) k.avvik -= t.mellom(EIENDOM.krakkMin, EIENDOM.krakkMaks)
   k.kurs = kursFra(k.fundament, k.avvik)
-  if (tikk % HISTORIKK_TIKK === 0) {
-    k.historikk.push(k.kurs)
-    if (k.historikk.length > MAKS_KURSHISTORIKK) k.historikk.shift()
-  }
+  if (tikk % HISTORIKK_TIKK === 0) k.historikk = medPunkt(k.historikk, k.kurs, MAKS_KURSHISTORIKK)
 }
 
 /**

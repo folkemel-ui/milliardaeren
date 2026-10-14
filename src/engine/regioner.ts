@@ -11,6 +11,7 @@
  */
 
 import { hashNormal, hashTekst } from './rng'
+import { medPunkt } from './delteLister'
 import { valutafaktor, valutaForBy } from './valuta'
 import type { By, Marked, Region, Regionindeks, Spilltilstand } from './types'
 
@@ -47,10 +48,8 @@ const REGION = { volatilitet: 0.05, reversjon: 0.35 }
 function steg(i: Regionindeks, frø: number, region: Region, tikk: number): void {
   const z = hashNormal(frø + hashTekst(region) + tikk * 2)
   i.avvik += -REGION.reversjon * i.avvik * DT + REGION.volatilitet * Math.sqrt(DT) * z
-  if (tikk % HISTORIKK_TIKK === 0) {
-    i.historikk.push(i.avvik)
-    if (i.historikk.length > MAKS_HISTORIKK) i.historikk.shift()
-  }
+  // Gjennom medPunkt, aldri push: et levende sekund deler historikken med sekundet før (`kopierSpill`).
+  if (tikk % HISTORIKK_TIKK === 0) i.historikk = medPunkt(i.historikk, i.avvik, MAKS_HISTORIKK)
 }
 
 /** Ett tikk for alle regionene. Kalles rett etter landsindeksen, med samme tikknummer. Muterer. */
