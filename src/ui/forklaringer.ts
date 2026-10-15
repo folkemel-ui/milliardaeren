@@ -197,7 +197,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
   racing: {
     tittel: 'Racingteamet',
     tekst:
-      `Med Formel 1-bilen kan du starte et team for ${kortKroner(TEAMPRIS)}. En sesong er ${LOP_PER_SESONG} løp, ett hver ${DAGER_MELLOM}. spilldag, mot ni team med to førere hver; løpet avgjøres ved dagsskiftet. ` +
+      `Med Formel 1-bilen kan du starte et team for ${kortKroner(TEAMPRIS)}. En sesong er ${LOP_PER_SESONG} løp, ett hver ${DAGER_MELLOM}. spilldag, mot ni team med to førere hver; løpet avgjøres ved dagsskiftet og kjøres direkte gjennom dagen etter — 50 runder, med depotstopp og utforkjøringer — mens tabellene og avisa venter til målflagget. ` +
       `Farten kommer fra bilen og førerne, og litt flaks. Bilen har fire deler i fem trinn, fra ${kortKroner(DELTRINN_PRIS[0])} til ${kortKroner(DELTRINN_PRIS[DELTRINN_PRIS.length - 1])}; førerne ansetter du fra markedet, som fornyes hver sesong, og de koster lønn hver dag. ` +
       'Hver del har sine tall — effekt, marktrykk, vekt og depotstopp — og sitt øyeblikk: motoren og aerodynamikken teller mest i kvalifiseringen, aero og chassis i regn, depotmannskapet i et tørt løp. En bil med like mange trinn overalt er like rask overalt. ' +
       'Kvalifiseringen avgjør startrekkefølgen, og startplassen teller i løpet — mest i Monaco, der ingen kommer forbi. ' +

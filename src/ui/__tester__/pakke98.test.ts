@@ -125,6 +125,9 @@ describe('racingen i regnskapet og loggen', () => {
     const s = vedLop()
     s.hendelser = Array.from({ length: MAKS_HENDELSER }, (_, i) => ({ sek: i, tittel: 'Fyll', tekst: `${i}`, alvor: 'info' as const }))
     racingVedDagsskifte(s, 'Du')
+    // Pakke 110: hendelsen kommer ved målflagget, dagsskiftet etter.
+    s.sek += DAG_SEK
+    racingVedDagsskifte(s, 'Du')
     expect(s.hendelser).toHaveLength(MAKS_HENDELSER)
     expect(s.hendelser.at(-1)!.tittel).toBe('Racing')
   })

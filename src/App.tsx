@@ -162,7 +162,10 @@ export default function App() {
           // Står kampen på skjermen, er varselet overflødig (Pakke 86).
           if (!document.querySelector('.livekamp')) visVarsel({ type: f.egne ? 'god' : 'advarsel', tittel: f.tittel, tekst: f.tekst, mål: 'klubb' })
         } else if (f.type === 'slutt') {
-          visVarsel({ type: 'god', tittel: f.tittel, tekst: f.tekst, mål: 'klubb' })
+          visVarsel({ type: 'god', tittel: f.tittel, tekst: f.tekst, mål: f.mål ?? 'klubb' })
+        } else if (f.type === 'lop') {
+          // Står løpet på skjermen, er varselet overflødig (Pakke 110).
+          if (!document.querySelector('.livelop')) visVarsel({ type: 'advarsel', tittel: f.tittel, tekst: f.tekst, mål: 'samling' })
         } else if (f.type === 'fane') {
           visVarsel({ type: 'god', tittel: `Ny fane: ${FANER.find((x) => x.id === f.fane)!.navn}`, tekst: FANE_INNHOLD[f.fane], mål: f.fane })
         }

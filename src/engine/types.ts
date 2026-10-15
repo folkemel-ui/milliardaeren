@@ -272,6 +272,13 @@ export interface Racinglop {
   regn?: boolean
   start?: (number | null)[]
   pole?: { forer: string; lag: string }
+  /**
+   * Pakke 110: hele feltet — startplass og plass (0 = ute) — til løpet direkte og den fulle
+   * rapporten. Står bare på de to siste løpene. Og motor- og depottrinnet ditt den dagen.
+   */
+  felt?: { forer: string; lag: string; start: number; plass: number }[]
+  motor?: number
+  depot?: number
 }
 
 export interface Racingsesong {
@@ -312,6 +319,14 @@ export interface Racingteam {
   /** Premier og lønn så langt, til siden. */
   premier: number
   lonn: number
+  /**
+   * Pakke 110: løpet spilles direkte dagen etter at det er avgjort, og avisa og hendelsene om det
+   * venter til målflagget (neste dagsskifte). Tabellen fra sesongen som nettopp ble avsluttet,
+   * så siden kan vise den mens siste løp kjøres.
+   */
+  ventendeSaker?: Overskrift[]
+  ventendeHendelser?: string[]
+  sisteTabell?: { sesong: number; lagpoeng: Record<string, number>; forerpoeng: Record<string, number> }
 }
 
 /** Utleie av yachten eller jeten (Pakke 89). Står den i lista, er den ute hos noen andre. */

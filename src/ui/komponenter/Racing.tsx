@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { dagnummer } from '../../engine/kalender'
 import { ansettForer, oppgraderDel, selgRacingteam, settStrategi, startRacingteam } from '../../engine/handlinger'
 import {
@@ -26,6 +27,7 @@ import { utfor } from '../../state/lager'
 import { fortegnKroner, kortKroner, tall } from '../format'
 import { useVoksUt } from '../overgang'
 import { aapneRacing } from '../racingside'
+import { forlop, liveLop, lopsrunde, raskesteRunde, rundetidTekst, RUNDER, stillingIRunde, visRacing } from '../racinglive'
 import { Bekreftknapp } from './Bekreftknapp'
 import { Forklaring } from './Forklaring'
 import { Ikon } from './Ikoner'
@@ -72,7 +74,8 @@ export function Racingrad({ s }: { s: Spilltilstand }) {
         <span className="klubbside-tekst">
           <strong>{r.navn}</strong>
           <span className="dempet liten">
-            Sesong {r.sesong} · {plassering(r)} · {baneFor(r.runde)} {nesteLopTekst(s, r)}
+            {/* Pakke 110: mens et løp kjøres, sier raden det. */}
+            {liveLop(s) ? `Live i ${liveLop(s)!.bane} · runde ${lopsrunde(s.sek)} av ${RUNDER}` : `Sesong ${r.sesong} · ${plassering(visRacing(s, r))} · ${baneFor(r.runde)} ${nesteLopTekst(s, r)}`}
           </span>
         </span>
         {(s.racingtrofeer?.length ?? 0) > 0 && (
@@ -93,20 +96,149 @@ export function Racingdetalj({ s, tilbake }: { s: Spilltilstand; tilbake: () => 
   const voks = useVoksUt<HTMLElement>()
   const r = s.racing
   if (!r) return null
-  const siste = r.lop.at(-1)
+  // Pakke 110: mens løpet kjøres, viser siden teamet slik det var før det (tabellene og siste løp).
+  const v = visRacing(s, r)
+  const live = liveLop(s)
+  const siste = v.lop.at(-1)
   return (
     <section className="skjerm detalj racingdetalj" ref={voks}>
       <button className="tilbake" onClick={tilbake}>
         ‹ Luksus
       </button>
       <h1 className="skjerm-tittel">{r.navn}</h1>
+      {live && <Livelop s={s} r={r} lop={live} />}
       <Nestelop s={s} r={r} />
-      {siste && <Sistelop r={r} lop={siste} />}
-      <Mesterskap r={r} />
+      {siste && (siste.felt ? <Lopsrapport r={r} lop={siste} /> : <Sistelop r={r} lop={siste} />)}
+      {v.tabellVenter ? (
+        <div className="kort">
+          <h2 className="kort-tittel">Mesterskapene</h2>
+          <p className="dempet liten">Sesongens siste løp kjøres. Tabellen kommer ved målflagget.</p>
+        </div>
+      ) : (
+        <Mesterskap r={v} />
+      )}
       <Bilkort s={s} r={r} />
       <Forerkort s={s} r={r} />
-      <Sesongkort s={s} r={r} />
+      <Sesongkort s={s} r={v} />
     </section>
+  )
+}
+
+/** «+12,4 s» bak vinneren, eller «Vinner». */
+const gapTekst = (gap: number | null) => (gap === null ? '' : gap === 0 ? 'Vinner' : `+${tall(gap, 1)} s`)
+
+/**
+ * Løpet direkte (Pakke 110): runden, de ti første og dine, hvem som er i depot, og de som har
+ * kjørt av. Følger spilldagen; ved målflagget (dagsskiftet) er det resultatet.
+ */
+function Livelop({ s, r, lop }: { s: Spilltilstand; r: Racingteam; lop: Racinglop }) {
+  const runde = lopsrunde(s.sek)
+  const rader = stillingIRunde(r, lop, runde)
+  const vises = rader.filter((x) => (!x.ute && x.plass <= 10) || x.deg || x.ute)
+  return (
+    <div className="kort livelop" aria-live="polite">
+      <div className="maal-topp">
+        <span className="etikett">
+          <span className="merke fare">Live</span> {lop.bane}
+          {lop.regn ? ' · regn' : ''}
+        </span>
+        <span className="dempet liten">
+          Runde {runde} av {RUNDER}
+        </span>
+      </div>
+      <div className="milepael-spor">
+        <div className="milepael-fyll" style={{ width: `${(runde / RUNDER) * 100}%` }} />
+      </div>
+      <ol className="racing-felt">
+        {vises.map((x) => (
+          <li key={`${x.forer}|${x.lag}`} className={x.deg ? 'deg' : undefined}>
+            <span className="racing-felt-plass">{x.ute ? 'Ute' : x.plass}</span>
+            <span className="racing-felt-navn">
+              <strong>{x.forer}</strong> <span className="dempet liten">{x.lag}</span>
+            </span>
+            <span className="dempet liten">{x.ute ? x.aarsak : x.iDepot ? 'Depot' : ''}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+/**
+ * Den fulle rapporten (Pakke 110): plassene med avstand, startplass og depotstopp, de som kjørte
+ * av med årsak, og raskeste runde. De ti første, dine og de som kjørte av vises; resten bak «Vis
+ * alle tjue».
+ */
+function Lopsrapport({ r, lop }: { r: Racingteam; lop: Racinglop }) {
+  const [alle, settAlle] = useState(false)
+  const biler = forlop(r, lop)
+  const imaal = biler.filter((b) => b.plass > 0).sort((a, b) => a.plass - b.plass)
+  const ute = biler.filter((b) => b.plass === 0)
+  const vises = alle ? imaal : imaal.filter((b) => b.plass <= 10 || b.deg)
+  const skjult = imaal.length - vises.length
+  const raskest = raskesteRunde(r, lop)
+  const mine = lop.plasser.map((p, i) => ({ p, f: r.forere[i] })).filter((x) => x.p !== null)
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Siste løp: {lop.bane}</h2>
+        <span className="dempet liten">
+          {lop.regn ? 'Regn · ' : ''}
+          {STRATEGIER[lop.strategi].navn}
+        </span>
+      </div>
+      <p className="liten">
+        Dine: {mine.map((x) => `${x.f?.navn ?? 'fører'} ${plasstekst(x.p!)}`).join(', ') || 'ingen førere'} ·{' '}
+        <strong className="gull">{lop.poeng} poeng</strong>
+        {lop.premie > 0 && ` · ${kortKroner(lop.premie)}`}
+      </p>
+      <table className="tabell racing-rapport">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fører</th>
+            <th>Bak</th>
+            <th>Start</th>
+            <th>Depot</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vises.map((b) => (
+            <tr key={`${b.forer}|${b.lag}`} className={b.deg ? 'deg' : undefined}>
+              <td>{b.plass}</td>
+              <td>
+                <strong>{b.forer}</strong>
+                <span className="dempet liten">{b.lag}</span>
+              </td>
+              <td>{gapTekst(b.gap)}</td>
+              <td>{b.start}</td>
+              <td>{tall(b.stopptid, 1)} s</td>
+            </tr>
+          ))}
+          {ute.map((b) => (
+            <tr key={`${b.forer}|${b.lag}`} className={b.deg ? 'deg' : undefined}>
+              <td>Ute</td>
+              <td>
+                <strong>{b.forer}</strong>
+                <span className="dempet liten">{b.lag}</span>
+              </td>
+              <td colSpan={3} className="dempet">
+                {b.aarsak}, runde {b.uteRunde}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {skjult > 0 && !alle && (
+        <button className="knapp knapp-liten bred" onClick={() => settAlle(true)}>
+          Vis alle tjue
+        </button>
+      )}
+      <p className="dempet liten">
+        {raskest && `Raskeste runde: ${raskest.forer} (${raskest.lag}), ${rundetidTekst(raskest.tid)}`}
+        {lop.pole && ` · Pole: ${lop.pole.forer}`}
+      </p>
+    </div>
   )
 }
 

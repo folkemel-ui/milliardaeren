@@ -66,7 +66,8 @@ export const lesVarsler = (): Varselnivaa => varsler
 export function vises(f: Nytt, nivaa: Varselnivaa = varsler): boolean {
   if (nivaa === 'av') return false
   if (nivaa === 'alle') return true
-  // Fløyta i din kamp er viktig; målene underveis bare med «Alle» (Pakke 86).
+  // Fløyta i din kamp er viktig; målene underveis bare med «Alle» (Pakke 86). Målflagget likeså, og
+  // en fører som kjører av, bare med «Alle» (Pakke 110).
   return f.type === 'fane' || f.type === 'slutt' || (f.type === 'hendelse' && f.hendelse.alvor !== 'info')
 }
 

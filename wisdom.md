@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 109, 15 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 110, 15 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -145,7 +145,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–109.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–110.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 

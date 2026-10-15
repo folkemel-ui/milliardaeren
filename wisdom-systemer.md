@@ -345,6 +345,21 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 
 ## Racing
 
+- **The live race (Pack 110) copies the club's live match**: the race is still decided at the day
+  change; `ui/racinglive.ts` plays it over the next game day (50 laps, one every 6 s) from the whole
+  field stored on the race (`Racinglop.felt`, kept on the last two races only), and everything shown
+  beyond the result — the laps, the pit stops, the gaps, the fastest lap, the causes — comes from hashes
+  of the race. `visRacing(s, r)` gives the page the team as it was before the race (points subtracted
+  from `felt`, «Siste løp» the race before; after a season's last race the old table from
+  `r.sisteTabell`), and Avisa's stories and the log line wait in `r.ventendeSaker`/`ventendeHendelser`
+  until the next day change. Tests that read a race story or log line right after
+  `racingVedDagsskifte` need one more day change (three old tests did).
+- **Noise that moves every frame looks wrong** (Pack 110): a fresh hash per lap swapped the lead three
+  times in three laps. Interpolating between a hash every fifth lap made places change one at a time.
+  Anything animated from hashes should glide between keyframes.
+- **`<br />` between two `display: block` children adds an empty line** in a table cell: the report's
+  rows were 67 px instead of 49 until the `<br />` went.
+
 - **The race model since Pack 109**: a car's pace in a condition is `bilfartI(r, 'kval' | 'tort' | 'regn')`,
   the steps weighted by `DELVEKT`. Every row sums to 4, so a car with even steps is equally fast
   everywhere and exactly as fast as `bilfart` — that is what kept old teams where they were. Rivals have

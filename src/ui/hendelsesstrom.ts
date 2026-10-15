@@ -23,6 +23,8 @@ import type { Fane } from './komponenter/Fanemeny'
 import { dagnummer } from '../engine/kalender'
 import type { Kamp, Klubb, Maalhendelse } from '../engine/types'
 import { kampminutt, stilling } from './klubblive'
+import { forlop, lopsrunde } from './racinglive'
+import { plasstekst } from '../engine/racing'
 
 /**
  * Et kjøp som fortjener et øyeblikk: første bedrift av en type, første
@@ -42,7 +44,9 @@ export type Nytt =
   | { type: 'fane'; fane: Fane }
   /** Pakke 86: et mål i kampen som spilles nå, og fløyta. */
   | { type: 'maal'; tittel: string; tekst: string; egne: boolean }
-  | { type: 'slutt'; tittel: string; tekst: string }
+  | { type: 'slutt'; tittel: string; tekst: string; mål?: 'klubb' | 'samling' }
+  /** Pakke 110: din fører kjører av i løpet som kjøres nå. */
+  | { type: 'lop'; tittel: string; tekst: string }
 
 /** Hvor stor feiringen er: et lite drys, gullblink og konfetti, eller milliarden. */
 export type Feiringsniva = 'liten' | 'stor' | 'milliard'
@@ -152,7 +156,42 @@ export function nytt(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
   const nyUtgave = etter.avis.at(-1)?.dag ?? -1
   if (nyUtgave > forrigeUtgave) funn.push({ type: 'avis', dag: nyUtgave })
   funn.push(...kampfunn(før, etter))
+  funn.push(...lopsfunn(før, etter))
   return funn
+}
+
+/**
+ * Pakke 110: løpet som kjøres nå — din fører som kjører av, i sin runde, og målflagget ved
+ * dagsskiftet. Utforkjøringene meldes bare i levende spill; målflagget alltid.
+ */
+function lopsfunn(før: Spilltilstand, etter: Spilltilstand): Nytt[] {
+  const r = etter.racing
+  if (!r || !før.racing || før.racing.navn !== r.navn) return []
+  const ut: Nytt[] = []
+  const levende = etter.sek - før.sek <= LEVENDE_SEK
+  const dagF = dagnummer(før.sek)
+  const dagE = dagnummer(etter.sek)
+  const fra = lopsrunde(før.sek)
+  const til = dagE > dagF ? Infinity : lopsrunde(etter.sek)
+  const lop = r.lop.find((x) => x.dag === dagF && x.felt)
+  if (lop && levende) {
+    for (const b of forlop(r, lop)) {
+      if (b.deg && b.uteRunde !== null && b.uteRunde > fra && b.uteRunde <= til) {
+        ut.push({ type: 'lop', tittel: `${b.forer} er ute`, tekst: `${b.aarsak} i runde ${b.uteRunde} i ${lop.bane}.` })
+      }
+    }
+  }
+  if (lop && dagE > dagF) {
+    const vinner = forlop(r, lop).find((b) => b.plass === 1)
+    const mine = lop.plasser.flatMap((p, i) => (p === null ? [] : [`${r.forere[i]?.navn ?? 'fører'} ${plasstekst(p)}`]))
+    ut.push({
+      type: 'slutt',
+      mål: 'samling',
+      tittel: `Målflagg i ${lop.bane}`,
+      tekst: `${vinner ? `${vinner.forer} vant for ${vinner.lag}. ` : ''}${mine.length ? `Dine: ${mine.join(', ')} — ${lop.poeng} poeng.` : ''}`,
+    })
+  }
+  return ut
 }
 
 /** Så lang tid kan gå mellom to tilstander før målene ikke meldes ett for ett (tid borte har velkomsten). */

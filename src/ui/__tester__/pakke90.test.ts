@@ -60,7 +60,8 @@ describe('siden', () => {
     kjorLop(s.racing!, 3)
     const html = tegn(createElement(Racingdetalj, { s, tilbake: () => {} }))
     expect(html).toContain('Siste løp: Melbourne')
-    expect(html).toContain('racing-pall')
+    // Pakke 110: den fulle rapporten med hele feltet.
+    expect(html).toContain('racing-rapport')
     expect(html).toContain('løp 2 av 8')
   })
 

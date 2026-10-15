@@ -1118,6 +1118,59 @@
 }
 
 /* Pallen i siste løp: plassen i en gull ring, ditt team i gull. */
+/* Pakke 110: løpet direkte og den fulle rapporten. */
+.racing-felt {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.racing-felt li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.racing-felt-plass {
+  font-variant-numeric: tabular-nums;
+  color: var(--tekst-dempet);
+}
+
+.racing-felt-navn {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.racing-felt li.deg strong,
+.racing-rapport tr.deg strong {
+  color: var(--gull);
+}
+
+/* Føreren og teamet på hver sin linje, kuttet med … så hver rad er to linjer høy. */
+.racing-rapport td:nth-child(2) {
+  width: 100%;
+  max-width: 0;
+}
+
+.racing-rapport td:nth-child(2) > strong,
+.racing-rapport td:nth-child(2) > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.racing-rapport td:nth-child(n + 3) {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .racing-pall {
   list-style: none;
   margin: 8px 0;

@@ -190,6 +190,9 @@ describe('avisa', () => {
       r.frø = k * 13 + 5
       r.nesteDag = 0
       s.racing = r
+      // Pakke 110: saken kommer ved dagsskiftet etter, når løpet er kjørt ferdig.
+      racingVedDagsskifte(s, 'Kjendisen')
+      r.nesteDag = 1e9
       const saker = racingVedDagsskifte(s, 'Kjendisen')
       const seier = saker.find((x) => x.tittel.includes('vinner i'))
       if (seier) {

@@ -174,6 +174,9 @@ describe('løpene', () => {
     expect(r.nesteDag).toBe(start + DAGER_MELLOM)
     expect(r.lonn).toBe(lonn * DAGER_MELLOM)
     expect((s.totaltKlubb ?? 0) - klubb).toBeCloseTo(r.premier - r.lonn, 2)
+    // Pakke 110: hendelsen venter til løpet er kjørt ferdig — ved neste dagsskifte.
+    expect(s.hendelser.some((h) => h.tittel === 'Racing')).toBe(false)
+    s = simuler(s, DAG_SEK)
     expect(s.hendelser.some((h) => h.tittel === 'Racing')).toBe(true)
   })
 
@@ -203,6 +206,9 @@ describe('mesterskapene', () => {
     const status = statuspoeng(s)
     const kontanter = s.kontanter
     s.sek = r.nesteDag * DAG_SEK
+    expect(racingVedDagsskifte(s, 'Rikmannen')).toEqual([])
+    // Pakke 110: avisa skriver om sesongen når siste løp er kjørt ferdig, ved neste dagsskifte.
+    s.sek += DAG_SEK
     const saker = racingVedDagsskifte(s, 'Rikmannen')
     expect(s.racingtrofeer?.map((t) => t.navn).sort()).toEqual(['Førermester', 'Konstruktørmester'])
     expect(statuspoeng(s) - status).toBe(2 * RACING_TROFE_STATUS)

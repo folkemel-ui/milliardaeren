@@ -408,10 +408,15 @@ export function kjorLop(r: Racingteam, dag: number): Racinglop {
       const b = biler.find((x) => x.start === 0)!
       return { forer: b.forer, lag: b.lag }
     })(),
+    felt: biler.map((b) => ({ forer: b.forer, lag: b.lag, start: b.start + 1, plass: imaal.indexOf(b) + 1 })),
+    motor: r.deler.motor ?? 0,
+    depot: r.deler.depot ?? 0,
   }
   r.runde += 1
   r.lop.push(lop)
   if (r.lop.length > 2 * LOP_PER_SESONG) r.lop.shift()
+  // Hele feltet trengs bare til løpet direkte og rapporten: de to siste løpene beholder det.
+  for (const x of r.lop.slice(0, -2)) delete x.felt
   return lop
 }
 
@@ -434,7 +439,7 @@ function racingpenger(s: Spilltilstand, belop: number): void {
 }
 
 /** Sesongen er over: mesterskapene, trofeene, et sammendrag, og en ny sesong med nytt marked. Muterer. */
-function sesongslutt(s: Spilltilstand, r: Racingteam, hvem: string): Overskrift[] {
+function sesongslutt(s: Spilltilstand, r: Racingteam, hvem: string, hendelser: string[]): Overskrift[] {
   const saker: Overskrift[] = []
   const lag = konstruktortabell(r)
   const forere = forertabell(r)
@@ -457,10 +462,12 @@ function sesongslutt(s: Spilltilstand, r: Racingteam, hvem: string): Overskrift[
   } else {
     saker.push({ type: 'marked', tittel: `${forere[0]?.forer ?? lag[0].lag} er verdensmester`, tekst: `${r.navn} endte på ${plass}. plass blant teamene.` })
   }
-  hendelse(s, titler.length ? `Sesong ${r.sesong} er over: ${titler.join(' og ').toLowerCase()}! ${kortKroner(MESTERPREMIE * titler.length)} i premie.` : `Sesong ${r.sesong} er over: ${plass}. plass blant teamene.`)
+  hendelser.push(titler.length ? `Sesong ${r.sesong} er over: ${titler.join(' og ').toLowerCase()}! ${kortKroner(MESTERPREMIE * titler.length)} i premie.` : `Sesong ${r.sesong} er over: ${plass}. plass blant teamene.`)
   const seire = r.lop.filter((l) => l.sesong === r.sesong && l.plasser.includes(1)).length
   r.sesonger.push({ sesong: r.sesong, plass, poeng: lag[plass - 1].poeng, forerplass, seire, titler })
   if (r.sesonger.length > 10) r.sesonger.shift()
+  // Pakke 110: tabellen slik den endte, så siden kan vise den mens det siste løpet kjøres.
+  r.sisteTabell = { sesong: r.sesong, lagpoeng: { ...r.lagpoeng }, forerpoeng: { ...r.forerpoeng } }
   r.sesong += 1
   r.runde = 0
   r.lagpoeng = {}
@@ -478,12 +485,18 @@ function sesongslutt(s: Spilltilstand, r: Racingteam, hvem: string): Overskrift[
 export function racingVedDagsskifte(s: Spilltilstand, hvem: string): Overskrift[] {
   const r = s.racing
   if (!r) return []
+  // Pakke 110: løpet som ble avgjort ved forrige dagsskifte, er kjørt ferdig nå — avisa og
+  // hendelsene om det slippes, og dagens løp holdes tilbake til sitt målflagg.
+  const ut = r.ventendeSaker ?? []
+  for (const h of r.ventendeHendelser ?? []) hendelse(s, h)
+  delete r.ventendeSaker
+  delete r.ventendeHendelser
   const dag = dagnummer(s.sek)
   const lonn = lonnPerDag(r)
   s.kontanter -= lonn
   racingpenger(s, -lonn)
   r.lonn += lonn
-  if (dag < r.nesteDag) return []
+  if (dag < r.nesteDag) return ut
   const lop = kjorLop(r, dag)
   r.nesteDag = dag + DAGER_MELLOM
   s.kontanter += lop.premie
@@ -509,7 +522,9 @@ export function racingVedDagsskifte(s: Spilltilstand, hvem: string): Overskrift[
     saker.push({ type: 'deg', tittel: `Krasj for ${r.navn} i ${lop.bane}`, tekst: `${ute.f.navn} kjørte av${lop.strategi === 'aggressiv' ? ' etter et vågalt forsøk på å ta igjen feltet' : ''}.` })
   }
   const plasser = mine.map((x) => plasstekst(x.p)).join(' og ')
-  hendelse(s, `${lop.bane}${lop.regn ? ' (regn)' : ''}: ${plasser || 'ingen førere'} — ${lop.poeng} poeng${lop.premie > 0 ? ` og ${kortKroner(lop.premie)}` : ''}.`)
-  if (r.runde >= LOP_PER_SESONG) saker.push(...sesongslutt(s, r, hvem))
-  return saker
+  const hendelser = [`${lop.bane}${lop.regn ? ' (regn)' : ''}: ${plasser || 'ingen førere'} — ${lop.poeng} poeng${lop.premie > 0 ? ` og ${kortKroner(lop.premie)}` : ''}.`]
+  if (r.runde >= LOP_PER_SESONG) saker.push(...sesongslutt(s, r, hvem, hendelser))
+  r.ventendeSaker = saker
+  r.ventendeHendelser = hendelser
+  return ut
 }
