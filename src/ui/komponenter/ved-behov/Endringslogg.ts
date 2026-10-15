@@ -8,6 +8,21 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '3.1.0',
+    navn: '3.1',
+    dato: 'Oktober 2026',
+    ingress: 'Gården går opp, statusen og kunsten varer, klubben har noe igjen på toppen — og hver eiendom, bil og klokke har fått hele bildet.',
+    punkter: [
+      'Gården går opp: maskinene og byggene prises etter avlingen, jordene er billigere, og hvert kjøp sier hva det gir i uka. Siloen kan lagre billig og selge dyrt, og låven tar grønnsakene og frukten også.',
+      'Dyrene er forskjellige — høna tjener seg inn fortest, kua gir mest per plass — og ulla som venter, teller i formuen. Skogen sier når den bør hogges, og jorda følger prisene i regionen sin.',
+      'To nye statusnivåer, Titan og Evig, en ubåt som gir dobbelt så mye status, og tre nye malerier. Kunstnernes trender bytter hver tiende time, og avisa sier hvem som er i vinden.',
+      'Klubben på toppen: Europa blir sterkere for hvert europeisk trofé, en utvidet nasjonalarena tar 45 000, og supercupen gir mindre status.',
+      'Åtte nye aksjer, én for hver bransje som manglet. Skatten viser hva du skylder så langt i måneden og kan betales i deler, og Marit Aas svinger mindre.',
+      'Hver eiendom utenlands, hver bil og hver klokke har fått sitt eget bilde i full ramme, og klokkene står i et opplyst skap i Samling.',
+      'Bedrifter er ryddigere øverst, og hvert sekund koster halvparten så mye på det tyngste spillet.',
+    ],
+  },
+  {
     versjon: '3.0.0',
     navn: '3.0',
     dato: 'Oktober 2026',
