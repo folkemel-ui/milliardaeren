@@ -5,6 +5,11 @@ import {
   bilfart,
   BILDELER,
   BILDELLISTE,
+  DELTALL,
+  deltall,
+  feltetsBesteTrinn,
+  regnILop,
+  vaatferdighet,
   forertabell,
   konstruktortabell,
   LOP_PER_SESONG,
@@ -120,6 +125,12 @@ function Nestelop({ s, r }: { s: Spilltilstand; r: Racingteam }) {
       <p className="dempet liten">
         Bilen har fart {fart(r)} av 90 · {plassering(r)} blant teamene
       </p>
+      {/* Pakke 109: været er kjent på forhånd, så strategien kan velges etter det. */}
+      {regnILop(r, r.runde) && (
+        <p className="liten">
+          <span className="merke info">Regn ventet</span> Aero, chassis og føreren teller mer, flaksen også, og dobbelt så mange kjører av.
+        </p>
+      )}
       <div className="segment racing-strategi" role="radiogroup" aria-label="Strategi">
         {STRATEGILISTE.map((id) => (
           <button key={id} role="radio" aria-checked={r.strategi === id} className={r.strategi === id ? 'aktiv' : ''} onClick={() => utfor(settStrategi(s, id))}>
@@ -138,7 +149,10 @@ function Sistelop({ r, lop }: { r: Racingteam; lop: Racinglop }) {
     <div className="kort">
       <div className="maal-topp">
         <h2 className="kort-tittel">Siste løp: {lop.bane}</h2>
-        <span className="dempet liten">{STRATEGIER[lop.strategi].navn}</span>
+        <span className="dempet liten">
+          {lop.regn ? 'Regn · ' : ''}
+          {STRATEGIER[lop.strategi].navn}
+        </span>
       </div>
       <ol className="racing-pall">
         {lop.pall.map((x, i) => (
@@ -155,6 +169,11 @@ function Sistelop({ r, lop }: { r: Racingteam; lop: Racinglop }) {
         <strong className="gull">{lop.poeng} poeng</strong>
         {lop.premie > 0 && ` · ${kortKroner(lop.premie)}`}
       </p>
+      {lop.pole && (
+        <p className="dempet liten">
+          Start: {lop.plasser.flatMap((p, i) => (p === null ? [] : [`${r.forere[i]?.navn ?? 'fører'} ${lop.start?.[i] ?? '–'}.`])).join(', ') || '–'} · Pole: {lop.pole.forer} ({lop.pole.lag})
+        </p>
+      )}
     </div>
   )
 }
@@ -214,7 +233,12 @@ function Mesterskap({ r }: { r: Racingteam }) {
   )
 }
 
+/**
+ * Bilen: farten, og (Pakke 109) hver del med sine virkelige tall som streker mot feltets beste
+ * i år, og når delen teller mest.
+ */
 function Bilkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
+  const best = feltetsBesteTrinn(r)
   return (
     <div className="kort">
       <div className="maal-topp">
@@ -224,22 +248,39 @@ function Bilkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
       <div className="milepael-spor">
         <div className="milepael-fyll" style={{ width: `${((bilfart(r) - 40) / 50) * 100}%` }} />
       </div>
+      <p className="dempet liten">Strekene er tallene dine; merket er feltets beste i år.</p>
       {BILDELLISTE.map((d) => {
         const pris = nesteDelpris(r, d)
         return (
-          <div key={d} className="personale-rad racing-del">
-            <p className="liten">
-              <strong>{BILDELER[d].navn}</strong> · trinn {r.deler[d]} av 5
-              <br />
-              <span className="dempet">{BILDELER[d].tekst}</span>
-            </p>
-            {pris === null ? (
-              <span className="merke ok">Ferdig</span>
-            ) : (
-              <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(oppgraderDel(s, d))}>
-                Bygg · {kortKroner(pris)}
-              </button>
-            )}
+          <div key={d} className="racing-del">
+            <div className="personale-rad">
+              <p className="liten">
+                <strong>{BILDELER[d].navn}</strong> · trinn {r.deler[d]} av 5
+                <br />
+                <span className="dempet">{BILDELER[d].tekst}</span>
+              </p>
+              {pris === null ? (
+                <span className="merke ok">Ferdig</span>
+              ) : (
+                <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(oppgraderDel(s, d))}>
+                  Bygg · {kortKroner(pris)}
+                </button>
+              )}
+            </div>
+            <div className="deltall">
+              {DELTALL[d].map((x) => (
+                <div key={x.navn} className="deltall-rad">
+                  <span className="dempet liten">{x.navn}</span>
+                  <span className="deltall-spor" aria-hidden="true">
+                    <span className="deltall-fyll" style={{ width: `${((r.deler[d] ?? 0) / 5) * 100}%` }} />
+                    <span className="deltall-best" style={{ left: `${(best[d] / 5) * 100}%` }} />
+                  </span>
+                  <span className="liten deltall-tall">
+                    {tall(deltall(x, r.deler[d] ?? 0), x.desimaler ?? 0)} {x.enhet}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )
       })}
@@ -247,10 +288,13 @@ function Bilkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
   )
 }
 
+/** «+3», «−2» eller «±0»: førerens ferdighet i regn mot tørt (Pakke 109). */
+const regnTekst = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : '±0')
+
 function Forerlinje({ f }: { f: Forer }) {
   return (
     <p className="liten">
-      <strong>{f.navn}</strong> · ferdighet {f.ferdighet}
+      <strong>{f.navn}</strong> · ferdighet {f.ferdighet} · regn {regnTekst(vaatferdighet(f.navn))}
       <br />
       <span className="dempet">{kortKroner(f.lonn)} om dagen</span>
     </p>

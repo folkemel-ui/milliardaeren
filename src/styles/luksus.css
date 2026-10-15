@@ -1150,6 +1150,49 @@
   font-weight: var(--vekt-fet);
 }
 
+/* Pakke 109: delens tall som streker mot feltets beste. */
+.deltall {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.deltall-rad {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 84px;
+  gap: 8px;
+  align-items: center;
+}
+
+.deltall-spor {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--flate-2);
+}
+
+.deltall-fyll {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--gull);
+}
+
+.deltall-best {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--tekst-dempet);
+}
+
+.deltall-tall {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .racing-del,
 .racing-forer {
   padding-top: 10px;

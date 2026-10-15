@@ -345,6 +345,22 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 
 ## Racing
 
+- **The race model since Pack 109**: a car's pace in a condition is `bilfartI(r, 'kval' | 'tort' | 'regn')`,
+  the steps weighted by `DELVEKT`. Every row sums to 4, so a car with even steps is equally fast
+  everywhere and exactly as fast as `bilfart` — that is what kept old teams where they were. Rivals have
+  no parts, only a car number (`rivaltrinn` splits it evenly for the bars). Qualifying, the weather
+  (`regnILop`) and a driver's wet skill (`vaatferdighet`) come from hashes, so the team's die still
+  draws three numbers per car (normal = 2, crash = 1; ten teams = 20 cars) — `pakke109.test.ts` checks the
+  count. Anything new in a race (a pit stop, a lap time) should come from a hash too, or every later race
+  of every old save changes.
+- **Recalibrate the luck when you add a term** (Pack 109): the grid bonus made the fast cars faster, so
+  the race's σ went 5 → 4.6. A scratch script that plays 300 seasons per car level with the old and new
+  model side by side (scratchpad `p109/maal.ts`) showed every level within ±0.2 places and the title rate
+  unchanged; Pack 90's `snittplass` assertions passed untouched. Pole then wins ~41 % (46 % at Monaco).
+- **A save version was not needed after all** (Pack 109): the plan said «the save version bumps once»,
+  but the new race fields (`regn`, `start`, `pole`) are optional on each race, and the weather and wet
+  skills are hashes. Check that before building a migration the plan assumed.
+
 - **A new competition: measure the ladder before the screen** (Pack 90, the racing team). The first
   numbers (rivals' cars 52–92, your car +3 a step to 100, luck σ 3.5) gave no points at all until
   ~1 mrd of upgrades and a title every time at the top; a 30-line Vitest script that plays 60–200

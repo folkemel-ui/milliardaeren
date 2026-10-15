@@ -199,6 +199,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       `Med Formel 1-bilen kan du starte et team for ${kortKroner(TEAMPRIS)}. En sesong er ${LOP_PER_SESONG} løp, ett hver ${DAGER_MELLOM}. spilldag, mot ni team med to førere hver; løpet avgjøres ved dagsskiftet. ` +
       `Farten kommer fra bilen og førerne, og litt flaks. Bilen har fire deler i fem trinn, fra ${kortKroner(DELTRINN_PRIS[0])} til ${kortKroner(DELTRINN_PRIS[DELTRINN_PRIS.length - 1])}; førerne ansetter du fra markedet, som fornyes hver sesong, og de koster lønn hver dag. ` +
+      'Hver del har sine tall — effekt, marktrykk, vekt og depotstopp — og sitt øyeblikk: motoren og aerodynamikken teller mest i kvalifiseringen, aero og chassis i regn, depotmannskapet i et tørt løp. En bil med like mange trinn overalt er like rask overalt. ' +
+      'Kvalifiseringen avgjør startrekkefølgen, og startplassen teller i løpet — mest i Monaco, der ingen kommer forbi. ' +
+      'Noen løp går i regn, oftest i Spa og Interlagos, og neste løps vær står på kortet: i regn teller føreren og flaksen mer, hver fører har sin egen regnferdighet, og dobbelt så mange kjører av. ' +
       `Strategien gjelder begge førerne: ${STRATEGIER.forsiktig.navn.toLowerCase()} kommer nesten alltid i mål, ${STRATEGIER.aggressiv.navn.toLowerCase()} er raskere, men kjører av omtrent én gang av åtte — best når du jager, verre når du leder. ` +
       `De ti første får poeng (25, 18, 15 … 1), og teamet får ${kortKroner(PREMIE_PER_POENG)} per poeng. Førermesterskapet og konstruktørmesterskapet gir hvert et trofé med ${RACING_TROFE_STATUS} i status og ${kortKroner(MESTERPREMIE)}. ` +
       `Teamet teller i formuen med det delene har kostet; selger du, får du ${pst(SALG_ANDEL)} av det, og bilen og trofeene beholder du.`,

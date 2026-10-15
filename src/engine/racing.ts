@@ -15,7 +15,7 @@
 
 import { MAKS_HENDELSER } from './innhold'
 import { dagnummer } from './kalender'
-import { hashTekst, Terning, tilfeldig } from './rng'
+import { hashNormal, hashTekst, Terning, tilfeldig } from './rng'
 import { kortKroner } from './tall'
 import type { Bildel, Forer, Lopsstrategi, Overskrift, Racinglop, Racingteam, Spilltilstand, Trofe } from './types'
 
@@ -47,14 +47,18 @@ export const KONSTRUKTORMESTER = 'Konstruktørmester'
 /** Bilen teller mest, føreren litt mindre. */
 const VEKT_BIL = 0.6
 const VEKT_FORER = 0.4
-/** Flaksen i et løp: standardavviket på farten (rundt en femdel av spennet mellom teamene). */
-export const SPREDNING = 5
+/**
+ * Flaksen i et løp: standardavviket på farten. 5 til Pakke 109; nå teller startplassen også,
+ * så flaksen er litt mindre — målt over 300 sesonger står hvert bilnivå der det sto (±0,2 plasser).
+ */
+export const SPREDNING = 4.6
 
+/** Hver del og når den teller mest (Pakke 109, `DELVEKT`). */
 export const BILDELER: Record<Bildel, { navn: string; tekst: string }> = {
-  motor: { navn: 'Motor', tekst: 'Mer kraft ut av svingene.' },
-  aero: { navn: 'Aerodynamikk', tekst: 'Vinger som holder bilen nede.' },
-  chassis: { navn: 'Chassis', tekst: 'Lettere og stivere.' },
-  depot: { navn: 'Depotmannskap', tekst: 'Raskere dekkskift.' },
+  motor: { navn: 'Motor', tekst: 'Kraft på rettene — teller mest i kvalifiseringen.' },
+  aero: { navn: 'Aerodynamikk', tekst: 'Holder bilen nede — mest verdt i regn og på en flyvende runde.' },
+  chassis: { navn: 'Chassis', tekst: 'Lettere og stivere — teller mest i regn.' },
+  depot: { navn: 'Depotmannskap', tekst: 'Raskere dekkskift — teller i løpet, ikke i kvalifiseringen.' },
 }
 export const BILDELLISTE = Object.keys(BILDELER) as Bildel[]
 
@@ -79,6 +83,93 @@ export const RIVALLAG: readonly { navn: string; bil: number }[] = [
 ]
 
 export const BANER = ['Melbourne', 'Monaco', 'Silverstone', 'Spa', 'Monza', 'Suzuka', 'Interlagos', 'Abu Dhabi'] as const
+export type Bane = (typeof BANER)[number]
+
+// ─────────────────────────────────────────────── Bilens tall, startplassen og været (Pakke 109)
+
+/** Et tall delen har på trinn 0 og trinn 5; lavere er bedre for tid og vekt. */
+export interface Deltall {
+  navn: string
+  enhet: string
+  fra: number
+  til: number
+  desimaler?: number
+}
+
+/** De virkelige tallene bak hvert trinn: det du ser på bilkortet, som streker mot feltets beste. */
+export const DELTALL: Record<Bildel, Deltall[]> = {
+  motor: [
+    { navn: 'Effekt', enhet: 'hk', fra: 760, til: 1010 },
+    { navn: 'Toppfart', enhet: 'km/t', fra: 318, til: 348 },
+    { navn: '0–100 km/t', enhet: 's', fra: 2.7, til: 2.2, desimaler: 1 },
+  ],
+  aero: [
+    { navn: 'Marktrykk', enhet: 'kg', fra: 2800, til: 4000 },
+    { navn: 'Luftmotstand', enhet: 'cW', fra: 1.1, til: 0.95, desimaler: 2 },
+  ],
+  chassis: [
+    { navn: 'Vekt', enhet: 'kg', fra: 830, til: 798 },
+    { navn: 'Stivhet', enhet: 'kNm/°', fra: 30, til: 45 },
+  ],
+  depot: [{ navn: 'Depotstopp', enhet: 's', fra: 3.6, til: 2.0, desimaler: 1 }],
+}
+
+/** Tallet på et trinn (0–5, kan være et brøktall for de andre teamene). */
+export const deltall = (t: Deltall, trinn: number) => t.fra + ((t.til - t.fra) * trinn) / 5
+
+/**
+ * Hvor mye hver del teller, i kvalifiseringen, i et tørt løp og i regn. Hver rad summerer til 4,
+ * så en bil med like mange trinn på alle delene har samme fart overalt — som før Pakke 109. Motor og
+ * aero teller mest på en flyvende runde, depotmannskapet ikke i det hele tatt; aero og chassis i regn.
+ */
+export const DELVEKT: Record<'kval' | 'tort' | 'regn', Record<Bildel, number>> = {
+  kval: { motor: 1.4, aero: 1.3, chassis: 1.3, depot: 0 },
+  tort: { motor: 1, aero: 0.9, chassis: 0.9, depot: 1.2 },
+  regn: { motor: 0.6, aero: 1.5, chassis: 1.3, depot: 0.6 },
+}
+
+/** Bilens fart i kvalifisering, et tørt løp eller regn. */
+export function bilfartI(r: Pick<Racingteam, 'deler'>, forhold: keyof typeof DELVEKT): number {
+  let sum = BIL_GRUNN
+  for (const d of BILDELLISTE) sum += (r.deler[d] ?? 0) * TRINN_FART * DELVEKT[forhold][d]
+  return sum
+}
+
+/** Feltets beste trinn på delene i år: det beste av ditt eget og de andre teamenes. */
+export function feltetsBesteTrinn(r: Racingteam): Record<Bildel, number> {
+  let rival = 0
+  for (const l of RIVALLAG) rival = Math.max(rival, rivaltrinn(rivalbil(l.navn, l.bil, r.sesong)))
+  const ut = {} as Record<Bildel, number>
+  for (const d of BILDELLISTE) ut[d] = Math.max(rival, r.deler[d] ?? 0)
+  return ut
+}
+
+/** Et annet teams trinn per del: bilnummeret delt jevnt på de fire. */
+export const rivaltrinn = (bil: number) => Math.max(0, Math.min(5, (bil - BIL_GRUNN) / (4 * TRINN_FART)))
+
+/** Flaksen i kvalifiseringen er halv: den beste bilen og føreren står oftest først. */
+export const KVAL_SPREDNING = 2.5
+/** Hver startplass bak er verdt så mye fart i løpet, og i Monaco, der ingen kommer forbi, ×2,5. */
+export const GRID_FART = 0.12
+export const MONACO_GRID = 2.5
+
+/** Sjansen for regn på hver bane; Spa og Interlagos oftest. Om lag 1,5 våte løp i sesongen. */
+export const REGNSJANSE: Partial<Record<Bane, number>> = { Spa: 0.35, Interlagos: 0.35, Silverstone: 0.25, Suzuka: 0.2 }
+export const REGN_ELLERS = 0.12
+/** I regn teller føreren mer, flaksen mer, og dobbelt så mange kjører av. */
+export const FORER_REGN = 0.5
+export const SPREDNING_REGN = 6.5
+export const KRASJ_REGN = 2
+
+/** Om det regner i et løp, fra en hash av teamet, sesongen og runden — kjent på forhånd. */
+export function regnILop(r: Pick<Racingteam, 'navn' | 'sesong'>, runde: number): boolean {
+  return hash(`racing:regn:${r.navn}:${r.sesong}:${runde}`) < (REGNSJANSE[baneFor(runde)] ?? REGN_ELLERS)
+}
+
+/** En førers ferdighet i regn i forhold til tørt, omtrent ±5, fra navnet. */
+export function vaatferdighet(navn: string): number {
+  return Math.max(-10, Math.min(10, Math.round(5 * hashNormal(hashTekst(`racing:vaat:${navn}`)))))
+}
 
 const TEAMNAVN = ['Nordlys Racing', 'Midnattsol Racing', 'Vestavind Motorsport', 'Polarstjerna Racing', 'Havørn Racing', 'Kvitfjell Motorsport']
 const FORNAVN = ['Aksel', 'Marco', 'Jonas', 'Luca', 'Emil', 'Kenji', 'Pierre', 'Diego', 'Oskar', 'Felipe', 'Tobias', 'Ravi', 'Sven', 'Mateo', 'Hugo', 'Kai', 'Niko', 'Enzo', 'Theo', 'Rafael']
@@ -227,6 +318,8 @@ interface Bil {
   krasj: boolean
   /** Setet hos deg, eller -1 for et annet team. */
   sete: number
+  /** Startplassen, 0 = pole. */
+  start: number
 }
 
 /**
@@ -236,22 +329,50 @@ interface Bil {
  */
 export function kjorLop(r: Racingteam, dag: number): Racinglop {
   const t = new Terning(r.frø)
-  const biler: Bil[] = []
+  // Pakke 109: været og kvalifiseringen kommer fra hasher, så terningen trekker like mange tall som før.
+  const runde = r.runde
+  const bane = baneFor(runde)
+  const regn = regnILop(r, runde)
+  const vektForer = regn ? FORER_REGN : VEKT_FORER
+  const forerfart = (navn: string, ferdighet: number) => vektForer * (ferdighet + (regn ? vaatferdighet(navn) : 0))
+  const felt: { forer: string; lag: string; ferdighet: number; kval: number; lop: number; sete: number }[] = []
   for (const lag of RIVALLAG) {
+    // De andre teamene har like mange trinn på alle delene, så bilen er den samme overalt.
     const bil = rivalbil(lag.navn, lag.bil, r.sesong)
-    for (const f of rivalforere(lag.navn, lag.bil, r.sesong)) {
-      const fart = VEKT_BIL * bil + VEKT_FORER * f.ferdighet + SPREDNING * normal(t)
-      biler.push({ forer: f.navn, lag: lag.navn, fart, krasj: t.sjanse(STRATEGIER.normal.krasj), sete: -1 })
+    for (const f of rivalforere(lag.navn, lag.bil, r.sesong)) felt.push({ forer: f.navn, lag: lag.navn, ferdighet: f.ferdighet, kval: bil, lop: bil, sete: -1 })
+  }
+  const kvalBil = bilfartI(r, 'kval')
+  const lopBil = bilfartI(r, regn ? 'regn' : 'tort')
+  r.forere.forEach((f, sete) => {
+    if (f) felt.push({ forer: f.navn, lag: r.navn, ferdighet: f.ferdighet, kval: kvalBil, lop: lopBil, sete })
+  })
+  const kvalfart = felt.map((b, i) => VEKT_BIL * b.kval + forerfart(b.forer, b.ferdighet) + KVAL_SPREDNING * hashNormal(hashTekst(`racing:kval:${r.navn}:${r.sesong}:${runde}:${b.forer}:${i}`)))
+  const start = new Array<number>(felt.length)
+  felt
+    .map((_, i) => i)
+    .sort((a, b) => kvalfart[b] - kvalfart[a])
+    .forEach((i, plass) => (start[i] = plass))
+  const grid = (i: number) => -GRID_FART * (bane === 'Monaco' ? MONACO_GRID : 1) * start[i]
+  const flaks = regn ? SPREDNING_REGN : SPREDNING
+  const krasjFaktor = regn ? KRASJ_REGN : 1
+  const biler: Bil[] = []
+  let n = 0
+  for (const lag of RIVALLAG) {
+    for (let k = 0; k < 2; k++) {
+      const b = felt[n]
+      const fart = VEKT_BIL * b.lop + forerfart(b.forer, b.ferdighet) + grid(n) + flaks * normal(t)
+      biler.push({ forer: b.forer, lag: lag.navn, fart, krasj: t.sjanse(STRATEGIER.normal.krasj * krasjFaktor), sete: -1, start: start[n] })
+      n++
     }
   }
   const st = STRATEGIER[r.strategi]
-  const fart = bilfart(r)
   r.forere.forEach((f, sete) => {
     // Et tomt sete trekker likevel, så terningen går i samme takt uansett.
-    const flaks = normal(t)
-    const krasj = t.sjanse(st.krasj)
+    const z = normal(t)
+    const krasj = t.sjanse(st.krasj * krasjFaktor)
     if (!f) return
-    biler.push({ forer: f.navn, lag: r.navn, fart: VEKT_BIL * fart + VEKT_FORER * f.ferdighet + st.fart + SPREDNING * flaks, krasj, sete })
+    const i = felt.findIndex((b) => b.sete === sete)
+    biler.push({ forer: f.navn, lag: r.navn, fart: VEKT_BIL * lopBil + forerfart(f.navn, f.ferdighet) + st.fart + grid(i) + flaks * z, krasj, sete, start: start[i] })
   })
   r.frø = t.fro
   const imaal = biler.filter((b) => !b.krasj).sort((a, b) => b.fart - a.fart)
@@ -278,6 +399,15 @@ export function kjorLop(r: Racingteam, dag: number): Racinglop {
     poeng,
     premie: poeng * PREMIE_PER_POENG,
     pall: imaal.slice(0, 3).map((b) => ({ forer: b.forer, lag: b.lag })),
+    regn,
+    start: r.forere.map((_, sete) => {
+      const b = biler.find((x) => x.sete === sete)
+      return b ? b.start + 1 : null
+    }),
+    pole: (() => {
+      const b = biler.find((x) => x.start === 0)!
+      return { forer: b.forer, lag: b.lag }
+    })(),
   }
   r.runde += 1
   r.lop.push(lop)
@@ -360,18 +490,26 @@ export function racingVedDagsskifte(s: Spilltilstand, hvem: string): Overskrift[
   racingpenger(s, lop.premie)
   r.premier += lop.premie
   const saker: Overskrift[] = []
-  const mine = lop.plasser.map((p, i) => ({ p, f: r.forere[i] })).filter((x): x is { p: number; f: Forer } => x.p !== null && !!x.f)
+  const mine = lop.plasser
+    .map((p, i) => ({ p, f: r.forere[i], start: lop.start?.[i] ?? null }))
+    .filter((x): x is { p: number; f: Forer; start: number | null } => x.p !== null && !!x.f)
   const beste = mine.filter((x) => x.p > 0).sort((a, b) => a.p - b.p)[0]
+  // Pakke 109: startplassen og regnet i saken — «fra pole», «fra 7. plass», «i regnet».
+  const fra = (x: { start: number | null }) => (x.start === 1 ? ' fra pole' : x.start ? ` fra ${x.start}. startplass` : '')
+  const vaat = lop.regn ? ' i regnet' : ''
+  const minPole = mine.find((x) => x.start === 1)
   if (beste?.p === 1) {
-    saker.push({ type: 'deg', tittel: `${r.navn} vinner i ${lop.bane}`, tekst: `${beste.f.navn} tok seieren foran ${lop.pall[1]?.forer} og ${lop.pall[2]?.forer}.` })
+    saker.push({ type: 'deg', tittel: `${r.navn} vinner i ${lop.bane}`, tekst: `${beste.f.navn} tok seieren${fra(beste)}${vaat}, foran ${lop.pall[1]?.forer} og ${lop.pall[2]?.forer}.` })
   } else if (beste && beste.p <= 3) {
-    saker.push({ type: 'deg', tittel: `Pallplass for ${r.navn} i ${lop.bane}`, tekst: `${beste.f.navn} ble nummer ${beste.p}. ${lop.pall[0].forer} vant for ${lop.pall[0].lag}.` })
+    saker.push({ type: 'deg', tittel: `Pallplass for ${r.navn} i ${lop.bane}`, tekst: `${beste.f.navn} ble nummer ${beste.p}${fra(beste)}${vaat}. ${lop.pall[0].forer} vant for ${lop.pall[0].lag}.` })
+  } else if (minPole) {
+    saker.push({ type: 'deg', tittel: `Pole for ${r.navn} i ${lop.bane}`, tekst: `${minPole.f.navn} satte bestetid i kvalifiseringen, men endte ${minPole.p === 0 ? 'utenfor banen' : `på ${minPole.p}. plass`}${vaat}.` })
   } else if (mine.some((x) => x.p === 0)) {
     const ute = mine.find((x) => x.p === 0)!
     saker.push({ type: 'deg', tittel: `Krasj for ${r.navn} i ${lop.bane}`, tekst: `${ute.f.navn} kjørte av${lop.strategi === 'aggressiv' ? ' etter et vågalt forsøk på å ta igjen feltet' : ''}.` })
   }
   const plasser = mine.map((x) => plasstekst(x.p)).join(' og ')
-  hendelse(s, `${lop.bane}: ${plasser || 'ingen førere'} — ${lop.poeng} poeng${lop.premie > 0 ? ` og ${kortKroner(lop.premie)}` : ''}.`)
+  hendelse(s, `${lop.bane}${lop.regn ? ' (regn)' : ''}: ${plasser || 'ingen førere'} — ${lop.poeng} poeng${lop.premie > 0 ? ` og ${kortKroner(lop.premie)}` : ''}.`)
   if (r.runde >= LOP_PER_SESONG) saker.push(...sesongslutt(s, r, hvem))
   return saker
 }

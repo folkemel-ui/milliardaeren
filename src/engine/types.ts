@@ -268,6 +268,10 @@ export interface Racinglop {
   premie: number
   /** De tre på pallen: fører og team. */
   pall: { forer: string; lag: string }[]
+  /** Pakke 109: om det regnet, startplassen til fører 1 og 2 (1–20), og hvem som tok pole. */
+  regn?: boolean
+  start?: (number | null)[]
+  pole?: { forer: string; lag: string }
 }
 
 export interface Racingsesong {
