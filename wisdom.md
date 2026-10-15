@@ -841,7 +841,7 @@ session; delete what stops being true.
   `bank` 21/20 once; each passed on the next run. The proof that it's old: check out the previous commit's
   engine files (`git checkout <commit> -- src/engine/…`), run `ytelse.test.ts` alone twice, and read the
   same part — it was 19–20 there too. Then rerun `lever.mjs`, report it, and ask before raising a budget:
-  Folke had «dagsskifte og kø» raised to 25 after the second miss, and `bank` (20, measures 19–22),
+  Folke had «dagsskifte og kø» and `bank` raised to 25 after their second misses, and
   `inntekt` (55, measures 48–54) and a fresh game (100, measures 66–90) are next in line.
 - **A payback line on something that pays weekly is a snittuke, not today** (Pack 105, the farm). The
   harvest swings with the week's weather and prices, so «tilbake på T» uses `forventetUke` with and
