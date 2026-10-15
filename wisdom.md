@@ -127,7 +127,14 @@ session; delete what stops being true.
   screenshot of four screens), and a question left with no answer (the native shell) went with the
   recommended option, said in one line before building. In a multi-select, mark only what you would
   really pick, and expect a subset.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78 and 96.**
+- **When both options in a list item measure badly, offer the combination** (Pack 105, the barn). The item
+  said «store the vegetables, *or* cost ~5 %»; measured on a full farm they paid back in ~40 h either way.
+  A third option doing both at a middle price (stores all crops, 15 %) came out at ~14 h — like the
+  tractor — and Folke picked it. Measure the item's own options first and show their numbers next to it.
+- **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
+  pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
+  questions), and say in one line at the start of the pack that the other two are done.
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–107.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -162,6 +169,9 @@ session; delete what stops being true.
   as an `Ideer.md` conflict at the end. Resolve to the plan on master (their «Next up», their numbering),
   rename your pack (commit message, comments, test file) to the number it has there, and say so. Better:
   `git fetch` and read `origin/master:Ideer.md`'s «Next up» before asking the pack's questions.
+- **`lever.mjs` refuses uncommitted work**, so run `npx vitest run` (the whole suite, ~5 min, into a log)
+  before the pack's commit when old tests are likely to move — Pack 107 found two (a level list and the
+  Avisa picture of each artist's priciest work) that way and folded the fixes into the pack's one commit.
 - **Run `lever.mjs` before the report, not after.** In Pack 66 the graphics track had pushed
   G12 while the pack was being built; the rebase stopped on `Ideer.md` (both tracks removed
   items from the same section, which then had to go) and `vite.config.ts` (both added a
@@ -355,6 +365,12 @@ session; delete what stops being true.
   screenshot cut off on the right, and a theme switch via `data-theme` never showed in a
   screenshot at all. When that happens, check with DOM numbers (rects, `scrollWidth`,
   computed colours) and say in the report which checks were DOM-only.
+- **«1 %» breaks over two lines at 375 px** if the space is a plain one (Pack 105, the store's text): write
+  `1&nbsp;%` in JSX text. The helpers don't do it for you — `pst` in `forklaringer.ts` and the help texts
+  use a plain space — so look at the end of each wrapped line in a screenshot of new text with a percent.
+- **The right edge cut off in a screenshot is the pane, not the page, if the DOM says so** (Packs 106–107,
+  twice, even after the 1-px resize): read the button's and the card's `getBoundingClientRect().right`
+  against `clientWidth` and `scrollWidth`, and say in the report that the check was DOM-only.
 - **In mobile emulation `innerWidth` grows** when content overflows. Measure against
   `document.documentElement.clientWidth`.
 - **Safari wants the clipboard and the share sheet inside the tap** (Pack 95): an `await` before
@@ -820,6 +836,13 @@ session; delete what stops being true.
 - **The speed test's `leie` part (budget 22 ms) fails under full-suite load** — 23 ms in Packs 93 and 95,
   25 ms in Pack 103 — and passes alone. Rerun `ytelse.test.ts` alone before suspecting the change;
   `lever.mjs` has passed it every time so far.
+- **Several speed budgets sit at their edge, and a 1 ms miss is load, not the pack** (15 October). In one
+  day `lever.mjs` failed three times on a part the pack never touched: «dagsskifte og kø» 21/20 twice and
+  `bank` 21/20 once; each passed on the next run. The proof that it's old: check out the previous commit's
+  engine files (`git checkout <commit> -- src/engine/…`), run `ytelse.test.ts` alone twice, and read the
+  same part — it was 19–20 there too. Then rerun `lever.mjs`, report it, and ask before raising a budget:
+  Folke had «dagsskifte og kø» raised to 25 after the second miss, and `bank` (20, measures 19–22),
+  `inntekt` (55, measures 48–54) and a fresh game (100, measures 66–90) are next in line.
 - **A payback line on something that pays weekly is a snittuke, not today** (Pack 105, the farm). The
   harvest swings with the week's weather and prices, so «tilbake på T» uses `forventetUke` with and
   without the purchase (`gardGir`): the weather averaged over two years of the game's own hash
