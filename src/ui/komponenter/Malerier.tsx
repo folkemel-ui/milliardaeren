@@ -254,6 +254,65 @@ const VERK: Record<MaleriId, Verk> = {
       </>
     ),
   },
+  // De tre sene verkene (Pakke 107), tegnet av spillsporet i kunstnernes stil; G24 kan gjøre dem ferdige.
+  // Lind 2009: «Tausheten» — et rødt fargefelt over et stille grått, og én lys linje imellom.
+  tausheten: {
+    b: 40,
+    h: 52,
+    ramme: 'svart',
+    motiv: (
+      <>
+        <rect width="40" height="52" fill="#5e1a1d" />
+        <rect x="4" y="4" width="32" height="27" rx="1.6" fill="#9b2a2a" opacity="0.95" />
+        <rect x="4" y="32.6" width="32" height="1.4" rx="0.7" fill="#f1e6d2" opacity="0.85" />
+        <rect x="4" y="35.4" width="32" height="12.6" rx="1.6" fill="#5b5f66" />
+        <rect x="4" y="31.4" width="32" height="3.6" rx="1.4" fill="#f1e6d2" opacity="0.18" />
+      </>
+    ),
+  },
+  // Vik 2024: «Byen våkner» — søsteren til «Byen sover»: morgenlys, solen opp og vinduene slukket.
+  'byen-vaakner': {
+    b: 60,
+    h: 44,
+    ramme: 'hvit',
+    motiv: (
+      <>
+        <rect width="60" height="44" fill="#f4d7b4" />
+        <rect width="60" height="12" fill="#e9b9a6" />
+        <rect y="12" width="60" height="8" fill="#f2c9a8" />
+        <circle cx="14" cy="22" r="5.4" fill="#fbe7a8" />
+        <rect x="2" y="24" width="11" height="20" fill="#8aa1bd" />
+        <rect x="13" y="17" width="10" height="27" fill="#a9bad0" />
+        <rect x="23" y="27" width="13" height="17" fill="#7e94b2" />
+        <rect x="36" y="20" width="10" height="24" fill="#b7c5d8" />
+        <rect x="46" y="29" width="13" height="15" fill="#8aa1bd" />
+        {[[16, 21], [39, 25], [50, 33]].map(([x, y]) => (
+          <rect key={`${x}-${y}`} x={x} y={y} width="2.2" height="2.4" fill="#5d7090" />
+        ))}
+      </>
+    ),
+  },
+  // Solheim 1934: «Fjorden brenner» — kveldssol i ekspresjonistiske bølger over mørke fjell og et glødende speil.
+  'fjorden-brenner': {
+    b: 60,
+    h: 44,
+    ramme: 'gull',
+    motiv: (
+      <>
+        <rect width="60" height="44" fill="#c5462a" />
+        <path d={`${bolge(5, 2, 60)} L60 0 L0 0 Z`} fill="#8e2f2a" />
+        <path d={`${bolge(11, 2.2, 60, 5)} L60 5 Q30 8 0 5 Z`} fill="#e88a3c" opacity="0.85" />
+        <path d={bolge(15, 1.6, 60, 3)} fill="none" stroke="#f3c650" strokeWidth="1.4" />
+        <circle cx="42" cy="20" r="4.2" fill="#f7d36a" />
+        <polygon points="0,26 10,15 19,22 28,13 38,24 48,17 60,25 60,28 0,28" fill="#2b1f3a" />
+        <rect y="28" width="60" height="16" fill="#3b2552" />
+        <path d={`${bolge(31, 1.4, 60, 6)} L60 44 L0 44 Z`} fill="#4a2c5e" />
+        {[30.5, 33, 35.6, 38.4, 41.2].map((y, i) => (
+          <path key={y} d={`M${36 - i * 1.4} ${y} q6 -1.2 ${12 + i * 2.8} 0`} stroke="#f2a53f" strokeWidth={1.2 - i * 0.15} fill="none" opacity={0.95 - i * 0.12} />
+        ))}
+      </>
+    ),
+  },
 }
 
 /** Rammen rundt lerretet: forgylt og utskåret, eik, tynn svart eller tynn hvit. */

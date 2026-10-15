@@ -9,9 +9,13 @@
  * på museum. Da kan det ikke selges, og det tar en dag å hente det hjem.
  *
  * Kunstmarkedet har sin egen terning, så kunst endrer ikke resten av spillet.
+ *
+ * Pakke 107: trendene byttes mellom kunstnerne hver 120. spilldag (ti timer), fra en hash —
+ * likt i alle spill, og avisa sier hvem som er i vinden. Før hadde hver kunstner sin trend
+ * for alltid, og Aske tapte penger hver gang. Tre sene verk gjør at kunsten varer.
  */
 
-import { hashvalg, Terning } from './rng'
+import { hashNormal, hashTekst, hashvalg, Terning, tilfeldig } from './rng'
 import { dagnummer } from './kalender'
 
 /** Utstillingssakene for kunstnere du ikke eier (Pakke 101): hver sto på trykk 14–19 ganger med én tekst. */
@@ -35,7 +39,10 @@ export interface Kunstner {
   trend: number
 }
 
-/** Per time: Vik +2 %, Lind +1,2 %, Solheim +0,6 %, Aske −0,6 % — som aksjene, ikke mer. */
+/**
+ * Per time: Vik +2 %, Lind +1,2 %, Solheim +0,6 %, Aske −0,6 % — som aksjene, ikke mer. Det
+ * er trendene i den første perioden; etter den byttes de (`kunstnertrend`).
+ */
 export const KUNSTNERE = {
   vik: { navn: 'Ragnhild Vik', trend: 0.02 / 12 },
   solheim: { navn: 'Einar Solheim', trend: 0.006 / 12 },
@@ -67,7 +74,45 @@ export const MALERIER: Record<MaleriId, Maleri> = {
   stormen: { id: 'stormen', navn: 'Stormen', kunstner: 'aske', aar: 1961, startpris: 150_000_000, status: 12, farger: ['#475569', '#1e3a5f', '#e2e8f0'] },
   sommernatt: { id: 'sommernatt', navn: 'Sommernatt', kunstner: 'vik', aar: 2021, startpris: 350_000_000, status: 18, farger: ['#fbcfe8', '#166534', '#fef08a'] },
   'skrik-i-byen': { id: 'skrik-i-byen', navn: 'Skrik i byen', kunstner: 'solheim', aar: 1933, startpris: 900_000_000, status: 30, farger: ['#ea580c', '#1e1b4b', '#fde047'] },
+  // Pakke 107: de tre sene verkene, så kunsten varer forbi ~1,5 mrd.
+  tausheten: { id: 'tausheten', navn: 'Tausheten', kunstner: 'lind', aar: 2009, startpris: 3_000_000_000, status: 35, farger: ['#9b2a2a', '#5b5f66', '#f1e6d2'] },
+  'byen-vaakner': { id: 'byen-vaakner', navn: 'Byen våkner', kunstner: 'vik', aar: 2024, startpris: 10_000_000_000, status: 50, farger: ['#f4d7b4', '#8aa1bd', '#fbe7a8'] },
+  'fjorden-brenner': { id: 'fjorden-brenner', navn: 'Fjorden brenner', kunstner: 'solheim', aar: 1934, startpris: 30_000_000_000, status: 70, farger: ['#c5462a', '#3b2552', '#f7d36a'] },
 }
+
+/** De sene verkene får svingningen sin fra en hash, så kunstterningen og de ni gamle står som før. */
+export const SENE_MALERIER: readonly MaleriId[] = ['tausheten', 'byen-vaakner', 'fjorden-brenner']
+
+/** Trendene som byttes mellom kunstnerne, per time, fra best til verst. */
+export const TRENDER = [0.02, 0.012, 0.006, -0.006] as const
+/** Så mange spilldager mellom hvert bytte: ti timer. */
+export const TRENDPERIODE = 120
+
+const KUNSTNERLISTE = ['vik', 'lind', 'solheim', 'aske'] as const
+const HUSKET_REKKEFOLGE = new Map<number, readonly KunstnerId[]>()
+
+/** Kunstnerne fra best til verst trend i en periode. Den første er den gamle rekkefølgen. */
+export function trendrekkefolge(periode: number): readonly KunstnerId[] {
+  if (periode <= 0) return KUNSTNERLISTE
+  const husket = HUSKET_REKKEFOLGE.get(periode)
+  if (husket) return husket
+  const r: KunstnerId[] = [...KUNSTNERLISTE]
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(tilfeldig(hashTekst(`kunsttrend:${periode}:${i}`)) * (i + 1))
+    ;[r[i], r[j]] = [r[j], r[i]]
+  }
+  if (HUSKET_REKKEFOLGE.size > 100) HUSKET_REKKEFOLGE.clear()
+  HUSKET_REKKEFOLGE.set(periode, r)
+  return r
+}
+
+/** Kunstnerens trend per spilldag på en dag (Pakke 107). */
+export function kunstnertrend(kid: KunstnerId, dag: number): number {
+  return TRENDER[trendrekkefolge(Math.floor(dag / TRENDPERIODE)).indexOf(kid)] / 12
+}
+
+/** Når neste bytte kommer, som spilldag. */
+export const nesteTrendbytte = (dag: number) => (Math.floor(dag / TRENDPERIODE) + 1) * TRENDPERIODE
 
 export const MALERILISTE = Object.keys(MALERIER) as MaleriId[]
 
@@ -126,7 +171,20 @@ export function kunstVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const k = s.kunst
   if (!k) return []
   const t = new Terning(k.frø)
+  const dag = dagnummer(s.sek)
   const saker: Overskrift[] = []
+  // Pakke 107: på byttedagen sier avisa hvem som er i vinden og hvem som går av moten.
+  if (dag > 0 && dag % TRENDPERIODE === 0) {
+    const r = trendrekkefolge(dag / TRENDPERIODE)
+    const opp = r[0]
+    const ned = r[r.length - 1]
+    const eier = MALERILISTE.some((id) => (MALERIER[id].kunstner === opp || MALERIER[id].kunstner === ned) && k.eide[id])
+    saker.push({
+      type: eier ? 'deg' : 'marked',
+      tittel: 'Nye favoritter i kunstmarkedet',
+      tekst: `${KUNSTNERE[opp].navn} er i vinden, og ${KUNSTNERE[ned].navn} går av moten. Kritikerne har snudd, og samlerne følger etter de neste ti timene.`,
+    })
+  }
   const loft: Partial<Record<KunstnerId, number>> = {}
   for (const kid of Object.keys(KUNSTNERE) as KunstnerId[]) {
     if (t.sjanse(UTSTILLING_SJANSE)) {
@@ -143,9 +201,15 @@ export function kunstVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const verdier = (k.verdier ??= { ...k.kurser })
   for (const id of MALERILISTE) {
     const m = MALERIER[id]
-    const u = 1 - t.neste()
-    const normal = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * t.neste())
-    const verdi = (verdier[id] ?? k.kurser[id]) * Math.exp(KUNSTNERE[m.kunstner].trend)
+    // De sene verkene finnes ikke i eldre lagringer: de starter på katalogprisen.
+    k.kurser[id] ??= m.startpris
+    let normal: number
+    if (SENE_MALERIER.includes(id)) normal = hashNormal(hashTekst(`maleri:${id}:${dag}`))
+    else {
+      const u = 1 - t.neste()
+      normal = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * t.neste())
+    }
+    const verdi = (verdier[id] ?? k.kurser[id]) * Math.exp(kunstnertrend(m.kunstner, dag))
     const avvik = Math.log(k.kurser[id] / verdi) * TILBAKETREKK + SVINGNING * normal + Math.log(loft[m.kunstner] ?? 1)
     verdier[id] = verdi
     k.kurser[id] = verdi * Math.exp(avvik)

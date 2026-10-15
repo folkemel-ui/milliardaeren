@@ -44,7 +44,8 @@ describe('en lavere lånegrense', () => {
 
 describe('to statusnivåer til', () => {
   it('Dynasti på 1 200 og Mytisk på 1 400, +2 % inntekt hver', () => {
-    expect(STATUSNIVAAER.slice(-3)).toEqual([
+    // Pakke 107 la Titan og Evig over dem.
+    expect(STATUSNIVAAER.slice(-5, -2)).toEqual([
       { poeng: 1000, navn: 'Udødelig' },
       { poeng: 1200, navn: 'Dynasti' },
       { poeng: 1400, navn: 'Mytisk' },
@@ -52,7 +53,7 @@ describe('to statusnivåer til', () => {
     const s = nyttSpill()
     // Status rett fra trofeer: hvert er verdt 3 poeng.
     s.trofeer = Array.from({ length: 467 }, (_, i) => ({ navn: 'Seriemester', sesong: i, divisjon: 0 })) as never
-    expect(statusnivaa(s)).toBe(STATUSNIVAAER.length - 1)
+    expect(STATUSNIVAAER[statusnivaa(s)].navn).toBe('Mytisk')
     expect(statusfaktor(s)).toBeCloseTo(1 + 0.02 * 12, 12)
   })
 

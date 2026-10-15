@@ -18,6 +18,8 @@ import { DAG_SEK } from './kalender'
 
 /** Statusnivået som heter Udødelig: prestasjonen står der den sto da det var det høyeste (Pakke 81). */
 const UDODELIG = STATUSNIVAAER.findIndex((n) => n.navn === 'Udødelig')
+/** Mytisk var det høyeste nivået til Pakke 107; prestasjonen står der, som Udødelig. */
+const MYTISK = STATUSNIVAAER.findIndex((n) => n.navn === 'Mytisk')
 
 /** Trofeene du har sett vunnet: de fra kampen som spilles nå, venter til den er ferdig (Pakke 86). */
 export function synligeTrofeer(s: Spilltilstand): NonNullable<Spilltilstand['trofeer']> {
@@ -122,7 +124,7 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'rikmann', navn: 'Rikmann', beskrivelse: 'Nå statusnivå 4', klart: (_, f) => f.status() >= 4 },
   { id: 'legende', navn: 'Legende', beskrivelse: 'Nå statusnivået Legende', klart: (_, f) => f.status() >= 7 },
   { id: 'udodelig', navn: 'Udødelig', beskrivelse: 'Nå statusnivået Udødelig', klart: (_, f) => f.status() >= UDODELIG },
-  { id: 'mytisk', navn: 'Mytisk', beskrivelse: 'Nå det høyeste statusnivået', klart: (_, f) => f.status() >= STATUSNIVAAER.length - 1 },
+  { id: 'mytisk', navn: 'Mytisk', beskrivelse: 'Nå statusnivået Mytisk', klart: (_, f) => f.status() >= MYTISK },
   { id: 'utenlands', navn: 'Utflytter', beskrivelse: 'Kjøp eiendom i utlandet', klart: (_, f) => f.byerUtenlands().size >= 1 },
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (_, f) => f.byerUtenlands().size >= UTENLANDSBYER.length },
   { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },

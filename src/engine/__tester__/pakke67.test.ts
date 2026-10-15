@@ -6,7 +6,8 @@ import { laan, type Utfall } from '../handlinger'
 import { laanetak, maksNyttLaan, bruttoPerSek } from '../formler'
 import { simuler } from '../simulering'
 import { LAANETAK_TIMER } from '../innhold'
-import { HALVERING_DAGER, KUNSTNERE, kunstVedDagsskifte, kunstverdi, lagKunst, MALERIER, MALERILISTE, SVINGNING, TILBAKETREKK } from '../kunst'
+import { HALVERING_DAGER, KUNSTNERE, kunstnertrend, kunstVedDagsskifte, kunstverdi, lagKunst, MALERIER, MALERILISTE, SVINGNING, TILBAKETREKK } from '../kunst'
+import { DAG_SEK } from '../kalender'
 import { BORS_MAKS, BORS_MIN, OPPKJOP_MAKS, OPPKJOP_MIN, RUNDEANDEL, RUNDER } from '../startups'
 import { MIGRERINGER } from '../../state/migrering'
 import type { MaleriId, Spilltilstand } from '../types'
@@ -16,7 +17,7 @@ function ok(u: Utfall): Spilltilstand {
   return u.tilstand
 }
 
-const marked = (frø: number) => ({ kunst: lagKunst(frø) }) as unknown as Spilltilstand
+const marked = (frø: number) => ({ kunst: lagKunst(frø), sek: 0 }) as unknown as Spilltilstand
 
 describe('kunst som trekkes tilbake', () => {
   it('hver kunstner vokser som aksjene: Vik +2 %, Lind +1,2 %, Solheim +0,6 %, Aske −0,6 % i timen', () => {
@@ -40,12 +41,15 @@ describe('kunst som trekkes tilbake', () => {
     for (let frø = 1; frø <= 60; frø++) {
       const s = marked(frø * 7919)
       for (let d = 0; d < dager; d++) {
+        // Dagsskiftet inn i dag d + 1. Trendene byttes hver 120. dag (Pakke 107).
+        s.sek = (d + 1) * DAG_SEK
         kunstVedDagsskifte(s)
         if (d > 100) for (const id of MALERILISTE) avvik.push(Math.log(s.kunst.kurser[id] / s.kunst.verdier[id]))
       }
       for (const id of MALERILISTE) {
-        const trend = KUNSTNERE[MALERIER[id].kunstner].trend
-        expect(s.kunst.verdier[id] / MALERIER[id].startpris).toBeCloseTo(Math.exp(trend * dager), 6)
+        let sum = 0
+        for (let d = 1; d <= dager; d++) sum += kunstnertrend(MALERIER[id].kunstner, d)
+        expect(s.kunst.verdier[id] / MALERIER[id].startpris).toBeCloseTo(Math.exp(sum), 6)
         forhold.push(s.kunst.kurser[id] / s.kunst.verdier[id])
       }
     }
@@ -91,7 +95,9 @@ describe('kunst som trekkes tilbake', () => {
     const s = marked(5)
     delete (s.kunst as Partial<typeof s.kunst>).verdier
     const før = { ...s.kunst.kurser }
+    s.sek = DAG_SEK
     kunstVedDagsskifte(s)
+    // Den første perioden har de gamle trendene.
     for (const id of MALERILISTE) expect(s.kunst.verdier[id] / før[id]).toBeCloseTo(Math.exp(KUNSTNERE[MALERIER[id].kunstner].trend), 10)
   })
 })

@@ -111,6 +111,8 @@ export const TITLER = [
   'Den udødelige',
   'Dynastigrunnleggeren',
   'Den mytiske',
+  'Titanen',
+  'Den evige',
 ]
 
 export function tittel(s: Spilltilstand): string {

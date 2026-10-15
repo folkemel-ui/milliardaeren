@@ -21,9 +21,9 @@ function rik(): Spilltilstand {
 const SENE: LuksusId[] = ['unikhyperbil', 'skreddersyddklokke', 'megayacht', 'widebodyjet', 'ubaat']
 
 describe('det sene sjiktet', () => {
-  it('fem ting fra 5 til 60 mrd, +440 status i alt', () => {
+  it('fem ting fra 5 til 60 mrd, +540 status i alt (ubåten 100 → 200 i Pakke 107)', () => {
     expect(SENE.map((id) => LUKSUS[id].pris)).toEqual([5e9, 8e9, 15e9, 40e9, 60e9])
-    expect(SENE.reduce((sum, id) => sum + LUKSUS[id].status, 0)).toBe(440)
+    expect(SENE.reduce((sum, id) => sum + LUKSUS[id].status, 0)).toBe(540)
   })
 
   it('hver er dyrest i sin kategori og gir mer status enn alt før den der', () => {

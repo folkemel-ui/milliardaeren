@@ -85,10 +85,11 @@ describe('G11: ekte bilder i Avisa', () => {
 
   it('en utstilling viser ditt dyreste verk av kunstneren, ellers kunstnerens dyreste', () => {
     const t = sak('Stor utstilling for Einar Solheim', 'marked')
-    expect(avisbilde(t)).toEqual({ art: 'maleri', id: 'skrik-i-byen' })
+    // Pakke 107: de sene verkene er nå kunstnernes dyreste.
+    expect(avisbilde(t)).toEqual({ art: 'maleri', id: 'fjorden-brenner' })
     expect(avisbilde(t, { malerier: ['morgenlys'] })).toEqual({ art: 'maleri', id: 'morgenlys' })
     expect(avisbilde(t, { malerier: ['morgenlys', 'nordlys-over-vaagen'] })).toEqual({ art: 'maleri', id: 'nordlys-over-vaagen' })
-    expect(avisbilde(sak('Stor utstilling for Maja Lind'))).toEqual({ art: 'maleri', id: 'kvinne-i-roedt' })
+    expect(avisbilde(sak('Stor utstilling for Maja Lind'))).toEqual({ art: 'maleri', id: 'tausheten' })
   })
 })
 

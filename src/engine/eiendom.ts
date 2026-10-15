@@ -401,7 +401,7 @@ export const LUKSUS: Record<LuksusId, Luksusgjenstand> = {
   skreddersyddklokke: { id: 'skreddersyddklokke', navn: 'Klokke laget for deg', kategori: 'klokke', pris: 8_000_000_000, status: 40, linje: 'Urmakeren målte håndleddet ditt to ganger og morgenhimmelen én.' },
   megayacht: { id: 'megayacht', navn: 'Megayacht med helipad', kategori: 'baat', pris: 15_000_000_000, status: 90, linje: 'Helipaden er på toppdekket, bassenget rett under. Rekkefølgen er diskutert.' },
   widebodyjet: { id: 'widebodyjet', navn: 'Privat widebody-jet', kategori: 'fly', pris: 40_000_000_000, status: 160, linje: 'Et rutefly bygget om til hjem: soverom, spisesal og et møterom ingen bruker.' },
-  ubaat: { id: 'ubaat', navn: 'Ubåt', kategori: 'baat', pris: 60_000_000_000, status: 100, linje: 'Dykker til 300 meter med fem gjester og en kokk som ikke liker trange rom.' },
+  ubaat: { id: 'ubaat', navn: 'Ubåt', kategori: 'baat', pris: 60_000_000_000, status: 200, linje: 'Dykker til 300 meter med fem gjester og en kokk som ikke liker trange rom.' },
 }
 
 export const LUKSUSLISTE = Object.keys(LUKSUS) as LuksusId[]
@@ -535,6 +535,10 @@ export const STATUSNIVAAER: { poeng: number; navn: string }[] = [
   // Pakke 81: to til, så de fjerde romtrinnene, klubben og premium har noe å nå.
   { poeng: 1200, navn: 'Dynasti' },
   { poeng: 1400, navn: 'Mytisk' },
+  // Pakke 107: rundt 2 460 poeng finnes i spillet, og ~264 mrd av det over Mytisk ga ingenting.
+  // Titan nås rundt 60 mrd på samlerens vei, Evig rundt 146 mrd. Boten stopper ved Monark.
+  { poeng: 1700, navn: 'Titan' },
+  { poeng: 2000, navn: 'Evig' },
 ]
 
 /** Hvert statusnivå gir så mye mer inntekt fra bedriftene … */

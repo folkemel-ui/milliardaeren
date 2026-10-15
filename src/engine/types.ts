@@ -841,6 +841,8 @@ export interface Landemerkeeie {
 export type MaleriId =
   | 'morgenlys' | 'fiskeverket' | 'blaatimen' | 'byen-sover' | 'nordlys-over-vaagen'
   | 'kvinne-i-roedt' | 'stormen' | 'sommernatt' | 'skrik-i-byen'
+  // Pakke 107: de tre sene verkene.
+  | 'tausheten' | 'byen-vaakner' | 'fjorden-brenner'
 
 export interface Kunstverk {
   kostpris: number

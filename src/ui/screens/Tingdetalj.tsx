@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react'
 import { EIENDOMSTYPER, eiendomspris, KATEGORINAVN, LAGER, LAGER_FOR, leieHverPerSek, LUKSUS, restverdi } from '../../engine/eiendom'
 import { JORD, landverdi, tommerverdi, vaer } from '../../engine/jord'
-import { KUNSTNERE, MALERIER, maleripris } from '../../engine/kunst'
+import { KUNSTNERE, kunstnertrend, MALERIER, maleripris, nesteTrendbytte } from '../../engine/kunst'
 import { eierDu, LANDEMERKER, landemerkepris } from '../../engine/landemerker'
-import { dagnummer } from '../../engine/kalender'
+import { DAG_SEK, dagnummer } from '../../engine/kalender'
 import type { EiendomId, JordId, LandemerkeId, LuksusId, MaleriId, Spilltilstand } from '../../engine/types'
 import { HJEM, INNREDNING_VERDI, type HjemId } from '../../engine/hjemmene'
 import { hjemTall } from '../romkode'
 import { Hjemkort } from '../komponenter/Hjemmene'
 import type { Ting } from '../detaljvisning'
-import { fortegnKroner, kortKroner, perSek, tall } from '../format'
+import { fortegnKroner, kortKroner, perSek, tall, varighet } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { Gardskart, Gardsregnskap, Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { Malerikort } from '../komponenter/Kunst'
@@ -47,6 +47,17 @@ export function Tingdetalj({ s, ting, tilbake, fane }: { s: Spilltilstand; ting:
 }
 
 type Fakta = [string, ReactNode][]
+
+/**
+ * «I vinden · +2 % i timen · bytter om 3 t 10 min» (Pakke 107). `trend` er per spilldag,
+ * `dager` spilldagene til trendene byttes igjen.
+ */
+function trendtekst(trend: number, dager: number): string {
+  const perTime = trend * 12
+  const ord = perTime >= 0.015 ? 'I vinden' : perTime >= 0.01 ? 'På vei opp' : perTime > 0 ? 'Stø' : 'Går av moten'
+  const p = Math.round(Math.abs(perTime) * 1000) / 10
+  return `${ord} · ${perTime > 0 ? '+' : '−'}${tall(p, p % 1 ? 1 : 0)} % i timen · bytter om ${varighet(dager * DAG_SEK)}`
+}
 
 function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
   switch (slag) {
@@ -137,6 +148,8 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
         ['Kunstner', KUNSTNERE[m.kunstner].navn],
         ['Malt', String(m.aar)],
         ['Verdi nå', kortKroner(pris)],
+        // Pakke 107: trendene byttes hver tiende time, så siden sier hvor kunstneren står nå.
+        ['Trend', trendtekst(kunstnertrend(m.kunstner, dagnummer(s.sek)), nesteTrendbytte(dagnummer(s.sek)) - dagnummer(s.sek))],
       ]
       if (eid) fakta.push(['Kjøpt for', `${kortKroner(eid.kostpris)} (${fortegnKroner(pris - eid.kostpris)})`])
       return [<Malerikort s={s} id={id as MaleriId} iDetalj />, fakta]

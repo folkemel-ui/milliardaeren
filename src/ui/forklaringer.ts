@@ -179,6 +179,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tittel: 'Kunst',
     tekst:
       'Hvert maleri har en verdi som følger kunstnerens trend, og prisen svinger rundt den og trekkes tilbake mot den. Av og til åpner en utstilling, og alt kunstneren har laget, stiger — men løftet ebber ut. ' +
+      'Hver tiende time snur kritikerne: trendene byttes mellom kunstnerne, og avisa sier hvem som er i vinden og hvem som går av moten. Maleriets side viser hvor kunstneren står nå. ' +
       `Auksjonshuset tar ${pst(KJOPSSALAER)} når du kjøper og ${pst(SALGSSALAER)} når du selger. ` +
       'Et maleri gir status — dobbelt så mye på museum, men da kan det ikke selges, og det tar en dag å hente det hjem.',
   },

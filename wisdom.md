@@ -3,7 +3,7 @@
 Written after Packs 25–32 of *Milliardær* (30 September 2026), updated after Packs 33–38
 (1 October 2026), Pack 39 (5 October 2026), Pack 47 (7 October 2026) and Packs 55–60
 (the bug review and the last v10.0 game items, 8–9 October 2026), and since then after each pack
-(last: Pack 106, 15 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
+(last: Pack 107, 15 October 2026). Read it after `Ideer.md` and `ARKITEKTUR.md`, before touching anything.
 It holds what the code doesn't tell you: how Folke works, what the tools do on this machine,
 the rules the engine depends on, and the mistakes that cost time. Pack numbers are
 landmarks, not state — run `git log --oneline -10` first. Update it at the end of a
@@ -837,6 +837,24 @@ session; delete what stops being true.
   silo). `lagre: boolean` became `lagring: 'selg' | 'lagre' | 'smart'`, and `lagringsvalg(j)` reads
   `lagring ?? (lagre ? 'smart' : 'selg')` — so «move the old default to the new setting» needed no
   migration and no save version. Grep every reader of the old field (`j.lagre` had three).
+- **Bench a list item's claim about the bot before building on it** (Pack 107). The review said «the
+  smart bot stops buying status at Mytisk»; a runner that prints `statuspoeng`/`statusnivaa` per tenfold
+  (scratchpad `p107/benk.ts` + `prov.mjs`, variants in parallel) showed it stops at Monark (705 points)
+  from 100 mrd to 1 000 mrd — so new levels above Mytisk moved the bench by zero minutes. Say so in the
+  question: levels up there are for collectors, not pace.
+- **A new painting must not draw from the art die** (Pack 107). `kunstVedDagsskifte` draws two numbers
+  per painting in `MALERILISTE` order; the three late works draw their noise from
+  `hashNormal(hashTekst('maleri:id:dag'))` (`SENE_MALERIER`), so the nine old paintings get exactly the
+  same prices with or without them (`pakke107.test.ts` runs 300 days both ways). Old saves lack the new
+  ids in `kurser`: `k.kurser[id] ??= startpris` at the next day change. A test fixture without `sek`
+  gives `dagnummer` NaN — give art fixtures a clock.
+- **A shuffle that keeps the first period as it was** (Pack 107, the art trends): `trendrekkefolge(0)` is
+  the old fixed order, so for the first 120 days `kunstnertrend` returns `KUNSTNERE[k].trend` bit for bit,
+  and a period's order comes from a hash per period (Fisher–Yates with `tilfeldig(hashTekst(…))`).
+- **A new thing the gallery tests count needs a picture of its own.** `grafikkG6` wants one unique
+  painting per `MaleriId` with the artist's frame colour, so «use the nearest painting» was not possible;
+  the game track drew three simple first versions in `Malerier.tsx` and left finishing them to G24.
+  Likewise an «X's priciest work» test (G11's Avisa picture) moves when a dearer work arrives.
 - **Net worth is computed before the day change in the same second** (`sekund`: formue, then
   `gisUtAvis`). Anything counted «so far today» from `dagnummer(s.sek) * DAG_SEK` therefore drops
   yesterday's last part at that one second — and the net-worth log can land on it. Pack 106 counts the
