@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 107, 15 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 108, 15 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -145,7 +145,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–107.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–108.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -278,6 +278,9 @@ lives in one place only.
   plain `s`, so the `from` never matched; fixing it with `sed` made it worse. Write any
   patch script that holds a regex or a backslash with the Write tool, or skip the script
   and rewrite a short test file whole.
+- **`${…}` inside a double-quoted `node -e` is Bash's, not JavaScript's** (Pack 108): a help-text edit that
+  inserted `${SUPERCUP_STATUS}` came out as two spaces — Bash expanded the empty variable. `tsc` only
+  noticed because the import went unused. Anything with `${` goes in a script file via the Write tool.
 - **Don't fix a scratch script with `node -e` from Bash.** Nested quotes and `\n` escapes
   inside a Bash string inside JS broke twice in a row; the Edit tool on the script file
   fixed it in one go.

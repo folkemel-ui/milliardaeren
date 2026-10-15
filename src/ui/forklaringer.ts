@@ -21,7 +21,7 @@ import { KURTASJE } from '../engine/marked'
 import { BLOKK, BLOKKPREMIE, OPPKJOPSPREMIE } from '../engine/rivaler'
 import { REVISJONSSJANSE, SKATTETRINN } from '../engine/skatt'
 import { DIN_DEL_AV_RUNDEN, RUNDEANDEL } from '../engine/startups'
-import { CUP_PREMIE, CUP_RUNDEPREMIE, EUROPA_PREMIER, KLUBBSALG_HONORAR, RUNDER_PER_SESONG, STADIONKRAV, STADIONTRINN } from '../engine/klubb'
+import { CUP_PREMIE, CUP_RUNDEPREMIE, EUROPA_PREMIER, KLUBBSALG_HONORAR, RUNDER_PER_SESONG, STADIONKRAV, STADIONTRINN, SUPERCUP_STATUS } from '../engine/klubb'
 import { kortKroner, tall } from './format'
 import { AUKSJON_DAGER, BUDSTIGNING, PASSER_ANDEL, TILBAKE_DAGER, TILBAKE_PREMIE } from '../engine/auksjon'
 import { CHARTER_I_SESONG, CHARTER_UTENFOR } from '../engine/charter'
@@ -212,7 +212,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Akademiet sender juniorer på 16–17 år opp hver sesong; de vokser raskt til de er 23, mot et tak du bare ser et spenn av. ' +
       'Hver kamp får en rapport: hvert mål et minutt og en scorer, hver av de elleve en vurdering fra 4 til 10, og en banens beste. Målene og vurderingene samles for sesongen, og ved sesongslutt kåres toppscoreren og årets spiller. ' +
       `Cupen spilles ved siden av serien, alle femti lagene, på faste dager i sesongen; de fjorten beste står over første runde, og uavgjort avgjøres på straffer. Hver runde du vinner, gir ${tall(CUP_RUNDEPREMIE * 100)} % av TV-pengene, og cupmesteren får ${kortKroner(CUP_PREMIE)} og et trofé. ` +
-      `Seriegull i Eliteserien gir plass i Europa neste sesong: åtte lag, tre runder, ${og(EUROPA_PREMIER.map((p) => p / 1_000_000))} mill for hver runde du vinner, og et trofé som gir mer status enn de andre. ` +
+      `Seriegull i Eliteserien gir plass i Europa neste sesong: åtte lag, tre runder, ${og(EUROPA_PREMIER.map((p) => p / 1_000_000))} mill for hver runde du vinner, og et trofé som gir mer status enn de andre. Hvert europeisk trofé du har, gjør motstanderne der sterkere. En supercup gir bare ${SUPERCUP_STATUS} status, siden mesteren nesten alltid vinner den. ` +
       `Selger du klubben, tar megler og advokater ${tall(KLUBBSALG_HONORAR * 100)} %; trofeene beholder du. ` +
       'TV-pengene kommer med sponsoren ved sesongstart, premier etter plassering og for hver runde du vinner i cupene. ' +
       'Spillerne koster lønn hver dag, og opprykk og trofeer gir status. ' +

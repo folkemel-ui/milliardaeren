@@ -1048,6 +1048,8 @@ export interface Trofe {
   navn: string
   sesong: number
   klubb: string
+  /** Statusen trofeet gir, når den er en annen enn slagets (Pakke 108: en ny supercup gir 1). */
+  status?: number
 }
 
 export interface Klubb {

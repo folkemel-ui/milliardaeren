@@ -222,6 +222,19 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 
 ## The club
 
+- **Harder Europe without touching the die** (Pack 108): `nyEuropa(k, sesong, titler)` draws the seven
+  clubs and their strengths exactly as before and adds `EUROPA_TITTELLOFT` (2) per Europe title in
+  `s.trofeer` afterwards, capped at `EUROPA_TAK` (99) — same names, same order, same `frø`. The cap
+  matters: a club with 10 titles would otherwise meet 98–112.
+- **A trophy can carry its own status** (Pack 108): `Trofe.status` is optional, and `klubbstatus` reads
+  `t.status ?? (Europe ? 5 : 3)`. New Super Cups get 1; the ones already won have no field and stay
+  at 3, so nobody drops a status level and no save version was needed. Use the same pattern for any
+  later change to what a trophy is worth.
+- **«What does this upgrade give right now?» can be zero** (Pack 108, floodlights): +20 % crowd means
+  nothing when `tilskuere` is already capped by the seats — at the top, demand reaches 42 000 against
+  25 000 seats. The row now compares `tilskuere` with and without (`flomlyseffekt` in `Klubb.tsx`),
+  says when the stadium is already full, and adds when the division above still requires them.
+
 - **The club (Pack 66)** keeps the whole league: `k.lag` is your division with the table
   (you at index 0), `k.serier[d]` the other four divisions as name + strength (your own
   entry empty). Only your division plays match by match; at season end `skiftSerier`

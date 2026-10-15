@@ -22,6 +22,7 @@ import {
   DIVISJONER,
   divisjonsnavn,
   FLOMLYS,
+  STADIONKRAV,
   form,
   CUPMESTER,
   dineForventedeMaal,
@@ -769,9 +770,23 @@ function Salgskort({ s }: { s: Spilltilstand }) {
   )
 }
 
+/**
+ * Flomlysene (Pakke 108): flere vil komme — men er stadion alt fullt i dagens form, gir de ingen
+ * flere før tribunene bygges ut, og det sier raden.
+ */
+function flomlyseffekt(k: KlubbT): string {
+  const f = form(k)
+  const uten = tilskuere({ ...k, stadion: { ...k.stadion, flomlys: false } }, f)
+  const med = tilskuere({ ...k, stadion: { ...k.stadion, flomlys: true } }, f)
+  // I en divisjon under kan lysene likevel trengs for å rykke opp; da sier raden det.
+  const kreves = !!STADIONKRAV[k.divisjon + 1]?.flomlys
+  if (med <= uten) return `Stadion er alt fullt: lysene gir ingen flere før tribunene bygges ut${kreves ? ' — men divisjonen over krever dem' : ''}`
+  return `Kveldskamper: ${tall((FLOMLYS.publikum - 1) * 100)} % flere vil komme — ${tall(med - uten)} til på neste hjemmekamp`
+}
+
 const UTBYGGINGER: { del: Stadiondel; effekt: (k: KlubbT) => string }[] = [
   { del: 'tribune', effekt: () => 'Plass til flere når laget går godt eller rykker opp' },
-  { del: 'flomlys', effekt: () => `Kveldskamper: ${tall((FLOMLYS.publikum - 1) * 100)} % flere vil komme` },
+  { del: 'flomlys', effekt: flomlyseffekt },
   { del: 'vip', effekt: (k) => `Sponsoren betaler ${tall((VIP.sponsor - 1) * 100)} % mer fra neste sesong — ${kortKroner(sponsorbelop({ ...k, stadion: { ...k.stadion, vip: true } }) - sponsorbelop(k))} i ${DIVISJONER[k.divisjon].navn}` },
 ]
 

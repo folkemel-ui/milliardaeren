@@ -47,6 +47,9 @@ export const STADIONTRINN = [
   { navn: 'Tribuner rundt banen', plasser: 5_000, pris: 15_000_000 },
   { navn: 'Moderne arena', plasser: 10_000, pris: 50_000_000 },
   { navn: 'Nasjonalarena', plasser: 25_000, pris: 150_000_000 },
+  // Pakke 108: en toppklubb vil ha 25 000 × 1,2 (flomlys) × 1,4 (form) = 42 000 på tribunen.
+  // Plass til alle gir om lag 31 mill mer i sesongen, tilbake på ~16 sesonger (~12 timer).
+  { navn: 'Utvidet nasjonalarena', plasser: 45_000, pris: 500_000_000 },
 ] as const
 
 /** Flomlys gir kveldskamper: flere vil komme. */
@@ -105,6 +108,11 @@ export const KLUBBSALG_HONORAR = 0.1
 export const TROFE_STATUS = 3
 /** … og et europeisk så mange (Pakke 73). */
 export const EUROPA_STATUS = 5
+/**
+ * … og en supercup bare så mye (Pakke 108): mesteren vinner den nesten hvert år, og et seriegull
+ * gir alt 3. Supercuper vunnet før står med 3 (`Trofe.status` mangler på dem).
+ */
+export const SUPERCUP_STATUS = 1
 const MARKED_ANTALL = 6
 const PENSJONSALDER = 35
 
@@ -421,7 +429,7 @@ export function lagstyrke(k: Klubb): number {
 
 export function klubbstatus(s: Spilltilstand): number {
   let sum = s.klubb ? DIVISJONER[s.klubb.divisjon].status : 0
-  for (const t of s.trofeer ?? []) sum += t.navn === EUROPAMESTER ? EUROPA_STATUS : TROFE_STATUS
+  for (const t of s.trofeer ?? []) sum += t.status ?? (t.navn === EUROPAMESTER ? EUROPA_STATUS : TROFE_STATUS)
   return sum
 }
 
@@ -466,6 +474,19 @@ export const EUROPAKLUBBER = [
   'Steaua Carpatia', 'Brøndhavn BK', 'Malmköping FF', 'Helsingin Kotka',
 ] as const
 export const EUROPA_STYRKE = [78, 92] as const
+/**
+ * Pakke 108: Europa merker seg mesterne. Hvert europeisk trofé du har, gjør motstanderne så mye
+ * sterkere, opp til taket — lagt på etter trekningen, så klubbens terninger står som før.
+ */
+export const EUROPA_TITTELLOFT = 2
+export const EUROPA_TAK = 99
+
+/** Hvor mange europeiske trofeer du har. */
+export function europatitler(s: Spilltilstand): number {
+  let n = 0
+  for (const t of s.trofeer ?? []) if (t.navn === EUROPAMESTER) n++
+  return n
+}
 
 export function tvpenger(k: Klubb): number {
   return TV_PENGER[k.divisjon]
@@ -497,12 +518,16 @@ export function nyCup(k: Klubb): Utslag {
   return { sesong: k.sesong, runde: 0, lag: [...useedet, ...seeder].map(({ navn, styrke, deg }) => (deg ? { navn, styrke, deg } : { navn, styrke })), ute: false, naadd: 0, frø: t.fro }
 }
 
-/** Europa neste sesong, for Eliteserie-mesteren: sju klubber fra lista, trukket med egen terning. */
-export function nyEuropa(k: Klubb, sesong: number): Utslag {
+/**
+ * Europa neste sesong, for Eliteserie-mesteren: sju klubber fra lista, trukket med egen terning.
+ * Pakke 108: hver europeisk tittel du har, gjør dem `EUROPA_TITTELLOFT` sterkere, til `EUROPA_TAK`.
+ */
+export function nyEuropa(k: Klubb, sesong: number, titler = 0): Utslag {
   const frø = hashTekst(`${k.navn}:${sesong}:europa`)
   const t = new Terning(frø)
   const klubber = stokk([...EUROPAKLUBBER], t).slice(0, 7)
-  const lag = klubber.map((navn) => ({ navn, styrke: Math.round(t.mellom(EUROPA_STYRKE[0], EUROPA_STYRKE[1])) }))
+  const loft = EUROPA_TITTELLOFT * titler
+  const lag = klubber.map((navn) => ({ navn, styrke: Math.min(EUROPA_TAK, Math.round(t.mellom(EUROPA_STYRKE[0], EUROPA_STYRKE[1])) + loft) }))
   return { sesong, runde: 0, lag: stokk([{ navn: k.navn, styrke: 0, deg: true }, ...lag], t), ute: false, naadd: 0, frø: t.fro }
 }
 
@@ -620,7 +645,7 @@ function spillTurneringer(s: Spilltilstand, k: Klubb, dag: number): Overskrift[]
     const din = spillUtslagskamp(s, k, new Terning(hashTekst(`${k.navn}:${k.sesong}:supercup`)), sc.mot, sc.hjemme, 'supercup', 0)
     const resultat = din.hjemme ? `${k.navn} ${din.maalFor}–${din.maalMot} ${din.motstander}` : `${din.motstander} ${din.maalMot}–${din.maalFor} ${k.navn}`
     if (vantDu(din)) {
-      s.trofeer.push({ navn: SUPERCUPMESTER, sesong: k.sesong, klubb: k.navn })
+      s.trofeer.push({ navn: SUPERCUPMESTER, sesong: k.sesong, klubb: k.navn, status: SUPERCUP_STATUS })
       saker.push({ type: 'deg', tittel: `${k.navn} vinner supercupen!`, tekst: `${resultat}${din.straffer ? ', avgjort på straffer' : ''}. Sesongen er i gang, og det første trofeet er alt i skapet.` })
       leggTilHendelse(s, { tittel: 'Trofé', tekst: `${k.navn} vant supercupen.`, alvor: 'info' })
     } else {
@@ -1303,8 +1328,11 @@ function sesongslutt(s: Spilltilstand, k: Klubb, t: Terning): Overskrift[] {
   delete k.tv
   delete k.premier
   if (fra === DIVISJONER.length - 1 && plass === 1) {
-    k.europa = nyEuropa(k, k.sesong)
-    saker.push({ type: 'deg', tittel: `${k.navn} skal spille i Europa`, tekst: `Seriegullet gir plass i kvartfinalen mot ${nesteUtslagskamp(k.europa)?.navn ?? 'Europas beste'}. Kampene spilles mellom seriekampene.` })
+    const titler = europatitler(s)
+    k.europa = nyEuropa(k, k.sesong, titler)
+    // Pakke 108: med europeiske trofeer i skapet sier avisa at motstanderne er klare.
+    const varsel = titler > 0 ? ` Europa har lagt merke til ${k.navn}: motstanderne stiller sterkere enn før.` : ''
+    saker.push({ type: 'deg', tittel: `${k.navn} skal spille i Europa`, tekst: `Seriegullet gir plass i kvartfinalen mot ${nesteUtslagskamp(k.europa)?.navn ?? 'Europas beste'}. Kampene spilles mellom seriekampene.${varsel}` })
   } else delete k.europa
   betalSponsor(s, k)
   betalTv(s, k)
