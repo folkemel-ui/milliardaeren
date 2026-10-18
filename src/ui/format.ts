@@ -53,11 +53,16 @@ export function fortegnKroner(n: number): string {
   return `${verdi > 0 ? '+' : '−'}${tekst}`
 }
 
-/** «+3,2 %», «−1,0 %». */
+/**
+ * «+3,2 %», «−1,0 %». Det som vises som null, har ikke fortegn: «0,0 %» — som
+ * fortegnKroner gir «kr 0» (Pakke 58). Før sto det «+0,0 %», også ved siden av
+ * et tap i kroner («−kr 108 449 · +0,0 %»).
+ */
 export function endring(andel: number): string {
   const verdi = Number.isFinite(andel) ? andel : 0
   const tekst = tall(Math.abs(verdi * 100), 1)
-  return `${verdi < 0 && tekst !== '0,0' ? '−' : '+'}${tekst} %`
+  if (tekst === '0,0') return '0,0 %'
+  return `${verdi < 0 ? '−' : '+'}${tekst} %`
 }
 
 /**

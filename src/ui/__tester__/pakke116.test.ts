@@ -74,6 +74,10 @@ describe('tall som ikke brytes', () => {
     expect(html.match(/class="samlet"/g)).toHaveLength(2)
     expect(tekst(html)).toBe('+kr 8,55 mill · +0,3 %')
   })
+
+  it('en endring som vises som null, har ikke fortegn — ikke «+0,0 %» ved et tap', () => {
+    expect(tekst(tegn(createElement(Endring, { kroner: -108_449, andel: -0.00004 })))).toBe('−kr 108 449 · 0,0 %')
+  })
 })
 
 describe('små andeler', () => {
