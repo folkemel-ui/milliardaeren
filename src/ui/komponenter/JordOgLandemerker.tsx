@@ -22,6 +22,9 @@ import {
   GARDSTRINN,
   gardstrinn,
   HOST_ANDEL,
+  hostSaLangt,
+  lagerFullt,
+  tidTilHost,
   JORD,
   JORD_SYNLIG_VED,
   JORDLISTE,
@@ -53,9 +56,10 @@ import { MEGLERHONORAR } from '../../engine/eiendom'
 import { DAG_SEK, dagnummer, dato, MÅNEDER, ukedag, ukenummer } from '../../engine/kalender'
 import type { By, Gardstall, JordId, LandemerkeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { kortKroner, perSek, tall } from '../format'
+import { kortKroner, perSek, tall, varighet } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from './BedriftIkon'
-import { trykkApner } from '../detaljvisning'
+import { aapneTing, trykkApner } from '../detaljvisning'
+import { aapneGardsside, GARDSSIDER, type Gardsside } from '../gardssider'
 import { Seksjon } from './Seksjon'
 import { gardTekst } from '../inntjening'
 import type { Avlingsgruppe } from '../../engine/jord'
@@ -121,15 +125,21 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
         </div>
       </div>
       <p className="dempet liten">
+        {/* Pakke 112: det uka har gitt så langt stiger mens du ser på, og når høsten kommer. */}
         {t.type === 'gard'
           ? eid
-            ? `Avling denne uka: omtrent ${kortKroner(ukensGardHost(s, id))}`
+            ? `Så langt denne uka ${kortKroner(hostSaLangt(s, id))} av omtrent ${kortKroner(ukensGardHost(s, id))}. Høstes mandag, om ${varighet(tidTilHost(s))}.`
             : `Gir omtrent ${kortKroner(land * HOST_ANDEL)} i uka i et normalt år`
           : eid
             ? `Tømmer ${kortKroner(tommer)} etter ${tall(skogalder(s, id))} dager`
             : 'Kjøpes nyplantet. Tømmeret vokser fra første dag.'}
       </p>
       {eid && t.type === 'skog' && <Skogstatus s={s} id={id} />}
+      {eid && gard && lagerFullt(s, id) && (
+        <p className="liten">
+          <span className="merke varsel">Silo full</span> <span className="dempet">Det som ikke får plass, selges mandag til ukas pris.</span>
+        </p>
+      )}
       {eid ? (
         <div className={t.type === 'skog' ? 'eiendom-knapper' : 'eiendom-knapper en'}>
           {t.type === 'skog' && (
@@ -171,7 +181,8 @@ function Skogstatus({ s, id }: { s: Spilltilstand; id: JordId }) {
  * langt det er kommet mot mandagens høst — og der neste jord kan legges til. Under
  * kartet maskinene. Trinnet (småbruk → gods) står øverst, med hva neste trinn gir.
  * Pakke 93: ukas priser over kartet, drivhuset som en ellevte rute, byggene under
- * maskinene, og kornlageret når gården har silo.
+ * maskinene, og kornlageret når gården har silo. Pakke 112: kartet står på «Jorder og
+ * maskiner»; prisene og lageret har flyttet til «Lager og regnskap», fjøset til «Dyr».
  */
 export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
   const j = s.jord[id]
@@ -182,7 +193,6 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
   const pris = nesteJordpris(s, id)
   // Hvor langt uka er kommet: avlingen høstes mandag morgen.
   const vekst = (ukedag(s.sek) + (s.sek % DAG_SEK) / DAG_SEK) / 7
-  const uke = ukeFor(dagnummer(s.sek))
   return (
     <li className="kort gardskart">
       <div className="maal-topp">
@@ -193,18 +203,6 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
       </div>
       <p className="dempet liten">
         {neste ? `${neste.navn} ved ${neste.fra} jorder: +${neste.status} status.` : 'Gården er et gods: alle jordene er dyrket.'} Høsten mandag morgen.
-      </p>
-      <p className="liten avlingspriser">
-        Priser denne uka:{' '}
-        {GRUPPELISTE.map((g, i) => {
-          const p = avlingspris(g, uke)
-          return (
-            <span key={g}>
-              {i > 0 && ' · '}
-              {GRUPPENAVN[g].toLowerCase()} <strong className={p >= 1.1 ? 'pluss' : p <= 0.9 ? 'minus' : undefined}>×{tall(p, 2)}</strong>
-            </span>
-          )
-        })}
       </p>
       <ul className="jordruter">
         {Array.from({ length: MAKS_JORDER }, (_, i) => {
@@ -243,7 +241,6 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
         )}
       </ul>
       {pris !== null && <p className="dempet liten">Neste jord: {gardTekst(pris, gardGir(s, id, { jord: true }))}</p>}
-      {j.bygg?.silo && <Kornlager s={s} id={id} />}
       {MASKINLISTE.map((m) => {
         const eier = !!j.maskiner?.[m]
         const mp = maskinpris(s, id, m)
@@ -270,7 +267,6 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
           </div>
         )
       })}
-      {j.bygg?.fjos && <Fjos s={s} id={id} />}
       {GARDSBYGGLISTE.map((b) => {
         const eier = !!j.bygg?.[b]
         const sperre = byggSperre(j, b)
@@ -302,6 +298,136 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
         )
       })}
     </li>
+  )
+}
+
+/** Ukas priser på avlingene, med de gode og dårlige merket (Pakke 93; fra Pakke 112 over lageret). */
+function Ukespriser({ s }: { s: Spilltilstand }) {
+  const uke = ukeFor(dagnummer(s.sek))
+  return (
+    <p className="liten avlingspriser">
+      Priser denne uka:{' '}
+      {GRUPPELISTE.map((g, i) => {
+        const p = avlingspris(g, uke)
+        return (
+          <span key={g}>
+            {i > 0 && ' · '}
+            {GRUPPENAVN[g].toLowerCase()} <strong className={p >= 1.1 ? 'pluss' : p <= 0.9 ? 'minus' : undefined}>×{tall(p, 2)}</strong>
+          </span>
+        )
+      })}
+    </p>
+  )
+}
+
+/**
+ * Radene til gårdens sider (Pakke 112), under kortet på gårdens side: hver sier i én linje
+ * hva som er der, og åpner siden med tilbake. «Silo full» står på lagerets rad.
+ */
+export function Gardsnav({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j || JORD[id].type !== 'gard') return null
+  const maskiner = MASKINLISTE.filter((m) => j.maskiner?.[m]).length
+  const under: Record<Gardsside, string> = {
+    jorder: `${jorder(j)} av ${MAKS_JORDER} jorder · ${maskiner} av ${MASKINLISTE.length} maskiner`,
+    dyr: j.bygg?.fjos ? `${antallDyr(j)} av ${fjosplasser(j)} dyr · ${kortKroner(dyrPerUke(s, id))} i uka` : 'Bygg et fjøs først, under jorder og maskiner',
+    lager: j.bygg?.silo ? `${kortKroner(lagerverdi(s, id))} på lager` : 'Ukas priser og regnskapet',
+  }
+  const fullt = lagerFullt(s, id)
+  return (
+    <li className="kort klubbsider" aria-label="Gårdens sider">
+      {GARDSSIDER.map((d) => (
+        <button key={d.id} className="klubbside-rad" onClick={() => aapneGardsside(d.id)}>
+          <span className="klubbside-tekst">
+            <strong>{d.navn}</strong>
+            <span className="dempet liten">{under[d.id]}</span>
+          </span>
+          {d.id === 'lager' && fullt ? <span className="merke varsel">Silo full</span> : <span />}
+          <span className="gull" aria-hidden="true">
+            ›
+          </span>
+        </button>
+      ))}
+    </li>
+  )
+}
+
+/** «Dyr» (Pakke 112): fjøset, eller hva som trengs for å få et. */
+export function Fjoskort({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j) return null
+  return (
+    <li className="kort">
+      {j.bygg?.fjos ? (
+        <Fjos s={s} id={id} />
+      ) : (
+        <p className="dempet liten">Gården har ikke fjøs ennå. Bygg det under «Jorder og maskiner»; da får du plass til kyr, høner, sauer og griser.</p>
+      )}
+    </li>
+  )
+}
+
+/** «Lager og regnskap» (Pakke 112): ukas priser og lageret, eller hva en silo gir. */
+export function Lagerkort({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j) return null
+  return (
+    <li className="kort">
+      <h2 className="kort-tittel">Lageret</h2>
+      <Ukespriser s={s} />
+      {j.bygg?.silo ? (
+        <Kornlager s={s} id={id} />
+      ) : (
+        <p className="dempet liten">Uten silo selges ukas avling mandag til ukas pris. Med silo kan du lagre kornet og selge når prisen er god — bygg den under «Jorder og maskiner».</p>
+      )}
+    </li>
+  )
+}
+
+/**
+ * «Gårder og skog» øverst på Eiendom (Pakke 112): når høsten kommer og hva uka har gitt så
+ * langt, og én rad per jordstykke du eier — gården med ukas høst og «Silo full», skogen med
+ * tømmeret og «Klar for hogst». Hver rad åpner stykkets side.
+ */
+export function Landkort({ s }: { s: Spilltilstand }) {
+  const eide = JORDLISTE.filter((id) => s.jord[id])
+  if (eide.length === 0) return null
+  const garder = eide.filter((id) => JORD[id].type === 'gard')
+  const saLangt = garder.reduce((sum, id) => sum + hostSaLangt(s, id), 0)
+  const omtrent = garder.reduce((sum, id) => sum + ukensGardHost(s, id), 0)
+  return (
+    <nav className="kort klubbsider landkort" aria-label="Gårder og skog">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Gårder og skog</h2>
+        {garder.length > 0 && <span className="dempet liten">høstes mandag, om {varighet(tidTilHost(s))}</span>}
+      </div>
+      {garder.length > 0 && (
+        <p className="dempet liten">
+          Så langt denne uka {kortKroner(saLangt)} av omtrent {kortKroner(omtrent)}.
+        </p>
+      )}
+      {eide.map((id) => {
+        const gard = JORD[id].type === 'gard'
+        const igjen = gard ? 0 : dagerTilHogst(s, id)
+        const merke = gard ? (lagerFullt(s, id) ? 'Silo full' : null) : igjen <= 0 ? 'Klar for hogst' : null
+        return (
+          <button key={id} className="klubbside-rad" onClick={() => aapneTing({ slag: 'jord', id })}>
+            <span className="klubbside-tekst">
+              <strong>{JORD[id].navn}</strong>
+              <span className="dempet liten">
+                {gard
+                  ? `${kortKroner(hostSaLangt(s, id))} så langt denne uka`
+                  : `Tømmer ${kortKroner(tommerverdi(s, id))}${igjen > 0 ? ` · best å hogge om ${tall(Math.ceil(igjen))} ${Math.ceil(igjen) === 1 ? 'dag' : 'dager'}` : ''}`}
+              </span>
+            </span>
+            {merke ? <span className={`merke ${gard ? 'varsel' : 'gull'}`}>{merke}</span> : <span />}
+            <span className="gull" aria-hidden="true">
+              ›
+            </span>
+          </button>
+        )
+      })}
+    </nav>
   )
 }
 

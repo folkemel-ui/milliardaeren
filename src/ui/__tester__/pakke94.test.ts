@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { nyttSpill } from '../../engine/start'
 import { kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, type Utfall } from '../../engine/handlinger'
 import type { Spilltilstand } from '../../engine/types'
-import { Gardskart, Gardsregnskap } from '../komponenter/JordOgLandemerker'
+import { Fjoskort, Gardsregnskap } from '../komponenter/JordOgLandemerker'
 import { FORKLARINGER } from '../forklaringer'
 import { lastAlle } from '../vedBehov'
 
@@ -31,7 +31,8 @@ function medFjos(): Spilltilstand {
 describe('fjøset', () => {
   it('plassene, dyrene du har og et kjøp per slag', () => {
     const s = ok(kjopDyr(ok(kjopDyr(medFjos(), 'gard-lista', 'ku')), 'gard-lista', 'ku'))
-    const html = tegn(createElement(Gardskart, { s, id: 'gard-lista' }))
+    // Pakke 112: fjøset står på sin egen side, «Dyr».
+    const html = tegn(createElement(Fjoskort, { s, id: 'gard-lista' }))
     expect(html).toContain('2 av 4 plasser')
     expect(html).toContain('2 kyr')
     expect(html).toContain('klippes 1. mai og 1. september')
@@ -42,7 +43,7 @@ describe('fjøset', () => {
   it('et fullt fjøs sier at en større gård gir flere plasser', () => {
     let s = medFjos()
     for (let i = 0; i < 4; i++) s = ok(kjopDyr(s, 'gard-lista', 'hone'))
-    expect(tegn(createElement(Gardskart, { s, id: 'gard-lista' }))).toContain('Fjøset er fullt')
+    expect(tegn(createElement(Fjoskort, { s, id: 'gard-lista' }))).toContain('Fjøset er fullt')
   })
 })
 

@@ -7,7 +7,7 @@ import { nyttSpill } from '../../engine/start'
 import { kjopDyr, kjopGardsbygg, kjopJord, type Utfall } from '../../engine/handlinger'
 import { DAG_SEK } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
-import { Gardskart, Jordkort } from '../komponenter/JordOgLandemerker'
+import { Fjoskort, Jordkort } from '../komponenter/JordOgLandemerker'
 import { FORKLARINGER } from '../forklaringer'
 import { lastAlle } from '../vedBehov'
 
@@ -55,7 +55,8 @@ describe('fjøset', () => {
     let s = ok(kjopGardsbygg(ok(kjopJord(rik(), 'gard-lista')), 'gard-lista', 'fjos'))
     s = ok(kjopDyr(ok(kjopDyr(s, 'gard-lista', 'sau')), 'gard-lista', 'gris'))
     s.sek += 3 * DAG_SEK
-    const html = renderToStaticMarkup(createElement(Gardskart, { s, id: 'gard-lista' }))
+    // Pakke 112: fjøset står på sin egen side, «Dyr».
+    const html = renderToStaticMarkup(createElement(Fjoskort, { s, id: 'gard-lista' }))
     expect(html).toMatch(/Ull så langt kr [^·]+· klippes 1\. (mai|september)/)
     expect(html).toMatch(/Kjøtt så langt kr [^·]+· slakt \d+\. [a-zø]+/)
     // Fire dyreslag med plass igjen: fire linjer med hva det gir.
@@ -67,7 +68,7 @@ describe('fjøset', () => {
   it('uten sauer og griser står ingen ventelinje', () => {
     let s = ok(kjopGardsbygg(ok(kjopJord(rik(), 'gard-lista')), 'gard-lista', 'fjos'))
     s = ok(kjopDyr(s, 'gard-lista', 'ku'))
-    const html = renderToStaticMarkup(createElement(Gardskart, { s, id: 'gard-lista' }))
+    const html = renderToStaticMarkup(createElement(Fjoskort, { s, id: 'gard-lista' }))
     expect(html).not.toContain('så langt')
   })
 })

@@ -18,7 +18,7 @@ import { endring, kortKroner, perSek } from '../format'
 import { Minigraf } from '../komponenter/Linjegraf'
 import { Norgeskart } from '../komponenter/Norgeskart'
 import { Verdenskart } from '../komponenter/Verdenskart'
-import { Jordliste, Landemerkeliste } from '../komponenter/JordOgLandemerker'
+import { Jordliste, Landemerkeliste, Landkort } from '../komponenter/JordOgLandemerker'
 import { Seksjon } from '../komponenter/Seksjon'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
 import { Gatebilde } from '../komponenter/Gatebilde'
@@ -137,6 +137,9 @@ export function Eiendom({ s }: { s: Spilltilstand }) {
       </div>
 
       {gate && <Gatebilde s={s} by={gate} lukk={lukkGate} />}
+
+      {/* Pakke 112: gårdene og skogene øverst, med ukas høst og det som venter. */}
+      {kart === 'norge' && !by && <Landkort s={s} />}
 
       {by ? (
         <Byvisning s={s} by={by} lukk={() => settBy(null)} gatebilde={() => settGate(by)} />

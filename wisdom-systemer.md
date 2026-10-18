@@ -178,6 +178,16 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   day 18 (the peak of f′), but a whole rotation gives most per day where f(d)/d peaks: day 36, and
   28–46 is within 2 %. A test comparing growth on two days must stand well apart from the peak: land
   rises 0.3 % a day, more than f′ changes between day 15 and 21.
+- **«Silo full» is said once per overflow** (Pack 112): `jordVedDagsskifte` collects what was sold because a
+  store had no room (more than 0.1 % of a group's harvest), writes one log line when `j.lagerFullt` isn't set,
+  sets it, and deletes it on a Monday with no overflow — so the next filling is announced again. `jord.ts`
+  pushes to `s.hendelser` itself with `MAKS_HENDELSER` from `innhold.ts`, as `racing.ts` does (bank.ts can't be
+  imported there). A new log title needs a line in `HENDELSE_FANE` in `App.tsx`, or its notice opens the log
+  instead of the tab. Building anything on a farm (`bokforOpptjent`) moves the week's start to now, so a
+  test that builds and then expects Monday's harvest must set `plantetSek` back a week.
+- **«So far this week» and the countdown** (Pack 112): `hostSaLangt` is `gardHost` from the week's start to
+  `s.sek` plus `opptjent`; `tidTilHost` is the seconds to the next multiple of seven days, the week `ukensGardHost`
+  already uses. A game week is 35 real minutes, so `varighet` reads «om 24 min».
 - **A harvest test computed before Monday is ~2 % short** (Pack 105): `gardHostDeler` uses the land
   value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
   the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.

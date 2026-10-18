@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { nyttSpill } from '../../engine/start'
 import { kjopGardsbygg, kjopJord, kjopJorde, settLagring, type Utfall } from '../../engine/handlinger'
 import type { Spilltilstand } from '../../engine/types'
-import { Gardskart } from '../komponenter/JordOgLandemerker'
+import { Gardskart, Lagerkort } from '../komponenter/JordOgLandemerker'
 import { gardTekst } from '../inntjening'
 import { UKE_SEK } from '../../engine/jord'
 import { lastAlle } from '../vedBehov'
@@ -29,7 +29,8 @@ function medGard(): Spilltilstand {
   return ok(kjopJord(s, ID))
 }
 
-const tegn = (s: Spilltilstand) => renderToStaticMarkup(createElement(Gardskart, { s, id: ID }))
+// Pakke 112: kartet og lageret står på hver sin side; testene leser begge.
+const tegn = (s: Spilltilstand) => renderToStaticMarkup(createElement(Gardskart, { s, id: ID })) + renderToStaticMarkup(createElement(Lagerkort, { s, id: ID }))
 
 describe('hva et kjøp gir', () => {
   it('«≈ kr X i uka · tilbake på T»', () => {

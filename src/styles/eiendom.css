@@ -404,3 +404,14 @@
   border-radius: 3px;
   background: color-mix(in srgb, var(--pluss) 25%, transparent);
 }
+
+/* ── Gårder og skog øverst på Eiendom (Pakke 112) ────────────────────────── */
+
+/* Radene som klubbens sider, med en strek over den første også: overskriften står over. */
+.landkort .maal-topp {
+  padding-top: 8px;
+}
+
+.landkort .klubbside-rad {
+  border-top: 1px solid var(--kant);
+}

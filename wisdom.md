@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 111, 18 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 112, 18 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -115,7 +115,10 @@ lives in one place only.
   done, rewrite that paragraph for the following pack in the same commit, and end the
   report to Folke with the same description. Since G12 there is one such paragraph per
   track («Next up» for the game track, «Next up on the graphics track» below it); each
-  track rewrites only its own.
+  track rewrites only its own. **On 18 October Folke asked again** («Can you tell me what the next pack
+  contains when suggesting the next pack?») after a push ended with only «Start Pack 112?»: every message or
+  next-step box that offers the next pack must itself say what it contains — the items with real numbers
+  and the start questions — even when an earlier report already did. Folke: «Nice! Always do this.»
 - **"What does the next pack contain?"** — answer from `Ideer.md` in a few lines, with the
   real numbers behind each item, and name the design choices you'll ask about when the
   pack starts. Don't start building.
@@ -145,7 +148,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–111.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–112.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 

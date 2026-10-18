@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { EIENDOMSTYPER, eiendomspris, KATEGORINAVN, LAGER, LAGER_FOR, leieHverPerSek, LUKSUS, restverdi } from '../../engine/eiendom'
 import { JORD, landverdi, tommerverdi, vaer } from '../../engine/jord'
 import { KUNSTNERE, kunstnertrend, MALERIER, maleripris, nesteTrendbytte } from '../../engine/kunst'
@@ -11,7 +11,9 @@ import { Hjemkort } from '../komponenter/Hjemmene'
 import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall, varighet } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
-import { Gardskart, Gardsregnskap, Jordkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
+import { Fjoskort, Gardskart, Gardsnav, Gardsregnskap, Jordkort, Lagerkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
+import { aapneGardsside, GARDSSIDER, useGardsside, type Gardsside } from '../gardssider'
+import { useTilbake } from '../tilbake'
 import { Malerikort } from '../komponenter/Kunst'
 import { nattstil } from '../dagognatt'
 import { useVoksUt } from '../overgang'
@@ -25,6 +27,13 @@ import { CHARTERBAR, kanLeiesUt } from '../../engine/charter'
  */
 export function Tingdetalj({ s, ting, tilbake, fane }: { s: Spilltilstand; ting: Ting; tilbake: () => void; fane: string }) {
   const voks = useVoksUt<HTMLElement>()
+  // Pakke 112: en gård har tre sider; en side er et steg tilbake, og den lukkes med gården.
+  const side = useGardsside()
+  const gard = ting.slag === 'jord' && JORD[ting.id as JordId].type === 'gard' && !!s.jord[ting.id as JordId]
+  const sideAapen = side !== null && gard
+  useEffect(() => () => aapneGardsside(null), [ting.id])
+  useTilbake(sideAapen, () => aapneGardsside(null))
+  if (sideAapen) return <Gardsdetalj s={s} id={ting.id as JordId} side={side} />
   const [kort, fakta] = innhold(s, ting)
   return (
     <section className="skjerm detalj tingdetalj" ref={voks} style={nattstil(s.sek)}>
@@ -42,6 +51,32 @@ export function Tingdetalj({ s, ting, tilbake, fane }: { s: Spilltilstand; ting:
           ))}
         </dl>
       )}
+    </section>
+  )
+}
+
+/**
+ * En av gårdens sider (Pakke 112), med tilbake til gården øverst. Siden står i stedet for
+ * gårdens side, som klubbens sider gjør i Luksus.
+ */
+function Gardsdetalj({ s, id, side }: { s: Spilltilstand; id: JordId; side: Gardsside }) {
+  const voks = useVoksUt<HTMLElement>()
+  return (
+    <section className={`skjerm detalj tingdetalj gardsdetalj side-${side}`} ref={voks} style={nattstil(s.sek)}>
+      <button className="tilbake" onClick={() => aapneGardsside(null)}>
+        ‹ {JORD[id].navn}
+      </button>
+      <h1 className="skjerm-tittel">{GARDSSIDER.find((d) => d.id === side)!.navn}</h1>
+      <ul className="kortliste">
+        {side === 'jorder' && <Gardskart s={s} id={id} />}
+        {side === 'dyr' && <Fjoskort s={s} id={id} />}
+        {side === 'lager' && (
+          <>
+            <Lagerkort s={s} id={id} />
+            <Gardsregnskap s={s} id={id} />
+          </>
+        )}
+      </ul>
     </section>
   )
 }
@@ -82,12 +117,11 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
       ]
       if (t.type === 'skog') fakta.push(['Tømmeret', kortKroner(tommerverdi(s, id as JordId))])
       else fakta.push(['Ukas vær', vaer(dagnummer(s.sek)).navn])
-      // Pakke 92: gårdens kart med jordene og maskinene står under kortet.
+      // Pakke 112: kortet, og radene som åpner gårdens tre sider — kartet, fjøset og lageret står der.
       return [
         <>
           <Jordkort s={s} id={id as JordId} iDetalj />
-          <Gardskart s={s} id={id as JordId} />
-          <Gardsregnskap s={s} id={id as JordId} />
+          <Gardsnav s={s} id={id as JordId} />
         </>,
         fakta,
       ]

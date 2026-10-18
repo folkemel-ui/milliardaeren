@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { nyttSpill } from '../../engine/start'
 import { kjopGardsbygg, kjopJord, kjopJorde, type Utfall } from '../../engine/handlinger'
 import type { Spilltilstand } from '../../engine/types'
-import { Gardskart } from '../komponenter/JordOgLandemerker'
+import { Gardskart, Lagerkort } from '../komponenter/JordOgLandemerker'
 import { FORKLARINGER } from '../forklaringer'
 import { lastAlle } from '../vedBehov'
 
@@ -30,7 +30,8 @@ function medGard(): Spilltilstand {
 
 describe('gårdens side', () => {
   it('ukas priser for korn, grønnsaker og frukt og bær', () => {
-    const html = tegn(createElement(Gardskart, { s: medGard(), id: 'gard-lista' }))
+    // Pakke 112: prisene står over lageret, på «Lager og regnskap».
+    const html = tegn(createElement(Lagerkort, { s: medGard(), id: 'gard-lista' }))
     expect(html).toContain('Priser denne uka')
     expect(html).toMatch(/korn <strong[^>]*>×\d,\d\d/)
     expect(html).toContain('grønnsaker')
@@ -48,7 +49,8 @@ describe('gårdens side', () => {
     let s = medGard()
     s = ok(kjopJorde(ok(kjopJorde(s, 'gard-lista')), 'gard-lista'))
     s = ok(kjopGardsbygg(ok(kjopGardsbygg(s, 'gard-lista', 'drivhus')), 'gard-lista', 'silo'))
-    const html = tegn(createElement(Gardskart, { s, id: 'gard-lista' }))
+    // Pakke 112: kartet og lageret står på hver sin side.
+    const html = tegn(createElement(Gardskart, { s, id: 'gard-lista' })) + tegn(createElement(Lagerkort, { s, id: 'gard-lista' }))
     expect(html).toContain('jordrute dyrket drivhus')
     expect(html).toContain('Tomater')
     // Pakke 105: lageret heter etter byggene, og har tre valg.

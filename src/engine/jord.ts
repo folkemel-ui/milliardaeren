@@ -15,7 +15,8 @@ import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
 import { hashTekst, tilfeldig } from './rng'
 import { byfaktor } from './regioner'
 import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, Lagring, NorskBy, Overskrift, Spilltilstand } from './types'
-import { kortKroner } from './tall'
+import { kortKroner, tall } from './tall'
+import { MAKS_HENDELSER } from './innhold'
 
 export interface Jordtype {
   id: JordId
@@ -606,6 +607,29 @@ export function gardHostDeler(s: Spilltilstand, id: JordId, dag: number, til: nu
   return { korn, annet, gronnsaker, frukt }
 }
 
+/** Sekundene til mandagens høst: til neste mandag morgen (Pakke 112). */
+export function tidTilHost(s: Pick<Spilltilstand, 'sek'>): number {
+  return (Math.floor(dagnummer(s.sek) / 7) + 1) * UKE_SEK - s.sek
+}
+
+/** Det en gård har tjent så langt denne uka, til mandagens høst (Pakke 112) — det som stiger mens du ser på. */
+export function hostSaLangt(s: Spilltilstand, id: JordId): number {
+  return gardHost(s, id, dagnummer(s.sek), s.sek) + (s.jord?.[id]?.opptjent ?? 0)
+}
+
+/**
+ * Om et lager som tar ukas avling, er fullt (Pakke 112): silo eller låve med plass, ikke satt
+ * til «Selg», og en gruppe som ikke får plass til mer. Da selges resten mandag til ukas pris.
+ */
+export function lagerFullt(s: Spilltilstand, id: JordId): boolean {
+  const j = s.jord?.[id]
+  if (!j || lagringsvalg(j) === 'selg') return false
+  return GRUPPELISTE.some((g) => {
+    const kap = lagerkapasitet(s, id, g)
+    return kap > 0 && lagerAv(j, g) >= kap * (1 - 1e-9)
+  })
+}
+
 /** Avlingen en gård du eier, gir mandag for uka som går nå — for dagene du eier den. */
 export function ukensGardHost(s: Spilltilstand, id: JordId): number {
   const dag = dagnummer(s.sek)
@@ -640,6 +664,8 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
     if (j.lagerAnnet) for (const g of ['gronnsaker', 'frukt'] as const) if (j.lagerAnnet[g]) j.lagerAnnet[g]! *= 1 - KORNSVINN
     const valg = lagringsvalg(j)
     let solgt = 0
+    // Pakke 112: det som ble solgt fordi lageret var fullt, per gruppe.
+    const over: { g: Avlingsgruppe; belop: number; pris: number }[] = []
     for (const g of GRUPPELISTE) {
       const mengde = avling[g]
       const pris = avlingspris(g, uke)
@@ -661,7 +687,13 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
       if (inn > 0) settLager(j, g, lagerAv(j, g) + inn)
       selges += mengde - inn * pris
       lagret += inn * pris
+      // Mer enn en promille som ikke fikk plass: lageret er fullt.
+      if (mengde > 0 && mengde - inn * pris > mengde * 0.001) over.push({ g, belop: mengde - inn * pris, pris })
     }
+    // Pakke 112: sies fra én gang når lageret renner over, og igjen først etter at det har hatt plass.
+    if (over.length && !j.lagerFullt) siloFull(s, id, over)
+    if (over.length) j.lagerFullt = true
+    else delete j.lagerFullt
     host += selges
     bokforGard(j, uke, 'host', selges)
     if (solgt > 0) {
@@ -680,6 +712,25 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const silo = lagret > 0 ? ` Avling for ${kortKroner(lagret)} gikk på lager.` : ''
   const salg = fraLager > 0 ? ` Prisen var god, og lageret ble solgt for ${kortKroner(fraLager)}.` : ''
   return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}${fra}.${silo}${salg}` }]
+}
+
+/**
+ * En linje i hendelsesloggen når et lager renner over (Pakke 112) — som varsel også. Kortere enn
+ * `leggTilHendelse` i bank.ts, som ikke kan importeres hit; samme tak på loggen.
+ */
+function siloFull(s: Spilltilstand, id: JordId, over: { g: Avlingsgruppe; belop: number; pris: number }[]): void {
+  const j = s.jord[id]!
+  const lager = j.bygg?.laave ? 'Silo og låve' : 'Siloen'
+  const hva = over.map((x) => GRUPPENAVN[x.g].toLowerCase())
+  const sum = over.reduce((a, x) => a + x.belop, 0)
+  const pris = over.length === 1 ? ` (×${tall(over[0].pris, 2)})` : ''
+  s.hendelser.push({
+    sek: s.sek,
+    tittel: 'Silo full',
+    tekst: `${lager} på ${JORD[id].by} er ${j.bygg?.laave ? 'fulle' : 'full'}: ${hva.length > 1 ? `${hva.slice(0, -1).join(', ')} og ${hva[hva.length - 1]}` : hva[0]} for ${kortKroner(sum)} ble solgt til ukas pris${pris}.`,
+    alvor: 'advarsel',
+  })
+  if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
 }
 
 /** Setter lageret av en gruppe. Muterer. */

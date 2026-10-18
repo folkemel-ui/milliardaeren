@@ -201,6 +201,14 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   `// @vitest-environment happy-dom` at the top of such a file. Amounts contain hard
   spaces («kr 1 200»): match them with `\s`, not a plain space. Investments and Profile
   have no `h1`.
+- **Sub-pages on a detail page (Pack 112, the farm)** follow the club: a tiny store (`ui/gardssider.ts`, like
+  `klubbsider.ts`), `useTilbake(open, close)` and the store hook in `Tingdetalj` before its early return, and an
+  effect keyed on `ting.id` that closes the sub-page when the farm closes. Old tests that rendered a component
+  for something that moved to a sub-page (`Gardskart` for the prices, the silo, the cowshed) keep their point
+  with the new component as the fixture — six tests in four files.
+- **«Spillet er åpent et annet sted» after a reload with an injected save**: the old tab's lock is still there.
+  A `.click()` from `javascript_tool` on «Spill her i stedet» did nothing; `find` plus a `computer` click on its
+  ref worked. A save made for a test also shows «Nytt i X» after a release — close it with «Spill videre».
 - **A hook called before an early return still subscribes.** The measuring panel called
   `useMaalinger()` and then `return null` when hidden, so it listened all the same, and once the
   store notified every second, every Innstillinger click test got a redraw outside `act` — the

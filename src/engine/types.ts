@@ -834,6 +834,11 @@ export interface Jordstykke {
   lagring?: Lagring
   /** Grønnsaker og frukt i låven (Pakke 105), målt i kroner til pris 1 som kornet. */
   lagerAnnet?: Partial<Record<'gronnsaker' | 'frukt', number>>
+  /**
+   * Pakke 112: lageret rant over sist mandag, og det er sagt fra. Settes når avling selges fordi
+   * lageret er fullt, og fjernes en mandag det ikke skjer — så neste gang det fylles, sies det igjen.
+   */
+  lagerFullt?: boolean
   /** Dyrene i fjøset (Pakke 94), antall per slag. */
   dyr?: Partial<Record<Gardsdyr, number>>
   /** Fra når dyrenes utbytte i dag regnes med antallet nå (kjøpet av det siste dyret). */
