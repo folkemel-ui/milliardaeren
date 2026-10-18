@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 114, 18 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 115, 18 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -147,7 +147,8 @@ lives in one place only.
 - **Pack 97: a multi-select with every option marked «Recommended» got one pick** (only the Bedrifter
   screenshot of four screens), and a question left with no answer (the native shell) went with the
   recommended option, said in one line before building. In a multi-select, mark only what you would
-  really pick, and expect a subset.
+  really pick, and expect a subset. Pack 115: four groups of achievements, one marked — Folke took exactly
+  that one; the other groups went to *Parked* as a «Not picked from …» list.
 - **When both options in a list item measure badly, offer the combination** (Pack 105, the barn). The item
   said «store the vegetables, *or* cost ~5 %»; measured on a full farm they paid back in ~40 h either way.
   A third option doing both at a middle price (stores all crops, 15 %) came out at ~14 h — like the
@@ -155,7 +156,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–114.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–115.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 

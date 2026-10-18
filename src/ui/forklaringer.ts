@@ -13,7 +13,7 @@ import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
-import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_ANNET_UKER, LAAVE_UKER, MAKS_JORDER, MAKS_MASKINTRINN, MAKS_NABOER, MASKINER, MASKINTRINN_PRIS, NABO_FAKTOR, NABO_STATUS, NABOPRIS, ODEL_DAGER, ODEL_STATUS, PRIS_MIN, PRIS_SPENN, SELG_DYRT, SILO_UKER, SPROYTE_DEMPING, START_JORDER, HOGST_BEST_DAG } from '../engine/jord'
+import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_ANNET_UKER, LAAVE_UKER, MAKS_JORDER, MAKS_MASKINTRINN, MAKS_NABOER, MASKINER, MASKINTRINN_PRIS, NABO_FAKTOR, NABO_STATUS, NABOPRIS, KRAFT_TILBAKE_TIMER, ODEL_DAGER, ODEL_STATUS, PRIS_MIN, PRIS_SPENN, SELG_DYRT, SILO_UKER, SPROYTE_DEMPING, START_JORDER, HOGST_BEST_DAG } from '../engine/jord'
 import { DYR, FJOSPLASSER, SLAKT_DAGER, TILSKUDD_DYR, TILSKUDD_JORD } from '../engine/dyr'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
@@ -161,6 +161,7 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `En traktor gir +${pst(MASKINER.traktor.host - 1)} avling, en skurtresker +${pst(MASKINER.tresker.host - 1)}, og en sprøyte +${pst(MASKINER.sproyte.host - 1)}, og med den faller en dårlig uke ${pst(MASKINER.sproyte.vaer)} mindre. Hver maskin har ${MAKS_MASKINTRINN} trinn: hvert gir det samme igjen og koster ${tall(MASKINTRINN_PRIS, 1)} ganger forrige, og sprøyta demper en dårlig uke opptil ${pst(SPROYTE_DEMPING[MAKS_MASKINTRINN])}. ` +
       `Et gods kan kjøpe opptil ${MAKS_NABOER} nabogårder: hver ${NABO_FAKTOR}-dobler jorda avlingen, jordene og maskinene regnes på, gir +${NABO_STATUS} status og koster ${NABOPRIS} ganger jordverdien — den neste ${NABO_FAKTOR} ganger så mye. ` +
       `En gård som har vært din i ${ODEL_DAGER} spilldager, blir odelsgård: +${ODEL_STATUS} status. ` +
+      `Kraft fra jorda: vindturbiner på Lista og et småkraftverk i Namdalen går mest i regn og snø, så de jevner ut en dårlig uke på gården; solcellepanel på låvetaket går mest i sol, som avlingen. Hvert verk tjener seg inn på rundt ${KRAFT_TILBAKE_TIMER} timer, betales hvert sekund som leia og teller i jordas verdi. ` +
       'Maskinene og byggene koster en andel av jordverdien ganger jordene delt på tre, så de tjener seg inn like fort på en liten gård som på et gods; drivhuset følger bare jorda. ' +
       `Med ${GARDSTRINN[1].fra} jorder blir småbruket en gård, med ${GARDSTRINN[2].fra} en storgård og med ${GARDSTRINN[3].fra} et gods: +${GARDSTRINN[1].status}, +${GARDSTRINN[2].status} og +${GARDSTRINN[3].status} status. ` +
       'Jordene, maskinene og byggene teller i gårdens verdi til det de kostet, og følger med når du selger. ' +

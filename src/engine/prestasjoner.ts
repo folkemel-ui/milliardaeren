@@ -15,6 +15,8 @@ import { ROM, ROMLISTE } from './hjemmene'
 import { STIGEN } from './innhold'
 import { LUKSUSLISTE } from './eiendom'
 import { DAG_SEK } from './kalender'
+import { JORD, JORDLISTE, jorder, MAKS_JORDER, MAKS_NABOER } from './jord'
+import { antallDyr } from './dyr'
 
 /** Statusnivået som heter Udødelig: prestasjonen står der den sto da det var det høyeste (Pakke 81). */
 const UDODELIG = STATUSNIVAAER.findIndex((n) => n.navn === 'Udødelig')
@@ -129,6 +131,11 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'verdensborger', navn: 'Verdensborger', beskrivelse: 'Eie eiendom i alle byene utenlands', klart: (_, f) => f.byerUtenlands().size >= UTENLANDSBYER.length },
   { id: 'jordeier', navn: 'Godseier', beskrivelse: 'Kjøp en gård eller en skog', klart: (s) => Object.keys(s.jord ?? {}).length > 0 },
   { id: 'tommerhogger', navn: 'Tømmerhogger', beskrivelse: 'Hogg en skog', klart: (s) => s.hendelser.some((h) => h.tittel === 'Hogst') },
+  // Pakke 115: gården bygd ut.
+  { id: 'gods', navn: 'Gods', beskrivelse: 'Dyrk alle ti jordene på en gård', klart: (s) => !!s.jord && JORDLISTE.some((id) => jorder(s.jord[id]) >= MAKS_JORDER && JORD[id].type === 'gard' && !!s.jord[id]) },
+  { id: 'fullt-fjos', navn: 'Fullt fjøs', beskrivelse: 'Fyll et fjøs med 20 dyr', klart: (s) => !!s.jord && JORDLISTE.some((id) => antallDyr(s.jord[id]) >= 20) },
+  { id: 'tre-nabogarder', navn: 'Storbonde', beskrivelse: 'Kjøp tre nabogårder til samme gård', klart: (s) => !!s.jord && JORDLISTE.some((id) => (s.jord[id]?.naboer ?? 0) >= MAKS_NABOER) },
+  { id: 'odelsgard', navn: 'Odelsbonde', beskrivelse: 'Eie en odelsgård', klart: (s) => !!s.jord && JORDLISTE.some((id) => !!s.jord[id]?.odel) },
   { id: 'landemerke', navn: 'Landemerke', beskrivelse: 'Eie et landemerke', klart: (s) => antallLandemerker(s) > 0 },
   { id: 'alle-landemerker', navn: 'Nasjonalskatt', beskrivelse: 'Eie alle landemerkene samtidig', klart: (s) => antallLandemerker(s) === LANDEMERKELISTE.length },
   { id: 'kunstsamler', navn: 'Kunstsamler', beskrivelse: 'Eie tre malerier', klart: (s) => antallMalerier(s) >= 3 },

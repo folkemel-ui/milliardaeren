@@ -23,6 +23,7 @@ import { dagsbilde, konjunkturdrift } from './verden'
 import { nyhetsfaktor, trenddrift } from './bransjer'
 import { kupongPerSek } from './obligasjoner'
 import { betalCharter } from './charter'
+import { betalKraft } from './jord'
 import type { PapirId, Spilltilstand } from './types'
 
 /**
@@ -173,6 +174,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
     s.totaltLeie += leie
     // Yachtene og jetene som er leid ut (Pakke 89), betales som leia.
     betalCharter(s, leieSek)
+    // Kraften fra jorda (Pakke 115) likeså.
+    betalKraft(s, leieSek)
   }
   if (m) t = runde(m, 'leie', t)
   dekkUnderskudd(s)

@@ -14,7 +14,7 @@ import { DAG_SEK, dagnummer, ukedag } from './kalender'
 import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
 import { hashTekst, tilfeldig } from './rng'
 import { byfaktor } from './regioner'
-import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, Lagring, NorskBy, Overskrift, Spilltilstand } from './types'
+import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, Kraftverk, Lagring, NorskBy, Overskrift, Spilltilstand } from './types'
 import { kortKroner, tall } from './tall'
 import { MAKS_HENDELSER } from './innhold'
 
@@ -413,6 +413,102 @@ export function ukeAvAtte(dag: number): 'beste' | 'verste' | null {
   if (tidligere.length === 0 || f > Math.max(...tidligere)) return 'beste'
   if (f < Math.min(...tidligere)) return 'verste'
   return null
+}
+
+// ─────────────────────────────────────────────── Kraft fra jorda (Pakke 115)
+
+/**
+ * Kraftverkene: hvor de står, hva de koster (en andel av det maskinene prises etter) og hvordan
+ * været virker. Vind og vann går mest når det regner — motsatt av avlingen — og sola som avlingen.
+ */
+export const KRAFTVERK: Record<Kraftverk, { navn: string; tekst: string; andel: number; virkning: Record<Vaertype, number> }> = {
+  vind: { navn: 'Vindturbiner', tekst: 'Går mest i regn og snø — jevner ut en dårlig uke på gården.', andel: 1, virkning: { regn: 1.6, overskyet: 1.1, sno: 1.2, sol: 0.6 } },
+  sol: { navn: 'Solcellepanel', tekst: 'På låvetaket: mest i sol, som avlingen — de jevner ikke ut.', andel: 0.4, virkning: { sol: 1.8, overskyet: 0.7, regn: 0.4, sno: 0.3 } },
+  vann: { navn: 'Småkraftverk', tekst: 'I elva: mest når det regner, minst når den fryser.', andel: 1, virkning: { regn: 1.5, overskyet: 1, sno: 0.7, sol: 0.7 } },
+}
+export const KRAFTLISTE = Object.keys(KRAFTVERK) as Kraftverk[]
+/** Et kraftverk tjener seg inn på så mange timer i snitt, som skurtreskeren. */
+export const KRAFT_TILBAKE_TIMER = 10
+
+/** Kraftverkene som kan stå på et jordstykke: vind på Lista, sol på gårdene, vann i Namdalen. */
+export function kraftverkFor(id: JordId): Kraftverk[] {
+  if (id === 'skog-namdalen') return ['vann']
+  if (JORD[id].type !== 'gard') return []
+  return id === 'gard-lista' ? ['vind', 'sol'] : ['sol']
+}
+
+/** Hvorfor et kraftverk ikke kan bygges ennå, eller null. Panelene trenger et låvetak. */
+export function kraftSperre(j: Jordstykke | undefined, verk: Kraftverk): string | null {
+  return verk === 'sol' && !j?.bygg?.laave ? 'Krever låve' : null
+}
+
+export function kraftpris(s: Spilltilstand, id: JordId, verk: Kraftverk): number {
+  return KRAFTVERK[verk].andel * utbyggingsgrunnlag(s, id)
+}
+
+const HUSKET_KRAFT = new Map<string, number>()
+
+/** Ukas vær for et kraftverk, forsterket som avlingens (×3, 0,3–1,8), før snittet tas ut. */
+function raKraft(verk: Kraftverk, uke: number): number {
+  const nokkel = `${verk}:${uke}`
+  const husket = HUSKET_KRAFT.get(nokkel)
+  if (husket !== undefined) return husket
+  let sum = 0
+  for (let d = uke * 7; d < uke * 7 + 7; d++) sum += jevnetVaer(KRAFTVERK[verk].virkning, 'norge', d)
+  const f = Math.min(1.8, Math.max(0.3, 1 + FORSTERKNING * (sum / 7 - 1)))
+  if (HUSKET_KRAFT.size > 600) HUSKET_KRAFT.clear()
+  HUSKET_KRAFT.set(nokkel, f)
+  return f
+}
+
+/** Snittet over to år av spillets vær, så hvert verk i snitt gir ×1 og tjener seg inn på 10 t. */
+function kraftsnitt(verk: Kraftverk): number {
+  const nokkel = `snitt:${verk}`
+  const husket = HUSKET_SNITT.get(nokkel)
+  if (husket !== undefined) return husket
+  let sum = 0
+  for (let u = 0; u < SNITT_UKER; u++) sum += raKraft(verk, u)
+  HUSKET_SNITT.set(nokkel, sum / SNITT_UKER)
+  return sum / SNITT_UKER
+}
+
+/** Ukas kraftfaktor for et verk (i snitt ×1): vind ×1,4 i en elendig uke, ×0,6 i en rekorduke. */
+export function kraftfaktor(verk: Kraftverk, dag: number): number {
+  return raKraft(verk, ukeFor(dag)) / kraftsnitt(verk)
+}
+
+/** Det et kraftverk gir per sekund nå: prisen i dag over 10 timer, ganget med ukas vær. */
+export function kraftverkPerSek(s: Spilltilstand, id: JordId, verk: Kraftverk, dag = dagnummer(s.sek)): number {
+  return (kraftpris(s, id, verk) / (KRAFT_TILBAKE_TIMER * 3600)) * kraftfaktor(verk, dag)
+}
+
+/** Det et kraftverk gir i en vanlig uke, til tilbakebetalingslinja på knappen. */
+export const kraftverkUke = (s: Spilltilstand, id: JordId, verk: Kraftverk) => (kraftpris(s, id, verk) / (KRAFT_TILBAKE_TIMER * 3600)) * UKE_SEK
+
+/**
+ * Kraften fra alle verkene, betalt som leia — hvert sekund, også mens du er borte (`sekunder`
+ * samlet). Føres på hvert verk. Muterer.
+ */
+export function betalKraft(s: Spilltilstand, sekunder: number): number {
+  if (!s.jord) return 0
+  const dag = dagnummer(s.sek)
+  let sum = 0
+  for (const id of JORDLISTE) {
+    const verk = s.jord[id]?.kraftverk
+    if (!verk) continue
+    for (const v of KRAFTLISTE) {
+      if (verk[v] === undefined) continue
+      const x = kraftverkPerSek(s, id, v, dag) * sekunder
+      verk[v]! += x
+      sum += x
+    }
+  }
+  if (sum > 0) {
+    s.kontanter += sum
+    s.totaltHost += sum
+    s.totaltLeie += sum
+  }
+  return sum
 }
 
 /** Traktoren og skurtreskeren ganget sammen. */

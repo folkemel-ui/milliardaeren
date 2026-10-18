@@ -829,6 +829,8 @@ export interface Jordstykke {
   eidFra?: number
   /** Gården er en odelsgård (Pakke 114): eid i 90 spilldager. */
   odel?: boolean
+  /** Kraftverkene på jorda (Pakke 115) og hva hvert har tjent så langt. Et verk står her fra det er bygd. */
+  kraftverk?: Partial<Record<Kraftverk, number>>
   /** Det jordene og maskinene kostet: teller i gårdens verdi. */
   investert?: number
   /** Avlingen så langt denne uka før du sist bygde ut — betales mandag med resten. */
@@ -896,6 +898,8 @@ export interface Gardsuke extends Gardstall {
 
 export type Gardsmaskin = 'traktor' | 'tresker' | 'sproyte'
 export type Gardsbygg = 'drenering' | 'frostdekke' | 'drivhus' | 'silo' | 'laave' | 'fjos'
+/** Kraftverkene på jorda (Pakke 115): vindturbiner på Lista, solcellepanel på låvetaket, småkraft i Namdalen. */
+export type Kraftverk = 'vind' | 'sol' | 'vann'
 
 export type LandemerkeId = 'fyret' | 'hoppbakken' | 'borgen' | 'tarnet'
 

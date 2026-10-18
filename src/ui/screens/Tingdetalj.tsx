@@ -11,7 +11,7 @@ import { Hjemkort } from '../komponenter/Hjemmene'
 import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall, varighet } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
-import { Fjoskort, Gardskart, Gardsnav, Gardsregnskap, Jordkort, Lagerkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
+import { Fjoskort, Gardskart, Gardsnav, Gardsregnskap, Jordkort, Kraftkort, Lagerkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
 import { aapneGardsside, GARDSSIDER, useGardsside, type Gardsside } from '../gardssider'
 import { useTilbake } from '../tilbake'
 import { Malerikort } from '../komponenter/Kunst'
@@ -68,7 +68,12 @@ function Gardsdetalj({ s, id, side }: { s: Spilltilstand; id: JordId; side: Gard
       </button>
       <h1 className="skjerm-tittel">{GARDSSIDER.find((d) => d.id === side)!.navn}</h1>
       <ul className="kortliste">
-        {side === 'jorder' && <Gardskart s={s} id={id} />}
+        {side === 'jorder' && (
+          <>
+            <Gardskart s={s} id={id} />
+            <Kraftkort s={s} id={id} />
+          </>
+        )}
         {side === 'dyr' && <Fjoskort s={s} id={id} />}
         {side === 'lager' && (
           <>
@@ -128,6 +133,8 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
         <>
           <Jordkort s={s} id={id as JordId} iDetalj />
           <Gardsnav s={s} id={id as JordId} />
+          {/* Pakke 115: skogen har ingen sider, så kraftverket står her. */}
+          {t.type === 'skog' && <Kraftkort s={s} id={id as JordId} />}
         </>,
         fakta,
       ]

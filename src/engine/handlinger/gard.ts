@@ -16,6 +16,10 @@ import {
   gardstrinn,
   JORD,
   jorder,
+  KRAFTVERK,
+  kraftpris,
+  kraftSperre,
+  kraftverkFor,
   lagerverdi,
   MAKS_JORDER,
   MAKS_MASKINTRINN,
@@ -32,7 +36,7 @@ import {
 } from '../jord'
 import { leggTilHendelse } from '../bank'
 import { flyt } from '../portefolje'
-import type { Gardsbygg, Gardsdyr, Gardsmaskin, JordId, Lagring, Spilltilstand } from '../types'
+import type { Gardsbygg, Gardsdyr, Gardsmaskin, JordId, Kraftverk, Lagring, Spilltilstand } from '../types'
 import { feil, type Utfall } from './felles'
 
 /**
@@ -82,6 +86,30 @@ export function kjopMaskin(s: Spilltilstand, id: JordId, m: Gardsmaskin): Utfall
   j.maskiner = { ...(j.maskiner ?? {}), [m]: true }
   flyt(n, 'eiendom', pris)
   bokforGard(j, ukeFor(dagnummer(n.sek)), 'bygd', pris)
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Bygger et kraftverk (Pakke 115): vindturbiner på Lista, solcellepanel på en gård med låve,
+ * småkraft i Namdalen. Prisen teller i jordas verdi; kraften betales hvert sekund, som leia.
+ */
+export function byggKraftverk(s: Spilltilstand, id: JordId, verk: Kraftverk): Utfall {
+  const j = s.jord[id]
+  if (!j) return feil('Du eier ikke jorda.')
+  if (!KRAFTVERK[verk] || !kraftverkFor(id).includes(verk)) return feil(`${KRAFTVERK[verk]?.navn ?? 'Det'} kan ikke stå her.`)
+  if (j.kraftverk?.[verk] !== undefined) return feil(`${KRAFTVERK[verk].navn} står alt her.`)
+  const sperre = kraftSperre(j, verk)
+  if (sperre) return feil(`${sperre}.`)
+  const pris = kraftpris(s, id, verk)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const nj = n.jord[id]!
+  n.kontanter -= pris
+  nj.kostpris += pris
+  nj.investert = (nj.investert ?? 0) + pris
+  nj.kraftverk = { ...(nj.kraftverk ?? {}), [verk]: 0 }
+  flyt(n, 'eiendom', pris)
+  bokforGard(nj, ukeFor(dagnummer(n.sek)), 'bygd', pris)
   return { ok: true, tilstand: n }
 }
 

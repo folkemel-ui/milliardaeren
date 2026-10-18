@@ -47,6 +47,11 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   verdensborger: { ikon: 'globus', grad: 'gull' },
   jordeier: { ikon: 'aks', grad: 'solv' },
   tommerhogger: { ikon: 'gran', grad: 'solv' },
+  // Pakke 115: gården bygd ut.
+  gods: { ikon: 'aks', grad: 'gull' },
+  'fullt-fjos': { ikon: 'hus', grad: 'solv' },
+  'tre-nabogarder': { ikon: 'aks', grad: 'gull' },
+  odelsgard: { ikon: 'krone', grad: 'gull' },
   landemerke: { ikon: 'tarn', grad: 'solv' },
   'alle-landemerker': { ikon: 'borg', grad: 'gull' },
   kunstsamler: { ikon: 'ramme', grad: 'solv' },

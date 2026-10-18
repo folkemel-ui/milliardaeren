@@ -212,6 +212,16 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 - **Odel needs a start day the old saves don't have** (Pack 114): `kjopJord` stamps `eidFra`; `odelVedDagsskifte`
   runs every day change (not only Mondays, unlike the harvest) and gives an old farm `eidFra` the first time it sees
   it, so old farms count from the update — said in the question, and shown as «Odel: Om N dager» on the farm page.
+- **Power from the land (Pack 115) is paid like rent**: `betalKraft` runs in the rent block of `sekund`
+  (per second, away time in one go), so there is no payday to buy just before — the leak the farm rules warn
+  about. Each plant's income is its price today (`kraftpris`, on `utbyggingsgrunnlag`, so neighbours and land
+  growth carry it) over 10 hours, times the week's factor: the week's smoothed weather with the plant's own table,
+  amplified ×3 and clamped like the harvest, divided by its two-year mean (`kraftsnitt`) so it averages exactly
+  ×1. A daily ×3 with a clamp halved the swing (wind ×1,27 instead of ×1,40 in Elendig weeks) — weekly matched
+  what the question promised. Payouts go to `totaltHost`/`totaltLeie` and onto the plant (`j.kraftverk[v]`).
+- **The sun moves with the harvest, not against it** (correlation +0,92 over 520 weeks): the item said all three
+  plants would take the edge off a bad week, but only wind (−0,77) and water (−0,43) do. Measured before the
+  question, said in it, and the panels' text says so.
 - **A harvest test computed before Monday is ~2 % short** (Pack 105): `gardHostDeler` uses the land
   value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
   the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.

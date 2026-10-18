@@ -1,5 +1,5 @@
 import { antallDyr, DYR, DYRLISTE, dyrGir, dyrKasseNaa, dyrPerUke, dyrpris, fjosplasser, nesteKlipping, nesteSlakt, SLAKT_DAGER } from '../../engine/dyr'
-import { hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, kjopNabogard, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
+import { byggKraftverk, hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, kjopNabogard, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
 import {
   AVLINGER,
@@ -44,6 +44,12 @@ import {
   nabopris,
   naboer,
   forventetUke,
+  KRAFTVERK,
+  kraftpris,
+  kraftSperre,
+  kraftverkFor,
+  kraftverkPerSek,
+  kraftverkUke,
   nesteJordpris,
   dagerTilHogst,
   skogalder,
@@ -519,6 +525,50 @@ function Nabogard({ s, id }: { s: Spilltilstand; id: JordId }) {
 
 /** Hva en nabogård til gir i en normal uke: avlingen ganger to til (×3 i alt). */
 const ukensNabogevinst = (s: Spilltilstand, id: JordId) => (NABO_FAKTOR - 1) * forventetUke(s, id, s.jord[id]!)
+
+/**
+ * Kraften (Pakke 115): verkene som kan stå på jorda — vind på Lista, sol på en gård med låve, vann
+ * i Namdalen — med hva de gir nå og har tjent, eller pris og tilbakebetaling. Står på «Jorder og
+ * maskiner» for en gård og på siden for skogen.
+ */
+export function Kraftkort({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  const verk = kraftverkFor(id)
+  if (!j || verk.length === 0) return null
+  return (
+    <li className="kort kraftkort">
+      <h2 className="kort-tittel">Kraft</h2>
+      <p className="dempet liten">Betales hvert sekund, også mens du er borte, og følger ukas vær.</p>
+      {verk.map((v) => {
+        const bygd = j.kraftverk?.[v]
+        const sperre = kraftSperre(j, v)
+        const pris = kraftpris(s, id, v)
+        return (
+          <div key={v} className="personale-rad gardsmaskin">
+            <p className="liten">
+              <strong>{KRAFTVERK[v].navn}</strong>
+              <br />
+              <span className="dempet">{KRAFTVERK[v].tekst}</span>
+              <br />
+              <span className="dempet">
+                {bygd !== undefined ? `Gir ${perSek(kraftverkPerSek(s, id, v))} nå · har tjent ${kortKroner(bygd)}` : !sperre ? gardTekst(pris, kraftverkUke(s, id, v)) : ''}
+              </span>
+            </p>
+            {bygd !== undefined ? (
+              <span className="merke ok">Bygd</span>
+            ) : sperre ? (
+              <span className="merke kant">{sperre}</span>
+            ) : (
+              <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(byggKraftverk(s, id, v))}>
+                Bygg · {kortKroner(pris)}
+              </button>
+            )}
+          </div>
+        )
+      })}
+    </li>
+  )
+}
 
 /** Hvordan hvert dyr betaler, i én linje. */
 const BETALING: Record<'daglig' | 'ull' | 'slakt', string> = {
