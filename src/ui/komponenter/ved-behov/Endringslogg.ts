@@ -8,6 +8,17 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '3.3.0',
+    navn: '3.3',
+    dato: 'Oktober 2026',
+    ingress: 'Gårdene har fått sider, en uke du kan følge og plass til å vokse.',
+    punkter: [
+      'Gården i deler: kortet og tre sider for jorder og maskiner, dyr, og lager og regnskap. «Gårder og skog» står øverst på Eiendom med høsten så langt og nedtellingen til mandag, og «Silo full» sier fra.',
+      'Gårdens uke: sju dagbrikker med været så langt og hva drenering og frostdekke har reddet, avlingsprisene i en graf over åtte uker, og avisa skriver om gårdene bare den beste og verste uka av åtte. «Uka di» sier hva de ga hver uke.',
+      'En gård som henger med: nabogårder som tredobler avlingen, maskiner i tre trinn, mer status, og odelsgård etter tre måneder.',
+    ],
+  },
+  {
     versjon: '3.2.0',
     navn: '3.2',
     dato: 'Oktober 2026',
