@@ -3094,6 +3094,9 @@ export const FLISUTSNITT: Record<string, readonly [number, number, number, numbe
  * plass; tegninger uten utsnitt vises hele, i `størrelse`. Med `flis` (kortet) går
  * det kvadratiske utsnittet i `FLISUTSNITT` foran nærbildet (G20: en bil har begge).
  * Til en eiendoms- eller luksustegning er hentet, står et tomt lerret i samme størrelse (G12).
+ * Tegningen tegnes som en komponent, ikke kalt som en funksjon: da hører krokene i den (lommeuret)
+ * til tegningen, så `Illustrasjon` har like mange kroker før og etter hentingen, og tegningen ser
+ * `Utklipp`/`Naerbilde`/`Fullramme` herfra.
  */
 export const Illustrasjon = memo(function Illustrasjon({
   id,
@@ -3125,7 +3128,9 @@ export const Illustrasjon = memo(function Illustrasjon({
   return (
     <Fullramme.Provider value={FULL_RAMME.includes(id)}>
       <Utklipp.Provider value={utklipp}>
-        <Naerbilde.Provider value={naer}>{Tegning({ størrelse, trinn, forbedringer, steg })}</Naerbilde.Provider>
+        <Naerbilde.Provider value={naer}>
+          <Tegning størrelse={størrelse} trinn={trinn} forbedringer={forbedringer} steg={steg} />
+        </Naerbilde.Provider>
       </Utklipp.Provider>
     </Fullramme.Provider>
   )

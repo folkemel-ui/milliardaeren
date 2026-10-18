@@ -1358,12 +1358,13 @@ back as the game's `index.html`. `milliardaer-test2` (5182) started from this fo
   full-frame tile) now prefers `FLISUTSNITT`; businesses and properties have only one of the two, so
   nothing else moved. A car's square tile is the whole car in the lower third with the room above
   ([5, 9, 87, 87]): cutting a car's nose to make it bigger read worse than a small car in its room.
-- **A drawing function is called, not rendered.** `Illustrasjon` calls `Tegning({...})` inside its
-  own render, *before* its `Utklipp`/`Naerbilde`/`Fullramme` providers exist, so a `useContext` in a
-  drawing's body reads the value from above `Illustrasjon` (wrong for `Utklipp`; right for `IScenen`,
-  which `Scene` provides from outside). The made-for-you watch's plate kept showing in the cabinet;
-  moving it into a small component (`Graveringsplate`) fixed it. `Klokkeskrin` and `Lerret` are JSX
-  components, which is why they always saw the context.
+- **A drawing function was called, not rendered (until 18 October 2026).** `Illustrasjon` called
+  `Tegning({...})` inside its own render, *before* its `Utklipp`/`Naerbilde`/`Fullramme` providers
+  existed, so a `useContext` in a drawing's body read the value from above `Illustrasjon`. The
+  made-for-you watch's plate kept showing in the cabinet; moving it into a small component
+  (`Graveringsplate`) fixed it. The same call made React warn about the hook order (the pocket watch's
+  hook counted as `Illustrasjon`'s), so the game track changed it to `<Tegning … />`: a drawing's body
+  now sees those three contexts too (`wisdom-skjerm.md` §3).
 - **The cabinet is a `Lagerkort` without a limit.** `Plass` takes `lager: LagerId | 'skap'`, the CSS is
   `.plass.skap` (velvet, a top light, a glass shelf, brass strips) in the game track's `luksus.css`, and
   `Klokkeskrin` in utklipp draws only the cushion and the watch. The first close-up (86 × 74) filled

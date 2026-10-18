@@ -222,10 +222,13 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   `Illustrasjon` new props every second, so every drawing in Selskaper and Samling was
   rebuilt each second (161 and 72 ms in dev). Hoist such values to a constant;
   `pakke64.test.ts` fails on the pattern for every memo drawing.
-- **«Change in the order of Hooks called by Illustrasjon» is old** (seen in Pack 89 on Luksus and
-  Eiendom, which the pack did not touch): `Illustrasjon` calls a drawing as a function, so while
-  its part loads (`TOMT`, no hooks) and after (the real drawing, `useContext`) the hook count
-  differs. Not a pack's bug; it was offered to Folke as a separate task on 11 October 2026.
+- **«Change in the order of Hooks called by Illustrasjon2» is fixed** (18 October 2026, after Pack 111).
+  `Illustrasjon` called the drawing as a function, so the pocket watch's `useContext(IScenen)` counted
+  as its own hook: `TOMT` while the luxury part loaded had none, the watch had one. It now renders
+  `<Tegning … />`. The warning only showed when a screen drew the watch before its part had loaded
+  (the full suite under load, a fresh page) — `pakke74b` alone passed three runs without it.
+  `illustrasjonKroker.test.ts` renders the watch, then `lastAlle()`, and fails on the warning. A hook
+  is now fine in a drawing's own body.
 
 ## 4. Parts, the start script, the font and the service worker
 
