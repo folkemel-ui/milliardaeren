@@ -8,6 +8,17 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '3.2.0',
+    navn: '3.2',
+    dato: 'Oktober 2026',
+    ingress: 'Racingteamet har fått virkelige tall, løp du kan følge, og et team som vokser utenfor banen.',
+    punkter: [
+      'Bilen har virkelige tall — effekt, marktrykk, vekt og depotstopp — og hver del teller mest i sitt øyeblikk: motoren i kvalifiseringen, aero og chassis i regn. Kvalifiseringen setter startrekkefølgen, og noen løp går i regn, varslet på forhånd.',
+      'Løpet direkte: 50 runder gjennom spilldagen, med depotstopp og utforkjøringer, og en full rapport etterpå.',
+      'Et team som vokser: et juniorakademi som sender opp en ung fører hver sesong, førere som blir bedre, anlegg som gjør bilen billigere, og en sponsor du velger avtale med før hver sesong.',
+    ],
+  },
+  {
     versjon: '3.1.0',
     navn: '3.1',
     dato: 'Oktober 2026',
