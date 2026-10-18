@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 115, 18 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 116, 19 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -167,7 +167,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–115.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–116.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -321,7 +321,9 @@ lives in one place only.
   fixed it in one go.
 - **Never sed backticks or `${`.** A `sed 's/\\`/`/g'` meant to unescape a test file put a
   backtick at the start of every line. And when you write a `.ts` file directly with the
-  Write tool, don't carry over the `\`` and `\${` escapes from a JS patch script.
+  Write tool, don't carry over the `\`` and `\${` escapes from a JS patch script. A backslash
+  fares no better (Pack 116): `sed` turned a test's `/[^,\d]/` into `/[^,d]/` with no error, and the
+  test failed for the wrong reason. A line holding a regex goes through the Edit tool.
 - **Bash heredocs still break** on long scripts with backticks (Pack 56: "unexpected EOF
   while looking for matching `''"). Anything longer than a few lines goes in a scratchpad
   file via the Write tool.
@@ -450,6 +452,11 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
 - **A rule change can break old tests' fixtures, not their point.** The merger tests in Packs
   11, 21 and 33 used a kiosk at level 10; the gate made them fail. Lift the fixture to meet
   the new rule (level 100) and keep what the test checks; test the new rule in its own pack.
+  The same when a screen folds rows away (Pack 116: kinds at kr 0 behind «Ikke i bruk»): two old
+  tests clicked an Indeksfond row their save didn't own. They now open the fold first, if it's there.
+- **Counts in a «Next up» go stale between packs** (Pack 116): it said 61 achievements, written before Pack
+  115 added the farm ones; the game had 63. Quote the constant's name in the plan (`PRESTASJONER.length`)
+  and read the number from the screen when the pack starts.
 - **Slow tests are slow on their own**: `formue.test.ts` takes ~19 s alone and ~33 s in
   the full suite. Before blaming your change for a slowdown, time it alone on both sides
   of `git stash` (Pack 39's daily settlement cost ~7 %, which is fine).

@@ -3,9 +3,10 @@
  * En del av Investeringer-fanen (Pakke 65 delte Investeringer.tsx per del).
  */
 
+import { useState } from 'react'
 import { portefolje, sum, type Aktivaklasse } from '../../../engine/portefolje'
 import type { Spilltilstand } from '../../../engine/types'
-import { kortKroner, tall } from '../../format'
+import { andelTekst, kortKroner } from '../../format'
 import { RulleTall } from '../../komponenter/RulleTall'
 import { Endring } from './felles'
 import { SkattSaLangt } from '../../komponenter/Skattekort'
@@ -27,6 +28,31 @@ export function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Exclude<Akti
   const total = sum(poster)
   const avkastning = total.verdi - total.kostpris
   const startIDag = total.verdi - total.iDag
+  // Pakke 116: slagene på kr 0 tok en hel rad hver; nå én linje under de andre, som folder dem ut.
+  const brukte = poster.filter((p) => p.verdi > 0)
+  const tomme = poster.filter((p) => p.verdi <= 0)
+  const [visTomme, settVisTomme] = useState(false)
+
+  const rad = (p: (typeof poster)[number]) => {
+    const avk = p.verdi - p.kostpris
+    return (
+      <li key={p.klasse}>
+        <button className="kort klasserad" onClick={() => velg(p.klasse)}>
+          <span className={`klasse-prikk ${p.klasse}`} aria-hidden="true" />
+          <span className="klasserad-navn">
+            <strong>{KLASSENAVN[p.klasse]}</strong>
+            <span className="dempet liten">
+              {p.verdi > 0 && total.verdi > 0 ? `${andelTekst(p.verdi / total.verdi)} av porteføljen` : 'Ingenting ennå'}
+            </span>
+          </span>
+          <span className="papirrad-kurs">
+            <span>{kortKroner(p.verdi)}</span>
+            {p.verdi > 0 && <Endring kroner={avk} andel={p.kostpris > 0 ? avk / p.kostpris : 0} liten />}
+          </span>
+        </button>
+      </li>
+    )
+  }
 
   return (
     <>
@@ -57,28 +83,18 @@ export function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Exclude<Akti
         <SkattSaLangt s={s} />
       </div>
 
-      <ul className="kortliste">
-        {poster.map((p) => {
-          const avk = p.verdi - p.kostpris
-          return (
-            <li key={p.klasse}>
-              <button className="kort klasserad" onClick={() => velg(p.klasse)}>
-                <span className={`klasse-prikk ${p.klasse}`} aria-hidden="true" />
-                <span className="klasserad-navn">
-                  <strong>{KLASSENAVN[p.klasse]}</strong>
-                  <span className="dempet liten">
-                    {total.verdi > 0 ? `${tall((p.verdi / total.verdi) * 100)} % av porteføljen` : 'Ingenting ennå'}
-                  </span>
-                </span>
-                <span className="papirrad-kurs">
-                  <span>{kortKroner(p.verdi)}</span>
-                  {p.verdi > 0 && <Endring kroner={avk} andel={p.kostpris > 0 ? avk / p.kostpris : 0} liten />}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+      {brukte.length > 0 && <ul className="kortliste">{brukte.map(rad)}</ul>}
+      {tomme.length > 0 && (
+        <button className="ubrukte-linje" aria-expanded={visTomme} onClick={() => settVisTomme(!visTomme)}>
+          <span>
+            <span className="dempet">Ikke i bruk:</span> {tomme.map((p) => KLASSENAVN[p.klasse]).join(' · ')}
+          </span>
+          <span className={`ubrukte-pil${visTomme ? ' apen' : ''}`} aria-hidden="true">
+            ›
+          </span>
+        </button>
+      )}
+      {visTomme && tomme.length > 0 && <ul className="kortliste">{tomme.map(rad)}</ul>}
       <p className="dempet liten">Bedriftene og eiendommene har egne faner. Hele formuen, delt opp, står på Profil.</p>
     </>
   )

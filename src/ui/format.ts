@@ -60,6 +60,19 @@ export function endring(andel: number): string {
   return `${verdi < 0 && tekst !== '0,0' ? '−' : '+'}${tekst} %`
 }
 
+/**
+ * En andel av en helhet (Pakke 116, regelen Profil har hatt siden Pakke 62): hele
+ * prosent fra 1 %, én desimal under, og «< 0,1 %» for det som er mindre enn det —
+ * aldri «0 %» for noe du eier. Hardt mellomrom før %, så tegnet ikke står alene.
+ */
+export function andelTekst(andel: number): string {
+  const a = Number.isFinite(andel) ? Math.max(0, andel) : 0
+  if (a === 0) return '0 %'
+  const p = a * 100
+  // Fra 0,95 % rundes det til «1 %», ikke «1,0 %».
+  return p < 0.05 ? '< 0,1 %' : `${tall(p, p < 0.95 ? 1 : 0)} %`
+}
+
 /** Antall aksjer eller mynter: brøkdeler bare når det trengs, og færre jo større tallet er. */
 export function antall(n: number): string {
   if (Number.isInteger(n)) return tall(n)

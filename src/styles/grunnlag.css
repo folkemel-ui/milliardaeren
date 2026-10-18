@@ -247,6 +247,11 @@ figure {
   color: var(--tekst-dempet);
 }
 
+/* Et beløp eller en prosent med fortegn og enhet, som ikke skal brytes (Pakke 116). */
+.samlet {
+  white-space: nowrap;
+}
+
 .liten {
   font-size: var(--skrift-2);
 }

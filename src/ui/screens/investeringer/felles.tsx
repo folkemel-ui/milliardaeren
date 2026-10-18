@@ -5,11 +5,14 @@
 
 import { endring, fortegnKroner } from '../../format'
 
-/** «+kr 1 240 · +4,6 %» i grønt, eller rødt når det går nedover. */
+/**
+ * «+kr 1 240 · +4,6 %» i grønt, eller rødt når det går nedover. Beløpet og prosenten
+ * holdes hver for seg samlet (Pakke 116), så linja bare brytes ved «·» — før sto «%» alene.
+ */
 export function Endring({ kroner: k, andel, liten = false }: { kroner: number; andel: number; liten?: boolean }) {
   return (
     <span className={`${k >= 0 ? 'pluss' : 'minus'}${liten ? ' liten' : ''}`}>
-      {fortegnKroner(k)} · {endring(andel)}
+      <span className="samlet">{fortegnKroner(k)}</span> · <span className="samlet">{endring(andel)}</span>
     </span>
   )
 }

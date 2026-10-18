@@ -95,6 +95,9 @@ describe('fondene står i Børs', () => {
     app = await startApp(rikt())
     await app.fane('Investeringer')
     await app.trykk(delKnapp(app, 'Investeringer', 'Oversikt'))
+    // Pakke 116: et slag på kr 0 står bak «Ikke i bruk» — fold det ut først.
+    const ubrukte = app.rot.querySelector<HTMLElement>('.ubrukte-linje')
+    if (ubrukte) await app.trykk(ubrukte)
     await app.trykk([...app.rot.querySelectorAll<HTMLElement>('.klasserad')].find((el) => el.textContent?.includes('Indeksfond'))!)
     expect(app.rot.querySelector('[role="tablist"][aria-label="Investeringer"] [aria-selected="true"]')!.textContent).toBe('Børs')
     expect(app.rot.querySelectorAll('.fondkort')).toHaveLength(2)

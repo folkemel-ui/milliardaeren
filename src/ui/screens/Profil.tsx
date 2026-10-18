@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from 'react'
 import { nettoformue } from '../../engine/formler'
 import { MAAL } from '../../engine/innhold'
-import { PRESTASJONER, synligePrestasjoner, synligeTrofeer } from '../../engine/prestasjoner'
+import { synligePrestasjoner, synligeTrofeer } from '../../engine/prestasjoner'
 import type { Spilltilstand } from '../../engine/types'
 import { startPaaNytt } from '../../state/lager'
-import { formue, kortKroner, kroner, perSek, tall, varighet } from '../format'
+import { andelTekst, formue, kortKroner, perSek, tall, varighet } from '../format'
 import { Formuegraf } from '../komponenter/Formuegraf'
 import { RulleTall } from '../komponenter/RulleTall'
 import { Regnskap } from '../komponenter/Regnskap'
@@ -21,7 +21,7 @@ import { investeringsdel, luksusdel, PROFILDELER, settProfildel, useProfildel } 
 import { formuedeler, GRUPPEFARGE, type Formuemaal } from '../formuedeler'
 import type { Fane } from '../komponenter/Fanemeny'
 import { Statistikk } from '../komponenter/Statistikk'
-import { kommendeMaal, profilmaal } from '../progresjon'
+import { kommendeMaal, prestasjonstall, profilmaal } from '../progresjon'
 import { settBevegelse, settVarsler, useBevegelse, useVarselnivaa } from '../innstillinger'
 import { VERSJON } from '../versjon'
 import { Endringslogg } from '../komponenter/Nyheter'
@@ -62,9 +62,10 @@ const PRESTASJONER_KORT = 3
 
 export function Prestasjonsliste({ s }: { s: Spilltilstand }) {
   // Pakke 70: de skjulte vises først når de er nådd — men de telles, så du vet at noe venter.
+  // Pakke 116: tallet er det samme som stripa og målet viser — alle, de skjulte også.
   const synlige = synligePrestasjoner(s)
-  const klart = synlige.filter((p) => s.prestasjoner[p.id] !== undefined).length
-  const skjulte = PRESTASJONER.length - synlige.length
+  const { klart, totalt } = prestasjonstall(s)
+  const skjulte = totalt - synlige.length
   // Pakke 84: lista var 2 458 px i et sent spill. Kort: tallet, de neste tre og de siste tre.
   const [alle, settAlle] = useState(false)
   const neste = synlige.filter((p) => s.prestasjoner[p.id] === undefined).slice(0, PRESTASJONER_KORT)
@@ -97,11 +98,11 @@ export function Prestasjonsliste({ s }: { s: Spilltilstand }) {
       <div className="maal-topp">
         <h2 className="kort-tittel">Prestasjoner</h2>
         <span className="dempet liten">
-          {klart} / {synlige.length}
+          {klart} / {totalt}
         </span>
       </div>
-      <div className="milepael-spor prestasjoner-spor" role="img" aria-label={`${klart} av ${synlige.length} prestasjoner`}>
-        <div className="milepael-fyll" style={{ width: `${(klart / Math.max(1, synlige.length)) * 100}%` }} />
+      <div className="milepael-spor prestasjoner-spor" role="img" aria-label={`${klart} av ${totalt} prestasjoner`}>
+        <div className="milepael-fyll" style={{ width: `${(klart / Math.max(1, totalt)) * 100}%` }} />
       </div>
       {alle ? (
         liste(synlige)
@@ -319,11 +320,7 @@ function Formuedeler({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => voi
     gåTil(m.fane)
   }
   // Små andeler med én desimal, og det som er mindre enn det, som «< 0,1 %» — aldri «0,0 %» for noe du eier.
-  const andel = (v: number) => {
-    if (brutto <= 0) return ''
-    const a = v / brutto
-    return a < 0.0005 ? '< 0,1 %' : `${tall(a * 100, a < 0.01 ? 1 : 0)} %`
-  }
+  const andel = (v: number) => (brutto <= 0 ? '' : andelTekst(v / brutto))
   return (
     <div className="kort formuedeler">
       <h2 className="kort-tittel">Hva formuen består av</h2>
@@ -431,7 +428,7 @@ function Meg({ s, gåTil }: { s: Spilltilstand; gåTil: (f: Fane) => void }) {
         </div>
         <div>
           <dt>Tjent totalt</dt>
-          <dd>{kroner(s.totaltTjent)}</dd>
+          <dd>{kortKroner(s.totaltTjent)}</dd>
         </div>
         <div>
           <dt>Bedrifter</dt>

@@ -137,17 +137,27 @@ export function nesteMaal(s: Spilltilstand): Neste | null {
   return { belop: neste.belop, maal: ALLE.filter((m) => m.belop === neste.belop), andel }
 }
 
-/** Prestasjonene som er igjen, som ett mål — også de skjulte teller, uten å røpes. */
-function prestasjonsmaal(s: Spilltilstand): Neste | null {
+/**
+ * Prestasjonene, talt likt overalt (Pakke 116): alle, de skjulte også — så
+ * tallet aldri hopper når en skjult blir funnet, og stripa, målet på Profil og
+ * Prestasjoner-kortet sier det samme («39 / 61»).
+ */
+export function prestasjonstall(s: Spilltilstand): { klart: number; totalt: number } {
   let klart = 0
   for (const p of PRESTASJONER) if (s.prestasjoner[p.id] !== undefined) klart++
-  const igjen = PRESTASJONER.length - klart
+  return { klart, totalt: PRESTASJONER.length }
+}
+
+/** Prestasjonene som er igjen, som ett mål — også de skjulte teller, uten å røpes. */
+function prestasjonsmaal(s: Spilltilstand): Neste | null {
+  const { klart, totalt } = prestasjonstall(s)
+  const igjen = totalt - klart
   if (igjen === 0) return null
   return {
     belop: Infinity,
     maal: [{ belop: Infinity, tekst: igjen === 1 ? 'Én prestasjon igjen' : `${igjen} prestasjoner igjen`, art: 'prestasjon', fane: 'profil' }],
-    andel: klart / PRESTASJONER.length,
-    visning: `${klart} / ${PRESTASJONER.length}`,
+    andel: klart / totalt,
+    visning: `${klart} / ${totalt}`,
   }
 }
 
@@ -175,9 +185,8 @@ export function profilmaal(s: Spilltilstand, verdi: number): Profilmaal {
   const etter = MILEPAELER.filter((m) => m.belop > MAAL)
   const neste = etter.find((m) => m.belop > s.hoyesteFormue)
   if (!neste) {
-    let klart = 0
-    for (const p of PRESTASJONER) if (s.prestasjoner[p.id] !== undefined) klart++
-    return { belop: null, fra: MILEPAELER[MILEPAELER.length - 1].belop, andel: klart / PRESTASJONER.length, prestasjoner: { klart, totalt: PRESTASJONER.length } }
+    const tall = prestasjonstall(s)
+    return { belop: null, fra: MILEPAELER[MILEPAELER.length - 1].belop, andel: tall.klart / tall.totalt, prestasjoner: tall }
   }
   const fra = Math.max(MAAL, ...etter.filter((m) => m.belop < neste.belop).map((m) => m.belop))
   return { belop: neste.belop, fra, andel: klem((logg(verdi) - logg(fra)) / (logg(neste.belop) - logg(fra))) }

@@ -124,6 +124,9 @@ describe('hva formuen består av', () => {
     app = await startApp(rikt())
     await app.fane('Investeringer')
     await app.trykk(app.knapp('Oversikt'))
+    // Pakke 116: slagene på kr 0 står bak «Ikke i bruk» — fold dem ut, så alle radene telles.
+    const ubrukte = app.rot.querySelector<HTMLElement>('.ubrukte-linje')
+    if (ubrukte) await app.trykk(ubrukte)
     const rader = [...app.rot.querySelectorAll('.klasserad strong')].map((el) => el.textContent)
     expect(rader).not.toContain('Eiendom')
     expect(rader).toContain('Aksjer')

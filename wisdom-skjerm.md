@@ -67,6 +67,11 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 - **«1 %» breaks over two lines at 375 px** if the space is a plain one (Pack 105, the store's text): write
   `1&nbsp;%` in JSX text. The helpers don't do it for you — `pst` in `forklaringer.ts` and the help texts
   use a plain space — so look at the end of each wrapped line in a screenshot of new text with a percent.
+  Since Pack 116 there are two tools for it: `andelTekst(a)` in `ui/format.ts` writes a share with a hard
+  space («0,3 %», «< 0,1 %», whole from 0.95 %) — use it for every «% av …» — and the class `samlet`
+  (`white-space: nowrap`, in `grunnlag.css`) keeps a formatted amount whole, as `Endring` does with each
+  half of «+kr 8,55 mill · +0,3 %», so the line can only break at the «·». To prove a break in the DOM, read
+  `getClientRects().length` and `top` of each `.samlet` span.
 - **The right edge cut off in a screenshot is the pane, not the page, if the DOM says so** (Packs 106–107,
   twice, even after the 1-px resize): read the button's and the card's `getBoundingClientRect().right`
   against `clientWidth` and `scrollWidth`, and say in the report that the check was DOM-only.

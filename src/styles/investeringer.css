@@ -286,6 +286,39 @@
   flex-direction: column;
 }
 
+/* «Ikke i bruk: Obligasjoner · Startups · Sparekonto ›» under slagene i bruk (Pakke 116). */
+.ubrukte-linje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 14px;
+  border: 0;
+  background: none;
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ubrukte-pil {
+  color: var(--tekst-dempet);
+  transition: transform 0.15s;
+}
+
+.ubrukte-pil.apen {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ubrukte-pil {
+    transition: none;
+  }
+}
+
 .papirrad.eid {
   border-color: var(--gull-mørk);
 }

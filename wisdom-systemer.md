@@ -461,7 +461,9 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 
 - **Hidden achievements (Pack 70)**: `skjult: true` on a `Prestasjon`; `synligePrestasjoner(s)`
   gives the list the Profile shows (open ones plus hidden ones earned), with a line counting the
-  hidden ones still waiting; the toast says «Skjult prestasjon». A hidden one should depend on
+  hidden ones still waiting; the toast says «Skjult prestasjon». The *count* is another thing: since
+  Pack 116 every screen (the strip, the Profil goal, the Prestasjoner card) reads `prestasjonstall(s)`
+  in `ui/progresjon.ts` — all of them, hidden too — so the total never jumps when one is found. A hidden one should depend on
   what the player does, not on the clock — a game day is 300 s, so «at night» happens every five
   minutes. «Kontrær» is stamped in `kjopPapir` (`kontraerKjop`, optional field, no version
   bump) when the price is ≤ 80 % of the two-hour high; `fulltSpill()` earns it at once, since

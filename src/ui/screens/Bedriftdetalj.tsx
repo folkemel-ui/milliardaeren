@@ -9,7 +9,7 @@ import { dagnummer } from '../../engine/kalender'
 import { INNTEKT_HISTORIKK_SEK } from '../../engine/simulering'
 import type { Bedrift, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { kortKroner, kroner, perSek, tall, varighet } from '../format'
+import { kortKroner, perSek, tall, varighet } from '../format'
 import { kortDato } from '../kalender'
 import { Scene } from '../komponenter/BedriftIkon'
 import { IDag, Oppgraderingsknapp, Personale, Retningskort, Tilbakelinje } from '../komponenter/Bedriftskort'
@@ -116,11 +116,11 @@ export function Bedriftdetalj({
       <dl className="kort rekorder">
         <div>
           <dt>Tjent totalt</dt>
-          <dd>{kroner(b.tjent)}</dd>
+          <dd>{kortKroner(b.tjent)}</dd>
         </div>
         <div>
           <dt>Investert</dt>
-          <dd>{kroner(b.investert)}</dd>
+          <dd>{kortKroner(b.investert)}</dd>
         </div>
         <div>
           <dt>Tjent inn igjen</dt>
