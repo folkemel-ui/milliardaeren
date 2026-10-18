@@ -173,7 +173,8 @@ describe('løpene', () => {
     expect(r.lop[0].dag).toBe(start)
     expect(r.nesteDag).toBe(start + DAGER_MELLOM)
     expect(r.lonn).toBe(lonn * DAGER_MELLOM)
-    expect((s.totaltKlubb ?? 0) - klubb).toBeCloseTo(r.premier - r.lonn, 2)
+    // Pakke 111: sponsorpengene står i samme linje.
+    expect((s.totaltKlubb ?? 0) - klubb).toBeCloseTo(r.premier + (r.sponsorpenger ?? 0) - r.lonn, 2)
     // Pakke 110: hendelsen venter til løpet er kjørt ferdig — ved neste dagsskifte.
     expect(s.hendelser.some((h) => h.tittel === 'Racing')).toBe(false)
     s = simuler(s, DAG_SEK)

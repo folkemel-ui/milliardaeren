@@ -26,7 +26,7 @@ import { kortKroner, tall } from './format'
 import { AUKSJON_DAGER, BUDSTIGNING, PASSER_ANDEL, TILBAKE_DAGER, TILBAKE_PREMIE } from '../engine/auksjon'
 import { CHARTER_I_SESONG, CHARTER_UTENFOR } from '../engine/charter'
 import { UNIK_RESTVERDI } from '../engine/unike'
-import { DAGER_MELLOM, DELTRINN_PRIS, LOP_PER_SESONG, MESTERPREMIE, PREMIE_PER_POENG, RACING_TROFE_STATUS, SALG_ANDEL, STRATEGIER, TEAMPRIS } from '../engine/racing'
+import { AKADEMI_TRINN, ANLEGG_RABATT, DAGER_MELLOM, DELTRINN_PRIS, LOP_PER_SESONG, MESTERPREMIE, PREMIE_PER_POENG, RACING_TROFE_STATUS, SALG_ANDEL, SPONSOR_PLASS, STRATEGIER, TEAMPRIS } from '../engine/racing'
 
 const pst = (andel: number, desimaler = 0) => `${tall(andel * 100, desimaler)} %`
 
@@ -204,7 +204,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       'Noen løp går i regn, oftest i Spa og Interlagos, og neste løps vær står på kortet: i regn teller føreren og flaksen mer, hver fører har sin egen regnferdighet, og dobbelt så mange kjører av. ' +
       `Strategien gjelder begge førerne: ${STRATEGIER.forsiktig.navn.toLowerCase()} kommer nesten alltid i mål, ${STRATEGIER.aggressiv.navn.toLowerCase()} er raskere, men kjører av omtrent én gang av åtte — best når du jager, verre når du leder. ` +
       `De ti første får poeng (25, 18, 15 … 1), og teamet får ${kortKroner(PREMIE_PER_POENG)} per poeng. Førermesterskapet og konstruktørmesterskapet gir hvert et trofé med ${RACING_TROFE_STATUS} i status og ${kortKroner(MESTERPREMIE)}. ` +
-      `Teamet teller i formuen med det delene har kostet; selger du, får du ${pst(SALG_ANDEL)} av det, og bilen og trofeene beholder du.`,
+      `Unge førere blir bedre for hver sesong til de er 23, mot et tak, og lønnen følger ferdigheten. Et juniorakademi (${kortKroner(AKADEMI_TRINN[1].pris)} til ${kortKroner(AKADEMI_TRINN[AKADEMI_TRINN.length - 1].pris)}) sender opp en junior hver sesong; han koster ingenting før han tar et sete, kan selges til et annet team, og de beste blir bedre enn noen på markedet. ` +
+      `Vindtunnelen og fabrikken gjør delene sine ${pst(ANLEGG_RABATT)} billigere per trinn, simulatoren gjør førerne bedre. Hver sesong velger du sponsoravtale før første løp: en trygg sum fordelt på løpene, eller en som betaler etter plassen, opptil ${kortKroner(SPONSOR_PLASS[0])}. ` +
+      `Teamet teller i formuen med det delene, anleggene og akademiet har kostet; selger du, får du ${pst(SALG_ANDEL)} av det, og bilen og trofeene beholder du.`,
   },
   klubb: {
     tittel: 'Fotballklubben',

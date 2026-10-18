@@ -18,7 +18,7 @@ import { KLUBBSALG_HONORAR, klubbverdi, salgspris } from './klubb'
 import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
 import { TILBAKE_DAGER, unikRestverdi } from './unike'
 import { dyrOpptjentNaa } from './dyr'
-import { SALG_ANDEL } from './racing'
+import { juniorpris, SALG_ANDEL } from './racing'
 
 /**
  * Bokfører gevinst (eller tap, negativt) på et salg: det du fikk, minus det du
@@ -97,6 +97,20 @@ export function utforRacingsalg(n: Spilltilstand): number {
   n.kontanter += inntekt
   bokforGevinst(n, inntekt - r.investert)
   delete n.racing
+  return inntekt
+}
+
+/**
+ * Selger en junior fra akademiet til et annet team for 40 dagers lønn (Pakke 111). Han kostet
+ * ingenting, så hele salget er gevinst, som en junior fra klubbens akademi.
+ */
+export function utforJuniorsalg(n: Spilltilstand, id: number): number {
+  const r = n.racing!
+  const f = r.juniorer!.find((x) => x.id === id)!
+  const inntekt = juniorpris(f)
+  n.kontanter += inntekt
+  bokforGevinst(n, inntekt)
+  r.juniorer = r.juniorer!.filter((x) => x.id !== id)
   return inntekt
 }
 

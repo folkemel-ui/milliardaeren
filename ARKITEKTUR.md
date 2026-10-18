@@ -66,6 +66,7 @@ Klubbens terning trekker også hele ligaen (Pakke 66): de andre divisjonene når
 | Valutakursene (`valuta.ts`, Pakke 59) | `valuta:<sti>:<lag>:<knute>` — tre glatte lag (14, 4 og 1 spilldag mellom knutene); DKK følger EUR, AED følger USD. Et spill fra før versjon 22 har `valutaanker` så kursen står på 1 der det var |
 | Auksjonene (`auksjon.ts`, Pakke 89) | `auksjon:<dag>` (hvilken ting bys fram), `auksjon:<id>:<dag>` (startprisen), `auksjon:pause:<dag>` (pausen etter), `auksjon:<id>:<fraDag>:rival` (rivalen som kjøper). Hva som passer, avhenger av formuen din den dagen |
 | De andre racingteamene og førerne (`racing.ts`, Pakke 90) | `racing:<team>:<sesong>:bil`, `racing:<team>:<sesong>:<sete>` (fører og ferdighet), `racing:marked:<ditt team>:<sesong>:<i>` (markedet), `racing:team:<sek>` (navnet ditt) |
+| Teamet utenfor banen (`racing.ts`, Pakke 111) | `racing:junior:<ditt team>:<sesong>` (junioren, med `:ferdighet`, `:alder`, `:tak`), `racing:vekst:<fører>:<id>:<sesong>` (veksten), `racing:alder:<fører>` og `racing:tak:<fører>` (en fører fra før), `racing:spenn:<fører>:<id>` (spennet du ser), `racing:sponsor:<ditt team>:<sesong>` (sponsorens navn) — teamets terning trekker like mange tall som før |
 
 `Hashkilde` (`rng.ts`) gir en rekke tall fra én hash, uten å lagre noe.
 

@@ -1,7 +1,23 @@
 import { useState } from 'react'
 import { dagnummer } from '../../engine/kalender'
-import { ansettForer, oppgraderDel, selgRacingteam, settStrategi, startRacingteam } from '../../engine/handlinger'
+import { ansettForer, byggAnlegg, byggRacingakademi, juniorISete, oppgraderDel, selgJunior, selgRacingteam, settStrategi, startRacingteam, velgSponsor } from '../../engine/handlinger'
 import {
+  AKADEMI_TRINN,
+  ANLEGG,
+  ANLEGG_PRIS,
+  ANLEGGLISTE,
+  anleggstrinn,
+  delrabatt,
+  juniorpris,
+  JUNIORSALG_DAGER,
+  MAKS_JUNIORER,
+  nesteAkademi,
+  nesteAnleggspris,
+  potensialspenn,
+  SPONSOR_PLASS,
+  SPONSOR_TRYGG,
+  SPONSORAVTALER,
+  tryggSponsor,
   baneFor,
   bilfart,
   BILDELER,
@@ -22,7 +38,7 @@ import {
   STRATEGILISTE,
   TEAMPRIS,
 } from '../../engine/racing'
-import type { Forer, Racinglop, Racingteam, Spilltilstand } from '../../engine/types'
+import type { Forer, Racinglop, Racingteam, Sponsoravtale, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { fortegnKroner, kortKroner, tall } from '../format'
 import { useVoksUt } from '../overgang'
@@ -118,7 +134,10 @@ export function Racingdetalj({ s, tilbake }: { s: Spilltilstand; tilbake: () => 
         <Mesterskap r={v} />
       )}
       <Bilkort s={s} r={r} />
+      <Anleggskort s={s} r={r} />
       <Forerkort s={s} r={r} />
+      <Akademikort s={s} r={r} />
+      <Sponsorkort s={s} r={r} />
       <Sesongkort s={s} r={v} />
     </section>
   )
@@ -399,6 +418,8 @@ function Bilkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
                 </button>
               )}
             </div>
+            {/* Pakke 111: rabatten fra anlegget som bygger delen. */}
+            {pris !== null && delrabatt(r, d) > 0 && <p className="dempet liten">{Math.round(delrabatt(r, d) * 100)} % billigere med {d === 'aero' || d === 'chassis' ? 'vindtunnelen' : 'fabrikken'}</p>}
             <div className="deltall">
               {DELTALL[d].map((x) => (
                 <div key={x.navn} className="deltall-rad">
@@ -423,12 +444,17 @@ function Bilkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
 /** «+3», «−2» eller «±0»: førerens ferdighet i regn mot tørt (Pakke 109). */
 const regnTekst = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : '±0')
 
-function Forerlinje({ f }: { f: Forer }) {
+function Forerlinje({ f, junior = false }: { f: Forer; junior?: boolean }) {
+  const spenn = junior ? potensialspenn(f) : null
   return (
     <p className="liten">
-      <strong>{f.navn}</strong> · ferdighet {f.ferdighet} · regn {regnTekst(vaatferdighet(f.navn))}
+      <strong>{f.navn}</strong> · ferdighet {f.ferdighet}
+      {f.alder !== undefined && ` · ${f.alder} år`} · regn {regnTekst(vaatferdighet(f.navn))}
       <br />
-      <span className="dempet">{kortKroner(f.lonn)} om dagen</span>
+      <span className="dempet">
+        {/* Pakke 111: en junior koster ingenting før han tar et sete. */}
+        {junior ? `${spenn ? `Kan bli ${spenn[0]}–${spenn[1]}` : 'Ferdig utviklet'} · ${kortKroner(f.lonn)} om dagen i et sete` : `${kortKroner(f.lonn)} om dagen`}
+      </span>
     </p>
   )
 }
@@ -449,7 +475,7 @@ function Forerkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
       {r.marked.length > 0 && (
         <>
           <h2 className="kort-tittel racing-undertittel">På markedet</h2>
-          <p className="dempet liten">Nye førere hver sesong. Den du ansetter, tar setet; den som satt der, går.</p>
+          <p className="dempet liten">Nye førere hver sesong. Den du ansetter, tar setet; den som satt der, går. Unge førere blir bedre for hver sesong, og lønnen følger.</p>
           {r.marked.map((f) => (
             <div key={f.id} className="personale-rad racing-forer">
               <Forerlinje f={f} />
@@ -464,6 +490,116 @@ function Forerkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
           ))}
         </>
       )}
+    </div>
+  )
+}
+
+/** Anleggene (Pakke 111): tre i tre trinn — vindtunnelen og fabrikken gjør delene billigere, simulatoren førerne bedre. */
+function Anleggskort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Anleggene</h2>
+        <span className="dempet liten">teller i teamets verdi</span>
+      </div>
+      {ANLEGGLISTE.map((a) => {
+        const pris = nesteAnleggspris(r, a)
+        return (
+          <div key={a} className="personale-rad racing-del">
+            <p className="liten">
+              <strong>{ANLEGG[a].navn}</strong> · trinn {anleggstrinn(r, a)} av {ANLEGG_PRIS.length}
+              <br />
+              <span className="dempet">{ANLEGG[a].tekst}</span>
+            </p>
+            {pris === null ? (
+              <span className="merke ok">Ferdig</span>
+            ) : (
+              <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(byggAnlegg(s, a))}>
+                Bygg · {kortKroner(pris)}
+              </button>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Juniorakademiet (Pakke 111): trinnet, og juniorene — med taket som et spenn, et sete eller et salg. */
+function Akademikort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
+  const trinn = r.akademi ?? 0
+  const neste = nesteAkademi(r)
+  const juniorer = r.juniorer ?? []
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Akademiet</h2>
+        <span className="dempet liten">{trinn > 0 ? `${AKADEMI_TRINN[trinn].navn} · ${juniorer.length} av ${MAKS_JUNIORER}` : 'ikke bygd'}</span>
+      </div>
+      <p className="dempet liten">
+        {trinn > 0
+          ? `En junior på 16–18 år hver sesong, ferdighet ${AKADEMI_TRINN[trinn].ferdighet[0]}–${AKADEMI_TRINN[trinn].ferdighet[1]}. De vokser til de er 23, mot et tak du bare ser et spenn av.`
+          : 'Et akademi sender opp en ung fører hver sesong. Han blir bedre for hver sesong — de beste blir bedre enn noen på markedet.'}
+      </p>
+      {juniorer.map((f) => (
+        <div key={f.id} className="racing-forer racing-junior">
+          <Forerlinje f={f} junior />
+          <span className="racing-seter">
+            {[0, 1].map((sete) => (
+              <button key={sete} className="knapp knapp-liten" onClick={() => utfor(juniorISete(s, f.id, sete))}>
+                Sete {sete + 1}
+              </button>
+            ))}
+            <Bekreftknapp className="knapp knapp-liten" onJa={() => utfor(selgJunior(s, f.id))} varsel={`Et annet team betaler ${JUNIORSALG_DAGER} dagers lønn.`}>
+              Selg · {kortKroner(juniorpris(f))}
+            </Bekreftknapp>
+          </span>
+        </div>
+      ))}
+      {neste && (
+        <button className="knapp knapp-gull bred racing-bygg" disabled={s.kontanter < neste.pris} onClick={() => utfor(byggRacingakademi(s))}>
+          {trinn > 0 ? 'Bygg ut til' : 'Bygg'} {neste.navn.toLowerCase()} · {kortKroner(neste.pris)}
+        </button>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Sponsoren (Pakke 111): en trygg sum fordelt på løpene, eller etter plassen til slutt. Valget står
+ * åpent til første løp; så gjelder det sesongen ut.
+ */
+function Sponsorkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
+  const sp = r.sponsor
+  const trygg = sp?.trygg ?? tryggSponsor(r)
+  const aapen = r.runde === 0
+  const avtale: Sponsoravtale = sp?.avtale ?? 'trygg'
+  const sum = (a: Sponsoravtale) => (a === 'trygg' ? kortKroner(trygg) : `opptil ${kortKroner(SPONSOR_PLASS[0])}`)
+  return (
+    <div className="kort">
+      <div className="maal-topp">
+        <h2 className="kort-tittel">Sponsoren</h2>
+        <span className="dempet liten">{sp?.navn ?? 'ny avtale ved neste løp'}</span>
+      </div>
+      {aapen ? (
+        <div className="segment racing-strategi" role="radiogroup" aria-label="Sponsoravtale">
+          {(['trygg', 'resultat'] as const).map((a) => (
+            <button key={a} role="radio" aria-checked={avtale === a} className={avtale === a ? 'aktiv' : ''} onClick={() => utfor(velgSponsor(s, a))}>
+              {SPONSORAVTALER[a].navn}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="liten">
+          <strong>{SPONSORAVTALER[avtale].navn}</strong> · {sum(avtale)}
+        </p>
+      )}
+      <p className="dempet liten">
+        {avtale === 'trygg'
+          ? `${aapen ? `${kortKroner(trygg)} for sesongen, fordelt` : 'Fordelt'} på de åtte løpene: ${Math.round(SPONSOR_TRYGG * 100)} % av det ${r.sesonger.length ? 'fjorårets plass' : '10. plass'} ville gitt med resultatavtalen.`
+          : `Betaler etter plassen blant teamene når sesongen er over: ${SPONSOR_PLASS.slice(0, 4).map((x, i) => `${i + 1}. ${kortKroner(x)}`).join(', ')} … ${SPONSOR_PLASS.length}. ${kortKroner(SPONSOR_PLASS[SPONSOR_PLASS.length - 1])}.`}
+        {aapen ? ' Velg før første løp.' : ' Skrevet under for sesongen.'}
+      </p>
     </div>
   )
 }
@@ -508,12 +644,16 @@ function Sesongkort({ s, r }: { s: Spilltilstand; r: Racingteam }) {
           <dd>{kortKroner(r.premier)}</dd>
         </div>
         <div>
+          <dt>Sponsorer</dt>
+          <dd>{kortKroner(r.sponsorpenger ?? 0)}</dd>
+        </div>
+        <div>
           <dt>Lønn</dt>
           <dd>{kortKroner(r.lonn)}</dd>
         </div>
         <div>
           <dt>Netto</dt>
-          <dd>{fortegnKroner(r.premier - r.lonn)}</dd>
+          <dd>{fortegnKroner(r.premier + (r.sponsorpenger ?? 0) - r.lonn)}</dd>
         </div>
       </dl>
       <Bekreftknapp

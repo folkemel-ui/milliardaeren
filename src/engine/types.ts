@@ -253,6 +253,24 @@ export interface Forer {
   ferdighet: number
   /** Lønn per spilldag. */
   lonn: number
+  /**
+   * Pakke 111: alderen og taket føreren kan vokse til. Mangler på førere fra før; de får dem fra
+   * en hash ved neste sesongslutt.
+   */
+  alder?: number
+  potensial?: number
+}
+
+/** Anleggene (Pakke 111): vindtunnelen og fabrikken gjør delene billigere, simulatoren førerne bedre. */
+export type Racinganlegg = 'vindtunnel' | 'fabrikk' | 'simulator'
+export type Sponsoravtale = 'trygg' | 'resultat'
+
+/** Sesongens tittelsponsor (Pakke 111): en trygg sum fordelt på løpene, eller etter plassen til slutt. */
+export interface Racingsponsor {
+  navn: string
+  avtale: Sponsoravtale
+  /** Det den trygge avtalen gir hele sesongen. */
+  trygg: number
 }
 
 /** Ett løp, sett fra ditt team: hvor førerne kom (0 = ute), poengene, premien og pallen. */
@@ -302,7 +320,7 @@ export interface Racingteam {
   /** Løp kjørt denne sesongen, 0–8. */
   runde: number
   deler: Record<Bildel, number>
-  /** Det delene har kostet — teamets verdi. */
+  /** Det delene (og fra Pakke 111 anleggene og akademiet) har kostet — teamets verdi. */
   investert: number
   /** To seter; null er tomt. */
   forere: (Forer | null)[]
@@ -327,6 +345,15 @@ export interface Racingteam {
   ventendeSaker?: Overskrift[]
   ventendeHendelser?: string[]
   sisteTabell?: { sesong: number; lagpoeng: Record<string, number>; forerpoeng: Record<string, number> }
+  /**
+   * Pakke 111: juniorakademiet (trinn 0–3) og juniorene det har sendt opp, anleggene (trinn 0–3
+   * hver), sesongens sponsor og det sponsorene har betalt. Alt mangler i team fra før.
+   */
+  akademi?: number
+  juniorer?: Forer[]
+  anlegg?: Partial<Record<Racinganlegg, number>>
+  sponsor?: Racingsponsor
+  sponsorpenger?: number
 }
 
 /** Utleie av yachten eller jeten (Pakke 89). Står den i lista, er den ute hos noen andre. */

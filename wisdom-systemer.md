@@ -391,6 +391,24 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   accounts and the tax needed nothing; its trophies sit in `racingtrofeer` at the top level, not in
   `s.trofeer` — the club's live view slices that list by a count (`synligeTrofeer`), and a trophy
   pushed in by another system would hide a club trophy for a day.
+- **The team off the track (Pack 111) is all hashes**: a junior (`racing:junior:<team>:<season>`), a
+  driver's growth (`racing:vekst:<name>:<id>:<season>`), a market driver's age and ceiling and the
+  sponsor's name come from hashes, so the team's die draws the same numbers and old saves' races don't move.
+  `pakke111.test.ts` checks that facilities and the academy give no pace (same places with and without).
+  Drivers from before have no `alder`/`potensial`; `medAlder` gives them both from the name at the next
+  season's end — no migration and no save version. Every new team field is optional for the same reason.
+- **Racing money in one line**: sponsor money goes through `racingpenger` like the prizes (`totaltKlubb`
+  and `totaltRacing`), so Pack 90's test comparing `totaltKlubb` with `premier − lonn` needed
+  `sponsorpenger` added. A junior sale is a gain (`bokforGevinst`, cost 0) like a club junior, not racing
+  income, so `utforJuniorsalg` lives in `handel.ts` (racing can't import it: handel → racing). Facilities
+  and the academy go into `investert`, so they count in the team's value and in the 85 % sale.
+- **What a season earns, measured over 300 seasons per car level (Pack 111, scratchpad `p111/maal.ts`)**:
+  before sponsors every level below the top lost 7–17 mill a season (wages outran prizes); all parts at 5
+  made +6 mill with two 95-skill drivers and +65 mill with 90s (they still win 88 % of titles). The
+  results deal (50/36/26/20/15/11/8/5/3/2 mill by place) puts a 4th-place team at about +4, 2nd–3rd at
+  +13 and a dominant one at +56. Re-run it before changing prizes, wages or the sponsor table.
+- **Three buttons in a `personale-rad` squeeze the text** to one word a line at 375 px (the junior row:
+  Sete 1, Sete 2, Selg). Put the buttons on their own row under the text (`.racing-junior`).
 - **`racing.ts` cannot import `bank.ts`**: bank → eiendom → racing makes a ring, so racing trims the
   event log itself with `MAKS_HENDELSER` from `innhold.ts` (which imports only types). Before Pack 98
   racing pushed to `s.hendelser` with no trim at all; grep `hendelser.push` when adding a system.

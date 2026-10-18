@@ -11,13 +11,17 @@
  * hasher av navn og sesong, så ingenting annet i spillet flytter seg — bortsett
  * fra avisa, som alle nye saker. Fila leser bare typene, terningen, kalenderen og
  * tallformatet, så eiendom.ts kan bruke verdien og statusen herfra.
+ *
+ * Pakke 111: teamet vokser utenfor banen — et juniorakademi, førere som blir bedre for hver
+ * sesong, anlegg som gjør delene billigere, og en sponsor. Alt fra hasher, så terningen trekker
+ * like mange tall som før.
  */
 
 import { MAKS_HENDELSER } from './innhold'
 import { dagnummer } from './kalender'
 import { hashNormal, hashTekst, Terning, tilfeldig } from './rng'
 import { kortKroner } from './tall'
-import type { Bildel, Forer, Lopsstrategi, Overskrift, Racinglop, Racingteam, Spilltilstand, Trofe } from './types'
+import type { Bildel, Forer, Lopsstrategi, Overskrift, Racinganlegg, Racinglop, Racingsponsor, Racingteam, Sponsoravtale, Spilltilstand, Trofe } from './types'
 
 /** Det koster å melde på et team (bilen har du alt). Forbruk, som luksus. */
 export const TEAMPRIS = 25_000_000
@@ -199,9 +203,127 @@ export function bilfart(r: Racingteam): number {
   return sum
 }
 
-/** Prisen for neste trinn på en del, eller null når den er bygd helt ut. */
+/** Prisen for neste trinn på en del — mindre med anlegget som bygger den — eller null når den er bygd helt ut. */
 export function nesteDelpris(r: Racingteam, del: Bildel): number | null {
-  return DELTRINN_PRIS[r.deler[del] ?? 0] ?? null
+  const pris = DELTRINN_PRIS[r.deler[del] ?? 0]
+  return pris === undefined ? null : Math.round(pris * (1 - delrabatt(r, del)))
+}
+
+// ─────────────────────────────────────────────── Juniorer, anlegg og sponsorer (Pakke 111)
+
+/**
+ * Juniorakademiet: hvert trinn sender opp én junior hver sesong, bedre og med høyere tak jo
+ * lenger opp. Taket kan gå til 99 — over markedets beste (95).
+ */
+export const AKADEMI_TRINN = [
+  { navn: 'Intet akademi', pris: 0, ferdighet: [0, 0], loft: [0, 0] },
+  { navn: 'Kartskole', pris: 20_000_000, ferdighet: [40, 48], loft: [15, 30] },
+  { navn: 'Juniorakademi', pris: 150_000_000, ferdighet: [44, 52], loft: [20, 40] },
+  { navn: 'Talentprogram', pris: 1_000_000_000, ferdighet: [48, 55], loft: [25, 45] },
+] as const
+export const JUNIOR_ALDER = [16, 18] as const
+/** Så mange juniorer akademiet holder; er det fullt, kommer ingen ny den sesongen. */
+export const MAKS_JUNIORER = 3
+/** En fører til og med 23 vokser 3–7 poeng i sesongen, en eldre 0–1 — aldri over taket. */
+export const UNG_TIL = 23
+export const VEKST_UNG = [3, 7] as const
+export const VEKST_ELDRE = [0, 1] as const
+export const MAKS_FERDIGHET = 99
+/** En junior selges til et annet team for så mange dagers lønn. */
+export const JUNIORSALG_DAGER = 40
+/** Spennet du får se rundt en juniors tak, som klubbens. */
+export const POTENSIAL_SPENN = 14
+
+export const ANLEGG: Record<Racinganlegg, { navn: string; tekst: string; deler: Bildel[] }> = {
+  vindtunnel: { navn: 'Vindtunnel', tekst: 'Aerodynamikk og chassis koster 10 % mindre per trinn.', deler: ['aero', 'chassis'] },
+  fabrikk: { navn: 'Fabrikk', tekst: 'Motor og depotmannskap koster 10 % mindre per trinn.', deler: ['motor', 'depot'] },
+  simulator: { navn: 'Simulator', tekst: 'Førerne dine vokser ett poeng mer i sesongen per trinn.', deler: [] },
+}
+export const ANLEGGLISTE = Object.keys(ANLEGG) as Racinganlegg[]
+export const ANLEGG_PRIS = [50_000_000, 300_000_000, 1_500_000_000] as const
+export const ANLEGG_RABATT = 0.1
+
+/** Sponsorpengene etter plassen blant teamene, 1.–10. Den trygge avtalen gir 70 % av fjorårets. */
+export const SPONSOR_PLASS = [50, 36, 26, 20, 15, 11, 8, 5, 3, 2].map((m) => m * 1_000_000)
+export const SPONSOR_TRYGG = 0.7
+export const SPONSORAVTALER: Record<Sponsoravtale, { navn: string; tekst: string }> = {
+  trygg: { navn: 'Trygg avtale', tekst: 'Fast sum, fordelt på de åtte løpene.' },
+  resultat: { navn: 'Resultatavtale', tekst: 'Betaler etter plassen blant teamene når sesongen er over.' },
+}
+const SPONSORNAVN = ['Brattberg Kraft', 'Skjærgård Forsikring', 'Fjellvann Brus', 'Nordnes Telekom', 'Havbris Shipping', 'Granli Sparebank', 'Isbre Energi', 'Lysaker Data']
+
+export const anleggstrinn = (r: Racingteam, a: Racinganlegg) => r.anlegg?.[a] ?? 0
+
+/** Rabatten på en del fra anlegget som bygger den: 10 % per trinn. */
+export function delrabatt(r: Racingteam, del: Bildel): number {
+  const a = ANLEGGLISTE.find((x) => ANLEGG[x].deler.includes(del))
+  return a ? anleggstrinn(r, a) * ANLEGG_RABATT : 0
+}
+
+export const nesteAnleggspris = (r: Racingteam, a: Racinganlegg): number | null => ANLEGG_PRIS[anleggstrinn(r, a)] ?? null
+export const nesteAkademi = (r: Racingteam) => AKADEMI_TRINN[(r.akademi ?? 0) + 1] ?? null
+
+/** Det en junior er verdt for et annet team: 40 dagers lønn på dagens ferdighet. */
+export const juniorpris = (f: Forer) => JUNIORSALG_DAGER * lonnFor(f.ferdighet)
+
+/** «Kan bli 78–92»: et spenn rundt taket, forskjøvet etter en hash så taket ikke kan leses av. */
+export function potensialspenn(f: Forer): [number, number] | null {
+  if (f.potensial === undefined || f.ferdighet >= f.potensial) return null
+  const skyv = Math.floor(hash(`racing:spenn:${f.navn}:${f.id}`) * (POTENSIAL_SPENN - 3))
+  const lav = Math.max(f.ferdighet, f.potensial - 2 - skyv)
+  return [lav, Math.min(MAKS_FERDIGHET, lav + POTENSIAL_SPENN)]
+}
+
+/** Den trygge summen for en sesong: 70 % av det fjorårets plass ville gitt (et nytt team: 10. plass). */
+export function tryggSponsor(r: Racingteam): number {
+  const plass = r.sesonger.at(-1)?.plass ?? 10
+  return Math.round(SPONSOR_PLASS[plass - 1] * SPONSOR_TRYGG)
+}
+
+/** Sesongens sponsor: et navn fra en hash, samme avtale som i fjor (eller den trygge). */
+export function nySponsor(r: Racingteam, avtale: Sponsoravtale = r.sponsor?.avtale ?? 'trygg'): Racingsponsor {
+  return { navn: SPONSORNAVN[Math.floor(hash(`racing:sponsor:${r.navn}:${r.sesong}`) * SPONSORNAVN.length)], avtale, trygg: tryggSponsor(r) }
+}
+
+/** Et heltall i [fra, til] fra en nøkkel. */
+const hashMellom = (nokkel: string, fra: number, til: number) => fra + Math.floor(hash(nokkel) * (til - fra + 1))
+
+/** En fører fra før Pakke 111 får alder og tak fra navnet: 22–30 år og 0–6 poeng å gå på. */
+function medAlder(f: Forer): Forer {
+  if (f.alder === undefined) f.alder = hashMellom(`racing:alder:${f.navn}`, 22, 30)
+  if (f.potensial === undefined) f.potensial = Math.min(MAKS_FERDIGHET, f.ferdighet + hashMellom(`racing:tak:${f.navn}`, 0, 6))
+  return f
+}
+
+/** En junior fra akademiet, fra teamets navn og sesongen. */
+function nyJunior(r: Racingteam): Forer {
+  const t = AKADEMI_TRINN[r.akademi ?? 0]
+  const nokkel = `racing:junior:${r.navn}:${r.sesong}`
+  const ferdighet = hashMellom(`${nokkel}:ferdighet`, t.ferdighet[0], t.ferdighet[1])
+  return {
+    id: r.nesteForerId++,
+    navn: navnFra(nokkel),
+    ferdighet,
+    lonn: lonnFor(ferdighet),
+    alder: hashMellom(`${nokkel}:alder`, JUNIOR_ALDER[0], JUNIOR_ALDER[1]),
+    potensial: Math.min(MAKS_FERDIGHET, ferdighet + hashMellom(`${nokkel}:tak`, t.loft[0], t.loft[1])),
+  }
+}
+
+/**
+ * Et år eldre: en ung fører vokser 3–7, en eldre 0–1, og simulatoren gir ett poeng til per trinn —
+ * aldri over taket. Lønnen følger ferdigheten. Fra en hash, så terningen går i samme takt. Muterer.
+ */
+function vokser(r: Racingteam, f: Forer): number {
+  medAlder(f)
+  const ung = f.alder! <= UNG_TIL
+  const [fra, til] = ung ? VEKST_UNG : VEKST_ELDRE
+  const vekst = hashMellom(`racing:vekst:${f.navn}:${f.id}:${r.sesong}`, fra, til) + anleggstrinn(r, 'simulator')
+  const for_ = f.ferdighet
+  f.ferdighet = Math.max(f.ferdighet, Math.min(f.potensial!, f.ferdighet + vekst))
+  f.alder! += 1
+  f.lonn = lonnFor(f.ferdighet)
+  return f.ferdighet - for_
 }
 
 /** Teamet teller i formuen med det delene har kostet, som stadion i klubben. */
@@ -247,7 +369,10 @@ export function lagMarked(r: Pick<Racingteam, 'navn' | 'sesong' | 'nesteForerId'
   return lag.map(([fra, til], i) => {
     const nokkel = `racing:marked:${r.navn}:${r.sesong}:${i}`
     const ferdighet = Math.round(fra + hash(`${nokkel}:ferdighet`) * (til - fra))
-    return { id: r.nesteForerId + i, navn: navnFra(nokkel), ferdighet, lonn: lonnFor(ferdighet) }
+    // Pakke 111: en alder og et tak — en ung fører har mer å gå på, en på 28 og eldre ingenting.
+    const alder = hashMellom(`${nokkel}:alder`, 19, 32)
+    const rom = alder <= UNG_TIL ? hashMellom(`${nokkel}:tak`, 3, 12) : alder < 28 ? hashMellom(`${nokkel}:tak`, 0, 5) : 0
+    return { id: r.nesteForerId + i, navn: navnFra(nokkel), ferdighet, lonn: lonnFor(ferdighet), alder, potensial: Math.min(MAKS_FERDIGHET, ferdighet + rom) }
   })
 }
 
@@ -257,7 +382,9 @@ export function nyttRacingteam(s: Spilltilstand): Racingteam {
   const nykommere: Forer[] = [0, 1].map((i) => {
     const nokkel = `racing:nykommer:${navn}:${i}`
     const ferdighet = 48 + Math.floor(hash(`${nokkel}:ferdighet`) * 5)
-    return { id: i + 1, navn: navnFra(nokkel), ferdighet, lonn: lonnFor(ferdighet) }
+    // Pakke 111: nykommere er unge og har litt å gå på.
+    const alder = hashMellom(`${nokkel}:alder`, 19, 22)
+    return { id: i + 1, navn: navnFra(nokkel), ferdighet, lonn: lonnFor(ferdighet), alder, potensial: ferdighet + hashMellom(`${nokkel}:tak`, 5, 15) }
   })
   const r: Racingteam = {
     navn,
@@ -277,9 +404,14 @@ export function nyttRacingteam(s: Spilltilstand): Racingteam {
     sesonger: [],
     premier: 0,
     lonn: 0,
+    akademi: 0,
+    juniorer: [],
+    anlegg: {},
+    sponsorpenger: 0,
   }
   r.marked = lagMarked(r)
   r.nesteForerId += r.marked.length
+  r.sponsor = nySponsor(r)
   return r
 }
 
@@ -463,18 +595,50 @@ function sesongslutt(s: Spilltilstand, r: Racingteam, hvem: string, hendelser: s
     saker.push({ type: 'marked', tittel: `${forere[0]?.forer ?? lag[0].lag} er verdensmester`, tekst: `${r.navn} endte på ${plass}. plass blant teamene.` })
   }
   hendelser.push(titler.length ? `Sesong ${r.sesong} er over: ${titler.join(' og ').toLowerCase()}! ${kortKroner(MESTERPREMIE * titler.length)} i premie.` : `Sesong ${r.sesong} er over: ${plass}. plass blant teamene.`)
+  // Pakke 111: resultatavtalen betaler etter plassen.
+  if (r.sponsor?.avtale === 'resultat') {
+    const belop = SPONSOR_PLASS[plass - 1]
+    sponsorpenger(s, r, belop)
+    hendelser.push(`${r.sponsor.navn} betaler ${kortKroner(belop)} for ${plass}. plass.`)
+  }
   const seire = r.lop.filter((l) => l.sesong === r.sesong && l.plasser.includes(1)).length
   r.sesonger.push({ sesong: r.sesong, plass, poeng: lag[plass - 1].poeng, forerplass, seire, titler })
   if (r.sesonger.length > 10) r.sesonger.shift()
   // Pakke 110: tabellen slik den endte, så siden kan vise den mens det siste løpet kjøres.
   r.sisteTabell = { sesong: r.sesong, lagpoeng: { ...r.lagpoeng }, forerpoeng: { ...r.forerpoeng } }
+  // Pakke 111: førerne og juniorene blir et år eldre og vokser, og akademiet sender opp en ny.
+  const vekst: string[] = []
+  for (const f of [...r.forere, ...(r.juniorer ?? [])]) {
+    if (!f) continue
+    const v = vokser(r, f)
+    if (v > 0) vekst.push(`${f.navn} +${v} til ${f.ferdighet}`)
+  }
+  if (vekst.length) hendelser.push(`Førerne har blitt bedre: ${vekst.join(', ')}.`)
+  if ((r.akademi ?? 0) > 0) {
+    r.juniorer ??= []
+    if (r.juniorer.length < MAKS_JUNIORER) {
+      const j = nyJunior(r)
+      r.juniorer.push(j)
+      saker.push({ type: 'deg', tittel: `Ny junior hos ${r.navn}`, tekst: `${j.navn} (${j.alder}) rykker opp fra ${AKADEMI_TRINN[r.akademi!].navn.toLowerCase()} med ferdighet ${j.ferdighet}. Teamet ser et tak et stykke over.` })
+    } else {
+      hendelser.push(`Akademiet er fullt (${MAKS_JUNIORER} juniorer): ingen ny junior i år.`)
+    }
+  }
   r.sesong += 1
   r.runde = 0
   r.lagpoeng = {}
   r.forerpoeng = {}
   r.marked = lagMarked(r)
   r.nesteForerId += r.marked.length
+  r.sponsor = nySponsor(r)
   return saker
+}
+
+/** Sponsorpenger: i racingens linje, som premiene. Muterer. */
+function sponsorpenger(s: Spilltilstand, r: Racingteam, belop: number): void {
+  s.kontanter += belop
+  racingpenger(s, belop)
+  r.sponsorpenger = (r.sponsorpenger ?? 0) + belop
 }
 
 /**
@@ -491,6 +655,8 @@ export function racingVedDagsskifte(s: Spilltilstand, hvem: string): Overskrift[
   for (const h of r.ventendeHendelser ?? []) hendelse(s, h)
   delete r.ventendeSaker
   delete r.ventendeHendelser
+  // Pakke 111: et team fra før får en sponsor med den trygge avtalen.
+  r.sponsor ??= nySponsor(r, 'trygg')
   const dag = dagnummer(s.sek)
   const lonn = lonnPerDag(r)
   s.kontanter -= lonn
@@ -502,6 +668,8 @@ export function racingVedDagsskifte(s: Spilltilstand, hvem: string): Overskrift[
   s.kontanter += lop.premie
   racingpenger(s, lop.premie)
   r.premier += lop.premie
+  // Pakke 111: den trygge avtalen betaler en åttendedel per løp.
+  if (r.sponsor.avtale === 'trygg') sponsorpenger(s, r, Math.round(r.sponsor.trygg / LOP_PER_SESONG))
   const saker: Overskrift[] = []
   const mine = lop.plasser
     .map((p, i) => ({ p, f: r.forere[i], start: lop.start?.[i] ?? null }))
