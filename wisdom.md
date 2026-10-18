@@ -199,6 +199,13 @@ lives in one place only.
   heavy test). Finding that before reporting meant the report could say «tested on top of
   master». After a conflict in `Ideer.md`, reread your «Next up» — it may talk about the
   other track's pack as if it were still to come.
+- **Always tell Folke when a push has gone live** (asked 18 October 2026: «Always give me a notice when a
+  push has gone live»). A push only starts the release: `.github/workflows/pages.yml` runs the tests, builds and
+  publishes, ~2–3 minutes, and a red test stops it. Right after `node scripts/lever.mjs --push`, start
+  `node scripts/live.mjs` in the background (it reads GitHub's open API for the pushed commit's run; exit 0 live,
+  1 failed, 2 not done in 15 min). When it ends, send a `PushNotification` («Pakke 114 er live på
+  folkemel-ui.github.io/milliardaeren») and say it in the chat too — or, if it failed, say so with the link.
+  The push being accepted is not the notice; the finished release is. `gh` isn't installed on this machine.
 - **Delivering**: commit on your branch, run `node scripts/lever.mjs` (fetch, rebase onto
   `origin/master`, `tsc` and every test on the result, then the list of what would go to
   master), report, and on Folke's «push» run `node scripts/lever.mjs --push`. It refuses a
