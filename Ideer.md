@@ -77,12 +77,42 @@ Loose ends after G1–G7, and what was picked for v10.0.
 18. **Silhouettes that fill their place.** The overview card in Samling (Pack 91) gives each thing a 44 px target, but the silhouettes inside are about 30 × 10 px for the cars and boats, so the card reads as a row of dots; and the eighth car stands alone on a second row. Crop each silhouette to fill its target (as `NAERBILDER` does for the storage slots), perhaps four to a row with larger targets. From the screen review on 14 October 2026.
 19. **Word marks for the eight new stocks.** Pack 104 put Solbær Drikker (SOL), Nordisk Pølse (NPL), Gatemat Norge (GMN), Kaffebrenneriet Nord (KBN), Bordet Gruppen (BRD), Fjordhotellene (FJH), Topptur Alpin (TOP) and Nordbygg Eiendom (NBE) on the exchange, with logo marks drawn by the game track in the G4 style (`Papirlogo.tsx`) but no word marks: `ORDMERKER` is now partial, and a logo with `ordmerke` shows the mark alone. Make the word marks with `scripts/lag-ordmerker.mjs` (a font per company, as G4 chose), check the eight marks while there, and take the eight off `VENTER_PAA_ORDMERKE` in `grafikkG4.test.ts`. Picked 14 October 2026 with Pack 104.
 20. **The power plants on the farms.** Pack 115 added wind turbines on Lista, solar panels on the barn roof (Lista and Hedmarken, with a barn) and a small hydro plant on the river in Namdalen’s forest, shown only as rows with text on the farm and forest pages. Draw them into the scenes when built: turbines on Lista’s fields (its scene already has distant turbines), panels on the barn roof, a small plant and intake by the river. Folke chose a Graphics item over first versions by the game track.
+21. **A forest that grows in the drawing.** The Trysil and Namdalen scenes look the same at day 1 and day 300. Show the rotation: bare stumps and small spruce right after a felling, a tall forest around day 36 (the best day to fell), and old, dense forest after day 150 — from the forest’s age (`skogalder`). From the forest list on 19 October 2026.
 
 ## Speed and tests
 
 From the same review, measured on the built engine.
 
 1. **Run the phone check and the playtest.** Pack 76 built the tools: `?maal` turns on a measuring panel in Profil → Innstillinger with the start-up time, the longest catch-up after time away, a live second (average and top over the last 60) and the save (time and size), with «Kopier tallene» to send them; `Spilltest.md` is the checklist for the phone check and for one or two outside testers (what to watch for and seven questions afterwards). What is left is to run it on a real slow phone and with real people — Folke’s part — and turn the results into a list.
+
+## The forests grow
+
+From the forest list on 19 October 2026: Folke picked 13 of 19 (12 new ideas and *Stands you fell one at a time* moved up from *Parked*; the drawing of a growing forest is *Graphics* item 21; the forester and the ready notice are under *Parked*). The forest today (`jord.ts`, `hoggSkog`): two forests, Trysil (base price 60 mill) and Namdalen (250 mill), whose land rises 0.3 % a game day like the farms. Timber grows towards 3 × the land value (`tommerfaktor`); a whole rotation gives most per day when felled at day 36 (~3 hours of play): 0.75 × the land, about 25 % of the land value an hour — ~62 mill an hour for Namdalen and ~15 mill for Trysil at start prices, against 149 mill for a full Lista farm and up to ~4 mrd with neighbours. A felling is one tap that pays the timber and replants for free. The timber price never moves, the weather does not touch the forest, it gives no status, gets no Avisa story (only a log line), keeps no accounts, has one achievement (Tømmerhogger), and the only thing to build is Namdalen’s hydro plant (Pack 115).
+
+### Money and decisions
+
+1. **A timber price that moves.** Today timber is always the land value × its age factor. Let it follow the building boom (the property index), so «fell now or wait for a better price» becomes a real choice, as the silo is for grain.
+2. **Carbon credits for standing forest.** A forest earns a daily payment for the CO₂ it holds, and how much follows how grown it is — e.g. a share of the standing timber, so a forest just felled earns almost nothing and an old one the most. Letting a forest stand then becomes a real alternative to felling at day 36 instead of just a lost rotation. The rate is measured in the pack against the rotation (felling every 36 days gives ~2.1 % of the land a day).
+3. **A sawmill.** Your own sawmill in Trysil or Namdalen raises each felling, e.g. +20 %, priced on the land with a payback line like the farm buildings.
+
+### Running the forest
+
+4. **Forest machines in steps.** A forest road (+10 % timber value: shorter haulage), a harvester (+10 %) and better seedlings that grow faster (best day 36 → 30), each in three steps priced on the land, like the farm machines since Pack 114.
+5. **Storm and fire.** A stormy week can blow down part of the timber, sold at ×0.7; a dry summer week carries a small fire risk. Forest insurance (a yearly premium) covers both.
+6. **Buy the neighbouring forest.** As the farms got in Pack 114: each neighbour triples the land the timber grows on, up to three. Today a forest stops mattering late: Namdalen’s land is ~850 mill by the bench’s end, ~210 mill an hour at best.
+7. **Stands you fell one at a time.** A forest in 3–5 stands, each with its own age, more stands bought like fields, felled in turn for a steady rotation, with stages and status. (Moved up from *Parked*, from the second farm list.)
+
+### Status, news and goals
+
+8. **Status from forests.** Forests give 0 status today — only the farm stages count (`jordstatus`). E.g. +5 per forest and +10 per neighbour.
+9. **Odel for forests too.** Pack 114 left forests out of odel: «odelsskog» after 90 days, with the same story and +15 status.
+10. **Avisa on fellings.** A story for a record felling (the most per day you have had) or a forest left to grow past 300 days; the rest in «Uka di».
+11. **Forest achievements.** One today (Tømmerhogger). E.g. «Perfekt omløp» (fell within ±2 days of day 36), «Gammelskog» (let a forest stand 360 days), «Tømmerbaron» (1 mrd from timber in all).
+
+### On screen
+
+12. **A forest page with a growth curve.** A chart of the timber value from planting to day 150, with today and the best day marked, so you see why day 36 and what waiting costs. Today the page is the card, the facts and (in Namdalen) the power plant.
+13. **The forest’s own accounts.** The last eight fellings — day, age, amount, per day — and the total since you bought it. Today a felling leaves only a log line.
 
 ## The screens at phone size
 
@@ -197,7 +227,6 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 **Not picked from the second farm list**
 - **Selling animals.** An animal can only be bought, so a full cowshed is fixed; sell back at 75 % to swap.
 - **What each buy has earned.** «Tjent siden kjøpet kr X» on every machine, building and animal; the accounts keep only totals by kind.
-- **Stands you fell one at a time.** A forest in 3–5 stands with their own age, more stands bought like fields, felled in turn for a steady rotation, with stages and status.
 - **Hunting rights.** Lease the elk hunt in the forests each autumn month, more in an older forest, with «Elgjakta i Trysil» in Avisa.
 - **Cabin plots in Trysil.** Sell plots out of the forest; each takes a share of the timber, the price follows the property cycle.
 - **Christmas trees.** In December a young stand sells Christmas trees, so a newly planted forest earns something.
@@ -242,6 +271,10 @@ These ideas were suggested but not picked. They stay here so they can be moved u
 - **Rekorduke.** Harvest a Rekorduke.
 - **Stormfull uke** (hidden). A week the power earns more than the harvest.
 - **Arvesølv** (hidden). An odelsgård with three neighbours.
+
+**Not picked from the forest list on 19 October 2026**
+- **A forester who fells for you.** Hire one for a fee (e.g. 5 % of each felling) who fells at day 36 automatically, also while you are away — 12 h away today gives ~36 % less per day than felling every 36 days.
+- **A notice when a forest is ready.** A log line and notice once per rotation at day 36, like «Silo full»; today only the «Klar for hogst» chip.
 
 **Declined in earlier rounds** (from lists Folke saw and didn't pick; the details were in chat, not in this file)
 - **Before v1.0:** a guided tutorial, an ending, missions, sound, accessibility.
