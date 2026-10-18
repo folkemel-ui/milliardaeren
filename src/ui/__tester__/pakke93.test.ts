@@ -33,9 +33,10 @@ describe('gårdens side', () => {
     // Pakke 112: prisene står over lageret, på «Lager og regnskap».
     const html = tegn(createElement(Lagerkort, { s: medGard(), id: 'gard-lista' }))
     expect(html).toContain('Priser denne uka')
-    expect(html).toMatch(/korn <strong[^>]*>×\d,\d\d/)
-    expect(html).toContain('grønnsaker')
-    expect(html).toContain('frukt og bær')
+    // Pakke 113: prisene står i lista under grafen, én rad per gruppe.
+    expect(html).toMatch(/Korn<\/span><strong[^>]*>×\d,\d\d/)
+    expect(html).toContain('Grønnsaker')
+    expect(html).toContain('Frukt og bær')
   })
 
   it('byggene: drivhuset krever fem jorder, låven en silo', () => {

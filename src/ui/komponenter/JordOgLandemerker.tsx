@@ -3,7 +3,6 @@ import { hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjop
 import { Bekreftknapp } from './Bekreftknapp'
 import {
   AVLINGER,
-  avlingspris,
   byggpris,
   byggSperre,
   DRIVHUSAVLING,
@@ -24,7 +23,9 @@ import {
   HOST_ANDEL,
   hostSaLangt,
   lagerFullt,
+  reddetSaLangt,
   tidTilHost,
+  ukefaktorSaLangt,
   JORD,
   JORD_SYNLIG_VED,
   JORDLISTE,
@@ -58,6 +59,9 @@ import type { By, Gardstall, JordId, LandemerkeId, Spilltilstand } from '../../e
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek, tall, varighet } from '../format'
 import { Apneknapp, BedriftIkon, Scene } from './BedriftIkon'
+import { Avlingspriser } from './Avlingspriser'
+import { Ikon, type Ikonnavn } from './Ikoner'
+import { vaerPaaDag, VAERTYPER, type Vaertype } from '../../engine/verden'
 import { aapneTing, trykkApner } from '../detaljvisning'
 import { aapneGardsside, GARDSSIDER, type Gardsside } from '../gardssider'
 import { Seksjon } from './Seksjon'
@@ -135,6 +139,7 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
             : 'Kjøpes nyplantet. Tømmeret vokser fra første dag.'}
       </p>
       {eid && t.type === 'skog' && <Skogstatus s={s} id={id} />}
+      {eid && gard && <Ukedager s={s} id={id} />}
       {eid && gard && lagerFullt(s, id) && (
         <p className="liten">
           <span className="merke varsel">Silo full</span> <span className="dempet">Det som ikke får plass, selges mandag til ukas pris.</span>
@@ -301,22 +306,42 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
   )
 }
 
-/** Ukas priser på avlingene, med de gode og dårlige merket (Pakke 93; fra Pakke 112 over lageret). */
-function Ukespriser({ s }: { s: Spilltilstand }) {
-  const uke = ukeFor(dagnummer(s.sek))
+/** Ikonet for hvert vær på dagbrikkene (Pakke 113). */
+const VAERIKON: Record<Vaertype, Ikonnavn> = { sol: 'sol', overskyet: 'sky', regn: 'regn', sno: 'sno' }
+const DAGNAVN = ['M', 'T', 'O', 'T', 'F', 'L', 'S'] as const
+
+/**
+ * Ukas vær på gårdens kort (Pakke 113): sju dager, fylt inn etter hvert som de går — i dag med —
+ * værfaktoren så langt, og hva drenering og frostdekke har reddet. Uka er bestemt fra mandag,
+ * men kortet viser bare det som har vært.
+ */
+function Ukedager({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]!
+  const dag = dagnummer(s.sek)
+  const start = ukeFor(dag) * 7
+  const faktor = ukefaktorSaLangt(dag, !!j.bygg?.drenering, !!j.bygg?.frostdekke)
+  const reddet = reddetSaLangt(s, id)
+  const bygg = [j.bygg?.drenering && 'dreneringen', j.bygg?.frostdekke && 'frostdekket'].filter(Boolean).join(' og ')
   return (
-    <p className="liten avlingspriser">
-      Priser denne uka:{' '}
-      {GRUPPELISTE.map((g, i) => {
-        const p = avlingspris(g, uke)
-        return (
-          <span key={g}>
-            {i > 0 && ' · '}
-            {GRUPPENAVN[g].toLowerCase()} <strong className={p >= 1.1 ? 'pluss' : p <= 0.9 ? 'minus' : undefined}>×{tall(p, 2)}</strong>
-          </span>
-        )
-      })}
-    </p>
+    <div className="ukedager-rad">
+      <ol className="ukedager" aria-label="Ukas vær så langt">
+        {DAGNAVN.map((navn, i) => {
+          const d = start + i
+          const v = d <= dag ? vaerPaaDag(d) : null
+          return (
+            <li key={i} className={`ukedag${v ? ` vaer-${v}` : ' kommer'}${d === dag ? ' idag' : ''}`} title={v ? VAERTYPER[v].navn : 'Kommer'}>
+              <span className="ukedag-navn">{navn}</span>
+              {v ? <Ikon navn={VAERIKON[v]} størrelse={16} /> : <span className="ukedag-tom" aria-hidden="true" />}
+              <span className="skjult-tekst">{v ? VAERTYPER[v].navn : 'kommer'}</span>
+            </li>
+          )
+        })}
+      </ol>
+      <p className="dempet liten">
+        Været så langt gir <strong className={faktor >= 1.1 ? 'pluss' : faktor <= 0.9 ? 'minus' : undefined}>×{tall(faktor, 2)}</strong>
+        {reddet >= 1 && ` · ${bygg[0].toUpperCase()}${bygg.slice(1)} har reddet ${kortKroner(reddet)}`}
+      </p>
+    </div>
   )
 }
 
@@ -373,8 +398,9 @@ export function Lagerkort({ s, id }: { s: Spilltilstand; id: JordId }) {
   if (!j) return null
   return (
     <li className="kort">
-      <h2 className="kort-tittel">Lageret</h2>
-      <Ukespriser s={s} />
+      <h2 className="kort-tittel">Priser denne uka</h2>
+      <Avlingspriser sek={s.sek} />
+      <h2 className="kort-tittel lager-tittel">Lageret</h2>
       {j.bygg?.silo ? (
         <Kornlager s={s} id={id} />
       ) : (

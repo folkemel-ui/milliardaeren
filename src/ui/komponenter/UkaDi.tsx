@@ -79,6 +79,12 @@ export function UkaDi({ o }: { o: Oppgjor }) {
           .
         </p>
       )}
+      {/* Pakke 113: gårdene står her hver uke; avisa skriver om dem bare den beste og verste uka av åtte. */}
+      {o.gardene && (
+        <p className="oppgjor-merknad">
+          Gårdene ga <strong>{kortKroner(o.gardene.host)}</strong> for {o.gardene.vaer.toLowerCase()}.
+        </p>
+      )}
       {!o.besteInvestering && !o.handel?.length && (
         <p className="oppgjor-merknad">En stille uke: ingen handel, og ingenting du eide hele uka å sammenligne.</p>
       )}

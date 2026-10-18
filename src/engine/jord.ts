@@ -320,6 +320,55 @@ export function ukefaktor(dag: number, drenering: boolean, frost: boolean): numb
   return faktor
 }
 
+/**
+ * Ukas værfaktor regnet av dagene som er gått, i dag med (Pakke 113): det samme som
+ * `ukefaktor`, men over færre dager. Uka er bestemt fra mandag; kortet viser bare det som har vært.
+ */
+export function ukefaktorSaLangt(dag: number, drenering: boolean, frost: boolean): number {
+  const virkning = drenering && frost ? BEGGE : drenering ? DRENERT : frost ? FROSTFRI : AVLING
+  const start = ukeFor(dag) * 7
+  let sum = 0
+  for (let d = start; d <= dag; d++) {
+    const v = vaerPaaDag(d)
+    sum += (jevnetVaer(AVLING, 'norge', d) * virkning[v]) / AVLING[v]
+  }
+  return Math.min(1.8, Math.max(0.3, 1 + FORSTERKNING * (sum / (dag - start + 1) - 1)))
+}
+
+/**
+ * Det drenering og frostdekke har gitt så langt denne uka (Pakke 113): avlingen så langt
+ * med dem, minus det den ville vært med ukas vær uten dem. Null uten byggene.
+ */
+export function reddetSaLangt(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  if (!j || (!j.bygg?.drenering && !j.bygg?.frostdekke)) return 0
+  const dag = dagnummer(s.sek)
+  const med = gardsvaer(j, ukefaktor(dag, !!j.bygg?.drenering, !!j.bygg?.frostdekke))
+  const uten = gardsvaer(j, vaer(dag).faktor)
+  if (med <= uten) return 0
+  return gardHost(s, id, dag, s.sek) * (1 - uten / med)
+}
+
+/** Snittet av en gruppes pris de åtte siste ukene, denne med (Pakke 113). */
+export function snittpris(gruppe: Avlingsgruppe, uke: number, uker = 8): number {
+  let sum = 0
+  for (let u = uke - uker + 1; u <= uke; u++) sum += avlingspris(gruppe, u)
+  return sum / uker
+}
+
+/**
+ * Om uka som ble høstet, er den beste eller verste av de åtte siste (Pakke 113) — da skriver
+ * avisa om gårdene; ellers står høsten i søndagsavisas «Uka di». Uker før spillet begynte telles ikke.
+ */
+export function ukeAvAtte(dag: number): 'beste' | 'verste' | null {
+  const f = vaer(dag).faktor
+  const tidligere: number[] = []
+  for (let k = 1; k <= 7; k++) if (dag - 7 * k >= 0) tidligere.push(vaer(dag - 7 * k).faktor)
+  if (tidligere.length === 0 || f > Math.max(...tidligere)) return 'beste'
+  if (f < Math.min(...tidligere)) return 'verste'
+  return null
+}
+
 /** Traktoren og skurtreskeren ganget sammen. */
 export function maskinfaktor(j: Jordstykke): number {
   let f = 1
@@ -711,7 +760,12 @@ export function jordVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const fra = garder.length ? ` fra ${garder.length > 1 ? `${garder.slice(0, -1).join(', ')} og ${garder[garder.length - 1]}` : garder[0]}` : ''
   const silo = lagret > 0 ? ` Avling for ${kortKroner(lagret)} gikk på lager.` : ''
   const salg = fraLager > 0 ? ` Prisen var god, og lageret ble solgt for ${kortKroner(fraLager)}.` : ''
-  return [{ type: 'deg', tittel: `${v.navn} på gårdene`, tekst: `${v.tekst} Ukas avling ga ${kortKroner(host)}${fra}.${silo}${salg}` }]
+  // Pakke 113: avisa skriver bare om den beste eller verste uka av de åtte siste; ellers står
+  // høsten i søndagsavisas «Uka di». Pengene er betalt uansett.
+  const hvilken = ukeAvAtte(forrige)
+  if (!hvilken) return []
+  const tittel = `${hvilken === 'beste' ? 'Beste' : 'Verste'} uke på gårdene på to måneder`
+  return [{ type: 'deg', tittel, tekst: `${v.navn}: ${v.tekst} Ukas avling ga ${kortKroner(host)}${fra}.${silo}${salg}` }]
 }
 
 /**

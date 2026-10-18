@@ -209,6 +209,14 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 - **«Spillet er åpent et annet sted» after a reload with an injected save**: the old tab's lock is still there.
   A `.click()` from `javascript_tool` on «Spill her i stedet» did nothing; `find` plus a `computer` click on its
   ref worked. A save made for a test also shows «Nytt i X» after a release — close it with «Spill videre».
+- **`Linjegraf` draws one series** (Pack 113): the crop prices got their own small chart (`Avlingspriser.tsx`) with the
+  same classes (`graf`, `graf-flate`, `graf-boble`), a fixed axis over the whole price range, `--kilde-1…3` per group
+  (colour follows the group), and the values written out in a list under it, so the chart reads without colour.
+  A component that renders `Linjegraf` (`UkaDi`) fails under `renderToStaticMarkup` with «CSS is not defined»
+  (`CSS.escape`): give the test fixture a one-point curve so the chart shows its placeholder.
+- **The pane's screenshot can come out magnified and cropped** on one page while the DOM is fine (Pack 113, the
+  storage page: right half missing, `visualViewport.scale` 1.02, every row inside 376 px). Resizing did not fix it;
+  prove such a page with rects and a driven hover instead of the picture.
 - **A hook called before an early return still subscribes.** The measuring panel called
   `useMaalinger()` and then `return null` when hidden, so it listened all the same, and once the
   store notified every second, every Innstillinger click test got a redraw outside `act` — the

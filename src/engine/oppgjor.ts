@@ -11,12 +11,12 @@
  */
 
 import { nettoformue } from './formler'
-import { dagnummer, dato, MÅNEDER, ukedag, ukenummer } from './kalender'
+import { DAG_SEK, dagnummer, dato, MÅNEDER, ukedag, ukenummer } from './kalender'
 import { AKSJER, PAPIRER } from './marked'
 import { EIENDOMSSTIGEN, EIENDOMSTYPER } from './eiendom'
 import { eiendomskurs } from './regioner'
 import { FOND, FONDLISTE, fondskurs } from './fond'
-import { JORD, JORDLISTE, landverdi } from './jord'
+import { JORD, JORDLISTE, landverdi, ukeFor, vaer } from './jord'
 import { MALERIER, MALERILISTE, maleripris } from './kunst'
 import { forbesliste } from './rivaler'
 import type { Aktivaklasse, EiendomId, FondId, Handelstotal, JordId, MaleriId, Oppgjor, PapirId, Periodestart, Spilltilstand } from './types'
@@ -145,6 +145,19 @@ function ukaDi(s: Spilltilstand, start: Periodestart, o: Oppgjor): void {
     if (endringer.length) o.besteInvestering = endringer[0]
     if (endringer.length > 1) o.versteInvestering = endringer[endringer.length - 1]
   }
+  // Pakke 113: mandagens høst — gårdenes regnskap fører den på uka som ble høstet.
+  const hostuker = new Set<number>()
+  for (let d = start.dag; d < dagnummer(s.sek); d++) if (ukedag(d * DAG_SEK) === 0) hostuker.add(ukeFor(d - 1))
+  let host = 0
+  let uke = -1
+  for (const u of hostuker) {
+    for (const id of JORDLISTE) {
+      const r = s.jord?.[id]?.regnskap?.find((x) => x.uke === u)
+      if (r) host += r.host + r.korn
+    }
+    uke = Math.max(uke, u)
+  }
+  if (host > 0) o.gardene = { host, vaer: vaer(uke * 7).navn }
 }
 
 function arkiver(s: Spilltilstand, o: Oppgjor): void {

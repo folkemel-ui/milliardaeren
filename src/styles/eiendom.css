@@ -415,3 +415,100 @@
 .landkort .klubbside-rad {
   border-top: 1px solid var(--kant);
 }
+
+/* ── Gårdens uke (Pakke 113) ─────────────────────────────────────────────── */
+
+/* Sju dagbrikker: dagens bokstav og været, fylt inn etter hvert som dagene går. */
+.ukedager-rad {
+  margin-top: 8px;
+}
+
+.ukedager {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.ukedag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  border: 1px solid var(--kant);
+  border-radius: 8px;
+  color: var(--tekst-dempet);
+}
+
+.ukedag-navn {
+  font-size: var(--skrift-1);
+}
+
+.ukedag.idag {
+  border-color: var(--gull);
+}
+
+.ukedag.vaer-sol {
+  color: var(--gull);
+}
+
+.ukedag.vaer-overskyet,
+.ukedag.vaer-regn,
+.ukedag.vaer-sno {
+  color: var(--tekst);
+}
+
+.ukedag.kommer {
+  border-style: dashed;
+}
+
+.ukedag-tom {
+  width: 16px;
+  height: 16px;
+}
+
+.skjult-tekst {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Avlingsprisene: tre linjer over åtte uker, ×1,00 stiplet, og tallene under. */
+.avlingsgraf .graf-snitt {
+  stroke: var(--tekst-dempet);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.avlingspriser-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.avlingspriser-liste li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.avlingspriser-farge {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.lager-tittel {
+  margin-top: 16px;
+}

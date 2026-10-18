@@ -476,6 +476,11 @@ export interface Oppgjor {
   /** Ukas beste og verste investering blant det du eide hele uka. */
   besteInvestering?: { navn: string; endring: number }
   versteInvestering?: { navn: string; endring: number }
+  /**
+   * Pakke 113: det gårdene ga for uka som ble høstet mandag — avling og salg fra lageret —
+   * og ukas vær. Avisa skriver om gårdene bare den beste og verste uka av åtte; dette står alltid.
+   */
+  gardene?: { host: number; vaer: string }
 }
 
 /** Et øyeblikksbilde ved forrige dagsskifte, så avisen kan melde hva som har endret seg. */

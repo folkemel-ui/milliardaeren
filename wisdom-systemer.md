@@ -188,6 +188,17 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 - **«So far this week» and the countdown** (Pack 112): `hostSaLangt` is `gardHost` from the week's start to
   `s.sek` plus `opptjent`; `tidTilHost` is the seconds to the next multiple of seven days, the week `ukensGardHost`
   already uses. A game week is 35 real minutes, so `varighet` reads «om 24 min».
+- **The week's weather is fixed from Monday** (Pack 113): `vaer(dag)` hashes all seven days at once and the harvest
+  uses the whole week's factor from the first second. The day chips show only the days that have passed and
+  `ukefaktorSaLangt` averages those, but the «Ukas vær» fact and the «Jord og skog» line still name the week from
+  Monday, as they did before — the week was never a full surprise. Weeks are blocks of seven game days starting on
+  a Monday (`ukeFor`), the same blocks `ukensGardHost` and `tidTilHost` use.
+- **The farm in the paper** (Pack 113): `jordVedDagsskifte` pays every Monday but returns a story only when the
+  harvested week is the best or worst of the last eight (`ukeAvAtte`, ~11 % each over 520 weeks; weeks before day 0
+  are skipped). The game's own extremes (Rekorduke ≥ ×1.35, Elendig < ×0.65) are 38 % of weeks — far from rare.
+  The quiet weeks show in the Sunday paper: `ukaDi` sums each farm's `regnskap` row (host + korn) for the weeks
+  harvested inside the settlement (`o.gardene`). Fewer stories don't move Avisa's die: every story source is still
+  called; only the slice to `MAKS_SAKER` changes.
 - **A harvest test computed before Monday is ~2 % short** (Pack 105): `gardHostDeler` uses the land
   value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
   the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.
