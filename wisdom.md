@@ -136,6 +136,17 @@ lives in one place only.
   recommendations in the previous reply** («what is your next task?» → four questions with my
   picks → «Start next pack», Pack 89), the reply is the go-ahead for those picks: build with them,
   say so in one line at the start, and don't ask again.
+- **«Is there anything more we could add?» (19 October 2026)**: by then *Parked* and the declined rounds held
+  ~120 entries, and most obvious ideas (taking the group public, an ending, missions, short selling, mortgages,
+  events, sound) were already there. Read the whole of *Parked* first, grep the code for each candidate (the Oslo
+  home already had a wine cellar room; «oil price» was only a hot/cold-trade label), and say at the top which
+  known ideas you left out. Each item says what the game has today in numbers. Folke picked 6 of 20 and asked
+  to «reorganize the packs to fit the new points».
+- **Reordering the pack plan means renumbering every mention**, not just the pack lines: the section intros
+  («Packed as 102 and 116–118»), other packs' text («UI only, like 117 and 118»), and the other track's pack
+  notes («fits after Pack 119» in G25). A grep for `Pack 1[0-9][0-9]` outside the plan lines after the script is
+  the check. Put new content where its dependencies and the files it shares say (the wine after the pack that
+  shortens Luksus), keep dependent packs in a row, and say why each landed where it did.
 - **A pack the size of a list section is fine as two packs on the same files.** The club page
   (19 items) became Pack 77 (the structure: a hub and four pages) and Pack 78 (the lists inside
   them). Building the structure first meant the second pack's measurements were per page, and
@@ -207,6 +218,12 @@ lives in one place only.
   1 failed, 2 not done in 15 min). When it ends, send a `PushNotification` («Pakke 114 er live på
   folkemel-ui.github.io/milliardaeren») and say it in the chat too — or, if it failed, say so with the link.
   The push being accepted is not the notice; the finished release is. `gh` isn't installed on this machine.
+- **A side session proposed from here works in this same folder** (18 October 2026): a proposal card
+  (`own_initiative`) can't name another folder, and without a worktree it shares the checkout and the branch. The
+  hooks-fix session added an untracked test while I wanted to run `lever.mjs` — which rebases and tests the
+  working tree. Check `git status` before `lever.mjs`; if another session's files are there, message it (by its
+  session id) to commit or stop, and wait for it to go idle. It committed on spill and the fix went out with the
+  version bump. For work that belongs to the graphics track's files, the brief should say so.
 - **Delivering**: commit on your branch, run `node scripts/lever.mjs` (fetch, rebase onto
   `origin/master`, `tsc` and every test on the result, then the list of what would go to
   master), report, and on Folke's «push» run `node scripts/lever.mjs --push`. It refuses a
@@ -330,6 +347,10 @@ lives in one place only.
   `Emulation.setDeviceMetricsOverride` with `deviceScaleFactor`, `Page.captureScreenshot`) took
   seconds: write the save from `/ikon.svg`, open `/`, wait for `.bedriftskort` and
   `document.fonts.ready`, finish the animations, capture (`scripts/lag-skjermbilder.mjs`).
+- **`process.exit()` right after a `fetch` crashes Node on Windows** (libuv: «Assertion failed: !(handle->flags &
+  UV_HANDLE_CLOSING)», exit 127 instead of 0). Set `process.exitCode` and leave the loop instead
+  (`scripts/live.mjs`). And `gh` isn't installed: GitHub's open API (`api.github.com/repos/…/actions/runs`) works
+  without logging in for a public repo, 60 calls an hour.
 - **There is no Python on this machine** (`python` opens the Microsoft Store stub and does
   nothing). Write edit scripts in Node.
 
@@ -380,6 +401,12 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   should yield (`await new Promise((r) => setTimeout(r, 0))` between chunks, like the
   bench); `simuler(s, n)` equals n single seconds, so chunking changes nothing.
 - **Absurd durations mean the machine slept** (one test "took" 3 815 s). Rerun; don't debug.
+- **A `lever.mjs` that never ends: look at the runner's CPU** (19 October 2026). After the machine slept, a run sat
+  for 86 minutes with no test workers left and the vitest process at 16 s of CPU in total. List the node processes
+  with their start times (`Get-CimInstance Win32_Process -Filter "Name = 'node.exe'"`, in the PowerShell tool —
+  `$_` in a Bash-quoted PowerShell line gets eaten), compare with the clock, stop `lever.mjs` and both vitest
+  processes, and run it again; the rerun passed in normal time. On a slow evening a full run took ~450 s, so run
+  `lever.mjs` in the background, never as a foreground call with the 10-minute limit.
 - **The speed test's `leie` part (budget 22 ms) fails under full-suite load** — 23 ms in Packs 93 and 95,
   25 ms in Pack 103 — and passes alone. Rerun `ytelse.test.ts` alone before suspecting the change;
   `lever.mjs` has passed it every time so far.
@@ -409,6 +436,11 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   missed that the hire option had shown a net «Gir kr X/s» since Pack 48. What was really
   missing: the net left out branches, nothing said a hire loses money, and there was no payback.
   Say in the report how the item turned out, not just that it is done.
+- **Three plan premises were wrong in one evening** (18 October 2026): Pack 113's «weather as it happens» was fixed
+  from Monday, Pack 114's «the save version bumps» wasn't needed, and Pack 115's «all three plants take the edge off a
+  bad week» was false for the sun (+0.92 with the harvest). Each was found by reading or measuring before the
+  questions, and each became a question or a line in the report. Treat every «Next up» claim about the model as a
+  hypothesis until the code or a measurement says so.
 - **Check an idea's premise against the model before offering it** (Pack 92's «Next up»): «irrigation
   takes the loss in a dry, sunny week» — but in the game's weather sun is the farm's *best* week.
   Say so in the next pack's description and offer alternatives in its questions.
