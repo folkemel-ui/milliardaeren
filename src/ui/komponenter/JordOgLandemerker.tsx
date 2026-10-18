@@ -1,5 +1,5 @@
 import { antallDyr, DYR, DYRLISTE, dyrGir, dyrKasseNaa, dyrPerUke, dyrpris, fjosplasser, nesteKlipping, nesteSlakt, SLAKT_DAGER } from '../../engine/dyr'
-import { hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
+import { hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, kjopNabogard, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
 import {
   AVLINGER,
@@ -35,6 +35,15 @@ import {
   MASKINER,
   MASKINLISTE,
   maskinpris,
+  maskintekst,
+  maskintrinn,
+  MAKS_MASKINTRINN,
+  MAKS_NABOER,
+  NABO_FAKTOR,
+  NABO_STATUS,
+  nabopris,
+  naboer,
+  forventetUke,
   nesteJordpris,
   dagerTilHogst,
   skogalder,
@@ -99,6 +108,13 @@ export function Jordliste({ s, by }: { s: Spilltilstand; by: By | null }) {
   )
 }
 
+/** «Gods med 2 nabogårder · odelsgård · 10 av 10 jorder» (Pakke 114). */
+function gardsnavn(j: NonNullable<Spilltilstand['jord'][JordId]>): string {
+  const n = naboer(j)
+  const nabo = n > 0 ? ` med ${n} ${n === 1 ? 'nabogård' : 'nabogårder'}` : ''
+  return `${GARDSTRINN[gardstrinn(j)].navn}${nabo}${j.odel ? ' · odelsgård' : ''} · ${jorder(j)} av ${MAKS_JORDER} jorder`
+}
+
 /** Kortet for en gård eller skog. Avlingen er ukas, for dagene du eier gården. Et trykk åpner detaljsiden (`iDetalj`). */
 export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: JordId; iDetalj?: boolean }) {
   const t = JORD[id]
@@ -120,7 +136,7 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
         <div className="bedriftskort-midt">
           <h2>{t.navn}</h2>
           <span className="dempet">
-            {eid && gard ? `${GARDSTRINN[gardstrinn(eid)].navn} · ${jorder(eid)} av ${MAKS_JORDER} jorder` : t.sted}
+            {eid && gard ? gardsnavn(eid) : t.sted}
           </span>
         </div>
         <div className="eiendom-tall">
@@ -246,32 +262,36 @@ export function Gardskart({ s, id }: { s: Spilltilstand; id: JordId }) {
         )}
       </ul>
       {pris !== null && <p className="dempet liten">Neste jord: {gardTekst(pris, gardGir(s, id, { jord: true }))}</p>}
+      {/* Pakke 114: tre trinn per maskin; raden sier hva den gir nå og hva neste trinn gir. */}
       {MASKINLISTE.map((m) => {
-        const eier = !!j.maskiner?.[m]
+        const trinn = maskintrinn(j, m)
+        const ferdig = trinn >= MAKS_MASKINTRINN
         const mp = maskinpris(s, id, m)
         return (
           <div key={m} className="personale-rad gardsmaskin">
             <p className="liten">
               <strong>{MASKINER[m].navn}</strong>
+              {trinn > 0 && ` · trinn ${trinn} av ${MAKS_MASKINTRINN}`}
               <br />
-              <span className="dempet">{MASKINER[m].tekst}</span>
-              {!eier && (
+              <span className="dempet">{trinn > 0 && !ferdig ? `Nå ${maskintekst(m, trinn)}; neste ${maskintekst(m, trinn + 1)}` : maskintekst(m, Math.max(1, trinn))}</span>
+              {!ferdig && (
                 <>
                   <br />
                   <span className="dempet">{gardTekst(mp, gardGir(s, id, { maskin: m }))}</span>
                 </>
               )}
             </p>
-            {eier ? (
-              <span className="merke ok">Kjøpt</span>
+            {ferdig ? (
+              <span className="merke ok">Ferdig</span>
             ) : (
               <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < mp} onClick={() => utfor(kjopMaskin(s, id, m))}>
-                Kjøp · {kortKroner(mp)}
+                {trinn > 0 ? `Trinn ${trinn + 1}` : 'Kjøp'} · {kortKroner(mp)}
               </button>
             )}
           </div>
         )
       })}
+      <Nabogard s={s} id={id} />
       {GARDSBYGGLISTE.map((b) => {
         const eier = !!j.bygg?.[b]
         const sperre = byggSperre(j, b)
@@ -352,9 +372,9 @@ function Ukedager({ s, id }: { s: Spilltilstand; id: JordId }) {
 export function Gardsnav({ s, id }: { s: Spilltilstand; id: JordId }) {
   const j = s.jord[id]
   if (!j || JORD[id].type !== 'gard') return null
-  const maskiner = MASKINLISTE.filter((m) => j.maskiner?.[m]).length
+  const maskiner = MASKINLISTE.reduce((sum, m) => sum + maskintrinn(j, m), 0)
   const under: Record<Gardsside, string> = {
-    jorder: `${jorder(j)} av ${MAKS_JORDER} jorder · ${maskiner} av ${MASKINLISTE.length} maskiner`,
+    jorder: `${jorder(j)} av ${MAKS_JORDER} jorder · ${maskiner} av ${MASKINLISTE.length * MAKS_MASKINTRINN} maskintrinn${naboer(j) ? ` · ${naboer(j)} ${naboer(j) === 1 ? 'nabogård' : 'nabogårder'}` : ''}`,
     dyr: j.bygg?.fjos ? `${antallDyr(j)} av ${fjosplasser(j)} dyr · ${kortKroner(dyrPerUke(s, id))} i uka` : 'Bygg et fjøs først, under jorder og maskiner',
     lager: j.bygg?.silo ? `${kortKroner(lagerverdi(s, id))} på lager` : 'Ukas priser og regnskapet',
   }
@@ -456,6 +476,49 @@ export function Landkort({ s }: { s: Spilltilstand }) {
     </nav>
   )
 }
+
+/**
+ * Nabogården (Pakke 114), under maskinene: et gods kan kjøpe opptil tre, og hver tredobler jorda
+ * avlingen regnes på. Før gården er et gods sier raden hva som trengs.
+ */
+function Nabogard({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]!
+  const n = naboer(j)
+  const pris = nabopris(s, id)
+  const gods = gardstrinn(j) >= GARDSTRINN.length - 1
+  return (
+    <div className="personale-rad gardsmaskin nabogard">
+      <p className="liten">
+        <strong>Nabogården</strong>
+        {n > 0 && ` · ${n} av ${MAKS_NABOER}`}
+        <br />
+        <span className="dempet">
+          {n >= MAKS_NABOER
+            ? `Gården er ${NABO_FAKTOR ** n} ganger så stor som da du kjøpte den.`
+            : `Kjøp naboen ut: avlingen ×${NABO_FAKTOR}, og +${NABO_STATUS} status. Jordene, maskinene og byggene du har, følger med.`}
+        </span>
+        {pris !== null && (
+          <>
+            <br />
+            <span className="dempet">{gardTekst(pris, ukensNabogevinst(s, id))}</span>
+          </>
+        )}
+      </p>
+      {n >= MAKS_NABOER ? (
+        <span className="merke ok">Ferdig</span>
+      ) : pris === null ? (
+        <span className="merke kant">{gods ? 'Ikke til salgs' : 'Krever gods'}</span>
+      ) : (
+        <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(kjopNabogard(s, id))}>
+          Kjøp · {kortKroner(pris)}
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** Hva en nabogård til gir i en normal uke: avlingen ganger to til (×3 i alt). */
+const ukensNabogevinst = (s: Spilltilstand, id: JordId) => (NABO_FAKTOR - 1) * forventetUke(s, id, s.jord[id]!)
 
 /** Hvordan hvert dyr betaler, i én linje. */
 const BETALING: Record<'daglig' | 'ull' | 'slakt', string> = {

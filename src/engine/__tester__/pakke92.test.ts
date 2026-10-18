@@ -108,13 +108,13 @@ describe('jordene', () => {
 })
 
 describe('maskinene', () => {
-  it('traktor 20 %, skurtresker 40 %, sprøyte 30 % av gårdens verdi; én av hver', () => {
+  it('traktor 20 %, skurtresker 40 %, sprøyte 30 % av gårdens verdi; høyst tre trinn (Pakke 114)', () => {
     let s = medGard()
     const verdi = landverdi(s, ID)
     expect(maskinpris(s, ID, 'traktor')).toBeCloseTo(0.2 * verdi, 2)
     expect(maskinpris(s, ID, 'tresker')).toBeCloseTo(0.4 * verdi, 2)
     expect(maskinpris(s, ID, 'sproyte')).toBeCloseTo(0.3 * verdi, 2)
-    s = ok(kjopMaskin(s, ID, 'traktor'))
+    for (let i = 0; i < 3; i++) s = ok(kjopMaskin(s, ID, 'traktor'))
     expect(kjopMaskin(s, ID, 'traktor').ok).toBe(false)
   })
 

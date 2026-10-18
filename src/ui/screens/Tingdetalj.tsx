@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { EIENDOMSTYPER, eiendomspris, KATEGORINAVN, LAGER, LAGER_FOR, leieHverPerSek, LUKSUS, restverdi } from '../../engine/eiendom'
-import { JORD, landverdi, tommerverdi, vaer } from '../../engine/jord'
+import { JORD, landverdi, ODEL_DAGER, tommerverdi, vaer } from '../../engine/jord'
 import { KUNSTNERE, kunstnertrend, MALERIER, maleripris, nesteTrendbytte } from '../../engine/kunst'
 import { eierDu, LANDEMERKER, landemerkepris } from '../../engine/landemerker'
 import { DAG_SEK, dagnummer } from '../../engine/kalender'
@@ -117,6 +117,12 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
       ]
       if (t.type === 'skog') fakta.push(['Tømmeret', kortKroner(tommerverdi(s, id as JordId))])
       else fakta.push(['Ukas vær', vaer(dagnummer(s.sek)).navn])
+      // Pakke 114: odel etter 90 dager — eller hvor lenge det er igjen.
+      const j = s.jord[id as JordId]
+      if (j && t.type === 'gard') {
+        const igjen = ODEL_DAGER - (dagnummer(s.sek) - (j.eidFra ?? dagnummer(s.sek)))
+        fakta.push(['Odel', j.odel ? 'Odelsgård' : `Om ${igjen} ${igjen === 1 ? 'dag' : 'dager'}`])
+      }
       // Pakke 112: kortet, og radene som åpner gårdens tre sider — kartet, fjøset og lageret står der.
       return [
         <>

@@ -38,7 +38,7 @@ describe('gårdens side i deler', () => {
 
   it('radene sier hva som er der; uten fjøs sier dyrene hva som trengs', () => {
     const html = tegn(createElement(Gardsnav, { s: medGard(), id: 'gard-lista' }))
-    expect(html).toContain('3 av 10 jorder · 0 av 3 maskiner')
+    expect(html).toContain('3 av 10 jorder · 0 av 9 maskintrinn')
     expect(html).toContain('Bygg et fjøs først')
     expect(html).toContain('Ukas priser og regnskapet')
     expect(html.match(/klubbside-rad/g)).toHaveLength(3)

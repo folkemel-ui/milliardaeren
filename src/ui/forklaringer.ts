@@ -13,7 +13,7 @@ import { OBLIGASJON_GEBYR, OBLIGASJONER } from '../engine/obligasjoner'
 import { NYHET_DAGER, NYHET_VIRKNING } from '../engine/bransjer'
 import { BYTTE_ANDEL, FORVALTER_ANDEL, LEDIGHET_MAKS, UFLAKS_SJANSE } from '../engine/utleie'
 import { ANSATT_BONUS, BEDRIFTSSALG_RABATT, BORTE_TAK_SEK, LAANETAK_TIMER, MAKS_BELAANING, MARGIN_MAAL, MARGINKRAV, MILEPAELER, MILEPAELFAKTORER, TOPP_FRA_NIVAA, TOPPMILEPAEL, TOPPMILEPAEL_FAKTOR } from '../engine/innhold'
-import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_ANNET_UKER, LAAVE_UKER, MAKS_JORDER, MASKINER, PRIS_MIN, PRIS_SPENN, SELG_DYRT, SILO_UKER, START_JORDER, HOGST_BEST_DAG } from '../engine/jord'
+import { GARDSTRINN, JORDPRIS_VEKST, KORNSVINN, LAAVE_ANNET_UKER, LAAVE_UKER, MAKS_JORDER, MAKS_MASKINTRINN, MAKS_NABOER, MASKINER, MASKINTRINN_PRIS, NABO_FAKTOR, NABO_STATUS, NABOPRIS, ODEL_DAGER, ODEL_STATUS, PRIS_MIN, PRIS_SPENN, SELG_DYRT, SILO_UKER, SPROYTE_DEMPING, START_JORDER, HOGST_BEST_DAG } from '../engine/jord'
 import { DYR, FJOSPLASSER, SLAKT_DAGER, TILSKUDD_DYR, TILSKUDD_JORD } from '../engine/dyr'
 import { KJOPSSALAER, SALGSSALAER } from '../engine/kunst'
 import { RIVAL_KJOPER_VED } from '../engine/landemerker'
@@ -158,7 +158,9 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
       `En skog gir ingenting mens den vokser, men tømmeret blir verdt mer for hver dag — raskest rundt dag ${HOGST_BEST_DAG / 2}, og en hogst gir mest per dag rundt dag ${HOGST_BEST_DAG}, så skogkortet sier når den er klar. ` +
       'Du bestemmer selv når du hogger; da får du betalt, og ny skog plantes. ' +
       `En gård starter med ${START_JORDER} jorder og kan dyrke opptil ${MAKS_JORDER}: den fjerde koster halve jordverdien, hver neste ${tall(JORDPRIS_VEKST, 2)} ganger så mye, og hver jord gir like mye avling. ` +
-      `En traktor gir +${pst(MASKINER.traktor.host - 1)} avling, en skurtresker +${pst(MASKINER.tresker.host - 1)}, og en sprøyte +${pst(MASKINER.sproyte.host - 1)}, og med den faller en dårlig uke ${pst(MASKINER.sproyte.vaer)} mindre — hver kjøpt én gang. ` +
+      `En traktor gir +${pst(MASKINER.traktor.host - 1)} avling, en skurtresker +${pst(MASKINER.tresker.host - 1)}, og en sprøyte +${pst(MASKINER.sproyte.host - 1)}, og med den faller en dårlig uke ${pst(MASKINER.sproyte.vaer)} mindre. Hver maskin har ${MAKS_MASKINTRINN} trinn: hvert gir det samme igjen og koster ${tall(MASKINTRINN_PRIS, 1)} ganger forrige, og sprøyta demper en dårlig uke opptil ${pst(SPROYTE_DEMPING[MAKS_MASKINTRINN])}. ` +
+      `Et gods kan kjøpe opptil ${MAKS_NABOER} nabogårder: hver ${NABO_FAKTOR}-dobler jorda avlingen, jordene og maskinene regnes på, gir +${NABO_STATUS} status og koster ${NABOPRIS} ganger jordverdien — den neste ${NABO_FAKTOR} ganger så mye. ` +
+      `En gård som har vært din i ${ODEL_DAGER} spilldager, blir odelsgård: +${ODEL_STATUS} status. ` +
       'Maskinene og byggene koster en andel av jordverdien ganger jordene delt på tre, så de tjener seg inn like fort på en liten gård som på et gods; drivhuset følger bare jorda. ' +
       `Med ${GARDSTRINN[1].fra} jorder blir småbruket en gård, med ${GARDSTRINN[2].fra} en storgård og med ${GARDSTRINN[3].fra} et gods: +${GARDSTRINN[1].status}, +${GARDSTRINN[2].status} og +${GARDSTRINN[3].status} status. ` +
       'Jordene, maskinene og byggene teller i gårdens verdi til det de kostet, og følger med når du selger. ' +

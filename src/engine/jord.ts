@@ -129,8 +129,52 @@ export const MASKINER: Record<Gardsmaskin, { navn: string; tekst: string; andel:
   sproyte: { navn: 'Sprøyte', tekst: '+8 % avling, og en dårlig uke faller 30 % mindre', andel: 0.3, host: 1.08, vaer: 0.3 },
 }
 export const MASKINLISTE = Object.keys(MASKINER) as Gardsmaskin[]
+/** Pakke 114: tre trinn per maskin; hvert gir det samme igjen og koster 1,5 ganger forrige. */
+export const MAKS_MASKINTRINN = 3
+export const MASKINTRINN_PRIS = 1.5
+/** Sprøyta demper en dårlig uke 30 % på trinn 1, så 15 prosentpoeng til per trinn. */
+export const SPROYTE_DEMPING = [0, 0.3, 0.45, 0.6] as const
 
-/** Trinnene en gård vokser i, etter jordene: status og et navn på kortet og i avisa. */
+/** Trinnet på en maskin, 0–3. En maskin kjøpt før Pakke 114 er trinn 1. */
+export function maskintrinn(j: Jordstykke | undefined, m: Gardsmaskin): number {
+  return j?.maskintrinn?.[m] ?? (j?.maskiner?.[m] ? 1 : 0)
+}
+
+/** «+20 % avling» — hva en maskin gir på et trinn. */
+export function maskintekst(m: Gardsmaskin, trinn: number): string {
+  const t = Math.max(1, trinn)
+  const prosent = Math.round((MASKINER[m].host - 1) * 100 * t)
+  return m === 'sproyte' ? `+${prosent} % avling, og en dårlig uke faller ${Math.round(SPROYTE_DEMPING[t] * 100)} % mindre` : `+${prosent} % avling`
+}
+
+// ─────────────────────────────────────────────── Nabogårdene (Pakke 114)
+
+/** Hver nabogård tredobler jorda avlingen og prisene regnes på, opptil tre (×27). */
+export const NABO_FAKTOR = 3
+export const MAKS_NABOER = 3
+/** Den første koster 15 ganger jordverdien, hver neste tre ganger så mye: tilbake på ~7,6 t på et fullt gods. */
+export const NABOPRIS = 15
+/** Status: hver nabogård og odel (Pakke 114), på toppen av trinnets. */
+export const NABO_STATUS = 25
+export const ODEL_STATUS = 15
+/** Så mange spilldager må gården ha vært din før den blir odelsgård: tre måneder. */
+export const ODEL_DAGER = 90
+
+export const naboer = (j: Jordstykke | undefined) => j?.naboer ?? 0
+
+/** Jorda avlingen, jordene, maskinene og byggene regnes på: din egen ganget med nabogårdene. */
+export function gardsgrunnlag(s: Spilltilstand, id: JordId): number {
+  return landverdi(s, id) * NABO_FAKTOR ** naboer(s.jord?.[id])
+}
+
+/** Prisen for neste nabogård, eller null: bare et gods kan kjøpe, og høyst tre. */
+export function nabopris(s: Spilltilstand, id: JordId): number | null {
+  const j = s.jord?.[id]
+  if (!j || JORD[id].type !== 'gard' || gardstrinn(j) < GARDSTRINN.length - 1 || naboer(j) >= MAKS_NABOER) return null
+  return NABOPRIS * landverdi(s, id) * NABO_FAKTOR ** naboer(j)
+}
+
+/** Trinnene en gård vokser i, etter jordene: status og et navn på kortet og i avisa. Pakke 114: nabogårdene og odel gir mer. */
 export const GARDSTRINN = [
   { navn: 'Småbruk', bestemt: 'småbruket', fra: 3, status: 0 },
   { navn: 'Gård', bestemt: 'gården', fra: 5, status: 3 },
@@ -157,7 +201,7 @@ export function jordstatus(s: Spilltilstand): number {
   let sum = 0
   for (const id of JORDLISTE) {
     const j = s.jord[id]
-    if (j && JORD[id].type === 'gard') sum += GARDSTRINN[gardstrinn(j)].status
+    if (j && JORD[id].type === 'gard') sum += GARDSTRINN[gardstrinn(j)].status + naboer(j) * NABO_STATUS + (j.odel ? ODEL_STATUS : 0)
   }
   return sum
 }
@@ -166,7 +210,7 @@ export function jordstatus(s: Spilltilstand): number {
 export function nesteJordpris(s: Spilltilstand, id: JordId): number | null {
   const n = jorder(s.jord?.[id])
   if (n >= MAKS_JORDER) return null
-  return landverdi(s, id) * JORDPRIS_ANDEL * JORDPRIS_VEKST ** (n - START_JORDER)
+  return gardsgrunnlag(s, id) * JORDPRIS_ANDEL * JORDPRIS_VEKST ** (n - START_JORDER)
 }
 
 /**
@@ -174,17 +218,19 @@ export function nesteJordpris(s: Spilltilstand, id: JordId): number | null {
  * vokser med avlingen de gir mer av. På et småbruk er det jordverdien, som før.
  */
 export function utbyggingsgrunnlag(s: Spilltilstand, id: JordId): number {
-  return (landverdi(s, id) * jorder(s.jord?.[id])) / START_JORDER
+  return (gardsgrunnlag(s, id) * jorder(s.jord?.[id])) / START_JORDER
 }
 
+/** Prisen for neste trinn på en maskin: trinn 1 som før, hvert neste 1,5 ganger forrige (Pakke 114). */
 export function maskinpris(s: Spilltilstand, id: JordId, m: Gardsmaskin): number {
-  return MASKINER[m].andel * utbyggingsgrunnlag(s, id)
+  return MASKINER[m].andel * utbyggingsgrunnlag(s, id) * MASKINTRINN_PRIS ** maskintrinn(s.jord?.[id], m)
 }
 
 /** Ukas vær for en gård: sprøyta tar en del av fallet i en dårlig uke. */
 export function gardsvaer(j: Jordstykke, faktor: number): number {
-  if (faktor >= 1 || !j.maskiner?.sproyte) return faktor
-  return faktor + MASKINER.sproyte.vaer * (1 - faktor)
+  const demping = SPROYTE_DEMPING[maskintrinn(j, 'sproyte')]
+  if (faktor >= 1 || !demping) return faktor
+  return faktor + demping * (1 - faktor)
 }
 
 /**
@@ -277,7 +323,7 @@ export const KORNSVINN = 0.01
 export const SELG_DYRT = 1.07
 
 export function byggpris(s: Spilltilstand, id: JordId, b: Gardsbygg): number {
-  return GARDSBYGG[b].andel * (b === 'drivhus' ? landverdi(s, id) : utbyggingsgrunnlag(s, id))
+  return GARDSBYGG[b].andel * (b === 'drivhus' ? gardsgrunnlag(s, id) : utbyggingsgrunnlag(s, id))
 }
 
 /** Lagerets valg: en silo fra før Pakke 105 som lagret, lagrer nå billig og selger dyrt. */
@@ -372,7 +418,8 @@ export function ukeAvAtte(dag: number): 'beste' | 'verste' | null {
 /** Traktoren og skurtreskeren ganget sammen. */
 export function maskinfaktor(j: Jordstykke): number {
   let f = 1
-  for (const m of MASKINLISTE) if (j.maskiner?.[m]) f *= MASKINER[m].host
+  // Pakke 114: hvert trinn gir det samme igjen — traktoren +10, +20, +30 %.
+  for (const m of MASKINLISTE) f *= 1 + (MASKINER[m].host - 1) * maskintrinn(j, m)
   return f
 }
 
@@ -397,7 +444,7 @@ export function felterMed(j: Jordstykke | undefined, gruppe: Avlingsgruppe): num
 export function gruppePerUke(s: Spilltilstand, id: JordId, gruppe: Avlingsgruppe): number {
   const j = s.jord?.[id]
   if (!j) return 0
-  return ((landverdi(s, id) * HOST_ANDEL) / START_JORDER) * felterMed(j, gruppe) * maskinfaktor(j)
+  return ((gardsgrunnlag(s, id) * HOST_ANDEL) / START_JORDER) * felterMed(j, gruppe) * maskinfaktor(j)
 }
 
 export function kornPerUke(s: Spilltilstand, id: JordId): number {
@@ -438,14 +485,14 @@ const LAGER_UKER = 312
 const HUSKET_SNITT = new Map<string, number>()
 
 /** Ukas værfaktor for en gård i snitt over to år av spillets vær, med drenering, frostdekke og sprøyte som valgt. */
-export function snittvaer(drenering: boolean, frost: boolean, sproyte: boolean): number {
-  const nokkel = `vaer:${+drenering}${+frost}${+sproyte}`
+export function snittvaer(drenering: boolean, frost: boolean, sproyte: number): number {
+  const nokkel = `vaer:${+drenering}${+frost}${sproyte}`
   const husket = HUSKET_SNITT.get(nokkel)
   if (husket !== undefined) return husket
   let sum = 0
   for (let u = 0; u < SNITT_UKER; u++) {
     const f = ukefaktor(u * 7, drenering, frost)
-    sum += sproyte && f < 1 ? f + MASKINER.sproyte.vaer * (1 - f) : f
+    sum += sproyte && f < 1 ? f + sproyte * (1 - f) : f
   }
   HUSKET_SNITT.set(nokkel, sum / SNITT_UKER)
   return sum / SNITT_UKER
@@ -490,8 +537,8 @@ export function lagringsgevinst(gruppe: Avlingsgruppe, uker: number): number {
  * side måles som forskjellen med og uten (`gardGir`).
  */
 export function forventetUke(s: Spilltilstand, id: JordId, j: Jordstykke): number {
-  const per = ((landverdi(s, id) * HOST_ANDEL) / START_JORDER) * maskinfaktor(j)
-  const w = snittvaer(!!j.bygg?.drenering, !!j.bygg?.frostdekke, !!j.maskiner?.sproyte)
+  const per = ((gardsgrunnlag(s, id) * HOST_ANDEL) / START_JORDER) * maskinfaktor(j)
+  const w = snittvaer(!!j.bygg?.drenering, !!j.bygg?.frostdekke, SPROYTE_DEMPING[maskintrinn(j, 'sproyte')])
   const drivhus = j.bygg?.drivhus ? DRIVHUS_FAKTOR : 0
   const korn = per * w * felterMed(j, 'korn')
   const gronn = per * (w * (felterMed(j, 'gronnsaker') - drivhus) + drivhus)
@@ -511,7 +558,7 @@ export function gardGir(s: Spilltilstand, id: JordId, kjop: Gardskjop): number {
   if (!j) return 0
   const ny: Jordstykke =
     'maskin' in kjop
-      ? { ...j, maskiner: { ...j.maskiner, [kjop.maskin]: true } }
+      ? { ...j, maskiner: { ...j.maskiner, [kjop.maskin]: true }, maskintrinn: { ...j.maskintrinn, [kjop.maskin]: maskintrinn(j, kjop.maskin) + 1 } }
       : 'bygg' in kjop
         ? { ...j, bygg: { ...j.bygg, [kjop.bygg]: true } }
         : { ...j, jorder: jorder(j) + 1 }
@@ -632,7 +679,7 @@ export function gardHostDeler(s: Spilltilstand, id: JordId, dag: number, til: nu
   const andel = Math.min(1, Math.max(0, (til - Math.max(ukestart, j.plantetSek)) / UKE_SEK))
   if (andel <= 0) return { korn: 0, annet: 0, gronnsaker: 0, frukt: 0 }
   const uke = ukeFor(dag)
-  const per = ((landverdi(s, id) * HOST_ANDEL) / START_JORDER) * andel * maskinfaktor(j)
+  const per = ((gardsgrunnlag(s, id) * HOST_ANDEL) / START_JORDER) * andel * maskinfaktor(j)
   const w = gardsvaer(j, ukefaktor(dag, !!j.bygg?.drenering, !!j.bygg?.frostdekke))
   let korn = 0
   let annet = 0
@@ -785,6 +832,29 @@ function siloFull(s: Spilltilstand, id: JordId, over: { g: Avlingsgruppe; belop:
     alvor: 'advarsel',
   })
   if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+}
+
+/**
+ * Odel (Pakke 114): en gård som har vært din i 90 spilldager, blir odelsgård — en sak i avisa,
+ * en linje i loggen og status. En gård fra før får dagen den først sees etter oppdateringen.
+ * Kalles ved hvert dagsskifte. Muterer.
+ */
+export function odelVedDagsskifte(s: Spilltilstand): Overskrift[] {
+  if (!s.jord) return []
+  const dag = dagnummer(s.sek)
+  const ut: Overskrift[] = []
+  for (const id of JORDLISTE) {
+    const j = s.jord[id]
+    if (!j || JORD[id].type !== 'gard') continue
+    j.eidFra ??= dag
+    if (j.odel || dag - j.eidFra < ODEL_DAGER) continue
+    j.odel = true
+    const navn = JORD[id].navn.replace(/^Gård/, 'Gården')
+    ut.push({ type: 'deg', tittel: `${navn} er en odelsgård`, tekst: `Tre måneder på samme hender gir odelsrett. ${GARDSTRINN[gardstrinn(j)].bestemt[0].toUpperCase()}${GARDSTRINN[gardstrinn(j)].bestemt.slice(1)} på ${JORD[id].by} går i arv.` })
+    s.hendelser.push({ sek: s.sek, tittel: 'Gården', tekst: `${navn} er en odelsgård: +${ODEL_STATUS} status.`, alvor: 'info' })
+    if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+  }
+  return ut
 }
 
 /** Setter lageret av en gruppe. Muterer. */

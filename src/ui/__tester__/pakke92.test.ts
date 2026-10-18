@@ -41,10 +41,11 @@ describe('gårdens kart', () => {
     expect(html).toContain('Havre')
   })
 
-  it('maskinene: kjøpt eller pris', () => {
+  it('maskinene: trinnet og neste trinn, eller pris (Pakke 114: tre trinn)', () => {
     const s = ok(kjopMaskin(medGard(), 'gard-lista', 'traktor'))
     const html = tegn(createElement(Gardskart, { s, id: 'gard-lista' }))
-    expect(html).toContain('Kjøpt')
+    expect(html).toContain('Traktor</strong> · trinn 1 av 3')
+    expect(html).toMatch(/Trinn 2 · kr/)
     expect(html).toMatch(/Kjøp · kr/)
     expect(html).toContain('Skurtresker')
     expect(html).toContain('Sprøyte')

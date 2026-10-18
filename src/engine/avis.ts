@@ -15,7 +15,7 @@ import { dagsskifteOppgjor } from './oppgjor'
 import { skattVedDagsskifte } from './skatt'
 import { startupsVedDagsskifte } from './startups'
 import { klubbVedDagsskifte } from './klubb'
-import { jordVedDagsskifte } from './jord'
+import { jordVedDagsskifte, odelVedDagsskifte } from './jord'
 import { dyrVedDagsskifte } from './dyr'
 import { landemerkerVedDagsskifte } from './landemerker'
 import { kunstVedDagsskifte } from './kunst'
@@ -340,6 +340,8 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     // Pakke 94: dyrene og tilskuddet hver dag, før mandagens høst.
     ...dyrVedDagsskifte(s),
     ...jordVedDagsskifte(s),
+    // Pakke 114: en gård eid i 90 dager blir odelsgård.
+    ...odelVedDagsskifte(s),
     ...landemerkerVedDagsskifte(s),
     ...kunstVedDagsskifte(s),
     // Mandagens leietakere (Pakke 54): en dårlig leietaker koster en ukes leie i byen (Pakke 83).

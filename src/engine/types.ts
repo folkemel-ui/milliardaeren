@@ -818,6 +818,17 @@ export interface Jordstykke {
   jorder?: number
   /** Maskinene du har kjøpt til gården. */
   maskiner?: Partial<Record<Gardsmaskin, boolean>>
+  /**
+   * Pakke 114: trinnet på hver maskin, 1–3. Mangler den, er en kjøpt maskin (`maskiner`) trinn 1 —
+   * les den gjennom `maskintrinn`, så trengs ingen migrering.
+   */
+  maskintrinn?: Partial<Record<Gardsmaskin, number>>
+  /** Nabogårdene du har kjøpt (Pakke 114), 0–3: hver tredobler jorda avlingen regnes på. */
+  naboer?: number
+  /** Spilldagen gården ble din (Pakke 114). En gård fra før får dagen den først ble sett etter oppdateringen. */
+  eidFra?: number
+  /** Gården er en odelsgård (Pakke 114): eid i 90 spilldager. */
+  odel?: boolean
   /** Det jordene og maskinene kostet: teller i gårdens verdi. */
   investert?: number
   /** Avlingen så langt denne uka før du sist bygde ut — betales mandag med resten. */

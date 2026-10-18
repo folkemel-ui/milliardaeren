@@ -6,7 +6,7 @@
 
 import { utforEiendomssalg, utforJordsalg, utforLandemerkesalg } from '../handel'
 import { byverdi, EIENDOM_SYNLIG_VED, forvalterpaaslag, kjopsprisEiendom, EIENDOMSTYPER, flyFor, kanReiseTil, LUKSUS, oppussingspris, standard, STANDARDER, statusnivaa } from '../eiendom'
-import { DAG_SEK } from '../kalender'
+import { DAG_SEK, dagnummer } from '../kalender'
 import { leggTilHendelse } from '../bank'
 import { flyt } from '../portefolje'
 import { byttepris, FORVALTERE, forvalterpris } from '../utleie'
@@ -83,7 +83,8 @@ export function kjopJord(s: Spilltilstand, id: JordId): Utfall {
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
   n.kontanter -= pris
-  n.jord[id] = { kostpris: pris, plantetSek: n.sek }
+  // Pakke 114: dagen den ble din, til odel.
+  n.jord[id] = { kostpris: pris, plantetSek: n.sek, eidFra: dagnummer(n.sek) }
   flyt(n, 'eiendom', pris)
   return { ok: true, tilstand: n }
 }

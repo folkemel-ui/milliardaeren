@@ -217,6 +217,10 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 - **The pane's screenshot can come out magnified and cropped** on one page while the DOM is fine (Pack 113, the
   storage page: right half missing, `visualViewport.scale` 1.02, every row inside 376 px). Resizing did not fix it;
   prove such a page with rects and a driven hover instead of the picture.
+- **A detail page can look 8 px too wide right after opening** (Pack 114): the slide-in (`gli-hoyre`) leaves
+  `translateX(24px)` on the section while the pane is hidden or busy, so an overflow scan lists every card at
+  383 of 375 px. `document.getAnimations().forEach((a) => a.finish())` first, then scan. A `computer` click by ref
+  can also miss on a page that is still sliding; when a buy «didn't happen», check the state before retrying.
 - **A hook called before an early return still subscribes.** The measuring panel called
   `useMaalinger()` and then `return null` when hidden, so it listened all the same, and once the
   store notified every second, every Innstillinger click test got a redraw outside `act` — the

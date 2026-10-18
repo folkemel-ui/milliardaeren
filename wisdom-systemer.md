@@ -199,6 +199,19 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   The quiet weeks show in the Sunday paper: `ukaDi` sums each farm's `regnskap` row (host + korn) for the weeks
   harvested inside the settlement (`o.gardene`). Fewer stories don't move Avisa's die: every story source is still
   called; only the slice to `MAKS_SAKER` changes.
+- **The farm's base vs. its value** (Pack 114): the harvest, the next field, the machines, the buildings and
+  the greenhouse are counted on `gardsgrunnlag` (own land × 3^neighbours); the farm's value, the sale, the
+  animals and the subsidy still use `landverdi`. A neighbour's price goes into `investert` like a field, so
+  net worth doesn't drop on purchase and the sale takes it along — tripling `landverdi` itself would have
+  added two land values of net worth for free. Payback is scale-free (price and harvest both follow the land),
+  so a neighbour at 15 × land pays back in ~7.6 h at any point in the game.
+- **Machine steps without a save version** (Pack 114): `maskintrinn(j, m)` reads `j.maskintrinn ?? (maskiner ? 1 : 0)`,
+  the Pack 105 silo trick again, so old saves need no migration; `kjopMaskin` writes both fields. The plan said
+  «the save version bumps once» — check before building one (as in Pack 109). The sprayer's damping is per step
+  (`SPROYTE_DEMPING` 30/45/60 %), so `snittvaer` takes a number, not a boolean.
+- **Odel needs a start day the old saves don't have** (Pack 114): `kjopJord` stamps `eidFra`; `odelVedDagsskifte`
+  runs every day change (not only Mondays, unlike the harvest) and gives an old farm `eidFra` the first time it sees
+  it, so old farms count from the update — said in the question, and shown as «Odel: Om N dager» on the farm page.
 - **A harvest test computed before Monday is ~2 % short** (Pack 105): `gardHostDeler` uses the land
   value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
   the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.

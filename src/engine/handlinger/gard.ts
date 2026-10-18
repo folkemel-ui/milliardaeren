@@ -18,8 +18,15 @@ import {
   jorder,
   lagerverdi,
   MAKS_JORDER,
+  MAKS_MASKINTRINN,
+  MAKS_NABOER,
   MASKINER,
   maskinpris,
+  maskintrinn,
+  NABO_FAKTOR,
+  NABO_STATUS,
+  nabopris,
+  naboer,
   nesteJordpris,
   ukeFor,
 } from '../jord'
@@ -57,12 +64,12 @@ export function kjopJorde(s: Spilltilstand, id: JordId): Utfall {
   return { ok: true, tilstand: n }
 }
 
-/** Kjøper en maskin til gården (Pakke 92): én av hver, priset etter gårdens verdi. */
+/** Kjøper en maskin til gården (Pakke 92), eller (Pakke 114) neste trinn på den: høyst tre. */
 export function kjopMaskin(s: Spilltilstand, id: JordId, m: Gardsmaskin): Utfall {
   if (!s.jord[id]) return feil('Du eier ikke gården.')
   if (JORD[id].type !== 'gard') return feil('En skog trenger ingen maskiner.')
   if (!MASKINER[m]) return feil('Ukjent maskin.')
-  if (s.jord[id]!.maskiner?.[m]) return feil(`Gården har alt ${MASKINER[m].navn.toLowerCase()}.`)
+  if (maskintrinn(s.jord[id], m) >= MAKS_MASKINTRINN) return feil(`${MASKINER[m].navn} er på høyeste trinn.`)
   const pris = maskinpris(s, id, m)
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
@@ -71,9 +78,37 @@ export function kjopMaskin(s: Spilltilstand, id: JordId, m: Gardsmaskin): Utfall
   n.kontanter -= pris
   j.kostpris += pris
   j.investert = (j.investert ?? 0) + pris
+  j.maskintrinn = { ...(j.maskintrinn ?? {}), [m]: maskintrinn(j, m) + 1 }
   j.maskiner = { ...(j.maskiner ?? {}), [m]: true }
   flyt(n, 'eiendom', pris)
   bokforGard(j, ukeFor(dagnummer(n.sek)), 'bygd', pris)
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Kjøper nabogården (Pakke 114): bare et gods, høyst tre. Hver tredobler jorda avlingen, jordene
+ * og maskinene regnes på; prisen teller i gårdens verdi som jordene. Ukas avling så langt bokføres
+ * først med gården slik den var.
+ */
+export function kjopNabogard(s: Spilltilstand, id: JordId): Utfall {
+  const j = s.jord[id]
+  if (!j) return feil('Du eier ikke gården.')
+  if (JORD[id].type !== 'gard') return feil('En skog har ingen nabogård.')
+  if (naboer(j) >= MAKS_NABOER) return feil(`Gården har alt ${MAKS_NABOER} nabogårder.`)
+  const pris = nabopris(s, id)
+  if (pris === null) return feil('Først når gården er et gods.')
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  bokforOpptjent(n, id)
+  const nj = n.jord[id]!
+  n.kontanter -= pris
+  nj.kostpris += pris
+  nj.investert = (nj.investert ?? 0) + pris
+  nj.naboer = naboer(nj) + 1
+  flyt(n, 'eiendom', pris)
+  bokforGard(nj, ukeFor(dagnummer(n.sek)), 'bygd', pris)
+  const navn = JORD[id].navn.replace(/^Gård/, 'Gården')
+  leggTilHendelse(n, { tittel: 'Gården', tekst: `${navn} har kjøpt nabogården: avlingen ×${NABO_FAKTOR}, +${NABO_STATUS} status.`, alvor: 'info' })
   return { ok: true, tilstand: n }
 }
 
