@@ -282,6 +282,28 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   credits) / days numerically, memoised per sawmill factor (49 without, 46 with). `HOGST_BEST_DAG` (36) stays the
   timber-only peak for the help text and old tests; the cards, `dagerTilHogst` and the curve use `besteHogstdag`.
   `bestandsverdi` includes the price and the sawmill, so felling, net worth and the sale all read one number.
+- **Faster growth goes per stand, not per forest** (Pack 122, better seedlings). Changing `TOMMER_DAGER` for the
+  whole forest would have raised the standing timber the moment the seedlings were bought — timber that never grew.
+  `j.planter` (parallel to `j.bestand`, missing = 0) records the step each stand was planted with; `vekstdager(j, i)`
+  reads it, and `tommerfaktor`, `tommerIntegral` and `besteHogstdag` take the growth days as an argument. Every place
+  that replants writes it: `hoggBestand`, `hoggSkog`, `kjopBestand` and the fire (`plantetrinnEtterPlanting`).
+- **A neighbouring forest comes with its standing timber, and you pay for it** (Pack 122). Tripling the base
+  (`skoggrunnlag` = land × 3^naboer, the farms' rule) would otherwise triple the standing timber in net worth at the
+  moment of purchase. The price is land (`NABOSKOG_PRIS` × base, into `investert`) plus 2 × `tommerverdi` (cash
+  into timber), so net worth stands still — the test checks it to the krone. A full forest earns ~3.9 % of its land a
+  day, so the farm's 15 × would have paid back in ~16 h; 7.5 × gives ~8 h. I first wrote 4.5 × from a three-stand
+  sum, but a neighbour needs all five stands, so it paid back in 4.8 h — measure the payback in the state the rule
+  allows, not the state you have in mind.
+- **Storm and fire come from hashes, insurance is a year paid up front** (Pack 122). `skogrisiko(id, dag)` is a pure
+  function of the forest and the day (the same in every game, like the weather): a winter week 5 %, a dry summer week
+  (June–August, ≥ 5 sun days, ~2.4 a year) 20 %, on a hashed day of the week. Measured over 600 years: ~1.07 storms
+  and ~0.54 fires a year. A per-second or per-day premium could be bought for the one day the storm comes, so
+  `FORSIKRING_ANDEL` (12.5 % of the land a year for three stands, ~15 % over what it pays beyond the storm sale) is
+  paid for 365 days, renewed in `skogVedDagsskifte`, and a cancel only stops the renewal. Damages go to `j.skader`
+  and the log (`Storm`, `Skogbrann`, `Skogforsikring` in `HENDELSE_FANE`), not to Avisa yet (Pack 123).
+- **A land purchase must add to `kostpris` as well as `investert`** (Pack 122 fixed Packs 120–121): the sale books
+  `inntekt − kostpris` as a gain, so a stand or a sawmill left out of `kostpris` was taxed as profit when the forest
+  was sold. The farm's `kjopMaskin` always did both.
 
 ## Luxury, Samling, homes and art
 

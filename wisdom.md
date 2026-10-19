@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 121, 19 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 122, 20 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -171,10 +171,15 @@ lives in one place only.
   said «store the vegetables, *or* cost ~5 %»; measured on a full farm they paid back in ~40 h either way.
   A third option doing both at a middle price (stores all crops, 15 %) came out at ~14 h — like the
   tractor — and Folke picked it. Measure the item's own options first and show their numbers next to it.
+- **«Please push and start the next pack» after a reply that described the pack with leans** (Pack 122): the leans are
+  the answers, as in Pack 89. Push, start `live.mjs` in the background, and build while it runs; send the live notice
+  when it ends. If `--push` says the commit isn't tested although `lever.mjs` passed, look at the marker
+  (`.git/lever-testet`): after the machine slept it held 41 zero bytes — the write never reached the disk. Rerun
+  `lever.mjs`; don't write the marker by hand.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117** — and in Packs 118–121 all but one: on the research
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117** — and in Packs 118–122 all but one: on the research
   tree Folke wrote their own «6 parts × 6 steps» instead of my 4 × 5. Build what was written; where it changes
   another answer (the chosen 1 → 16 game days now spans six steps), spread it the obvious way (1, 2, 3, 5, 9, 16)
   and say so in the report.

@@ -15,6 +15,11 @@ balance, the saves or the speed. Per-system details (the club, the farms, art �
 - **Golden master** (`gullmester.test.ts`): update the fasit only for intended changes,
   with `OPPDATER_FASIT=1`, and record before → after net worth in the commit message.
   A change in `frø` alone means the die shifted while the economy stayed the same.
+- **`hashTekst` alone is a poor coin** (Pack 122). FNV-1a of keys that differ only in the last digits
+  (`storm:skog-namdalen:107`, `…:108`) gives numbers close together, so `hashTekst(k) / 2³²` < 0.05 hit four
+  weeks in a row and then nothing for years. For a chance, mix it first: `tilfeldig(hashTekst(k))` (after that a hit
+  the week after a hit was 4.9 %, as it should be). `hashvalg` (a pick by modulo) and `Hashkilde` are fine. List the
+  first hits for a few years before trusting an average — 600 years had the right mean while the first 40 had half.
 - **`hashTekst` is signed.** `hashTekst(x) % n` can be negative and index nothing (the
   market players' positions came out undefined in the first run of the migration). Use
   `(hashTekst(x) >>> 0) % n`.

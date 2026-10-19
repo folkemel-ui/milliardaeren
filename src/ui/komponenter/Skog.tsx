@@ -2,26 +2,48 @@
  * Skogen på sin side (Pakke 120): bestandene med alder, tømmer og hogst, et bestand til å
  * kjøpe, vekstkurven og skogens regnskap. Før var siden kortet, faktaene og kraftverket, og
  * en hogst etterlot bare en linje i loggen. Pakke 121: tømmerprisen, klimakredittene og sagbruket.
+ * Pakke 122: skogsmaskinene, naboskogen, og storm, brann og forsikring.
  */
 
 import { useState, type PointerEvent } from 'react'
-import { hoggBestand, kjopBestand, kjopSagbruk } from '../../engine/handlinger'
+import { hoggBestand, kjopBestand, kjopNaboskog, kjopSagbruk, kjopSkogforsikring, kjopSkogmaskin, siOppSkogforsikring } from '../../engine/handlinger'
 import {
   bestand,
   bestandsalder,
   bestandsverdi,
   besteHogstdag,
+  BRANN_SJANSE,
+  erForsikret,
+  FORSIKRING_DAGER,
+  forsikringspris,
   HOGST_BEST_DAG,
+  MAKS_MASKINTRINN,
+  MAKS_NABOER,
+  NABO_FAKTOR,
+  naboer,
+  naboskogpris,
+  naboskogTommer,
+  nyeVekstdager,
+  SKOGMASKINER,
+  SKOGMASKINLISTE,
+  skoggrunnlag,
+  skogmaskinPerDag,
+  skogmaskinpris,
+  skogmaskintekst,
+  skogmaskintrinn,
+  STORM_ANDEL,
+  STORM_PRIS,
+  STORM_SJANSE,
+  vekstdager,
   KARBON_PER_DAG,
   karbonPerDag,
-  landverdi,
   MAKS_BESTAND,
   nesteBestandpris,
   omlopPerDag,
   SAGBRUK_LOFT,
   sagbrukPerDag,
   sagbrukpris,
-  sagbruksfaktor,
+  verdifaktor,
   START_BESTAND,
   TOMMER_DAGER,
   TOMMER_MAKS,
@@ -29,7 +51,7 @@ import {
   tommerpris,
 } from '../../engine/jord'
 import { DAG_SEK } from '../../engine/kalender'
-import type { JordId, Spilltilstand } from '../../engine/types'
+import type { JordId, Skogmaskin, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, tall, varighet } from '../format'
 
@@ -55,7 +77,7 @@ export function Bestandkort({ s, id }: { s: Spilltilstand; id: JordId }) {
         {b.map((_, i) => {
           const alder = bestandsalder(s, id, i)
           const verdi = bestandsverdi(s, id, i)
-          const igjen = best - alder
+          const igjen = besteHogstdag(j, i) - alder
           return (
             <li key={i}>
               <div>
@@ -158,10 +180,12 @@ export function Tommerkurve({ s, id }: { s: Spilltilstand; id: JordId }) {
   if (!j) return null
   const x = (d: number) => (d / MAKS_DAG) * B
   const y = (f: number) => H - (f / TOPP) * H
-  const punkter = Array.from({ length: 76 }, (_, i) => i * 2).map((d) => `${x(d).toFixed(1)},${y(tommerfaktor(d)).toFixed(1)}`).join(' ')
-  const tredel = landverdi(s, id) / START_BESTAND
-  const verdiFaktor = tommerpris(s) * sagbruksfaktor(j)
+  const tredel = skoggrunnlag(s, id) / START_BESTAND
+  const verdiFaktor = tommerpris(s) * verdifaktor(j)
   const best = besteHogstdag(j)
+  // Pakke 122: kurven er for et bestand som plantes nå, med plantene skogen har.
+  const a = nyeVekstdager(j)
+  const punkter = Array.from({ length: 76 }, (_, i) => i * 2).map((d) => `${x(d).toFixed(1)},${y(tommerfaktor(d, a)).toFixed(1)}`).join(' ')
   const lesAv = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect()
     settValgt(Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * MAKS_DAG))
@@ -200,14 +224,14 @@ export function Tommerkurve({ s, id }: { s: Spilltilstand; id: JordId }) {
           </svg>
           {bestand(j).map((_, i) => {
             const d = Math.min(MAKS_DAG, Math.max(0, bestandsalder(s, id, i)))
-            return <span key={i} className="graf-punkt" style={{ left: `${(x(d) / B) * 100}%`, top: `${(y(tommerfaktor(d)) / H) * 100}%`, background: 'var(--gull)' }} aria-hidden="true" />
+            return <span key={i} className="graf-punkt" style={{ left: `${(x(d) / B) * 100}%`, top: `${(y(tommerfaktor(d, vekstdager(j, i))) / H) * 100}%`, background: 'var(--gull)' }} aria-hidden="true" />
           })}
           {valgt !== null && (
             <>
               <span className="graf-sikte" style={{ left: `${(x(valgt) / B) * 100}%` }} aria-hidden="true" />
               <span className="graf-boble" style={{ left: `${Math.min(75, Math.max(25, (valgt / MAKS_DAG) * 100))}%` }} role="status">
                 <strong>Dag {valgt}</strong>
-                <span>{kortKroner(tredel * tommerfaktor(valgt) * verdiFaktor)} per bestand</span>
+                <span>{kortKroner(tredel * tommerfaktor(valgt, a) * verdiFaktor)} per bestand</span>
                 <span>{valgt > 0 ? `${kortKroner(omlopPerDag(s, id, valgt))} om dagen med kredittene` : ''}</span>
               </span>
             </>
@@ -226,6 +250,139 @@ export function Tommerkurve({ s, id }: { s: Spilltilstand; id: JordId }) {
       <p className="dempet liten">
         Tømmeret vokser raskest rundt dag {TOMMER_DAGER / 2}. Med klimakredittene gir et omløp mest per dag ved dag {best}: {kortKroner(perDagBest)} om dagen per bestand til vanlig pris. Hogger du ved dag {HOGST_BEST_DAG}, er det {Math.round((1 - perDag36 / perDagBest) * 100)} % mindre; venter du til dag {best + 30}, {Math.round((1 - perDagSent / perDagBest) * 100)} % mindre. Prikkene er bestandene dine.
       </p>
+    </div>
+  )
+}
+
+/** Hva neste trinn gir om dagen og når det er tilbake, eller hva det gir når det står. */
+function tilbake(pris: number, perDag: number): string {
+  return perDag > 0 ? `≈ ${kortKroner(perDag)} om dagen i et jevnt omløp, tilbake på ${varighet((pris / perDag) * DAG_SEK)}` : ''
+}
+
+/**
+ * Skogsmaskinene og naboskogen (Pakke 122): vei, hogstmaskin og bedre planter i tre trinn som
+ * gårdens maskiner, og naboskogen når skogen har alle fem bestandene.
+ */
+export function Skogmaskiner({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j) return null
+  const jordpris = naboskogpris(s, id)
+  const tommer = naboskogTommer(s, id)
+  const n = naboer(j)
+  // Naboskogen gir to ganger det skogen gir nå: jorda tredobles.
+  const naboGir = omlopPerDag(s, id, besteHogstdag(j)) * bestand(j).length * (NABO_FAKTOR - 1)
+  return (
+    <div className="kort">
+      <h2 className="kort-tittel">Maskiner og naboskog</h2>
+      {SKOGMASKINLISTE.map((m: Skogmaskin) => {
+        const trinn = skogmaskintrinn(j, m)
+        const ferdig = trinn >= MAKS_MASKINTRINN
+        const pris = skogmaskinpris(s, id, m)
+        return (
+          <div key={m} className="personale-rad gardsmaskin">
+            <p className="liten">
+              <strong>{SKOGMASKINER[m].navn}</strong>
+              {trinn > 0 && ` · trinn ${trinn} av ${MAKS_MASKINTRINN}`}
+              <br />
+              <span className="dempet">{trinn > 0 && !ferdig ? `Nå ${skogmaskintekst(m, trinn)}; neste ${skogmaskintekst(m, trinn + 1)}` : skogmaskintekst(m, Math.max(1, trinn))}</span>
+              {!ferdig && (
+                <>
+                  <br />
+                  <span className="dempet">{tilbake(pris, skogmaskinPerDag(s, id, m))}</span>
+                </>
+              )}
+            </p>
+            {ferdig ? (
+              <span className="merke ok">Ferdig</span>
+            ) : (
+              <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < pris} onClick={() => utfor(kjopSkogmaskin(s, id, m))}>
+                {trinn > 0 ? `Trinn ${trinn + 1}` : 'Kjøp'} · {kortKroner(pris)}
+              </button>
+            )}
+          </div>
+        )
+      })}
+      <p className="dempet liten">Dagene er tiden til en firedel av tømmeret ({TOMMER_DAGER} uten bedre planter). Plantene gjelder bestand som plantes etter kjøpet; de som står, vokser som før.</p>
+      <div className="personale-rad gardsmaskin">
+        <p className="liten">
+          <strong>Naboskog</strong>
+          {n > 0 && ` · ${n} av ${MAKS_NABOER}`}
+          <br />
+          <span className="dempet">
+            {n >= MAKS_NABOER
+              ? `Skogen har alle ${MAKS_NABOER} naboskogene: tømmeret vokser på ${NABO_FAKTOR ** n} ganger jorda.`
+              : jordpris === null
+                ? `Når skogen har alle ${MAKS_BESTAND} bestandene, kan du kjøpe naboskogen: ${NABO_FAKTOR} ganger så mye jord til tømmeret.`
+                : `${NABO_FAKTOR} ganger så mye jord til tømmeret. Jorda koster ${kortKroner(jordpris)}, og tømmeret som står der, ${kortKroner(tommer)}. ${tilbake(jordpris, naboGir)}.`}
+          </span>
+        </p>
+        {jordpris !== null && (
+          <button className="knapp knapp-gull knapp-liten" disabled={s.kontanter < jordpris + tommer} onClick={() => utfor(kjopNaboskog(s, id))}>
+            Kjøp · {kortKroner(jordpris + tommer)}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Storm og brann (Pakke 122): hva som kan skje, forsikringen, og de siste skadene. En storm tar en
+ * tredel av det eldste bestandet om vinteren; en brann et bestand i en tørr sommeruke.
+ */
+export function Skogrisiko({ s, id }: { s: Spilltilstand; id: JordId }) {
+  const j = s.jord[id]
+  if (!j) return null
+  const pris = forsikringspris(s, id)
+  const forsikret = erForsikret(s, j)
+  const skader = [...(j.skader ?? [])].reverse()
+  const igjen = Math.max(0, ((j.forsikretTil ?? 0) - s.sek) / DAG_SEK)
+  return (
+    <div className="kort">
+      <h2 className="kort-tittel">Storm og brann</h2>
+      <p className="dempet liten">
+        En vinteruke kan gi storm ({Math.round(STORM_SJANSE * 100)} % sjanse, omtrent én i året): den blåser ned en tredel av det eldste bestandet, som selges for {Math.round(STORM_PRIS * 100)} % av prisen. En tørr sommeruke gir {Math.round(BRANN_SJANSE * 100)} % sjanse for brann, omtrent annethvert år, og den tar et helt bestand.
+      </p>
+      {forsikret ? (
+        <div className="personale-rad gardsmaskin">
+          <p className="liten">
+            <span className="merke ok">Forsikret</span> <span className="dempet">{j.fornyForsikring ? `Fornyes om ${dager(Math.ceil(igjen))} for ${kortKroner(pris)}.` : `Sagt opp — dekker i ${dager(Math.ceil(igjen))} til.`}</span>
+          </p>
+          {j.fornyForsikring ? (
+            <button className="knapp knapp-sekundær knapp-liten" onClick={() => utfor(siOppSkogforsikring(s, id))}>
+              Si opp
+            </button>
+          ) : (
+            <button className="knapp knapp-sekundær knapp-liten" onClick={() => utfor(kjopSkogforsikring(s, id))}>
+              Forny
+            </button>
+          )}
+        </div>
+      ) : (
+        <>
+          <button className="knapp knapp-gull" disabled={s.kontanter < pris} onClick={() => utfor(kjopSkogforsikring(s, id))}>
+            Forsikre skogen · {kortKroner(pris)} i året
+          </button>
+          <p className="dempet liten">
+            Dekker det stormen tar fullt ut og tømmeret en brann tar, til dagens verdi. Et år er {FORSIKRING_DAGER} spilldager, betalt på forskudd; den fornyes av seg selv og kan sies opp.
+          </p>
+        </>
+      )}
+      {skader.length > 0 && (
+        <ul className="romlogg">
+          {skader.map((k, i) => (
+            <li key={`${k.dag}-${i}`}>
+              <span>
+                Dag {k.dag} · {k.type === 'storm' ? `storm, ${Math.round(STORM_ANDEL * 100)} % av et bestand` : 'brann, et bestand'}
+              </span>
+              <span>
+                −{kortKroner(k.tapt)}
+                {k.betalt > 0 && <span className="dempet"> · fikk {kortKroner(k.betalt)}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

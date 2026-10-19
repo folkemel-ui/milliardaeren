@@ -12,7 +12,7 @@ import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall, varighet } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { Fjoskort, Gardskart, Gardsnav, Gardsregnskap, Jordkort, Kraftkort, Lagerkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
-import { Bestandkort, Skogdrift, Skogregnskap, Tommerkurve } from '../komponenter/Skog'
+import { Bestandkort, Skogdrift, Skogmaskiner, Skogregnskap, Skogrisiko, Tommerkurve } from '../komponenter/Skog'
 import { aapneGardsside, GARDSSIDER, useGardsside, type Gardsside } from '../gardssider'
 import { useTilbake } from '../tilbake'
 import { Malerikort } from '../komponenter/Kunst'
@@ -137,6 +137,8 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
           {/* Pakke 120: bestandene, vekstkurven og regnskapet. Pakke 115: skogen har ingen sider, så kraftverket står her. */}
           {t.type === 'skog' && <Bestandkort s={s} id={id as JordId} />}
           {t.type === 'skog' && <Skogdrift s={s} id={id as JordId} />}
+          {t.type === 'skog' && <Skogmaskiner s={s} id={id as JordId} />}
+          {t.type === 'skog' && <Skogrisiko s={s} id={id as JordId} />}
           {t.type === 'skog' && <Tommerkurve s={s} id={id as JordId} />}
           {t.type === 'skog' && <Skogregnskap s={s} id={id as JordId} />}
           {t.type === 'skog' && <Kraftkort s={s} id={id as JordId} />}

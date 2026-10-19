@@ -10,11 +10,11 @@
  * seg å vente — men ikke for alltid.
  */
 
-import { DAG_SEK, dagnummer, ukedag } from './kalender'
+import { DAG_SEK, dagnummer, dato, ukedag } from './kalender'
 import { jevnetVaer, vaerPaaDag, type Vaertype } from './verden'
 import { hashTekst, tilfeldig } from './rng'
 import { byfaktor } from './regioner'
-import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, Kraftverk, Lagring, NorskBy, Overskrift, Spilltilstand } from './types'
+import type { Gardsbygg, Gardsmaskin, Gardstall, Gardsuke, JordId, Jordstykke, Kraftverk, Lagring, NorskBy, Overskrift, Skogmaskin, Spilltilstand } from './types'
 import { kortKroner, tall } from './tall'
 import { MAKS_HENDELSER } from './innhold'
 
@@ -698,16 +698,20 @@ export function landverdi(s: Spilltilstand, id: JordId): number {
   return JORD[id].pris * jordfaktor(s) * byfaktor(s, JORD[id].by)
 }
 
-/** Tømmeret som andel av jordverdien, etter hvor mange dager skogen har vokst. */
-export function tommerfaktor(dager: number): number {
+/**
+ * Tømmeret som andel av jordverdien, etter hvor mange dager skogen har vokst. `vekst` er dagene
+ * til en firedel av taket: 36, eller færre for bestand plantet med bedre planter (Pakke 122).
+ */
+export function tommerfaktor(dager: number, vekst = TOMMER_DAGER): number {
   const d = Math.max(0, dager)
-  return TOMMER_MAKS * (d / (d + TOMMER_DAGER)) ** 2
+  return TOMMER_MAKS * (d / (d + vekst)) ** 2
 }
 
 /**
  * Tømmeret vokser raskest ved dag 18 (halve TOMMER_DAGER), men det som gir mest per dag
  * over en hel omgang — hogst og ny skog — er å hogge ved dag 36: tømmer(d)/d er størst der
  * (Pakke 106). Fra dag 28 til 46 er det under 2 % fra det beste, så det haster ikke.
+ * Med klimakredittene (Pakke 121) er den beste dagen senere — se `besteHogstdag`.
  */
 export const HOGST_BEST_DAG = TOMMER_DAGER
 
@@ -718,14 +722,17 @@ export function tommervekst(s: Spilltilstand, id: JordId): number {
   let sum = 0
   for (let i = 0; i < bestand(j).length; i++) {
     const d = Math.max(0, bestandsalder(s, id, i))
-    sum += ((landverdi(s, id) / START_BESTAND) * TOMMER_MAKS * 2 * d * TOMMER_DAGER) / (d + TOMMER_DAGER) ** 3
+    const a = vekstdager(j, i)
+    sum += (TOMMER_MAKS * 2 * d * a) / (d + a) ** 3
   }
-  return sum * tommerpris(s) * sagbruksfaktor(j)
+  return (skoggrunnlag(s, id) / START_BESTAND) * sum * tommerpris(s) * verdifaktor(j)
 }
 
-/** Hvor mange dager til skogen er best å hogge; 0 når den er klar. */
+/** Hvor mange dager til skogens eldste bestand er best å hogge; 0 når det er klart. */
 export function dagerTilHogst(s: Spilltilstand, id: JordId): number {
-  return Math.max(0, besteHogstdag(s.jord?.[id]) - skogalder(s, id))
+  const j = s.jord?.[id]
+  if (!j) return 0
+  return Math.max(0, besteHogstdag(j, eldsteBestand(s, id)) - skogalder(s, id))
 }
 
 // ─────────────────────────────────────────────── Bestandene (Pakke 120)
@@ -756,12 +763,14 @@ export function bestandsalder(s: Spilltilstand, id: JordId, i: number): number {
 }
 
 /**
- * Hva tømmeret i ett bestand er verdt nå: en tredel av jorda ganger veksten, ganget med dagens
- * tømmerpris og sagbruket (Pakke 121) — det en hogst gir, og det skogen står i formuen med.
+ * Hva tømmeret i ett bestand er verdt nå: en tredel av jorda (med naboskogene, Pakke 122) ganger
+ * veksten, ganget med dagens tømmerpris, sagbruket (Pakke 121) og veien og hogstmaskinen (Pakke
+ * 122) — det en hogst gir, og det skogen står i formuen med.
  */
 export function bestandsverdi(s: Spilltilstand, id: JordId, i: number): number {
-  if (JORD[id].type !== 'skog') return 0
-  return (landverdi(s, id) / START_BESTAND) * tommerfaktor(bestandsalder(s, id, i)) * tommerpris(s) * sagbruksfaktor(s.jord?.[id])
+  const j = s.jord?.[id]
+  if (JORD[id].type !== 'skog' || !j) return 0
+  return (skoggrunnlag(s, id) / START_BESTAND) * tommerfaktor(bestandsalder(s, id, i), vekstdager(j, i)) * tommerpris(s) * verdifaktor(j)
 }
 
 /** Det eldste bestandet — det som er nærmest hogst. */
@@ -777,7 +786,7 @@ export function nesteBestandpris(s: Spilltilstand, id: JordId): number | null {
   const j = s.jord?.[id]
   if (!j || JORD[id].type !== 'skog') return null
   const n = bestand(j).length
-  return n >= MAKS_BESTAND ? null : (landverdi(s, id) / START_BESTAND) * 1.5 ** (n - START_BESTAND)
+  return n >= MAKS_BESTAND ? null : (skoggrunnlag(s, id) / START_BESTAND) * 1.5 ** (n - START_BESTAND)
 }
 
 /** Alderen til skogens eldste bestand (for en skog fra før: skogens alder). */
@@ -825,16 +834,23 @@ export function sagbruksfaktor(j: Jordstykke | undefined): number {
   return j?.sagbruk ? 1 + SAGBRUK_LOFT : 1
 }
 
+/** Alt som gjør en hogst mer verdt utenom prisen: sagbruket, veien og hogstmaskinen. */
+export function verdifaktor(j: Jordstykke | undefined): number {
+  return sagbruksfaktor(j) * skogmaskinfaktor(j)
+}
+
 export function sagbrukpris(s: Spilltilstand, id: JordId): number {
-  return landverdi(s, id) * SAGBRUK_ANDEL
+  return skoggrunnlag(s, id) * SAGBRUK_ANDEL
 }
 
 /** Det sagbruket legger til per spilldag i et jevnt omløp ved den beste dagen, til vanlig tømmerpris. */
 export function sagbrukPerDag(s: Spilltilstand, id: JordId): number {
   const j = s.jord?.[id]
   if (!j) return 0
-  const d = besteHogstdag({ ...j, sagbruk: true })
-  return (landverdi(s, id) / START_BESTAND) * bestand(j).length * (tommerfaktor(d) / d) * SAGBRUK_LOFT
+  const med = { ...j, sagbruk: true }
+  const d = besteHogstdag(med)
+  const a = nyeVekstdager(j)
+  return (skoggrunnlag(s, id) / START_BESTAND) * bestand(j).length * (tommerfaktor(d, a) / d) * skogmaskinfaktor(j) * SAGBRUK_LOFT
 }
 
 /*
@@ -847,8 +863,7 @@ export function sagbrukPerDag(s: Spilltilstand, id: JordId): number {
 export const KARBON_PER_DAG = 0.006
 
 /** Integralet av tommerfaktor fra 0 til t dager. */
-function tommerIntegral(t: number): number {
-  const a = TOMMER_DAGER
+function tommerIntegral(t: number, a = TOMMER_DAGER): number {
   const d = Math.max(0, t)
   return TOMMER_MAKS * (d - 2 * a * Math.log((d + a) / a) - (a * a) / (d + a) + a)
 }
@@ -858,8 +873,8 @@ export function karbonPerDag(s: Spilltilstand, id: JordId): number {
   const j = s.jord?.[id]
   if (!j || JORD[id].type !== 'skog') return 0
   let sum = 0
-  for (let i = 0; i < bestand(j).length; i++) sum += tommerfaktor(bestandsalder(s, id, i))
-  return (landverdi(s, id) / START_BESTAND) * sum * KARBON_PER_DAG
+  for (let i = 0; i < bestand(j).length; i++) sum += tommerfaktor(bestandsalder(s, id, i), vekstdager(j, i))
+  return (skoggrunnlag(s, id) / START_BESTAND) * sum * KARBON_PER_DAG
 }
 
 /**
@@ -874,10 +889,14 @@ export function betalKarbon(s: Spilltilstand, sekunder: number): number {
     const j = s.jord[id]
     if (!j || JORD[id].type !== 'skog') continue
     let f = 0
-    for (const plantet of bestand(j)) f += tommerIntegral((s.sek - plantet) / DAG_SEK) - tommerIntegral((s.sek - sekunder - plantet) / DAG_SEK)
+    const b = bestand(j)
+    for (let i = 0; i < b.length; i++) {
+      const a = vekstdager(j, i)
+      f += tommerIntegral((s.sek - b[i]) / DAG_SEK, a) - tommerIntegral((s.sek - sekunder - b[i]) / DAG_SEK, a)
+    }
     // Jorda stiger 0,3 % om dagen: en time borte (12 dager) regnes på jordverdien midt i tiden, ikke ved slutten.
     const midt = (1 + JORDVEKST_PER_DAG) ** (-sekunder / DAG_SEK / 2)
-    const x = (landverdi(s, id) / START_BESTAND) * f * KARBON_PER_DAG * midt
+    const x = (skoggrunnlag(s, id) / START_BESTAND) * f * KARBON_PER_DAG * midt
     if (x <= 0) continue
     j.karbon = (j.karbon ?? 0) + x
     sum += x
@@ -891,36 +910,274 @@ export function betalKarbon(s: Spilltilstand, sekunder: number): number {
 }
 
 /**
- * Hva ett bestand gir per dag over et helt omløp som hogges ved dag `d`: tømmeret (med sagbruket)
- * og klimakredittene underveis, til vanlig tømmerpris. Til vekstkurven og bestandsknappen.
+ * Hva ett bestand gir per dag over et helt omløp som hogges ved dag `d`: tømmeret (med sagbruket,
+ * veien og hogstmaskinen) og klimakredittene underveis, til vanlig tømmerpris. Plantet nå, med
+ * plantene skogen har (eller vekstdagene `a`). Til vekstkurven og bestandsknappen.
  */
-export function omlopPerDag(s: Spilltilstand, id: JordId, d: number): number {
+export function omlopPerDag(s: Spilltilstand, id: JordId, d: number, a = nyeVekstdager(s.jord?.[id])): number {
   if (d <= 0) return 0
-  return ((landverdi(s, id) / START_BESTAND) * (tommerfaktor(d) * sagbruksfaktor(s.jord?.[id]) + KARBON_PER_DAG * tommerIntegral(d))) / d
+  return ((skoggrunnlag(s, id) / START_BESTAND) * (tommerfaktor(d, a) * verdifaktor(s.jord?.[id]) + KARBON_PER_DAG * tommerIntegral(d, a))) / d
 }
 
-const BESTE_DAG = new Map<number, number>()
+const BESTE_DAG = new Map<string, number>()
 
 /**
  * Dagen et bestand gir mest per dag over et helt omløp, med klimakredittene medregnet: tømmeret
- * ved hogst (med sagbruket) pluss kredittene underveis, delt på dagene. 49 uten sagbruk, 46 med;
- * til vanlig tømmerpris — en høy pris gjør det verdt å hogge før, en lav å vente.
+ * ved hogst (med sagbruket, veien og hogstmaskinen) pluss kredittene underveis, delt på dagene.
+ * 49 uten noe, 46 med sagbruk; bedre planter gjør det tidligere. Til vanlig tømmerpris — en høy
+ * pris gjør det verdt å hogge før, en lav å vente. Med `i` for det bestandet, ellers for et som
+ * plantes nå.
  */
-export function besteHogstdag(j: Jordstykke | undefined): number {
-  const faktor = sagbruksfaktor(j)
-  const husket = BESTE_DAG.get(faktor)
+export function besteHogstdag(j: Jordstykke | undefined, i?: number): number {
+  const faktor = verdifaktor(j)
+  const a = j && i !== undefined ? vekstdager(j, i) : nyeVekstdager(j)
+  const nokkel = `${faktor}:${a}`
+  const husket = BESTE_DAG.get(nokkel)
   if (husket !== undefined) return husket
   let best = 0
   let dag = HOGST_BEST_DAG
   for (let d = 1; d <= 400; d++) {
-    const v = (tommerfaktor(d) * faktor + KARBON_PER_DAG * tommerIntegral(d)) / d
+    const v = (tommerfaktor(d, a) * faktor + KARBON_PER_DAG * tommerIntegral(d, a)) / d
     if (v > best) {
       best = v
       dag = d
     }
   }
-  BESTE_DAG.set(faktor, dag)
+  BESTE_DAG.set(nokkel, dag)
   return dag
+}
+
+// ───────────────────────────── Skogen holder følge: maskiner, naboskog, storm og brann (Pakke 122)
+
+/*
+ * Skogsmaskinene, i tre trinn som gårdens (Pakke 114): hvert trinn gir det samme igjen og koster
+ * 1,5 ganger forrige. Veien og hogstmaskinen gir +10 % tømmer per trinn; bedre planter gjør at et
+ * bestand som plantes etter kjøpet, vokser fortere (36 → 34 → 32 → 30 dager til en firedel av
+ * taket) — bestandene som står, vokser som før, så kjøpet gir ikke tømmer som ikke har vokst.
+ * Prisen er en andel av jorda (med naboskogene) ganger bestandene ÷ 3, som gårdens maskiner: de
+ * tjener seg inn like fort i en liten og en stor skog. Trinn 1 er tilbake på ~8–10 t.
+ */
+export const SKOGMASKINER: Record<Skogmaskin, { navn: string; andel: number; tommer: number; dager: number }> = {
+  vei: { navn: 'Skogsbilvei', andel: 0.2, tommer: 0.1, dager: 0 },
+  hogstmaskin: { navn: 'Hogstmaskin', andel: 0.25, tommer: 0.1, dager: 0 },
+  planter: { navn: 'Bedre planter', andel: 0.15, tommer: 0, dager: 2 },
+}
+export const SKOGMASKINLISTE = Object.keys(SKOGMASKINER) as Skogmaskin[]
+
+/** Trinnet på en skogsmaskin, 0–3. */
+export function skogmaskintrinn(j: Jordstykke | undefined, m: Skogmaskin): number {
+  return j?.skogmaskiner?.[m] ?? 0
+}
+
+/** Veien og hogstmaskinen ganget sammen. */
+export function skogmaskinfaktor(j: Jordstykke | undefined): number {
+  let f = 1
+  for (const m of SKOGMASKINLISTE) f *= 1 + SKOGMASKINER[m].tommer * skogmaskintrinn(j, m)
+  return f
+}
+
+/** Vekstdagene for et bestand som plantes nå, med plantene skogen har. */
+export function nyeVekstdager(j: Jordstykke | undefined): number {
+  return TOMMER_DAGER - SKOGMASKINER.planter.dager * skogmaskintrinn(j, 'planter')
+}
+
+/** Vekstdagene for bestand `i`: plantene det ble plantet med. */
+export function vekstdager(j: Jordstykke, i: number): number {
+  return TOMMER_DAGER - SKOGMASKINER.planter.dager * (j.planter?.[i] ?? 0)
+}
+
+/** «+20 % tømmer» eller «nye bestand vokser på 32 dager» — hva en skogsmaskin gir på et trinn. */
+export function skogmaskintekst(m: Skogmaskin, trinn: number): string {
+  const t = Math.max(1, trinn)
+  const x = SKOGMASKINER[m]
+  return m === 'planter' ? `nye bestand vokser på ${TOMMER_DAGER - x.dager * t} dager` : `+${Math.round(x.tommer * 100 * t)} % tømmer`
+}
+
+/** Jorda tømmeret, kredittene og prisene regnes på: din egen ganget med naboskogene. */
+export function skoggrunnlag(s: Spilltilstand, id: JordId): number {
+  return landverdi(s, id) * NABO_FAKTOR ** naboer(s.jord?.[id])
+}
+
+export function skogmaskinpris(s: Spilltilstand, id: JordId, m: Skogmaskin): number {
+  const j = s.jord?.[id]
+  const bestander = j ? bestand(j).length : START_BESTAND
+  return SKOGMASKINER[m].andel * ((skoggrunnlag(s, id) * bestander) / START_BESTAND) * MASKINTRINN_PRIS ** skogmaskintrinn(j, m)
+}
+
+/** Det neste trinnet på en skogsmaskin gir per spilldag i et jevnt omløp, til vanlig pris. */
+export function skogmaskinPerDag(s: Spilltilstand, id: JordId, m: Skogmaskin): number {
+  const j = s.jord?.[id]
+  if (!j) return 0
+  const naa = omlopPerDag(s, id, besteHogstdag(j))
+  const neste = { ...j, skogmaskiner: { ...(j.skogmaskiner ?? {}), [m]: skogmaskintrinn(j, m) + 1 } }
+  const s2 = { ...s, jord: { ...s.jord, [id]: neste } }
+  return (omlopPerDag(s2, id, besteHogstdag(neste)) - naa) * bestand(j).length
+}
+
+/*
+ * Naboskogen, som gårdene fikk i Pakke 114: hver tredobler jorda tømmeret, kredittene og prisene
+ * regnes på, opptil tre. Bare en full skog (fem bestand) kan kjøpe, som bare et gods kan kjøpe
+ * nabogård. En full skog tjener ~3,9 % av jorda om dagen — mye mindre enn et fullt gods — så til
+ * gårdens pris (15 × jorda) ville den vært tilbake på ~16 t; 7,5 × jorda gir ~8 t som gårdene.
+ * Naboskogen har tømmer like gammelt som ditt, og det betaler du for i tillegg, til det er verdt:
+ * ellers ville tømmeret som sto, tredoblet seg i formuen i det du kjøpte.
+ */
+export const NABOSKOG_PRIS = 7.5
+
+/** Prisen for jorda i neste naboskog (uten tømmeret), eller null. */
+export function naboskogpris(s: Spilltilstand, id: JordId): number | null {
+  const j = s.jord?.[id]
+  if (!j || JORD[id].type !== 'skog' || bestand(j).length < MAKS_BESTAND || naboer(j) >= MAKS_NABOER) return null
+  return NABOSKOG_PRIS * skoggrunnlag(s, id)
+}
+
+/** Tømmeret som står i naboskogen: to ganger ditt, siden jorda tredobles. */
+export function naboskogTommer(s: Spilltilstand, id: JordId): number {
+  return (NABO_FAKTOR - 1) * tommerverdi(s, id)
+}
+
+/*
+ * Storm og brann. En stormuke om vinteren (november–mars, ~21 uker i året) treffer en skog med 5 %
+ * sjanse: ~1 storm i året. Den blåser ned en tredel av tømmeret i det eldste bestandet, som selges
+ * for ×0,7. En tørr sommeruke (juni–august med minst fem soldager — ~18 % av sommerukene, ~2,4 i
+ * året) gir 20 % sjanse for brann: ~1 brann annethvert år, og den tar ett bestand. Dagen i uka og
+ * bestandet som brenner, trekkes også av hasher: de samme i alle spill, og ingen terning flytter
+ * seg. Skogforsikringen betaler det som gikk tapt, til dagens verdi.
+ */
+export const STORM_SJANSE = 0.05
+export const STORM_ANDEL = 1 / 3
+export const STORM_PRIS = 0.7
+export const BRANN_SJANSE = 0.2
+export const TORKE_SOLDAGER = 5
+
+// FNV-1a alene gir nesten like tall for nesten like nøkler (uke 107 og 108), så stormene kom i rekker;
+// tilfeldig() blander hashen først.
+const hashtall = (nokkel: string) => tilfeldig(hashTekst(nokkel))
+
+/** Er dagen i en vintermåned (november–mars)? */
+function vinter(dag: number): boolean {
+  const m = dato(dag).maaned
+  return m >= 10 || m <= 2
+}
+
+/** En tørr sommeruke: juni–august, med minst fem soldager. */
+export function torkeuke(dag: number): boolean {
+  const m = dato(dag).maaned
+  return m >= 5 && m <= 7 && vaer(dag).dager.sol >= TORKE_SOLDAGER
+}
+
+/** Hva som rammer en skog på en spilldag: storm, brann eller ingenting. Samme i alle spill. */
+export function skogrisiko(id: JordId, dag: number): 'storm' | 'brann' | null {
+  const uke = ukeFor(dag)
+  if (vinter(dag) && hashtall(`storm:${id}:${uke}`) < STORM_SJANSE && dag === uke * 7 + Math.floor(hashtall(`stormdag:${id}:${uke}`) * 7)) return 'storm'
+  if (torkeuke(dag) && hashtall(`brann:${id}:${uke}`) < BRANN_SJANSE && dag === uke * 7 + Math.floor(hashtall(`branndag:${id}:${uke}`) * 7)) return 'brann'
+  return null
+}
+
+/** Alderen et bestand må ha for å holde `faktor` av taket — det motsatte av tommerfaktor. */
+function alderFor(faktor: number, a: number): number {
+  const r = Math.sqrt(Math.max(0, faktor) / TOMMER_MAKS)
+  return r >= 1 ? 1e6 : (a * r) / (1 - r)
+}
+
+/*
+ * Skogforsikringen: en premie for et år (365 spilldager) betalt på forskudd, fornyet av seg selv
+ * når året er omme. Den kan sies opp, men løper ut året — en premie for én dag ville vært billig
+ * å kjøpe bare den dagen stormen kom. Premien er målt mot det forsikringen i snitt betaler mer enn
+ * stormsalget (~1,07 stormer og ~0,54 branner i året over 600 år): ~10,9 % av jorda i året for en
+ * skog med tre bestand, og ~15 % på toppen, så den koster litt mer enn
+ * den gir i snitt — den tar toppen av et dårlig år. Føres som forbruk, som forvalteren.
+ */
+export const FORSIKRING_ANDEL = 0.125
+export const FORSIKRING_DAGER = 365
+
+export function forsikringspris(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  return FORSIKRING_ANDEL * ((skoggrunnlag(s, id) * (j ? bestand(j).length : START_BESTAND)) / START_BESTAND)
+}
+
+export function erForsikret(s: Spilltilstand, j: Jordstykke | undefined): boolean {
+  return (j?.forsikretTil ?? 0) > s.sek
+}
+
+/** Legger en linje i hendelsesloggen. Muterer. */
+function loggSkog(s: Spilltilstand, tittel: string, tekst: string, alvor: 'info' | 'advarsel'): void {
+  s.hendelser.push({ sek: s.sek, tittel, tekst, alvor })
+  if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+}
+
+/**
+ * Hver dag: storm og brann i skogene, og forsikringen som fornyes. Det stormen blåser ned,
+ * selges for ×0,7 (forsikringen betaler resten); et bestand som brenner, plantes på nytt, og
+ * forsikringen betaler tømmeret det hadde. Muterer.
+ */
+export function skogVedDagsskifte(s: Spilltilstand): void {
+  if (!s.jord) return
+  const dag = dagnummer(s.sek)
+  for (const id of JORDLISTE) {
+    const j = s.jord[id]
+    if (!j || JORD[id].type !== 'skog') continue
+    // Forsikringen fornyes når året er omme, om det er penger til det.
+    if (j.fornyForsikring && (j.forsikretTil ?? 0) <= s.sek) {
+      const pris = forsikringspris(s, id)
+      if (s.kontanter >= pris) {
+        s.kontanter -= pris
+        s.totaltForbruk += pris
+        j.forsikretTil = s.sek + FORSIKRING_DAGER * DAG_SEK
+        j.forsikringBetalt = (j.forsikringBetalt ?? 0) + pris
+      } else {
+        j.fornyForsikring = false
+        loggSkog(s, 'Skogforsikring', `Forsikringen på ${skognavn(id)} er ute, og det var ikke penger til et nytt år.`, 'advarsel')
+      }
+    }
+    const hendelse = skogrisiko(id, dag)
+    if (!hendelse) continue
+    const forsikret = erForsikret(s, j)
+    const b = [...bestand(j)]
+    let tapt = 0
+    let inn = 0
+    let tekst: string
+    if (hendelse === 'storm') {
+      const i = eldsteBestand(s, id)
+      const verdi = bestandsverdi(s, id, i)
+      if (verdi < 1) continue
+      tapt = verdi * STORM_ANDEL
+      inn = tapt * (forsikret ? 1 : STORM_PRIS)
+      // Bestandet står igjen med to tredeler av tømmeret: som om det var plantet senere.
+      const a = vekstdager(j, i)
+      const igjen = tommerfaktor(bestandsalder(s, id, i), a) * (1 - STORM_ANDEL)
+      b[i] = s.sek - alderFor(igjen, a) * DAG_SEK
+      tekst = `Stormen blåste ned en tredel av bestand ${i + 1} i ${skognavn(id)}. ${forsikret ? `Forsikringen dekket alt: ${kortKroner(inn)}.` : `Tømmeret ble solgt for ${kortKroner(inn)}, ${Math.round((1 - STORM_PRIS) * 100)} % under prisen.`}`
+    } else {
+      const i = Math.floor(hashtall(`brannbestand:${id}:${dag}`) * b.length)
+      tapt = bestandsverdi(s, id, i)
+      inn = forsikret ? tapt : 0
+      b[i] = s.sek
+      j.planter = plantetrinnEtterPlanting(j, i)
+      tekst = `Brann i bestand ${i + 1} i ${skognavn(id)}: tømmer for ${kortKroner(tapt)} gikk tapt, og nytt er plantet. ${forsikret ? 'Forsikringen betalte det.' : 'Skogen var ikke forsikret.'}`
+    }
+    j.bestand = b
+    j.skader = [...(j.skader ?? []), { dag, type: hendelse, tapt, betalt: inn }].slice(-HOGSTER_HUSKET)
+    if (inn > 0) {
+      s.kontanter += inn
+      s.totaltHost += inn
+      s.totaltLeie += inn
+    }
+    loggSkog(s, hendelse === 'storm' ? 'Storm' : 'Skogbrann', tekst, forsikret ? 'info' : 'advarsel')
+  }
+}
+
+/** «skog i Namdalen» — navnet midt i en setning, med stedet som egennavn. */
+export function skognavn(id: JordId): string {
+  const n = JORD[id].navn
+  return n[0].toLowerCase() + n.slice(1)
+}
+
+/** Plantene hvert bestand er plantet med, etter at bestand `i` er plantet på nytt nå. */
+export function plantetrinnEtterPlanting(j: Jordstykke, i: number): number[] {
+  const p = Array.from({ length: bestand(j).length }, (_, k) => j.planter?.[k] ?? 0)
+  p[i] = skogmaskintrinn(j, 'planter')
+  return p
 }
 
 /** Jord og tømmer du eier, og det du har bygd på gårdene (Pakke 92). */

@@ -933,6 +933,17 @@ export interface Jordstykke {
   sagbruk?: boolean
   /** Klimakredittene skogen har gitt (Pakke 121), betalt hvert sekund for det stående tømmeret. */
   karbon?: number
+  /** Trinnene på skogsmaskinene (Pakke 122): vei, hogstmaskin og bedre planter, 0–3. */
+  skogmaskiner?: Partial<Record<Skogmaskin, number>>
+  /** Plantetrinnet hvert bestand ble plantet med (Pakke 122), i samme rekkefølge som `bestand`. Mangler = 0. */
+  planter?: number[]
+  /** Skogforsikringen (Pakke 122) løper til dette sekundet, og fornyes av seg selv når `fornyForsikring` står. */
+  forsikretTil?: number
+  fornyForsikring?: boolean
+  /** Alt forsikringen har kostet. */
+  forsikringBetalt?: number
+  /** Storm og brann i skogen (Pakke 122), de siste åtte. */
+  skader?: Skogskade[]
   /** Jordene på gården (Pakke 92): 3 fra start, opptil 10. Mangler i eldre lagringer. */
   jorder?: number
   /** Maskinene du har kjøpt til gården. */
@@ -1016,6 +1027,15 @@ export interface Gardsuke extends Gardstall {
 }
 
 export type Gardsmaskin = 'traktor' | 'tresker' | 'sproyte'
+/** Skogsmaskinene (Pakke 122). */
+export type Skogmaskin = 'vei' | 'hogstmaskin' | 'planter'
+/** En storm eller brann i skogen (Pakke 122): hva som gikk tapt, og hva som kom inn (salget eller forsikringen). */
+export interface Skogskade {
+  dag: number
+  type: 'storm' | 'brann'
+  tapt: number
+  betalt: number
+}
 export type Gardsbygg = 'drenering' | 'frostdekke' | 'drivhus' | 'silo' | 'laave' | 'fjos'
 /** Kraftverkene på jorda (Pakke 115): vindturbiner på Lista, solcellepanel på låvetaket, småkraft i Namdalen. */
 export type Kraftverk = 'vind' | 'sol' | 'vann'
