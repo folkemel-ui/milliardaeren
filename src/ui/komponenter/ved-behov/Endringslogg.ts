@@ -8,6 +8,19 @@ import type { Versjonsoppforing } from '../../versjon'
 
 export const ENDRINGER: Versjonsoppforing[] = [
   {
+    versjon: '3.4.0',
+    navn: '3.4',
+    dato: 'Oktober 2026',
+    ingress: 'Stigen går høyere, og øverst står en romfartsfabrikk med egne raketter og satellitter. Skogen hogges bestand for bestand.',
+    punkter: [
+      'Kraft og premier: vind- og vannkraft som svinger med uka, solceller på gårder med låve, og prestasjoner for gården du bygger.',
+      'Tall som leses riktig: én telling av prestasjonene overalt, korte beløp i tallfeltene, tall som ikke brytes, «< 0,1 %» i stedet for «0 %», og tomme slag på én linje i Oversikt.',
+      'Toppen av stigen: brikkefabrikken over skisenteret med aksjen Nordlys Halvleder, synergier mellom bedrifter som hører sammen, og hovedkontoret i Bjørvika, som bygges etasje for etasje.',
+      'Romfartsfabrikken: raketter for andre selskaper hver spilldag, seks deler du forsker fram i en egen avdeling, og en sjanse for at oppskytingen går galt. Egne satellitter gir mobildekning over hele verden — jo flere i bane, jo mer tjener nettet, også når du er borte.',
+      'Skogen i bestand: tre bestand du hogger hver for seg, to til å kjøpe, en kurve som viser når tømmeret gir mest, og skogens eget regnskap.',
+    ],
+  },
+  {
     versjon: '3.3.0',
     navn: '3.3',
     dato: 'Oktober 2026',
