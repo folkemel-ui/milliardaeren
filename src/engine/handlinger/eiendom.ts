@@ -10,7 +10,7 @@ import { DAG_SEK, dagnummer } from '../kalender'
 import { leggTilHendelse } from '../bank'
 import { flyt } from '../portefolje'
 import { byttepris, FORVALTERE, forvalterpris } from '../utleie'
-import { bestand, bestandsalder, bestandsverdi, HOGSTER_HUSKET, JORD, JORD_SYNLIG_VED, landverdi, MAKS_BESTAND, nesteBestandpris, tommerverdi } from '../jord'
+import { bestand, bestandsalder, bestandsverdi, HOGSTER_HUSKET, JORD, JORD_SYNLIG_VED, landverdi, MAKS_BESTAND, nesteBestandpris, sagbrukpris, tommerverdi } from '../jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from '../landemerker'
 import type { EiendomId, JordId, LandemerkeId, Spilltilstand, By, ForvalterId } from '../types'
 import { kortKroner } from '../tall'
@@ -160,6 +160,23 @@ export function kjopBestand(s: Spilltilstand, id: JordId): Utfall {
   n.kontanter -= pris
   j.investert = (j.investert ?? 0) + pris
   j.bestand = [...bestand(j), n.sek]
+  flyt(n, 'eiendom', pris)
+  return { ok: true, tilstand: n }
+}
+
+/** Bygger skogens sagbruk (Pakke 121): hver hogst gir 20 % mer. Prisen står i skogens verdi. */
+export function kjopSagbruk(s: Spilltilstand, id: JordId): Utfall {
+  const j0 = s.jord[id]
+  if (!j0) return feil('Du eier ikke skogen.')
+  if (JORD[id].type !== 'skog') return feil('Sagbruk bygges ved skog.')
+  if (j0.sagbruk) return feil('Skogen har sagbruk.')
+  const pris = sagbrukpris(s, id)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const j = n.jord[id]!
+  n.kontanter -= pris
+  j.investert = (j.investert ?? 0) + pris
+  j.sagbruk = true
   flyt(n, 'eiendom', pris)
   return { ok: true, tilstand: n }
 }

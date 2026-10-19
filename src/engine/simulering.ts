@@ -25,7 +25,7 @@ import { dagsbilde, konjunkturdrift } from './verden'
 import { nyhetsfaktor, trenddrift } from './bransjer'
 import { kupongPerSek } from './obligasjoner'
 import { betalCharter } from './charter'
-import { betalKraft } from './jord'
+import { betalKarbon, betalKraft } from './jord'
 import type { PapirId, Spilltilstand } from './types'
 
 /**
@@ -183,6 +183,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
     betalCharter(s, leieSek)
     // Kraften fra jorda (Pakke 115) likeså.
     betalKraft(s, leieSek)
+    // Klimakredittene for den stående skogen (Pakke 121) likeså.
+    betalKarbon(s, leieSek)
   }
   if (m) t = runde(m, 'leie', t)
   dekkUnderskudd(s)

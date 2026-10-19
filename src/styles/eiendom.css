@@ -489,6 +489,11 @@
   vector-effect: non-scaling-stroke;
 }
 
+/* Pakke 121: tømmerprisen under bestandenes tekst, med luft over. */
+.tommerpris {
+  margin-top: 8px;
+}
+
 .avlingspriser-liste {
   display: flex;
   flex-direction: column;

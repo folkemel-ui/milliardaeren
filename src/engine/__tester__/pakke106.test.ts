@@ -9,7 +9,7 @@ import { kjopDyr, kjopGardsbygg, kjopJord, type Utfall } from '../handlinger'
 import { nettoformue } from '../formler'
 import { eiendomsverdi } from '../eiendom'
 import { DAG_SEK, dagFra, dato } from '../kalender'
-import { dagerTilHogst, HOGST_BEST_DAG, JORD, jordfaktor, landverdi, tommerfaktor, tommervekst, tommerverdi } from '../jord'
+import { besteHogstdag, dagerTilHogst, HOGST_BEST_DAG, JORD, jordfaktor, landverdi, tommerfaktor, TOMMERPRIS_SNITT, tommervekst, tommerverdi } from '../jord'
 import { DYR, DYRLISTE, dyrGir, dyrKasseNaa, dyrOpptjent, dyrpris, dyrVedDagsskifte, nesteKlipping, nesteSlakt, SLAKT_DAGER, tilskudd } from '../dyr'
 import { byfaktor, regionFor } from '../regioner'
 import { simuler } from '../simulering'
@@ -110,6 +110,8 @@ describe('skog som sier når den bør hogges', () => {
     const s = nyttSpill()
     s.kontanter = 1e13
     s.hoyesteFormue = 1e13
+    // Pakke 121: tømmerprisen følger boligmarkedet; her står den på 1.
+    s.marked.eiendom.avvik = Math.log(TOMMERPRIS_SNITT)
     return ok(kjopJord(s, SKOG))
   }
 
@@ -140,7 +142,8 @@ describe('skog som sier når den bør hogges', () => {
     expect(snitt(46) / snitt(36)).toBeGreaterThan(0.98)
     const s = medSkog()
     s.sek = s.jord[SKOG]!.plantetSek + 10 * DAG_SEK
-    expect(dagerTilHogst(s, SKOG)).toBeCloseTo(26, 6)
+    // Pakke 121: med klimakredittene er den beste dagen 49, så kortet teller ned dit.
+    expect(dagerTilHogst(s, SKOG)).toBeCloseTo(besteHogstdag(undefined) - 10, 6)
     s.sek += 40 * DAG_SEK
     expect(dagerTilHogst(s, SKOG)).toBe(0)
     expect(tommervekst({ ...s, jord: {} }, SKOG)).toBe(0)

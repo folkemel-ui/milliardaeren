@@ -720,12 +720,12 @@ export function tommervekst(s: Spilltilstand, id: JordId): number {
     const d = Math.max(0, bestandsalder(s, id, i))
     sum += ((landverdi(s, id) / START_BESTAND) * TOMMER_MAKS * 2 * d * TOMMER_DAGER) / (d + TOMMER_DAGER) ** 3
   }
-  return sum
+  return sum * tommerpris(s) * sagbruksfaktor(j)
 }
 
 /** Hvor mange dager til skogen er best å hogge; 0 når den er klar. */
 export function dagerTilHogst(s: Spilltilstand, id: JordId): number {
-  return Math.max(0, HOGST_BEST_DAG - skogalder(s, id))
+  return Math.max(0, besteHogstdag(s.jord?.[id]) - skogalder(s, id))
 }
 
 // ─────────────────────────────────────────────── Bestandene (Pakke 120)
@@ -755,9 +755,13 @@ export function bestandsalder(s: Spilltilstand, id: JordId, i: number): number {
   return j ? (s.sek - bestand(j)[i]) / DAG_SEK : 0
 }
 
-/** Hva tømmeret i ett bestand er verdt nå: en tredel av jorda ganger veksten. */
+/**
+ * Hva tømmeret i ett bestand er verdt nå: en tredel av jorda ganger veksten, ganget med dagens
+ * tømmerpris og sagbruket (Pakke 121) — det en hogst gir, og det skogen står i formuen med.
+ */
 export function bestandsverdi(s: Spilltilstand, id: JordId, i: number): number {
-  return JORD[id].type === 'skog' ? (landverdi(s, id) / START_BESTAND) * tommerfaktor(bestandsalder(s, id, i)) : 0
+  if (JORD[id].type !== 'skog') return 0
+  return (landverdi(s, id) / START_BESTAND) * tommerfaktor(bestandsalder(s, id, i)) * tommerpris(s) * sagbruksfaktor(s.jord?.[id])
 }
 
 /** Det eldste bestandet — det som er nærmest hogst. */
@@ -789,6 +793,134 @@ export function tommerverdi(s: Spilltilstand, id: JordId): number {
   let sum = 0
   for (let i = 0; i < bestand(j).length; i++) sum += bestandsverdi(s, id, i)
   return sum
+}
+
+// ───────────────────────────── Tømmerprisen, klimakredittene og sagbruket (Pakke 121)
+
+/*
+ * Tømmerprisen følger boligmarkedet: landsindeksens avvik fra trenden (marked.eiendom), som
+ * husene. Avviket svinger ±16 % og faller 10–25 % i et boligkrakk, så det står i snitt under
+ * null (e^avvik ≈ 0,79 over 9 600 timer i 24 spill) — derfor deles det på snittet, så prisen
+ * er 1 i et vanlig marked: halve tiden innen ±10 %, fire av fem innen ±20 %. Etter et krakk
+ * kommer prisen tilbake over noen timer, så det kan lønne seg å vente med hogsten. Prisen
+ * leses av indeksen som finnes, så ingen terning flytter seg. Jorda følger regionen som før.
+ */
+export const TOMMERPRIS_SNITT = 0.789
+export const TOMMERPRIS_MIN = 0.5
+export const TOMMERPRIS_MAKS = 1.5
+
+/** Dagens tømmerpris, 1 i et vanlig marked. */
+export function tommerpris(s: Spilltilstand): number {
+  const avvik = s.marked?.eiendom?.avvik
+  if (avvik === undefined) return 1
+  return Math.min(TOMMERPRIS_MAKS, Math.max(TOMMERPRIS_MIN, Math.exp(avvik) / TOMMERPRIS_SNITT))
+}
+
+/** Sagbruket gir så mye mer for hver hogst … */
+export const SAGBRUK_LOFT = 0.2
+/** … og koster en tredel av jorda. Med tre bestand tjener det seg inn på ~80 spilldager (~7 t). */
+export const SAGBRUK_ANDEL = 1 / 3
+
+export function sagbruksfaktor(j: Jordstykke | undefined): number {
+  return j?.sagbruk ? 1 + SAGBRUK_LOFT : 1
+}
+
+export function sagbrukpris(s: Spilltilstand, id: JordId): number {
+  return landverdi(s, id) * SAGBRUK_ANDEL
+}
+
+/** Det sagbruket legger til per spilldag i et jevnt omløp ved den beste dagen, til vanlig tømmerpris. */
+export function sagbrukPerDag(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  if (!j) return 0
+  const d = besteHogstdag({ ...j, sagbruk: true })
+  return (landverdi(s, id) / START_BESTAND) * bestand(j).length * (tommerfaktor(d) / d) * SAGBRUK_LOFT
+}
+
+/*
+ * Klimakreditter: hvert bestand får 0,6 % av det stående tømmeret om dagen — mengden, til vanlig
+ * pris, uten sagbruket (CO₂ bryr seg ikke om boligmarkedet). Et nyhogd bestand gir nesten
+ * ingenting, et gammelt mest. Målt mot omløpet: det beste er nå å hogge ved dag ~49 (36 før),
+ * hogst ved dag 36 gir 98 % av det, og et bestand som aldri hogges gir 77 % — et ekte valg for
+ * den som er borte, uten å slå hogsten. Betales hvert sekund som leia, også mens du er borte.
+ */
+export const KARBON_PER_DAG = 0.006
+
+/** Integralet av tommerfaktor fra 0 til t dager. */
+function tommerIntegral(t: number): number {
+  const a = TOMMER_DAGER
+  const d = Math.max(0, t)
+  return TOMMER_MAKS * (d - 2 * a * Math.log((d + a) / a) - (a * a) / (d + a) + a)
+}
+
+/** Klimakredittene en skog gir nå, i kroner per spilldag. */
+export function karbonPerDag(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  if (!j || JORD[id].type !== 'skog') return 0
+  let sum = 0
+  for (let i = 0; i < bestand(j).length; i++) sum += tommerfaktor(bestandsalder(s, id, i))
+  return (landverdi(s, id) / START_BESTAND) * sum * KARBON_PER_DAG
+}
+
+/**
+ * Klimakredittene fra alle skogene for de siste `sekunder` sekundene, betalt som leia (borte
+ * samlet). Regnes som integralet over bestandets alder, så en time borte gir det samme som en
+ * time sekund for sekund. Føres på skogen. Muterer.
+ */
+export function betalKarbon(s: Spilltilstand, sekunder: number): number {
+  if (!s.jord) return 0
+  let sum = 0
+  for (const id of JORDLISTE) {
+    const j = s.jord[id]
+    if (!j || JORD[id].type !== 'skog') continue
+    let f = 0
+    for (const plantet of bestand(j)) f += tommerIntegral((s.sek - plantet) / DAG_SEK) - tommerIntegral((s.sek - sekunder - plantet) / DAG_SEK)
+    // Jorda stiger 0,3 % om dagen: en time borte (12 dager) regnes på jordverdien midt i tiden, ikke ved slutten.
+    const midt = (1 + JORDVEKST_PER_DAG) ** (-sekunder / DAG_SEK / 2)
+    const x = (landverdi(s, id) / START_BESTAND) * f * KARBON_PER_DAG * midt
+    if (x <= 0) continue
+    j.karbon = (j.karbon ?? 0) + x
+    sum += x
+  }
+  if (sum > 0) {
+    s.kontanter += sum
+    s.totaltHost += sum
+    s.totaltLeie += sum
+  }
+  return sum
+}
+
+/**
+ * Hva ett bestand gir per dag over et helt omløp som hogges ved dag `d`: tømmeret (med sagbruket)
+ * og klimakredittene underveis, til vanlig tømmerpris. Til vekstkurven og bestandsknappen.
+ */
+export function omlopPerDag(s: Spilltilstand, id: JordId, d: number): number {
+  if (d <= 0) return 0
+  return ((landverdi(s, id) / START_BESTAND) * (tommerfaktor(d) * sagbruksfaktor(s.jord?.[id]) + KARBON_PER_DAG * tommerIntegral(d))) / d
+}
+
+const BESTE_DAG = new Map<number, number>()
+
+/**
+ * Dagen et bestand gir mest per dag over et helt omløp, med klimakredittene medregnet: tømmeret
+ * ved hogst (med sagbruket) pluss kredittene underveis, delt på dagene. 49 uten sagbruk, 46 med;
+ * til vanlig tømmerpris — en høy pris gjør det verdt å hogge før, en lav å vente.
+ */
+export function besteHogstdag(j: Jordstykke | undefined): number {
+  const faktor = sagbruksfaktor(j)
+  const husket = BESTE_DAG.get(faktor)
+  if (husket !== undefined) return husket
+  let best = 0
+  let dag = HOGST_BEST_DAG
+  for (let d = 1; d <= 400; d++) {
+    const v = (tommerfaktor(d) * faktor + KARBON_PER_DAG * tommerIntegral(d)) / d
+    if (v > best) {
+      best = v
+      dag = d
+    }
+  }
+  BESTE_DAG.set(faktor, dag)
+  return dag
 }
 
 /** Jord og tømmer du eier, og det du har bygd på gårdene (Pakke 92). */

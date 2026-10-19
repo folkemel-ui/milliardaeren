@@ -264,6 +264,24 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   stand (what the cards and the Pack 106 old-save adjustment read), `tommerverdi` and `tommervekst` sum the
   stands, and `hoggSkog` still fells them all (old tests and a «fell everything» button), `hoggBestand` one.
   Every felling goes to `j.hogster` (last eight) and `j.tommerTotalt`.
+- **The property index's deviation is not centred on zero** (Pack 121, the timber price). `marked.eiendom.avvik`
+  mean-reverts (0.15/h, noise 0.03), but a crash (0.0003 a tick = ~0.2 an hour, −10 to −25 %) keeps it at −0.25 on
+  average with a spread of ±16 % — so `e^avvik` averages 0.789, and a price read straight from it would sit ~20 %
+  low. `tommerpris` divides by `TOMMERPRIS_SNITT` (0.789) and clamps to 0.5–1.5: half the time within ±10 %, four in
+  five within ±20 %. Measured with the game's own code (an esbuild bundle of `lagMarked` + `markedstikk`, 24 seeds ×
+  400 h), not with a copy of the formula — my copy with its own random generator gave −0.52. The land already
+  follows its *region* (±6 %, `byfaktor`), so the timber price uses the *national* index on top. Old tests that compare
+  fellings with the bare formula pin the price: `s.marked.eiendom.avvik = Math.log(TOMMERPRIS_SNITT)`.
+- **Carbon credits are paid like rent, as an integral** (Pack 121): `betalKarbon` in the rent block, 0.6 % of the
+  standing timber a day at price 1 and without the sawmill, summed over each stand with the closed form of
+  ∫tommerfaktor (`tommerIntegral`), so an hour away pays what an hour second by second does. The land rises 3.6 % in
+  an hour, so the lump is priced at the land value in the middle of the interval (otherwise +1.8 %). Into
+  `totaltHost`/`totaltLeie` and `j.karbon`, like the power plants; not in `nettoPerSek` (the power plants aren't
+  either). The rate was measured against the rotation: best day 36 → 49, felling at 36 still 98 %, never felling 77 %.
+- **«The best day» is now computed, not a constant** (Pack 121): `besteHogstdag(j)` maximises (timber × sawmill +
+  credits) / days numerically, memoised per sawmill factor (49 without, 46 with). `HOGST_BEST_DAG` (36) stays the
+  timber-only peak for the help text and old tests; the cards, `dagerTilHogst` and the curve use `besteHogstdag`.
+  `bestandsverdi` includes the price and the sawmill, so felling, net worth and the sale all read one number.
 
 ## Luxury, Samling, homes and art
 

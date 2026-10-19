@@ -929,6 +929,10 @@ export interface Jordstykke {
   /** De siste hogstene i skogen (Pakke 120), nyeste sist, og alt tømmeret har gitt. */
   hogster?: Hogst[]
   tommerTotalt?: number
+  /** Skogens eget sagbruk (Pakke 121): hver hogst gir mer. Prisen står i `investert`. */
+  sagbruk?: boolean
+  /** Klimakredittene skogen har gitt (Pakke 121), betalt hvert sekund for det stående tømmeret. */
+  karbon?: number
   /** Jordene på gården (Pakke 92): 3 fra start, opptil 10. Mangler i eldre lagringer. */
   jorder?: number
   /** Maskinene du har kjøpt til gården. */

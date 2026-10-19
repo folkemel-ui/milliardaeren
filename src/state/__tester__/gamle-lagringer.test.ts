@@ -17,7 +17,7 @@ import { simuler } from '../../engine/simulering'
 import { botSpill } from '../../engine/__tester__/bot'
 import { DAG_SEK, dagnummer } from '../../engine/kalender'
 import type { BedriftstypeId, Spilltilstand } from '../../engine/types'
-import { JORD, JORDLISTE, jordfaktor, skogalder, tommerfaktor } from '../../engine/jord'
+import { JORD, JORDLISTE, jordfaktor, skogalder, tommerfaktor, tommerpris, tommerverdi } from '../../engine/jord'
 import { byfaktor } from '../../engine/regioner'
 import { dyrOpptjent } from '../../engine/dyr'
 
@@ -33,6 +33,16 @@ function pakke106(s: Spilltilstand): number {
     const tommer = JORD[id].type === 'skog' ? tommerfaktor(skogalder(s, id)) : 0
     sum += uten * (byfaktor(s, JORD[id].by) - 1) * (1 + tommer)
   }
+  return sum
+}
+
+/**
+ * Pakke 121: tømmeret følger tømmerprisen (boligmarkedet). Alle de gamle lagringene er fra før,
+ * da prisen var 1, så forskjellen er tømmeret nå ganger (1 − 1/prisen). Ingen av dem har sagbruk.
+ */
+function pakke121(s: Spilltilstand): number {
+  let sum = 0
+  for (const id of JORDLISTE) if (s.jord?.[id] && JORD[id].type === 'skog') sum += tommerverdi(s, id) * (1 - 1 / tommerpris(s))
   return sum
 }
 
@@ -99,12 +109,12 @@ describe('lagringer fra alle gamle versjoner', () => {
       it('har den samme formuen som den gamle motoren regnet ut', () => {
         // Den eneste migreringen som flytter verdi med vilje er 18 → 19, som tok
         // lederens pris ut av bedriftens verdi. Pakke 106 flyttet jorda og dyrene
-        // (pakke106 over). Alt annet skal stemme på kronen.
+        // (pakke106 over), og Pakke 121 tømmeret med tømmerprisen (pakke121). Alt annet skal stemme på kronen.
         const g = l.tilstand as { bedrifter: { type: BedriftstypeId; leder?: boolean }[] }
         const ledere = l.versjon < 19 ? g.bedrifter.filter((b) => b.leder).reduce((sum, b) => sum + lederpris(b.type), 0) : 0
         // Lagringene fra versjon 26 og senere er laget etter Pakke 106, så jorda står allerede riktig der.
         const jorda = l.versjon <= 25 ? pakke106(s) : 0
-        expect(Math.abs(nettoformue(s) - (l.formue - ledere + jorda))).toBeLessThan(2)
+        expect(Math.abs(nettoformue(s) - (l.formue - ledere + jorda + pakke121(s)))).toBeLessThan(2)
       })
 
       it('kan spilles videre en måned, også med boten', () => {

@@ -18,6 +18,7 @@ import {
   skogalder,
   START_BESTAND,
   tommerfaktor,
+  TOMMERPRIS_SNITT,
   tommerverdi,
 } from '../jord'
 import type { Spilltilstand } from '../types'
@@ -35,6 +36,8 @@ function medSkog(): Spilltilstand {
   const s = nyttSpill()
   s.kontanter = 1e12
   s.hoyesteFormue = 1e12
+  // Pakke 121: tømmerprisen følger boligmarkedet; her står den på 1.
+  s.marked.eiendom.avvik = Math.log(TOMMERPRIS_SNITT)
   return ok(kjopJord(s, ID))
 }
 
@@ -121,7 +124,7 @@ describe('siden', () => {
     expect(kort).toContain('Bestand 1')
     expect(kort).toContain('Bestand 3')
     expect(kort).toContain('Bestand 4 av 5')
-    expect(tekst(createElement(Tommerkurve, { s, id: ID }))).toContain('gir mest per dag over et helt omløp ved dag 36')
+    expect(tekst(createElement(Tommerkurve, { s, id: ID }))).toContain('gir et omløp mest per dag ved dag 49')
     expect(tekst(createElement(Skogregnskap, { s, id: ID }))).toContain('Ingen hogster ennå')
     s = ok(hoggBestand(s, ID, 0))
     expect(tekst(createElement(Skogregnskap, { s, id: ID }))).toContain('bestand 1')

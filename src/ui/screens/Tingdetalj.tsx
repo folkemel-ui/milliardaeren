@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { EIENDOMSTYPER, eiendomspris, KATEGORINAVN, LAGER, LAGER_FOR, leieHverPerSek, LUKSUS, restverdi } from '../../engine/eiendom'
-import { JORD, landverdi, ODEL_DAGER, tommerverdi, vaer } from '../../engine/jord'
+import { JORD, landverdi, ODEL_DAGER, tommerpris, tommerverdi, vaer } from '../../engine/jord'
 import { KUNSTNERE, kunstnertrend, MALERIER, maleripris, nesteTrendbytte } from '../../engine/kunst'
 import { eierDu, LANDEMERKER, landemerkepris } from '../../engine/landemerker'
 import { DAG_SEK, dagnummer } from '../../engine/kalender'
@@ -12,7 +12,7 @@ import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall, varighet } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { Fjoskort, Gardskart, Gardsnav, Gardsregnskap, Jordkort, Kraftkort, Lagerkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
-import { Bestandkort, Skogregnskap, Tommerkurve } from '../komponenter/Skog'
+import { Bestandkort, Skogdrift, Skogregnskap, Tommerkurve } from '../komponenter/Skog'
 import { aapneGardsside, GARDSSIDER, useGardsside, type Gardsside } from '../gardssider'
 import { useTilbake } from '../tilbake'
 import { Malerikort } from '../komponenter/Kunst'
@@ -121,7 +121,7 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
         ['Sted', t.sted],
         ['Verdien av jorda', kortKroner(landverdi(s, id as JordId))],
       ]
-      if (t.type === 'skog') fakta.push(['Tømmeret', kortKroner(tommerverdi(s, id as JordId))])
+      if (t.type === 'skog') fakta.push(['Tømmeret', kortKroner(tommerverdi(s, id as JordId))], ['Tømmerprisen', `×${tall(tommerpris(s), 2)}`])
       else fakta.push(['Ukas vær', vaer(dagnummer(s.sek)).navn])
       // Pakke 114: odel etter 90 dager — eller hvor lenge det er igjen.
       const j = s.jord[id as JordId]
@@ -136,6 +136,7 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
           <Gardsnav s={s} id={id as JordId} />
           {/* Pakke 120: bestandene, vekstkurven og regnskapet. Pakke 115: skogen har ingen sider, så kraftverket står her. */}
           {t.type === 'skog' && <Bestandkort s={s} id={id as JordId} />}
+          {t.type === 'skog' && <Skogdrift s={s} id={id as JordId} />}
           {t.type === 'skog' && <Tommerkurve s={s} id={id as JordId} />}
           {t.type === 'skog' && <Skogregnskap s={s} id={id as JordId} />}
           {t.type === 'skog' && <Kraftkort s={s} id={id as JordId} />}

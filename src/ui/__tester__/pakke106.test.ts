@@ -32,13 +32,14 @@ describe('skogkortet', () => {
     const s = ok(kjopJord(rik(), 'skog-trysil'))
     s.sek += 10 * DAG_SEK
     const html = renderToStaticMarkup(createElement(Jordkort, { s, id: 'skog-trysil' }))
-    expect(html).toMatch(/Vokser nå kr [\d,\s]+(mill|mrd)? om dagen · best å hogge om 26 dager/)
+    expect(html).toMatch(/Vokser nå kr [\d,\s]+(mill|mrd)? om dagen · best å hogge om 39 dager/)
     expect(html).not.toContain('Klar for hogst')
   })
 
-  it('sier «Klar for hogst» fra dag 36', () => {
+  // Pakke 121: med klimakredittene er den beste dagen 49 (36 før).
+  it('sier «Klar for hogst» fra dag 49', () => {
     const s = ok(kjopJord(rik(), 'skog-trysil'))
-    s.sek += 40 * DAG_SEK
+    s.sek += 50 * DAG_SEK
     const html = renderToStaticMarkup(createElement(Jordkort, { s, id: 'skog-trysil' }))
     expect(html).toContain('<span class="merke gull">Klar for hogst</span>')
     expect(html).not.toContain('best å hogge om')
@@ -79,7 +80,7 @@ describe('forklaringen', () => {
     expect(t).toContain('Kua gir 4 % av prisen i uka, grisen 5,5 %, sauen 6 % og høna 7 %')
     expect(t).toContain('følger prisene i regionen sin')
     expect(t).toContain('raskest rundt dag 18')
-    expect(t).toContain('rundt dag 36')
+    expect(t).toContain('rundt dag 49')
     expect(t).not.toContain('de første 36 dagene')
   })
 })
