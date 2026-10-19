@@ -273,7 +273,9 @@ lives in one place only.
   `VERSJON`, an entry at the top of `ENDRINGER` in `ved-behov/Endringslogg.ts` (the text lives in a
   part since Pack 70), the «Releases» sentence in `Ideer.md` (what this version covered, «the next
   entry should start from there»), one commit `Versjon X: endringsloggen`, `lever.mjs`, and push
-  only on Folke's word. Draft the points in the recommendation itself, so «yes» approves the text
+  only on Folke's word. **Folke may go past a due version** (3.4 was due from Pack 117 and Folke chose «Start the
+  next pack» three times): don't push it — keep adding each new pack to the draft and offer it once more at the end of
+  the next report, after the next pack's description. Draft the points in the recommendation itself, so «yes» approves the text
   as well as the number; if the entry gets anything the draft didn't have (the ingress line in
   2.7), say so.
 
@@ -326,6 +328,12 @@ lives in one place only.
 - **`${…}` inside a double-quoted `node -e` is Bash's, not JavaScript's** (Pack 108): a help-text edit that
   inserted `${SUPERCUP_STATUS}` came out as two spaces — Bash expanded the empty variable. `tsc` only
   noticed because the import went unused. Anything with `${` goes in a script file via the Write tool.
+- **Backticks in a double-quoted `node -e` are command substitution** (Pack 117, twice in one day): a
+  `feil(…)` with a template string came out as `feil()`, and a whole wisdom entry lost every `code` word — Bash ran
+  each one as a command. The tell is a run of «command not found» lines above the script's own «ok». What held for
+  every patch in Packs 118–120: the patch script in a file — the Write tool, or a quoted `cat > x.mjs <<'EOF'` when it
+  has backticks but no backslash regexes — and wisdom text always through the Write tool. When the damaged file had
+  no other uncommitted change, `git checkout -- <file>` and do it again.
 - **Don't fix a scratch script with `node -e` from Bash.** Nested quotes and `\n` escapes
   inside a Bash string inside JS broke twice in a row; the Edit tool on the script file
   fixed it in one go.
@@ -419,6 +427,11 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   `$_` in a Bash-quoted PowerShell line gets eaten), compare with the clock, stop `lever.mjs` and both vitest
   processes, and run it again; the rerun passed in normal time. On a slow evening a full run took ~450 s, so run
   `lever.mjs` in the background, never as a foreground call with the 10-minute limit.
+- **To tell a pack's cost from load, time the part old and new, interleaved** (Pack 117): `BENK=1` makes
+  `ytelse.test.ts` print every part's milliseconds; run it in a worktree of `HEAD` (junction to `node_modules`,
+  see §3) and in the working tree by turns, three rounds, in one PowerShell loop. «inntekt» read 45–46 before and
+  56–57 after on every round — the change, not load — and 48–52 after the fix. A 1 ms swing that the old commit
+  shows too is load.
 - **The speed test's `leie` part (budget 22 ms) fails under full-suite load** — 23 ms in Packs 93 and 95,
   25 ms in Pack 103 — and passes alone. Rerun `ytelse.test.ts` alone before suspecting the change;
   `lever.mjs` has passed it every time so far.

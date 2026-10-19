@@ -75,6 +75,9 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 - **The right edge cut off in a screenshot is the pane, not the page, if the DOM says so** (Packs 106–107,
   twice, even after the 1-px resize): read the button's and the card's `getBoundingClientRect().right`
   against `clientWidth` and `scrollWidth`, and say in the report that the check was DOM-only.
+- **`preview_start` navigates its tab after it returns** (Pack 118): a save-building script run right after it was
+  cut off («the page navigated while this script was running») and nothing was saved. Navigate to `/ikon.svg`
+  once more, then run the script.
 - **A page that is «9 px too wide» right after it opens is often its slide-in animation** (Packs 118–119):
   `.detalj` slides in with `gli-fra-hoyre`, and when the pane isn't drawing frames the animation stays at 0 ms with
   the section at x = 40, so `scrollWidth` reads 384. `getAnimations()` on the section showed `running 0`; after a

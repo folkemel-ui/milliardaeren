@@ -299,8 +299,19 @@ balance, the saves or the speed. Per-system details (the club, the farms, art �
   quality, the impression as quality ± noise in thirds, and Pack 83's measured return per true team gave
   +3.6 points at ±0.25 and +7.4 at ±0.5 — matching the review's claim — in a one-line `node -e`.
 
+- **Measure a new money system before fixing its constant** (Packs 118–119): a temporary
+  `src/engine/__tester__/zz-maal*.test.ts` that plays thousands of game days with the system's own day-change
+  function and prints `MAAL` lines (read them with `grep -a`), deleted before the commit. The factory's price per
+  tonne went 12.5 → 13.5 mrd that way, because the board's contracts average below a full rocket. **Mind the tax:**
+  a run through `simuler` over whole months pays the monthly tax, so the same factory read 178 mill/s on its own
+  loop and ~135 mill/s through `simuler`. Compare like with like, and say in the report which one a number is.
+
 ## 4. Saves and migrations
 
+- **An adjustment in `gamle-lagringer.test.ts` must name the versions it applies to** (Pack 117): Pack 106's
+  land adjustment was added for every saved version, so the first real save made after Pack 106 (v26) «differed»
+  from its own engine by kr 57 mill. Now `l.versjon <= 25 ? pakke106(s) : 0`. When a test fails on the newest old
+  save only, read the test's own corrections before the migration.
 - **The save is written through `tilLagring`** (`state/lagringsformat.ts`): number
   histories with 7 significant digits, everything else exact. A new number history must
   be named `historikk`/`inntektHistorikk` (or `punkter`) to be rounded. Every list has a
@@ -358,6 +369,13 @@ balance, the saves or the speed. Per-system details (the club, the farms, art �
   copy, not a failure.
 
 ## 5. Speed
+
+- **Lookups by name, per business, per second, add up** (Pack 117): the synergy factor looked up each business's
+  partners by type name every second — ~7 ms over two hours away on the heaviest save, and a bitmask version was no
+  faster, because the cost was the name lookups. What worked: remember the factors per business list
+  (`WeakMap<Bedrift[], { n, f }>` with a length check), since every purchase replaces the list and it is the same
+  object through a whole `simuler` call. Every path that sums income reads it — the achievement check goes
+  through `bedriftsfaktor` too, and its part rose 11 → 15 ms until the owned-types mask was cached as well.
 
 - **Speed is measured on the built engine** (`ytelse.test.ts` bundles with esbuild and
   runs a child Node process): a fresh game ≤ 100 ms, the heaviest save (`fulltSpill`)
