@@ -77,12 +77,18 @@ export const BEDRIFTSTYPER: Record<BedriftstypeId, Bedriftstype> = {
     id: 'skisenter', navn: 'Skisenter',
     pris: 600_000_000_000, grunninntekt: 20_000_000, oppgraderingspris: 240_000_000_000, vekst: 1.1, laasesOppVed: 750_000_000_000,
   },
+  // Pakke 117: stigen gikk bare til skisenteret (600 mrd) mens et sent spill passerer flere hundre
+  // billioner. Et trinn til med samme ×3 i pris og inntekt, og samme andel (0,4) i første oppgradering.
+  brikkefabrikk: {
+    id: 'brikkefabrikk', navn: 'Brikkefabrikk',
+    pris: 1_800_000_000_000, grunninntekt: 60_000_000, oppgraderingspris: 720_000_000_000, vekst: 1.1, laasesOppVed: 2_250_000_000_000,
+  },
 }
 
 /** Stigen i rekkefølge. */
 export const STIGEN: BedriftstypeId[] = [
   'saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap',
-  'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
+  'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'brikkefabrikk',
 ]
 
 /**
@@ -202,6 +208,11 @@ export const FORBEDRINGER: Record<BedriftstypeId, Forbedring[]> = {
     ['Ny gondolbane', 'Fra dalen til toppen på seks minutter.'],
     ['Snøkanoner', 'Sesongen starter i oktober, uansett vær.'],
     ['Vinter-OL-arena', 'Verden ser på — og bestiller hytte.'],
+  ]),
+  brikkefabrikk: forbedringer([
+    ['Renrom', 'Ett støvkorn ødelegger tusen brikker. Nå er det ingen.'],
+    ['EUV-maskiner', 'Lys med kortere bølger enn noen har brukt — og transistorer på størrelse med et virus.'],
+    ['Eget designlaboratorium', 'Dere tegner brikkene selv, og resten av verden står i kø.'],
   ]),
 }
 

@@ -4,7 +4,7 @@
  * raskest — og sparer til det hvis den ikke har råd ennå.
  */
 
-import { aapneFilial, ansett, betalSkatt, byPaaBedrift, godtaMotbud, innred, kjopBedrift, kjopForbedring, kjopLandemerke, kjopLuksus, laan, oppgrader, oppgraderFlere, utvidLager, velgRetning, type Utfall } from '../handlinger'
+import { aapneFilial, ansett, betalSkatt, byggEtasje, byPaaBedrift, godtaMotbud, innred, kjopBedrift, kjopForbedring, kjopLandemerke, kjopLuksus, laan, oppgrader, oppgraderFlere, utvidLager, velgRetning, type Utfall } from '../handlinger'
 import { brukteplasser, LAGER, LAGER_FOR, LUKSUS, LUKSUSLISTE, START_LAGER, STATUS_INNTEKT, STATUSNIVAAER, statusnivaa, statuspoeng } from '../eiendom'
 import { HJEM, HJEMLISTE, hjemAapent, nesteTrinn } from '../hjemmene'
 import { eierDu, kjopsprisLandemerke, LANDEMERKELISTE, LANDEMERKER } from '../landemerker'
@@ -27,6 +27,7 @@ import {
 } from '../formler'
 import { BEDRIFTSTYPER, STIGEN } from '../innhold'
 import { simuler } from '../simulering'
+import { HK_INNTEKT, hovedkontorfaktor, nesteEtasjepris } from '../hovedkontor'
 import { GRADER, GRADLISTE, kanVelgeRetning, medNyAnsatt } from '../ansatte'
 import type { Bedrift, LagerId, Spilltilstand } from '../types'
 
@@ -201,6 +202,10 @@ function kandidater(s: Spilltilstand, smart: boolean): Kandidat[] {
   if (smart) {
     const status = statuskandidat(s)
     if (status) liste.push(status)
+    // Pakke 117: neste etasje i hovedkontoret, når den er det som tjener seg raskest inn.
+    // Gevinsten er 1 % av det bedriftene tjener uten hovedkontoret; statusen regnes ikke med.
+    const etasje = nesteEtasjepris(s)
+    if (etasje !== null) liste.push({ pris: etasje, gevinst: (inntektPerSek(s) / hovedkontorfaktor(s)) * HK_INNTEKT, utfor: (t) => byggEtasje(t) })
   }
   return liste
 }

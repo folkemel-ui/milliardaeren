@@ -22,9 +22,10 @@ import { kompakt } from '../../ui/format'
 import type { PapirId } from '../types'
 
 describe('sluttspillet etter milliarden', () => {
-  it('hele stigen låses opp før billionen', () => {
-    for (const id of STIGEN) expect(BEDRIFTSTYPER[id].laasesOppVed, id).toBeLessThan(1e12)
+  it('stigen til og med skisenteret låses opp før billionen; brikkefabrikken (Pakke 117) etter', () => {
+    for (const id of STIGEN.slice(0, STIGEN.indexOf('skisenter') + 1)) expect(BEDRIFTSTYPER[id].laasesOppVed, id).toBeLessThan(1e12)
     expect(BEDRIFTSTYPER.skisenter.laasesOppVed).toBe(750e9)
+    expect(BEDRIFTSTYPER.brikkefabrikk.laasesOppVed).toBe(2.25e12)
   })
 
   it('bransjene fra oljeselskapet tjener seg inn på rundt 30 000 sekunder, som banken', () => {

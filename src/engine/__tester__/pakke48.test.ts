@@ -114,10 +114,11 @@ describe('retning på nivå 50', () => {
     expect(statuspoeng(s)).toBe(premiumstatus(s))
   })
 
-  it('premium på alle tretten gir 91 statuspoeng', () => {
+  it('premium på alle gir trinnet på stigen hver: 1 + 2 + … + 14 = 105 statuspoeng', () => {
     const s = nyttSpill()
     s.bedrifter = STIGEN.map((t) => bedrift(t, { retning: 'premium' }))
-    expect(premiumstatus(s)).toBe(91)
+    // 91 med tretten bedrifter; brikkefabrikken (Pakke 117) gir 14.
+    expect(premiumstatus(s)).toBe(105)
   })
 
   it('stjernene og retningen kommer på samme nivå', () => {

@@ -28,8 +28,8 @@ function spillMed(type: (typeof STIGEN)[number], nivaa: number): Spilltilstand {
 }
 
 describe('toppbedriftene', () => {
-  it('er de sju fra hotellet og opp', () => {
-    expect(TOPP).toEqual(['hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter'])
+  it('er de fra hotellet og opp — sju, og brikkefabrikken fra Pakke 117', () => {
+    expect(TOPP).toEqual(['hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'brikkefabrikk'])
     for (const t of TOPP) expect(erToppbedrift(t)).toBe(true)
     for (const t of UNDER) expect(erToppbedrift(t)).toBe(false)
   })

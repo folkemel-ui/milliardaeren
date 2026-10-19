@@ -2843,6 +2843,183 @@ const skisenter: B = (t, f) => {
   )
 }
 
+/** En parkert bil sett fjernt (brikkefabrikken): kropp, vindu og skygge. */
+function Parkert({ x, y, m }: { x: number; y: number; m: Materiale }) {
+  return (
+    <g>
+      <ellipse cx={r2(x + 2.6)} cy={r2(y + 0.3)} rx="3" ry="0.6" fill="#000000" opacity="0.25" />
+      <rect x={x} y={y - 2.2} width="5.2" height="2.2" rx="0.8" fill={m.flate} />
+      <rect x={x + 1.1} y={y - 3.3} width="3" height="1.3" rx="0.5" fill={m.lys} />
+      <rect x={x + 1.5} y={y - 3} width="2.2" height="0.8" fill={S.glass.skygge} />
+    </g>
+  )
+}
+
+/**
+ * Brikkefabrikken (Pakke 117; fjern avstand, i Trøndelag): en hvit renromshall
+ * med en petrolstripe og et lite kontor i glass på nivå 1, en hall dobbelt så
+ * stor med avtrekkspiper og gasstanker fra 25, lastebiler, folk og full
+ * parkering ved 50, og ved 100 gullbånd, lysmaster og plakett. Forbedringene:
+ * viftene til renrommet på taket, en kran som løfter en EUV-maskin i kasse inn
+ * gjennom taket, og et designlaboratorium i glass til venstre. Tegnet av
+ * spillsporet i stilen; grafikksporet kan gjøre den ferdig.
+ */
+const brikkefabrikk: B = (t, f) => {
+  const g = GRUNNLINJE
+  const stor = t >= 1
+  const fx = stor ? 8 : 20
+  const fb = stor ? 72 : 52
+  const fh = stor ? 24 : 17
+  const fd = stor ? 16 : 12
+  const fy = g - 3
+  const topp = fy - fh
+  const biler: Materiale[] = [S.marine, S.hvit, S.vin, S.skifer, S.mork, S.oker, S.hvit, S.marine, S.metall]
+  const antallBiler = t >= 2 ? 9 : t >= 1 ? 5 : 3
+  return (
+    <>
+      {/* Åsene rundt fjorden og skogen ved foten, i disen. */}
+      <Kantfade>
+        <Dis>
+          <polygon points={`-40,${g - 12} -22,${g - 24} 2,${g - 20} 28,${g - 32} 54,${g - 24} 80,${g - 34} 104,${g - 26} 136,${g - 18} 136,${g - 6} -40,${g - 6}`} fill={S.fjell.flate} />
+          <polygon points={`-40,${g - 8} -10,${g - 13} 30,${g - 12} 70,${g - 15} 110,${g - 12} 136,${g - 10} 136,${g - 6} -40,${g - 6}`} fill={S.gran.flate} />
+          {[-36, -28, -20, 98, 106, 114, 122, 130].map((tx, i) => (
+            <Tre key={tx} x={tx} y={g - 9 + (i % 2)} h={6} slag="gran" />
+          ))}
+        </Dis>
+      </Kantfade>
+      <Bakke type="gress" />
+      {/* Det asfalterte området rundt hallen og veien inn. */}
+      <polygon points={`-40,${g - 3} 136,${g - 3} 136,${g + 8} -40,${g + 8}`} fill={S.skifer.flate} />
+      <rect x="-40" y={g + 8} width="176" height="0.6" fill={S.skifer.lys} />
+      {/* Designlaboratoriet, et tårn i glass bak til venstre. */}
+      {f >= 3 && (
+        <g>
+          <Kloss x={-20} y={g - 4} b={18} h={40} d={8} m={S.glass} />
+          {Array.from({ length: 8 }, (_, i) => (
+            <Vindusrad key={i} x={-19} y={g - 42 + i * 4.6} antall={5} b={2.4} h={2.2} mellom={1.05} tent={i % 3 === 0 ? 3 : 2} start={i % 2} />
+          ))}
+          <Glans points={`-20,${g - 44} -14,${g - 44} -18,${g - 4} -20,${g - 4}`} />
+          <rect x="-20" y={g - 45} width="18" height="1" fill={S.gull.flate} />
+        </g>
+      )}
+      {/* Gasstankene bak hallen fra nivå 25. */}
+      {stor &&
+        [0, 1, 2].map((i) => {
+          const tx = fx + fb + 6 + i * 7
+          return (
+            <g key={i}>
+              <rect x={tx} y={g - 16} width="5.2" height="12" fill={S.hvit.flate} />
+              <rect x={tx + 3.2} y={g - 16} width="2" height="12" fill={S.hvit.skygge} />
+              <ellipse cx={r2(tx + 2.6)} cy={g - 16} rx="2.6" ry="0.9" fill={S.hvit.lys} />
+              <rect x={tx} y={g - 11} width="5.2" height="0.6" fill={S.petrol.flate} />
+            </g>
+          )
+        })}
+      {/* Hallen: hvit, nesten uten vinduer — renrom trenger ikke utsikt. */}
+      <Slagskygge x1={fx} x2={fx + fb} y={fy} lengde={10} d={fd} />
+      <Kloss x={fx} y={fy} b={fb} h={fh} d={fd} m={S.hvit} />
+      <rect x={fx} y={topp + 2} width={fb} height="1.6" fill={S.petrol.flate} />
+      {stor && <rect x={fx} y={topp + 8} width={fb} height="0.5" fill={S.hvit.skygge} />}
+      <Bunnskygge x={fx} y={fy - 3} b={fb} h={3} />
+      {/* Merket på veggen: en brikke med bein. */}
+      <g>
+        <rect x={fx + fb - 9} y={topp + 5} width="4.4" height="4.4" fill={S.petrol.flate} />
+        {[0, 1.4, 2.8].map((d) => (
+          <rect key={d} x={fx + fb - 8.4 + d} y={topp + 4.2} width="0.5" height="6" fill={S.petrol.skygge} />
+        ))}
+        <rect x={fx + fb - 8} y={topp + 6} width="2.4" height="2.4" fill={S.vinduLys.flate} />
+      </g>
+      {/* Avtrekkspipene fra nivå 25. */}
+      {stor &&
+        [0.62, 0.74].map((a) => (
+          <g key={a}>
+            <rect x={r2(fx + fb * a + fd * 0.25)} y={r2(topp - fd * 0.15 - 10)} width="1.6" height="10" fill={S.metall.flate} />
+            <rect x={r2(fx + fb * a + fd * 0.25 + 1)} y={r2(topp - fd * 0.15 - 10)} width="0.6" height="10" fill={S.metall.skygge} />
+            <rect x={r2(fx + fb * a + fd * 0.25 - 0.2)} y={r2(topp - fd * 0.15 - 10.6)} width="2" height="0.8" fill={S.petrol.flate} />
+          </g>
+        ))}
+      {/* Renrommet: viftene på taket. */}
+      {f >= 1 &&
+        Array.from({ length: stor ? 7 : 4 }, (_, i) => {
+          const vx = r2(fx + 3 + i * (stor ? 7.6 : 8.4) + fd * 0.2)
+          const vy = r2(topp - fd * 0.12)
+          return (
+            <g key={i}>
+              <Kloss x={vx} y={vy} b={5} h={1.8} d={4} m={S.metall} />
+              <ellipse cx={r2(vx + 3.4)} cy={r2(vy - 2.4)} rx="1.6" ry="0.55" fill={S.mork.flate} />
+            </g>
+          )
+        })}
+      {/* Flaggstanga ved inngangen; flagget vaier i scenen. */}
+      <rect x={fx - 6.3} y={g - 24} width="0.5" height="22" fill={S.metall.skygge} />
+      <polygon className="anim-flagg" points={`${fx - 5.8},${g - 24} ${fx - 0.6},${g - 23.2} ${fx - 0.6},${g - 21.4} ${fx - 5.8},${g - 20.6}`} fill={S.petrol.lys} />
+      <rect x={fx - 4.2} y={g - 23.4} width="1.6" height="1.6" fill={S.hvit.lys} />
+      {/* Kontoret i glass ved inngangen. */}
+      <Kloss x={fx - 3} y={g - 4} b={stor ? 16 : 12} h={7} d={6} m={S.glass} />
+      <Vindusrad x={fx - 2} y={g - 10} antall={stor ? 5 : 4} b={2.2} h={2.4} mellom={0.9} tent={2} />
+      <rect x={fx - 3} y={g - 11.6} width={stor ? 16 : 12} height="0.7" fill={t >= 3 ? S.gull.flate : S.hvit.flate} />
+      {/* EUV-maskinen kommer i kasse: en kran løfter den inn over taket. */}
+      {f >= 2 && (
+        <g>
+          <line x1={fx + fb + 6} y1={g + 1} x2={fx + fb - 12} y2={topp - 22} stroke={S.oker.flate} strokeWidth="1.3" strokeLinecap="round" />
+          <line x1={fx + fb + 6.6} y1={g + 1} x2={fx + fb - 11.4} y2={topp - 22} stroke={S.oker.skygge} strokeWidth="0.4" />
+          <line x1={fx + fb - 12} y1={topp - 22} x2={fx + fb - 12} y2={topp - 13} stroke={S.mork.flate} strokeWidth="0.35" />
+          <Kloss x={fx + fb - 16} y={topp - 7} b={8} h={6} d={4} m={S.petrol} />
+          <rect x={fx + fb - 15} y={topp - 10.6} width="6" height="0.6" fill={S.gull.flate} />
+          <Kloss x={fx + fb + 1} y={g + 4} b={12} h={3.6} d={4} m={S.oker} />
+          <Kloss x={fx + fb + 10} y={g + 4} b={4} h={5.6} d={4} m={S.oker} />
+          <rect x={fx + fb + 10.6} y={g - 0.6} width="2.6" height="1.6" fill={S.glass.skygge} />
+          {[fx + fb + 3, fx + fb + 11].map((cx) => (
+            <circle key={cx} cx={cx} cy={g + 4.4} r="1" fill={S.mork.skygge} />
+          ))}
+        </g>
+      )}
+      {/* Parkeringen foran til venstre. */}
+      {Array.from({ length: 8 }, (_, i) => (
+        <rect key={i} x={-37 + i * 5.8} y={g + 1.8} width="0.3" height="5.4" fill={S.hvit.lys} opacity="0.5" />
+      ))}
+      {biler.slice(0, antallBiler).map((m, i) => (
+        <Parkert key={i} x={-36.4 + (i % 8) * 5.8} y={g + (i >= 8 ? 6.8 : 5)} m={m} />
+      ))}
+      {/* Lastebiler ved rampa og folk ved inngangen fra nivå 50. */}
+      {t >= 2 && (
+        <g>
+          {[0, 1].map((i) => (
+            <g key={i}>
+              <Kloss x={fx + 20 + i * 18} y={g + 3 + i} b={13} h={4.6} d={4} m={S.hvit} />
+              <Kloss x={fx + 33 + i * 18} y={g + 3 + i} b={3.6} h={4} d={4} m={i ? S.marine : S.vin} />
+              <rect x={fx + 33.4 + i * 18} y={g - 0.4 + i} width="2.4" height="1.2" fill={S.glass.skygge} />
+              {[fx + 22 + i * 18, fx + 31 + i * 18, fx + 34.8 + i * 18].map((cx) => (
+                <circle key={cx} cx={cx} cy={g + 3.4 + i} r="0.9" fill={S.mork.skygge} />
+              ))}
+            </g>
+          ))}
+          <Figur x={fx + 14} y={g - 3} avstand="fjern" klaer={S.hvit} />
+          <Figur x={fx + 16.6} y={g - 2.6} avstand="fjern" klaer={S.marine} vendt={-1} />
+          <Figur x={fx - 6} y={g + 1} avstand="fjern" klaer={S.petrol} />
+        </g>
+      )}
+      {/* Bjørk foran til høyre. */}
+      {[[118, 0], [127, 1]].map(([tx, i]) => (
+        <Tre key={tx} x={tx} y={g + 2 + i} h={9} slag="lov" />
+      ))}
+      {/* Gullbånd, lysmaster og plakett ved nivå 100. */}
+      {t >= 3 && (
+        <g>
+          <rect x={fx} y={topp + 0.6} width={fb} height="0.8" fill={S.gull.flate} />
+          {[-30, fx + fb + 30].map((lx) => (
+            <g key={lx}>
+              <rect x={lx - 0.3} y={g - 30} width="0.6" height="32" fill={S.metall.skygge} />
+              <Lampe x={lx} y={g - 30} r={2.2} />
+            </g>
+          ))}
+          <Plakett x={fx + 4} y={topp - 16} />
+        </g>
+      )}
+    </>
+  )
+}
+
 // ─────────────────────────────────────────────── Oppslag
 
 export type Tegning = (p: P & { trinn: Trinn; forbedringer: number; steg?: number }) => ReactNode
@@ -2884,6 +3061,7 @@ const BEDRIFTER: Record<string, Tegning> = {
   fiskeoppdrett: bedriftNy('fiskeoppdrett', fiskeoppdrett),
   flyselskap: bedriftNy('flyselskap', flyselskap),
   skisenter: bedriftNy('skisenter', skisenter),
+  brikkefabrikk: bedriftNy('brikkefabrikk', brikkefabrikk),
 }
 
 /** Eiendommene, tegnet i ved-behov/Eiendomstegninger.tsx og lastet når de trengs (G12). */
@@ -2918,7 +3096,7 @@ const TOMT: Tegning = ({ størrelse = 48 }) => (
  * Hver eiendom har sin egen tegning fra stedet den ligger (G5), så les `sted` i
  * EIENDOMSTYPER før du tegner en ny.
  */
-export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kontorbygg', 'kontorbygg-stavanger', 'superbil', 'seilbaat', 'saftbod', 'polsebod', 'gatekjokken', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'stasjonsvogn', 'elbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke', 'snekke', 'motorbaat', 'seilyacht', 'superyacht', 'propellfly', 'helikopter', 'forretningsjet', 'langdistansejet', 'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'oy', 'fyret', 'borgen', 'hoppbakken', 'tarnet', 'naeringsbygg', 'kjopesenter', 'stockholm', 'kobenhavn', 'berlin', 'london', 'newyork', 'dubai', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'amsterdam', 'roma', 'paris', 'canary-wharf', 'kjopesenterkjede', 'downtown-dubai', 'manhattan-skyskraper', 'unikhyperbil', 'skreddersyddklokke', 'megayacht', 'widebodyjet', 'ubaat']
+export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kontorbygg', 'kontorbygg-stavanger', 'superbil', 'seilbaat', 'saftbod', 'polsebod', 'gatekjokken', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'brikkefabrikk', 'stasjonsvogn', 'elbil', 'hyperbil', 'veteranbil', 'limousin', 'formelbil', 'dykkerklokke', 'gullklokke', 'mesterverk', 'lommeur', 'diamantklokke', 'snekke', 'motorbaat', 'seilyacht', 'superyacht', 'propellfly', 'helikopter', 'forretningsjet', 'langdistansejet', 'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'gard-hedmarken', 'gard-lista', 'skog-trysil', 'skog-namdalen', 'oy', 'fyret', 'borgen', 'hoppbakken', 'tarnet', 'naeringsbygg', 'kjopesenter', 'stockholm', 'kobenhavn', 'berlin', 'london', 'newyork', 'dubai', 'marbella-leilighet', 'marbella-hotell', 'zermatt-leilighet', 'zermatt-hotell', 'amsterdam', 'roma', 'paris', 'canary-wharf', 'kjopesenterkjede', 'downtown-dubai', 'manhattan-skyskraper', 'unikhyperbil', 'skreddersyddklokke', 'megayacht', 'widebodyjet', 'ubaat']
 
 /**
  * Tegningene med full ramme (G13): ingen vignett, og i scenen bredformat
@@ -2930,6 +3108,8 @@ export const NY_STIL = ['kiosk', 'hytte', 'hytte-trysil', 'hytte-lofoten', 'kont
 export const FULL_RAMME: readonly string[] = [
   // G13–G15: bedriftene.
   'saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter',
+  // Pakke 117: brikkefabrikken, tegnet bred fra start av spillsporet.
+  'brikkefabrikk',
   // G17: boligene og hyttene.
   'hybel', 'hybel-oslo', 'hybel-trondheim', 'leilighet', 'leilighet-bergen', 'leilighet-trondheim', 'rekkehus', 'rekkehus-bergen', 'hytte', 'hytte-trysil', 'hytte-lofoten',
   // G18: byggene, jorda og landemerkene, og kjøpesenterkjeden fra Pakke 76.
@@ -2942,7 +3122,7 @@ export const FULL_RAMME: readonly string[] = [
 ]
 
 /** Bedriftene, som har fire vekstrinn. */
-export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter']
+export const BEDRIFTSTEGNINGER = ['saftbod', 'polsebod', 'gatekjokken', 'kiosk', 'kafe', 'restaurant', 'hotell', 'bank', 'oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'brikkefabrikk']
 
 /**
  * Nærbildene (G9): utsnittet rundt motivet, [x, y, bredde, høyde] i lerretets
@@ -2966,6 +3146,7 @@ export const NAERBILDER: Record<string, readonly [number, number, number, number
   fiskeoppdrett: [44, 52, 40, 40],
   flyselskap: [10, 16, 80, 80],
   skisenter: [14, 24, 68, 68],
+  brikkefabrikk: [16, 36, 60, 60],
   stasjonsvogn: [5, 48, 88, 40],
   elbil: [5, 54, 88, 34],
   superbil: [5, 54, 88, 34],
@@ -3014,6 +3195,7 @@ const TRINNUTSNITT: Record<string, readonly (readonly [number, number, number, n
   fiskeoppdrett: [[28, 40, 54, 54], [32, 36, 60, 60], [30, 34, 62, 62], [30, 30, 66, 66]],
   flyselskap: [[10, 16, 80, 80], [10, 16, 80, 80], [10, 16, 80, 80], [2, 10, 86, 86]],
   skisenter: [[14, 24, 68, 68], [6, 12, 80, 80], [6, 12, 80, 80], [0, 8, 86, 86]],
+  brikkefabrikk: [[16, 36, 60, 60], [6, 20, 76, 76], [6, 20, 76, 76], [4, 12, 84, 84]],
 }
 
 /**

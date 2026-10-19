@@ -12,6 +12,18 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   stages and three improvement details plus entries in `ILLUSTRASJONER` and
   `BEDRIFTSTEGNINGER`. `pakke35.test.ts` checks the ladder rules: steps ≤ 16×, unlock at
   1.2–1.3 × price, first-upgrade share rising from 25 % (kiosk) to ≤ 80 %.
+  **The full list, from the chip factory (Pack 117)** — `tsc` names the `Record`s, the tests the rest:
+  `HJEMREGION` (filialer.ts), `TRENDTEKST` (verden.ts), `FORMER`, a stock (`PAPIRER` with `bransje`,
+  `NYE_PAPIRER`, `PapirId`, `RAPPORTDAG` on a free day ≤ 24, a logo mark in `Papirlogo.tsx`, and a save
+  version whose migration calls `leggTilNyePapirer`, as in Pack 104), an achievement with its `MERKER`
+  row, and for the drawing `BEDRIFTER`, `NY_STIL`, `FULL_RAMME`, `BEDRIFTSTEGNINGER`, `NAERBILDER`,
+  `TRINNUTSNITT` and the steps in `ved-behov/Trinnsteg.tsx`. Texts that count the ladder («tretten») and
+  tests that count stocks (Pack 104: 20 → 21) or read the goal strip after the trillion (Pack 70: the
+  new business became a goal at 2.25 bill) move with it.
+- **Two income paths** (Pack 117): a factor on one business goes in `bedriftsfaktor` *and* in the
+  per-second loop in `simulering.ts`, which repeats the product for speed (`filialfaktor(s, b) *
+  synergifaktor(s, b)`). A factor on all of them (the headquarters) goes inside `statusfaktor`, which
+  every income function multiplies by. `pakke117.test.ts` compares a simulated second with `bedriftInntektIDag`.
 - **Staff live in `b.stab`** (Pack 48), with `ansatte` still the count. Old saves have no
   `stab`: `stab(b)` then makes everyone experienced with names from a hash, so no save
   version was needed. Never compute "one more hire" as `{ ...b, ansatte: b.ansatte + 1 }`

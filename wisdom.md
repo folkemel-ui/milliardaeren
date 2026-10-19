@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 116, 19 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 117, 19 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -136,6 +136,13 @@ lives in one place only.
   recommendations in the previous reply** («what is your next task?» → four questions with my
   picks → «Start next pack», Pack 89), the reply is the go-ahead for those picks: build with them,
   say so in one line at the start, and don't ask again.
+- **Folke's own idea comes as a description** (19 October 2026, the aerospace factory: «It will operate differently
+  from the rest … You have to unlock new and better parts … through research»). Write it into `Ideer.md` as items in
+  their words (quote the key sentence), split by what can be built and tested on its own, and ask only what it leaves
+  open — the packing, how different from the rest, risk, and one thing the description is silent on. Folke answered
+  one question with an option of their own (satellites last 30 days, longer with better parts, and can be taken
+  down); write such an answer in as given. A one-line idea («setting amount of revenue per/s to the sparekonto») got
+  its own item, placed in the pack whose files and purpose it shares, with the placement said in the reply.
 - **«Is there anything more we could add?» (19 October 2026)**: by then *Parked* and the declined rounds held
   ~120 entries, and most obvious ideas (taking the group public, an ending, missions, short selling, mortgages,
   events, sound) were already there. Read the whole of *Parked* first, grep the code for each candidate (the Oslo
@@ -167,7 +174,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–116.**
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117.**
   Spend the effort on making the recommended option right, with numbers, and on saying
   plainly what the alternative costs (other track's files, existing saves, pace).
 
@@ -442,7 +449,9 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   from Monday, Pack 114's «the save version bumps» wasn't needed, and Pack 115's «all three plants take the edge off a
   bad week» was false for the sun (+0.92 with the harvest). Each was found by reading or measuring before the
   questions, and each became a question or a line in the report. Treat every «Next up» claim about the model as a
-  hypothesis until the code or a measurement says so.
+  hypothesis until the code or a measurement says so. Pack 117 again: the plan said the bench bot owns all six
+  synergy businesses before 1 000 mrd; a measuring run showed it never owns the fish farm or the airline, so the
+  synergy question offered two earlier pairs — the option Folke picked.
 - **Check an idea's premise against the model before offering it** (Pack 92's «Next up»): «irrigation
   takes the loss in a dry, sunny week» — but in the game's weather sun is the farm's *best* week.
   Say so in the next pack's description and offer alternatives in its questions.

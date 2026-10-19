@@ -17,6 +17,8 @@ export type BedriftstypeId =
   | 'fiskeoppdrett'
   | 'flyselskap'
   | 'skisenter'
+  // Pakke 117: et trinn over skisenteret.
+  | 'brikkefabrikk'
 
 export interface Bedriftstype {
   id: BedriftstypeId
@@ -93,6 +95,8 @@ export type PapirId =
   | 'STK' | 'ELG' | 'BRN'
   // Børsnotert i Pakke 104: en aksje for hver bransje som manglet, og et eiendomsselskap.
   | 'SOL' | 'NPL' | 'GMN' | 'KBN' | 'BRD' | 'FJH' | 'TOP' | 'NBE'
+  // Børsnotert i Pakke 117, med brikkefabrikken.
+  | 'NLH'
 
 export type Risiko = 'lav' | 'middels' | 'høy'
 
@@ -672,6 +676,8 @@ export interface Spilltilstand {
   oppussing: Partial<Record<EiendomId, { standard: number; ferdigSek: number }>>
   /** Leie, avlinger og tømmer, totalt. `totaltHost` er delen som kom fra jorda. */
   totaltLeie: number
+  /** Etasjene i hovedkontoret (Pakke 117), 0–10. Valgfritt: gamle lagringer har ingen. */
+  hovedkontor?: number
   /** Penger på sparekontoen. */
   sparing: number
   totaltSparerente: number

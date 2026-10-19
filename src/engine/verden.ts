@@ -260,6 +260,7 @@ export const TRENDTEKST: Record<BedriftstypeId, { het: string; kald: string }> =
   fiskeoppdrett: { het: 'Laksen gir rekordpris', kald: 'Lakseprisen stuper' },
   flyselskap: { het: 'Nordmenn flyr som aldri før', kald: 'Flyskam rammer setebelegget' },
   skisenter: { het: 'Skiferien er booket ut', kald: 'Skisesongen skuffer' },
+  brikkefabrikk: { het: 'Verden slåss om brikkene', kald: 'Brikkelagrene hoper seg opp' },
 }
 
 // ─────────────────────────────────────────────── Helligdagene

@@ -405,6 +405,17 @@ const LOGOER: Record<PapirId, Logo> = {
       </>
     ),
   },
+  // Nordlys Halvleder (Pakke 117): en brikke med bein, og et nordlys over kjernen.
+  NLH: {
+    farge: '#3f8f86',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M6 6h12v12H6z" />
+        <path d="M9 3v3M12 3v3M15 3v3M9 18v3M12 18v3M15 18v3M3 9h3M3 12h3M3 15h3M18 9h3M18 12h3M18 15h3" {...strek(m, 1.1)} />
+        <path fill={lys} d="M8.4 14.6c1.6-3 4.4-4.6 7.2-4.2-2.4.6-4 2.2-5 4.8z" />
+      </>
+    ),
+  },
 }
 
 export const PAPIRLOGOER = Object.keys(LOGOER) as PapirId[]

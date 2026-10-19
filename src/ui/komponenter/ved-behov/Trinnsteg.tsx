@@ -694,6 +694,25 @@ const skisenter: Steg = (_t, _f, k) => (
   </>
 )
 
+/** Brikkefabrikken (Pakke 117): flere biler, busser med skift, tankbiler med gass og et helikopter med kunder. */
+const brikkefabrikk: Steg = (_t, _f, k) => (
+  <>
+    {med(
+      k,
+      [1, <Tankbil x={98} y={g + 9} />],
+      [2, <Buss x={-30} y={g + 12} farge={S.petrol} />],
+      [3, <Heli x={110} y={22} farge={S.hvit} />],
+      [4, <Tankbil x={56} y={g + 11} />],
+      [5, <Buss x={14} y={g + 12} farge={S.marine} />],
+      [6, <Heli x={-24} y={16} farge={S.vin} />],
+      [7, <Tankbil x={120} y={g + 12} />],
+      [8, <Buss x={80} y={g + 12} farge={S.oker} />],
+      [9, <Heli x={44} y={10} farge={S.marine} />],
+      [10, <Tankbil x={-8} y={g + 10} />],
+    )}
+  </>
+)
+
 // ─────────────────────────────────────────────── Oppslag
 
 /** Stegene, etter bedriftens id. `Trinnsteg` i Illustrasjoner.tsx slår opp her når delen er lastet. */
@@ -711,4 +730,5 @@ export const TRINNSTEG: Record<string, Steg> = {
   fiskeoppdrett,
   flyselskap,
   skisenter,
+  brikkefabrikk,
 }

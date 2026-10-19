@@ -18,6 +18,7 @@ import { fastInntekt } from '../sortering'
 import { useTilbake } from '../tilbake'
 import { Hjemskjermkort } from '../komponenter/Hjemskjerm'
 import { Ikon } from '../komponenter/Ikoner'
+import { Hovedkontorkort } from '../komponenter/Hovedkontor'
 
 /** `tilRival` åpner en rival i Investeringer → Selskaper (Pakke 99: fusjonsraden). */
 /** En forbedring er billig når den koster under så stor andel av kontantene (Pakke 102). */
@@ -110,6 +111,8 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
           <Bedriftskort key={b.id} b={b} s={s} mengde={mengdeNaa} åpne={() => settValgt(b.id)} />
         ))}
       </ul>
+
+      <Hovedkontorkort s={s} />
 
       {(tilSalgs.length > 0 || laaste.length > 0) && (
       <Seksjon id="bedrifter-nye" tittel="Start ny bedrift" sammendrag={tilSalgs.length ? `${tilSalgs.length} til salgs` : `${laaste.length} låst`} harInnhold={tilSalgs.length > 0}>

@@ -22,6 +22,7 @@ import { useVoksUt } from '../overgang'
 import { Ikon } from '../komponenter/Ikoner'
 import { Bekreftknapp } from '../komponenter/Bekreftknapp'
 import { Filialkort } from '../komponenter/Filialer'
+import { Synergikort } from '../komponenter/Synergier'
 import { filialer } from '../../engine/filialer'
 
 export function Bedriftdetalj({
@@ -78,7 +79,7 @@ export function Bedriftdetalj({
         </div>
         <div className="detalj-kurs">
           <span className={`tall-kjempe ${inntekt >= 0 ? 'pluss' : 'minus'} inntekt ${puls}`}>{perSek(inntekt)}</span>
-          <span className="dempet liten">Inntekt i dag, etter lønn{statusfaktor(s) > 1 && ' og statusbonus'}</span>
+          <span className="dempet liten">Inntekt i dag, etter lønn{statusfaktor(s) > 1 && (s.hovedkontor ? ' og bonus fra status og hovedkontor' : ' og statusbonus')}</span>
           <IDag s={s} b={b} />
         </div>
         <Koknapp s={s} b={b} legg={legg} />
@@ -171,6 +172,8 @@ export function Bedriftdetalj({
       </div>
 
       <Filialkort s={s} b={b} />
+
+      <Synergikort s={s} b={b} />
 
       <div className="kort">
         <h2 className="kort-tittel">Milepæler</h2>

@@ -44,6 +44,8 @@ import { startupverdi } from './startups'
 import { klubbverdi } from './klubb'
 import { kunstverdi } from './kunst'
 import { fondverdi } from './fond'
+import { synergifaktor } from './synergi'
+import { hovedkontorfaktor, hovedkontorverdi } from './hovedkontor'
 import type { Ansattgrad, Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -165,10 +167,11 @@ export function dagensFaktor(s: Spilltilstand, type: BedriftstypeId): number {
 
 /**
  * Alt inntekten (før lønn) ganges med for én bedrift i dag: kalenderen og
- * nyhetene i bransjen, og filialene (Pakke 59). Uten filialer er det dagensFaktor.
+ * nyhetene i bransjen, filialene (Pakke 59) og synergiene (Pakke 117). Uten filialer og
+ * synergier er det dagensFaktor.
  */
 export function bedriftsfaktor(s: Spilltilstand, b: Bedrift): number {
-  return dagForBedrift(b, dagensFaktor(s, b.type)) * filialfaktor(s, b)
+  return dagForBedrift(b, dagensFaktor(s, b.type)) * filialfaktor(s, b) * synergifaktor(s, b)
 }
 
 /** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor, filialene og statusbonusen. */
@@ -212,7 +215,8 @@ export function inntektPerSek(s: Spilltilstand, borte = false): number {
 
 /** Statusen din gir bedriftene litt mer inntekt. */
 export function statusfaktor(s: Spilltilstand): number {
-  return 1 + STATUS_INNTEKT * statusnivaa(s)
+  // Pakke 117: hovedkontoret virker på alle bedriftene som statusen, så det ganges på her.
+  return (1 + STATUS_INNTEKT * statusnivaa(s)) * hovedkontorfaktor(s)
 }
 
 /**
@@ -282,7 +286,9 @@ export function eiendeler(s: Spilltilstand): number {
     kunstverdi(s) +
     obligasjonsverdi(s) +
     // Innredningen i hjemmene (Pakke 60) til halv pris. Lagt til sist, så summene ellers står helt likt.
-    hjemverdi(s)
+    hjemverdi(s) +
+    // Hovedkontoret (Pakke 117) til det etasjene kostet, også lagt til sist.
+    hovedkontorverdi(s)
   )
 }
 

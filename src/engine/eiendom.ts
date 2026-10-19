@@ -26,6 +26,7 @@ import { FORVALTER_ANDEL, forvalter, leiefaktorBy } from './utleie'
 import { hjemstatus } from './hjemmene'
 import { unikeI, unikstatus, unikverdi } from './unike'
 import { racingstatus, racingverdi } from './racing'
+import { hovedkontorstatus } from './hovedkontor'
 
 // ─────────────────────────────────────────────── Eiendom
 
@@ -548,7 +549,7 @@ export const STATUS_RENTEKUTT = 0.002
 
 /** Status fra luksusen, klubben og trofeene, landemerkene, kunsten og premiumbedriftene. */
 export function statuspoeng(s: Spilltilstand): number {
-  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s) + racingstatus(s) + jordstatus(s)
+  return s.luksus.reduce((sum, id) => sum + LUKSUS[id].status, 0) + klubbstatus(s) + landemerkestatus(s) + kunststatus(s) + premiumstatus(s) + hjemstatus(s) + lagerstatus(s) + unikstatus(s) + racingstatus(s) + jordstatus(s) + hovedkontorstatus(s)
 }
 
 export function statusnivaa(s: Spilltilstand): number {

@@ -11,6 +11,7 @@ import { filialFraNivaa, FILIALBYER, filialer, filialpris, MAKS_FILIALER } from 
 import { ansattnavn, GRADER, kanVelgeRetning, retningNivaa, RETNINGER, stab } from '../ansatte'
 import type { Ansattgrad, Bedrift, BedriftstypeId, Retning, Spilltilstand, NorskBy } from '../types'
 import { feil, finn, ikkeTall, investerI, UGYLDIG, type Utfall } from './felles'
+import { etasjer, HK_ETASJER, nesteEtasjepris } from '../hovedkontor'
 
 /**
  * Åpner en filial for bedriften i en norsk by (Pakke 59). Prisen går inn i det
@@ -178,4 +179,15 @@ export function ansettLeder(s: Spilltilstand, id: string): Utfall {
   return investerI(s, id, lederpris(b.type), (n) => {
     n.leder = true
   }, false)
+}
+
+/** Bygger neste etasje i hovedkontoret (Pakke 117). */
+export function byggEtasje(s: Spilltilstand): Utfall {
+  const pris = nesteEtasjepris(s)
+  if (pris === null) return feil(`Hovedkontoret har alle ${HK_ETASJER} etasjene.`)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.hovedkontor = etasjer(s) + 1
+  return { ok: true, tilstand: n }
 }

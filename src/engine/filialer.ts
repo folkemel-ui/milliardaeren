@@ -57,6 +57,7 @@ export const HJEMREGION: Record<BedriftstypeId, Region> = {
   fiskeoppdrett: 'nord',
   flyselskap: 'trondelag',
   skisenter: 'fjellet',
+  brikkefabrikk: 'trondelag',
 }
 
 /**

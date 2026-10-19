@@ -44,9 +44,10 @@ function rik(kontanter = 1e11): Spilltilstand {
 }
 
 describe('sluttspillet', () => {
-  it('fire nye bedrifter etter oljeselskapet, hver dyrere enn den forrige', () => {
+  it('nye bedrifter etter oljeselskapet, hver dyrere enn den forrige', () => {
     const slutt = STIGEN.slice(STIGEN.indexOf('oljeselskap'))
-    expect(slutt).toEqual(['oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter'])
+    // Pakke 13 la til fire; Pakke 117 brikkefabrikken over skisenteret.
+    expect(slutt).toEqual(['oljeselskap', 'rederi', 'fiskeoppdrett', 'flyselskap', 'skisenter', 'brikkefabrikk'])
     for (let i = 1; i < slutt.length; i++) {
       expect(BEDRIFTSTYPER[slutt[i]].pris).toBeGreaterThan(BEDRIFTSTYPER[slutt[i - 1]].pris)
       expect(BEDRIFTSTYPER[slutt[i]].laasesOppVed).toBeGreaterThan(1e9)

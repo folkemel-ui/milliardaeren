@@ -11,6 +11,7 @@ import { utbytteFor } from './kvartal'
 import { fondsutbytteIDag } from './fond'
 import { erDagsskifte, erHelg } from './kalender'
 import { filialfaktor } from './filialer'
+import { synergifaktorer } from './synergi'
 import { dagForBedrift } from './ansatte'
 import { gisUtAvis } from './avis'
 import { sjekkPrestasjoner } from './prestasjoner'
@@ -134,7 +135,9 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
   // Dagens kalender (Pakke 49): ukedag, vær, bransjetrend og helligdag per bransje.
   const dag = dagsbilde(s).faktor
   // Filialene (Pakke 59) går med bedriften: står den stille mens du er borte, gjør de det også.
-  const perBedrift = s.bedrifter.map((b) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dagForBedrift(b, dag[b.type] * nyhetsfaktor(s, b.type)) * filialfaktor(s, b))))
+  // Synergiene (Pakke 117) ganges på som filialene: begge i paret må eies, ikke drives.
+  const syn = synergifaktorer(s)
+  const perBedrift = s.bedrifter.map((b, i) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dagForBedrift(b, dag[b.type] * nyhetsfaktor(s, b.type)) * filialfaktor(s, b) * syn[i])))
   let sum = 0
   for (let i = 0; i < perBedrift.length; i++) if (!(borte && !s.bedrifter[i].leder)) sum += perBedrift[i]
   const inntekt = sum * faktor

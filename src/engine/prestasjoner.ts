@@ -155,12 +155,14 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'grand-prix', navn: 'Grand Prix-vinner', beskrivelse: 'Vinn et løp med racingteamet', klart: (s) => !!s.racing?.lop.some((l) => l.plasser.includes(1)) },
   { id: 'verdensmester', navn: 'Verdensmester', beskrivelse: 'Vinn førermesterskapet', klart: (s) => !!s.racingtrofeer?.some((t) => t.navn === 'Førermester') },
   { id: 'oljebaron', navn: 'Oljebaron', beskrivelse: 'Kjøp et oljeselskap', klart: (s) => s.bedrifter.some((b) => b.type === 'oljeselskap') },
-  { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
+  { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
+  // Pakke 117: et trinn over skisenteret.
+  { id: 'brikkebaron', navn: 'Brikkebaron', beskrivelse: 'Kjøp en brikkefabrikk — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'brikkefabrikk') },
   // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.
   { id: 'gjeldfri', navn: 'Gjeldfri', beskrivelse: 'Betal tilbake hele lånet', skjult: true, klart: (s) => !!s.harLaant && s.gjeld <= 0 },
   { id: 'kontraer', navn: 'Kontrær', beskrivelse: 'Kjøp en aksje eller mynt minst 20 % under toppen de siste to timene', skjult: true, klart: (s) => s.kontraerKjop !== undefined },
   // Én bedrift per bransje (kjopBedrift nekter en til), så antallet er antall bransjer.
-  { id: 'hele-stigen', navn: 'Hele stigen', beskrivelse: 'Eie alle tretten bedriftene på én gang', skjult: true, klart: (s) => s.bedrifter.length >= STIGEN.length },
+  { id: 'hele-stigen', navn: 'Hele stigen', beskrivelse: 'Eie alle fjorten bedriftene på én gang', skjult: true, klart: (s) => s.bedrifter.length >= STIGEN.length },
   { id: 'helt-aar', navn: 'Et helt år', beskrivelse: 'Spill gjennom et helt år i kalenderen', skjult: true, klart: (s) => s.sek >= 365 * DAG_SEK },
   { id: 'samleren', navn: 'Samleren', beskrivelse: 'Eie alt i samlingen på én gang', skjult: true, klart: (s) => s.luksus.length >= LUKSUSLISTE.length },
 ]

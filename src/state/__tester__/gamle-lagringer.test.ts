@@ -102,7 +102,9 @@ describe('lagringer fra alle gamle versjoner', () => {
         // (pakke106 over). Alt annet skal stemme på kronen.
         const g = l.tilstand as { bedrifter: { type: BedriftstypeId; leder?: boolean }[] }
         const ledere = l.versjon < 19 ? g.bedrifter.filter((b) => b.leder).reduce((sum, b) => sum + lederpris(b.type), 0) : 0
-        expect(Math.abs(nettoformue(s) - (l.formue - ledere + pakke106(s)))).toBeLessThan(2)
+        // Lagringene fra versjon 26 og senere er laget etter Pakke 106, så jorda står allerede riktig der.
+        const jorda = l.versjon <= 25 ? pakke106(s) : 0
+        expect(Math.abs(nettoformue(s) - (l.formue - ledere + jorda))).toBeLessThan(2)
       })
 
       it('kan spilles videre en måned, også med boten', () => {

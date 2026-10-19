@@ -34,10 +34,11 @@ function iFase(fase: 'hoy' | 'normal' | 'lav'): Spilltilstand {
 }
 
 describe('aksjene og bransjene', () => {
-  it('hver bransje du kan eie, har sin aksje (seks fra Pakke 53, alle tretten fra Pakke 104)', () => {
+  it('hver bransje du kan eie, har sin aksje (seks fra Pakke 53, alle tretten fra Pakke 104, brikkefabrikken fra 117)', () => {
     expect(AKSJE_FOR).toEqual({
       fiskeoppdrett: 'NFS', rederi: 'BSH', oljeselskap: 'POL', bank: 'NRB', kiosk: 'KRV', flyselskap: 'FJF',
       saftbod: 'SOL', polsebod: 'NPL', gatekjokken: 'GMN', kafe: 'KBN', restaurant: 'BRD', hotell: 'FJH', skisenter: 'TOP',
+      brikkefabrikk: 'NLH',
     })
     for (const id of Object.values(AKSJE_FOR)) expect(PAPIRER[id!].klasse).toBe('aksje')
   })

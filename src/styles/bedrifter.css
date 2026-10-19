@@ -4,6 +4,17 @@
  */
 
 /* Luksus: bildet til venstre over to rader, knappen under navnet — så lange navn får plass. */
+/* Hovedkontoret (Pakke 117): tårnet og teksten på én rad, knappen for neste etasje under i hele bredden. */
+.kjopskort.hovedkontor {
+  grid-template-columns: auto 1fr;
+  row-gap: 10px;
+}
+
+.kjopskort.hovedkontor > .knapp,
+.kjopskort.hovedkontor > .merke {
+  grid-column: 1 / -1;
+}
+
 .kjopskort.luksuskort {
   grid-template-columns: auto 1fr;
   row-gap: 8px;

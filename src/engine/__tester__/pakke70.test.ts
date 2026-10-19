@@ -107,8 +107,9 @@ describe('mål etter siste opplåsing', () => {
     expect(maal.every((m, i) => i === 0 || m.belop >= maal[i - 1].belop)).toBe(true)
   })
 
-  it('etter billionen står prestasjonene igjen, og stripa forsvinner først når alle er nådd', () => {
-    const s = med(1e12)
+  it('etter det siste beløpet står prestasjonene igjen, og stripa forsvinner først når alle er nådd', () => {
+    // Pakke 117: brikkefabrikken (2,25 bill) er et mål over billionen, så prestasjonene kommer etter det siste beløpet.
+    const s = med(Math.max(...alleMaal().map((m) => m.belop)))
     const n = nesteMaal(s)!
     expect(n.maal[0].art).toBe('prestasjon')
     expect(n.maal[0].fane).toBe('profil')

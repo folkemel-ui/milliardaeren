@@ -1,5 +1,6 @@
 import { bedriftInntektPerSek, dagensFaktor, statusfaktor } from '../../engine/formler'
 import { erHjemme, filialbidrag, filialer, filialFraNivaa, filialpris, FILIALANDEL, HJEMME_BONUS, hjemby, ledigeFilialbyer, MAKS_FILIALER } from '../../engine/filialer'
+import { synergifaktor } from '../../engine/synergi'
 import { aapneFilial } from '../../engine/handlinger'
 import { BEDRIFTSTYPER } from '../../engine/innhold'
 import { dagnummer } from '../../engine/kalender'
@@ -24,7 +25,7 @@ export function Filialkort({ s, b }: { s: Spilltilstand; b: Bedrift }) {
   const pris = filialpris(b)
   const fra = filialFraNivaa(b.type)
   // Inntekten før lønn i dag, med statusbonusen: det en filial tar en andel av.
-  const brutto = (bedriftInntektPerSek(b, dagensFaktor(s, b.type)) - bedriftInntektPerSek(b, 0)) * statusfaktor(s)
+  const brutto = (bedriftInntektPerSek(b, dagensFaktor(s, b.type) * synergifaktor(s, b)) - bedriftInntektPerSek(b, 0)) * statusfaktor(s)
   // Regionen, når den heter noe annet enn byen: «Trøndelag», men ikke «Bergen · Bergen».
   const sted = (by: (typeof mine)[number]['by']) => (erHjemme(b.type, by) ? 'Hjemregionen · ' : REGIONER[regionFor(by)!].navn !== by ? `${REGIONER[regionFor(by)!].navn} · ` : '')
 

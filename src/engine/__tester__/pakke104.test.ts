@@ -20,7 +20,8 @@ const NYE: PapirId[] = ['SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE']
 
 describe('de åtte nye aksjene', () => {
   it('er aksjer med rapportdag, logo og plass blant de nye papirene — men ikke i Børsfondet', () => {
-    expect(AKSJER).toHaveLength(20)
+    // 21 siden Pakke 117 (Nordlys Halvleder, med brikkefabrikken).
+    expect(AKSJER).toHaveLength(21)
     for (const id of NYE) {
       expect(PAPIRER[id].klasse, id).toBe('aksje')
       expect(RAPPORTDAG[id], id).toBeLessThanOrEqual(24)
@@ -30,7 +31,7 @@ describe('de åtte nye aksjene', () => {
     }
   })
 
-  it('hver av de tretten bransjene har sin aksje; eiendomsselskapet står for seg selv', () => {
+  it('hver bransje har sin aksje; eiendomsselskapet står for seg selv', () => {
     for (const type of Object.keys(BEDRIFTSTYPER) as BedriftstypeId[]) expect(AKSJE_FOR[type], type).toBeDefined()
     expect(PAPIRER.NBE.bransje).toBeUndefined()
   })
@@ -46,7 +47,7 @@ describe('de åtte nye aksjene', () => {
 
 describe('lagringsversjon 25 → 26', () => {
   it('legger til de nye aksjene og lar terningen og de gamle kursene stå', () => {
-    expect(SPILLVERSJON).toBe(26)
+    expect(SPILLVERSJON).toBeGreaterThanOrEqual(26)
     const s = simuler(nyttSpill(), DAG_SEK)
     const gammel = structuredClone(s) as unknown as Record<string, unknown>
     const kurser = { ...(s.marked.kurser as Record<string, unknown>) }

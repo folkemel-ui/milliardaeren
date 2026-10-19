@@ -33,10 +33,10 @@ const logo = (id: PapirId, ordmerke = false) => tegn(createElement(Papirlogo, { 
 const portrett = (id: RivalId, størrelse: number, form: 'rund' | 'omslag' = 'rund') => tegn(createElement(Rivalportrett, { id, størrelse, form }))
 
 /**
- * Aksjene fra Pakke 104 (spillsporet) venter på ordmerkene sine (Grafikk): til da tegnes merket
+ * Aksjene fra Pakke 104 og 117 (spillsporet) venter på ordmerkene sine (Grafikk): til da tegnes merket
  * alene. Fjern dem herfra når ordmerkene er laget med scripts/lag-ordmerker.mjs.
  */
-const VENTER_PAA_ORDMERKE: PapirId[] = ['SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE']
+const VENTER_PAA_ORDMERKE: PapirId[] = ['SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE', 'NLH']
 const harOrdmerke = (id: PapirId) => !VENTER_PAA_ORDMERKE.includes(id)
 
 describe('selskapslogoene (G4)', () => {

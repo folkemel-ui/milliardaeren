@@ -168,8 +168,12 @@ balance, the saves or the speed. Per-system details (the club, the farms, art �
   status: `statuskandidat` in `bot.ts` bundles the cheapest luxury, rooms and landmarks per
   status point into one candidate that lifts the level, priced with the warehouse expansions it
   needs; it reaches level 5 at 1 mrd and stops at Monark (level 9, 705 points) from 100 mrd on.
-  **Today (Pack 107, 15 October 2026): 1 mrd 5 h 01, 10 mrd 11 h 15, 100 mrd 22 h 02,
-  1 000 mrd 33 h 16.** The golden master stands at kr 147.6 mill after 4 h (since Pack 104).
+  **Today (Pack 117, 19 October 2026): 1 mrd 5 h 03, 10 mrd 11 h 16, 100 mrd 21 h 49,
+  1 000 mrd 32 h 43** (33 h 16 before Pack 117: the synergies, and the bot builds headquarters floors —
+  `nesteEtasjepris` in `kandidater`, the first between 100 and 300 mrd, the second by 1 000 mrd).
+  What the bot owns at 1 000 mrd: hotel, bank, oil and a rederi just bought — never a fish farm or an
+  airline, so a rule for those (Pack 117's late synergy pairs) only shows past the bench. Its business
+  income: 0.17 mill/s at 1 mrd, 0.92 at 10 mrd, 6.4 at 100 mrd, ~85–105 at 1 000 mrd. The golden master stands at kr 147.6 mill after 4 h (since Pack 104).
   The road there, for scale: 1 mrd in 7 h 20 after Pack 47 (Folke then picked «steady, ~15 h
   per tenfold» after 1 mrd), 6 h 33 after Pack 48 (volum +15 %, not +25 %, to move the pace
   less), 6 h 12 after Pack 59's branches, 5 h 11 after Pack 68's mergers, 5 h 07 after Pack 70,
