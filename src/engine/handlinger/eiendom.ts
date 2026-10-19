@@ -10,7 +10,7 @@ import { DAG_SEK, dagnummer } from '../kalender'
 import { leggTilHendelse } from '../bank'
 import { flyt } from '../portefolje'
 import { byttepris, FORVALTERE, forvalterpris } from '../utleie'
-import { JORD, JORD_SYNLIG_VED, landverdi, tommerverdi } from '../jord'
+import { bestand, bestandsalder, bestandsverdi, HOGSTER_HUSKET, JORD, JORD_SYNLIG_VED, landverdi, MAKS_BESTAND, nesteBestandpris, tommerverdi } from '../jord'
 import { eierDu, kjopsprisLandemerke, landemerkepris, LANDEMERKER } from '../landemerker'
 import type { EiendomId, JordId, LandemerkeId, Spilltilstand, By, ForvalterId } from '../types'
 import { kortKroner } from '../tall'
@@ -98,18 +98,69 @@ export function selgJord(s: Spilltilstand, id: JordId): Utfall {
 }
 
 /** Hogger skogen: tømmeret selges, og ny skog plantes. */
+/** Hogger hele skogen: alle bestandene på én gang, som før Pakke 120. */
 export function hoggSkog(s: Spilltilstand, id: JordId): Utfall {
   if (!s.jord[id]) return feil('Du eier ikke skogen.')
   if (JORD[id].type !== 'skog') return feil('Det er ingen skog å hogge der.')
   const n = structuredClone(s)
   const tommer = tommerverdi(n, id)
   if (tommer < 1) return feil('Skogen er nyplantet — det er ingenting å hogge ennå.')
+  const j = n.jord[id]!
+  const b = bestand(j)
+  for (let i = 0; i < b.length; i++) noterHogst(n, id, i, bestandsverdi(n, id, i))
   n.kontanter += tommer
   n.totaltHost += tommer
   n.totaltLeie += tommer
-  n.jord[id]!.plantetSek = n.sek
+  j.bestand = b.map(() => n.sek)
+  j.plantetSek = n.sek
   flyt(n, 'eiendom', -tommer)
   leggTilHendelse(n, { tittel: 'Hogst', tekst: `${JORD[id].navn} er hogd. Tømmeret ga ${kortKroner(tommer)}, og ny skog er plantet.`, alvor: 'info' })
+  return { ok: true, tilstand: n }
+}
+
+/** Skriver en hogst i skogens regnskap. Muterer. */
+function noterHogst(n: Spilltilstand, id: JordId, i: number, belop: number): void {
+  const j = n.jord[id]!
+  const h = { dag: dagnummer(n.sek), bestand: i, alder: Math.round(bestandsalder(n, id, i) * 10) / 10, belop }
+  j.hogster = [...(j.hogster ?? []), h].slice(-HOGSTER_HUSKET)
+  j.tommerTotalt = (j.tommerTotalt ?? 0) + belop
+}
+
+/** Hogger ett bestand (Pakke 120): tømmeret i det, og nytt bestand plantes. */
+export function hoggBestand(s: Spilltilstand, id: JordId, i: number): Utfall {
+  const j0 = s.jord[id]
+  if (!j0) return feil('Du eier ikke skogen.')
+  if (JORD[id].type !== 'skog') return feil('Det er ingen skog å hogge der.')
+  if (!Number.isInteger(i) || i < 0 || i >= bestand(j0).length) return feil('Bestandet finnes ikke.')
+  const n = structuredClone(s)
+  const tommer = bestandsverdi(n, id, i)
+  if (tommer < 1) return feil('Bestandet er nyplantet — det er ingenting å hogge ennå.')
+  const j = n.jord[id]!
+  noterHogst(n, id, i, tommer)
+  const b = [...bestand(j)]
+  b[i] = n.sek
+  j.bestand = b
+  n.kontanter += tommer
+  n.totaltHost += tommer
+  n.totaltLeie += tommer
+  flyt(n, 'eiendom', -tommer)
+  leggTilHendelse(n, { tittel: 'Hogst', tekst: `Bestand ${i + 1} i ${JORD[id].navn.toLowerCase()} er hogd. Tømmeret ga ${kortKroner(tommer)}, og nytt er plantet.`, alvor: 'info' })
+  return { ok: true, tilstand: n }
+}
+
+/** Kjøper et bestand til (Pakke 120): en tredel mer jord, plantet nå. Prisen står i skogens verdi. */
+export function kjopBestand(s: Spilltilstand, id: JordId): Utfall {
+  const j0 = s.jord[id]
+  if (!j0) return feil('Du eier ikke skogen.')
+  const pris = nesteBestandpris(s, id)
+  if (pris === null) return feil(`Skogen har ${MAKS_BESTAND} bestand.`)
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  const j = n.jord[id]!
+  n.kontanter -= pris
+  j.investert = (j.investert ?? 0) + pris
+  j.bestand = [...bestand(j), n.sek]
+  flyt(n, 'eiendom', pris)
   return { ok: true, tilstand: n }
 }
 

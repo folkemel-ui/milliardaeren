@@ -1,5 +1,5 @@
 import { antallDyr, DYR, DYRLISTE, dyrGir, dyrKasseNaa, dyrPerUke, dyrpris, fjosplasser, nesteKlipping, nesteSlakt, SLAKT_DAGER } from '../../engine/dyr'
-import { byggKraftverk, hoggSkog, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, kjopNabogard, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
+import { byggKraftverk, hoggBestand, jordSynlig, kjopDyr, kjopGardsbygg, kjopJord, kjopJorde, kjopLandemerke, kjopMaskin, kjopNabogard, selgJord, selgKorn, selgLandemerke, settLagring } from '../../engine/handlinger'
 import { Bekreftknapp } from './Bekreftknapp'
 import {
   AVLINGER,
@@ -52,6 +52,9 @@ import {
   kraftverkUke,
   nesteJordpris,
   dagerTilHogst,
+  bestand,
+  bestandsverdi,
+  eldsteBestand,
   skogalder,
   tommervekst,
   tommerverdi,
@@ -157,7 +160,7 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
             ? `Så langt denne uka ${kortKroner(hostSaLangt(s, id))} av omtrent ${kortKroner(ukensGardHost(s, id))}. Høstes mandag, om ${varighet(tidTilHost(s))}.`
             : `Gir omtrent ${kortKroner(land * HOST_ANDEL)} i uka i et normalt år`
           : eid
-            ? `Tømmer ${kortKroner(tommer)} etter ${tall(skogalder(s, id))} dager`
+            ? `Tømmer ${kortKroner(tommer)} i ${bestand(eid).length} bestand · det eldste ${tall(skogalder(s, id))} dager`
             : 'Kjøpes nyplantet. Tømmeret vokser fra første dag.'}
       </p>
       {eid && t.type === 'skog' && <Skogstatus s={s} id={id} />}
@@ -169,9 +172,10 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
       )}
       {eid ? (
         <div className={t.type === 'skog' ? 'eiendom-knapper' : 'eiendom-knapper en'}>
+          {/* Pakke 120: knappen hogger det eldste bestandet; alle står på skogens side. */}
           {t.type === 'skog' && (
-            <button className="knapp knapp-gull" disabled={tommer < 1} onClick={() => utfor(hoggSkog(s, id))}>
-              Hogg · {kortKroner(tommer)}
+            <button className="knapp knapp-gull" disabled={bestandsverdi(s, id, eldsteBestand(s, id)) < 1} onClick={() => utfor(hoggBestand(s, id, eldsteBestand(s, id)))}>
+              Hogg eldste · {kortKroner(bestandsverdi(s, id, eldsteBestand(s, id)))}
             </button>
           )}
           <Bekreftknapp onJa={() => utfor(selgJord(s, id))}>

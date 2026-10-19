@@ -256,6 +256,15 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   value of `s.sek`, which rises 0.3 % a day, and `jordVedDagsskifte` runs on Monday. Set `s.sek` to
   the Monday first (`avlingFor` in `pakke105.test.ts`), then compare.
 
+- **A forest is stands (Pack 120).** `j.bestand` is an optional list of planting times, read through `bestand(j)`,
+  which gives three stands planted at `plantetSek` when it is missing — so a forest from before keeps its timber
+  and net worth to the krone and no migration was needed. Each of the first three stands is a third of the land
+  (`landverdi / START_BESTAND`); a bought 4th and 5th add a third each, counted at their price in `j.investert`
+  like the farm's fields, while their timber follows the rising land value. `skogalder` is now the *oldest*
+  stand (what the cards and the Pack 106 old-save adjustment read), `tommerverdi` and `tommervekst` sum the
+  stands, and `hoggSkog` still fells them all (old tests and a «fell everything» button), `hoggBestand` one.
+  Every felling goes to `j.hogster` (last eight) and `j.tommerTotalt`.
+
 ## Luxury, Samling, homes and art
 
 - **A new luxury thing needs (Pack 88)**: the `LuksusId`, a `LUKSUS` entry whose status beats every

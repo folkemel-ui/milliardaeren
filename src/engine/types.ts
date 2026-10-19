@@ -903,6 +903,16 @@ export interface Kvartal {
 
 export type JordId = 'gard-hedmarken' | 'gard-lista' | 'skog-trysil' | 'skog-namdalen'
 
+/** En hogst i skogen (Pakke 120), til skogens regnskap. */
+export interface Hogst {
+  dag: number
+  /** Bestandet som ble hogd, fra 0. */
+  bestand: number
+  /** Hvor mange dager bestandet hadde vokst. */
+  alder: number
+  belop: number
+}
+
 export interface Jordstykke {
   kostpris: number
   /**
@@ -911,6 +921,14 @@ export interface Jordstykke {
    * du bygde ut — Pakke 92).
    */
   plantetSek: number
+  /**
+   * Bestandene i skogen (Pakke 120): når hvert ble plantet. 3 fra start, opptil 5. Mangler den,
+   * er skogen tre bestand plantet `plantetSek` — les den gjennom `bestand`, så trengs ingen migrering.
+   */
+  bestand?: number[]
+  /** De siste hogstene i skogen (Pakke 120), nyeste sist, og alt tømmeret har gitt. */
+  hogster?: Hogst[]
+  tommerTotalt?: number
   /** Jordene på gården (Pakke 92): 3 fra start, opptil 10. Mangler i eldre lagringer. */
   jorder?: number
   /** Maskinene du har kjøpt til gården. */

@@ -711,11 +711,16 @@ export function tommerfaktor(dager: number): number {
  */
 export const HOGST_BEST_DAG = TOMMER_DAGER
 
-/** Hvor fort tømmeret i en skog vokser nå, i kroner per spilldag. */
+/** Hvor fort tømmeret i en skog vokser nå, i kroner per spilldag: alle bestandene. */
 export function tommervekst(s: Spilltilstand, id: JordId): number {
-  if (JORD[id].type !== 'skog' || !s.jord?.[id]) return 0
-  const d = Math.max(0, skogalder(s, id))
-  return (landverdi(s, id) * TOMMER_MAKS * 2 * d * TOMMER_DAGER) / (d + TOMMER_DAGER) ** 3
+  const j = s.jord?.[id]
+  if (JORD[id].type !== 'skog' || !j) return 0
+  let sum = 0
+  for (let i = 0; i < bestand(j).length; i++) {
+    const d = Math.max(0, bestandsalder(s, id, i))
+    sum += ((landverdi(s, id) / START_BESTAND) * TOMMER_MAKS * 2 * d * TOMMER_DAGER) / (d + TOMMER_DAGER) ** 3
+  }
+  return sum
 }
 
 /** Hvor mange dager til skogen er best å hogge; 0 når den er klar. */
@@ -723,14 +728,67 @@ export function dagerTilHogst(s: Spilltilstand, id: JordId): number {
   return Math.max(0, HOGST_BEST_DAG - skogalder(s, id))
 }
 
-export function skogalder(s: Spilltilstand, id: JordId): number {
-  const j = s.jord?.[id]
-  return j ? (s.sek - j.plantetSek) / DAG_SEK : 0
+// ─────────────────────────────────────────────── Bestandene (Pakke 120)
+
+/*
+ * En skog er tre bestand, hvert en tredel av jorda, med hver sin alder, som hogges hver for
+ * seg — så pengene kommer i en jevn rekke i stedet for én stor hogst hver tredje time. Et
+ * fjerde og femte bestand kan kjøpes, og hvert legger en tredel til (Folkes valg): prisen er
+ * en tredel av jordverdien, ×1,5 for det femte, og står i skogens verdi til det den kostet,
+ * som gårdens jorder. Et bestand gir ~0,25 × jorda per omløp på 36 dager, så det tjener seg
+ * inn på ~48 spilldager (~4 t). En skog fra før er tre bestand med skogens alder: tømmeret
+ * og formuen står som før, på kronen.
+ */
+export const START_BESTAND = 3
+export const MAKS_BESTAND = 5
+/** Så mange hogster huskes i skogens regnskap. */
+export const HOGSTER_HUSKET = 8
+
+/** Når hvert bestand ble plantet. */
+export function bestand(j: Jordstykke): number[] {
+  return j.bestand ?? Array.from({ length: START_BESTAND }, () => j.plantetSek)
 }
 
-/** Hva tømmeret i en skog er verdt nå. */
+/** Hvor mange dager et bestand har vokst. */
+export function bestandsalder(s: Spilltilstand, id: JordId, i: number): number {
+  const j = s.jord?.[id]
+  return j ? (s.sek - bestand(j)[i]) / DAG_SEK : 0
+}
+
+/** Hva tømmeret i ett bestand er verdt nå: en tredel av jorda ganger veksten. */
+export function bestandsverdi(s: Spilltilstand, id: JordId, i: number): number {
+  return JORD[id].type === 'skog' ? (landverdi(s, id) / START_BESTAND) * tommerfaktor(bestandsalder(s, id, i)) : 0
+}
+
+/** Det eldste bestandet — det som er nærmest hogst. */
+export function eldsteBestand(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  if (!j) return 0
+  const b = bestand(j)
+  return b.indexOf(Math.min(...b))
+}
+
+/** Prisen på neste bestand, eller null når skogen har fem. */
+export function nesteBestandpris(s: Spilltilstand, id: JordId): number | null {
+  const j = s.jord?.[id]
+  if (!j || JORD[id].type !== 'skog') return null
+  const n = bestand(j).length
+  return n >= MAKS_BESTAND ? null : (landverdi(s, id) / START_BESTAND) * 1.5 ** (n - START_BESTAND)
+}
+
+/** Alderen til skogens eldste bestand (for en skog fra før: skogens alder). */
+export function skogalder(s: Spilltilstand, id: JordId): number {
+  const j = s.jord?.[id]
+  return j ? (s.sek - Math.min(...bestand(j))) / DAG_SEK : 0
+}
+
+/** Hva tømmeret i en skog er verdt nå: alle bestandene. */
 export function tommerverdi(s: Spilltilstand, id: JordId): number {
-  return JORD[id].type === 'skog' ? landverdi(s, id) * tommerfaktor(skogalder(s, id)) : 0
+  const j = s.jord?.[id]
+  if (JORD[id].type !== 'skog' || !j) return 0
+  let sum = 0
+  for (let i = 0; i < bestand(j).length; i++) sum += bestandsverdi(s, id, i)
+  return sum
 }
 
 /** Jord og tømmer du eier, og det du har bygd på gårdene (Pakke 92). */

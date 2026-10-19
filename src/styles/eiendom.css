@@ -480,6 +480,8 @@
 }
 
 /* Avlingsprisene: tre linjer over åtte uker, ×1,00 stiplet, og tallene under. */
+/* Pakke 120: den beste dagen i skogens vekstkurve, stiplet som snittet i avlingsgrafen. */
+.tommergraf .graf-snitt,
 .avlingsgraf .graf-snitt {
   stroke: var(--tekst-dempet);
   stroke-width: 1;

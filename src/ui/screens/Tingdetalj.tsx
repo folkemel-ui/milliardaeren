@@ -12,6 +12,7 @@ import type { Ting } from '../detaljvisning'
 import { fortegnKroner, kortKroner, perSek, tall, varighet } from '../format'
 import { Eiendomskort } from '../komponenter/Eiendomskort'
 import { Fjoskort, Gardskart, Gardsnav, Gardsregnskap, Jordkort, Kraftkort, Lagerkort, Landemerkekort } from '../komponenter/JordOgLandemerker'
+import { Bestandkort, Skogregnskap, Tommerkurve } from '../komponenter/Skog'
 import { aapneGardsside, GARDSSIDER, useGardsside, type Gardsside } from '../gardssider'
 import { useTilbake } from '../tilbake'
 import { Malerikort } from '../komponenter/Kunst'
@@ -133,7 +134,10 @@ function innhold(s: Spilltilstand, { slag, id }: Ting): [ReactNode, Fakta] {
         <>
           <Jordkort s={s} id={id as JordId} iDetalj />
           <Gardsnav s={s} id={id as JordId} />
-          {/* Pakke 115: skogen har ingen sider, så kraftverket står her. */}
+          {/* Pakke 120: bestandene, vekstkurven og regnskapet. Pakke 115: skogen har ingen sider, så kraftverket står her. */}
+          {t.type === 'skog' && <Bestandkort s={s} id={id as JordId} />}
+          {t.type === 'skog' && <Tommerkurve s={s} id={id as JordId} />}
+          {t.type === 'skog' && <Skogregnskap s={s} id={id as JordId} />}
           {t.type === 'skog' && <Kraftkort s={s} id={id as JordId} />}
         </>,
         fakta,
