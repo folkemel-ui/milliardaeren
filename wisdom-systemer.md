@@ -41,6 +41,13 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   constant was fixed: the board's contracts average below a full rocket, so the price per tonne went
   12.5 → 13.5 mrd to land on 178 mill/s. When no contract is chosen, the factory launches the best one it can
   lift — otherwise a player who is away would earn nothing from a once-a-day system.
+  **The satellite network (Pack 119)** sits in the same object as optional fields (`satdeler`, `kull`, `nettPerSek`
+  …), read through helpers with defaults (`satdeler(r)`), so a factory from Pack 118 needed no migration. The network
+  pays every second like rent: its income is computed when the batches change (launch, take down, a batch running
+  out at the day change) and stored in `nettPerSek`, so `romfartSekund` only adds a number — the per-second hook
+  is now `if (s.romfart)`. Measured over 240 game days after a 120-day build-up (after tax): first parts,
+  contracts only ~135 mill/s, satellites every 3–4 days ~375 mill/s (40–56 in orbit, 90–95 % coverage); fully
+  researched ~2.35 → ~3.5 bill/s, and the 100-satellite licence is full with one launch a month.
 
 ## The market: stocks, funds, bonds, startups
 

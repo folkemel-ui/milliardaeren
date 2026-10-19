@@ -318,6 +318,21 @@ export interface Racingsesong {
 
 /** Rakettens seks deler, som forskes fram i seks trinn hver. */
 export type Rakettdel = 'motorer' | 'tanker' | 'ovretrinn' | 'styring' | 'varmeskjold' | 'gjenbruk'
+/** Satellittenes tre deler (Pakke 119), forsket fram i samme avdeling som rakettdelene. */
+export type Satellittdel = 'solpaneler' | 'antenner' | 'kapasitet'
+export type Forskningsdel = Rakettdel | Satellittdel
+
+/** Satellittene fra én oppskyting (Pakke 119): de er like, og går ut av drift samme dag. */
+export interface Satellittkull {
+  id: number
+  antall: number
+  /** Dekningen hver satellitt gir, i enheter (1 med de første antennene, 2,5 ferdig forsket). */
+  dekning: number
+  /** Dagen de ble skutt opp, og den siste dagen de er i drift. */
+  dag: number
+  sluttDag: number
+}
+
 /** Lav bane eller geostasjonær: den høye banen krever mer løft og betaler mer per tonn. */
 export type Romkontraktbane = 'lav' | 'geo'
 
@@ -335,6 +350,7 @@ export interface Romkontrakt {
 /** En oppskyting som er gjort. */
 export interface Oppskyting {
   dag: number
+  /** Kunden — eller «Egne satellitter» (Pakke 119). */
   kunde: string
   tonn: number
   bane: Romkontraktbane
@@ -359,7 +375,19 @@ export interface Romfart {
   avdeling: number
   deler: Record<Rakettdel, number>
   /** Forskningen som pågår. */
-  forskning?: { del: Rakettdel; ferdigSek: number }
+  forskning?: { del: Forskningsdel; ferdigSek: number }
+  /** Satellittdelene (Pakke 119). Mangler i fabrikker fra Pakke 118: da er alle på trinn 0. */
+  satdeler?: Record<Satellittdel, number>
+  /** Satellittene i bane, kull for kull (Pakke 119). */
+  kull?: Satellittkull[]
+  nesteKullId?: number
+  /** Du har valgt å skyte opp egne satellitter ved neste dagsskifte. */
+  valgtSatellitter?: boolean
+  /** Hva nettet tjener per sekund nå — regnet ut når kullene endrer seg, lagt til hvert sekund. */
+  nettPerSek?: number
+  /** Det nettet har tjent, og det satellittene har kostet, siden start. */
+  nettTjent?: number
+  satellittkostnad?: number
   /** Kontraktene på tavla i dag, og dagen de gjelder. */
   tavle: Romkontrakt[]
   tavleDag: number

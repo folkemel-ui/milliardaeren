@@ -7,29 +7,42 @@
 
 import { useId } from 'react'
 import { DAG_SEK } from '../../engine/kalender'
-import { byggAvdeling, kjopRomfart, startForskning, velgKontrakt } from '../../engine/handlinger'
+import { byggAvdeling, kjopRomfart, startForskning, taNedSatellitter, velgKontrakt, velgSatellitter } from '../../engine/handlinger'
 import {
   AVDELING_KUTT,
   baneTekst,
+  dekning,
+  delnavn,
   DELTRINN,
   forskningspris,
   forskningstid,
   forventet,
   GEO_FRA_TRINN,
+  iBane,
   kanLofte,
+  levetid,
   loft,
   LOFT_PER_TRINN,
+  MAKS_SATELLITTER,
   nesteAvdelingspris,
+  nettInntekt,
   RAKETTDELER,
   RAKETTDELLISTE,
   rakettpris,
   ROMFART_LAASES_OPP,
   ROMFART_PRIS,
+  SATELLITT_PRIS,
+  SATELLITTDELER,
+  SATELLITTDELLISTE,
+  satellitterPerOppskyting,
+  satellittoppskytingPris,
+  satDekning,
   sikkerhet,
   trengerLoft,
+  trinnFor,
   valgtKontrakt,
 } from '../../engine/romfart'
-import type { Romfart, Spilltilstand } from '../../engine/types'
+import type { Forskningsdel, Romfart, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { andelTekst, kortKroner, perSek, tall, varighet } from '../format'
 import { nattstil } from '../dagognatt'
@@ -106,6 +119,19 @@ export function Romfartscene({ r, liten = false }: { r: Romfart | null; liten?: 
           <path d={`M${rx - 3} ${g - 12} L${rx - 5.5} ${g - 6} L${rx - 3} ${g - 7} Z M${rx + 3} ${g - 12} L${rx + 5.5} ${g - 6} L${rx + 3} ${g - 7} Z`} fill={S.mork.flate} />
         )}
       </g>
+      {/* Satellittene i bane (Pakke 119): én prikk med paneler per tolv, høyst åtte. */}
+      {r &&
+        Array.from({ length: Math.min(8, Math.ceil(iBane(r) / 12)) }, (_, i) => {
+          const x = 20 + ((i * 47) % 140)
+          const y = 10 + ((i * 13) % 22)
+          return (
+            <g key={i}>
+              <rect x={x - 3.4} y={y - 0.6} width="2.4" height="1.2" fill={S.marine.lys} />
+              <rect x={x + 1} y={y - 0.6} width="2.4" height="1.2" fill={S.marine.lys} />
+              <rect x={x - 1} y={y - 1} width="2" height="2" fill={S.gull.lys} />
+            </g>
+          )
+        })}
       {/* Lagertankene til høyre. */}
       {[150, 158].map((x) => (
         <g key={x}>
@@ -138,8 +164,8 @@ export function Romfartkort({ s, åpne }: { s: Spilltilstand; åpne: () => void 
       </li>
     )
   }
-  const k = valgtKontrakt(r)
-  const snitt = k ? forventet(r, k) / DAG_SEK : 0
+  const k = r.valgtSatellitter ? null : valgtKontrakt(r)
+  const snitt = (k ? forventet(r, k) / DAG_SEK : 0) + (r.nettPerSek ?? 0)
   return (
     <button className="kort romfartkort" onClick={åpne}>
       <div className="romfart-flis">
@@ -148,8 +174,9 @@ export function Romfartkort({ s, åpne }: { s: Spilltilstand; åpne: () => void 
       <div className="bedriftskort-midt">
         <h2>Romfartsfabrikken</h2>
         <span className="dempet liten">
-          {k ? `Neste: ${k.kunde} · ${tonn(k.tonn)} · ${kortKroner(k.honorar)}` : 'Ingen kontrakt raketten løfter i dag'}
-          {r.forskning ? ` · forsker ${RAKETTDELER[r.forskning.del].navn.toLowerCase()}` : ''}
+          {r.valgtSatellitter ? `Neste: ${satellitterPerOppskyting(r)} egne satellitter` : k ? `Neste: ${k.kunde} · ${tonn(k.tonn)} · ${kortKroner(k.honorar)}` : 'Ingen kontrakt raketten løfter i dag'}
+          {iBane(r) > 0 ? ` · dekning ${andelTekst(dekning(r))}` : ''}
+          {r.forskning ? ` · forsker ${delnavn(r.forskning.del).toLowerCase()}` : ''}
         </span>
       </div>
       <span className="pluss">{perSek(snitt)}</span>
@@ -175,7 +202,11 @@ export function RomfartLaast({ s, synlig }: { s: Spilltilstand; synlig: boolean 
 
 export function Romfartside({ s, tilbake }: { s: Spilltilstand; tilbake: () => void }) {
   const r = s.romfart!
-  const valgt = valgtKontrakt(r)
+  const valgt = r.valgtSatellitter ? null : valgtKontrakt(r)
+  const antallSat = satellitterPerOppskyting(r)
+  const satPris = satellittoppskytingPris(r)
+  // Dekningen etter neste oppskyting med egne satellitter, om den går bra.
+  const dekningEtter = 1 - (1 - dekning(r)) * Math.exp((-antallSat * satDekning(r)) / 20)
   const tilSkiftet = DAG_SEK - (s.sek % DAG_SEK)
   const avdPris = nesteAvdelingspris(r)
   const f = r.forskning
@@ -231,8 +262,28 @@ export function Romfartside({ s, tilbake }: { s: Spilltilstand; tilbake: () => v
               </li>
             )
           })}
+          <li className={r.valgtSatellitter ? 'valgt' : ''}>
+            <div>
+              <strong>Egne satellitter</strong>
+              <span className="dempet liten">
+                {antallSat > 0 ? `${antallSat} stk · i drift i ${levetid(r)} dager · dekning ${andelTekst(dekning(r))} → ${andelTekst(dekningEtter)}` : `Lisensen er full: ${MAKS_SATELLITTER} i bane`}
+              </span>
+              <span className="liten">
+                {kortKroner(satPris)} <span className="dempet">· ingen kontrakt den dagen</span>
+              </span>
+            </div>
+            {r.valgtSatellitter ? (
+              <span className="merke ok">✓ Valgt</span>
+            ) : (
+              <button className="knapp knapp-sekundær knapp-liten" disabled={antallSat < 1 || s.kontanter < satPris} onClick={() => utfor(velgSatellitter(s))}>
+                Velg
+              </button>
+            )}
+          </li>
         </ul>
       </div>
+
+      <Satellittnett s={s} />
 
       <div className="kort">
         <h2 className="kort-tittel">Forskning</h2>
@@ -241,7 +292,7 @@ export function Romfartside({ s, tilbake }: { s: Spilltilstand; tilbake: () => v
         ) : (
           <p className="dempet liten">
             Avdelingen er på trinn {r.avdeling} av 6{r.avdeling > 1 ? ` · forsker på ${andelTekst((1 - AVDELING_KUTT) ** (r.avdeling - 1))} av tiden` : ''}.
-            {f ? ` Forsker på ${RAKETTDELER[f.del].navn.toLowerCase()} trinn ${r.deler[f.del] + 1} — ferdig om ${varighet(Math.max(0, f.ferdigSek - s.sek))}.` : ' Ingen forskning pågår.'}
+            {f ? ` Forsker på ${delnavn(f.del).toLowerCase()} trinn ${trinnFor(r, f.del) + 1} — ferdig om ${varighet(Math.max(0, f.ferdigSek - s.sek))}.` : ' Ingen forskning pågår.'}
           </p>
         )}
         {avdPris !== null && (
@@ -249,38 +300,19 @@ export function Romfartside({ s, tilbake }: { s: Spilltilstand; tilbake: () => v
             {r.avdeling === 0 ? 'Bygg forskningsavdeling' : `Avdelingen trinn ${r.avdeling + 1}`} · {kortKroner(avdPris)}
           </button>
         )}
+        <h3 className="etikett prestasjoner-del">Raketten</h3>
         <ul className="forbedringer">
           {RAKETTDELLISTE.map((del) => {
             const d = RAKETTDELER[del]
-            const trinn = r.deler[del]
-            const pris = forskningspris(r, del)
-            const tid = forskningstid(r, del)
             const gir = d.gir === 'loft' ? `+${tonn(LOFT_PER_TRINN)} per trinn` : d.gir === 'sikkerhet' ? 'sikrere oppskytinger' : 'billigere rakett'
-            return (
-              <li key={del} className={trinn >= DELTRINN ? 'kjøpt' : ''}>
-                <div>
-                  <strong>
-                    {d.navn} <span className="gull">{trinn}/{DELTRINN}</span>
-                  </strong>
-                  <p className="dempet liten">
-                    {d.tekst} {gir[0].toUpperCase() + gir.slice(1)}.
-                  </p>
-                </div>
-                {pris === null ? (
-                  <span className="merke ok">✓ Ferdig</span>
-                ) : f?.del === del ? (
-                  <span className="dempet liten">Forskes nå</span>
-                ) : (
-                  <span className="forbedring-kjop">
-                    <button className="knapp knapp-gull knapp-liten" disabled={r.avdeling === 0 || !!f || s.kontanter < pris} onClick={() => utfor(startForskning(s, del))}>
-                      {kortKroner(pris)}
-                    </button>
-                    <span className="dempet liten">{varighet(tid!)}</span>
-                  </span>
-                )}
-              </li>
-            )
+            return <Forskningsrad key={del} s={s} del={del} navn={d.navn} tekst={`${d.tekst} ${gir[0].toUpperCase() + gir.slice(1)}.`} />
           })}
+        </ul>
+        <h3 className="etikett prestasjoner-del">Satellittene</h3>
+        <ul className="forbedringer">
+          {SATELLITTDELLISTE.map((del) => (
+            <Forskningsrad key={del} s={s} del={del} navn={SATELLITTDELER[del].navn} tekst={SATELLITTDELER[del].tekst} />
+          ))}
         </ul>
       </div>
 
@@ -306,5 +338,82 @@ export function Romfartside({ s, tilbake }: { s: Spilltilstand; tilbake: () => v
         )}
       </div>
     </section>
+  )
+}
+
+/** Én del i forskningslista: trinnet, hva den gir, og knappen som starter neste trinn. */
+function Forskningsrad({ s, del, navn, tekst }: { s: Spilltilstand; del: Forskningsdel; navn: string; tekst: string }) {
+  const r = s.romfart!
+  const f = r.forskning
+  const trinn = trinnFor(r, del)
+  const pris = forskningspris(r, del)
+  const tid = forskningstid(r, del)
+  return (
+    <li className={trinn >= DELTRINN ? 'kjøpt' : ''}>
+      <div>
+        <strong>
+          {navn} <span className="gull">{trinn}/{DELTRINN}</span>
+        </strong>
+        <p className="dempet liten">{tekst}</p>
+      </div>
+      {pris === null ? (
+        <span className="merke ok">✓ Ferdig</span>
+      ) : f?.del === del ? (
+        <span className="dempet liten">Forskes nå</span>
+      ) : (
+        <span className="forbedring-kjop">
+          <button className="knapp knapp-gull knapp-liten" disabled={r.avdeling === 0 || !!f || s.kontanter < pris} onClick={() => utfor(startForskning(s, del))}>
+            {kortKroner(pris)}
+          </button>
+          <span className="dempet liten">{varighet(tid!)}</span>
+        </span>
+      )}
+    </li>
+  )
+}
+
+/**
+ * Satellittnettet (Pakke 119): dekningen, hva nettet tjener hvert sekund, og kullene i
+ * bane med når de går ut av drift — hvert kull kan tas ned for å gi plass til bedre.
+ */
+function Satellittnett({ s }: { s: Spilltilstand }) {
+  const r = s.romfart!
+  const kull = r.kull ?? []
+  const d = dekning(r)
+  const n = iBane(r)
+  return (
+    <div className="kort">
+      <h2 className="kort-tittel">Satellittnettet</h2>
+      {n === 0 ? (
+        <p className="dempet liten">
+          Egne satellitter gir mobildekning over hele verden: jo flere i bane, jo mer dekning, og nettet tjener hvert sekund — også når du er borte. 20 satellitter gir 63 %, 60 gir 95 %. Lisensen gjelder {MAKS_SATELLITTER} i bane. Hver satellitt koster {kortKroner(SATELLITT_PRIS)} i tillegg til raketten.
+        </p>
+      ) : (
+        <>
+          <div className="milepael-spor" role="img" aria-label={`Dekning ${Math.round(d * 100)} %`}>
+            <div className="milepael-fyll" style={{ width: `${d * 100}%` }} />
+          </div>
+          <p className="liten">
+            <strong>{andelTekst(d)} dekning</strong> · {n} av {MAKS_SATELLITTER} i bane · <span className="pluss">{perSek(nettInntekt(r))}</span>
+          </p>
+          <p className="dempet liten">Nettet har tjent {kortKroner(r.nettTjent ?? 0)}; satellittene har kostet {kortKroner(r.satellittkostnad ?? 0)}.</p>
+          <ul className="romlogg">
+            {kull.map((k) => {
+              const igjen = (k.sluttDag + 1) * DAG_SEK - s.sek
+              return (
+                <li key={k.id}>
+                  <span>
+                    {k.antall} satellitter · ute av drift om {varighet(Math.max(0, igjen))}
+                  </span>
+                  <button className="lenkeknapp liten" onClick={() => utfor(taNedSatellitter(s, k.id))}>
+                    Ta ned
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </>
+      )}
+    </div>
   )
 }

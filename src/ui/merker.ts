@@ -72,6 +72,7 @@ export const MERKER: Record<string, { ikon: Ikonnavn; grad: Grad }> = {
   brikkebaron: { ikon: 'lyn', grad: 'gull' },
   'i-bane': { ikon: 'pil', grad: 'gull' },
   romfartspioner: { ikon: 'stjerne', grad: 'gull' },
+  'verden-dekket': { ikon: 'globus', grad: 'gull' },
   // Pakke 70: de skjulte.
   gjeldfri: { ikon: 'bank', grad: 'solv' },
   kontraer: { ikon: 'graf', grad: 'gull' },

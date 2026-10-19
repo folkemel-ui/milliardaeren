@@ -1,7 +1,7 @@
 /** Romfartsfabrikken (Pakke 118): kjøpet, forskningsavdelingen, forskningen og valget av kontrakt. */
 
-import { DELTRINN, forskningspris, forskningstid, nesteAvdelingspris, nyRomfart, RAKETTDELER, ROMFART_PRIS, romfartAapen, kanLofte } from '../romfart'
-import type { Rakettdel, Spilltilstand } from '../types'
+import { DELTRINN, delnavn, FORSKNINGSDELER, forskningspris, forskningstid, kanLofte, nesteAvdelingspris, nyRomfart, ROMFART_PRIS, romfartAapen, satellitterPerOppskyting, satellittoppskytingPris, taNedKull, trinnFor } from '../romfart'
+import type { Forskningsdel, Spilltilstand } from '../types'
 import { feil, type Utfall } from './felles'
 
 export function kjopRomfart(s: Spilltilstand): Utfall {
@@ -28,14 +28,14 @@ export function byggAvdeling(s: Spilltilstand): Utfall {
   return { ok: true, tilstand: n }
 }
 
-/** Starter forskningen på neste trinn av en del. Én om gangen. */
-export function startForskning(s: Spilltilstand, del: Rakettdel): Utfall {
+/** Starter forskningen på neste trinn av en del — i raketten eller satellittene (Pakke 119). Én om gangen. */
+export function startForskning(s: Spilltilstand, del: Forskningsdel): Utfall {
   const r = s.romfart
   if (!r) return feil('Du har ingen romfartsfabrikk.')
-  if (!RAKETTDELER[del]) return feil('Ukjent del.')
+  if (!FORSKNINGSDELER.includes(del)) return feil('Ukjent del.')
   if (r.avdeling < 1) return feil('Bygg en forskningsavdeling først.')
   if (r.forskning) return feil('Avdelingen forsker allerede.')
-  if (r.deler[del] >= DELTRINN) return feil(`${RAKETTDELER[del].navn} er forsket ferdig.`)
+  if (trinnFor(r, del) >= DELTRINN) return feil(`${delnavn(del)} er forsket ferdig.`)
   const pris = forskningspris(r, del)!
   if (s.kontanter < pris) return feil('Du har ikke råd.')
   const n = structuredClone(s)
@@ -54,5 +54,31 @@ export function velgKontrakt(s: Spilltilstand, id: number): Utfall {
   if (!kanLofte(r, k)) return feil('Raketten løfter ikke denne.')
   const n = structuredClone(s)
   n.romfart!.valgt = id
+  delete n.romfart!.valgtSatellitter
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Velger egne satellitter for neste dagsskifte (Pakke 119): så mange som raketten løfter,
+ * innenfor lisensen. Raketten og satellittene betales ved oppskytingen.
+ */
+export function velgSatellitter(s: Spilltilstand): Utfall {
+  const r = s.romfart
+  if (!r) return feil('Du har ingen romfartsfabrikk.')
+  if (satellitterPerOppskyting(r) < 1) return feil('Lisensen er full: ta ned gamle satellitter først.')
+  if (s.kontanter < satellittoppskytingPris(r)) return feil('Du har ikke råd til raketten og satellittene.')
+  const n = structuredClone(s)
+  n.romfart!.valgtSatellitter = true
+  delete n.romfart!.valgt
+  return { ok: true, tilstand: n }
+}
+
+/** Tar et kull satellitter ned før tiden, for å gi plass til bedre (Pakke 119). */
+export function taNedSatellitter(s: Spilltilstand, kullId: number): Utfall {
+  const r = s.romfart
+  if (!r) return feil('Du har ingen romfartsfabrikk.')
+  if (!(r.kull ?? []).some((k) => k.id === kullId)) return feil('Satellittene finnes ikke.')
+  const n = structuredClone(s)
+  taNedKull(n.romfart!, kullId)
   return { ok: true, tilstand: n }
 }

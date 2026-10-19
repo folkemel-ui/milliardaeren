@@ -17,7 +17,7 @@ import { LUKSUSLISTE } from './eiendom'
 import { DAG_SEK } from './kalender'
 import { JORD, JORDLISTE, jorder, MAKS_JORDER, MAKS_NABOER } from './jord'
 import { antallDyr } from './dyr'
-import { alleForsket } from './romfart'
+import { alleForsket, dekning } from './romfart'
 
 /** Statusnivået som heter Udødelig: prestasjonen står der den sto da det var det høyeste (Pakke 81). */
 const UDODELIG = STATUSNIVAAER.findIndex((n) => n.navn === 'Udødelig')
@@ -161,6 +161,7 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'brikkebaron', navn: 'Brikkebaron', beskrivelse: 'Kjøp en brikkefabrikk — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'brikkefabrikk') },
   // Pakke 118: romfartsfabrikken.
   { id: 'i-bane', navn: 'I bane', beskrivelse: 'Skyt opp den første raketten', klart: (s) => (s.romfart?.vellykket ?? 0) > 0 },
+  { id: 'verden-dekket', navn: 'Hele verden dekket', beskrivelse: 'Nå 95 % dekning med egne satellitter', klart: (s) => !!s.romfart && dekning(s.romfart) >= 0.95 },
   { id: 'romfartspioner', navn: 'Romfartspioner', beskrivelse: 'Forsk fram alle delene til raketten', klart: (s) => !!s.romfart && alleForsket(s.romfart) },
   // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.
   { id: 'gjeldfri', navn: 'Gjeldfri', beskrivelse: 'Betal tilbake hele lånet', skjult: true, klart: (s) => !!s.harLaant && s.gjeld <= 0 },

@@ -160,8 +160,9 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
   const sparerente = sparerentePerSek(s)
   s.sparing += sparerente
   s.totaltSparerente += sparerente
-  // Pakke 118: forskningen ved romfartsfabrikken blir ferdig i sitt sekund.
-  if (s.romfart?.forskning) romfartSekund(s)
+  // Pakke 118: forskningen ved romfartsfabrikken blir ferdig i sitt sekund. Pakke 119: og
+  // satellittnettet tjener hvert sekund, som leie.
+  if (s.romfart) romfartSekund(s)
   // Rivalselskapene du eier andeler i, betaler utbytte løpende.
   const rivalutbytte = rivalutbyttePerSek(s)
   s.kontanter += rivalutbytte
