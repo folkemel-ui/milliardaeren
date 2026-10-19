@@ -41,6 +41,7 @@ const HENDELSE_FANE: Record<string, Mål> = {
   Storm: 'eiendom',
   Skogbrann: 'eiendom',
   Skogforsikring: 'eiendom',
+  Skogen: 'eiendom',
   Bokettersyn: 'profil',
   'Skatt innkrevd': 'profil',
   Auksjon: 'samling',

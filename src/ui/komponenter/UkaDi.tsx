@@ -85,6 +85,20 @@ export function UkaDi({ o }: { o: Oppgjor }) {
           Gårdene ga <strong>{kortKroner(o.gardene.host)}</strong> for {o.gardene.vaer.toLowerCase()}.
         </p>
       )}
+      {/* Pakke 123: skogene — hogstene i uka, og storm og brann. */}
+      {o.skogene && (
+        <p className="oppgjor-merknad">
+          {o.skogene.hogster > 0 ? (
+            <>
+              Skogene ga <strong>{kortKroner(o.skogene.tommer)}</strong> i tømmer fra {o.skogene.hogster} {o.skogene.hogster === 1 ? 'hogst' : 'hogster'}
+            </>
+          ) : (
+            'Ingen hogst i skogene'
+          )}
+          {o.skogene.stormer + o.skogene.branner > 0 && `, og ${[o.skogene.stormer ? (o.skogene.stormer === 1 ? 'en storm' : `${o.skogene.stormer} stormer`) : '', o.skogene.branner ? (o.skogene.branner === 1 ? 'en brann' : `${o.skogene.branner} branner`) : ''].filter(Boolean).join(' og ')}`}
+          .
+        </p>
+      )}
       {!o.besteInvestering && !o.handel?.length && (
         <p className="oppgjor-merknad">En stille uke: ingen handel, og ingenting du eide hele uka å sammenligne.</p>
       )}

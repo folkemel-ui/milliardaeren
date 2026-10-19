@@ -339,12 +339,12 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const racingsaker = racingVedDagsskifte(s, tittel(s))
   // Pakke 118: dagens oppskyting fra romfartsfabrikken, og morgendagens kontrakter.
   const romfartsaker = romfartVedDagsskifte(s, tittel(s))
-  // Pakke 122: storm og brann i skogene, og skogforsikringen som fornyes. Ingen saker i avisa ennå.
-  skogVedDagsskifte(s)
   const andre = [
     // Pakke 94: dyrene og tilskuddet hver dag, før mandagens høst.
     ...dyrVedDagsskifte(s),
     ...jordVedDagsskifte(s),
+    // Pakke 122–123: storm og brann i skogene, forsikringen, rekordhogsten og gammelskogen.
+    ...skogVedDagsskifte(s),
     // Pakke 114: en gård eid i 90 dager blir odelsgård.
     ...odelVedDagsskifte(s),
     ...landemerkerVedDagsskifte(s),

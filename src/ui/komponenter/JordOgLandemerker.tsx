@@ -160,7 +160,7 @@ export function Jordkort({ s, id, iDetalj = false }: { s: Spilltilstand; id: Jor
             ? `Så langt denne uka ${kortKroner(hostSaLangt(s, id))} av omtrent ${kortKroner(ukensGardHost(s, id))}. Høstes mandag, om ${varighet(tidTilHost(s))}.`
             : `Gir omtrent ${kortKroner(land * HOST_ANDEL)} i uka i et normalt år`
           : eid
-            ? `Tømmer ${kortKroner(tommer)} i ${bestand(eid).length} bestand · det eldste ${tall(skogalder(s, id))} dager`
+            ? `Tømmer ${kortKroner(tommer)} i ${bestand(eid).length} bestand · det eldste ${tall(skogalder(s, id))} dager${naboer(eid) ? ` · ${naboer(eid)} ${naboer(eid) === 1 ? 'naboskog' : 'naboskoger'}` : ''}${eid.odel ? ' · odelsskog' : ''}`
             : 'Kjøpes nyplantet. Tømmeret vokser fra første dag.'}
       </p>
       {eid && t.type === 'skog' && <Skogstatus s={s} id={id} />}

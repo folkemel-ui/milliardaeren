@@ -301,6 +301,13 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   `FORSIKRING_ANDEL` (12.5 % of the land a year for three stands, ~15 % over what it pays beyond the storm sale) is
   paid for 365 days, renewed in `skogVedDagsskifte`, and a cancel only stops the renewal. Damages go to `j.skader`
   and the log (`Storm`, `Skogbrann`, `Skogforsikring` in `HENDELSE_FANE`), not to Avisa yet (Pack 123).
+- **Forest stories ride on the day change, record fellings are stamped by the action** (Pack 123). A felling is a
+  player action, but Avisa is written at the day change, so `noterHogst` stamps `j.nyRekord` (only when a felling
+  beats every earlier one per day — the first felling has nothing to beat) and `skogVedDagsskifte` prints it the next
+  morning and deletes it. It now returns its stories and sits in the `andre` list right after `jordVedDagsskifte`; the
+  bot owns no forest, so Avisa's die and the golden master stayed. «Gammelskog» prints when a stand crosses 300 days
+  between yesterday and today — no flag needed. Odel now covers forests (old ones count from the update); the
+  achievement Odelsbonde stays a farm one (`JORD[id].type === 'gard'`), or a forest would have earned it.
 - **A land purchase must add to `kostpris` as well as `investert`** (Pack 122 fixed Packs 120–121): the sale books
   `inntekt − kostpris` as a gain, so a stand or a sawmill left out of `kostpris` was taxed as profit when the forest
   was sold. The farm's `kjopMaskin` always did both.
@@ -551,6 +558,10 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   achievements left (`art: 'prestasjon'`, `visning` «37 / 53» in place of the amount) and is
   null only when every achievement is earned. The late goals in `alleMaal` (landmarks, the
   long-range jet, New York) use base prices; the strip is static per game.
+- **An achievement must not allocate** (Pack 123): three forest checks written with `.some`, `reduce` and `skogalder`
+  (whose `bestand(j)` builds a new array for a forest from before Pack 120) took the speed test's «prestasjoner» from
+  13–14 to 16 ms (budget 14) — every unearned achievement runs every second. One plain loop (`skogsjekk`) brought it
+  back to 14. Measure the part alone and against the old file (`git show HEAD:… > file`) before asking to raise it.
 - **A new achievement needs a medal** in `ui/merker.ts` (`ikoner.test.ts` checks).
   Achievements are checked every second: return early when the player can't have it yet.
 - **Net worth by kind (Pack 62)**: `ui/formuedeler.ts` on Profil → Meg. A new kind of

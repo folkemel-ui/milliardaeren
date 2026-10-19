@@ -574,6 +574,8 @@ export interface Oppgjor {
    * og ukas vær. Avisa skriver om gårdene bare den beste og verste uka av åtte; dette står alltid.
    */
   gardene?: { host: number; vaer: string }
+  /** Pakke 123: skogene denne uka — tømmeret fra hogstene, hvor mange, og storm og brann. */
+  skogene?: { tommer: number; hogster: number; stormer: number; branner: number }
 }
 
 /** Et øyeblikksbilde ved forrige dagsskifte, så avisen kan melde hva som har endret seg. */
@@ -944,6 +946,11 @@ export interface Jordstykke {
   forsikringBetalt?: number
   /** Storm og brann i skogen (Pakke 122), de siste åtte. */
   skader?: Skogskade[]
+  /** Den beste hogsten per dag skogen har hatt (Pakke 123), og en ny rekord som venter på avisa. */
+  rekordPerDag?: number
+  nyRekord?: { bestand: number; belop: number; alder: number }
+  /** Et bestand er hogd innen to dager fra den beste dagen (Pakke 123, «Perfekt omløp»). */
+  perfektOmlop?: boolean
   /** Jordene på gården (Pakke 92): 3 fra start, opptil 10. Mangler i eldre lagringer. */
   jorder?: number
   /** Maskinene du har kjøpt til gården. */

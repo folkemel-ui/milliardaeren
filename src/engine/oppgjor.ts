@@ -158,6 +158,17 @@ function ukaDi(s: Spilltilstand, start: Periodestart, o: Oppgjor): void {
     uke = Math.max(uke, u)
   }
   if (host > 0) o.gardene = { host, vaer: vaer(uke * 7).navn }
+  // Pakke 123: skogene — hogstene og skadene i uka.
+  let tommer = 0
+  let hogster = 0
+  let stormer = 0
+  let branner = 0
+  for (const id of JORDLISTE) {
+    const j = s.jord?.[id]
+    for (const h of j?.hogster ?? []) if (h.dag >= start.dag) (tommer += h.belop), hogster++
+    for (const k of j?.skader ?? []) if (k.dag >= start.dag) k.type === 'storm' ? stormer++ : branner++
+  }
+  if (hogster || stormer || branner) o.skogene = { tommer, hogster, stormer, branner }
 }
 
 function arkiver(s: Spilltilstand, o: Oppgjor): void {

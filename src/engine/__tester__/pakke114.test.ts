@@ -135,7 +135,8 @@ describe('odel', () => {
     expect(odelVedDagsskifte(s)).toEqual([])
   })
 
-  it('en gård fra før får dagen den først sees, og en skog blir aldri odel', () => {
+  // Pakke 123: skogene blir odelsskog på samme vilkår (før: aldri).
+  it('en gård fra før får dagen den først sees, og en skog blir odel på samme vilkår', () => {
     let s = medGard()
     s = ok(kjopJord(s, 'skog-trysil'))
     delete s.jord[ID]!.eidFra
@@ -145,7 +146,7 @@ describe('odel', () => {
     s.sek += ODEL_DAGER * DAG_SEK
     odelVedDagsskifte(s)
     expect(s.jord[ID]!.odel).toBe(true)
-    expect(s.jord['skog-trysil']!.odel).toBeUndefined()
+    expect(s.jord['skog-trysil']!.odel).toBe(true)
   })
 
   it('nye bygg flytter ikke dagen gården ble din', () => {

@@ -121,6 +121,10 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 
 ## 2. Proving a UI change
 
+- **Rendering a real weekly settlement in a Node test fails on `CSS.escape`** (Pack 123): `UkaDi` draws the week's
+  net-worth curve with `Linjegraf`, which calls `CSS.escape` — not defined outside a browser. Render it with
+  `{ ...oppgjor, formuekurve: undefined }`, as `pakke113` does by building its own; `lastAlle()` doesn't help.
+
 - **Scan every page a pack touches for overflow**, not just when a number looks odd:
   list the elements whose right edge passes `document.documentElement.clientWidth`. In
   Pack 62 it found an old bug (the achievements grid, `repeat(2, 1fr)` with long words, was

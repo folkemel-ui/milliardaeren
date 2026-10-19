@@ -136,7 +136,11 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'gods', navn: 'Gods', beskrivelse: 'Dyrk alle ti jordene på en gård', klart: (s) => !!s.jord && JORDLISTE.some((id) => jorder(s.jord[id]) >= MAKS_JORDER && JORD[id].type === 'gard' && !!s.jord[id]) },
   { id: 'fullt-fjos', navn: 'Fullt fjøs', beskrivelse: 'Fyll et fjøs med 20 dyr', klart: (s) => !!s.jord && JORDLISTE.some((id) => antallDyr(s.jord[id]) >= 20) },
   { id: 'tre-nabogarder', navn: 'Storbonde', beskrivelse: 'Kjøp tre nabogårder til samme gård', klart: (s) => !!s.jord && JORDLISTE.some((id) => (s.jord[id]?.naboer ?? 0) >= MAKS_NABOER) },
-  { id: 'odelsgard', navn: 'Odelsbonde', beskrivelse: 'Eie en odelsgård', klart: (s) => !!s.jord && JORDLISTE.some((id) => !!s.jord[id]?.odel) },
+  { id: 'odelsgard', navn: 'Odelsbonde', beskrivelse: 'Eie en odelsgård', klart: (s) => !!s.jord && JORDLISTE.some((id) => JORD[id].type === 'gard' && !!s.jord[id]?.odel) },
+  // Pakke 123: skogen.
+  { id: 'perfekt-omlop', navn: 'Perfekt omløp', beskrivelse: 'Hogg et bestand innen to dager fra den beste dagen', klart: (s) => skogsjekk(s, 'perfekt') },
+  { id: 'gammelskog', navn: 'Gammelskog', beskrivelse: 'La et bestand stå i 360 dager', klart: (s) => skogsjekk(s, 'gammel') },
+  { id: 'tommerbaron', navn: 'Tømmerbaron', beskrivelse: 'Tjen 1 mrd på tømmer', klart: (s) => skogsjekk(s, 'baron') },
   { id: 'landemerke', navn: 'Landemerke', beskrivelse: 'Eie et landemerke', klart: (s) => antallLandemerker(s) > 0 },
   { id: 'alle-landemerker', navn: 'Nasjonalskatt', beskrivelse: 'Eie alle landemerkene samtidig', klart: (s) => antallLandemerker(s) === LANDEMERKELISTE.length },
   { id: 'kunstsamler', navn: 'Kunstsamler', beskrivelse: 'Eie tre malerier', klart: (s) => antallMalerier(s) >= 3 },
@@ -171,6 +175,29 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'helt-aar', navn: 'Et helt år', beskrivelse: 'Spill gjennom et helt år i kalenderen', skjult: true, klart: (s) => s.sek >= 365 * DAG_SEK },
   { id: 'samleren', navn: 'Samleren', beskrivelse: 'Eie alt i samlingen på én gang', skjult: true, klart: (s) => s.luksus.length >= LUKSUSLISTE.length },
 ]
+
+/**
+ * Skogenes prestasjoner (Pakke 123) i én løkke uten lister: de sjekkes hvert sekund, og
+ * `bestand(j)` lager en ny liste for en skog fra før Pakke 120 — det kostet 2 ms i fartstesten.
+ */
+function skogsjekk(s: Spilltilstand, hva: 'perfekt' | 'gammel' | 'baron'): boolean {
+  const jord = s.jord
+  if (!jord) return false
+  let tommer = 0
+  for (const id of JORDLISTE) {
+    const j = jord[id]
+    if (!j || JORD[id].type !== 'skog') continue
+    if (hva === 'perfekt') {
+      if (j.perfektOmlop) return true
+    } else if (hva === 'gammel') {
+      let eldst = j.bestand ? Infinity : j.plantetSek
+      if (j.bestand) for (const b of j.bestand) if (b < eldst) eldst = b
+      if (s.sek - eldst >= GAMMELSKOG_PRESTASJON * DAG_SEK) return true
+    } else tommer += j.tommerTotalt ?? 0
+  }
+  return hva === 'baron' && tommer >= 1e9
+}
+const GAMMELSKOG_PRESTASJON = 360
 
 /** Prestasjonene som kan vises: alle åpne, og de skjulte du har nådd. */
 export function synligePrestasjoner(s: Spilltilstand): Prestasjon[] {

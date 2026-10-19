@@ -195,14 +195,26 @@ export function gardstrinn(j: Jordstykke | undefined): number {
   return t
 }
 
-/** Status fra gårdenes trinn. */
+/**
+ * Pakke 123: en skog gir status også — +5 for skogen og +10 per naboskog, halvparten av gårdens
+ * 25 siden en naboskog koster halvparten (7,5 mot 15 ganger jorda), og odel +15 som gårdene.
+ */
+export const SKOG_STATUS = 5
+export const NABOSKOG_STATUS = 10
+
+/** Status fra én gård eller skog. */
+export function jordstatusFor(j: Jordstykke | undefined, id: JordId): number {
+  if (!j) return 0
+  const odel = j.odel ? ODEL_STATUS : 0
+  if (JORD[id].type === 'skog') return SKOG_STATUS + naboer(j) * NABOSKOG_STATUS + odel
+  return GARDSTRINN[gardstrinn(j)].status + naboer(j) * NABO_STATUS + odel
+}
+
+/** Status fra gårdenes trinn og (Pakke 123) skogene. */
 export function jordstatus(s: Spilltilstand): number {
   if (!s.jord) return 0
   let sum = 0
-  for (const id of JORDLISTE) {
-    const j = s.jord[id]
-    if (j && JORD[id].type === 'gard') sum += GARDSTRINN[gardstrinn(j)].status + naboer(j) * NABO_STATUS + (j.odel ? ODEL_STATUS : 0)
-  }
+  for (const id of JORDLISTE) sum += jordstatusFor(s.jord[id], id)
   return sum
 }
 
@@ -1109,14 +1121,17 @@ function loggSkog(s: Spilltilstand, tittel: string, tekst: string, alvor: 'info'
 /**
  * Hver dag: storm og brann i skogene, og forsikringen som fornyes. Det stormen blåser ned,
  * selges for ×0,7 (forsikringen betaler resten); et bestand som brenner, plantes på nytt, og
- * forsikringen betaler tømmeret det hadde. Muterer.
+ * forsikringen betaler tømmeret det hadde. Muterer. Pakke 123: saker i avisa for storm, brann,
+ * en rekordhogst (fra gårsdagen) og et bestand som fyller 300 dager.
  */
-export function skogVedDagsskifte(s: Spilltilstand): void {
-  if (!s.jord) return
+export function skogVedDagsskifte(s: Spilltilstand): Overskrift[] {
+  if (!s.jord) return []
   const dag = dagnummer(s.sek)
+  const ut: Overskrift[] = []
   for (const id of JORDLISTE) {
     const j = s.jord[id]
     if (!j || JORD[id].type !== 'skog') continue
+    ut.push(...skogsaker(s, id))
     // Forsikringen fornyes når året er omme, om det er penger til det.
     if (j.fornyForsikring && (j.forsikretTil ?? 0) <= s.sek) {
       const pris = forsikringspris(s, id)
@@ -1164,7 +1179,53 @@ export function skogVedDagsskifte(s: Spilltilstand): void {
       s.totaltLeie += inn
     }
     loggSkog(s, hendelse === 'storm' ? 'Storm' : 'Skogbrann', tekst, forsikret ? 'info' : 'advarsel')
+    const sted = JORD[id].by
+    ut.push(
+      hendelse === 'storm'
+        ? { type: 'deg', tittel: `Stormen feller tømmer i ${sted}`, tekst: `En tredel av det eldste bestandet ligger nede. ${forsikret ? `Forsikringen dekker alt: ${kortKroner(inn)}.` : `Tømmeret selges for ${kortKroner(inn)}, ${Math.round((1 - STORM_PRIS) * 100)} % under prisen, og skogen var ikke forsikret.`}` }
+        : { type: 'deg', tittel: `Skogbrann i ${sted}`, tekst: `Et bestand brant ned, og tømmer for ${kortKroner(tapt)} gikk tapt. ${forsikret ? 'Forsikringen betaler.' : 'Skogen var ikke forsikret.'} Nytt er plantet.` },
+    )
   }
+  return ut
+}
+
+/** Et bestand som har stått så lenge, får en sak i avisa (Pakke 123). */
+export const GAMMELSKOG_DAGER = 300
+
+/**
+ * Sakene fra én skog som ikke er storm eller brann: rekordhogsten fra i går (stemplet av
+ * hogsten, `j.nyRekord`) og et bestand som fylte 300 dager i natt. Muterer (rekorden slettes).
+ */
+function skogsaker(s: Spilltilstand, id: JordId): Overskrift[] {
+  const j = s.jord[id]!
+  const ut: Overskrift[] = []
+  const sted = JORD[id].by
+  if (j.nyRekord) {
+    const r = j.nyRekord
+    ut.push({ type: 'deg', tittel: `Rekordhogst i ${sted}`, tekst: `Bestand ${r.bestand + 1} ga ${kortKroner(r.belop)} etter ${tall(Math.round(r.alder))} dager — ${kortKroner(r.belop / r.alder)} om dagen, mer enn noen hogst i skogen før.` })
+    delete j.nyRekord
+  }
+  const b = bestand(j)
+  for (let i = 0; i < b.length; i++) {
+    const alder = (s.sek - b[i]) / DAG_SEK
+    if (alder >= GAMMELSKOG_DAGER && alder - 1 < GAMMELSKOG_DAGER) {
+      ut.push({ type: 'deg', tittel: `Gammelskog i ${sted}`, tekst: `Bestand ${i + 1} har stått i ${GAMMELSKOG_DAGER} dager uten å bli hogd. Tømmeret er verdt ${kortKroner(bestandsverdi(s, id, i))}, og klimakredittene fra skogen gir ${kortKroner(karbonPerDag(s, id))} om dagen.` })
+      break
+    }
+  }
+  return ut
+}
+
+/** Hogsten per dag som skogen må slå for å gi en rekord: den beste før, eller null før første hogst. */
+export function rekordPerDag(j: Jordstykke): number | null {
+  if (j.rekordPerDag !== undefined) return j.rekordPerDag
+  const h = (j.hogster ?? []).filter((x) => x.alder > 0)
+  return h.length ? Math.max(...h.map((x) => x.belop / x.alder)) : null
+}
+
+/** Er en hogst ved `alder` dager innen to dager fra bestandets beste dag (Pakke 123, «Perfekt omløp»)? */
+export function perfektOmlop(j: Jordstykke, i: number, alder: number): boolean {
+  return Math.abs(alder - besteHogstdag(j, i)) <= 2
 }
 
 /** «skog i Namdalen» — navnet midt i en setning, med stedet som egennavn. */
@@ -1388,10 +1449,17 @@ export function odelVedDagsskifte(s: Spilltilstand): Overskrift[] {
   const ut: Overskrift[] = []
   for (const id of JORDLISTE) {
     const j = s.jord[id]
-    if (!j || JORD[id].type !== 'gard') continue
+    if (!j) continue
     j.eidFra ??= dag
     if (j.odel || dag - j.eidFra < ODEL_DAGER) continue
     j.odel = true
+    // Pakke 123: skogene blir odelsskog på samme vilkår.
+    if (JORD[id].type === 'skog') {
+      ut.push({ type: 'deg', tittel: `${JORD[id].navn} er en odelsskog`, tekst: `Tre måneder på samme hender gir odelsrett. Skogen på ${JORD[id].by} går i arv, med ${bestand(j).length} bestand${naboer(j) ? ` og ${naboer(j)} ${naboer(j) === 1 ? 'naboskog' : 'naboskoger'}` : ''}.` })
+      s.hendelser.push({ sek: s.sek, tittel: 'Skogen', tekst: `${JORD[id].navn} er en odelsskog: +${ODEL_STATUS} status.`, alvor: 'info' })
+      if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+      continue
+    }
     const navn = JORD[id].navn.replace(/^Gård/, 'Gården')
     ut.push({ type: 'deg', tittel: `${navn} er en odelsgård`, tekst: `Tre måneder på samme hender gir odelsrett. ${GARDSTRINN[gardstrinn(j)].bestemt[0].toUpperCase()}${GARDSTRINN[gardstrinn(j)].bestemt.slice(1)} på ${JORD[id].by} går i arv.` })
     s.hendelser.push({ sek: s.sek, tittel: 'Gården', tekst: `${navn} er en odelsgård: +${ODEL_STATUS} status.`, alvor: 'info' })

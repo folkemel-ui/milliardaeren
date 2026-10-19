@@ -22,7 +22,9 @@ import {
   naboskogpris,
   naboskogTommer,
   nesteBestandpris,
+  perfektOmlop,
   plantetrinnEtterPlanting,
+  rekordPerDag,
   sagbrukpris,
   SKOGMASKINER,
   skogmaskinpris,
@@ -56,10 +58,21 @@ export function hoggSkog(s: Spilltilstand, id: JordId): Utfall {
   return { ok: true, tilstand: n }
 }
 
-/** Skriver en hogst i skogens regnskap. Muterer. */
+/**
+ * Skriver en hogst i skogens regnskap. Pakke 123: en hogst som gir mer per dag enn noen før,
+ * venter på morgendagens avis (`nyRekord`), og en hogst nær den beste dagen gir «Perfekt omløp».
+ * Muterer.
+ */
 function noterHogst(n: Spilltilstand, id: JordId, i: number, belop: number): void {
   const j = n.jord[id]!
-  const h = { dag: dagnummer(n.sek), bestand: i, alder: Math.round(bestandsalder(n, id, i) * 10) / 10, belop }
+  const alder = bestandsalder(n, id, i)
+  if (alder > 0) {
+    const forrige = rekordPerDag(j)
+    if (forrige !== null && belop / alder > forrige && (!j.nyRekord || belop / alder > j.nyRekord.belop / j.nyRekord.alder)) j.nyRekord = { bestand: i, belop, alder }
+    j.rekordPerDag = Math.max(forrige ?? 0, belop / alder)
+    if (perfektOmlop(j, i, alder)) j.perfektOmlop = true
+  }
+  const h = { dag: dagnummer(n.sek), bestand: i, alder: Math.round(alder * 10) / 10, belop }
   j.hogster = [...(j.hogster ?? []), h].slice(-HOGSTER_HUSKET)
   j.tommerTotalt = (j.tommerTotalt ?? 0) + belop
 }
