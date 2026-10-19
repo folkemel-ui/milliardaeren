@@ -12,6 +12,7 @@ import { fondsutbytteIDag } from './fond'
 import { erDagsskifte, erHelg } from './kalender'
 import { filialfaktor } from './filialer'
 import { synergifaktorer } from './synergi'
+import { romfartSekund } from './romfart'
 import { dagForBedrift } from './ansatte'
 import { gisUtAvis } from './avis'
 import { sjekkPrestasjoner } from './prestasjoner'
@@ -159,6 +160,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
   const sparerente = sparerentePerSek(s)
   s.sparing += sparerente
   s.totaltSparerente += sparerente
+  // Pakke 118: forskningen ved romfartsfabrikken blir ferdig i sitt sekund.
+  if (s.romfart?.forskning) romfartSekund(s)
   // Rivalselskapene du eier andeler i, betaler utbytte løpende.
   const rivalutbytte = rivalutbyttePerSek(s)
   s.kontanter += rivalutbytte

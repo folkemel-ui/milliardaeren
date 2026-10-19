@@ -31,6 +31,17 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   experienced staff the formulas are bit-for-bit the old ones (zeros added last), which
   is why the golden master didn't move.
 
+- **The aerospace factory (Pack 118) is not a business type.** It has no levels, so it lives outside
+  `STIGEN` and `BedriftstypeId`: an optional `s.romfart` (no save version, like `s.racing`), its own die
+  (`r.frø`), its launch in `gisUtAvis` next to racing (`romfartVedDagsskifte`, stories as `'deg'`), research
+  that ends in its second (`romfartSekund`, behind a cheap `s.romfart?.forskning` check in `sekund`), its value
+  in `eiendeler` and the Bedrifter group of `formuedeler`, its own goal in `alleMaal`, and three cards on
+  Bedrifter (owned, for sale, locked) plus a page opened with `useTilbake`. Money was set like a business at
+  its price (~30 000 s payback → ~180 mill/s at 5.4 bill) and *measured* over 2 000 simulated days before the
+  constant was fixed: the board's contracts average below a full rocket, so the price per tonne went
+  12.5 → 13.5 mrd to land on 178 mill/s. When no contract is chosen, the factory launches the best one it can
+  lift — otherwise a player who is away would earn nothing from a once-a-day system.
+
 ## The market: stocks, funds, bonds, startups
 
 - **A new asset class (Pack 53, bonds)** touches: `Aktivaklasse` (types.ts), `KLASSER`,

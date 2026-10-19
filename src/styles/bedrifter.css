@@ -856,3 +856,70 @@
   grid-column: 1 / -1;
   color: var(--tekst-dempet);
 }
+
+/* Romfartsfabrikken (Pakke 118): flisa med raketten, kortet som åpner siden, kontraktene og loggen. */
+.romfart-flis {
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: var(--radius-liten, 10px);
+  flex-shrink: 0;
+}
+
+.romfart-flis.silhuett {
+  filter: brightness(0) opacity(0.35);
+}
+
+.romfartkort {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.romfartkort h2 {
+  margin: 0;
+  font-size: var(--skrift-4);
+}
+
+.romkontrakter,
+.romlogg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.romkontrakter li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--kant);
+  border-radius: var(--radius-liten, 10px);
+}
+
+.romkontrakter li.valgt {
+  border-color: var(--gull);
+}
+
+.romkontrakter li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.romlogg li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--skrift-2);
+}

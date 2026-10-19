@@ -17,6 +17,7 @@ import { LUKSUSLISTE } from './eiendom'
 import { DAG_SEK } from './kalender'
 import { JORD, JORDLISTE, jorder, MAKS_JORDER, MAKS_NABOER } from './jord'
 import { antallDyr } from './dyr'
+import { alleForsket } from './romfart'
 
 /** Statusnivået som heter Udødelig: prestasjonen står der den sto da det var det høyeste (Pakke 81). */
 const UDODELIG = STATUSNIVAAER.findIndex((n) => n.navn === 'Udødelig')
@@ -158,6 +159,9 @@ export const PRESTASJONER: Prestasjon[] = [
   { id: 'skikonge', navn: 'Skikonge', beskrivelse: 'Kjøp et skisenter', klart: (s) => s.bedrifter.some((b) => b.type === 'skisenter') },
   // Pakke 117: et trinn over skisenteret.
   { id: 'brikkebaron', navn: 'Brikkebaron', beskrivelse: 'Kjøp en brikkefabrikk — toppen av stigen', klart: (s) => s.bedrifter.some((b) => b.type === 'brikkefabrikk') },
+  // Pakke 118: romfartsfabrikken.
+  { id: 'i-bane', navn: 'I bane', beskrivelse: 'Skyt opp den første raketten', klart: (s) => (s.romfart?.vellykket ?? 0) > 0 },
+  { id: 'romfartspioner', navn: 'Romfartspioner', beskrivelse: 'Forsk fram alle delene til raketten', klart: (s) => !!s.romfart && alleForsket(s.romfart) },
   // Pakke 70: de skjulte. Hver sjekkes hvert sekund, så de svarer uten å lage noe.
   { id: 'gjeldfri', navn: 'Gjeldfri', beskrivelse: 'Betal tilbake hele lånet', skjult: true, klart: (s) => !!s.harLaant && s.gjeld <= 0 },
   { id: 'kontraer', navn: 'Kontrær', beskrivelse: 'Kjøp en aksje eller mynt minst 20 % under toppen de siste to timene', skjult: true, klart: (s) => s.kontraerKjop !== undefined },

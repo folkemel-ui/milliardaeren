@@ -314,6 +314,67 @@ export interface Racingsesong {
   titler: string[]
 }
 
+// ─────────────────────────────────────────────── Romfarten (Pakke 118)
+
+/** Rakettens seks deler, som forskes fram i seks trinn hver. */
+export type Rakettdel = 'motorer' | 'tanker' | 'ovretrinn' | 'styring' | 'varmeskjold' | 'gjenbruk'
+/** Lav bane eller geostasjonær: den høye banen krever mer løft og betaler mer per tonn. */
+export type Romkontraktbane = 'lav' | 'geo'
+
+/** En oppskyting et annet selskap vil betale for. */
+export interface Romkontrakt {
+  id: number
+  kunde: string
+  /** Hva som skal opp: «en værsatellitt», «forsyninger til romstasjonen». */
+  last: string
+  tonn: number
+  bane: Romkontraktbane
+  honorar: number
+}
+
+/** En oppskyting som er gjort. */
+export interface Oppskyting {
+  dag: number
+  kunde: string
+  tonn: number
+  bane: Romkontraktbane
+  honorar: number
+  /** Hva raketten kostet å bygge. */
+  kostnad: number
+  ok: boolean
+}
+
+/**
+ * Romfartsfabrikken (Pakke 118): den siste bedriften, som ikke har nivåer. Den
+ * bygger raketter av delene som er forsket fram og skyter opp en kontrakt hver
+ * spilldag. Mangler i lagringer uten fabrikk.
+ */
+export interface Romfart {
+  /** Fabrikkens egen terning: bare oppskytingene trekker fra den. */
+  frø: number
+  startetSek: number
+  /** Fabrikken, forskningsavdelingen og forskningen — det fabrikken står til i formuen. */
+  investert: number
+  /** Forskningsavdelingens trinn: 0 = ingen, 1–6. */
+  avdeling: number
+  deler: Record<Rakettdel, number>
+  /** Forskningen som pågår. */
+  forskning?: { del: Rakettdel; ferdigSek: number }
+  /** Kontraktene på tavla i dag, og dagen de gjelder. */
+  tavle: Romkontrakt[]
+  tavleDag: number
+  /** Kontrakten du har valgt for neste dagsskifte. Uten valg tar fabrikken den beste raketten løfter. */
+  valgt?: number
+  nesteKontraktId: number
+  /** De siste oppskytingene, nyeste sist. */
+  oppskytinger: Oppskyting[]
+  antall: number
+  vellykket: number
+  /** Honorarene og hva rakettene kostet, siden start. */
+  inntekt: number
+  kostnad: number
+}
+
 export interface Racingteam {
   navn: string
   sesong: number
@@ -728,6 +789,8 @@ export interface Spilltilstand {
   auksjon?: Auksjonshus
   /** Racingteamet (Pakke 90), om du har startet ett. */
   racing?: Racingteam
+  /** Romfartsfabrikken (Pakke 118), om du har kjøpt den. */
+  romfart?: Romfart
   /** Mesterskapene teamet har vunnet — de står igjen om teamet selges. */
   racingtrofeer?: Trofe[]
   /** De siste utgavene av avisen, nyeste sist. */

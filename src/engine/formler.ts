@@ -46,6 +46,7 @@ import { kunstverdi } from './kunst'
 import { fondverdi } from './fond'
 import { synergifaktor } from './synergi'
 import { hovedkontorfaktor, hovedkontorverdi } from './hovedkontor'
+import { romfartsverdi } from './romfart'
 import type { Ansattgrad, Bedrift, BedriftstypeId, Beholdning, Forbedring, PapirId, Spilltilstand } from './types'
 
 // ─────────────────────────────────────────────── Nivåer
@@ -288,7 +289,9 @@ export function eiendeler(s: Spilltilstand): number {
     // Innredningen i hjemmene (Pakke 60) til halv pris. Lagt til sist, så summene ellers står helt likt.
     hjemverdi(s) +
     // Hovedkontoret (Pakke 117) til det etasjene kostet, også lagt til sist.
-    hovedkontorverdi(s)
+    hovedkontorverdi(s) +
+    // Romfartsfabrikken (Pakke 118) til det som er bygget og forsket fram.
+    romfartsverdi(s)
   )
 }
 

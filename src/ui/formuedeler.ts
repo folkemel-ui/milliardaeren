@@ -10,6 +10,7 @@ import { obligasjonsverdi } from '../engine/obligasjoner'
 import { eiendomsverdi, luksusverdi } from '../engine/eiendom'
 import { hjemverdi } from '../engine/hjemmene'
 import { hovedkontorverdi } from '../engine/hovedkontor'
+import { romfartsverdi } from '../engine/romfart'
 import { klubbverdi } from '../engine/klubb'
 import { kunstverdi } from '../engine/kunst'
 import { rivalverdi } from '../engine/rivaler'
@@ -53,7 +54,7 @@ export interface Formuedeler {
 
 export function formuedeler(s: Spilltilstand): Formuedeler {
   // Hovedkontoret (Pakke 117) hører til bedriftene.
-  const bedrifter = s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) + hovedkontorverdi(s)
+  const bedrifter = s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) + hovedkontorverdi(s) + romfartsverdi(s)
   const investeringer = papirverdi(s) + fondverdi(s) + obligasjonsverdi(s) + rivalverdi(s) + startupverdi(s) + s.sparing
   const eiendom = eiendomsverdi(s)
   const samling = luksusverdi(s)

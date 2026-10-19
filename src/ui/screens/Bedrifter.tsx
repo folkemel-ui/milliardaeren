@@ -19,6 +19,8 @@ import { useTilbake } from '../tilbake'
 import { Hjemskjermkort } from '../komponenter/Hjemskjerm'
 import { Ikon } from '../komponenter/Ikoner'
 import { Hovedkontorkort } from '../komponenter/Hovedkontor'
+import { Romfartkort, RomfartLaast, Romfartside } from '../komponenter/Romfart'
+import { romfartAapen } from '../../engine/romfart'
 
 /** `tilRival` åpner en rival i Investeringer → Selskaper (Pakke 99: fusjonsraden). */
 /** En forbedring er billig når den koster under så stor andel av kontantene (Pakke 102). */
@@ -28,6 +30,8 @@ const BILLIGE_MIN = 2
 
 export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: string, type: BedriftstypeId) => void }) {
   const [valgt, settValgt] = useState<string | null>(null)
+  // Pakke 118: romfartsfabrikkens egen side.
+  const [romfartApen, settRomfartApen] = useState(false)
   const [mengde, settMengde] = useState<Kjopsmengde>(lesKjopsmengde)
   const velgMengde = (m: Kjopsmengde) => {
     lagreKjopsmengde(m)
@@ -50,10 +54,14 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
   })
   const tilSalgs = STIGEN.filter((t) => !eierType(s, t) && erLaastOpp(s, t))
   const laaste = STIGEN.filter((t) => !erLaastOpp(s, t))
+  const romfartTilSalgs = !s.romfart && romfartAapen(s)
+  const romfartLaast = !s.romfart && !romfartAapen(s)
 
   // Bedriften kan forsvinne mens siden er åpen (banken kan ta den over).
   const detalj = valgt ? s.bedrifter.find((b) => b.id === valgt) : undefined
   useTilbake(detalj !== undefined, () => settValgt(null))
+  useTilbake(romfartApen && !!s.romfart, () => settRomfartApen(false))
+  if (romfartApen && s.romfart) return <Romfartside s={s} tilbake={() => settRomfartApen(false)} />
   if (detalj) return <Bedriftdetalj s={s} b={detalj} mengde={mengdeNaa} tilbake={() => settValgt(null)} tilRival={tilRival} />
 
   // Rekkefølgen som én knapp (Pakke 102): den viser hvordan lista står, og et trykk bytter.
@@ -112,10 +120,17 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
         ))}
       </ul>
 
+      {s.romfart && <Romfartkort s={s} åpne={() => settRomfartApen(true)} />}
+
       <Hovedkontorkort s={s} />
 
-      {(tilSalgs.length > 0 || laaste.length > 0) && (
-      <Seksjon id="bedrifter-nye" tittel="Start ny bedrift" sammendrag={tilSalgs.length ? `${tilSalgs.length} til salgs` : `${laaste.length} låst`} harInnhold={tilSalgs.length > 0}>
+      {(tilSalgs.length > 0 || laaste.length > 0 || !s.romfart) && (
+      <Seksjon
+        id="bedrifter-nye"
+        tittel="Start ny bedrift"
+        sammendrag={tilSalgs.length + (romfartTilSalgs ? 1 : 0) > 0 ? `${tilSalgs.length + (romfartTilSalgs ? 1 : 0)} til salgs` : `${laaste.length + (romfartLaast ? 1 : 0)} låst`}
+        harInnhold={tilSalgs.length > 0 || romfartTilSalgs}
+      >
       <ul className="kortliste">
         {tilSalgs.map((id) => {
           const t = BEDRIFTSTYPER[id]
@@ -136,9 +151,11 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
             </li>
           )
         })}
+        {romfartTilSalgs && <Romfartkort s={s} åpne={() => settRomfartApen(true)} />}
         {laaste.map((id, i) => (
           <Laastkort key={id} s={s} id={id} neste={i === 0} synlig={i < SYNLIGE_LAASTE} />
         ))}
+        <RomfartLaast s={s} synlig={laaste.length < SYNLIGE_LAASTE} />
       </ul>
       </Seksjon>
       )}

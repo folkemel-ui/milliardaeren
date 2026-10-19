@@ -32,6 +32,7 @@ import { utleieVedDagsskifte } from './utleie'
 import { byerMedEiendom, leieIByen } from './eiendom'
 import { auksjonVedDagsskifte } from './auksjon'
 import { racingVedDagsskifte } from './racing'
+import { romfartVedDagsskifte } from './romfart'
 import { charterVedDagsskifte } from './charter'
 
 /**
@@ -336,6 +337,8 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const auksjonssaker = auksjonVedDagsskifte(s, tittel(s))
   // Pakke 90: racingteamets lønn, og løpet på løpsdagen.
   const racingsaker = racingVedDagsskifte(s, tittel(s))
+  // Pakke 118: dagens oppskyting fra romfartsfabrikken, og morgendagens kontrakter.
+  const romfartsaker = romfartVedDagsskifte(s, tittel(s))
   const andre = [
     // Pakke 94: dyrene og tilskuddet hver dag, før mandagens høst.
     ...dyrVedDagsskifte(s),
@@ -358,6 +361,7 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
     ...skattesaker,
     ...klubbsaker,
     ...racingsaker.filter((x) => x.type === 'deg'),
+    ...romfartsaker,
     ...andre.filter((x) => x.type === 'deg'),
     ...auksjonssaker.filter((x) => x.type === 'deg'),
     ...startupsaker.filter((x) => x.type === 'deg'),

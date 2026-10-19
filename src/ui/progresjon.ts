@@ -12,6 +12,7 @@ import { LANDEMERKELISTE, LANDEMERKER } from '../engine/landemerker'
 import { MAAL } from '../engine/innhold'
 import { PASSER_ANDEL } from '../engine/auksjon'
 import { TEAMPRIS } from '../engine/racing'
+import { ROMFART_LAASES_OPP } from '../engine/romfart'
 import { UNIKE, UNIKLISTE } from '../engine/unike'
 import { PRESTASJONER } from '../engine/prestasjoner'
 import type { Spilltilstand } from '../engine/types'
@@ -90,6 +91,8 @@ export function alleMaal(): Maal[] {
     const t = BEDRIFTSTYPER[id]
     if (t.laasesOppVed > 0) maal.push({ belop: t.laasesOppVed, tekst: t.navn, art: 'bedrift', fane: 'bedrifter' })
   }
+  // Pakke 118: romfartsfabrikken står ikke på stigen, men er den siste bedriften.
+  maal.push({ belop: ROMFART_LAASES_OPP, tekst: 'Romfartsfabrikk', art: 'bedrift', fane: 'bedrifter' })
   maal.push({ belop: STARTUP_LAAST_OPP, tekst: 'Oppstartsselskaper', art: 'annet', fane: 'investeringer' })
   maal.push({ belop: KLUBB_LAAST_OPP, tekst: 'Fotballklubb til salgs', art: 'annet', fane: 'luksus' })
   // Pakke 70: de sene målene spillet alt har — landemerkene, langdistansejeten og New York.
