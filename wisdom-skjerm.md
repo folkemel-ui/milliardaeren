@@ -30,6 +30,12 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   actions: upgrades failed quietly once, wages outran income and every chart went
   negative. Set `b.nivaa` directly, or log failures. Simulating 40 days takes < 1 s, so
   charts and stats can get weeks of history.
+- **A short pane crops the screenshots** (20 October 2026): with the pane at 631 × 664 and a 2× screen, the mobile
+  preset (375 × 812) was scaled to fit and every screenshot showed only the left ~300 px — while the DOM said 375. Use
+  375 × 660 (fits the height) and shrink the picture, not the layout: `document.documentElement.style.transform =
+  'scale(0.78)'` with origin 0 0, then resize 376 → 375 for a fresh frame. Layout and measurements stay at 375. Fixed
+  layers (Avisa, sheets) land off-screen under the transform: clear it for those. Check `innerWidth`/`innerHeight` with
+  the `desktop` preset first to see the pane's real size.
 - **Hover readouts can be driven from the console**: dispatch
   `new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse', clientX, clientY })`
   on `.graf-flate`, wait ~300 ms, then read `.graf-boble` or take the screenshot.
