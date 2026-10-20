@@ -35,6 +35,7 @@ export type Tema =
   | 'aksjer'
   | 'krypto'
   | 'fond'
+  | 'ravarer'
   | 'ordre'
   | 'laan'
   | 'skatt'
@@ -92,6 +93,13 @@ export const FORKLARINGER: Record<Tema, { tittel: string; tekst: string }> = {
     tekst:
       'Kryptomynter handles hele døgnet, hele uka, og betaler ikke utbytte. Kursene følger en felles stemning — grådighet eller frykt — ' +
       'og kan hoppe 15–40 % på et blunk. Jo mindre mynten er, jo villere går det. Stabilkronen holder seg rundt 10 kr og er et sted å parkere penger.',
+  },
+  ravarer: {
+    tittel: 'Råvarer',
+    tekst:
+      'Olje, laks og gull handles i hele enheter — fat, kilo og gram — på hverdager, som aksjene, og betaler ikke utbytte. Olje og laks svinger rundt et vanlig nivå: ' +
+      'når en uke gjør olje eller laks het eller kald, dras prisen opp eller ned. Oljeselskapet og fiskeoppdrettet tjener i takt med prisen på det de lever av, ' +
+      'men ditt eget kjøp løfter ikke inntekten: den følger markedets pris uten trykket fra dine handler. Gullet stiger sakte og går mot aksjene — det stiger i lavkonjunktur.',
   },
   fond: {
     tittel: 'Indeksfond',

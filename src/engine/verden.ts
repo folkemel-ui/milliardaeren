@@ -228,6 +228,8 @@ export const EIENDOMSVAER: Partial<Record<EiendomId, { sted: Vaersted; virkning:
 
 /** Ukas trend: én bransje er het (+20 %) og én kald (−20 %), hver med sjanse 50 %. */
 export const TREND = 0.2
+/** Bransjene der trenden drar råvareprisen, ikke inntekten direkte (Pakke 124). */
+export const TRENDFRI: ReadonlySet<BedriftstypeId> = new Set<BedriftstypeId>(['oljeselskap', 'fiskeoppdrett'])
 
 export interface Trend {
   het: BedriftstypeId | null
@@ -343,8 +345,8 @@ export interface Kalenderdag {
 export function grunner(d: Kalenderdag, type: BedriftstypeId, sek: number): string[] {
   const ut: string[] = []
   if (d.helligdag?.virkning[type]) ut.push(d.helligdag.navn)
-  if (d.trend.het === type) ut.push('Het bransje')
-  if (d.trend.kald === type) ut.push('Kald bransje')
+  if (d.trend.het === type && !TRENDFRI.has(type)) ut.push('Het bransje')
+  if (d.trend.kald === type && !TRENDFRI.has(type)) ut.push('Kald bransje')
   if (VAERVIRKNING[type] && Math.abs(vaerfaktor(type, d.vaer, d.dag) - 1) > 0.05) ut.push(VAERTYPER[d.vaer].navn)
   const u = UKEDAG[type]
   if (u) ut.push(ukedag(sek) >= 5 ? 'Helg' : 'Hverdag')
@@ -381,8 +383,9 @@ export function dagsbilde(s: Spilltilstand, dag = dagnummer(s.sek)): Kalenderdag
     const u = UKEDAG[type]
     if (u) f *= helg ? u.helg : u.hverdag
     f *= vaerfaktor(type, vaer, dag)
-    if (trend.het === type) f *= 1 + TREND
-    if (trend.kald === type) f *= 1 - TREND
+    // Pakke 124: olje og laks følger råvareprisen (ravarer.ts), som trenden drar i stedet.
+    if (trend.het === type && !TRENDFRI.has(type)) f *= 1 + TREND
+    if (trend.kald === type && !TRENDFRI.has(type)) f *= 1 - TREND
     f *= hellig?.virkning[type] ?? 1
     faktor[type] = f
   }

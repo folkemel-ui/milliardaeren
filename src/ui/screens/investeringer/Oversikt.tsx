@@ -10,11 +10,13 @@ import { andelTekst, kortKroner } from '../../format'
 import { RulleTall } from '../../komponenter/RulleTall'
 import { Endring } from './felles'
 import { SkattSaLangt } from '../../komponenter/Skattekort'
+import { Formuesforvalter } from '../../komponenter/Formuesforvalter'
 
 const KLASSENAVN: Record<Aktivaklasse, string> = {
   aksje: 'Aksjer',
   krypto: 'Krypto',
   fond: 'Indeksfond',
+  ravare: 'Råvarer',
   obligasjon: 'Obligasjoner',
   eiendom: 'Eiendom',
   rival: 'Rivalselskaper',
@@ -95,6 +97,8 @@ export function Oversikt({ s, velg }: { s: Spilltilstand; velg: (k: Exclude<Akti
         </button>
       )}
       {visTomme && tomme.length > 0 && <ul className="kortliste">{tomme.map(rad)}</ul>}
+      {/* Pakke 124: forvalteren holder aksjene, fondet, obligasjonene og råvarene i en blanding. */}
+      <Formuesforvalter s={s} />
       <p className="dempet liten">Bedriftene og eiendommene har egne faner. Hele formuen, delt opp, står på Profil.</p>
     </>
   )

@@ -8,7 +8,7 @@ import { leggTilHendelse } from './bank'
 import { maksKjop } from './formler'
 import { utforKjop, utforSalg } from './handel'
 import { erHelg } from './kalender'
-import { maksPerOrdre, PAPIRER, rundAntall } from './marked'
+import { maksPerOrdre, PAPIRER, rundAntall, stengtIHelgen } from './marked'
 import type { Ordre, Spilltilstand } from './types'
 import { kortKroner } from './tall'
 
@@ -30,7 +30,7 @@ export function sjekkOrdre(s: Spilltilstand): void {
     const p = PAPIRER[o.papir]
     const kurs = s.marked.kurser[o.papir].kurs
     // Aksjeordre venter når børsen er stengt.
-    if (!utløst(o, kurs) || (p.klasse === 'aksje' && erHelg(s.sek))) {
+    if (!utløst(o, kurs) || (stengtIHelgen(p) && erHelg(s.sek))) {
       igjen.push(o)
       continue
     }

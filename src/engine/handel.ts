@@ -15,7 +15,7 @@ import { dagnummer } from './kalender'
 import { LANDEMERKE_HONORAR, landemerkepris } from './landemerker'
 import { salgsprisMaleri } from './kunst'
 import { KLUBBSALG_HONORAR, klubbverdi, salgspris } from './klubb'
-import { OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
+import { markedsrente, OBLIGASJON_GEBYR, obligasjonsverdiFor } from './obligasjoner'
 import { TILBAKE_DAGER, unikRestverdi } from './unike'
 import { dyrOpptjentNaa } from './dyr'
 import { juniorpris, SALG_ANDEL } from './racing'
@@ -194,6 +194,36 @@ export function utforKlubbsalg(n: Spilltilstand): number {
   bokforGevinst(n, inntekt - (n.klubb?.kostpris ?? 0))
   n.klubb = null
   return inntekt
+}
+
+/** Kjøper fondsandeler for `belop` kroner, gebyret inkludert (Pakke 124: delt med forvalteren). Muterer. */
+export function utforFondskjop(n: Spilltilstand, id: FondId, belop: number): void {
+  const andeler = belop / (1 + FOND_GEBYR) / fondskurs(n, id)
+  const f = n.fond[id] ?? { antall: 0, kostpris: 0 }
+  n.fond[id] = { antall: f.antall + andeler, kostpris: f.kostpris + belop }
+  n.kontanter -= belop
+  flyt(n, 'fond', belop)
+}
+
+/**
+ * Kjøper statsobligasjoner for `belop` (Pakke 53; Pakke 124 delte den med forvalteren). Kupongen
+ * låses til markedsrenten i dag; har du fra før, blir renten snittet vektet med pålydende. Muterer.
+ */
+export function utforObligasjonskjop(n: Spilltilstand, id: ObligasjonId, belop: number): void {
+  n.obligasjoner ??= {}
+  const fra = n.obligasjoner[id]
+  const rente = markedsrente(n, id)
+  const palydende = (fra?.palydende ?? 0) + belop
+  // Kursen er lineær i ankeret, så et vektet snitt holder verdien av den gamle posten der den var.
+  const snitt = (gammel: number) => (fra ? (fra.palydende * gammel + belop * rente) / palydende : rente)
+  n.obligasjoner[id] = {
+    palydende,
+    rente: snitt(fra?.rente ?? 0),
+    anker: snitt(fra?.anker ?? 0),
+    kostpris: (fra?.kostpris ?? 0) + belop,
+  }
+  n.kontanter -= belop
+  flyt(n, 'obligasjon', belop)
 }
 
 /** Kjøper `antall` og returnerer hva det kostet, kurtasje inkludert. */

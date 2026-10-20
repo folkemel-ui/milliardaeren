@@ -416,6 +416,39 @@ const LOGOER: Record<PapirId, Logo> = {
       </>
     ),
   },
+  // Pakke 124, råvarene. Nordsjøolje: en dråpe over havflaten.
+  OLJ: {
+    farge: '#8a5a2b',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M12 2.6C8.6 7.8 6.6 10.9 6.6 13.9a5.4 5.4 0 0 0 10.8 0c0-3-2-6.1-5.4-11.3z" />
+        <path fill={lys} d="M9.4 14.2c0-1.6.8-3.2 2-4.8-.5 1.8-.6 3.3-.2 4.8z" />
+        <path d="M3 21.2q2.25-1.8 4.5 0t4.5 0t4.5 0t4.5 0" {...strek(m, 1.5)} />
+      </>
+    ),
+  },
+  // Oppdrettslaks: laksen over merdens kant.
+  LAK: {
+    farge: '#c25b45',
+    merke: ({ m, lys }) => (
+      <>
+        <g transform="translate(0 1.5)">{laks(m)}</g>
+        <path d="M3 19.4h18" {...strek(m, 1.7)} />
+        <path d="M6 22.2h12" {...strek(lys, 1.4)} />
+      </>
+    ),
+  },
+  // Gull: en barre sett fra siden, med lys overflate.
+  GLD: {
+    farge: '#9c7a1e',
+    merke: ({ m, lys }) => (
+      <>
+        <path fill={m} d="M3.5 18.5l3.2-7.6h10.6l3.2 7.6z" />
+        <path fill={lys} d="M6.7 10.9l1.9-4.4h6.8l1.9 4.4z" />
+        <path d="M9.2 14.7h5.6" {...strek(lys, 1.2)} />
+      </>
+    ),
+  },
 }
 
 export const PAPIRLOGOER = Object.keys(LOGOER) as PapirId[]

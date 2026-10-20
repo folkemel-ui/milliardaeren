@@ -107,7 +107,7 @@ describe('tomme slag på én linje', () => {
     const t = tekst(html)
     expect(t).toContain('Aksjer')
     expect(t).toContain('100 % av porteføljen')
-    expect(t).toContain('Ikke i bruk: Krypto · Indeksfond · Obligasjoner · Rivalselskaper · Startups · Sparekonto')
+    expect(t).toContain('Ikke i bruk: Krypto · Indeksfond · Råvarer · Obligasjoner · Rivalselskaper · Startups · Sparekonto')
     expect(html).toContain('aria-expanded="false"')
     expect(t).not.toMatch(/(^|[^,\d])0 % av porteføljen/)
   })
@@ -118,7 +118,7 @@ describe('tomme slag på én linje', () => {
     const t = tekst(tegn(createElement(Oversikt, { s, velg: tom })))
     expect(t).toMatch(/< 0,1 % av porteføljen|0,\d % av porteføljen/)
     expect(t).not.toMatch(/(^|[^,\d])0 % av porteføljen/)
-    expect(t).toContain('Ikke i bruk: Krypto · Indeksfond · Obligasjoner · Rivalselskaper · Startups')
+    expect(t).toContain('Ikke i bruk: Krypto · Indeksfond · Råvarer · Obligasjoner · Rivalselskaper · Startups')
   })
 
   it('uten noe i bruk står bare linja', () => {

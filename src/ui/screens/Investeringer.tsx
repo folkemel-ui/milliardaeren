@@ -16,6 +16,7 @@ const TIL_UNDERFANE: Record<Exclude<Aktivaklasse, 'eiendom'>, Investeringsdel> =
   aksje: 'bors',
   krypto: 'bors',
   fond: 'bors',
+  ravare: 'bors',
   obligasjon: 'bank',
   rival: 'selskaper',
   startup: 'selskaper',
@@ -45,7 +46,7 @@ export function Investeringer({ s }: { s: Spilltilstand }) {
           s={s}
           velg={(k) => {
             // Aksjer og Krypto åpner Børs på riktig liste.
-            if (k === 'aksje' || k === 'krypto' || k === 'fond') borsdel.sett(k)
+            if (k === 'aksje' || k === 'krypto' || k === 'fond' || k === 'ravare') borsdel.sett(k)
             settFane(TIL_UNDERFANE[k])
           }}
         />

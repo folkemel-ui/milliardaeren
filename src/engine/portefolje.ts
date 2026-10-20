@@ -21,7 +21,7 @@ import { fondKostpris, fondverdi } from './fond'
 
 export type { Aktivaklasse }
 
-export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'fond', 'obligasjon', 'eiendom', 'rival', 'startup', 'sparing']
+export const KLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'fond', 'ravare', 'obligasjon', 'eiendom', 'rival', 'startup', 'sparing']
 
 export interface Postering {
   klasse: Aktivaklasse
@@ -33,7 +33,7 @@ export interface Postering {
 }
 
 export function nullPerKlasse(): Record<Aktivaklasse, number> {
-  return { aksje: 0, krypto: 0, fond: 0, obligasjon: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 }
+  return { aksje: 0, krypto: 0, fond: 0, ravare: 0, obligasjon: 0, eiendom: 0, rival: 0, startup: 0, sparing: 0 }
 }
 
 export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
@@ -41,6 +41,7 @@ export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
     aksje: papirverdi(s, 'aksje'),
     krypto: papirverdi(s, 'krypto'),
     fond: fondverdi(s),
+    ravare: papirverdi(s, 'ravare'),
     obligasjon: obligasjonsverdi(s),
     eiendom: eiendomsverdi(s),
     rival: rivalverdi(s),

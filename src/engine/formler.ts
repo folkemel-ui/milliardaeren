@@ -35,6 +35,7 @@ import { fusjonsfaktor } from './fusjon'
 import { dagForBedrift, GRADER, medNyAnsatt, retningsfaktor, teller, utenAnsatt, verdifaktor } from './ansatte'
 import { dagsfaktor, NORMAL_STYRINGSRENTE, styringsrente } from './verden'
 import { nyhetsfaktor } from './bransjer'
+import { ravarefaktor } from './ravarer'
 import { filialfaktor } from './filialer'
 import { hjemverdi } from './hjemmene'
 import { charterPerSek } from './charter'
@@ -163,7 +164,8 @@ export function bedriftInntektPerSek(b: Bedrift, dag = 1): number {
 
 /** Alt som endrer en bransjes inntekt i dag: kalenderen (Pakke 49) og nyhetene i bransjen (Pakke 53). */
 export function dagensFaktor(s: Spilltilstand, type: BedriftstypeId): number {
-  return dagsfaktor(s, type) * nyhetsfaktor(s, type)
+  // Pakke 124: oljeselskapet og fiskeoppdrettet følger råvareprisen.
+  return dagsfaktor(s, type) * nyhetsfaktor(s, type) * ravarefaktor(s, type)
 }
 
 /**
@@ -172,7 +174,8 @@ export function dagensFaktor(s: Spilltilstand, type: BedriftstypeId): number {
  * synergier er det dagensFaktor.
  */
 export function bedriftsfaktor(s: Spilltilstand, b: Bedrift): number {
-  return dagForBedrift(b, dagensFaktor(s, b.type)) * filialfaktor(s, b) * synergifaktor(s, b)
+  // Pakke 124: råvareprisen ganges på utenfor premiums gulv — premium tar ikke en lav oljepris.
+  return dagForBedrift(b, dagsfaktor(s, b.type) * nyhetsfaktor(s, b.type)) * ravarefaktor(s, b.type) * filialfaktor(s, b) * synergifaktor(s, b)
 }
 
 /** Det bedriften tjener per sekund i dag: med dagens kalenderfaktor, filialene og statusbonusen. */
@@ -259,7 +262,7 @@ export function nettoPerSek(s: Spilltilstand): number {
 
 // ─────────────────────────────────────────────── Formue
 
-export function papirverdi(s: Spilltilstand, klasse?: 'aksje' | 'krypto'): number {
+export function papirverdi(s: Spilltilstand, klasse?: 'aksje' | 'krypto' | 'ravare'): number {
   let sum = 0
   for (const [id, b] of Object.entries(s.beholdning) as [PapirId, Beholdning][]) {
     if (klasse && PAPIRER[id].klasse !== klasse) continue
@@ -349,7 +352,7 @@ export function maksKjop(s: Spilltilstand, id: PapirId): number {
   // For mye: finn det største antallet du har råd til ved halvering, i hele
   // enheter (én aksje, 1/10 000 mynt). Før gikk dette ned én enhet om gangen —
   // med milliarder på konto kunne det ta minutter og fryse spillet (Pakke 47).
-  const perEnhet = PAPIRER[id].klasse === 'aksje' ? 1 : 10_000
+  const perEnhet = PAPIRER[id].klasse === 'krypto' ? 10_000 : 1
   let lav = 0
   let hoy = Math.round(antall * perEnhet)
   for (let i = 0; i < 100 && hoy - lav > 1; i++) {

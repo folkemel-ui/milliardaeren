@@ -5,12 +5,12 @@
  */
 
 import { fastrente, flytendeRente, maksNyttLaan } from '../formler'
-import { utforObligasjonssalg } from '../handel'
+import { utforObligasjonskjop, utforObligasjonssalg } from '../handel'
 import { RENTE_PER_TIME } from '../innhold'
 import { dagnummer } from '../kalender'
 import { flyt, settInnSparing, trekkFraSparing } from '../portefolje'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from '../verden'
-import { markedsrente, OBLIGASJONER } from '../obligasjoner'
+import { OBLIGASJONER } from '../obligasjoner'
 import type { ObligasjonId, Spilltilstand } from '../types'
 import { feil, ikkeTall, UGYLDIG, type Utfall } from './felles'
 
@@ -26,21 +26,8 @@ export function kjopObligasjon(s: Spilltilstand, id: ObligasjonId, belop: number
   const b = Math.floor(Math.min(belop, s.kontanter))
   if (b <= 0) return feil('Velg hvor mye du vil kjøpe for.')
   const n = structuredClone(s)
-  n.obligasjoner ??= {}
-  const fra = n.obligasjoner[id]
   // Den nye kjøpes til kurs 1, med kupongen låst til markedsrenten i dag (Pakke 56).
-  const rente = markedsrente(n, id)
-  const palydende = (fra?.palydende ?? 0) + b
-  // Kursen er lineær i ankeret, så et vektet snitt holder verdien av den gamle posten der den var.
-  const snitt = (gammel: number) => (fra ? (fra.palydende * gammel + b * rente) / palydende : rente)
-  n.obligasjoner[id] = {
-    palydende,
-    rente: snitt(fra?.rente ?? 0),
-    anker: snitt(fra?.anker ?? 0),
-    kostpris: (fra?.kostpris ?? 0) + b,
-  }
-  n.kontanter -= b
-  flyt(n, 'obligasjon', b)
+  utforObligasjonskjop(n, id, b)
   n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, b)
   return { ok: true, tilstand: n }
 }

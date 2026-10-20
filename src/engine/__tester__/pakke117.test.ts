@@ -87,7 +87,7 @@ describe('Nordlys Halvleder', () => {
   })
 
   it('versjon 26 → 27 legger den til og lar terningen og de andre kursene stå', () => {
-    expect(SPILLVERSJON).toBe(27)
+    expect(SPILLVERSJON).toBeGreaterThanOrEqual(27)
     const s = simuler(nyttSpill(), DAG_SEK)
     const gammel = structuredClone(s) as unknown as Record<string, unknown>
     const kurser = { ...(s.marked.kurser as Record<string, unknown>) }

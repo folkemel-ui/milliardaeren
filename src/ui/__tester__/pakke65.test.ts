@@ -79,7 +79,8 @@ describe('fondene står i Børs', () => {
     await app.fane('Investeringer')
     await app.trykk(delKnapp(app, 'Investeringer', 'Børs'))
     const fliser = [...app.rot.querySelectorAll('.dashbord .flis .etikett')].map((el) => el.textContent)
-    expect(fliser).toEqual(['Aksjer', 'Krypto', 'Fond'])
+    // Pakke 124: Råvarer som fjerde flis.
+    expect(fliser).toEqual(['Aksjer', 'Krypto', 'Fond', 'Råvarer'])
     await app.trykk(app.rot.querySelectorAll<HTMLElement>('.dashbord .flis')[2])
     expect(app.rot.querySelectorAll('.fondkort')).toHaveLength(2)
   })

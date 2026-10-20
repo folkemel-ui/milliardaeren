@@ -61,6 +61,12 @@ export const PAPIRER: Record<PapirId, Papir> = {
   NBE: { id: 'NBE', navn: 'Nordbygg Eiendom', klasse: 'aksje', risiko: 'middels', startkurs: 150, drift: 0.025, volatilitet: 0.05, reversjon: 0.4, utbytte: 0.0005, dybde: 1.2e9, hopp: 0 },
   // ── Børsnotert i Pakke 117 (versjon 27), med brikkefabrikken: en vekstaksje som svinger mye.
   NLH: { id: 'NLH', navn: 'Nordlys Halvleder', klasse: 'aksje', bransje: 'brikkefabrikk', risiko: 'høy', startkurs: 420, drift: 0.05, volatilitet: 0.12, reversjon: 0.3, utbytte: 0.0001, dybde: 6e8, hopp: 0.0006 },
+  // ── Råvarene i Pakke 124 (versjon 28). Ingen bransje (den hører til aksjen), intet utbytte. Olje og
+  // laks svinger rundt et fast nivå, og oljeselskapet og fiskeoppdrettet følger dem (ravarer.ts);
+  // gullet stiger sakte og går mot konjunkturen. Handles i hele enheter, og står stille i helgen.
+  OLJ: { id: 'OLJ', navn: 'Nordsjøolje', klasse: 'ravare', enhet: 'fat', risiko: 'middels', startkurs: 820, drift: 0, volatilitet: 0.08, reversjon: 0.3, utbytte: 0, dybde: 3e9, hopp: 0 },
+  LAK: { id: 'LAK', navn: 'Oppdrettslaks', klasse: 'ravare', enhet: 'kg', risiko: 'middels', startkurs: 95, drift: 0, volatilitet: 0.09, reversjon: 0.35, utbytte: 0, dybde: 1.5e9, hopp: 0 },
+  GLD: { id: 'GLD', navn: 'Gull', klasse: 'ravare', enhet: 'gram', risiko: 'lav', startkurs: 720, drift: 0.015, volatilitet: 0.05, reversjon: 0.4, utbytte: 0, dybde: 5e9, hopp: 0, motKonjunktur: 1 },
 }
 
 /**
@@ -70,10 +76,17 @@ export const PAPIRER: Record<PapirId, Papir> = {
  * hvor mange fyllsaker den trekker avhenger av det — så en gammel lagring går
  * ikke tikk for tikk som den ville gjort uten dem, men like forutsigbart.)
  */
-export const NYE_PAPIRER: PapirId[] = ['NRB', 'KRV', 'FJF', 'ROM', 'STK', 'ELG', 'BRN', 'SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE', 'NLH']
+export const NYE_PAPIRER: PapirId[] = ['NRB', 'KRV', 'FJF', 'ROM', 'STK', 'ELG', 'BRN', 'SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE', 'NLH', 'OLJ', 'LAK', 'GLD']
+
+/** Det samme som en mengde: slås opp for hvert papir i hvert markedstikk (Pakke 124: 19 nye av 33). */
+const NYE: ReadonlySet<PapirId> = new Set(NYE_PAPIRER)
 
 export const AKSJER = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'aksje')
 export const KRYPTO = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'krypto')
+export const RAVARER = (Object.keys(PAPIRER) as PapirId[]).filter((id) => PAPIRER[id].klasse === 'ravare')
+
+/** Aksjer og råvarer handles bare på hverdager; krypto alltid (Pakke 124). */
+export const stengtIHelgen = (p: Papir) => p.klasse !== 'krypto'
 
 /** Hvor mye stemningen (−1 til 1) drar kryptoens drift, per time. */
 const STEMNINGSKRAFT = 0.3
@@ -130,10 +143,14 @@ function hashgrunnlag(nyeFrø: number, id: PapirId, tikk: number): number {
  * avviket svinger og trekkes tilbake, og en sjelden gang et hopp. Trekkene
  * fra kilden kommer i samme rekkefølge som alltid, så terningen går likt.
  */
-function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde, konjunktur = 0): void {
+function papirsteg(p: Papir, k: Kurs, stemning: number, kilde: Kilde, konjunktur = 0, trend = 0): void {
   const drag = p.klasse === 'krypto' ? stemning * (p.stemning ?? 1) : 0
   // Konjunkturen (Pakke 49) gir aksjene ekstra drift: opp i høykonjunktur, ned i lav. Null i normale tider.
-  k.fundament *= Math.exp((p.drift + STEMNINGSKRAFT * drag + (p.klasse === 'aksje' ? konjunktur : 0)) * DT)
+  // Pakke 124: en råvare får ukas trend på avviket (en prisstøt som trekkes tilbake), og gullet
+  // konjunkturdriften med motsatt fortegn. `konjunktur` er da den rene konjunkturen, `trend` trenden.
+  const ekstra = p.klasse === 'aksje' ? konjunktur + trend : p.klasse === 'ravare' ? -(p.motKonjunktur ?? 0) * konjunktur : 0
+  k.fundament *= Math.exp((p.drift + STEMNINGSKRAFT * drag + ekstra) * DT)
+  if (p.klasse === 'ravare' && trend) k.avvik += trend * DT
   // En selskapsnyhet prises inn litt for hvert tikk, til den er ferdig.
   if (k.nyhet) {
     const steg = k.nyhet.igjen / k.nyhet.tikk
@@ -166,10 +183,10 @@ function papirtikk(m: Marked, t: Terning, helg = false, konjunktur = 0, perPapir
     // Et nytt papir som ikke er børsnotert ennå (mens et nytt marked bygges).
     if (!k) continue
     // Stengt børs: kursen står, men historikken får fortsatt punkter, så grafen viser helgen som flat.
-    if (!(helg && p.klasse === 'aksje')) {
-      const kilde = NYE_PAPIRER.includes(id) ? new Hashkilde(hashgrunnlag(m.nyeFrø ?? 0, id, m.tikk)) : t
-      // Ukas bransjetrend (Pakke 53) legges på konjunkturen for selskapene i bransjen.
-      papirsteg(p, k, m.stemning, kilde, konjunktur + (perPapir?.[id] ?? 0))
+    if (!(helg && stengtIHelgen(p))) {
+      const kilde = NYE.has(id) ? new Hashkilde(hashgrunnlag(m.nyeFrø ?? 0, id, m.tikk)) : t
+      // Ukas bransjetrend (Pakke 53) legges på konjunkturen for selskapene i bransjen (og på råvarens avvik).
+      papirsteg(p, k, m.stemning, kilde, konjunktur, perPapir?.[id] ?? 0)
     }
     if (m.tikk % HISTORIKK_TIKK === 0) k.historikk = medPunkt(k.historikk, k.kurs, MAKS_KURSHISTORIKK)
   }
@@ -324,9 +341,9 @@ export function flyttKurs(m: Marked, id: PapirId, antall: number): void {
   k.kurs = kursFra(k.fundament, k.avvik + k.trykk)
 }
 
-/** Aksjer handles i hele stykk; krypto i brøkdeler ned til 1/10 000. */
+/** Aksjer og råvarer handles i hele stykk; krypto i brøkdeler ned til 1/10 000. */
 export function rundAntall(id: PapirId, antall: number): number {
   // En liten margin før avrundingen: 0,57 · 10 000 er 5 699,999… i flyttall, og ble 0,5699 (Pakke 58).
   const ned = (x: number) => Math.floor(x + Math.abs(x) * 1e-12 + 1e-9)
-  return PAPIRER[id].klasse === 'aksje' ? ned(antall) : ned(antall * 10_000) / 10_000
+  return PAPIRER[id].klasse === 'krypto' ? ned(antall * 10_000) / 10_000 : ned(antall)
 }

@@ -345,6 +345,13 @@ export const MIGRERINGER: Record<number, (s: Raatilstand) => Raatilstand> = {
     leggTilNyePapirer(marked, s.frø as number)
     return { ...s, marked }
   },
+  /* 27 → 28: råvarene på børsen (Pakke 124) — olje, laks og gull, som papirene i versjon 26 og 27:
+     to timers historikk fra en hash, terningen og de gamle kursene står. */
+  27: (s) => {
+    const marked = structuredClone(s.marked) as Spilltilstand['marked']
+    leggTilNyePapirer(marked, s.frø as number)
+    return { ...s, marked }
+  },
 }
 
 export type MigreringsResultat =

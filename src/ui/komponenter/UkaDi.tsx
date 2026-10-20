@@ -7,6 +7,7 @@ const KLASSENAVN: Record<Aktivaklasse, string> = {
   aksje: 'Aksjer',
   krypto: 'Krypto',
   fond: 'Fond',
+  ravare: 'Råvarer',
   obligasjon: 'Obligasjoner',
   eiendom: 'Eiendom og jord',
   sparing: 'Sparekontoen',

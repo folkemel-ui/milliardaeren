@@ -9,10 +9,12 @@ import { borsenStengt, kjopPapir, nyOrdre, selgPapir, slettOrdre } from '../../.
 import { PapirBransje } from '../../komponenter/Bransje'
 import { ORDRETYPER } from '../../../engine/ordre'
 import { erHelg } from '../../../engine/kalender'
-import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, maksPerOrdre, MARKED_TIKK_SEK, PAPIRER, rundAntall } from '../../../engine/marked'
-import type { Ordretype, PapirId, Spilltilstand } from '../../../engine/types'
+import { AKSJER, HISTORIKK_TIKK, handelskurs, KRYPTO, kurstrykk, KURTASJE, maksPerOrdre, MARKED_TIKK_SEK, PAPIRER, RAVARER, rundAntall } from '../../../engine/marked'
+import { RAVARE_FOR, ravarenivaa } from '../../../engine/ravarer'
+import { BEDRIFTSTYPER } from '../../../engine/innhold'
+import type { BedriftstypeId, Ordretype, PapirId, Spilltilstand } from '../../../engine/types'
 import { utfor } from '../../../state/lager'
-import { antall as fmtAntall, endring, kortKroner, kroner, kurs as fmtKurs, varighet } from '../../format'
+import { antall as fmtAntall, endring, kortKroner, kroner, kurs as fmtKurs, tall, varighet } from '../../format'
 import { Minigraf } from '../../komponenter/Linjegraf'
 import { Fondkort, Kursgraf, Nokkeltall, utbyttetekst } from '../../komponenter/Marked'
 import { fondKostpris, fondverdi } from '../../../engine/fond'
@@ -36,7 +38,14 @@ function endringTo(s: Spilltilstand, id: PapirId): number {
 
 type Klasse = Borsdel
 
-const FLISNAVN: Record<Klasse, string> = { aksje: 'Aksjer', krypto: 'Krypto', fond: 'Fond' }
+const FLISNAVN: Record<Klasse, string> = { aksje: 'Aksjer', krypto: 'Krypto', fond: 'Fond', ravare: 'Råvarer' }
+const PAPIRER_I: Record<'aksje' | 'krypto' | 'ravare', PapirId[]> = { aksje: AKSJER, krypto: KRYPTO, ravare: RAVARER }
+/** Ord for klassen i lista: flertall, «alle …», og forklaringen. */
+const ORD = {
+  aksje: { alle: 'Alle aksjer', andre: 'Andre aksjer', eier: 'alle aksjene', tema: 'aksjer', enhet: 'aksjer' },
+  krypto: { alle: 'Alle mynter', andre: 'Andre mynter', eier: 'alle myntene', tema: 'krypto', enhet: 'stk' },
+  ravare: { alle: 'Alle råvarer', andre: 'Andre råvarer', eier: 'alle råvarene', tema: 'ravarer', enhet: '' },
+} as const
 
 /**
  * Børsfanen: et lite dashbord med aksjene og kryptoen dine — verdien, hva du
@@ -48,11 +57,11 @@ export function Bors({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => voi
   const bytt = borsdel.sett
   return (
     <>
-      <div className="dashbord" role="tablist" aria-label="Aksjer, krypto eller fond">
-        {(['aksje', 'krypto', 'fond'] as Klasse[]).map((k) => {
+      <div className="dashbord fire" role="tablist" aria-label="Aksjer, krypto, fond eller råvarer">
+        {(['aksje', 'krypto', 'fond', 'ravare'] as Klasse[]).map((k) => {
           // Fondene (Pakke 65) har egen verdi og kostpris; aksjer og krypto regnes per papir.
           const verdi = k === 'fond' ? fondverdi(s) : papirverdi(s, k)
-          const kost = k === 'fond' ? fondKostpris(s) : (k === 'aksje' ? AKSJER : KRYPTO).reduce((sum, id) => sum + (s.beholdning[id]?.kostpris ?? 0), 0)
+          const kost = k === 'fond' ? fondKostpris(s) : PAPIRER_I[k].reduce((sum, id) => sum + (s.beholdning[id]?.kostpris ?? 0), 0)
           return (
             <button key={k} role="tab" aria-selected={klasse === k} className={klasse === k ? 'kort flis aktiv' : 'kort flis'} onClick={() => bytt(k)}>
               <span className="etikett">{FLISNAVN[k]}</span>
@@ -87,14 +96,16 @@ export function Bors({ s, velg }: { s: Spilltilstand; velg: (id: PapirId) => voi
   )
 }
 
-export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | 'krypto'; velg: (id: PapirId) => void }) {
-  const ider = klasse === 'aksje' ? AKSJER : KRYPTO
+export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aksje' | 'krypto' | 'ravare'; velg: (id: PapirId) => void }) {
+  const ider = PAPIRER_I[klasse]
+  const ord = ORD[klasse]
   const eide = ider.filter((id) => s.beholdning[id])
   const andre = ider.filter((id) => !s.beholdning[id])
 
   return (
     <>
-      {klasse === 'aksje' && erHelg(s.sek) && <p className="kort stengt">Børsen er stengt i helgen. Kursene står stille til mandag.</p>}
+      {klasse !== 'krypto' && erHelg(s.sek) && <p className="kort stengt">Børsen er stengt i helgen. Kursene står stille til mandag.</p>}
+      {klasse === 'ravare' && <Ravarenivaa s={s} />}
 
       {eide.length > 0 && (
         <ul className="kortliste papirliste">
@@ -108,7 +119,7 @@ export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aks
                   <span className="papirrad-navn">
                     <strong>{PAPIRER[id].navn}</strong>
                     <span className="dempet liten">
-                      {id} · {fmtAntall(b.antall)} {klasse === 'aksje' ? 'aksjer' : 'stk'}
+                      {id} · {fmtAntall(b.antall)} {PAPIRER[id].enhet ?? ord.enhet}
                     </span>
                   </span>
                   <Minigraf verdier={s.marked.kurser[id].historikk} />
@@ -125,10 +136,9 @@ export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aks
 
       {/* Pakke 84: det du eier, står over; her bare resten, så hver står én gang. */}
       <h2 className="seksjon-tittel">
-        {eide.length === 0 ? (klasse === 'aksje' ? 'Alle aksjer' : 'Alle mynter') : klasse === 'aksje' ? 'Andre aksjer' : 'Andre mynter'}{' '}
-        <Forklaring tema={klasse === 'aksje' ? 'aksjer' : 'krypto'} />
+        {eide.length === 0 ? ord.alle : ord.andre} <Forklaring tema={ord.tema} />
       </h2>
-      {andre.length === 0 && <p className="dempet liten">Du eier {klasse === 'aksje' ? 'alle aksjene' : 'alle myntene'} på børsen.</p>}
+      {andre.length === 0 && <p className="dempet liten">Du eier {ord.eier} på børsen.</p>}
       <ul className="kortliste papirliste">
         {andre.map((id) => {
           const p = PAPIRER[id]
@@ -140,7 +150,7 @@ export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aks
                 <span className="papirrad-navn">
                   <strong>{p.navn}</strong>
                   <span className="dempet liten">
-                    {id} · {klasse !== 'aksje' ? 'Krypto' : utbyttetekst(s, id) ? `${RISIKO_KORT[p.risiko]} · ${utbyttetekst(s, id)}` : RISIKO_TEKST[p.risiko]}
+                    {id} · {klasse === 'ravare' ? `Per ${p.enhet}` : klasse !== 'aksje' ? 'Krypto' : utbyttetekst(s, id) ? `${RISIKO_KORT[p.risiko]} · ${utbyttetekst(s, id)}` : RISIKO_TEKST[p.risiko]}
                   </span>
                 </span>
                 <Minigraf verdier={s.marked.kurser[id].historikk} />
@@ -154,6 +164,38 @@ export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aks
         })}
       </ul>
     </>
+  )
+}
+
+/** «Olje ×1,08 · Laks ×0,93» over råvarelista: der prisene står mot sitt vanlige nivå, og hva det betyr (Pakke 124). */
+function Ravarenivaa({ s }: { s: Spilltilstand }) {
+  return (
+    <p className="kort liten ravarenivaa">
+      {(['OLJ', 'LAK'] as const).map((id, i) => (
+        <span key={id}>
+          {i > 0 && ' · '}
+          {PAPIRER[id].navn} <strong>×{tall(ravarenivaa(s, id), 2)}</strong>
+        </span>
+      ))}
+      <br />
+      <span className="dempet">Mot vanlig nivå. Oljeselskapet og fiskeoppdrettet tjener i takt med prisen. Gullet går mot aksjene: det stiger i lavkonjunktur.</span>
+    </p>
+  )
+}
+
+/** På råvarens side: hvilken bransje som følger den, og hva det gir nå. */
+function Ravarebransje({ s, id }: { s: Spilltilstand; id: PapirId }) {
+  const type = (Object.keys(RAVARE_FOR) as BedriftstypeId[]).find((t) => RAVARE_FOR[t] === id)
+  if (!type) {
+    return <p className="kort liten dempet">Gullet går mot konjunkturen: når aksjene faller i en lavkonjunktur, stiger det — et sted å stå trygt.</p>
+  }
+  const eier = s.bedrifter.some((b) => b.type === type)
+  const f = ravarenivaa(s, id)
+  return (
+    <p className="kort liten">
+      {BEDRIFTSTYPER[type].navn} følger prisen: inntekten ganges med <strong>×{tall(f, 2)}</strong> nå, der prisen står mot sitt vanlige nivå.{' '}
+      <span className="dempet">{eier ? 'Ditt eget kjøp løfter ikke inntekten — den følger markedets pris uten ditt kurstrykk.' : 'Du eier ingen ennå.'}</span>
+    </p>
   )
 }
 
@@ -187,7 +229,7 @@ export function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId;
   return (
     <section className="skjerm detalj" ref={voks}>
       <button className="tilbake" onClick={tilbake}>
-        ‹ {p.klasse === 'aksje' ? 'Aksjer' : 'Krypto'}
+        ‹ {p.klasse === 'aksje' ? 'Aksjer' : p.klasse === 'ravare' ? 'Råvarer' : 'Krypto'}
       </button>
       <div className="kort">
         <div className="detalj-topp papir-topp">
@@ -208,6 +250,7 @@ export function Papirdetalj({ s, id, tilbake }: { s: Spilltilstand; id: PapirId;
       </div>
       <Nokkeltall s={s} id={id} />
       <PapirBransje s={s} id={id} />
+      {p.klasse === 'ravare' && <Ravarebransje s={s} id={id} />}
 
       {eier && (
         <dl className="kort statistikk">

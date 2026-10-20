@@ -19,6 +19,7 @@ import { GRADER, GRADLISTE, kanVelgeRetning, retningNivaa, RETNINGER, RETNINGSLI
 import { Bekreftknapp } from './Bekreftknapp'
 import { dagsbilde, grunner } from '../../engine/verden'
 import { nyhetsfaktor } from '../../engine/bransjer'
+import { ravarefaktor } from '../../engine/ravarer'
 import { kjop, type Kjopsmengde } from '../kjopsmengde'
 import {
   ANSATTE_PER_NIVAA,
@@ -176,12 +177,16 @@ export function Tilbakelinje({ s, b, mengde }: { s: Spilltilstand; b: Bedrift; m
 export function IDag({ s, b }: { s: Spilltilstand; b: Bedrift }) {
   const d = dagsbilde(s)
   const nyhet = nyhetsfaktor(s, b.type)
-  const f = d.faktor[b.type] * nyhet
+  // Pakke 124: oljeselskapet og fiskeoppdrettet følger råvareprisen.
+  const ravare = ravarefaktor(s, b.type)
+  const kalender = d.faktor[b.type] * nyhet
+  // Premium har ingen dårlige dager (Pakke 83): dagen kan bare løfte den. Råvareprisen tar den likevel (Pakke 124).
+  const f = (b.retning === 'premium' ? Math.max(1, kalender) : kalender) * ravare
   if (Math.abs(f - 1) < 0.02) return null
-  // Premium har ingen dårlige dager (Pakke 83): dagen kan bare løfte den.
-  if (f < 1 && b.retning === 'premium') return <span className="i-dag liten dempet">Premium · ingen dårlig dag</span>
+  if (kalender < 1 && b.retning === 'premium' && Math.abs(ravare - 1) < 0.02) return <span className="i-dag liten dempet">Premium · ingen dårlig dag</span>
   const hvorfor = grunner(d, b.type, s.sek)
   if (nyhet !== 1) hvorfor.unshift(nyhet > 1 ? 'God nyhet' : 'Dårlig nyhet')
+  if (Math.abs(ravare - 1) >= 0.02) hvorfor.unshift(`${b.type === 'oljeselskap' ? 'Oljeprisen' : 'Lakseprisen'} ×${tall(ravare, 2)}`)
   return (
     <span className={`i-dag liten ${f > 1 ? 'pluss' : 'minus'}`}>
       {f > 1 ? '+' : '−'}

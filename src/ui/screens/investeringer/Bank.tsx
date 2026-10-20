@@ -4,8 +4,9 @@
  */
 
 import { Bekreftknapp } from '../../komponenter/Bekreftknapp'
-import { belaaningsgrad, maksNyttLaan, laanetak, rentePerSek, rentesats, fastrente, flytendeRente, sparerente, sparerentePerSek } from '../../../engine/formler'
-import { laan, nedbetal, settInn, taUt, bindRente } from '../../../engine/handlinger'
+import { belaaningsgrad, maksNyttLaan, laanetak, rentePerSek, rentesats, fastrente, flytendeRente, sparerente, sparerentePerSek, inntektPerSek } from '../../../engine/formler'
+import { laan, nedbetal, settInn, taUt, bindRente, settSparandel, SPARANDELER } from '../../../engine/handlinger'
+import { leiePerSek } from '../../../engine/eiendom'
 import { BINDING_DAGER, FAST_PAASLAG, NORMAL_STYRINGSRENTE } from '../../../engine/verden'
 import { Konjunkturkort } from '../../komponenter/Dagen'
 import { Obligasjoner } from '../../komponenter/Obligasjoner'
@@ -38,6 +39,18 @@ function Sparekonto({ s }: { s: Spilltilstand }) {
       <p className="dempet liten">
         Risikofritt: renten legges til hvert sekund, også mens du er borte. Opptjent så langt: {kroner(s.totaltSparerente)}.
       </p>
+      {/* Pakke 124: en andel av inntekten og leia rett på kontoen, hvert sekund. */}
+      <div className="spare-rad">
+        <span className="etikett">Spar av inntekten</span>
+        <div className="andelsknapper" role="radiogroup" aria-label="Spar av inntekten">
+          {SPARANDELER.map((a) => (
+            <button key={a} role="radio" aria-checked={(s.sparandel ?? 0) === a} className={(s.sparandel ?? 0) === a ? 'knapp knapp-liten aktiv' : 'knapp knapp-liten'} onClick={() => utfor(settSparandel(s, a))}>
+              {a ? `${tall(a * 100)} %` : 'Av'}
+            </button>
+          ))}
+        </div>
+      </div>
+      {(s.sparandel ?? 0) > 0 && <p className="dempet liten">{tall((s.sparandel ?? 0) * 100)} % av det bedriftene og leia gir, går rett på sparekontoen: ≈ {perSek((inntektPerSek(s) + leiePerSek(s)) * (s.sparandel ?? 0))}.</p>}
       <div className="spare-rad">
         <span className="etikett">Sett inn</span>
         <div className="andelsknapper">

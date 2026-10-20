@@ -5,19 +5,19 @@
  */
 
 import { maksKjop } from '../formler'
-import { utforFondssalg, utforKjop, utforSalg } from '../handel'
-import { FOND, FOND_GEBYR, fondskurs, fondStengt } from '../fond'
+import { utforFondskjop, utforFondssalg, utforKjop, utforSalg } from '../handel'
+import { FOND, fondStengt } from '../fond'
 import { erHelg } from '../kalender'
-import { flyt } from '../portefolje'
-import { maksPerOrdre, PAPIRER, rundAntall } from '../marked'
-import type { FondId, Ordretype, PapirId, Spilltilstand } from '../types'
+import { maksPerOrdre, PAPIRER, rundAntall, stengtIHelgen } from '../marked'
+import type { FondId, Forvalterprofil, Ordretype, PapirId, Spilltilstand } from '../types'
+import { forvaltetVerdi, PROFILER, rebalanser, trekkForvaltergebyr } from '../forvalter'
 import { tall } from '../tall'
 import { KONTRAER_ANDEL } from '../prestasjoner'
 import { feil, ikkeTall, UGYLDIG, type Utfall } from './felles'
 
-/** Aksjer kan ikke handles i helgen; krypto kan. */
+/** Aksjer og råvarer (Pakke 124) kan ikke handles i helgen; krypto kan. */
 export function borsenStengt(s: Spilltilstand, id: PapirId): boolean {
-  return PAPIRER[id].klasse === 'aksje' && erHelg(s.sek)
+  return stengtIHelgen(PAPIRER[id]) && erHelg(s.sek)
 }
 
 const STENGT = 'Børsen er stengt i helgen. Den åpner mandag morgen.'
@@ -70,11 +70,7 @@ export function kjopFond(s: Spilltilstand, id: FondId, belop: number): Utfall {
   const b = Math.floor(Math.min(belop, s.kontanter))
   if (b <= 0) return feil('Velg hvor mye du vil kjøpe for.')
   const n = structuredClone(s)
-  const andeler = b / (1 + FOND_GEBYR) / fondskurs(n, id)
-  const f = n.fond[id] ?? { antall: 0, kostpris: 0 }
-  n.fond[id] = { antall: f.antall + andeler, kostpris: f.kostpris + b }
-  n.kontanter -= b
-  flyt(n, 'fond', b)
+  utforFondskjop(n, id, b)
   n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, b)
   return { ok: true, tilstand: n }
 }
@@ -88,6 +84,52 @@ export function selgFond(s: Spilltilstand, id: FondId, belop = Infinity): Utfall
   n.rekorder.storsteHandel = Math.max(n.rekorder.storsteHandel, inntekt)
   return { ok: true, tilstand: n }
 }
+
+/** Starter formuesforvalteren, eller bytter profil (Pakke 124). Første ukes gebyr tas med en gang. */
+export function startForvalter(s: Spilltilstand, profil: Forvalterprofil): Utfall {
+  if (!PROFILER[profil]) return feil('Ukjent profil.')
+  if (erHelg(s.sek)) return feil(FORVALTER_STENGT)
+  if (s.forvalter?.profil === profil) return feil(`Forvalteren er alt ${PROFILER[profil].navn.toLowerCase()}.`)
+  const n = structuredClone(s)
+  if (n.forvalter) n.forvalter.profil = profil
+  else {
+    n.forvalter = { profil, fra: n.sek, gebyrBetalt: 0 }
+    trekkForvaltergebyr(n)
+  }
+  rebalanser(n)
+  return { ok: true, tilstand: n }
+}
+
+/** Sier opp forvalteren. Det den har kjøpt, blir stående som ditt. */
+export function stoppForvalter(s: Spilltilstand): Utfall {
+  if (!s.forvalter) return feil('Du har ingen forvalter.')
+  const n = structuredClone(s)
+  delete n.forvalter
+  return { ok: true, tilstand: n }
+}
+
+/** Gir forvalteren `belop` av kontantene (positivt) eller tar ut (negativt), og blandingen holdes. */
+export function forvalterBelop(s: Spilltilstand, belop: number): Utfall {
+  if (!s.forvalter) return feil('Du har ingen forvalter.')
+  if (ikkeTall(belop) || belop === 0) return feil(UGYLDIG)
+  if (erHelg(s.sek)) return feil(FORVALTER_STENGT)
+  if (belop > s.kontanter) return feil('Du har ikke så mye i kontanter.')
+  const n = structuredClone(s)
+  rebalanser(n, belop < 0 ? -Math.min(-belop, forvaltetVerdi(n)) : belop)
+  return { ok: true, tilstand: n }
+}
+
+const FORVALTER_STENGT = 'Forvalteren handler når børsen er åpen, mandag til fredag.'
+
+/** Hvor mye av inntekten og leia som går rett på sparekontoen hvert sekund (Pakke 124). */
+export function settSparandel(s: Spilltilstand, andel: number): Utfall {
+  if (!SPARANDELER.includes(andel)) return feil('Velg 0, 10, 25 eller 50 %.')
+  const n = structuredClone(s)
+  if (andel) n.sparandel = andel
+  else delete n.sparandel
+  return { ok: true, tilstand: n }
+}
+export const SPARANDELER = [0, 0.1, 0.25, 0.5]
 
 export const MAKS_ORDRE = 20
 

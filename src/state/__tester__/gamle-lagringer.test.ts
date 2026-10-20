@@ -114,7 +114,7 @@ describe('lagringer fra alle gamle versjoner', () => {
         const ledere = l.versjon < 19 ? g.bedrifter.filter((b) => b.leder).reduce((sum, b) => sum + lederpris(b.type), 0) : 0
         // Lagringene fra versjon 26 og senere er laget etter Pakke 106, så jorda står allerede riktig der.
         const jorda = l.versjon <= 25 ? pakke106(s) : 0
-        expect(Math.abs(nettoformue(s) - (l.formue - ledere + jorda + pakke121(s)))).toBeLessThan(2)
+        expect(Math.abs(nettoformue(s) - (l.formue - ledere + jorda + (l.versjon <= 26 ? pakke121(s) : 0)))).toBeLessThan(2)
       })
 
       it('kan spilles videre en måned, også med boten', () => {

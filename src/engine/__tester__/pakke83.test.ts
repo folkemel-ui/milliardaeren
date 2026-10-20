@@ -11,6 +11,7 @@ import { byverdi } from '../eiendom'
 import { fase, type Fase } from '../verden'
 import { DAG_SEK } from '../kalender'
 import { DIN_DEL_AV_RUNDEN, granskingspris, INNTRYKK_STOY, ledigIRunde, RUNDEANDEL, sanntInntrykk, STARTUP_IDEER } from '../startups'
+import { RAVARESNITT } from '../ravarer'
 import { bedrift } from './hjelp'
 import type { BedriftstypeId, ForvalterId, Spilltilstand, Startup } from '../types'
 
@@ -33,6 +34,9 @@ describe('premium som betaler', () => {
   /** Snittet over to år av det retningen gir, med kalenderen og nyhetene. */
   function snitt(type: BedriftstypeId, retning: 'premium' | 'volum'): number {
     const s = nyttSpill(5)
+    // Pakke 124: olje og laks på sitt vanlige nivå, så snittet er kalenderen og nyhetene, som før.
+    s.marked.kurser.OLJ.avvik = Math.log(RAVARESNITT.OLJ!)
+    s.marked.kurser.LAK.avvik = Math.log(RAVARESNITT.LAK!)
     const b = bedrift(type, { retning })
     let sum = 0
     for (let d = 0; d < 730; d++) {

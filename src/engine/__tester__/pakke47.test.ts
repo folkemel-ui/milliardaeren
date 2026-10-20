@@ -84,7 +84,7 @@ describe('maks kjøp med svært mye penger', () => {
         expect(kost(maks), id).toBeLessThanOrEqual(kontanter)
         // Og det bruker så godt som alle pengene: høyst én enhet (eller 0,1 promille) igjen.
         // (Med billioner er én 1/10 000 mynt mindre enn tallets nøyaktighet, så «én til» kan ikke sjekkes.)
-        const enhet = PAPIRER[id].klasse === 'aksje' ? 1 : 0.0001
+        const enhet = PAPIRER[id].klasse === 'krypto' ? 0.0001 : 1
         const rest = kontanter - kost(maks)
         // Fra Pakke 56 kan én ordre høyst doble kursen — da er det taket, ikke pengene, som stopper.
         const vedTaket = maks === maksPerOrdre(s, id, 'kjop')

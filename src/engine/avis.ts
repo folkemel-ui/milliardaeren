@@ -16,6 +16,7 @@ import { skattVedDagsskifte } from './skatt'
 import { startupsVedDagsskifte } from './startups'
 import { klubbVedDagsskifte } from './klubb'
 import { jordVedDagsskifte, odelVedDagsskifte, skogVedDagsskifte } from './jord'
+import { forvalterVedDagsskifte } from './forvalter'
 import { dyrVedDagsskifte } from './dyr'
 import { landemerkerVedDagsskifte } from './landemerker'
 import { kunstVedDagsskifte } from './kunst'
@@ -339,6 +340,8 @@ export function gisUtAvis(s: Spilltilstand, t: Terning): void {
   const racingsaker = racingVedDagsskifte(s, tittel(s))
   // Pakke 118: dagens oppskyting fra romfartsfabrikken, og morgendagens kontrakter.
   const romfartsaker = romfartVedDagsskifte(s, tittel(s))
+  // Pakke 124: formuesforvalteren tar ukas gebyr og bringer blandingen tilbake, hver mandag.
+  forvalterVedDagsskifte(s)
   const andre = [
     // Pakke 94: dyrene og tilskuddet hver dag, før mandagens høst.
     ...dyrVedDagsskifte(s),

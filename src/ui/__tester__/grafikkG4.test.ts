@@ -36,7 +36,7 @@ const portrett = (id: RivalId, størrelse: number, form: 'rund' | 'omslag' = 'ru
  * Aksjene fra Pakke 104 og 117 (spillsporet) venter på ordmerkene sine (Grafikk): til da tegnes merket
  * alene. Fjern dem herfra når ordmerkene er laget med scripts/lag-ordmerker.mjs.
  */
-const VENTER_PAA_ORDMERKE: PapirId[] = ['SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE', 'NLH']
+const VENTER_PAA_ORDMERKE: PapirId[] = ['SOL', 'NPL', 'GMN', 'KBN', 'BRD', 'FJH', 'TOP', 'NBE', 'NLH', 'OLJ', 'LAK', 'GLD']
 const harOrdmerke = (id: PapirId) => !VENTER_PAA_ORDMERKE.includes(id)
 
 describe('selskapslogoene (G4)', () => {

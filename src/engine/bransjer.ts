@@ -15,6 +15,7 @@
 import { dagnummer } from './kalender'
 import { PAPIRER } from './marked'
 import { ukensTrend } from './verden'
+import { RAVARE_FOR } from './ravarer'
 import type { BedriftstypeId, PapirId, Spilltilstand } from './types'
 
 /** Ekstra drift per time for aksjen til ukas hete (+) og kalde (−) bransje. */
@@ -37,8 +38,19 @@ export function trenddrift(s: Spilltilstand): Partial<Record<PapirId, number>> {
   const kald = t.kald && AKSJE_FOR[t.kald]
   if (het) ut[het] = TRENDDRIFT
   if (kald) ut[kald] = -TRENDDRIFT
+  // Pakke 124: en het eller kald olje- eller fiskeuke drar råvareprisen i stedet for inntekten direkte.
+  const rh = t.het && RAVARE_FOR[t.het]
+  const rk = t.kald && RAVARE_FOR[t.kald]
+  if (rh) ut[rh] = RAVARE_TRENDDRIFT
+  if (rk) ut[rk] = -RAVARE_TRENDDRIFT
   return ut
 }
+
+/**
+ * Hvor mye ukas trend drar en råvares avvik per time (Pakke 124): en uke er 0,58 time, så
+ * en het uke løfter prisen ~+20 % mot slutten av uka — det samme som +20 % for bransjen før.
+ */
+export const RAVARE_TRENDDRIFT = 0.4
 
 /** Hvor mye nyhetene i bransjen endrer inntekten i dag: produktet av dem som gjelder. 1 uten nyheter. */
 export function nyhetsfaktor(s: Spilltilstand, type: BedriftstypeId): number {

@@ -97,14 +97,28 @@ export type PapirId =
   | 'SOL' | 'NPL' | 'GMN' | 'KBN' | 'BRD' | 'FJH' | 'TOP' | 'NBE'
   // Børsnotert i Pakke 117, med brikkefabrikken.
   | 'NLH'
+  // Råvarene i Pakke 124: olje, laks og gull.
+  | 'OLJ' | 'LAK' | 'GLD'
 
 export type Risiko = 'lav' | 'middels' | 'høy'
+
+/** Formuesforvalterens profil (Pakke 124). */
+export type Forvalterprofil = 'forsiktig' | 'balansert' | 'offensiv'
+export interface Forvalter {
+  profil: Forvalterprofil
+  /** Sekundet forvalteren startet. */
+  fra: number
+  /** Alle gebyrene så langt. */
+  gebyrBetalt: number
+  /** Den siste mandagen: hva den solgte, kjøpte og tok i gebyr. */
+  siste?: { dag: number; solgt: number; kjopt: number; gebyr: number }
+}
 
 /** En aksje eller en kryptomynt. Rater er per time spilltid. */
 export interface Papir {
   id: PapirId
   navn: string
-  klasse: 'aksje' | 'krypto'
+  klasse: 'aksje' | 'krypto' | 'ravare'
   risiko: Risiko
   /** Bransjen selskapet hører til (Pakke 53): ukas trend flytter kursen, og nyhetene treffer bedriftene dine i bransjen. */
   bransje?: BedriftstypeId
@@ -123,6 +137,10 @@ export interface Papir {
   hopp: number
   /** Hvor mye kryptostemningen drar i kursen (1 om ikke satt). 0 for en stabil mynt. */
   stemning?: number
+  /** Pakke 124: gullet går mot konjunkturen — det stiger når aksjene faller. Ganges med konjunkturdriften. */
+  motKonjunktur?: number
+  /** Pakke 124: enheten en råvare handles i («fat», «kg», «gram»). */
+  enhet?: string
 }
 
 export interface Kurs {
@@ -598,7 +616,7 @@ export interface Dagsbilde {
   stemningssone?: number
 }
 
-export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'obligasjon' | 'eiendom' | 'sparing' | 'rival' | 'startup'
+export type Aktivaklasse = 'aksje' | 'krypto' | 'fond' | 'obligasjon' | 'eiendom' | 'sparing' | 'rival' | 'startup' | 'ravare'
 
 /** Rommene i hjemmene (Pakke 60). */
 export type RomId = 'kjokken' | 'stue' | 'vinkjeller' | 'peisestue' | 'badstue' | 'boblebad' | 'terrasse' | 'basseng' | 'gjestefloy'
@@ -771,6 +789,10 @@ export interface Spilltilstand {
   hovedkontor?: number
   /** Penger på sparekontoen. */
   sparing: number
+  /** Pakke 124: andelen av inntekten og leia som går rett på sparekontoen hvert sekund (0, 0,1, 0,25 eller 0,5). */
+  sparandel?: number
+  /** Pakke 124: formuesforvalteren, når du har en. */
+  forvalter?: Forvalter
   totaltSparerente: number
   /**
    * Kostprisen for sparekontoen (Pakke 58): det du har satt inn og ikke tatt

@@ -75,6 +75,28 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   leave it to the graphics track (`ORDMERKER` is partial since Pack 104). A version bump also needs
   `vN.json.gz` for the old version: add it to `NESTE_BUMP` in `scripts/lag-gamle-lagringer.mjs` with the
   last commit at that version and run `node scripts/lag-gamle-lagringer.mjs N` (about a minute).
+- **A new paper class (Pack 124, raw materials)**: everything in «A new asset class» above, plus `Papir.klasse` and the
+  `PapirId`s, `NYE_PAPIRER` (hash ticks, so `frø` and the golden master stay), no `bransje` (`AKSJE_FOR` keeps the last
+  paper per industry, so a raw material with one would have taken over NFS), `stengtIHelgen` (closed days; `borsenStengt`
+  and `ordre.ts` read it), `rundAntall`/`maksKjop` (fractions only for krypto), `Borsdel` and its saved list in `deler.ts`,
+  a logo per id with a unique colour, `VENTER_PAA_ORDMERKE` in `grafikkG4`, a `Tema` for the help, and the hand-written
+  class lists in old tests (`portefolje`, `migrering`, `pakke116`, `pakke65`, `pakke47`). An Explore agent mapped all of it in
+  five minutes; the list was right. Four tiles do not fit at 375 px («kr 1,09 mrd» was cut): `.dashbord.fire` is 2 × 2
+  under 640 px.
+- **Income that follows a price reads the deviation without your own pressure** (Pack 124). `ravarenivaa` is
+  `e^avvik / RAVARESNITT`, clamped 0.5–1.6, where `avvik` excludes `Kurs.trykk` — or buying oil would lift your own oil
+  company (the derived-price leak). It is applied in both income places (`dagensFaktor` and `simulering`, Pack 83) and
+  cached per `Kurs` like `byfaktor`. The weekly hot/cold for oil and fish now pushes the price's `avvik` (`TRENDFRI` in
+  `verden.ts`, `RAVARE_TRENDDRIFT` in `trenddrift`) instead of the income, so «Oljeprisen stiger» stays true. Measure the
+  swing on the real market with trends (an esbuild bundle of `nyttSpill` + `markedstikk` + `trenddrift`): with jumps the
+  income swung ×0.62–1.50; without, ×0.79–1.27 — about the old ±20 %.
+  The price is multiplied **outside** premium's floor (`dagForBedrift`, Pack 83): inside it, a premium oil company
+  ignored every low price — a free hedge. `pakke83`'s premium-vs-volume test caught it, through a frozen market where
+  the salmon factor sat at ×0.81; the test now pins olje and laks at their usual level.
+- **A manager trades through the `utfor*` functions** (Pack 124, `forvalter.ts`): fees per week on the managed value
+  and at start (a start without a fee would be a free rebalance), `maksPerOrdre` per paper, the rest left in cash; the
+  fund and bond buys were moved into `utforFondskjop`/`utforObligasjonskjop` so the buttons and the manager share them.
+  The bot never uses it, and neither the manager nor the savings share moves the golden master.
 - **The borrowing limit and the margin call were one constant until Pack 81.** `MAKS_BELAANING`
   was both how far you can borrow and how far a margin call sells down; lowering it to 0.2 would
   have made every forced sale harsher. Now `MARGIN_MAAL` (0.5) is the sell-down target and the

@@ -212,6 +212,24 @@
   background: var(--klasse-obligasjon);
 }
 
+/* Pakke 124: fire fliser på børsen (aksjer, krypto, fond, råvarer): to og to på telefonen, der fire på rad
+   kuttet «kr 1,09 mrd» ved 375 px; alle fire på rad når det er plass. */
+.dashbord.fire {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .dashbord.fire {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Pakke 124: råvarene — lime, ulik alle de andre klassene på begge temaene. */
+.fordeling-del.ravare,
+.klasse-prikk.ravare {
+  background: var(--klasse-ravare);
+}
+
 .oversikt {
   display: flex;
   flex-direction: column;

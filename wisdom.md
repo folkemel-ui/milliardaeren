@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 123, 20 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 124, 20 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -179,7 +179,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117** — and in Packs 118–123 all but one: on the research
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117** — and in Packs 118–124 all but one: on the research
   tree Folke wrote their own «6 parts × 6 steps» instead of my 4 × 5. Build what was written; where it changes
   another answer (the chosen 1 → 16 game days now spans six steps), spread it the obvious way (1, 2, 3, 5, 9, 16)
   and say so in the report.
@@ -376,6 +376,10 @@ lives in one place only.
   UV_HANDLE_CLOSING)», exit 127 instead of 0). Set `process.exitCode` and leave the loop instead
   (`scripts/live.mjs`). And `gh` isn't installed: GitHub's open API (`api.github.com/repos/…/actions/runs`) works
   without logging in for a public repo, 60 calls an hour.
+- **The Write tool overwrites a file that exists, and only the reply says so** (Pack 124): a new card written to
+  `ui/komponenter/Forvalter.tsx` replaced the property managers' card from Pack 54 — the tell was «has been updated
+  successfully» instead of «File created». `git checkout -- <file>` brought it back. Glob the name before writing a new
+  file, and read that line of the reply.
 - **There is no Python on this machine** (`python` opens the Microsoft Store stub and does
   nothing). Write edit scripts in Node.
 

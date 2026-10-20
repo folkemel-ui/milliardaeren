@@ -26,6 +26,8 @@ import { nyhetsfaktor, trenddrift } from './bransjer'
 import { kupongPerSek } from './obligasjoner'
 import { betalCharter } from './charter'
 import { betalKarbon, betalKraft } from './jord'
+import { RAVARE_FOR, ravarenivaa } from './ravarer'
+import { flyt, settInnSparing } from './portefolje'
 import type { PapirId, Spilltilstand } from './types'
 
 /**
@@ -122,6 +124,13 @@ export function kopierSpill(s: Spilltilstand): Spilltilstand {
   return n
 }
 
+/** Flytter `belop` fra kontantene til sparekontoen, med kostprisen og dagens flyt (Pakke 124). Muterer. */
+function spar(s: Spilltilstand, belop: number): void {
+  s.kontanter -= belop
+  settInnSparing(s, belop)
+  flyt(s, 'sparing', belop)
+}
+
 /**
  * Ett sekund, på en tilstand simuleringen selv eier. `leieSek` er hvor mange
  * sekunder leie som betales nå (1 når du spiller); 0 betyr at leien, formuen og
@@ -138,11 +147,16 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
   // Filialene (Pakke 59) går med bedriften: står den stille mens du er borte, gjør de det også.
   // Synergiene (Pakke 117) ganges på som filialene: begge i paret må eies, ikke drives.
   const syn = synergifaktorer(s)
-  const perBedrift = s.bedrifter.map((b, i) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dagForBedrift(b, dag[b.type] * nyhetsfaktor(s, b.type)) * filialfaktor(s, b) * syn[i])))
+  // Pakke 124: oljeselskapet og fiskeoppdrettet følger råvareprisen — de to faktorene regnes én gang i sekundet.
+  const olje = ravarenivaa(s, RAVARE_FOR.oljeselskap!)
+  const laks = ravarenivaa(s, RAVARE_FOR.fiskeoppdrett!)
+  const perBedrift = s.bedrifter.map((b, i) => (borte && !b.leder ? 0 : bedriftInntektPerSek(b, dagForBedrift(b, dag[b.type] * nyhetsfaktor(s, b.type)) * (b.type === 'oljeselskap' ? olje : b.type === 'fiskeoppdrett' ? laks : 1) * filialfaktor(s, b) * syn[i])))
   let sum = 0
   for (let i = 0; i < perBedrift.length; i++) if (!(borte && !s.bedrifter[i].leder)) sum += perBedrift[i]
   const inntekt = sum * faktor
   s.kontanter += inntekt
+  // Pakke 124: en andel av inntekten rett på sparekontoen.
+  if (s.sparandel && inntekt > 0) spar(s, inntekt * s.sparandel)
   s.totaltTjent += inntekt
   // Regnskapet per bedrift. Summen over står for kontantene; dette er bare bokføring.
   const maalHistorikk = (s.sek + 1) % INNTEKT_HISTORIKK_SEK === 0
@@ -179,6 +193,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
     const leie = leiePerSek(s) * leieSek
     s.kontanter += leie
     s.totaltLeie += leie
+    if (s.sparandel && leie > 0) spar(s, leie * s.sparandel)
     // Yachtene og jetene som er leid ut (Pakke 89), betales som leia.
     betalCharter(s, leieSek)
     // Kraften fra jorda (Pakke 115) likeså.

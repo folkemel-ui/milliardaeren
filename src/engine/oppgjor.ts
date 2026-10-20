@@ -49,7 +49,7 @@ export function investeringsnavn(nøkkel: string): string {
 }
 
 /** Klassene ukeavisa viser handel for: alt unntatt sparekontoen. */
-const HANDELSKLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'fond', 'obligasjon', 'eiendom', 'rival', 'startup']
+const HANDELSKLASSER: Aktivaklasse[] = ['aksje', 'krypto', 'fond', 'ravare', 'obligasjon', 'eiendom', 'rival', 'startup']
 
 function kopiAvHandel(h: Handelstotal | undefined): Handelstotal {
   return { kjopt: { ...(h?.kjopt ?? {}) }, solgt: { ...(h?.solgt ?? {}) } }

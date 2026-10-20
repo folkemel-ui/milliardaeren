@@ -466,6 +466,12 @@ balance, the saves or the speed. Per-system details (the club, the farms, art �
   The exact path left little: ~9 % (406 → ~370 ms). Ticking rent, net worth or achievements
   less often would cut far more, but moves the golden master — Folke chose exact for now.
 
+- **Three new papers cost the heaviest second ~10 ms** (Pack 124). `fulltSpill` owns every paper, and every market tick
+  steps every paper: `marked` went 36 → 46 ms (budget 55), half of it a linear `NYE_PAPIRER.includes(id)` for 33 papers
+  per tick — a `Set` (`NYE`) took that back. `inntekt` 50–51 → 53–55 (budget 55) and `prestasjoner` 14 → 15 (budget 14)
+  moved with the bigger state too: taking the price factor out and the saving out each measured the same. Time old and
+  new interleaved in a worktree of `HEAD` (§4 in wisdom.md) before asking to raise a budget.
+
 ## 6. Testing the engine
 
 - **A price on an existing payout moves every old test that wrote the formula out** (Pack 93: the

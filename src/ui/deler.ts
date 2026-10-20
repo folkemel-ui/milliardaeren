@@ -106,14 +106,14 @@ export const EIENDOMSREKKEFOLGER: { id: Eiendomsrekkefolge; navn: string }[] = [
   { id: 'leie', navn: 'Leie' },
 ]
 
-export type Borsdel = 'aksje' | 'krypto' | 'fond'
+export type Borsdel = 'aksje' | 'krypto' | 'fond' | 'ravare'
 export type Kartdel = 'norge' | 'verden'
 
 // Nøklene fra før Pakke 61 beholdes, så valgene spillerne har gjort, står.
 export const profildel = lagDelvalg<Profildel>('milliardaer.profilfane', PROFILDELER.map((d) => d.id))
 export const investeringsdel = lagDelvalg<Investeringsdel>('milliardaer.investeringsdel', INVESTERINGSDELER.map((d) => d.id))
 export const luksusdel = lagDelvalg<Luksusdel>('milliardaer.luksusdel', LUKSUSDELER.map((d) => d.id))
-export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'krypto', 'fond'])
+export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'krypto', 'fond', 'ravare'])
 export const kartdel = lagDelvalg<Kartdel>('milliardaer.eiendomskart', ['norge', 'verden'])
 export const bedriftsrekkefolge = lagDelvalg<Bedriftsrekkefolge>('milliardaer.bedriftsrekkefolge', REKKEFOLGER.map((r) => r.id))
 export const eiendomsrekkefolge = lagDelvalg<Eiendomsrekkefolge>('milliardaer.eiendomsrekkefolge', EIENDOMSREKKEFOLGER.map((r) => r.id))
