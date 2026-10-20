@@ -13,8 +13,9 @@ export const BUDSJETT: Record<string, number> = {
   // og 103). Den har vokst med det som betales som leie: de sene eiendommene (Pakke 76), utleien av
   // yachtene og jetene (Pakke 89) og gårdene (Pakkene 92–94).
   leie: 30,
-  prestasjoner: 14,
-  inntekt: 55,
+  // Pakke 124: tre råvarer til i det tyngste spillet tok prestasjoner 14 → 15 og inntekt 50 → 53–55 (Folkes ja).
+  prestasjoner: 16,
+  inntekt: 60,
   // 45 → 55 etter Pakke 104: åtte nye aksjer gjorde markedet 27 → 39–42 ms.
   marked: 55,
   // 20 → 25 etter Pakke 107: målte 19–22 alene og 21–22 under en hel kjøring (to ganger 15. oktober),
