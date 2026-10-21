@@ -7,7 +7,7 @@
  * ganger tregere, så grensene der var gjetninger; her betyr de noe.
  *
  * En treg telefon regnes som fem ganger tregere enn en vanlig PC. Grensene:
- *  - et nytt spill, to timer borte: høyst 100 ms her, rundt et halvt sekund på telefonen;
+ *  - et nytt spill, to timer borte: høyst 120 ms her, rundt et halvt sekund på telefonen;
  *  - det tyngste en lagring kan bli (fulltSpill), to timer borte: høyst 400 ms
  *    her, rundt to sekunder på telefonen — bak lasteskjermen.
  *
@@ -100,14 +100,15 @@ async function maalBygget(): Promise<{ nytt: number; fullt: number; deler: Recor
 }
 
 describe('ytelse, målt på bygget motor', () => {
-  it('to timer borte: et nytt spill på høyst 100 ms, det tyngste på høyst 400 ms', { timeout: 120_000 }, async () => {
+  it('to timer borte: et nytt spill på høyst 120 ms, det tyngste på høyst 400 ms', { timeout: 120_000 }, async () => {
     const ms = await maalBygget()
     if (process.env.BENK) console.log(`to timer borte, bygget: nytt spill ${ms.nytt} ms, fullt spill ${ms.fullt} ms CPU; ett levende sekund ${ms.sekund} ms`, ms.deler)
     // På GitHub (CI) kjører testene på delte maskiner med ukjent fart før hver
     // publisering. Der får grensene dobbelt slakk, så en treg maskin ikke stopper
     // en publisering; telefonbudsjettet sjekkes her, der det ble målt.
     const slakk = process.env.CI ? 2 : 1
-    expect(ms.nytt).toBeLessThanOrEqual(100 * slakk)
+    // Pakke 125: et nytt spill har krøpet fra 66–90 til 90–98 ms over pakkene (råvarene, forvalteren); 120 på Folkes ja.
+    expect(ms.nytt).toBeLessThanOrEqual(120 * slakk)
     expect(ms.fullt).toBeLessThanOrEqual(400 * slakk)
     // Hvert system innenfor sitt budsjett, og ingen del uten budsjett.
     expect(Object.keys(ms.deler).sort()).toEqual(Object.keys(BUDSJETT).sort())

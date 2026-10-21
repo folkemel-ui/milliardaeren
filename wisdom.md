@@ -453,7 +453,8 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   `inntekt` 55 → 60 after Pack 124's raw materials. **Folke, 20 October 2026: «Nudging the budget is no problem. If
   needed you can just ask, and I'll most likely say yes.»** Still ask — one line with the before/after numbers and the
   cause — but expect a yes; don't spend an hour hunting the last millisecond first. A fresh game (100, measures 66–90)
-  is next in line.
+  was raised 100 → 120 ms after Pack 125 (it had crept from 66–90 to 90–98 ms over the packs, the same on both sides of the
+  pack).
 
 ## 5. Verifying well
 
