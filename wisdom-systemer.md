@@ -97,6 +97,17 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   and at start (a start without a fee would be a free rebalance), `maksPerOrdre` per paper, the rest left in cash; the
   fund and bond buys were moved into `utforFondskjop`/`utforObligasjonskjop` so the buttons and the manager share them.
   The bot never uses it, and neither the manager nor the savings share moves the golden master.
+- **The manager's steps were measured before they were priced** (Pack 125): Balansert with 1 mrd for 24 game hours in four
+  games — savings +19.0 %, no steps +33.4 %, lower fee +35.7 %, the business-cycle tilt +38.3 %, the rate post +38.7 %
+  (Forsiktig 27.1 → 28.8 → 30.7 → 31.5). The steps cost 0.5 %, 1.5 % and 0.5 % of **net worth** (not of what the
+  manager holds, or a step bought on a small portfolio and then given billions is the fee-fixed-at-the-start leak), each
+  back in one to two play days with half the fortune managed. The rate post's cash goes to the manager's own account
+  (`f.konto`, the savings rate per second, `totaltSparerente` for the tax), which counts in `eiendeler` (appended last),
+  `formuedeler` and the `sparing` class; on stop it moves to the savings account with its cost price.
+- **Rebalancing more often has no value in this market** (Pack 125, measured and dropped): every weekday for 0.1 % more a
+  week lost 7.7 points in 24 h; weekday rebalancing only on big moves (15 % off) lost 0.6. Prices mean-revert, so more
+  trades buy only commission. And the business cycle turns only on Mondays: `FASE_DAGER` is 28, four weeks, and day 0 is a
+  Monday — a «react the same day the phase changes» step measured exactly equal to the weekly one.
 - **The borrowing limit and the margin call were one constant until Pack 81.** `MAKS_BELAANING`
   was both how far you can borrow and how far a margin call sells down; lowering it to 0.2 would
   have made every forced sale harsher. Now `MARGIN_MAAL` (0.5) is the sell-down target and the

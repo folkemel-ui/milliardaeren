@@ -112,6 +112,9 @@ export interface Forvalter {
   gebyrBetalt: number
   /** Den siste mandagen: hva den solgte, kjøpte og tok i gebyr. */
   siste?: { dag: number; solgt: number; kjopt: number; gebyr: number }
+  /** Pakke 125: forvalterkontoen, der renteposten står når renten er lav — med sparekontoens rente — og det den kostet. */
+  konto?: number
+  kontoKostpris?: number
 }
 
 /** En aksje eller en kryptomynt. Rater er per time spilltid. */
@@ -793,6 +796,8 @@ export interface Spilltilstand {
   sparandel?: number
   /** Pakke 124: formuesforvalteren, når du har en. */
   forvalter?: Forvalter
+  /** Pakke 125: trinnene du har kjøpt til forvalteren, 0–3. Blir stående om du sier den opp. */
+  forvaltertrinn?: number
   totaltSparerente: number
   /**
    * Kostprisen for sparekontoen (Pakke 58): det du har satt inn og ikke tatt

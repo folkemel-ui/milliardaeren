@@ -10,7 +10,8 @@ import { FOND, fondStengt } from '../fond'
 import { erHelg } from '../kalender'
 import { maksPerOrdre, PAPIRER, rundAntall, stengtIHelgen } from '../marked'
 import type { FondId, Forvalterprofil, Ordretype, PapirId, Spilltilstand } from '../types'
-import { forvaltetVerdi, PROFILER, rebalanser, trekkForvaltergebyr } from '../forvalter'
+import { forvaltertrinn, forvaltertrinnpris, forvaltetVerdi, PROFILER, rebalanser, trekkForvaltergebyr } from '../forvalter'
+import { sparingKostpris } from '../portefolje'
 import { tall } from '../tall'
 import { KONTRAER_ANDEL } from '../prestasjoner'
 import { feil, ikkeTall, UGYLDIG, type Utfall } from './felles'
@@ -100,13 +101,32 @@ export function startForvalter(s: Spilltilstand, profil: Forvalterprofil): Utfal
   return { ok: true, tilstand: n }
 }
 
-/** Sier opp forvalteren. Det den har kjøpt, blir stående som ditt. */
+/** Sier opp forvalteren. Det den har kjøpt, blir stående som ditt; forvalterkontoen går til sparekontoen. */
 export function stoppForvalter(s: Spilltilstand): Utfall {
   if (!s.forvalter) return feil('Du har ingen forvalter.')
   const n = structuredClone(s)
+  const konto = n.forvalter!.konto ?? 0
+  if (konto > 0) {
+    // Til sparekontoen med kostprisen den hadde, så avkastningen står som før.
+    n.sparingKostpris = sparingKostpris(n) + (n.forvalter!.kontoKostpris ?? 0)
+    n.sparing += konto
+  }
   delete n.forvalter
   return { ok: true, tilstand: n }
 }
+
+/** Kjøper neste trinn til forvalteren (Pakke 125): en andel av nettoformuen, én gang. */
+export function kjopForvaltertrinn(s: Spilltilstand): Utfall {
+  const pris = forvaltertrinnpris(s)
+  if (pris === null) return feil('Forvalteren har alle trinnene.')
+  if (s.kontanter < pris) return feil('Du har ikke råd.')
+  const n = structuredClone(s)
+  n.kontanter -= pris
+  n.totaltForbruk += pris
+  n.forvaltertrinn = forvaltertrinn(n) + 1
+  return { ok: true, tilstand: n }
+}
+
 
 /** Gir forvalteren `belop` av kontantene (positivt) eller tar ut (negativt), og blandingen holdes. */
 export function forvalterBelop(s: Spilltilstand, belop: number): Utfall {

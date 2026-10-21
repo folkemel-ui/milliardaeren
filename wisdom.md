@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 124, 20 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 125, 21 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -179,7 +179,7 @@ lives in one place only.
 - **A short reply can hold three orders** («Yes, please raise the speed-test limit. Push and start the next
   pack»): do them in that order, each as its own step (a small commit, `lever.mjs`, `--push`, then the pack's
   questions), and say in one line at the start of the pack that the other two are done.
-- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117** — and in Packs 118–124 all but one: on the research
+- **Folke picked the recommended option on every question in Packs 56, 57, 59, 60, 61–78, 96 and 105–117** — and in Packs 118–125 all but one: on the research
   tree Folke wrote their own «6 parts × 6 steps» instead of my 4 × 5. Build what was written; where it changes
   another answer (the chosen 1 → 16 game days now spans six steps), spread it the obvious way (1, 2, 3, 5, 9, 16)
   and say so in the report.
@@ -483,6 +483,10 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   to about ±15 %», but the property index already swings ±16 % (its crashes, not its noise) — so the target was built
   (×1, normalised to its average) and the doubling dropped, said in the report. When an option names both a means and
   a measured target, the target is what was chosen.
+- **Measure a picked item before building it into a price** (Pack 125): «rebalancing more often», picked with the
+  option «daily, for 0.3 % a week», lost 7.7 points in 24 h; two other designs gained nothing. It went back to *Parked*
+  with the numbers, the steps were reshaped around the two that pay, and the prices followed the measured gain (the
+  rate step 5 % → 0.5 % of net worth). Say all of it in the report, with the table.
 - **Check an idea's premise against the model before offering it** (Pack 92's «Next up»): «irrigation
   takes the loss in a dry, sunny week» — but in the game's weather sun is the farm's *best* week.
   Say so in the next pack's description and offer alternatives in its questions.

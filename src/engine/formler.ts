@@ -294,7 +294,9 @@ export function eiendeler(s: Spilltilstand): number {
     // Hovedkontoret (Pakke 117) til det etasjene kostet, også lagt til sist.
     hovedkontorverdi(s) +
     // Romfartsfabrikken (Pakke 118) til det som er bygget og forsket fram.
-    romfartsverdi(s)
+    romfartsverdi(s) +
+    // Forvalterkontoen (Pakke 125), også lagt til sist.
+    (s.forvalter?.konto ?? 0)
   )
 }
 

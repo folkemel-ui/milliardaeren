@@ -46,7 +46,8 @@ export function klasseverdier(s: Spilltilstand): Record<Aktivaklasse, number> {
     eiendom: eiendomsverdi(s),
     rival: rivalverdi(s),
     startup: startupverdi(s),
-    sparing: s.sparing,
+    // Pakke 125: forvalterkontoen står med sparekontoen.
+    sparing: s.sparing + (s.forvalter?.konto ?? 0),
   }
 }
 
@@ -88,7 +89,7 @@ export function trekkFraSparing(s: Spilltilstand, belop: number): void {
 }
 
 function kostpris(s: Spilltilstand, klasse: Aktivaklasse): number {
-  if (klasse === 'sparing') return sparingKostpris(s)
+  if (klasse === 'sparing') return sparingKostpris(s) + (s.forvalter?.kontoKostpris ?? 0)
   if (klasse === 'startup') return startupKostpris(s)
   if (klasse === 'fond') return fondKostpris(s)
   if (klasse === 'obligasjon') return obligasjonKostpris(s)

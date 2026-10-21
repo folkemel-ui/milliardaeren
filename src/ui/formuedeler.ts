@@ -55,7 +55,8 @@ export interface Formuedeler {
 export function formuedeler(s: Spilltilstand): Formuedeler {
   // Hovedkontoret (Pakke 117) hører til bedriftene.
   const bedrifter = s.bedrifter.reduce((sum, b) => sum + bedriftsverdi(b), 0) + hovedkontorverdi(s) + romfartsverdi(s)
-  const investeringer = papirverdi(s) + fondverdi(s) + obligasjonsverdi(s) + rivalverdi(s) + startupverdi(s) + s.sparing
+  // Pakke 125: forvalterkontoen hører til investeringene, som sparekontoen.
+  const investeringer = papirverdi(s) + fondverdi(s) + obligasjonsverdi(s) + rivalverdi(s) + startupverdi(s) + s.sparing + (s.forvalter?.konto ?? 0)
   const eiendom = eiendomsverdi(s)
   const samling = luksusverdi(s)
   const hjem = hjemverdi(s)

@@ -13,7 +13,7 @@ import { FOND } from '../fond'
 import { RAVARE_TRENDDRIFT, trenddrift } from '../bransjer'
 import { dagsbilde, ukensTrend } from '../verden'
 import { RAVARE_FOR, ravarefaktor, ravarenivaa, RAVARESNITT } from '../ravarer'
-import { blanding, FORVALTER_GEBYR, forvalterVedDagsskifte, forvaltetVerdi, PROFILER, PROFILLISTE } from '../forvalter'
+import { blanding, erPapirpost, FORVALTER_GEBYR, forvalterVedDagsskifte, forvaltetVerdi, PROFILER, PROFILLISTE } from '../forvalter'
 import { MIGRERINGER } from '../../state/migrering'
 import { Terning } from '../rng'
 import { bedrift } from './hjelp'
@@ -146,7 +146,7 @@ describe('formuesforvalteren', () => {
     for (const p of PROFILLISTE) {
       const b = blanding(p)
       expect([...b.values()].reduce((a, x) => a + x, 0), p).toBeCloseTo(1, 10)
-      for (const k of b.keys()) if (k !== 'fond' && k !== 'obligasjon') expect(PAPIRER[k].klasse).not.toBe('krypto')
+      for (const k of b.keys()) if (erPapirpost(k)) expect(PAPIRER[k].klasse).not.toBe('krypto')
     }
     expect(PROFILER.offensiv.obligasjon).toBe(0)
   })

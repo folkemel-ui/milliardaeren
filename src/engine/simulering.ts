@@ -4,7 +4,8 @@
  */
 
 import { betalRente, dekkUnderskudd, sjekkMargin } from './bank'
-import { bedriftInntektPerSek, nettoformue, sparerentePerSek, statusfaktor } from './formler'
+import { bedriftInntektPerSek, nettoformue, sparerente as sparesats, sparerentePerSek, statusfaktor } from './formler'
+import { forvalterkontoRente } from './forvalter'
 import { leiePerSek, sjekkOppussing } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
 import { utbytteFor } from './kvartal'
@@ -174,6 +175,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
   const sparerente = sparerentePerSek(s)
   s.sparing += sparerente
   s.totaltSparerente += sparerente
+  // Pakke 125: forvalterkontoen får sparekontoens rente.
+  if (s.forvalter?.konto) forvalterkontoRente(s, sparesats(s))
   // Pakke 118: forskningen ved romfartsfabrikken blir ferdig i sitt sekund. Pakke 119: og
   // satellittnettet tjener hvert sekund, som leie.
   if (s.romfart) romfartSekund(s)
