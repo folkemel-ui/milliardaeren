@@ -107,6 +107,19 @@
   gap: 8px;
 }
 
+/* Pakke 126: fire valg på én rad (profilene, andelen av inntekten), og sparemålet med bedriften bredest. */
+.andelsknapper.fire {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.andelsknapper.maalvalg {
+  grid-template-columns: 2.4fr 1fr 1fr 1fr;
+}
+
+.formuesforvalter .spare-rad > .knapp {
+  align-self: flex-start;
+}
+
 .handel-sum {
   display: flex;
   flex-direction: column;

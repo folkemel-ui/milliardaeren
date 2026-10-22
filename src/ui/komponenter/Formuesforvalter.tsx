@@ -3,16 +3,36 @@
  * ut, og se hva den gjorde sist mandag. Forvalteren holder aksjene, Børsfondet, obligasjonene og
  * råvarene dine i profilens blanding; kryptoen rører den ikke. (Ikke å forveksle med
  * eiendomsforvalterne i Forvalter.tsx, fra Pakke 54.) Pakke 125: trinnene, og hva den holder nå.
+ * Pakke 126: Utbytte-profilen, en andel av inntekten og sparemålet.
  */
 
-import { forvalterBelop, kjopForvaltertrinn, startForvalter, stoppForvalter } from '../../engine/handlinger'
-import { blandingNaa, erPapirpost, FORVALTERTRINN, forvaltertrinn, forvaltertrinnpris, forvaltetVerdi, gebyrsats, PROFILER, PROFILLISTE } from '../../engine/forvalter'
+import { forvalterBelop, kjopForvaltertrinn, settForvalterinnskudd, settForvaltermaal, startForvalter, stoppForvalter } from '../../engine/handlinger'
+import {
+  blandingNaa,
+  erPapirpost,
+  FORVALTERTRINN,
+  forvaltertrinn,
+  forvaltertrinnpris,
+  forvaltetVerdi,
+  gebyrsats,
+  GLIR_FRA,
+  INNSKUDDSANDELER,
+  MAALGANGER,
+  nesteBedriftsmaal,
+  PROFILER,
+  PROFILLISTE,
+  utbyttePerDag,
+  VINNER_SLINGRING,
+} from '../../engine/forvalter'
+import { eierType, inntektPerSek } from '../../engine/formler'
+import { STIGEN } from '../../engine/innhold'
+import { leiePerSek } from '../../engine/eiendom'
 import { PAPIRER } from '../../engine/marked'
 import { fase, FASER } from '../../engine/verden'
 import { erHelg } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { kortKroner, tall } from '../format'
+import { kortKroner, perSek, tall } from '../format'
 import { Bekreftknapp } from './Bekreftknapp'
 
 const RENTEPOST: Record<string, string> = { kort: '2-årige obligasjoner', lang: '10-årige obligasjoner', konto: 'forvalterkontoen' }
@@ -29,6 +49,74 @@ function blandingstekst(s: Spilltilstand): string {
   }
   const deler = [`aksjer ${pst(aksjer)}`, `gull ${pst(m.get('GLD') ?? 0)}`]
   return `${FASER[fase(s)].navn}: ${deler.join(', ')}${rente ? ` · ${rente}` : ''}`
+}
+
+/** «Av inntekten»: en andel av inntekten og leia til forvalteren hvert sekund, investert mandag (Pakke 126). */
+function Innskudd({ s }: { s: Spilltilstand }) {
+  const andel = s.forvalter?.innskudd ?? 0
+  const spar = s.sparandel ?? 0
+  return (
+    <>
+      <div className="spare-rad">
+        <span className="etikett">Gi forvalteren av inntekten</span>
+        <div className="andelsknapper fire" role="radiogroup" aria-label="Gi forvalteren av inntekten">
+          {INNSKUDDSANDELER.map((a) => (
+            <button key={a} role="radio" aria-checked={andel === a} className={andel === a ? 'knapp knapp-liten aktiv' : 'knapp knapp-liten'} onClick={() => utfor(settForvalterinnskudd(s, a))}>
+              {a ? `${tall(a * 100)} %` : 'Av'}
+            </button>
+          ))}
+        </div>
+      </div>
+      {andel > 0 && (
+        <p className="dempet liten">
+          ≈ {perSek((inntektPerSek(s) + leiePerSek(s)) * andel)} samles på forvalterkontoen ({kortKroner(s.forvalter?.konto ?? 0)} nå) og investeres mandag morgen.
+          {spar > 0 && ` Med ${tall(spar * 100)} % til sparekontoen beholder du ${tall((1 - andel - spar) * 100)} %.`}
+        </p>
+      )}
+    </>
+  )
+}
+
+/** Sparemålet (Pakke 126): neste bedrift eller to, fem eller ti ganger det den har; tryggere fra halvveis. */
+function Sparemaal({ s, verdi }: { s: Spilltilstand; verdi: number }) {
+  const m = s.forvalter?.maal
+  const neste = nesteBedriftsmaal(s, verdi)
+  if (m) {
+    const andel = Math.min(1, verdi / m.belop)
+    return (
+      <div className="spare-rad">
+        <span className="etikett">Sparemål</span>
+        <p className="liten">
+          <strong>{m.bedrift ? m.navn : 'Sparemål'}</strong> · {kortKroner(m.belop)} · {tall(andel * 100)} % der
+          <br />
+          <span className="dempet">
+            {andel >= GLIR_FRA ? 'Blandingen glir mot Forsiktig nå.' : `Blandingen glir mot Forsiktig fra ${tall(GLIR_FRA * 100)} %.`} Når den har beløpet, betales det ut som kontanter en hverdag morgen.
+          </span>
+        </p>
+        <button className="knapp knapp-liten" onClick={() => utfor(settForvaltermaal(s, null))}>
+          Fjern målet
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className="spare-rad">
+      <span className="etikett">Spar til</span>
+      <div className="andelsknapper maalvalg">
+        <button className="knapp knapp-liten" disabled={!neste} onClick={() => utfor(settForvaltermaal(s, 'bedrift'))}>
+          {neste ? neste.navn : 'Neste bedrift'}
+        </button>
+        {MAALGANGER.map((g) => (
+          <button key={g} className="knapp knapp-liten" disabled={verdi < 1} onClick={() => utfor(settForvaltermaal(s, g))}>
+            {g} ×
+          </button>
+        ))}
+      </div>
+      <p className="dempet liten">
+        {neste ? `${neste.navn} koster ${kortKroner(neste.belop)}` : STIGEN.every((id) => eierType(s, id)) ? 'Du eier alle bedriftene' : 'Forvalteren har nok til bedriftene du ikke eier'}, eller 2, 5 eller 10 ganger det den har. Den blir tryggere fra halvveis og betaler ut når målet er nådd.
+      </p>
+    </div>
+  )
 }
 
 export function Formuesforvalter({ s }: { s: Spilltilstand }) {
@@ -58,13 +146,19 @@ export function Formuesforvalter({ s }: { s: Spilltilstand }) {
               Sist mandag: solgte for {kortKroner(f.siste.solgt)}, kjøpte for {kortKroner(f.siste.kjopt)}.
             </span>
           )}
+          {f.profil === 'utbytte' && (
+            <span className="dempet">
+              <br />
+              Utbytte og kuponger ≈ {kortKroner(utbyttePerDag(s))} til deg hver hverdag.
+            </span>
+          )}
         </p>
       ) : (
         <p className="dempet liten">
-          Velg en profil, og forvalteren holder aksjene, Børsfondet, obligasjonene og råvarene dine i den blandingen — hver mandag morgen, for {gebyr} av det den forvalter i uka. Kryptoen rører den ikke.
+          Velg en profil, og forvalteren holder aksjene, Børsfondet, obligasjonene og råvarene dine i den blandingen — hver mandag morgen, for {gebyr} av det den forvalter i uka. Den selger tap før gevinst, og en vinner først når den er {tall(VINNER_SLINGRING * 100)} % over målet, så skatten venter. Kryptoen rører den ikke.
         </p>
       )}
-      <div className="andelsknapper" role="radiogroup" aria-label="Profil">
+      <div className="andelsknapper fire" role="radiogroup" aria-label="Profil">
         {PROFILLISTE.map((p) => (
           <button key={p} role="radio" aria-checked={f?.profil === p} className={f?.profil === p ? 'knapp knapp-liten aktiv' : 'knapp knapp-liten'} disabled={stengt} onClick={() => utfor(startForvalter(s, p))}>
             {PROFILER[p].navn}
@@ -100,6 +194,8 @@ export function Formuesforvalter({ s }: { s: Spilltilstand }) {
               })}
             </div>
           </div>
+          <Innskudd s={s} />
+          <Sparemaal s={s} verdi={verdi} />
           <Bekreftknapp className="knapp knapp-liten" ja="Ja, si opp" varsel="Det forvalteren har kjøpt, blir stående som ditt." onJa={() => utfor(stoppForvalter(s))}>
             Si opp forvalteren
           </Bekreftknapp>

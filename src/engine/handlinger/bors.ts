@@ -4,15 +4,16 @@
  * en ren funksjon: tilstand inn, ny tilstand (eller en feilmelding) ut.
  */
 
-import { maksKjop } from '../formler'
+import { eierType, maksKjop } from '../formler'
+import { STIGEN } from '../innhold'
 import { utforFondskjop, utforFondssalg, utforKjop, utforSalg } from '../handel'
 import { FOND, fondStengt } from '../fond'
 import { erHelg } from '../kalender'
 import { maksPerOrdre, PAPIRER, rundAntall, stengtIHelgen } from '../marked'
 import type { FondId, Forvalterprofil, Ordretype, PapirId, Spilltilstand } from '../types'
-import { forvaltertrinn, forvaltertrinnpris, forvaltetVerdi, PROFILER, rebalanser, trekkForvaltergebyr } from '../forvalter'
+import { forvaltertrinn, forvaltertrinnpris, forvaltetVerdi, INNSKUDDSANDELER, MAALGANGER, nesteBedriftsmaal, PROFILER, rebalanser, trekkForvaltergebyr } from '../forvalter'
 import { sparingKostpris } from '../portefolje'
-import { tall } from '../tall'
+import { kortKroner, tall } from '../tall'
 import { KONTRAER_ANDEL } from '../prestasjoner'
 import { feil, ikkeTall, UGYLDIG, type Utfall } from './felles'
 
@@ -140,6 +141,42 @@ export function forvalterBelop(s: Spilltilstand, belop: number): Utfall {
 }
 
 const FORVALTER_STENGT = 'Forvalteren handler når børsen er åpen, mandag til fredag.'
+
+/** Hvor mye av inntekten og leia som går til forvalteren hvert sekund (Pakke 126). Den investerer det mandag. */
+export function settForvalterinnskudd(s: Spilltilstand, andel: number): Utfall {
+  if (!s.forvalter) return feil('Du har ingen forvalter.')
+  if (!INNSKUDDSANDELER.includes(andel)) return feil('Velg 0, 10, 25 eller 50 %.')
+  const n = structuredClone(s)
+  if (andel) n.forvalter!.innskudd = andel
+  else delete n.forvalter!.innskudd
+  return { ok: true, tilstand: n }
+}
+
+/**
+ * Setter sparemålet (Pakke 126): `'bedrift'` for den billigste bedriften du ikke eier, et tall for så
+ * mange ganger det forvalteren har nå, eller null for å fjerne det. Prisen står fast fra i dag.
+ */
+export function settForvaltermaal(s: Spilltilstand, valg: 'bedrift' | number | null): Utfall {
+  if (!s.forvalter) return feil('Du har ingen forvalter.')
+  const n = structuredClone(s)
+  const f = n.forvalter!
+  if (valg === null) {
+    if (!f.maal) return feil('Forvalteren har ikke noe sparemål.')
+    delete f.maal
+    return { ok: true, tilstand: n }
+  }
+  if (valg === 'bedrift') {
+    const m = nesteBedriftsmaal(n)
+    if (!m) return feil(STIGEN.every((id) => eierType(n, id)) ? 'Du eier alle bedriftene.' : 'Forvalteren har alt nok til bedriftene du ikke eier — ta ut i stedet.')
+    f.maal = m
+    return { ok: true, tilstand: n }
+  }
+  if (!MAALGANGER.includes(valg)) return feil(UGYLDIG)
+  const verdi = forvaltetVerdi(n)
+  if (verdi < 1) return feil('Gi forvalteren noe å forvalte først.')
+  f.maal = { belop: verdi * valg, navn: `${valg} × ${kortKroner(verdi)}` }
+  return { ok: true, tilstand: n }
+}
 
 /** Hvor mye av inntekten og leia som går rett på sparekontoen hvert sekund (Pakke 124). */
 export function settSparandel(s: Spilltilstand, andel: number): Utfall {

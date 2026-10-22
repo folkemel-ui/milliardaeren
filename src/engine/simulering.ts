@@ -5,7 +5,7 @@
 
 import { betalRente, dekkUnderskudd, sjekkMargin } from './bank'
 import { bedriftInntektPerSek, nettoformue, sparerente as sparesats, sparerentePerSek, statusfaktor } from './formler'
-import { forvalterkontoRente } from './forvalter'
+import { forvalterInnskudd, forvalterkontoRente } from './forvalter'
 import { leiePerSek, sjekkOppussing } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
 import { utbytteFor } from './kvartal'
@@ -158,6 +158,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
   s.kontanter += inntekt
   // Pakke 124: en andel av inntekten rett på sparekontoen.
   if (s.sparandel && inntekt > 0) spar(s, inntekt * s.sparandel)
+  // Pakke 126: og en andel til forvalterkontoen, som investeres mandag.
+  if (s.forvalter?.innskudd && inntekt > 0) forvalterInnskudd(s, inntekt * s.forvalter.innskudd)
   s.totaltTjent += inntekt
   // Regnskapet per bedrift. Summen over står for kontantene; dette er bare bokføring.
   const maalHistorikk = (s.sek + 1) % INNTEKT_HISTORIKK_SEK === 0
@@ -197,6 +199,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
     s.kontanter += leie
     s.totaltLeie += leie
     if (s.sparandel && leie > 0) spar(s, leie * s.sparandel)
+    if (s.forvalter?.innskudd && leie > 0) forvalterInnskudd(s, leie * s.forvalter.innskudd)
     // Yachtene og jetene som er leid ut (Pakke 89), betales som leia.
     betalCharter(s, leieSek)
     // Kraften fra jorda (Pakke 115) likeså.

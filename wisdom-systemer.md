@@ -108,6 +108,26 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   week lost 7.7 points in 24 h; weekday rebalancing only on big moves (15 % off) lost 0.6. Prices mean-revert, so more
   trades buy only commission. And the business cycle turns only on Mondays: `FASE_DAGER` is 28, four weeks, and day 0 is a
   Monday — a «react the same day the phase changes» step measured exactly equal to the weekly one.
+- **Tax-aware rebalancing is free money, so it went to every manager** (Pack 126): a post with a gain is sold only when
+  it is 20 % over its target (`VINNER_SLINGRING`), losers at the old 3 %, losers first; a withdrawal sells winners too
+  if the losers don't raise enough, so the amount asked for always arrives. Measured after tax (1 mrd, 24 h, four
+  games): +2.4 to +2.7 points per profile, realised gains 112 → 55 mill for Balansert; 10 % gave +2.0 to +2.5. Gains
+  and dividends are taxed alike (`skattegrunnlag` adds business income too, so any real player is in the 28 % bracket
+  and a realised loss always saves 28 %), so the Utbytte profile has no tax edge — it is a blend for cash, +35.1 %
+  with 203 mill paid out (Balansert +33.8 %, 151 mill).
+- **The income share reuses the manager's own account** (Pack 126, `forvalterInnskudd`): the money lands on `f.konto`
+  every second with its cost price, earns the savings rate, and Monday's rebalance moves it out like any post over
+  its target — no new post, no new field in `eiendeler`, and a stop moves it to the savings account as before. Moving
+  money on and off that account now calls `flyt(…, 'sparing', ±)`: without it the day's change for the «Sparekontoen»
+  class would show a deposit as a gain and Monday's investing as a loss. The side effect: «Kjøpt og solgt» in «Uka di»
+  lists those moves under «Sparekontoen» (a line for Pack 127).
+- **A goal the manager can already pay is no goal** (Pack 126): «the cheapest business you don't own» picked Pølsebod at
+  kr 1 200 in a save that had skipped it. `nesteBedriftsmaal` takes the cheapest one that costs more than the manager
+  holds. And unlocking (`laasesOppVed`, e.g. Rederi 25 mrd net worth) sits 25 % above the price (20 mrd), so the goal
+  is about cash in hand, not about reaching the business.
+- **To move a price in a test, move `avvik`, not `kurs`** (Pack 126): `flyttKurs` rebuilds the price from
+  `fundament · e^(avvik + trykk)` on the next trade, so a test that set `kurs *= 1.3` saw the manager sell, the price
+  snap back, and the manager buy *more* than before. Add `Math.log(f)` to `avvik` and multiply `kurs` with it.
 - **The borrowing limit and the margin call were one constant until Pack 81.** `MAKS_BELAANING`
   was both how far you can borrow and how far a margin call sells down; lowering it to 0.2 would
   have made every forced sale harsher. Now `MARGIN_MAAL` (0.5) is the sell-down target and the

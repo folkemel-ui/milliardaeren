@@ -310,6 +310,11 @@ balance, the saves or the speed. Per-system details (the club, the farms, art �
   tonne went 12.5 → 13.5 mrd that way, because the board's contracts average below a full rocket. **Mind the tax:**
   a run through `simuler` over whole months pays the monthly tax, so the same factory read 178 mill/s on its own
   loop and ~135 mill/s through `simuler`. Compare like with like, and say in the report which one a number is.
+- **A plain-Node measuring loop must keep what `simuler` returns** (Pack 126): it copies the state (`kopierSpill`) and
+  hands back the new one, so `simuler(s, 300)` in a loop simulated nothing — every variant in four games came out at
+  exactly −52.5 %, the same to the decimal across seeds. Identical numbers across seeds are the tell. Write
+  `s = simuler(s, n)`. And «after tax» is `nettoformue − skattSaLangt − unpaid bills`: net worth doesn't subtract the
+  month's tax that is still to come, and a manager that realises more gains owes more of it.
 
 ## 4. Saves and migrations
 

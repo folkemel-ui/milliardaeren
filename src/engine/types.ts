@@ -103,7 +103,7 @@ export type PapirId =
 export type Risiko = 'lav' | 'middels' | 'høy'
 
 /** Formuesforvalterens profil (Pakke 124). */
-export type Forvalterprofil = 'forsiktig' | 'balansert' | 'offensiv'
+export type Forvalterprofil = 'forsiktig' | 'balansert' | 'offensiv' | 'utbytte'
 export interface Forvalter {
   profil: Forvalterprofil
   /** Sekundet forvalteren startet. */
@@ -115,6 +115,10 @@ export interface Forvalter {
   /** Pakke 125: forvalterkontoen, der renteposten står når renten er lav — med sparekontoens rente — og det den kostet. */
   konto?: number
   kontoKostpris?: number
+  /** Pakke 126: andelen av inntekten og leia som går til forvalterkontoen hvert sekund, og investeres mandag. Mangler: ingen. */
+  innskudd?: number
+  /** Pakke 126: sparemålet — beløpet den betaler ut som kontanter når den har det, og hva det er til. */
+  maal?: { belop: number; navn: string; bedrift?: BedriftstypeId }
 }
 
 /** En aksje eller en kryptomynt. Rater er per time spilltid. */

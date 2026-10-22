@@ -13,19 +13,25 @@
  * forvalteren har — ellers kunne du kjøpt trinnet billig og så gitt den milliarder): et lavere
  * gebyr, så en forvalter som følger konjunkturen (vipper blandingen), så en som følger renten
  * (renteposten). Trinnene blir stående om du sier den opp.
+ *
+ * Pakke 126: en forvalter for hvert formål. En fjerde profil, Utbytte, for jevne kontanter; en
+ * rebalansering som tenker på skatten (tapere selges før vinnere, og en vinner først når den er langt
+ * unna); en andel av inntekten hvert sekund, samlet på forvalterkontoen og investert mandag; og et
+ * sparemål som blir tryggere jo nærmere det kommer, og betales ut når det er nådd.
  */
 
 import { AKSJER, handelskurs, KURTASJE, maksPerOrdre, PAPIRER, rundAntall } from './marked'
 import { utforFondskjop, utforFondssalg, utforKjop, utforObligasjonskjop, utforObligasjonssalg, utforSalg } from './handel'
-import { fondskurs } from './fond'
-import { obligasjonsverdiFor } from './obligasjoner'
-import { dagnummer, erHelg, ukedag } from './kalender'
-import { MAKS_HENDELSER } from './innhold'
-import { nettoformue } from './formler'
-import { sparingKostpris } from './portefolje'
+import { fondskurs, fondsutbytteIDag } from './fond'
+import { kupongPerSek, obligasjonsverdiFor } from './obligasjoner'
+import { DAG_SEK, dagnummer, erHelg, ukedag } from './kalender'
+import { utbytteFor } from './kvartal'
+import { BEDRIFTSTYPER, MAKS_HENDELSER, STIGEN } from './innhold'
+import { eierType, nettoformue } from './formler'
+import { flyt, sparingKostpris } from './portefolje'
 import { fase, type Fase } from './verden'
 import { kortKroner } from './tall'
-import type { Forvalterprofil, ObligasjonId, PapirId, Risiko, Spilltilstand } from './types'
+import type { BedriftstypeId, Forvalterprofil, ObligasjonId, PapirId, Risiko, Spilltilstand } from './types'
 
 /** Gebyret hver uke, av det forvalteren har … */
 export const FORVALTER_GEBYR = 0.002
@@ -33,11 +39,21 @@ export const FORVALTER_GEBYR = 0.002
 export const FORVALTER_GEBYR_LAV = 0.0015
 /** Forvalteren lar en post være til den er mer enn 3 % fra målet, så den ikke handler for småpenger. */
 const SLINGRING = 0.03
+/*
+ * … men en post med gevinst først når den er 20 % over (Pakke 126): gevinsten skattes med måneden, med opptil
+ * 28 %, så et salg som bare pynter på blandingen koster mer enn det gir. Målt med 1 mrd i 24 t i fire spill,
+ * etter skatt: Forsiktig 22,8 → 25,5 %, Balansert 30,9 → 33,6, Offensiv 50,5 → 52,9 (10 % ga 24,9, 33,4 og
+ * 52,5). Et uttak selger likevel det som trengs.
+ */
+export const VINNER_SLINGRING = 0.2
 
 export const PROFILER: Record<Forvalterprofil, { navn: string; tekst: string; obligasjon: number; fond: number; aksjer: number; risiko: Risiko[]; gull: number; energi: number }> = {
   forsiktig: { navn: 'Forsiktig', tekst: 'Halvparten i obligasjoner, resten i Børsfondet, gull og trygge aksjer.', obligasjon: 0.5, fond: 0.25, aksjer: 0.1, risiko: ['lav'], gull: 0.15, energi: 0 },
   balansert: { navn: 'Balansert', tekst: 'En firedel i obligasjoner, Børsfondet, aksjer med lav og middels risiko, litt gull, olje og laks.', obligasjon: 0.25, fond: 0.35, aksjer: 0.25, risiko: ['lav', 'middels'], gull: 0.1, energi: 0.05 },
   offensiv: { navn: 'Offensiv', tekst: 'Ingen obligasjoner: Børsfondet, aksjer med middels og høy risiko, olje og laks.', obligasjon: 0, fond: 0.3, aksjer: 0.5, risiko: ['middels', 'høy'], gull: 0.05, energi: 0.15 },
+  // Pakke 126: de trygge aksjene betaler 0,07–0,085 % om dagen. Målt med 1 mrd i 24 t, etter skatt: +32,6 % og
+  // 196 mill i utbytte og kuponger, mot Balansert +30,9 % og 145 mill (80 % aksjer ga 29,4 % og 208 mill).
+  utbytte: { navn: 'Utbytte', tekst: 'Trygge aksjer som betaler utbytte, Børsfondet og obligasjoner — jevne kontanter hver hverdag.', obligasjon: 0.2, fond: 0.2, aksjer: 0.6, risiko: ['lav'], gull: 0, energi: 0 },
 }
 export const PROFILLISTE = Object.keys(PROFILER) as Forvalterprofil[]
 
@@ -133,12 +149,30 @@ export function blanding(profil: Forvalterprofil, marked?: Fase, rente = false):
   return m
 }
 
-/** Blandingen forvalteren følger nå: med konjunkturen (trinn 2) og renten (trinn 3). */
-export function blandingNaa(s: Spilltilstand): Map<Post, number> {
+/** Sparemålet (Pakke 126) blir tryggere fra halvveis: blandingen glir mot Forsiktig, og er helt der ved målet. */
+export const GLIR_FRA = 0.5
+
+/** Hvor langt mot Forsiktig blandingen har glidd for sparemålet, 0–1. */
+export function maalvekt(s: Spilltilstand, verdi = forvaltetVerdi(s)): number {
+  const m = s.forvalter?.maal
+  if (!m || m.belop <= 0) return 0
+  return Math.min(1, Math.max(0, (verdi / m.belop - GLIR_FRA) / (1 - GLIR_FRA)))
+}
+
+/** Blandingen forvalteren følger nå: med konjunkturen (trinn 2), renten (trinn 3) og sparemålet. */
+export function blandingNaa(s: Spilltilstand, verdi?: number): Map<Post, number> {
   const f = s.forvalter
   if (!f) return new Map()
   const t = forvaltertrinn(s)
-  return blanding(f.profil, t >= 2 ? fase(s) : undefined, t >= 3)
+  const marked = t >= 2 ? fase(s) : undefined
+  const egen = blanding(f.profil, marked, t >= 3)
+  const v = f.maal ? maalvekt(s, verdi) : 0
+  if (v <= 0 || f.profil === 'forsiktig') return egen
+  const trygg = blanding('forsiktig', marked, t >= 3)
+  const m = new Map<Post, number>()
+  for (const [post, andel] of egen) m.set(post, andel * (1 - v))
+  for (const [post, andel] of trygg) m.set(post, (m.get(post) ?? 0) + andel * v)
+  return m
 }
 
 /** Postene forvalteren kan holde: alle aksjer, råvarer, Børsfondet og obligasjonene. */
@@ -154,10 +188,27 @@ function verdiAv(s: Spilltilstand, post: Post): number {
   return b ? b.antall * s.marked.kurser[post].kurs : 0
 }
 
+/** Gevinsten i en post om den selges nå, mot kostprisen — kontoen har ingen; renten er alt skattet. */
+function gevinstAv(s: Spilltilstand, post: Post): number {
+  if (post === 'konto') return 0
+  const kost = post === 'fond' ? s.fond.BORSFOND?.kostpris : post === 'kort' || post === 'lang' ? s.obligasjoner?.[post]?.kostpris : s.beholdning[post]?.kostpris
+  return verdiAv(s, post) - (kost ?? 0)
+}
+
 /** Det forvalteren har nå: aksjene, råvarene, Børsfondet, obligasjonene og forvalterkontoen. */
 export function forvaltetVerdi(s: Spilltilstand): number {
   let sum = verdiAv(s, 'fond') + verdiAv(s, 'kort') + verdiAv(s, 'lang') + verdiAv(s, 'konto')
   for (const id of Object.keys(s.beholdning) as PapirId[]) if (forvaltes(id)) sum += verdiAv(s, id)
+  return sum
+}
+
+/**
+ * Utbyttet og kupongene det forvalteren har gir på en hverdag (Pakke 126), som kontanter til deg:
+ * aksjene og Børsfondet hver hverdag morgen, kupongene sekund for sekund.
+ */
+export function utbyttePerDag(s: Spilltilstand): number {
+  let sum = fondsutbytteIDag(s) + kupongPerSek(s) * DAG_SEK
+  for (const id of Object.keys(s.beholdning) as PapirId[]) if (forvaltes(id)) sum += verdiAv(s, id) * utbytteFor(s, id)
   return sum
 }
 
@@ -176,6 +227,7 @@ function selg(n: Spilltilstand, post: Post, belop: number): number {
     f.kontoKostpris = konto > 0 ? (f.kontoKostpris ?? 0) * (1 - ut / konto) : 0
     f.konto = konto - ut
     n.kontanter += ut
+    flyt(n, 'sparing', -ut)
     return ut
   }
   const b = n.beholdning[post]
@@ -205,6 +257,7 @@ function kjop(n: Spilltilstand, post: Post, belop: number): number {
     f.konto = (f.konto ?? 0) + belop
     f.kontoKostpris = (f.kontoKostpris ?? 0) + belop
     n.kontanter -= belop
+    flyt(n, 'sparing', belop)
     return belop
   }
   const kost = (a: number) => a * handelskurs(n, post, a) * (1 + KURTASJE)
@@ -216,26 +269,36 @@ function kjop(n: Spilltilstand, post: Post, belop: number): number {
 
 /**
  * Bringer det forvalteren har til blandingen den følger nå, med \`ekstra\` kroner mer (et innskudd
- * fra kontantene) eller mindre (et uttak til kontantene). Selger det som er for mye først, kjøper
- * så for det som kom inn. Gir hva den solgte og kjøpte for. Muterer.
+ * fra kontantene) eller mindre (et uttak til kontantene). Selger det som er for mye først — tapere
+ * før vinnere, og en vinner først når den er langt unna (Pakke 126) — og kjøper så for det som kom
+ * inn, det som mangler mest først. Gir hva den solgte og kjøpte for. Muterer.
  */
 export function rebalanser(n: Spilltilstand, ekstra = 0): { solgt: number; kjopt: number } {
   const f = n.forvalter
   if (!f) return { solgt: 0, kjopt: 0 }
-  const maal = blandingNaa(n)
-  const total = Math.max(0, forvaltetVerdi(n) + ekstra)
+  const verdi = forvaltetVerdi(n)
+  const maal = blandingNaa(n, verdi)
+  const total = Math.max(0, verdi + ekstra)
   const poster = new Set<Post>([...maal.keys(), 'fond', 'kort', 'lang', 'konto', ...(Object.keys(n.beholdning) as PapirId[]).filter(forvaltes)])
+  // Tapene først: et salg med tap trekkes fra månedens skatt, et med gevinst legges til.
+  const gevinst = new Map<Post, number>()
+  for (const post of poster) gevinst.set(post, gevinstAv(n, post))
+  const rekke = [...poster].sort((a, b) => gevinst.get(a)! - gevinst.get(b)!)
   let solgt = 0
-  for (const post of poster) {
+  const selgNed = (post: Post, slakk: number) => {
     const naa = verdiAv(n, post)
     const mal = (maal.get(post) ?? 0) * total
-    if (naa > mal * (1 + SLINGRING) + 1) solgt += selg(n, post, mal > 0 ? naa - mal : Infinity)
+    if (naa > mal * (1 + slakk) + 1) solgt += selg(n, post, mal > 0 ? naa - mal : Infinity)
   }
+  for (const post of rekke) selgNed(post, gevinst.get(post)! > 0 ? VINNER_SLINGRING : SLINGRING)
+  // Et uttak skal fram: kom det ikke inn nok, selges vinnerne også, den minste gevinsten først.
+  if (ekstra < 0) for (const post of rekke) if (solgt + ekstra < 0 && gevinst.get(post)! > 0) selgNed(post, SLINGRING)
   // Det som kom inn, pluss et innskudd eller minus et uttak, er det forvalteren kan kjøpe for.
   let budsjett = Math.min(n.kontanter, solgt + ekstra)
   let kjopt = 0
-  for (const [post, andel] of maal) {
-    const mangler = andel * total - verdiAv(n, post)
+  const mangel = (post: Post, andel: number) => andel * total - verdiAv(n, post)
+  for (const [post, andel] of [...maal].sort((a, b) => mangel(b[0], b[1]) - mangel(a[0], a[1]))) {
+    const mangler = mangel(post, andel)
     if (mangler <= andel * total * SLINGRING || budsjett < 1) continue
     const brukt = kjop(n, post, Math.min(mangler, budsjett))
     kjopt += brukt
@@ -264,9 +327,67 @@ export function forvalterkontoRente(s: Spilltilstand, sats: number, sekunder = 1
   s.totaltSparerente += r
 }
 
+// ─────────────────────────────────────────────── Innskudd og sparemål (Pakke 126)
+
+/** Andelene av inntekten forvalteren kan få, som sparingen av inntekten (Pakke 124). */
+export const INNSKUDDSANDELER = [0, 0.1, 0.25, 0.5]
+
+/**
+ * En andel av inntekten eller leia til forvalterkontoen, hvert sekund (Pakke 126). Den står med
+ * sparekontoens rente til mandag, da rebalanseringen kjøper for den — kurtasjen tas én gang i uka,
+ * ikke hvert sekund. Muterer.
+ */
+export function forvalterInnskudd(s: Spilltilstand, belop: number): void {
+  const f = s.forvalter!
+  // Sparekontoens kostpris låses før forvalterkontoens renter regnes med i totaltSparerente.
+  if (s.sparingKostpris === undefined) s.sparingKostpris = sparingKostpris(s)
+  s.kontanter -= belop
+  f.konto = (f.konto ?? 0) + belop
+  f.kontoKostpris = (f.kontoKostpris ?? 0) + belop
+  flyt(s, 'sparing', belop)
+}
+
+/**
+ * Den billigste bedriften på stigen du ikke eier og forvalteren ikke alt har nok til, som sparemål — eller
+ * null. En bedrift den alt kan betale, ville vært nådd med en gang; da er et uttak det du vil.
+ */
+export function nesteBedriftsmaal(s: Spilltilstand, verdi = forvaltetVerdi(s)): { belop: number; navn: string; bedrift: BedriftstypeId } | null {
+  for (const id of STIGEN) if (!eierType(s, id) && BEDRIFTSTYPER[id].pris > verdi) return { belop: BEDRIFTSTYPER[id].pris, navn: BEDRIFTSTYPER[id].navn, bedrift: id }
+  return null
+}
+
+/** Sparemålene du kan velge: neste bedrift, eller to, fem eller ti ganger det forvalteren har. */
+export const MAALGANGER = [2, 5, 10]
+
+/**
+ * Hver hverdag morgen: er sparemålet nådd, betales beløpet ut som kontanter, og forvalteren holder
+ * resten i profilen sin som før. Gir det som ble betalt ut, eller 0. Muterer.
+ */
+export function betalUtMaal(s: Spilltilstand): number {
+  const f = s.forvalter
+  const m = f?.maal
+  if (!f || !m || erHelg(s.sek) || forvaltetVerdi(s) < m.belop) return 0
+  const for_ = s.kontanter
+  delete f.maal
+  // Uten målet følger blandingen profilen igjen; uttaket selger det som trengs, tapene først.
+  rebalanser(s, -m.belop)
+  const ut = s.kontanter - for_
+  s.hendelser.push({
+    sek: s.sek,
+    tittel: 'Sparemålet er nådd',
+    tekst: m.bedrift
+      ? `Forvalteren betalte ut ${kortKroner(ut)} — nok til ${m.navn.toLowerCase()}. Resten forvalter den som før.`
+      : `Forvalteren betalte ut ${kortKroner(ut)}, målet ${m.navn}. Resten forvalter den som før.`,
+    alvor: 'info',
+  })
+  if (s.hendelser.length > MAKS_HENDELSER) s.hendelser.splice(0, s.hendelser.length - MAKS_HENDELSER)
+  return ut
+}
+
 /** Hver mandag morgen — også dagen konjunkturen skifter: ukas gebyr, og blandingen bringes tilbake. Muterer. */
 export function forvalterVedDagsskifte(s: Spilltilstand): void {
   const f = s.forvalter
+  if (f?.maal) betalUtMaal(s)
   if (!f || erHelg(s.sek) || ukedag(s.sek) !== 0) return
   const gebyr = trekkForvaltergebyr(s)
   const r = rebalanser(s)
