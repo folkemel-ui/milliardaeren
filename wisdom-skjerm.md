@@ -127,6 +127,10 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 
 ## 2. Proving a UI change
 
+- **A script that hunts cut text finds screen-reader labels** (20 October 2026): `scrollWidth > clientWidth` flagged
+  «Overskyet», «Snø» on Eiendom — the `.skjult-tekst` labels inside the farm's weather chips, 1 px wide by design. Skip
+  elements whose own class or an ancestor's is `skjult-tekst`, and look at the parent before listing a hit. The same
+  scan counts the «?» help buttons (18 px) and the city chips (30 px) as small targets; those were real.
 - **Rendering a real weekly settlement in a Node test fails on `CSS.escape`** (Pack 123): `UkaDi` draws the week's
   net-worth curve with `Linjegraf`, which calls `CSS.escape` — not defined outside a browser. Render it with
   `{ ...oppgjor, formuekurve: undefined }`, as `pakke113` does by building its own; `lastAlle()` doesn't help.

@@ -1,7 +1,7 @@
 # wisdom.md — what the sessions have taught, for the next one
 
 Written after Packs 25–32 of *Milliardær* (30 September 2026) and updated after almost every pack
-since (last: Pack 125, 21 October 2026). On 15 October it was split in four, because the whole of it
+since (last: Pack 125 and its second pass, 22 October 2026). On 15 October it was split in four, because the whole of it
 had grown to 1 635 lines that every session read before starting. **Read this file every session**,
 after `Ideer.md` and `ARKITEKTUR.md`; read the others when the work touches them:
 
@@ -149,6 +149,14 @@ lives in one place only.
   home already had a wine cellar room; «oil price» was only a hot/cold-trade label), and say at the top which
   known ideas you left out. Each item says what the game has today in numbers. Folke picked 6 of 20 and asked
   to «reorganize the packs to fit the new points».
+- **«How can X be smarter?» and «make it look even better» lists (20 October 2026)** worked best measured first. For the
+  manager: a 12-hour run of each profile against the savings account (an esbuild bundle of `nyttSpill` + `simuler`)
+  gave the opening table, and every item quoted a number from the engine; Folke picked 10 of 15. For the screens: a
+  script that clicked every tab and part at 375 px on a late save and a fresh game, recording page height, buttons under
+  40 px, text under 13 px, cut text and overflow, then screenshots only where the look mattered; Folke picked all 16.
+  Check every hit before listing it — the «cut» weather words were screen-reader text (`skjult-tekst`, 1 px wide on
+  purpose) — and leave out what an earlier list already holds, saying so at the end. A follow-up list for something just
+  built (the manager after Pack 124) goes first in the plan, since its files are fresh; say why and offer the old order.
 - **Reordering the pack plan means renumbering every mention**, not just the pack lines: the section intros
   («Packed as 102 and 116–118»), other packs' text («UI only, like 117 and 118»), and the other track's pack
   notes («fits after Pack 119» in G25). A grep for `Pack 1[0-9][0-9]` outside the plan lines after the script is
@@ -380,6 +388,12 @@ lives in one place only.
   `ui/komponenter/Forvalter.tsx` replaced the property managers' card from Pack 54 — the tell was «has been updated
   successfully» instead of «File created». `git checkout -- <file>` brought it back. Glob the name before writing a new
   file, and read that line of the reply.
+- **Don't chain a commit after a test on a grep** (Pack 125): `npx vitest run … | grep "Tests" && git commit …` committed
+  although the test had failed — the grep found the line, so the chain went on. Run the test, read the result, then
+  commit in a separate call (or test the exit code of vitest itself, not of the grep).
+- **A `\`` in the Read tool's view is not in the file** (Pack 125): comments looked like they held backslashes before
+  backticks, and a «clean-up» was started; a node scan of every source file found none. Count with a script before
+  fixing what the view shows.
 - **There is no Python on this machine** (`python` opens the Microsoft Store stub and does
   nothing). Write edit scripts in Node.
 
@@ -436,6 +450,12 @@ Every `lever.mjs` runs all of it, so these bite every delivery. In short: a run 
   `$_` in a Bash-quoted PowerShell line gets eaten), compare with the clock, stop `lever.mjs` and both vitest
   processes, and run it again; the rerun passed in normal time. On a slow evening a full run took ~450 s, so run
   `lever.mjs` in the background, never as a foreground call with the 10-minute limit.
+- **Another program can fail the speed test too** (Pack 125): every part of `ytelse.test.ts` ran ~30–40 % slow at once
+  (inntekt 72, prestasjoner 26, formue 44–45 against 53–55, 15 and 33), and `lever.mjs` failed on `formue`. No other
+  node process ran; FL Studio (`FL64`) used ~2 cores. Measure CPU per process over a few seconds in PowerShell (two
+  `Get-Process` snapshots five seconds apart, the CPU difference per id) — the total CPU column only shows history. When
+  all parts are slow together it is load: ask Folke to pause the program; the rerun passed at once. Don't raise budgets
+  for it.
 - **To tell a pack's cost from load, time the part old and new, interleaved** (Pack 117): `BENK=1` makes
   `ytelse.test.ts` print every part's milliseconds; run it in a worktree of `HEAD` (junction to `node_modules`,
   see §3) and in the working tree by turns, three rounds, in one PowerShell loop. «inntekt» read 45–46 before and
