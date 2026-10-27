@@ -209,6 +209,12 @@ figure {
   color: var(--tekst-dempet);
 }
 
+/* Pakke 128: en etikett som bærer et tall — en rente, en kurs — leses som en linje: 13 px, uten store bokstaver. */
+.etikett-tall {
+  font-size: var(--skrift-2);
+  color: var(--tekst-dempet);
+}
+
 .tall-mellom,
 .tall-stort,
 .tall-kjempe,

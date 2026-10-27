@@ -598,12 +598,13 @@
   font-weight: var(--vekt-halvfet);
 }
 
+/* Pakke 128: «+4 status» og prisen under hver ting, 13 px som andre tall (var 11). */
 .plass-under {
   max-width: 92px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--skrift-1);
+  font-size: var(--skrift-2);
   color: var(--tekst-dempet);
 }
 

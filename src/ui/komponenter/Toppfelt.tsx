@@ -81,18 +81,24 @@ export function Toppfelt({
             {kortDato(dag)} <span className="dempet">· uke {ukenummer(dag)} · {klokke(s.sek)}</span>
           </span>
           {s.skatt.regninger.length > 0 ? (
+            // Pakke 128: bare ikonet, så hele datoen får plass (ordet «Børsen stengt» tok 116 px av 343).
             <button
-              className="merke fare"
+              className="merke fare merke-ikon"
               onClick={() => {
                 settProfildel('regnskap')
                 tilProfil()
               }}
               aria-label="Ubetalt skatt — gå til regnskapet"
+              title="Ubetalt skatt"
             >
-              <Ikon navn="kvittering" størrelse={14} /> Skatt
+              <Ikon navn="kvittering" størrelse={14} />
             </button>
           ) : (
-            erHelg(s.sek) && <span className="merke varsel">Børsen stengt</span>
+            erHelg(s.sek) && (
+              <span className="merke varsel merke-ikon" role="img" aria-label="Børsen stengt" title="Børsen stengt">
+                <Ikon navn="las" størrelse={14} />
+              </span>
+            )
           )}
           <button className="avisknapp hendelsesknapp" onClick={åpneLogg} aria-label={usette ? `Hendelser, ${usette} nye` : 'Hendelser'}>
             <Ikon navn="bjelle" størrelse={18} />

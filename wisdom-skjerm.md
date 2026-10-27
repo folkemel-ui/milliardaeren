@@ -132,9 +132,19 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   elements whose own class or an ancestor's is `skjult-tekst`, and look at the parent before listing a hit. The same
   scan counts the «?» help buttons (18 px) and the city chips (30 px) as small targets. The city chips were real; the
   help button may not be: `.forklaring-knapp::after` has been a 44 × 44 tap area since Pack 74, and
-  `getBoundingClientRect` never sees a pseudo-element (found writing Pack 128's description). Grep the CSS for
-  `::after` / `::before` with `inset` before listing a small target, and test the tap with `elementFromPoint` at the
-  edge of the area.
+  `getBoundingClientRect` never sees a pseudo-element. Pack 128 proved it: all 34 «?» buttons on every tab and part,
+  `elementFromPoint` at ±20 px and ±14 px from the centre in eight directions, each hit landed on the button
+  (`closest('.forklaring-knapp')`), so the item became a CSS test. Grep the CSS for `::after` / `::before` with
+  `inset` before listing a small target, and test the tap that way.
+- **Try a layout option in the page before asking about it** (Pack 128, the date row): swap the chip's text and the
+  date's HTML in place, read `scrollWidth` against `clientWidth`, and put the numbers in the question. «Stengt» alone
+  still cut the date (158 of 151 px), no week alone too (113 of 100), «Stengt» and no week fit to the pixel (151 of
+  151, so a 360 px phone would cut it), and an icon-only chip left 186 px for a date needing 167 — the option Folke
+  picked. The widest date to try is a two-digit day and week («Lør 26. jan · uke 12 · 14:05»).
+- **A label that is a value goes to 13 px; a heading with a number in it does not** (Pack 128): «Rente 1 % per time»
+  and «Markedsrente 3,91 % · kupong 1,07 % per time» became `.etikett-tall` (13 px, no capitals), but «Statsobligasjon,
+  2 år» above the big number and «1 GBP · siste uke» in the city's stat grid stayed `.etikett` — at 13 px they wrapped
+  and broke their row's look beside «Priser · landet». Look at the neighbours before changing one label.
 - **A chart in a server-rendered test needs `CSS.escape`** (Pack 127): `Linjegraf` writes `url(#${CSS.escape(id)})`,
   and Node has no `CSS`, so `renderToStaticMarkup` of a card holding one threw «CSS is not defined». No test had
   rendered a chart before. `vi.stubGlobal('CSS', { escape: (x: string) => x })` at the top of the test file.

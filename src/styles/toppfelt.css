@@ -102,6 +102,19 @@
   padding: 0 6px;
 }
 
+/* Pakke 128: merkene i datolinja er bare et ikon — ordene står i aria-label og title. */
+.merke-ikon {
+  position: relative;
+  padding: 3px 7px;
+}
+
+/* Skatteknappen får en trykkflate som de andre: 44 px høy, uten å gå inn i bjella ved siden av. */
+button.merke-ikon::after {
+  content: '';
+  position: absolute;
+  inset: -12px -4px;
+}
+
 /* Trykkflata er minst 44 px høy (Pakke 74), selv om knappene ser ut som 28. */
 .avisknapp::after {
   content: '';

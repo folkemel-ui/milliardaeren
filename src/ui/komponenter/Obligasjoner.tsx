@@ -44,7 +44,7 @@ function Obligasjonskort({ s, id }: { s: Spilltilstand; id: ObligasjonId }) {
           <span className="tall-stort">{post ? kortKroner(verdi) : '—'}</span>
         </div>
         <div className="bank-rente">
-          <span className="etikett">
+          <span className="etikett-tall">
             Markedsrente {prosent(rente)} · kupong {prosent(kupongsats(id, rente) * 100)} per time
           </span>
           {post && <span className="pluss">{perSek((post.palydende * kupongsats(id, post.rente)) / 3600)}</span>}

@@ -32,7 +32,7 @@ function Sparekonto({ s }: { s: Spilltilstand }) {
           </span>
         </div>
         <div className="bank-rente">
-          <span className="etikett">Rente {tall(sparerente(s) * 100, 2).replace(/,?0+$/, '')} % per time</span>
+          <span className="etikett-tall">Rente {tall(sparerente(s) * 100, 2).replace(/,?0+$/, '')} % per time</span>
           <span className={s.sparing > 0 ? 'pluss' : 'dempet'}>{perSek(sparerentePerSek(s))}</span>
         </div>
       </div>
