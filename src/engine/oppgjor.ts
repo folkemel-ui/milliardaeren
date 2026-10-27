@@ -19,6 +19,7 @@ import { FOND, FONDLISTE, fondskurs } from './fond'
 import { JORD, JORDLISTE, landverdi, ukeFor, vaer } from './jord'
 import { MALERIER, MALERILISTE, maleripris } from './kunst'
 import { forbesliste } from './rivaler'
+import { forvalterstand, ukeresultat } from './forvalter'
 import type { Aktivaklasse, EiendomId, FondId, Handelstotal, JordId, MaleriId, Oppgjor, PapirId, Periodestart, Spilltilstand } from './types'
 
 /**
@@ -61,7 +62,8 @@ const BEHOLD: Record<Oppgjor['periode'], number> = { dag: 30, uke: 8, maaned: 12
 export function periodestart(s: Spilltilstand, uke = false): Periodestart {
   const kurser = {} as Record<PapirId, number>
   for (const id of Object.keys(s.marked.kurser) as PapirId[]) kurser[id] = s.marked.kurser[id].kurs
-  const ekstra = uke ? { enhetspriser: enhetspriser(s), handel: kopiAvHandel(s.handelTotalt) } : {}
+  // Pakke 127: forvalterens tellere, så søndagsavisa kan si hva den ga i uka.
+  const ekstra = uke ? { enhetspriser: enhetspriser(s), handel: kopiAvHandel(s.handelTotalt), forvalter: forvalterstand(s) } : {}
   return {
     ...ekstra,
     dag: dagnummer(s.sek),
@@ -169,6 +171,9 @@ function ukaDi(s: Spilltilstand, start: Periodestart, o: Oppgjor): void {
     for (const k of j?.skader ?? []) if (k.dag >= start.dag) k.type === 'storm' ? stormer++ : branner++
   }
   if (hogster || stormer || branner) o.skogene = { tommer, hogster, stormer, branner }
+  // Pakke 127: forvalteren — hva den ga i uka, mot sparekontoen med de samme pengene.
+  const forvalter = ukeresultat(s, start.forvalter)
+  if (forvalter) o.forvalter = forvalter
 }
 
 function arkiver(s: Spilltilstand, o: Oppgjor): void {

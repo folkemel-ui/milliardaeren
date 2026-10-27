@@ -69,6 +69,13 @@ export function UkaDi({ o }: { o: Oppgjor }) {
         </>
       )}
 
+      {/* Pakke 127: forvalteren, etter gebyr og med utbyttet, mot sparekontoen med de samme pengene. */}
+      {o.forvalter && (
+        <p className="oppgjor-merknad">
+          Forvalteren ga <strong>{endring(o.forvalter.endring)}</strong> denne uka (sparekontoen {endring(o.forvalter.spar)}).
+        </p>
+      )}
+
       {o.besteInvestering && (
         <p className="oppgjor-merknad">
           Ukas beste investering: <strong>{o.besteInvestering.navn}</strong> ({endring(o.besteInvestering.endring)})

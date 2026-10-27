@@ -130,7 +130,14 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
 - **A script that hunts cut text finds screen-reader labels** (20 October 2026): `scrollWidth > clientWidth` flagged
   «Overskyet», «Snø» on Eiendom — the `.skjult-tekst` labels inside the farm's weather chips, 1 px wide by design. Skip
   elements whose own class or an ancestor's is `skjult-tekst`, and look at the parent before listing a hit. The same
-  scan counts the «?» help buttons (18 px) and the city chips (30 px) as small targets; those were real.
+  scan counts the «?» help buttons (18 px) and the city chips (30 px) as small targets. The city chips were real; the
+  help button may not be: `.forklaring-knapp::after` has been a 44 × 44 tap area since Pack 74, and
+  `getBoundingClientRect` never sees a pseudo-element (found writing Pack 128's description). Grep the CSS for
+  `::after` / `::before` with `inset` before listing a small target, and test the tap with `elementFromPoint` at the
+  edge of the area.
+- **A chart in a server-rendered test needs `CSS.escape`** (Pack 127): `Linjegraf` writes `url(#${CSS.escape(id)})`,
+  and Node has no `CSS`, so `renderToStaticMarkup` of a card holding one threw «CSS is not defined». No test had
+  rendered a chart before. `vi.stubGlobal('CSS', { escape: (x: string) => x })` at the top of the test file.
 - **Rendering a real weekly settlement in a Node test fails on `CSS.escape`** (Pack 123): `UkaDi` draws the week's
   net-worth curve with `Linjegraf`, which calls `CSS.escape` — not defined outside a browser. Render it with
   `{ ...oppgjor, formuekurve: undefined }`, as `pakke113` does by building its own; `lastAlle()` doesn't help.

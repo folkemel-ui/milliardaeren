@@ -5,7 +5,7 @@
 
 import { betalRente, dekkUnderskudd, sjekkMargin } from './bank'
 import { bedriftInntektPerSek, nettoformue, sparerente as sparesats, sparerentePerSek, statusfaktor } from './formler'
-import { forvalterInnskudd, forvalterkontoRente } from './forvalter'
+import { bokforUtbytte, forvalterInnskudd, forvalterkontoRente, forvalterSekund } from './forvalter'
 import { leiePerSek, sjekkOppussing } from './eiendom'
 import { MARKED_TIKK_SEK, markedstikk, registrerDagslutt } from './marked'
 import { utbytteFor } from './kvartal'
@@ -192,6 +192,8 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
     s.kontanter += kupong
     s.totaltUtbytte += kupong
   }
+  // Pakke 127: forvalterens regnskap — skyggekontoens rente og kupongene fra obligasjonene den har.
+  if (s.forvalter) forvalterSekund(s, sparesats(s), kupong)
   if (m) t = runde(m, 'sparing og utbytte', t)
   // Leien kommer uansett — eiendom trenger ingen leder. Borte kommer den samlet.
   if (leieSek > 0) {
@@ -245,6 +247,7 @@ function sekund(s: Spilltilstand, terning: Terning, borte: boolean, leieSek: num
 }
 
 function betalUtbytte(s: Spilltilstand): void {
+  bokforUtbytte(s)
   let sum = 0
   for (const [id, b] of Object.entries(s.beholdning) as [PapirId, { antall: number }][]) {
     sum += b.antall * s.marked.kurser[id].kurs * utbytteFor(s, id)

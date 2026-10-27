@@ -11,7 +11,7 @@ import { FOND, fondStengt } from '../fond'
 import { erHelg } from '../kalender'
 import { maksPerOrdre, PAPIRER, rundAntall, stengtIHelgen } from '../marked'
 import type { FondId, Forvalterprofil, Ordretype, PapirId, Spilltilstand } from '../types'
-import { forvaltertrinn, forvaltertrinnpris, forvaltetVerdi, INNSKUDDSANDELER, MAALGANGER, nesteBedriftsmaal, PROFILER, rebalanser, trekkForvaltergebyr } from '../forvalter'
+import { bokforInn, bokforUt, forvaltertrinn, forvaltertrinnpris, forvaltetVerdi, INNSKUDDSANDELER, MAALGANGER, nesteBedriftsmaal, PROFILER, rebalanser, startRegnskap, trekkForvaltergebyr } from '../forvalter'
 import { sparingKostpris } from '../portefolje'
 import { kortKroner, tall } from '../tall'
 import { KONTRAER_ANDEL } from '../prestasjoner'
@@ -96,6 +96,8 @@ export function startForvalter(s: Spilltilstand, profil: Forvalterprofil): Utfal
   if (n.forvalter) n.forvalter.profil = profil
   else {
     n.forvalter = { profil, fra: n.sek, gebyrBetalt: 0 }
+    // Pakke 127: det den overtar, regnes som gitt den — før det første gebyret.
+    startRegnskap(n)
     trekkForvaltergebyr(n)
   }
   rebalanser(n)
@@ -136,7 +138,11 @@ export function forvalterBelop(s: Spilltilstand, belop: number): Utfall {
   if (erHelg(s.sek)) return feil(FORVALTER_STENGT)
   if (belop > s.kontanter) return feil('Du har ikke så mye i kontanter.')
   const n = structuredClone(s)
+  const kontanter = n.kontanter
   rebalanser(n, belop < 0 ? -Math.min(-belop, forvaltetVerdi(n)) : belop)
+  // Pakke 127: det som faktisk gikk inn eller ut, til regnskapet.
+  if (n.kontanter < kontanter) bokforInn(n, kontanter - n.kontanter)
+  else bokforUt(n, n.kontanter - kontanter)
   return { ok: true, tilstand: n }
 }
 

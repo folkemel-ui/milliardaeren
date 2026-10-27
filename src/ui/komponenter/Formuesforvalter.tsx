@@ -3,7 +3,7 @@
  * ut, og se hva den gjorde sist mandag. Forvalteren holder aksjene, Børsfondet, obligasjonene og
  * råvarene dine i profilens blanding; kryptoen rører den ikke. (Ikke å forveksle med
  * eiendomsforvalterne i Forvalter.tsx, fra Pakke 54.) Pakke 125: trinnene, og hva den holder nå.
- * Pakke 126: Utbytte-profilen, en andel av inntekten og sparemålet.
+ * Pakke 126: Utbytte-profilen, en andel av inntekten og sparemålet. Pakke 127: om den lønner seg, og kurven.
  */
 
 import { forvalterBelop, kjopForvaltertrinn, settForvalterinnskudd, settForvaltermaal, startForvalter, stoppForvalter } from '../../engine/handlinger'
@@ -14,6 +14,7 @@ import {
   forvaltertrinn,
   forvaltertrinnpris,
   forvaltetVerdi,
+  forvalterResultat,
   gebyrsats,
   GLIR_FRA,
   INNSKUDDSANDELER,
@@ -32,7 +33,9 @@ import { fase, FASER } from '../../engine/verden'
 import { erHelg } from '../../engine/kalender'
 import type { Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
-import { kortKroner, perSek, tall } from '../format'
+import { fortegnKroner, kortKroner, perSek, tall } from '../format'
+import { DAG_SEK, dagnummer, dato, MÅNEDER } from '../../engine/kalender'
+import { Linjegraf } from './Linjegraf'
 import { Bekreftknapp } from './Bekreftknapp'
 
 const RENTEPOST: Record<string, string> = { kort: '2-årige obligasjoner', lang: '10-årige obligasjoner', konto: 'forvalterkontoen' }
@@ -49,6 +52,32 @@ function blandingstekst(s: Spilltilstand): string {
   }
   const deler = [`aksjer ${pst(aksjer)}`, `gull ${pst(m.get('GLD') ?? 0)}`]
   return `${FASER[fase(s)].navn}: ${deler.join(', ')}${rente ? ` · ${rente}` : ''}`
+}
+
+/**
+ * Om den lønner seg (Pakke 127): «+kr 148 mill siden start, kr 44 mill i gebyr — kr 52 mill mer enn
+ * sparekontoen», før skatt og med utbyttet, og det den har forvaltet de siste åtte ukene.
+ */
+function Resultat({ s, verdi }: { s: Spilltilstand; verdi: number }) {
+  const f = s.forvalter!
+  const r = forvalterResultat(s)
+  if (!r) return <p className="dempet liten">Gebyrene så langt: {kortKroner(f.gebyrBetalt)}.</p>
+  const d = dato(dagnummer(r.fra))
+  const siden = r.fra === f.fra ? 'siden start' : `siden ${d.dag}. ${MÅNEDER[d.maaned]}`
+  const kurve = f.regnskap!.kurve
+  const idag = dagnummer(s.sek)
+  const punkter = [...kurve.map((v, i) => ({ sek: (idag - (kurve.length - i) + 1) * DAG_SEK, verdi: v })), { sek: s.sek, verdi }]
+  return (
+    <>
+      <p className="liten">
+        <strong className={r.gevinst >= 0 ? 'pluss' : 'minus'}>{fortegnKroner(r.gevinst)}</strong> {siden}, {kortKroner(r.gebyr)} i gebyr —{' '}
+        {r.mer >= 0 ? `${kortKroner(r.mer)} mer` : `${kortKroner(-r.mer)} mindre`} enn sparekontoen.
+        <br />
+        <span className="dempet">Før skatt, med utbyttet og kupongene. Sparekontoen har fått de samme pengene til de samme tidene.</span>
+      </p>
+      {kurve.length >= 1 && <Linjegraf punkter={punkter} format={kortKroner} etikett={`Det forvalteren har, de siste ${punkter.length - 1} dagene`} />}
+    </>
+  )
 }
 
 /** «Av inntekten»: en andel av inntekten og leia til forvalteren hvert sekund, investert mandag (Pakke 126). */
@@ -199,7 +228,7 @@ export function Formuesforvalter({ s }: { s: Spilltilstand }) {
           <Bekreftknapp className="knapp knapp-liten" ja="Ja, si opp" varsel="Det forvalteren har kjøpt, blir stående som ditt." onJa={() => utfor(stoppForvalter(s))}>
             Si opp forvalteren
           </Bekreftknapp>
-          <p className="dempet liten">Gebyrene så langt: {kortKroner(f.gebyrBetalt)}.</p>
+          <Resultat s={s} verdi={verdi} />
         </>
       )}
       {/* Pakke 125: tre trinn, kjøpt én gang og priset på nettoformuen; de blir stående om du sier opp. */}

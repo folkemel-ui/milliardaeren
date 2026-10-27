@@ -119,8 +119,8 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
   every second with its cost price, earns the savings rate, and Monday's rebalance moves it out like any post over
   its target — no new post, no new field in `eiendeler`, and a stop moves it to the savings account as before. Moving
   money on and off that account now calls `flyt(…, 'sparing', ±)`: without it the day's change for the «Sparekontoen»
-  class would show a deposit as a gain and Monday's investing as a loss. The side effect: «Kjøpt og solgt» in «Uka di»
-  lists those moves under «Sparekontoen» (a line for Pack 127).
+  class would show a deposit as a gain and Monday's investing as a loss. «Kjøpt og solgt» in «Uka di» never shows them:
+  `HANDELSKLASSER` in `oppgjor.ts` leaves the savings class out (Pack 127 found it; Pack 126 had claimed otherwise).
 - **A goal the manager can already pay is no goal** (Pack 126): «the cheapest business you don't own» picked Pølsebod at
   kr 1 200 in a save that had skipped it. `nesteBedriftsmaal` takes the cheapest one that costs more than the manager
   holds. And unlocking (`laasesOppVed`, e.g. Rederi 25 mrd net worth) sits 25 % above the price (20 mrd), so the goal
@@ -128,6 +128,18 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 - **To move a price in a test, move `avvik`, not `kurs`** (Pack 126): `flyttKurs` rebuilds the price from
   `fundament · e^(avvik + trykk)` on the next trade, so a test that set `kurs *= 1.3` saw the manager sell, the price
   snap back, and the manager buy *more* than before. Add `Math.log(f)` to `avvik` and multiply `kurs` with it.
+- **The manager's books are counters, not a history** (Pack 127, `f.regnskap`): what it took over and was given
+  (`inn`), what it paid out (`ut`), the dividends and coupons from what it holds (`utbytte`, booked before
+  `betalUtbytte` pays them — only the Børsfondet's share of the fund dividends), the fee level at the start, and a
+  shadow savings account that gets the same money at the same times and the savings rate each second. Gain =
+  value + ut + utbytte − inn − fees; the savings account's = shadow + ut − inn. Book every flow at the cash it
+  really moved (`forvalterBelop` reads the cash before and after): a deposit leaves a slack's worth unspent, a
+  withdrawal can bring a little less. An old manager starts counting on its first second (`forvalterSekund`), with
+  what it holds as `inn`, so no save version. The week's line in «Uka di» takes the counters at the week's start
+  (`Periodestart.forvalter`) and puts half the week's net money in the base for both sides — otherwise money that
+  came in mid-week earns in the numerator but not the base (0.76 % a week for the savings account against ~0.6 %).
+  In a 20-day test save: +kr 282 mill, 24 mill in fees, 185 mill more than the savings account; weeks +1.8–2.3 %
+  against +0.7 %.
 - **The borrowing limit and the margin call were one constant until Pack 81.** `MAKS_BELAANING`
   was both how far you can borrow and how far a margin call sells down; lowering it to 0.2 would
   have made every forced sale harsher. Now `MARGIN_MAAL` (0.5) is the sell-down target and the

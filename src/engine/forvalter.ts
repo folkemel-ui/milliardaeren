@@ -18,11 +18,15 @@
  * rebalansering som tenker på skatten (tapere selges før vinnere, og en vinner først når den er langt
  * unna); en andel av inntekten hvert sekund, samlet på forvalterkontoen og investert mandag; og et
  * sparemål som blir tryggere jo nærmere det kommer, og betales ut når det er nådd.
+ *
+ * Pakke 127: en forvalter du kan se. Et regnskap fra start (eller, for en forvalter fra før, fra
+ * oppdateringen): det som gikk inn og ut, utbyttet, gebyret, og en skyggekonto — sparekontoen med de
+ * samme pengene til de samme tidene — så kortet og søndagsavisa kan si om den lønner seg.
  */
 
 import { AKSJER, handelskurs, KURTASJE, maksPerOrdre, PAPIRER, rundAntall } from './marked'
 import { utforFondskjop, utforFondssalg, utforKjop, utforObligasjonskjop, utforObligasjonssalg, utforSalg } from './handel'
-import { fondskurs, fondsutbytteIDag } from './fond'
+import { fondskurs, fondsutbytte } from './fond'
 import { kupongPerSek, obligasjonsverdiFor } from './obligasjoner'
 import { DAG_SEK, dagnummer, erHelg, ukedag } from './kalender'
 import { utbytteFor } from './kvartal'
@@ -31,7 +35,7 @@ import { eierType, nettoformue } from './formler'
 import { flyt, sparingKostpris } from './portefolje'
 import { fase, type Fase } from './verden'
 import { kortKroner } from './tall'
-import type { BedriftstypeId, Forvalterprofil, ObligasjonId, PapirId, Risiko, Spilltilstand } from './types'
+import type { BedriftstypeId, Forvalterprofil, Forvalterstand, ObligasjonId, PapirId, Risiko, Spilltilstand } from './types'
 
 /** Gebyret hver uke, av det forvalteren har … */
 export const FORVALTER_GEBYR = 0.002
@@ -207,7 +211,12 @@ export function forvaltetVerdi(s: Spilltilstand): number {
  * aksjene og Børsfondet hver hverdag morgen, kupongene sekund for sekund.
  */
 export function utbyttePerDag(s: Spilltilstand): number {
-  let sum = fondsutbytteIDag(s) + kupongPerSek(s) * DAG_SEK
+  return utbytteIDag(s) + kupongPerSek(s) * DAG_SEK
+}
+
+/** Utbyttet aksjene, råvarene og Børsfondet forvalteren har, betaler en hverdag morgen — ikke andre fond (Pakke 127). */
+export function utbytteIDag(s: Spilltilstand): number {
+  let sum = verdiAv(s, 'fond') * fondsutbytte(s, 'BORSFOND')
   for (const id of Object.keys(s.beholdning) as PapirId[]) if (forvaltes(id)) sum += verdiAv(s, id) * utbytteFor(s, id)
   return sum
 }
@@ -345,6 +354,7 @@ export function forvalterInnskudd(s: Spilltilstand, belop: number): void {
   f.konto = (f.konto ?? 0) + belop
   f.kontoKostpris = (f.kontoKostpris ?? 0) + belop
   flyt(s, 'sparing', belop)
+  bokforInn(s, belop)
 }
 
 /**
@@ -372,6 +382,7 @@ export function betalUtMaal(s: Spilltilstand): number {
   // Uten målet følger blandingen profilen igjen; uttaket selger det som trengs, tapene først.
   rebalanser(s, -m.belop)
   const ut = s.kontanter - for_
+  bokforUt(s, ut)
   s.hendelser.push({
     sek: s.sek,
     tittel: 'Sparemålet er nådd',
@@ -384,9 +395,99 @@ export function betalUtMaal(s: Spilltilstand): number {
   return ut
 }
 
+// ─────────────────────────────────────────────── Regnskapet (Pakke 127)
+
+/** Så mange dager kurven på kortet husker: åtte uker. */
+export const KURVE_DAGER = 56
+
+/** Starter regnskapet: det forvalteren har nå regnes som gitt den, og skyggekontoen får like mye. Muterer. */
+export function startRegnskap(s: Spilltilstand): void {
+  const f = s.forvalter
+  if (!f) return
+  const verdi = forvaltetVerdi(s)
+  f.regnskap = { fra: s.sek, inn: verdi, ut: 0, utbytte: 0, gebyr0: f.gebyrBetalt, skygge: verdi, kurve: [] }
+}
+
+/** Penger til forvalteren — knappene og andelen av inntekten. Skyggekontoen får det samme. Muterer. */
+export function bokforInn(s: Spilltilstand, belop: number): void {
+  const r = s.forvalter?.regnskap
+  if (!r || !(belop > 0)) return
+  r.inn += belop
+  r.skygge += belop
+}
+
+/** Penger fra forvalteren — uttak og sparemålet. Skyggekontoen gir det samme. Muterer. */
+export function bokforUt(s: Spilltilstand, belop: number): void {
+  const r = s.forvalter?.regnskap
+  if (!r || !(belop > 0)) return
+  r.ut += belop
+  r.skygge -= belop
+}
+
+/**
+ * Hvert sekund: skyggekontoen får sparekontoens rente, og kupongene fra obligasjonene den har føres som
+ * utbytte. En forvalter fra før Pakke 127 begynner å telle her. Muterer.
+ */
+export function forvalterSekund(s: Spilltilstand, sats: number, kupong: number): void {
+  if (!s.forvalter!.regnskap) startRegnskap(s)
+  const r = s.forvalter!.regnskap!
+  r.skygge += (r.skygge * sats) / 3600
+  r.utbytte += kupong
+}
+
+/** Hverdag morgen: aksjeutbyttet og fondsutbyttet til det forvalteren har, før det betales ut. Muterer. */
+export function bokforUtbytte(s: Spilltilstand): void {
+  const r = s.forvalter?.regnskap
+  if (r) r.utbytte += utbytteIDag(s)
+}
+
+/**
+ * Hva forvalteren har gitt siden regnskapet startet, før skatt: det den har og det den har betalt ut og
+ * gitt i utbytte, minus det den fikk og gebyrene. Og det samme for sparekontoen med de samme pengene.
+ */
+export function forvalterResultat(s: Spilltilstand): { fra: number; gevinst: number; gebyr: number; spar: number; mer: number } | null {
+  const f = s.forvalter
+  const r = f?.regnskap
+  if (!f || !r) return null
+  const gebyr = f.gebyrBetalt - r.gebyr0
+  const gevinst = forvaltetVerdi(s) + r.ut + r.utbytte - r.inn - gebyr
+  const spar = r.skygge + r.ut - r.inn
+  return { fra: r.fra, gevinst, gebyr, spar, mer: gevinst - spar }
+}
+
+/** Tellerne ved ukas start, til søndagsavisa. */
+export function forvalterstand(s: Spilltilstand): Forvalterstand | undefined {
+  const f = s.forvalter
+  const r = f?.regnskap
+  if (!f || !r) return undefined
+  return { fra: r.fra, verdi: forvaltetVerdi(s), inn: r.inn, ut: r.ut, utbytte: r.utbytte, gebyr: f.gebyrBetalt - r.gebyr0, skygge: r.skygge }
+}
+
+/**
+ * Ukas avkastning for forvalteren, etter gebyr og med utbyttet, og for skyggekontoen — begge mot det de
+ * hadde ved ukas start og halvparten av pengene inn og ut i uka, som er trukket fra gevinsten. Null når
+ * regnskapet startet i uka.
+ */
+export function ukeresultat(s: Spilltilstand, start: Forvalterstand | undefined): { endring: number; spar: number } | null {
+  const naa = forvalterstand(s)
+  if (!start || !naa || naa.fra !== start.fra || start.verdi <= 0 || start.skygge <= 0) return null
+  const inn = naa.inn - start.inn
+  const ut = naa.ut - start.ut
+  const gevinst = naa.verdi + ut + (naa.utbytte - start.utbytte) - inn - (naa.gebyr - start.gebyr) - start.verdi
+  // Penger som kom inn i uka, har bare stått en del av den: halvparten regnes med i grunnlaget, for begge.
+  const midt = (inn - ut) / 2
+  return { endring: gevinst / Math.max(1, start.verdi + midt), spar: (naa.skygge + ut - inn - start.skygge) / Math.max(1, start.skygge + midt) }
+}
+
 /** Hver mandag morgen — også dagen konjunkturen skifter: ukas gebyr, og blandingen bringes tilbake. Muterer. */
 export function forvalterVedDagsskifte(s: Spilltilstand): void {
   const f = s.forvalter
+  // Pakke 127: kurven får dagens sluttverdi.
+  const bok = f?.regnskap
+  if (bok) {
+    bok.kurve.push(forvaltetVerdi(s))
+    if (bok.kurve.length > KURVE_DAGER) bok.kurve.splice(0, bok.kurve.length - KURVE_DAGER)
+  }
   if (f?.maal) betalUtMaal(s)
   if (!f || erHelg(s.sek) || ukedag(s.sek) !== 0) return
   const gebyr = trekkForvaltergebyr(s)

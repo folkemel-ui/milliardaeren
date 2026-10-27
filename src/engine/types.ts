@@ -119,6 +119,35 @@ export interface Forvalter {
   innskudd?: number
   /** Pakke 126: sparemålet — beløpet den betaler ut som kontanter når den har det, og hva det er til. */
   maal?: { belop: number; navn: string; bedrift?: BedriftstypeId }
+  /** Pakke 127: regnskapet som viser om den lønner seg. Mangler hos en forvalter fra før: telles fra første sekund etter. */
+  regnskap?: Forvalterregnskap
+}
+
+/**
+ * Forvalterens regnskap (Pakke 127), fra sekundet `fra`: det som gikk inn (det den overtok, knappene, andelen
+ * av inntekten) og ut (uttak, sparemålet), utbyttet og kupongene det den har ga deg, gebyrstanden da tellingen
+ * startet, og en skyggekonto — sparekontoen med de samme pengene til de samme tidene. Alt før skatt.
+ */
+export interface Forvalterregnskap {
+  fra: number
+  inn: number
+  ut: number
+  utbytte: number
+  gebyr0: number
+  skygge: number
+  /** Det den forvalter ved hvert dagsskifte, de siste 56 dagene. */
+  kurve: number[]
+}
+
+/** Forvalterens tellere ved ukas start (Pakke 127), til linja i søndagsavisa. */
+export interface Forvalterstand {
+  fra: number
+  verdi: number
+  inn: number
+  ut: number
+  utbytte: number
+  gebyr: number
+  skygge: number
 }
 
 /** En aksje eller en kryptomynt. Rater er per time spilltid. */
@@ -556,6 +585,8 @@ export interface Periodestart {
    */
   enhetspriser?: Record<string, number>
   handel?: Handelstotal
+  /** Pakke 127: forvalterens tellere, når du har en. */
+  forvalter?: Forvalterstand
 }
 
 export interface Oppgjor {
@@ -601,6 +632,8 @@ export interface Oppgjor {
   gardene?: { host: number; vaer: string }
   /** Pakke 123: skogene denne uka — tømmeret fra hogstene, hvor mange, og storm og brann. */
   skogene?: { tommer: number; hogster: number; stormer: number; branner: number }
+  /** Pakke 127: hva forvalteren ga denne uka, etter gebyr og med utbyttet, og hva sparekontoen ville gitt. */
+  forvalter?: { endring: number; spar: number }
 }
 
 /** Et øyeblikksbilde ved forrige dagsskifte, så avisen kan melde hva som har endret seg. */
