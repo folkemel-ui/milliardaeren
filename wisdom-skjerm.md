@@ -145,6 +145,12 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   none gets the 135 px short card (Pack 84) a real late game earns, both banners show, and Bedrifter measured 4 146 px
   of cards (5.1 screens). With every business finished it was 1 890 px and no banners. Before quoting a page height
   from the test save, set the state a real player would have (`forbedringer`, `retning`) and measure both.
+- **A cut name: measure who takes the row, not the one the review blamed** (Pack 130): «Nordsjøolje cut because the value
+  is written in full» — but 27 of 33 owned Børs names were cut, most next to values under a million, where the short
+  form changes nothing. The row gave the name 65 px: logo 36, mini chart 60, the change line («−kr 30 336 · −3,7 %») 126,
+  and 30 px of gaps. Try each fix in the page and count what stays cut (short value 27, % only 7, no chart 3, both 0,
+  two-line names 0 but 16 rows taller) before asking; Folke picked no chart on owned rows, with the 3–4 longest names
+  on two lines.
 - **A full control row means a new place, not a smaller button** (Pack 129): the «Kompakt» switch was offered «by the
   amounts», but six controls used 334 of 343 px and a seventh 44 px button needed ~29 more. Measure the free width of
   the row an option names before offering it; here it became one follow-up question (the heading row, with

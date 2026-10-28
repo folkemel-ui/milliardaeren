@@ -122,9 +122,12 @@ export function Papirliste({ s, klasse, velg }: { s: Spilltilstand; klasse: 'aks
                       {id} · {fmtAntall(b.antall)} {PAPIRER[id].enhet ?? ord.enhet}
                     </span>
                   </span>
-                  <Minigraf verdier={s.marked.kurser[id].historikk} />
+                  {/*
+                    Pakke 130: uten minigraf på det du eier, og verdien i kortform — før fikk navnet 65 px, og 27 av 33
+                    navn ble kuttet. Grafen står på papirets side og på radene du ikke eier.
+                  */}
                   <span className="papirrad-kurs">
-                    <span>{kroner(v)}</span>
+                    <span>{kortKroner(v)}</span>
                     <Endring kroner={v - b.kostpris} andel={v / b.kostpris - 1} liten />
                   </span>
                 </button>

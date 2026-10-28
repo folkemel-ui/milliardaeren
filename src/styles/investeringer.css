@@ -354,6 +354,15 @@
   border-color: var(--gull-mørk);
 }
 
+/* Pakke 130: en rad du eier har ingen minigraf, og et langt navn får to linjer i stedet for å kuttes. */
+.papirrad.eid {
+  grid-template-columns: auto 1fr auto;
+}
+
+.papirrad.eid .papirrad-navn strong {
+  white-space: normal;
+}
+
 .sparekonto,
 .obligasjon,
 .forvalter {

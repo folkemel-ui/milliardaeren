@@ -17,8 +17,15 @@ import type { Spilltilstand } from '../../../engine/types'
 import { utfor } from '../../../state/lager'
 import { kortKroner, kroner, perSek, tall } from '../../format'
 import { RulleTall } from '../../komponenter/RulleTall'
-import { Forklaring } from '../../komponenter/Forklaring'
 import { SkattSaLangt } from '../../komponenter/Skattekort'
+import { Seksjon } from '../../komponenter/Seksjon'
+import { OBLIGASJONSLISTE, obligasjonsverdi } from '../../../engine/obligasjoner'
+
+/** «2 obligasjoner · kr 2,4 mrd», eller «Ingen ennå» (Pakke 130). */
+function obligasjonssammendrag(s: Spilltilstand): string {
+  const antall = OBLIGASJONSLISTE.filter((id) => s.obligasjoner?.[id]).length
+  return antall ? `${antall} ${antall === 1 ? 'obligasjon' : 'obligasjoner'} · ${kortKroner(obligasjonsverdi(s))}` : 'Ingen ennå'
+}
 
 function Sparekonto({ s }: { s: Spilltilstand }) {
   const andeler = [0.25, 0.5, 1]
@@ -42,7 +49,8 @@ function Sparekonto({ s }: { s: Spilltilstand }) {
       {/* Pakke 124: en andel av inntekten og leia rett på kontoen, hvert sekund. */}
       <div className="spare-rad">
         <span className="etikett">Spar av inntekten</span>
-        <div className="andelsknapper" role="radiogroup" aria-label="Spar av inntekten">
+        {/* Pakke 130: fire knapper på én rad — før sto «50 %» alene på en ny rad (en feil fra Pakke 124). */}
+        <div className="andelsknapper fire" role="radiogroup" aria-label="Spar av inntekten">
           {SPARANDELER.map((a) => (
             <button key={a} role="radio" aria-checked={(s.sparandel ?? 0) === a} className={(s.sparandel ?? 0) === a ? 'knapp knapp-liten aktiv' : 'knapp knapp-liten'} onClick={() => utfor(settSparandel(s, a))}>
               {a ? `${tall(a * 100)} %` : 'Av'}
@@ -92,15 +100,22 @@ export function Bank({ s }: { s: Spilltilstand }) {
     <>
       <Konjunkturkort s={s} />
       <Sparekonto s={s} />
-      <h2 className="seksjon-tittel">
-        Obligasjoner <Forklaring tema="obligasjoner" />
-      </h2>
-      <Obligasjoner s={s} />
-      <h2 className="seksjon-tittel">
-        Gjeld og lån <Forklaring tema="laan" />
-      </h2>
+      {/*
+        Pakke 130: obligasjonene og lånene som seksjoner du kan folde — sammenfoldet når du ikke har noe der,
+        åpne når du har. Skatten så langt står utenfor, så den ikke forsvinner med lånene.
+      */}
+      <Seksjon id="bank-obligasjoner" tittel="Obligasjoner" forklaring="obligasjoner" sammendrag={obligasjonssammendrag(s)} harInnhold={obligasjonsverdi(s) > 0}>
+        <Obligasjoner s={s} />
+      </Seksjon>
+      <SkattSaLangt s={s} />
+      <Seksjon
+        id="bank-laan"
+        tittel="Gjeld og lån"
+        forklaring="laan"
+        sammendrag={s.gjeld > 0 ? `Gjeld ${kortKroner(s.gjeld)} · ${tall(Math.min(grad, 9.99) * 100)} %` : `Ingen gjeld · kan låne ${kortKroner(tilgjengelig)}`}
+        harInnhold={s.gjeld > 0}
+      >
       <div className="kort bank">
-        <SkattSaLangt s={s} />
         <div className="bank-rad">
           <div>
             <span className="etikett">Gjeld</span>
@@ -193,6 +208,7 @@ export function Bank({ s }: { s: Spilltilstand }) {
           })}
         </div>
       </div>
+      </Seksjon>
 
     </>
   )

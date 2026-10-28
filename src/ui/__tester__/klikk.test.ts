@@ -73,6 +73,9 @@ describe('klikk gjennom appen', () => {
     await app.fane('Investeringer')
     await app.trykk(app.knapp(/^Bank$/))
     await app.vent(50)
+    // Pakke 130: uten gjeld er «Gjeld og lån» foldet sammen; et trykk på overskriften åpner den.
+    await app.trykk(app.knapp(/Gjeld og lån/))
+    await app.vent(50)
     const laan = [...app.rot.querySelectorAll('.kort')].find((k) => k.querySelector('h2')?.textContent === 'Lån')!
     await app.trykk(app.knapper(/^kr /, laan)[0])
     expect(app.spill().gjeld).toBeGreaterThan(0)
