@@ -81,6 +81,18 @@
   gap: 12px;
 }
 
+/* Pakke 131: byene i eiendomslista som seksjoner i seksjonen — bynavnet som vanlig tekst. */
+.seksjon.under .seksjon-tittel {
+  font-size: var(--skrift-3);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--tekst);
+}
+
+.seksjon.under {
+  gap: 8px;
+}
+
 .indeks {
   display: flex;
   justify-content: space-between;
@@ -101,15 +113,20 @@
   white-space: nowrap;
 }
 
+/*
+ * Pakke 131: kolonnene deler bredden (minmax(0, 1fr)), og en lang tekst får to linjer i knappen. Før vokste
+ * kolonnene med teksten, og skogkortets «Hogg eldste · kr 3,96 mill» og «Selg · kr 74,5 mill» stakk 19 px ut av kortet.
+ */
 .eiendom-knapper {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .eiendom-knapper .knapp {
-  padding: 0 8px;
-  white-space: nowrap;
+  padding: 4px 8px;
+  white-space: normal;
+  line-height: 1.25;
 }
 
 .eiendom-knapper.en {

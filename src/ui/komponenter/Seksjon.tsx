@@ -51,6 +51,7 @@ export function Seksjon({
   sammendrag,
   harInnhold,
   forklaring,
+  under = false,
   children,
 }: {
   id: string
@@ -59,6 +60,8 @@ export function Seksjon({
   forklaring?: Tema
   sammendrag?: string
   harInnhold: boolean
+  /** Pakke 131: en seksjon i en seksjon (en by i eiendomslista) — overskriften som vanlig tekst, ikke store bokstaver. */
+  under?: boolean
   children: ReactNode
 }) {
   const [valgt, settValgt] = useState<boolean | undefined>(() => lesValg()[id])
@@ -68,7 +71,7 @@ export function Seksjon({
     settValgt(!åpen)
   }
   return (
-    <div className={åpen ? 'seksjon åpen' : 'seksjon'}>
+    <div className={`seksjon${åpen ? ' åpen' : ''}${under ? ' under' : ''}`}>
       <div className="seksjon-hoderad">
         <button className="seksjon-hode" aria-expanded={åpen} onClick={bytt}>
           <span className="seksjon-pil" aria-hidden="true">

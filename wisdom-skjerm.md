@@ -135,7 +135,9 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   `getBoundingClientRect` never sees a pseudo-element. Pack 128 proved it: all 34 «?» buttons on every tab and part,
   `elementFromPoint` at ±20 px and ±14 px from the centre in eight directions, each hit landed on the button
   (`closest('.forklaring-knapp')`), so the item became a CSS test. Grep the CSS for `::after` / `::before` with
-  `inset` before listing a small target, and test the tap that way.
+  `inset` before listing a small target, and test the tap that way. Pack 131 found the same for the 30 px city chips
+  (`.byvalg button::after`, 8 px over and under, inside the row's own padding — the row scrolls sideways and so clips
+  in height): all 23 took a tap 21 px from the centre. Both «small targets» from the 20 October review were already fine.
 - **Try a layout option in the page before asking about it** (Pack 128, the date row): swap the chip's text and the
   date's HTML in place, read `scrollWidth` against `clientWidth`, and put the numbers in the question. «Stengt» alone
   still cut the date (158 of 151 px), no week alone too (113 of 100), «Stengt» and no week fit to the pixel (151 of

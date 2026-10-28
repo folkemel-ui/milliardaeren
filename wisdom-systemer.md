@@ -198,6 +198,11 @@ after `wisdom-motor.md`. «A new X needs …» lists are here.
 
 ## Property, cities and maps
 
+- **The Eiendom list is the types on sale, not what you own** (Pack 131): one row per `EiendomId` that `eiendomSynlig`
+  shows, with the count you own on it — 17 rows in Norway whether you own 1 or 17 of them. Since Pack 131 the rows
+  stand under one `Seksjon` per city (`under`, a plain-text heading), in `NORSKE_BYER`/`UTENLANDSBYER` order, open
+  where you own something; the map is a `Seksjon` too, folded from `KART_FOLDES_FRA` (5) cities with something owned —
+  buildings, and in Norway farms, forests and landmarks.
 - **Rent (Pack 54)** = price × index × yield × standard × city factor × season × weather
   ÷ 3600, where the city factor (`byfaktorLeie`) holds the whole-city bonus, vacancy and
   the manager's trait, and the weather factor comes from `dagsbilde(s).eiendom[id]`. Tests
