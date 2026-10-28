@@ -42,7 +42,8 @@ export const DIVISJONER = [
  * god form, så en klubb med «sitt» trinn tjener minst det billettene ga før.
  */
 export const STADIONTRINN = [
-  { navn: 'Gressbane med én tribune', plasser: 700, pris: 0 },
+  // Pakke 132: «Gressbane, 1 tribune» — «Gressbane med én tribune» ble kuttet i klubblinja på 375 px.
+  { navn: 'Gressbane, 1 tribune', plasser: 700, pris: 0 },
   { navn: 'Ny langsidetribune', plasser: 2_000, pris: 4_000_000 },
   { navn: 'Tribuner rundt banen', plasser: 5_000, pris: 15_000_000 },
   { navn: 'Moderne arena', plasser: 10_000, pris: 50_000_000 },

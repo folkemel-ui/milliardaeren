@@ -147,6 +147,14 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   none gets the 135 px short card (Pack 84) a real late game earns, both banners show, and Bedrifter measured 4 146 px
   of cards (5.1 screens). With every business finished it was 1 890 px and no banners. Before quoting a page height
   from the test save, set the state a real player would have (`forbedringer`, `retning`) and measure both.
+- **Counting tags in rendered HTML: `<li>`, not `<li`** (Pack 132): after `lastAlle()` the drawings are real SVG, and
+  every `<linearGradient>` also starts with «<li» — a group of 8 cars counted as 14. The same goes for any tag a drawing
+  can contain (`<line`, `<linearGradient`, `<rect`): match the full tag or a class.
+- **Two review items about «the same» thing can be about two things** (Pack 132): «garage rows that scroll and cut
+  names» and «eight cars seven to a row» sounded like one shelf described twice, but the first is the garage, harbour
+  and hangar *scenes* (they scroll sideways on purpose; no name was truncated, long names wrap inside their 96 px
+  place) and the second is the Samling *overview* grid (it wraps; 7 + 1 was real). Find each item's component before
+  deciding they conflict.
 - **A cut name: measure who takes the row, not the one the review blamed** (Pack 130): «Nordsjøolje cut because the value
   is written in full» — but 27 of 33 owned Børs names were cut, most next to values under a million, where the short
   form changes nothing. The row gave the name 65 px: logo 36, mini chart 60, the change line («−kr 30 336 · −3,7 %») 126,

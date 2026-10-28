@@ -87,7 +87,8 @@ export function Luksus({ s }: { s: Spilltilstand }) {
   return (
     <section className="skjerm">
       <h1 className="skjerm-tittel">Luksus</h1>
-      {del === 'klubb' ? <Statusstripe s={s} /> : <Status s={s} />}
+      {/* Pakke 132: stripa på alle delene, ikke bare på Klubb — det fulle kortet (220 px) sto over Samling, Hjem og Kunst. */}
+      <Statusstripe s={s} />
       <div className="segment" role="tablist" aria-label="Luksus">
         {LUKSUSDELER.map((d) => (
           <button key={d.id} role="tab" aria-selected={del === d.id} className={del === d.id ? 'aktiv' : ''} onClick={() => luksusdel.sett(d.id)}>
@@ -192,7 +193,7 @@ function Klokkeskap({ s }: { s: Spilltilstand }) {
 }
 
 /**
- * Statusen som én linje på Klubb (Pakke 77): klubbens egen topp skal ikke
+ * Statusen som én linje (Pakke 77 på Klubb, Pakke 132 på alle delene): delene skal ikke
  * starte en skjerm ned. Et trykk viser hele kortet.
  */
 function Statusstripe({ s }: { s: Spilltilstand }) {

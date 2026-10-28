@@ -211,15 +211,15 @@ describe('cupen i neste kamp', () => {
 })
 
 describe('statusen på Klubb', () => {
-  it('er én linje som åpner hele kortet; Samling har hele kortet', async () => {
+  it('er én linje som åpner hele kortet — fra Pakke 132 også på Samling', async () => {
     app = await tilKlubben(medKlubb())
     expect(app.rot.querySelector('.kort.status')).toBeNull()
     const stripe = app.rot.querySelector<HTMLElement>('.statusstripe')!
     expect(stripe.getAttribute('aria-expanded')).toBe('false')
     await app.trykk(stripe)
     expect(app.rot.querySelector('.kort.status')).not.toBeNull()
+    // Pakke 132: stripa står på alle delene, også på Samling.
     await app.trykk(app.knapp('Samling', app.rot.querySelector('[aria-label="Luksus"]')!))
-    expect(app.rot.querySelector('.statusstripe')).toBeNull()
-    expect(app.rot.querySelector('.kort.status')).not.toBeNull()
+    expect(app.rot.querySelector('.statusstripe')).not.toBeNull()
   })
 })

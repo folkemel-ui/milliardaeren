@@ -16,6 +16,9 @@ const KATEGORIER: LuksusKategori[] = ['bil', 'klokke', 'baat', 'fly']
  * eier: de andre kan bare kjøpes når de er under hammeren, og tolv skygger tok to
  * linjer på en telefon.
  */
+/** Så mange 44 px-mål står i bredden på en telefon (315 px), uten luft imellom. */
+export const PER_RAD = 7
+
 export function Samlingsoversikt({ s }: { s: Spilltilstand }) {
   const eide = s.luksus.length
   const unikeEid = UNIKLISTE.filter((id) => s.auksjon?.eide[id]).length
@@ -36,7 +39,11 @@ export function Samlingsoversikt({ s }: { s: Spilltilstand }) {
             <span className="samling-navn liten">
               {KATEGORINAVN[k]} <span className="dempet">{mine} av {ider.length}</span>
             </span>
-            <ul className="samling-ikoner">
+            {/*
+              Pakke 132: en gruppe som trenger to rader, deles jevnt (8 → 4 + 4) i stedet for 7 + 1. Sju står i bredden på
+              en telefon; færre enn det fyller raden som før.
+            */}
+            <ul className="samling-ikoner" style={ider.length > PER_RAD ? { maxWidth: `${Math.ceil(ider.length / Math.ceil(ider.length / PER_RAD)) * 44}px` } : undefined}>
               {ider.map((id) => {
                 const eier = s.luksus.includes(id)
                 return (

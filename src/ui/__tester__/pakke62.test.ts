@@ -44,12 +44,13 @@ describe('Luksus i deler', () => {
     app = await startApp(rikt())
     await app.fane('Luksus')
     expect(del(app)).toBe('Samling')
-    const status = app.rot.querySelector('.status')!
+    // Pakke 132: statusen er en stripe over delene (et trykk åpner hele kortet).
+    const status = app.rot.querySelector('.statusstripe')!
     const deler = app.rot.querySelector('[aria-label="Luksus"]')!
     expect(status.compareDocumentPosition(deler) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     await app.trykk(app.knapp('Kunst', deler))
     // Statusen står der på hver del.
-    expect(app.rot.querySelector('.status')).not.toBeNull()
+    expect(app.rot.querySelector('.statusstripe')).not.toBeNull()
   })
 
   it('en bil du eier, står i garasjen og ikke i noen liste — hver ting vises én gang', async () => {
