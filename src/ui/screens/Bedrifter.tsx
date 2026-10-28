@@ -8,12 +8,12 @@ import type { BedriftstypeId, Spilltilstand } from '../../engine/types'
 import { utfor } from '../../state/lager'
 import { kortKroner, perSek } from '../format'
 import { BedriftIkon } from '../komponenter/BedriftIkon'
-import { Bedriftskort } from '../komponenter/Bedriftskort'
+import { Bedriftskort, Kompaktrad } from '../komponenter/Bedriftskort'
 import { Seksjon } from '../komponenter/Seksjon'
 import { Markedsknapp } from '../komponenter/Dagen'
 import { lagreKjopsmengde, lesKjopsmengde, MENGDER, type Kjopsmengde } from '../kjopsmengde'
 import { Forklaring } from '../komponenter/Forklaring'
-import { bedriftsrekkefolge, REKKEFOLGER } from '../deler'
+import { bedriftsrekkefolge, bedriftsvisning, REKKEFOLGER } from '../deler'
 import { fastInntekt } from '../sortering'
 import { useTilbake } from '../tilbake'
 import { Hjemskjermkort } from '../komponenter/Hjemskjerm'
@@ -39,12 +39,15 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
   }
   // Kjøpt (standard) eller etter fast inntekt — størst først, lik inntekt i kjøpsrekkefølge.
   const rekkefolge = bedriftsrekkefolge.bruk()
+  // Pakke 129: kort eller én rad per bedrift. Bryteren kommer med den tredje bedriften, som rekkefølgen.
+  const visning = bedriftsvisning.bruk()
   const bedrifter = rekkefolge === 'inntekt' ? [...s.bedrifter].sort((a, b) => fastInntekt(b) - fastInntekt(a)) : s.bedrifter
   // Bedriftene som venter på en retning (Pakke 75): én linje øverst i stedet for et merke på hvert kort.
   const venter = bedrifter.filter(kanVelgeRetning)
   // Pakke 102: kjøpsmengdene først når de betyr noe — med en bedrift nummer to, eller nivå 10.
   const visMengde = s.bedrifter.length >= 2 || s.bedrifter.some((b) => b.nivaa >= 10)
   const visRekkefolge = s.bedrifter.length >= 3
+  const kompakt = visRekkefolge && visning === 'kompakt'
   // Uten valget kjøper knappen ett nivå om gangen, uansett hva som er lagret fra før.
   const mengdeNaa: Kjopsmengde = visMengde ? mengde : '1'
   // De billige forbedringene (Pakke 102): klare til kjøp og under 0,1 % av kontantene hver.
@@ -68,6 +71,7 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
   const neste = REKKEFOLGER[(REKKEFOLGER.findIndex((r) => r.id === rekkefolge) + 1) % REKKEFOLGER.length]
   const naa = REKKEFOLGER.find((r) => r.id === rekkefolge) ?? REKKEFOLGER[0]
   const prisBillige = billige.reduce((sum, x) => sum + x.pris, 0)
+  const visBillige = billige.length >= BILLIGE_MIN
 
   return (
     <section className="skjerm">
@@ -76,15 +80,36 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
         <h1 className="skjerm-tittel">
           Dine bedrifter <Forklaring tema="bedrifter" />
         </h1>
-        <Markedsknapp s={s} />
+        <div className="skjerm-hode-hoyre">
+          <Markedsknapp s={s} />
+          {visRekkefolge && (
+            <button
+              type="button"
+              className={kompakt ? 'visningsknapp aktiv' : 'visningsknapp'}
+              aria-pressed={kompakt}
+              aria-label="Kompakt visning: én rad per bedrift"
+              title={kompakt ? 'Vis bedriftene som kort' : 'Vis bedriftene kompakt'}
+              onClick={() => bedriftsvisning.sett(kompakt ? 'kort' : 'kompakt')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
       {/* Pakke 95: Safari-spillere får beskjed om Hjem-skjermen fra første besøk. */}
       <Hjemskjermkort />
-      {/* Pakke 75: ganger og rekkefølge på én rad — med rekkefølgen som én knapp igjen (Pakke 102). */}
+      {/*
+        Pakke 75: ganger og rekkefølge på én rad — med rekkefølgen som én knapp igjen (Pakke 102), og fra Pakke 129
+        i samme segment, med en strek imellom, i stedet for en boks i boksen.
+      */}
       {(visMengde || visRekkefolge) && (
-        <div className="bedrifter-kontroller">
+        <div className="bedrifter-kontroller segment">
           {visMengde && (
-            <div className="segment mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
+            <div className="mengdevalg" role="radiogroup" aria-label="Hvor mange nivåer hver oppgradering kjøper">
               {MENGDER.map((m) => (
                 <button key={m.id} role="radio" aria-checked={mengde === m.id} className={mengde === m.id ? 'aktiv' : ''} onClick={() => velgMengde(m.id)}>
                   {m.navn}
@@ -93,31 +118,46 @@ export function Bedrifter({ s, tilRival }: { s: Spilltilstand; tilRival: (id: st
             </div>
           )}
           {visRekkefolge && (
-            <div className="segment rekkefolge" role="group" aria-label="Rekkefølge på bedriftene">
-              <button type="button" className="aktiv" aria-label={`Rekkefølge: ${naa.navn.toLowerCase()}. Trykk for ${neste.navn.toLowerCase()}.`} onClick={() => bedriftsrekkefolge.sett(neste.id)}>
+            <div className={visMengde ? 'rekkefolge med-skille' : 'rekkefolge'} role="group" aria-label="Rekkefølge på bedriftene">
+              <button type="button" className="rekkefolge-knapp" aria-label={`Rekkefølge: ${naa.navn.toLowerCase()}. Trykk for ${neste.navn.toLowerCase()}.`} onClick={() => bedriftsrekkefolge.sett(neste.id)}>
                 {naa.navn}
               </button>
             </div>
           )}
         </div>
       )}
-      {venter.length > 0 && (
-        <button type="button" className="retningslinje" onClick={() => settValgt(venter[0].id)}>
-          <span className="retningsprikk" aria-hidden="true" />
-          {venter.length === 1 ? `${BEDRIFTSTYPER[venter[0].type].navn} venter på retning` : `${venter.length} bedrifter venter på retning`}
-          <span aria-hidden="true"> ›</span>
-        </button>
+      {/*
+        Pakke 129: retningen og de billige forbedringene i én stripe, i én stil — to halvdeler når begge står der,
+        hele stripa når bare den ene gjør det. Før var de to linjer i to stiler, 98 px over det første kortet.
+      */}
+      {(venter.length > 0 || visBillige) && (
+        <div className={venter.length > 0 && visBillige ? 'varselstripe delt' : 'varselstripe'}>
+          {venter.length > 0 && (
+            <button type="button" className="stripe-del stripe-retning" onClick={() => settValgt(venter[0].id)}>
+              <span className="retningsprikk" aria-hidden="true" />
+              <span>
+                {venter.length === 1 && !visBillige ? `${BEDRIFTSTYPER[venter[0].type].navn} venter på retning` : `${venter.length} venter på retning`}
+                <span aria-hidden="true"> ›</span>
+              </span>
+            </button>
+          )}
+          {visBillige && (
+            <button type="button" className="stripe-del stripe-billige" onClick={() => utfor(kjopForbedringer(s, billige.map((x) => x.id)))}>
+              <Ikon navn="gnist" størrelse={14} />
+              <span>{venter.length > 0 ? `Kjøp ${billige.length} billige` : `Kjøp alle billige forbedringer (${billige.length})`}</span>
+              <span className="stripe-pris">{kortKroner(prisBillige)}</span>
+            </button>
+          )}
+        </div>
       )}
-      {billige.length >= BILLIGE_MIN && (
-        <button type="button" className="billiglinje" onClick={() => utfor(kjopForbedringer(s, billige.map((x) => x.id)))}>
-          <Ikon navn="gnist" størrelse={14} /> Kjøp alle billige forbedringer ({billige.length})
-          <span className="billiglinje-pris">{kortKroner(prisBillige)}</span>
-        </button>
-      )}
-      <ul className="kortliste">
-        {bedrifter.map((b) => (
-          <Bedriftskort key={b.id} b={b} s={s} mengde={mengdeNaa} åpne={() => settValgt(b.id)} />
-        ))}
+      <ul className={kompakt ? 'kortliste kompakt' : 'kortliste'}>
+        {bedrifter.map((b) =>
+          kompakt ? (
+            <Kompaktrad key={b.id} b={b} s={s} mengde={mengdeNaa} åpne={() => settValgt(b.id)} />
+          ) : (
+            <Bedriftskort key={b.id} b={b} s={s} mengde={mengdeNaa} åpne={() => settValgt(b.id)} />
+          ),
+        )}
       </ul>
 
       {s.romfart && <Romfartkort s={s} åpne={() => settRomfartApen(true)} />}

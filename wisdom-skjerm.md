@@ -141,6 +141,14 @@ work; the graphics track's own notes are in `wisdom-grafikk.md`.
   still cut the date (158 of 151 px), no week alone too (113 of 100), «Stengt» and no week fit to the pixel (151 of
   151, so a 360 px phone would cut it), and an icon-only chip left 186 px for a date needing 167 — the option Folke
   picked. The widest date to try is a two-digit day and week («Lør 26. jan · uke 12 · 14:05»).
+- **`fulltSpill()` is an unfinished late game** (Pack 129): its 14 businesses have no improvements and no direction, so
+  none gets the 135 px short card (Pack 84) a real late game earns, both banners show, and Bedrifter measured 4 146 px
+  of cards (5.1 screens). With every business finished it was 1 890 px and no banners. Before quoting a page height
+  from the test save, set the state a real player would have (`forbedringer`, `retning`) and measure both.
+- **A full control row means a new place, not a smaller button** (Pack 129): the «Kompakt» switch was offered «by the
+  amounts», but six controls used 334 of 343 px and a seventh 44 px button needed ~29 more. Measure the free width of
+  the row an option names before offering it; here it became one follow-up question (the heading row, with
+  «Markedet i dag» shortened to «Markedet» for ~40 px).
 - **A label that is a value goes to 13 px; a heading with a number in it does not** (Pack 128): «Rente 1 % per time»
   and «Markedsrente 3,91 % · kupong 1,07 % per time» became `.etikett-tall` (13 px, no capitals), but «Statsobligasjon,
   2 år» above the big number and «1 GBP · siste uke» in the city's stat grid stayed `.etikett` — at 13 px they wrapped

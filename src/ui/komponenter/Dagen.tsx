@@ -22,7 +22,8 @@ export function Markedsknapp({ s }: { s: Spilltilstand }) {
   return (
     <>
       <button type="button" className="markedslinje" aria-haspopup="dialog" aria-expanded={åpen} onClick={() => settÅpen(true)}>
-        Markedet i dag
+        {/* Pakke 129: «Markedet» — kortere, så bryteren for kompakt visning får plass i raden. Arket heter fortsatt «Markedet i dag». */}
+        Markedet
         {m.spesielle > 0 && <span className="brikke markedstall">{m.spesielle}</span>}
         <span aria-hidden="true"> ›</span>
       </button>

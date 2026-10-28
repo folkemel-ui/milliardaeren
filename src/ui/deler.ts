@@ -117,6 +117,8 @@ export const borsdel = lagDelvalg<Borsdel>('milliardaer.borsvalg', ['aksje', 'kr
 export const kartdel = lagDelvalg<Kartdel>('milliardaer.eiendomskart', ['norge', 'verden'])
 export const bedriftsrekkefolge = lagDelvalg<Bedriftsrekkefolge>('milliardaer.bedriftsrekkefolge', REKKEFOLGER.map((r) => r.id))
 export const eiendomsrekkefolge = lagDelvalg<Eiendomsrekkefolge>('milliardaer.eiendomsrekkefolge', EIENDOMSREKKEFOLGER.map((r) => r.id))
+/** Pakke 129: bedriftene som kort eller som én rad hver («Kompakt»), husket i nettleseren. */
+export const bedriftsvisning = lagDelvalg<'kort' | 'kompakt'>('milliardaer.bedriftsvisning', ['kort', 'kompakt'])
 
 /** Alle settene, for testen som sjekker at de følger samme regel. */
 export const ALLE_DELVALG = { profildel, investeringsdel, luksusdel, borsdel, kartdel, bedriftsrekkefolge, eiendomsrekkefolge }

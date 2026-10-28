@@ -923,3 +923,169 @@
   gap: 12px;
   font-size: var(--skrift-2);
 }
+
+/*
+ * Pakke 129: Bedrifter kortere.
+ * Bryteren for kompakt visning står ved «Markedet ›» i overskriftsraden (raden med mengdene var full).
+ */
+.skjerm-hode-hoyre {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.visningsknapp {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--tekst-dempet);
+  cursor: pointer;
+}
+
+.visningsknapp.aktiv {
+  border-color: var(--kant);
+  background: var(--flate-2);
+  color: var(--gull);
+}
+
+/* Mengdene og rekkefølgen i ett segment, med en strek imellom — ikke en boks i boksen. */
+.bedrifter-kontroller.segment {
+  display: flex;
+  gap: 4px;
+}
+
+.bedrifter-kontroller > .mengdevalg {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 4px;
+}
+
+.bedrifter-kontroller > .rekkefolge {
+  display: grid;
+}
+
+.bedrifter-kontroller > .rekkefolge.med-skille {
+  padding-left: 4px;
+  border-left: 1px solid var(--kant);
+}
+
+/* Retningen og de billige forbedringene i én stripe, i én stil; to halvdeler når begge står der. */
+.varselstripe {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0 0 10px;
+  border: 1px solid var(--gull-mørk);
+  border-radius: 10px;
+  background: var(--flate);
+  overflow: hidden;
+}
+
+.varselstripe.delt {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.stripe-del {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 0;
+  background: none;
+  color: var(--tekst);
+  font: inherit;
+  font-size: var(--skrift-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.varselstripe.delt .stripe-del + .stripe-del {
+  border-left: 1px solid var(--kant);
+}
+
+.stripe-retning {
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+}
+
+.stripe-billige > svg {
+  flex: none;
+  color: var(--gull);
+}
+
+.stripe-pris {
+  margin-left: auto;
+  color: var(--gull);
+  font-weight: var(--vekt-fet);
+  white-space: nowrap;
+}
+
+/* I en halv stripe står prisen under teksten. */
+.varselstripe.delt .stripe-billige {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 0;
+}
+
+.varselstripe.delt .stripe-billige > svg {
+  grid-row: span 2;
+}
+
+.varselstripe.delt .stripe-pris {
+  margin-left: 0;
+}
+
+/* Kompakt visning: én rad per bedrift — bildet, navnet og inntekten, og knappen med prisen. */
+.kortliste.kompakt {
+  gap: 6px;
+}
+
+.bedriftskort-kompakt {
+  padding: 8px 10px;
+  gap: 6px;
+}
+
+.kompaktrad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.kompakt-midt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kompakt-midt > h2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--skrift-3);
+  white-space: nowrap;
+}
+
+.kompakt-tegn {
+  display: inline-flex;
+  color: var(--gull);
+}
+
+.kort-knapp {
+  min-width: 92px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+/* Rekkefølgen er en bryter, ikke et valg: gull tekst uten boksen et valgt segment får. */
+.bedrifter-kontroller .rekkefolge-knapp {
+  color: var(--gull);
+}

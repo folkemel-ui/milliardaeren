@@ -37,6 +37,7 @@ import { BedriftIkon } from './BedriftIkon'
 import { usePuls } from './Tikk'
 import { NyMerke } from './Kjopsglimt'
 import { Ikon } from './Ikoner'
+import { dagnummer } from '../../engine/kalender'
 
 /** En ferdig bedrift (Pakke 84): alle forbedringene kjøpt og retningen valgt. Da får den det korte kortet. */
 export function erFerdig(b: Bedrift): boolean {
@@ -160,6 +161,44 @@ export function Bedriftskort({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltils
 }
 
 /**
+ * Kompakt visning (Pakke 129): én rad per bedrift — bildet, navnet og inntekten, og kjøpsknappen med bare prisen.
+ * En klar forbedring og en retning som venter står som små tegn ved navnet; køen kommer som en knapp under raden
+ * når den er der (Pakke 99: den skal ikke bli usynlig). Resten står på detaljsiden, som et trykk på raden åpner.
+ */
+export function Kompaktrad({ b, s, mengde, åpne }: { b: Bedrift; s: Spilltilstand; mengde: Kjopsmengde; åpne: () => void }) {
+  const type = BEDRIFTSTYPER[b.type]
+  const f = nesteForbedring(b)
+  const klar = !!f && b.nivaa >= f.nivaa
+  const puls = usePuls(b.nivaa + b.ansatte + b.forbedringer + (b.leder ? 1 : 0), milepaelerFor(b.type).includes(b.nivaa))
+  const [flytetall, legg] = useFlytetall()
+  const inntekt = bedriftInntektIDag(s, b)
+  return (
+    <li className={`kort bedriftskort bedriftskort-kompakt kan-aapnes ${puls}`} data-ny={b.type} onClick={vedKorttrykk(åpne)}>
+      <div className="kompaktrad">
+        <BedriftIkon type={b.type} nivaa={b.nivaa} forbedringer={b.forbedringer} />
+        <div className="kompakt-midt">
+          <h2>
+            {type.navn}
+            <NyMerke id={b.type} />
+            {klar && (
+              <span className="kompakt-tegn gull" role="img" aria-label="En forbedring er klar" title="En forbedring er klar">
+                <Ikon navn="gnist" størrelse={12} />
+              </span>
+            )}
+            {kanVelgeRetning(b) && <span className="retningsprikk" role="img" aria-label="Venter på retning" title="Venter på retning" />}
+          </h2>
+          {/* Bare inntekten: «Nivå 121 · +kr 55,5 mill/s» brøt over to linjer. Nivået står på detaljsiden. */}
+          <span className={`liten ${inntekt >= 0 ? 'pluss' : 'minus'} ${puls}`}>{perSek(inntekt)}</span>
+        </div>
+        <Oppgraderingsknapp s={s} b={b} mengde={mengde} kort />
+      </div>
+      {flytetall}
+      <Koknapp s={s} b={b} legg={legg} />
+    </li>
+  )
+}
+
+/**
  * Hvor fort neste kjøp på oppgraderingsknappen tjener seg inn (Pakke 99), på en linje under den.
  * Uten råd til noe: for neste nivå.
  */
@@ -169,6 +208,9 @@ export function Tilbakelinje({ s, b, mengde }: { s: Spilltilstand; b: Bedrift; m
   const pris = k.antall > 0 ? k.pris : prisForNivaaer(b, 1)
   return <span className="dempet liten tilbake-linje">{tilbakeTekst(pris, oppgraderingGir(s, b, antall))}</span>
 }
+
+/** Så mange dager fra start står dagens vær i grått (Pakke 129): dag 0 og 1 er snø i alle spill. */
+export const ROLIGE_DAGER = 2
 
 /**
  * Dagens kalender for én bedrift (Pakke 49): «+30 % i dag · Helg». Vises bare
@@ -185,10 +227,12 @@ export function IDag({ s, b }: { s: Spilltilstand; b: Bedrift }) {
   if (Math.abs(f - 1) < 0.02) return null
   if (kalender < 1 && b.retning === 'premium' && Math.abs(ravare - 1) < 0.02) return <span className="i-dag liten dempet">Premium · ingen dårlig dag</span>
   const hvorfor = grunner(d, b.type, s.sek)
+  // Pakke 129: de to første dagene er snø i hvert spill; der står været i grått, ikke i rødt.
+  const rolig = dagnummer(s.sek) < ROLIGE_DAGER
   if (nyhet !== 1) hvorfor.unshift(nyhet > 1 ? 'God nyhet' : 'Dårlig nyhet')
   if (Math.abs(ravare - 1) >= 0.02) hvorfor.unshift(`${b.type === 'oljeselskap' ? 'Oljeprisen' : 'Lakseprisen'} ×${tall(ravare, 2)}`)
   return (
-    <span className={`i-dag liten ${f > 1 ? 'pluss' : 'minus'}`}>
+    <span className={`i-dag liten ${rolig ? 'dempet' : f > 1 ? 'pluss' : 'minus'}`}>
       {f > 1 ? '+' : '−'}
       {tall(Math.abs(f - 1) * 100)} % i dag{hvorfor.length > 0 && <span className="dempet"> · {hvorfor.join(', ')}</span>}
     </span>
@@ -369,7 +413,7 @@ function retningGir(b: Bedrift, id: Retning): string {
  * Oppgraderingsknappen, for 1, 10, 100 eller så mange nivåer du har råd til.
  * Holder du den inne, fortsetter den å kjøpe — stadig raskere — til pengene tar slutt.
  */
-export function Oppgraderingsknapp({ s, b, mengde, bred = false }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; bred?: boolean }) {
+export function Oppgraderingsknapp({ s, b, mengde, bred = false, kort = false }: { s: Spilltilstand; b: Bedrift; mengde: Kjopsmengde; bred?: boolean; kort?: boolean }) {
   const { antall, pris } = kjop(b, mengde, s.kontanter)
   const hold = useHold(
     (første) =>
@@ -379,13 +423,16 @@ export function Oppgraderingsknapp({ s, b, mengde, bred = false }: { s: Spilltil
         return oppgraderFlere(nå, b.id, kjop(bn, mengde, nå.kontanter).antall)
       }, !første) === null,
   )
+  const tekst = antall === 0 ? (mengde === 'milepael' ? 'Alle milepæler nådd' : `Maks · trenger ${kortKroner(pris)}`) : `→ nivå ${b.nivaa + antall} · ${kortKroner(pris)}`
   return (
     <button
-      className={bred ? 'knapp knapp-gull bred hold-knapp' : 'knapp knapp-gull hold-knapp'}
+      className={bred ? 'knapp knapp-gull bred hold-knapp' : kort ? 'knapp knapp-gull hold-knapp kort-knapp' : 'knapp knapp-gull hold-knapp'}
       disabled={antall === 0 || s.kontanter < pris}
+      // Pakke 129: på den kompakte raden står bare prisen; hele teksten leses opp.
+      aria-label={kort ? tekst : undefined}
       {...hold}
     >
-      {antall === 0 ? (mengde === 'milepael' ? 'Alle milepæler nådd' : `Maks · trenger ${kortKroner(pris)}`) : `→ nivå ${b.nivaa + antall} · ${kortKroner(pris)}`}
+      {kort ? (antall === 0 && mengde === 'milepael' ? 'Ferdig' : kortKroner(pris)) : tekst}
     </button>
   )
 }

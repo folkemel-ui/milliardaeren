@@ -26,7 +26,8 @@ describe('mindre over det første kortet', () => {
     const html = tegn(rik)
     const hode = html.slice(html.indexOf('skjerm-hode'), html.indexOf('</div>', html.indexOf('skjerm-hode')))
     expect(hode).toContain('Dine bedrifter')
-    expect(hode).toContain('Markedet i dag')
+    // Pakke 129: «Markedet», så bryteren for kompakt visning får plass i raden.
+    expect(hode).toContain('Markedet')
     expect(html).not.toContain('dagen-dato')
   })
 
@@ -81,9 +82,13 @@ describe('de billige forbedringene i ett trykk', () => {
       return f && b.nivaa >= f.nivaa && forbedringspris(b, f) <= BILLIG_ANDEL * s.kontanter
     })
     expect(billige.length).toBeGreaterThanOrEqual(2)
-    expect(tegn(s)).toContain(`Kjøp alle billige forbedringer (${billige.length})`)
+    // Pakke 129: i én stripe med retningen — halvparten når bedrifter også venter på retning, hele når ikke.
+    expect(tegn(s)).toContain(`Kjøp ${billige.length} billige`)
+    const utenRetning = structuredClone(s)
+    for (const b of utenRetning.bedrifter) b.retning = 'volum'
+    expect(tegn(utenRetning)).toContain(`Kjøp alle billige forbedringer (${billige.length})`)
     s.kontanter = 0
-    expect(tegn(s)).not.toContain('billiglinje')
+    expect(tegn(s)).not.toContain('stripe-billige')
   })
 
   it('kjøper neste forbedring i hver, og hopper over den det ikke er råd til', () => {
